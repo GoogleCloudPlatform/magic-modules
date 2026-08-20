@@ -293,6 +293,38 @@ func TestAccComputeRouterPeer_UpdateRouterCustomLearnedRoutePriority(t *testing.
 	})
 }
 
+func TestAccComputeRouterPeer_customLearnedIpRangesOrder(t *testing.T) {
+	t.Parallel()
+	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_router_peer.peer"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterPeerCustomLearnedIpRanges(routerName, []string{"10.1.0.0/24", "10.2.0.0/24"}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "custom_learned_ip_ranges.#", "2"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set", "zero_custom_learned_route_priority"},
+			},
+			{
+				// The API keeps the ranges in the order it received them. The same
+				// set in another order must not plan a change.
+				Config:             testAccComputeRouterPeerCustomLearnedIpRanges(routerName, []string{"10.2.0.0/24", "10.1.0.0/24"}),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
 func TestAccComputeRouterPeer_UpdateRouterAdvertisedRoutePriority(t *testing.T) {
 	t.Parallel()
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
@@ -1176,6 +1208,47 @@ resource "google_compute_router_peer" "peer" {
   zero_custom_learned_route_priority = %t
 }
   `, routerName, routerName, routerName, routerName, customLearnedRoutePriority, zeroCustomLearnedRoutePriority)
+}
+
+func testAccComputeRouterPeerCustomLearnedIpRanges(routerName string, ranges []string) string {
+	blocks := ""
+	for _, r := range ranges {
+		blocks += fmt.Sprintf(`
+  custom_learned_ip_ranges {
+    range = "%s"
+  }`, r)
+	}
+	return fmt.Sprintf(`
+resource "google_compute_network" "network" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "%s-sub"
+  network       = google_compute_network.network.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "router" {
+  name    = "%s-router"
+  region  = google_compute_subnetwork.subnetwork.region
+  network = google_compute_network.network.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router_peer" "peer" {
+  name      = "%s-router-peer"
+  router    = google_compute_router.router.name
+  region    = google_compute_router.router.region
+  interface = "interface-1"
+  peer_asn  = 65513
+%s
+}
+  `, routerName, routerName, routerName, routerName, blocks)
 }
 
 func testAccComputeRouterPeerKeepRouter(routerName string) string {

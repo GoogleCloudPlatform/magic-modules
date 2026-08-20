@@ -141,20 +141,11 @@ length, the routes with the lowest priority value win.`,
 				Description: "An internal boolean field for provider use for zero_advertised_route_priority.",
 			},
 			"custom_learned_ip_ranges": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Description: `The custom learned route IP address range. Must be a valid CIDR-formatted prefix. If an 
 IP address is provided without a subnet mask, it is interpreted as, for IPv4, a /32 singular IP address range, and, for IPv6, /128.`,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"range": {
-							Type:     schema.TypeString,
-							Required: true,
-							Description: `The IP range to learn. The value must be a
-CIDR-formatted string.`,
-						},
-					},
-				},
+				Elem: computeRouterBgpPeerCustomLearnedIpRangesSchema(),
 			},
 			"custom_learned_route_priority": {
 				Type:     schema.TypeInt,
@@ -394,6 +385,19 @@ CIDR-formatted string.`,
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: `User-specified description for the IP range.`,
+			},
+		},
+	}
+}
+
+func computeRouterBgpPeerCustomLearnedIpRangesSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"range": {
+				Type:     schema.TypeString,
+				Required: true,
+				Description: `The IP range to learn. The value must be a
+CIDR-formatted string.`,
 			},
 		},
 	}
@@ -1202,16 +1206,15 @@ func flattenNestedComputeRouterBgpPeerCustomLearnedIpRanges(v interface{}, d *sc
 		return v
 	}
 	l := v.([]interface{})
-	transformed := make([]interface{}, 0, len(l))
+	transformed := schema.NewSet(schema.HashResource(computeRouterBgpPeerCustomLearnedIpRangesSchema()), []interface{}{})
 	for _, raw := range l {
 		original := raw.(map[string]interface{})
 		if len(original) < 1 {
 			// Do not include empty json objects coming back from the api
 			continue
 		}
-		transformed = append(transformed, map[string]interface{}{
-			"range":       flattenNestedComputeRouterBgpPeerCustomLearnedIpRangesRange(original["range"], d, config),
-	
+		transformed.Add(map[string]interface{}{
+			"range": flattenNestedComputeRouterBgpPeerCustomLearnedIpRangesRange(original["range"], d, config),
 		})
 	}
 	return transformed
@@ -1451,6 +1454,7 @@ func expandNestedComputeRouterBgpPeerAdvertisedIpRangesDescription(v interface{}
 	return v, nil
 }
 func expandNestedComputeRouterBgpPeerCustomLearnedIpRanges(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	v = v.(*schema.Set).List()
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
