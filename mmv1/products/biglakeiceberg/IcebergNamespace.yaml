@@ -36,7 +36,6 @@ import_format:
   - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}
   - '{{project}}/{{catalog}}/{{namespace_id}}'
   - '{{catalog}}/{{namespace_id}}'
-api_resource_type_kind: Namespace
 supports_indirect_user_project_override: true
 custom_code:
   update_encoder: templates/terraform/encoders/biglake_iceberg_namespace.go.tmpl
