@@ -59,10 +59,9 @@ Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symp
 
 ---
 
-### 3. Verification & PR Handoff
+### 3. Verification & Compliance Checks
 * Verify that test output reports `PASS` for all failing targets (`ga`, `beta`, or `both`).
 * **Verify Handwritten Test Naming Compliance**: For handwritten test files (`*_test.go`), verify that any newly added unit tests are named `Test...` (without the `TestAcc` prefix) and handwritten acceptance tests are named `TestAcc...`. (Generated acceptance tests from MMv1 samples handle naming automatically).
 * **Verify Remediation Scope**: Verify that code modifications are strictly scoped to the specific field(s) or resource(s) proven by the test failure log or plan diff to be causing the failure. Do NOT include assumption-based edits to adjacent/sibling fields without empirical evidence.
 * **Verify Breaking Change Compliance & User Notification**: Consult all files in `docs/content/breaking-changes/` (`breaking-changes.md` and `make-a-breaking-change.md`) before making any schema or behavioral modifications. If a breaking change needs to be made, explicitly state it to the user and list out the reason why, referencing the applicable policy in `docs/content/breaking-changes/`.
 * Verify that no test-dodging flags (`ignore_read`, `default_from_api`, etc.) were introduced without justification.
-* If requested by the user (e.g. "create a PR for the fix"), automatically invoke the `create-pr` skill (`.agents/skills/operations/create-pr/`) to open a pull request.
