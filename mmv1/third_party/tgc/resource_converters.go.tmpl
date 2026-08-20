@@ -76,7 +76,6 @@ import (
     "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/kms"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/logging"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/monitoring"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/notebooks"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/orgpolicy"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/privateca"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/pubsub"
@@ -438,12 +437,6 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_logging_log_view_iam_policy":                            {logging.ResourceConverterLoggingLogViewIamPolicy()},
 		"google_logging_log_view_iam_binding":                           {logging.ResourceConverterLoggingLogViewIamBinding()},
 		"google_logging_log_view_iam_member":                            {logging.ResourceConverterLoggingLogViewIamMember()},
-		"google_notebooks_instance_iam_policy":                          {notebooks.ResourceConverterNotebooksInstanceIamPolicy()},
-		"google_notebooks_instance_iam_binding":                         {notebooks.ResourceConverterNotebooksInstanceIamBinding()},
-		"google_notebooks_instance_iam_member":                          {notebooks.ResourceConverterNotebooksInstanceIamMember()},
-		"google_notebooks_runtime_iam_policy":                           {notebooks.ResourceConverterNotebooksRuntimeIamPolicy()},
-		"google_notebooks_runtime_iam_binding":                          {notebooks.ResourceConverterNotebooksRuntimeIamBinding()},
-		"google_notebooks_runtime_iam_member":                           {notebooks.ResourceConverterNotebooksRuntimeIamMember()},
 		"google_privateca_ca_pool_iam_policy":                           {privateca.ResourceConverterPrivatecaCaPoolIamPolicy()},
 		"google_privateca_ca_pool_iam_binding":                          {privateca.ResourceConverterPrivatecaCaPoolIamBinding()},
 		"google_privateca_ca_pool_iam_member":                           {privateca.ResourceConverterPrivatecaCaPoolIamMember()},
