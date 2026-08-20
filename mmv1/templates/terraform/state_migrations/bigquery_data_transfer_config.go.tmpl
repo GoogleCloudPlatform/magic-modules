@@ -1,18 +1,134 @@
 func resourceBigqueryDataTransferConfigResourceV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
+			"data_source_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"display_name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"params": {
+				Type:     schema.TypeMap,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"data_refresh_window_days": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"destination_dataset_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"disabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"email_preferences": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_failure_email": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+					},
+				},
+			},
+			"encryption_configuration": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kms_key_name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "US",
+			},
+			"notification_pubsub_topic": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"schedule": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"schedule_options": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"disable_auto_scheduling": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"end_time": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"start_time": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"sensitive_params": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"secret_access_key": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+						},
+						"secret_access_key_wo": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"secret_access_key_wo_version": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
 					},
 				},
+			},
+			"service_account_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 		},
 		UseJSONNumber: true,
