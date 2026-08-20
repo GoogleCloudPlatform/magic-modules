@@ -844,6 +844,7 @@ cluster_config {
       user_service_account_mapping = {
         "user@company.com" = "service-account@iam.gserviceaccounts.com"
       }
+      enable_ssh = false
     }
   }
 }
@@ -901,8 +902,15 @@ cluster_config {
 * `identity_config` (Optional) Identity Configuration. At least one of `identity_config`
        or `kerberos_config` is required.
 
-    * `user_service_account_mapping` - (Required) The end user to service account mappings
-       in a service account based multi-tenant cluster
+    * `user_service_account_mapping` - (Optional) The end user to service account mappings
+       in a service account based multi-tenant cluster. At least one of
+       `user_service_account_mapping` or `enable_ssh` is required.
+
+    * `enable_ssh` - (Optional) Whether to enable SSH access for the cluster. The default is
+       `true` for image versions prior to 3.1 and `false` for image versions 3.1 and later.
+       The default behavior can be changed when creating clusters using image versions
+       2.3.30 and later. At least one of `user_service_account_mapping` or `enable_ssh` is
+       required.
 
 - - -
 

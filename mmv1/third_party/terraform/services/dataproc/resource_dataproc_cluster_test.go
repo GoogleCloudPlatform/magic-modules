@@ -1335,6 +1335,33 @@ func TestAccDataprocCluster_withKerberos(t *testing.T) {
 	})
 }
 
+// enable_ssh may be set without user_service_account_mapping, and an explicit false must
+// survive a plan/apply round trip rather than being silently replaced by the API default.
+func TestAccDataprocCluster_withIdentityConfigEnableSsh(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withIdentityConfigEnableSsh(rnd, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.identity_config_enable_ssh", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.identity_config_enable_ssh", "cluster_config.0.security_config.0.identity_config.0.enable_ssh", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withIdentityConfig(t *testing.T) {
 	t.Parallel()
 
@@ -3495,6 +3522,29 @@ resource "google_dataproc_cluster" "identity_config" {
         user_service_account_mapping = {
           "bob@company.com" = "bob-sa@iam.gserviceaccouts.com"
         }
+      }
+    }
+  }
+}
+`, rnd, subnetworkName)
+}
+
+func testAccDataprocCluster_withIdentityConfigEnableSsh(rnd, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "identity_config_enable_ssh" {
+  name   = "tf-test-dataproc-identity-ssh-%s"
+  region = "us-central1"
+  cluster_config {
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+    software_config {
+      # Overriding the SSH default requires image version 2.3.30 or later.
+      image_version = "2.3-debian12"
+    }
+    security_config {
+      identity_config {
+        enable_ssh = false
       }
     }
   }
