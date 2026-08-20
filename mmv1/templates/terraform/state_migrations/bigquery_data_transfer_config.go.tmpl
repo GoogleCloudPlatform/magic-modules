@@ -1,0 +1,82 @@
+func resourceBigqueryDataTransferConfigResourceV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"sensitive_params": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"secret_access_key": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+						},
+						"secret_access_key_wo": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"secret_access_key_wo_version": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+					},
+				},
+			},
+		},
+		UseJSONNumber: true,
+	}
+}
+
+func ResourceBigqueryDataTransferConfigUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
+	// sensitive_params.secret_access_key_wo_version was originally TypeInt.
+	// The field was changed to TypeString with no default. The old zero value of
+	// 0 maps to "" (unset) so that resources that never explicitly set the
+	// version see no update-in-place after upgrading. Non-zero values are
+	// preserved as their decimal string equivalent.
+	// UseJSONNumber is set on this resource, so numbers arrive as json.Number.
+	raw, ok := rawState["sensitive_params"]
+	if !ok || raw == nil {
+		log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+		return rawState, nil
+	}
+	list, ok := raw.([]interface{})
+	if !ok {
+		log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+		return rawState, nil
+	}
+	for _, item := range list {
+		m, ok := item.(map[string]interface{})
+		if !ok || m == nil {
+			continue
+		}
+		v, exists := m["secret_access_key_wo_version"]
+		if !exists {
+			continue
+		}
+		m["secret_access_key_wo_version"] = convertSecretAccessKeyWoVersionToString(v)
+	}
+	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+	return rawState, nil
+}
+
+func convertSecretAccessKeyWoVersionToString(v interface{}) string {
+	intVal := int64(0)
+	switch typed := v.(type) {
+	case json.Number:
+		intVal, _ = typed.Int64()
+	case float64:
+		intVal = int64(typed)
+	case int:
+		intVal = int64(typed)
+	case int64:
+		intVal = typed
+	case string:
+		return typed
+	}
+	if intVal == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d", intVal)
+}
