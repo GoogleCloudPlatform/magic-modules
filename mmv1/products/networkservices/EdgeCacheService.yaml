@@ -52,6 +52,8 @@ samples:
           bucket_name: my-bucket
           origin_name: my-origin
           service_name: my-service
+        vars:
+          location: global
   - name: network_services_edge_cache_service_advanced
     primary_resource_id: instance
     steps:

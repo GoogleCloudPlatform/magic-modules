@@ -23,6 +23,7 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 autogen_status: Um9sbG91dEtpbmQ=
+generate_list_resource: true
 samples:
   - name: saas_runtime_rollout_kind_basic
     primary_resource_id: example

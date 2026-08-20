@@ -37,6 +37,7 @@ samples:
           saas_name: test-saas
 autogen_async: false
 autogen_status: U2Fhcw==
+generate_list_resource: true
 parameters:
   - name: location
     type: String
