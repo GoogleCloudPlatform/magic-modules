@@ -15,6 +15,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if !ok || len(original) == 0 {
 		return flattenAlloydbInstanceEmptyNetworkConfig(d)
 	}
+
 	transformed := make(map[string]interface{})
 	transformed["authorized_external_networks"] =
 		flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworks(original["authorizedExternalNetworks"], d, config)
