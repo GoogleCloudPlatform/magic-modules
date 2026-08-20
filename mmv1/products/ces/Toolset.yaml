@@ -192,6 +192,103 @@ parameters:
     url_param_only: true
     required: true
 properties:
+  - name: connectorToolset
+    type: NestedObject
+    description: |-
+      A toolset that generates tools from an Integration Connectors Connection.
+    properties:
+      - name: authConfig
+        type: NestedObject
+        description: |-
+          Configures how authentication is handled in Integration Connectors.
+        properties:
+          - name: oauth2AuthCodeConfig
+            type: NestedObject
+            description: |-
+              Oauth 2.0 Authorization Code authentication configuration.
+            properties:
+              - name: oauthToken
+                type: String
+                description: |-
+                  Oauth token parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+          - name: oauth2JwtBearerConfig
+            type: NestedObject
+            description: |-
+              JWT Profile Oauth 2.0 Authorization Grant authentication configuration.
+            properties:
+              - name: clientKey
+                type: String
+                description: |-
+                  Client parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+              - name: issuer
+                type: String
+                description: |-
+                  Issuer parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+              - name: subject
+                type: String
+                description: |-
+                  Subject parameter name to pass through.
+                  Must be in the format `$context.variables.<name_of_variable>`.
+                required: true
+      - name: connection
+        type: String
+        description: |-
+          The full resource name of the referenced Integration Connectors
+          Connection.
+          Format:
+          `projects/{project}/locations/{location}/connections/{connection}`
+        required: true
+      - name: connectorActions
+        type: Array
+        description: |-
+          The list of connector actions/entity operations to generate tools for.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: connectionActionId
+              type: String
+              description: |-
+                ID of a Connection action for the tool to use.
+            - name: entityOperation
+              type: NestedObject
+              description: |-
+                Entity operation configuration for the tool to use.
+              properties:
+                - name: entityId
+                  type: String
+                  description: |-
+                    ID of the entity.
+                  required: true
+                - name: operation
+                  type: String
+                  description: |-
+                    Operation to perform on the entity.
+                    Possible values:
+                    LIST
+                    GET
+                    CREATE
+                    UPDATE
+                    DELETE
+                  required: true
+            - name: inputFields
+              type: Array
+              description: |-
+                Entity fields to use as inputs for the operation.
+              item_type:
+                type: String
+            - name: outputFields
+              type: Array
+              description: |-
+                Entity fields to return from the operation.
+              item_type:
+                type: String
   - name: createTime
     type: String
     description: Timestamp when the toolset was created.
@@ -579,6 +676,12 @@ properties:
           set in the session variables. See
           https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
           for more details.
+  - name: timeout
+    type: String
+    description: |-
+      The timeout for the toolset execution. If not set, the default timeout is
+      30 seconds for `SYNCHRONOUS` toolsets and 60 seconds for `ASYNCHRONOUS`
+      toolsets.
   - name: toolFakeConfig
     type: NestedObject
     description: Configuration for tools behavior in fake mode.

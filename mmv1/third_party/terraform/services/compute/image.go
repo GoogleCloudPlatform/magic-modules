@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-
-	"google.golang.org/api/googleapi"
 )
 
 const (
@@ -55,9 +53,16 @@ var ImageMap = map[string]string{
 }
 
 func resolveImageImageExists(c *transport_tpg.Config, project, name, userAgent string) (bool, error) {
-	if _, err := NewClient(c, userAgent).Images.Get(project, name).Do(); err == nil {
+	url := fmt.Sprintf("%sprojects/%s/global/images/%s", transport_tpg.BaseUrl(Product, c), project, name)
+	if _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    c,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	}); err == nil {
 		return true, nil
-	} else if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+	} else if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		return false, nil
 	} else {
 		return false, fmt.Errorf("Error checking if image %s exists: %s", name, err)
@@ -65,9 +70,16 @@ func resolveImageImageExists(c *transport_tpg.Config, project, name, userAgent s
 }
 
 func resolveImageFamilyExists(c *transport_tpg.Config, project, name, userAgent string) (bool, error) {
-	if _, err := NewClient(c, userAgent).Images.GetFromFamily(project, name).Do(); err == nil {
+	url := fmt.Sprintf("%sprojects/%s/global/images/family/%s", transport_tpg.BaseUrl(Product, c), project, name)
+	if _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    c,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	}); err == nil {
 		return true, nil
-	} else if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+	} else if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		return false, nil
 	} else {
 		return false, fmt.Errorf("Error checking if family %s exists: %s", name, err)
