@@ -13,7 +13,12 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	original, ok := v.(map[string]interface{})
 	if !ok || len(original) == 0 {
-		return flattenAlloydbInstanceEmptyNetworkConfig(d)
+		return []interface{}{
+			map[string]interface{}{
+				"enable_public_ip":          d.Get("network_config.0.enable_public_ip"),
+				"enable_outbound_public_ip": d.Get("network_config.0.enable_outbound_public_ip"),
+			},
+		}
 	}
 
 	transformed := make(map[string]interface{})
@@ -26,18 +31,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	transformed["allocated_ip_range_override"] =
 		flattenAlloydbInstanceNetworkConfigAllocatedIpRangeOverride(original["allocatedIpRangeOverride"], d, config)
 	return []interface{}{transformed}
-}
-
-func flattenAlloydbInstanceEmptyNetworkConfig(d *schema.ResourceData) interface{} {
-	// The API returns nil/empty for networkConfig when enable_public_ip and
-	// enable_outbound_public_ip are both false (the default). Keep the user's
-	// existing boolean values to avoid a permadiff.
-	return []interface{}{
-		map[string]interface{}{
-			"enable_public_ip":          d.Get("network_config.0.enable_public_ip"),
-			"enable_outbound_public_ip": d.Get("network_config.0.enable_outbound_public_ip"),
-		},
-	}
 }
 
 func flattenAlloydbInstanceNetworkConfigAuthorizedExternalNetworks(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
