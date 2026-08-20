@@ -115,13 +115,13 @@ func TestAccClouddeployDeliveryPipeline_withPredeployTasks(t *testing.T) {
 			{
 				Config: testAccClouddeployDeliveryPipeline_withPredeployTasks(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-image"),
-						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.command.0", "echo"),
-						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.args.0", "hello"),
-						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-cleanup-image"),
-						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.command.0", "cleanup"),
-						resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.args.0", "--all"),
-					),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.command.0", "echo"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.predeploy.0.tasks.0.container.0.args.0", "hello"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-cleanup-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.command.0", "cleanup"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.postdeploy.0.tasks.0.container.0.args.0", "--all"),
+				),
 			},
 			{
 				ResourceName:            "google_clouddeploy_delivery_pipeline.primary",
