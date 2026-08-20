@@ -84,18 +84,18 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: Output only. The creation timestamp of the link.
+    description: Output only. Create timestamp.
     output: true
   - name: description
     type: String
-    description: Describes this link.
+    description: Description of the link.
     default_from_api: true
   - name: displayName
     type: String
-    description: User-assigned name of the link.
+    description: A user friendly display name.
     default_from_api: true
   - name: name
     type: String
     description: |-
-      Identifier. The resource name of the link. The format is: projects/[PROJECT_ID]/locations/[LOCATION]/buckets/[BUCKET_ID]/datasets/[DATASET_ID]/links/[LINK_ID]
+      Identifier. Name of the link. The format is: projects/[PROJECT_ID]/locations/[LOCATION]/buckets/[BUCKET_ID]/datasets/[DATASET_ID]/links/[LINK_ID]
     output: true
