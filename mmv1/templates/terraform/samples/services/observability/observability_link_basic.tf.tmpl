@@ -14,11 +14,16 @@ resource "google_project_service" "observability_api" {
   disable_on_destroy = false
 }
 
+# Explicitly chain service enablement to ensure deterministic sequential execution in VCR testing
 resource "google_project_service" "bigquery_api" {
   provider           = "google-beta"
   project            = google_project.project.project_id
   service            = "bigquery.googleapis.com"
   disable_on_destroy = false
+
+  depends_on = [
+    google_project_service.observability_api
+  ]
 }
 
 # Actively force the creation of the Service Agent identity
