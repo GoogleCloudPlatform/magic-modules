@@ -69,7 +69,11 @@ properties:
     type: NestedObject
     description: |
       This defines the criteria for applying the Snooze.
+
+      ~> **Note:** After a snooze is created, its criteria can't be modified.
+      Changing this block will force replacement of the resource.
     required: true
+    immutable: true
     properties:
       - name: 'policies'
         type: Array
@@ -81,8 +85,10 @@ properties:
           at the same time.
         item_type:
           type: String
+        immutable: true
       - name: 'filter'
         type: String
+        immutable: true
         description: |
           When you define a snooze, you can also define a filter for that snooze.
           The filter is a string containing one or more key-value pairs. The string
@@ -107,6 +113,10 @@ properties:
       The Snooze will be active from interval.start_time through interval.end_time.
       interval.start_time cannot be in the past. There is a 15 second clock skew to
       account for the time it takes for a request to reach the API from the UI.
+
+      ~> **Note:** You can edit the name and period of an upcoming snooze, and you
+      can edit the name and end time of an active snooze. You can't edit a past
+      (expired) snooze.
     required: true
     properties:
       - name: 'startTime'
