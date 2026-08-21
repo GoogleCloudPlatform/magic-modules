@@ -65,6 +65,18 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 				ForceNew:    true,
 				Description: `The Apigee Organization name associated with the Apigee instance.`,
 			},
+			"space": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				Description: `The ID of the space associated with this shared flow. Any IAM ` +
+					`policies applied to the space will affect access to this shared ` +
+					`flow. If not set, the shared flow is created at the organization ` +
+					`level. This field is only respected when creating a new shared ` +
+					`flow; it has no effect when creating a new revision for an existing ` +
+					`shared flow. Changing this field forces the resource to be recreated.`,
+			},
 			"latest_revision_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -175,6 +187,15 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
+	// The space of a shared flow is set via the `space` query parameter at import
+	// time (it is only honored when creating a new shared flow, not a new
+	// revision).
+	if space, ok := d.GetOk("space"); ok {
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{"space": space.(string)})
+		if err != nil {
+			return err
+		}
+	}
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
@@ -263,6 +284,14 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	if err := d.Set("latest_revision_id", flattenApigeeSharedFlowLatestRevisionId(res["latestRevisionId"], d, config)); err != nil {
 		return fmt.Errorf("Error reading SharedFlow: %s", err)
+	}
+	// `space` is returned on the SharedFlow object; only set it when present so a
+	// shared flow at the organization level (no space) doesn't get a spurious
+	// value.
+	if v, ok := res["space"]; ok && v != nil && v != "" {
+		if err := d.Set("space", v); err != nil {
+			return fmt.Errorf("Error reading SharedFlow: %s", err)
+		}
 	}
 
 	//setting hash to suggest update
