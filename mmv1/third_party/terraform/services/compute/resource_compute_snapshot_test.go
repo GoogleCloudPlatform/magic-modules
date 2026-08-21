@@ -127,7 +127,6 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	})
 }
 
-
 func TestAccComputeSnapshot_kmsKeyVersionBehaviors(t *testing.T) {
 	t.Parallel()
 	acctest.SkipIfVcr(t) // Based on the other test having this
