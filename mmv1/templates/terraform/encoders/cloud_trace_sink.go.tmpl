@@ -1,0 +1,11 @@
+// The Cloud Trace API requires the sink's canonical resource name in the create
+// request body. It is built from the configured project and sink id; the
+// project must be given as its number (see the resource documentation).
+config := meta.(*transport_tpg.Config)
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return nil, err
+}
+
+obj["name"] = fmt.Sprintf("projects/%s/traceSinks/%s", project, d.Get("sink_id"))
+return obj, nil
