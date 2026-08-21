@@ -58,8 +58,7 @@ custom_code:
 samples:
   - name: app_engine_flexible_app_version
     primary_resource_id: myapp_v1
-    # https://github.com/hashicorp/terraform-provider-google/issues/19040
-    exclude_test: true
+    external_providers: [time]
     steps:
       - name: app_engine_flexible_app_version
         resource_id_vars:
