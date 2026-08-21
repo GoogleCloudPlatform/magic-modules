@@ -25,6 +25,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/schedules'
 update_url: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
 update_mask: true
 update_verb: 'PATCH'
+generate_list_resource: true
 async:
   type: 'OpAsync'
   actions: ['delete']
