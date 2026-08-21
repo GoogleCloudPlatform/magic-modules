@@ -867,7 +867,6 @@ properties:
                       The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
           - name: 'agentConfigSource'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Specification for the deploying from agent config.
             properties:
