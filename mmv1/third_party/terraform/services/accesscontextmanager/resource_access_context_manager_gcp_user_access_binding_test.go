@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -18,6 +19,36 @@ import (
 
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
+
+func TestAccessContextManagerGcpUserAccessBinding_multipleAccessLevels(t *testing.T) {
+	t.Parallel()
+
+	accessLevels := []interface{}{
+		"accessPolicies/123/accessLevels/corporate_network",
+		"accessPolicies/123/accessLevels/trusted_device",
+	}
+
+	config := sdkterraform.NewResourceConfigRaw(map[string]interface{}{
+		"organization_id":       "123",
+		"group_key":             "test-group",
+		"access_levels":         accessLevels,
+		"dry_run_access_levels": accessLevels,
+		"scoped_access_settings": []interface{}{
+			map[string]interface{}{
+				"active_settings": []interface{}{
+					map[string]interface{}{"access_levels": accessLevels},
+				},
+				"dry_run_settings": []interface{}{
+					map[string]interface{}{"access_levels": accessLevels},
+				},
+			},
+		},
+	})
+
+	if diagnostics := accesscontextmanager.ResourceAccessContextManagerGcpUserAccessBinding().Validate(config); diagnostics.HasError() {
+		t.Fatalf("multiple enforced and dry-run access levels should pass provider validation: %v", diagnostics)
+	}
+}
 
 func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 	t.Parallel()
