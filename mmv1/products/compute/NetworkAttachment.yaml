@@ -38,6 +38,7 @@ collection_url_key: 'items'
 custom_code:
 # excluding identity due to region value inconsistency
 exclude_identity_generation: true
+error_retry_predicates: ['transport_tpg.IsNetworkAttachmentConnectedEndpointsError']
 samples:
   - name: 'network_attachment_basic'
     primary_resource_id: 'default'

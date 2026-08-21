@@ -677,7 +677,6 @@ properties:
               - 'EXPERIMENTAL'
           - name: 'agentGatewayConfig'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Agent Gateway configuration for a Reasoning Engine deployment.
             properties:
