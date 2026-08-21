@@ -1,0 +1,58 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(bigquerydatatransfer.Product, config)+"projects/{{"{{"}}project{{"}}"}}/dataSources/{{"{{"}}data_source_id{{"}}"}}")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+// Unenrollment is eventually consistent: for a while after unenrollDataSources returns, reads
+// alternate between success and FAILED_PRECONDITION depending on which replica serves them. A
+// single read that still succeeds is not evidence the enrollment survived, so poll until the
+// data source reads as gone several times in a row.
+consecutiveGone := 0
+if err := transport_tpg.Retry(transport_tpg.RetryOptions{
+	Timeout: 10 * time.Minute,
+	RetryFunc: func() error {
+		if _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		}); err != nil {
+			// Only the not-enrolled signal counts as gone. Any other error (auth, network,
+			// quota) is a real failure and must not be mistaken for a successful destroy.
+			// Returning it unwrapped matches no retry predicate, so the poll stops and surfaces it.
+			if !strings.Contains(err.Error(), "BigQuery DataTransfer is not enabled for") &&
+				!transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+				return err
+			}
+
+			consecutiveGone++
+			if consecutiveGone < 5 {
+				return fmt.Errorf("enrollment not yet consistently gone")
+			}
+			return nil
+		}
+
+		consecutiveGone = 0
+		return fmt.Errorf("BigqueryDataTransferDataSourceEnrollment still exists at %s", url)
+	},
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+		func(err error) (bool, string) {
+			if strings.Contains(err.Error(), "not yet consistently gone") ||
+				strings.Contains(err.Error(), "still exists at") {
+				return true, "waiting for data source unenrollment to become consistently visible"
+			}
+			return false, ""
+		},
+	},
+}); err != nil {
+	return err
+}
