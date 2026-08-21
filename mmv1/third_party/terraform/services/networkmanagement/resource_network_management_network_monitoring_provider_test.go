@@ -36,7 +36,7 @@ func testAccNetworkManagementNetworkMonitoringProvider_basicTest(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: {{ if eq $.TargetVersionName "ga" }}acctest.ProtoV5ProviderFactories(t){{ else }}acctest.ProtoV5ProviderBetaFactories(t){{ end }},
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -62,7 +62,7 @@ func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicyTest(t *tes
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: {{ if eq $.TargetVersionName "ga" }}acctest.ProtoV5ProviderFactories(t){{ else }}acctest.ProtoV5ProviderBetaFactories(t){{ end }},
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +81,6 @@ func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicyTest(t *tes
 func testAccNetworkManagementNetworkMonitoringProvider_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_management_network_monitoring_provider" "provider" {
-  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
   network_monitoring_provider_id = "tf-test-provider-%{random_suffix}"
   location                       = "global"
   provider_type                  = "EXTERNAL"
@@ -92,7 +91,6 @@ resource "google_network_management_network_monitoring_provider" "provider" {
 func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_management_network_monitoring_provider" "provider" {
-  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
   network_monitoring_provider_id = "tf-test-provider-dp-%{random_suffix}"
   location                       = "global"
   provider_type                  = "EXTERNAL"
@@ -112,7 +110,7 @@ func testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t *te
 			}
 
 			config := acctest.GoogleProviderConfig(t)
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(networkmanagement.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/networkMonitoringProviders/{{"{{"}}network_monitoring_provider_id{{"}}"}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(networkmanagement.Product, config)+"projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}")
 			if err != nil {
 				return err
 			}
