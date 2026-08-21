@@ -38,11 +38,15 @@ resource "google_ces_app" "ces_app_basic" {
       language_code = "en-US"
       voice         = "en-US-Standard-A"
       speaking_rate = 1.0
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Speak clearly in a professional and helpful tone."
     }
     synthesize_speech_configs {
       language_code = "es-ES"
       voice         = "es-ES-Standard-A"
       speaking_rate = 0.95
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla de manera clara y profesional."
     }
 
     barge_in_config {
