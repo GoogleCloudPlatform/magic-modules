@@ -4,6 +4,7 @@ import (
 	"fmt"
 	neturl "net/url"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -19,6 +20,69 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+func TestDiskKmsKeyDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old                string
+		New                string
+		ExpectDiffSuppress bool
+	}{
+		"matching base keys": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			ExpectDiffSuppress: true,
+		},
+		"base key old, versioned new": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key/cryptoKeyVersions/1",
+			ExpectDiffSuppress: true,
+		},
+		"versioned old, base key new": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key/cryptoKeyVersions/1",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			ExpectDiffSuppress: true,
+		},
+		"different versions same key": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key/cryptoKeyVersions/1",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key/cryptoKeyVersions/2",
+			ExpectDiffSuppress: true,
+		},
+		"self link old, relative versioned new": {
+			Old:                "https://www.googleapis.com/compute/v1/projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key/cryptoKeyVersions/1",
+			ExpectDiffSuppress: true,
+		},
+		"different keys": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/other-key",
+			ExpectDiffSuppress: false,
+		},
+		"different keys with versions": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key/cryptoKeyVersions/1",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/other-key/cryptoKeyVersions/1",
+			ExpectDiffSuppress: false,
+		},
+		"empty old": {
+			Old:                "",
+			New:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			ExpectDiffSuppress: false,
+		},
+		"empty new": {
+			Old:                "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if tpgcompute.DiskKmsKeyDiffSuppress("disk_encryption_key.0.kms_key_self_link", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+				t.Fatalf("DiskKmsKeyDiffSuppress %q failed: old=%s, new=%s, expected=%v, got=%v",
+					name, tc.Old, tc.New, tc.ExpectDiffSuppress, !tc.ExpectDiffSuppress)
+			}
+		})
+	}
+}
 
 func TestDiskImageDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
@@ -695,6 +759,120 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 				ImportStateId:     importID,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func TestAccComputeDisk_kmsKeyVersionBehaviors(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	kms1 := kms.BootstrapKMSKey(t)
+	kms2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tftest-shared-key-2")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create disk with base key
+			{
+				Config: testAccComputeDisk_encryptionKMS(diskName, kms1.CryptoKey.Name),
+			},
+			// Step 2: Change config to version 1 of the SAME key. Diff should be suppressed.
+			{
+				Config:             testAccComputeDisk_encryptionKMS(diskName, kms1.CryptoKey.Name+"/cryptoKeyVersions/1"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			// Step 3: Change to a DIFFERENT key WITH a version. Diff is not suppressed. API fails.
+			{
+				Config:      testAccComputeDisk_encryptionKMS(diskName, kms2.CryptoKey.Name+"/cryptoKeyVersions/1"),
+				ExpectError: regexp.MustCompile("Changing the KMS key to a specific version is not supported\\."),
+			},
+		},
+	})
+}
+func TestAccComputeDisk_updateKmsKey(t *testing.T) {
+	t.Parallel()
+
+	bootstrapped1 := kms.BootstrapKMSKey(t)
+	bootstrapped2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tftest-shared-key-2")
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
+	var disk map[string]interface{}
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create disk with CMEK Key 1
+			{
+				Config: testAccComputeDisk_encryptionKMS(diskName, bootstrapped1.CryptoKey.Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(
+						t, "google_compute_disk.foobar", pid, &disk),
+					resource.TestCheckResourceAttr(
+						"google_compute_disk.foobar", "disk_encryption_key.0.kms_key_self_link", bootstrapped1.CryptoKey.Name),
+				),
+			},
+			// Step 2: Update in-place to change CMEK to Key 2
+			{
+				Config: testAccComputeDisk_encryptionKMS(diskName, bootstrapped2.CryptoKey.Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(
+						t, "google_compute_disk.foobar", pid, &disk),
+					resource.TestCheckResourceAttr(
+						"google_compute_disk.foobar", "disk_encryption_key.0.kms_key_self_link", bootstrapped2.CryptoKey.Name),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeDisk_disallowCmekToGmek(t *testing.T) {
+	t.Parallel()
+
+	bootstrapped := kms.BootstrapKMSKey(t)
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create disk with CMEK
+			{
+				Config: testAccComputeDisk_encryptionKMS(diskName, bootstrapped.CryptoKey.Name),
+			},
+			// Step 2: Attempt removing CMEK (downgrade to GMEK) - expect validation error
+			{
+				Config:      testAccComputeDisk_noEncryption(diskName),
+				ExpectError: regexp.MustCompile("Removing 'disk_encryption_key' is not supported in-place. To remove the KMS key, please destroy and recreate the disk without a KMS key."),
 			},
 		},
 	})
@@ -1421,6 +1599,23 @@ resource "google_compute_disk" "foobar" {
   }
 }
 `, diskName, kmsKey)
+}
+
+func testAccComputeDisk_noEncryption(diskName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+`, diskName)
 }
 
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
