@@ -794,6 +794,12 @@ properties:
                     type: Boolean
                     description: Whether to disable conversation logging for the sessions.
                     output: true
+                  - name: retentionWindow
+                    type: String
+                    description: |-
+                      Controls the retention window for the conversation.
+                      If not set, the conversation will be retained for 365 days.
+                    output: true
               - name: redactionConfig
                 type: NestedObject
                 description: Configuration to instruct how sensitive data should be handled.
