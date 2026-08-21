@@ -361,6 +361,13 @@ properties:
                     The mapping of the app variables names to the Dialogflow session
                     parameters names to be sent to the Dialogflow agent as input.
                   output: true
+                - name: languageCodeVariable
+                  type: String
+                  description: |-
+                    The name of the variable that contains the language code to be used for
+                    the Dialogflow session. If unspecified, the default language code of the
+                    Dialogflow agent will be used.
+                  output: true
                 - name: outputVariableMapping
                   type: KeyValuePairs
                   description: |-
