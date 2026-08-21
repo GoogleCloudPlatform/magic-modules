@@ -45,6 +45,7 @@ type TgcMetadataPayload struct {
 type ResourceTestData struct {
 	ParsedRawConfig  map[string]any `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
+	RawConfig        string         `json:"raw_config"`
 }
 
 type StepTestData struct {
@@ -256,6 +257,7 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 			resourceTestData[address] = ResourceTestData{
 				ParsedRawConfig:  rawConfigMap[address],
 				ResourceMetadata: *metadata,
+				RawConfig:        stepMetadata.RawConfig,
 			}
 		}
 		return &StepTestData{
