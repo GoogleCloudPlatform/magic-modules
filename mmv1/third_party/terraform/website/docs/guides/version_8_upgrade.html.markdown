@@ -281,7 +281,7 @@ The `run_as_service_account` argument has been removed from `google_integrations
 
 ### `http_check.0.auth_info.0.password` and `http_check.0.auth_info.0.password_wo` now require exactly one to be set
 
-The constraint between `http_check.0.auth_info.0.password` and `http_check.0.auth_info.0.password_wo` is now `ExactlyOneOf`. Configurations that set both fields must be updated to set only one.
+Updated `http_check.0.auth_info.0.password` and `http_check.0.auth_info.0.password_wo` to be `ExactlyOneOf`. Configurations that set both fields prior to this version must be updated to set only one of them.
 
 ## Resource: `google_netapp_storage_pool`
 
