@@ -1024,6 +1024,22 @@ properties:
                   The passphrase to decrypt the private key.
                   Should be left unset if the private key is not encrypted.
                 output: true
+          - name: vpcScSettings
+            type: NestedObject
+            description: VPC-SC settings for the app.
+            output: true
+            properties:
+              - name: allowedOrigins
+                type: Array
+                description: |-
+                  The allowed HTTP(s) origins that OpenAPI tools in the App are
+                  able to directly call when VPC Service Controls are enabled. These strings
+                  must match the origin exactly, including the port if specified. For
+                  example, "https://example.com" or "https://example.com:443". This list does
+                  not yet apply to Python tools that may make direct HTTP calls.
+                output: true
+                item_type:
+                  type: String
       - name: examples
         type: Array
         description: List of examples in the app.
