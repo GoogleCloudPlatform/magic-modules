@@ -226,13 +226,6 @@ properties:
           type: String
           description: Human readable message indicating details about the current status.
           output: true
-        - name: details
-          type: Array
-          description: |
-            A list of messages that carry the error details.
-          output: true
-          item_type:
-            type: KeyValuePairs
   - name: tags
     type: KeyValuePairs
     description: |
