@@ -670,6 +670,7 @@ service/networksecurity-swp:
 service/networkservices-agent-gateway:
   resources:
   - google_network_services_agent_gateway
+  - google_network_services_agent_connectivity_template
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*

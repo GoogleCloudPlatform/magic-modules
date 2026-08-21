@@ -1,0 +1,13 @@
+data "google_project" "project" {}
+
+resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
+  agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
+  location                       = "us-central1"
+  description                    = "A basic configuration for Agent Connectivity Template"
+  labels = {
+    env  = "test"
+    tier = "gold"
+  }
+
+  access_path = "CLIENT_TO_AGENT"
+}
