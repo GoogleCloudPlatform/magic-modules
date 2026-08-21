@@ -350,6 +350,79 @@ func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckF
 	}
 }
 
+func testAccCheckGoogleSqlUserPasswordPolicy(t *testing.T, n string, wantAllowedFailedAttempts int64, wantEnablePasswordVerification bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", n)
+		}
+
+		name := rs.Primary.Attributes["name"]
+		instance := rs.Primary.Attributes["instance"]
+		host := rs.Primary.Attributes["host"]
+
+		users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project, instance).Do()
+		if err != nil {
+			return err
+		}
+
+		for _, user := range users.Items {
+			if user.Name != name || user.Host != host {
+				continue
+			}
+			if user.PasswordPolicy == nil {
+				return fmt.Errorf("user %s: password_policy not set on API", n)
+			}
+			if got := user.PasswordPolicy.AllowedFailedAttempts; got != wantAllowedFailedAttempts {
+				return fmt.Errorf("user %s: allowed_failed_attempts = %d, want %d", n, got, wantAllowedFailedAttempts)
+			}
+			if got := user.PasswordPolicy.EnablePasswordVerification; got != wantEnablePasswordVerification {
+				return fmt.Errorf("user %s: enable_password_verification = %t, want %t", n, got, wantEnablePasswordVerification)
+			}
+			return nil
+		}
+
+		return fmt.Errorf("user %s (%s@%s) not found in instance %s", n, name, host, instance)
+	}
+}
+
+func testAccCheckGoogleSqlUserPasswordPolicyAttempts(t *testing.T, n string, wantAllowedFailedAttempts int64, wantEnableFailedAttemptsCheck bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", n)
+		}
+
+		name := rs.Primary.Attributes["name"]
+		instance := rs.Primary.Attributes["instance"]
+
+		users, err := sql.NewClient(config, config.UserAgent).Users.List(config.Project, instance).Do()
+		if err != nil {
+			return err
+		}
+
+		for _, user := range users.Items {
+			if user.Name != name {
+				continue
+			}
+			if user.PasswordPolicy == nil {
+				return fmt.Errorf("user %s: password_policy not set on API", n)
+			}
+			if got := user.PasswordPolicy.AllowedFailedAttempts; got != wantAllowedFailedAttempts {
+				return fmt.Errorf("user %s: allowed_failed_attempts = %d, want %d", n, got, wantAllowedFailedAttempts)
+			}
+			if got := user.PasswordPolicy.EnableFailedAttemptsCheck; got != wantEnableFailedAttemptsCheck {
+				return fmt.Errorf("user %s: enable_failed_attempts_check = %t, want %t", n, got, wantEnableFailedAttemptsCheck)
+			}
+			return nil
+		}
+
+		return fmt.Errorf("user %s (%s) not found in instance %s", n, name, instance)
+	}
+}
+
 func testAccCheckGoogleSqlUserExistsWithName(t *testing.T, instance, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -431,6 +504,100 @@ func TestAccSqlUser_mysqlPasswordPolicy(t *testing.T) {
 			{
 				ResourceName:            "google_sql_user.user2",
 				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+			},
+		},
+	})
+}
+
+func TestAccSqlUser_mysqlPasswordPolicyUpdate(t *testing.T) {
+	// Verifies that changes to password_policy are actually sent on update.
+	// A pure state check is insufficient (state is populated from config), so
+	// the applied values are verified against the Cloud SQL API.
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instance := fmt.Sprintf("tf-test-i%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlUser_mysqlPasswordPolicyUpdate(instance, "password", 6, "2592000s", true, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.allowed_failed_attempts", "6"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.enable_password_verification", "true"),
+					testAccCheckGoogleSqlUserPasswordPolicy(t, "google_sql_user.user1", 6, true),
+				),
+			},
+			{
+				Config: testGoogleSqlUser_mysqlPasswordPolicyUpdate(instance, "password", 3, "1209600s", true, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.allowed_failed_attempts", "3"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.enable_password_verification", "false"),
+					testAccCheckGoogleSqlUserPasswordPolicy(t, "google_sql_user.user1", 3, false),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.user1",
+				ImportStateId:           fmt.Sprintf("%s/%s/google.com/admin", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+			},
+		},
+	})
+}
+
+func TestAccSqlUser_postgresPasswordPolicyUpdate(t *testing.T) {
+	// Verifies that changes to password_policy are actually sent on update for
+	// a POSTGRES_18 instance. A pure state check is insufficient (state is
+	// populated from config), so the applied values are verified against the
+	// Cloud SQL API.
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instance := fmt.Sprintf("tf-test-i%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlUser_postgresPasswordPolicyUpdate(instance, "password", 6, "2592000s", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.allowed_failed_attempts", "6"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.enable_failed_attempts_check", "true"),
+					testAccCheckGoogleSqlUserPasswordPolicyAttempts(t, "google_sql_user.user1", 6, true),
+				),
+			},
+			{
+				Config: testGoogleSqlUser_postgresPasswordPolicyUpdate(instance, "password", 3, "1209600s", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.allowed_failed_attempts", "3"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.enable_failed_attempts_check", "true"),
+					testAccCheckGoogleSqlUserPasswordPolicyAttempts(t, "google_sql_user.user1", 3, true),
+				),
+			},
+			{
+				Config: testGoogleSqlUser_postgresPasswordPolicyUpdate(instance, "password", 0, "1209600s", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.allowed_failed_attempts", "0"),
+					resource.TestCheckResourceAttr("google_sql_user.user1", "password_policy.0.enable_failed_attempts_check", "false"),
+					testAccCheckGoogleSqlUserPasswordPolicyAttempts(t, "google_sql_user.user1", 0, false),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.user1",
+				ImportStateId:           fmt.Sprintf("%s/%s/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -1023,6 +1190,66 @@ resource "google_sql_user" "user2" {
   }
 }
 `, instance, password)
+}
+
+func testGoogleSqlUser_mysqlPasswordPolicyUpdate(instance, password string, allowedFailedAttempts int, passwordExpirationDuration string, enableFailedAttemptsCheck, enablePasswordVerification bool) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_4"
+  deletion_protection = false
+  settings {
+    edition = "ENTERPRISE"
+    tier    = "db-f1-micro"
+  }
+}
+
+resource "google_sql_user" "user1" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "google.com"
+  password = "%s"
+
+  password_policy {
+    allowed_failed_attempts      = %d
+    password_expiration_duration = "%s"
+    enable_failed_attempts_check = %t
+    enable_password_verification = %t
+  }
+}
+`, instance, password, allowedFailedAttempts, passwordExpirationDuration, enableFailedAttemptsCheck, enablePasswordVerification)
+}
+
+func testGoogleSqlUser_postgresPasswordPolicyUpdate(instance, password string, allowedFailedAttempts int, passwordExpirationDuration string, enableFailedAttemptsCheck bool) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_18"
+  deletion_protection = false
+  settings {
+    edition = "ENTERPRISE"
+    tier    = "db-f1-micro"
+
+    password_validation_policy {
+      enable_password_policy = true
+    }
+  }
+}
+
+resource "google_sql_user" "user1" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  password = "%s"
+
+  password_policy {
+    allowed_failed_attempts      = %d
+    password_expiration_duration = "%s"
+    enable_failed_attempts_check = %t
+  }
+}
+`, instance, password, allowedFailedAttempts, passwordExpirationDuration, enableFailedAttemptsCheck)
 }
 
 func testGoogleSqlUser_postgres(instance, password string) string {
