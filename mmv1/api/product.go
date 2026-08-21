@@ -156,7 +156,7 @@ func (p *Product) SetCompiler(t string) {
 		p.Compiler = "terraformgoogleconversionnext-codegen"
 	case "tgc_cai2hcl":
 		p.Compiler = "caitoterraformconversion-codegen"
-	case "terraform", "oics", "bics":
+	case "terraform", "default (terraform)", "oics", "bics", "":
 		p.Compiler = "terraform-codegen"
 	default:
 		p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
@@ -165,6 +165,10 @@ func (p *Product) SetCompiler(t string) {
 
 func (p Product) IsTgcCompiler() bool {
 	return p.Compiler == "terraformgoogleconversionnext-codegen"
+}
+
+func (p Product) IsTerraformProvider() bool {
+	return p.Compiler == "terraform-codegen"
 }
 
 // ====================

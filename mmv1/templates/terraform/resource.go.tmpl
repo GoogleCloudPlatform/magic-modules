@@ -46,9 +46,6 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-    {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
-    "github.com/hashicorp/terraform-plugin-go/tftypes"
-    {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -272,13 +269,13 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 {{- end}}
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
+{{- if $.CustomCode.CustomCreate }}
+	return resource{{ $.ResourceName }}CustomCreate(d, meta)
+{{- else }}
 {{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
     var project string
 {{- end}}
     config := meta.(*transport_tpg.Config)
-{{ if $.CustomCode.CustomCreate -}}
-    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
-{{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
@@ -892,13 +889,13 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         return resource{{ $.ResourceName -}}Read(d, meta)
     }
 {{-     end}}
+{{- if $.CustomCode.CustomUpdate }}
+	return resource{{ $.ResourceName }}CustomUpdate(d, meta)
+{{- else }}
 {{     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
     config := meta.(*transport_tpg.Config)
-{{      if $.CustomCode.CustomUpdate -}}
-    {{ customTemplate $ $.CustomCode.CustomUpdate false -}}
-{{      else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
@@ -1302,6 +1299,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return nil
     }
 {{- end }}
+{{- if $.CustomCode.CustomDelete }} 
+	return resource{{ $.ResourceName }}CustomDelete(d, meta)
+{{- else }}
 {{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}
@@ -1310,9 +1310,6 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-{{ if $.CustomCode.CustomDelete }} 
-{{ customTemplate $ $.CustomCode.CustomDelete false -}}
-{{- else }}
 
     billingProject := ""
     {{ if $.HasProject }}
@@ -1440,9 +1437,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
 {{ if not $.ExcludeImport -}}
 func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-    {{- if $.CustomCode.CustomImport }}
-        {{ customTemplate $ $.CustomCode.CustomImport false -}}
-    {{- else }}
+{{- if $.CustomCode.CustomImport }}
+	return resource{{ $.ResourceName }}CustomImport(d, meta)
+{{- else }}
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
         {{- range $id := $.ImportIdFormatsFromResource }}
@@ -1483,40 +1480,8 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end }}
-{{- if $.CustomCode.Encoder }}
-func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ customTemplate $ $.CustomCode.Encoder false -}}
-}
-{{ end -}}
-{{- if $.CustomCode.UpdateEncoder }}
-
-func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
-}
-{{- end }}
 {{- if $.NestedQuery }}
     {{ template "NestedQuery" $ }}
-{{- end }}
-{{- if $.CustomCode.Decoder }}
-{{- if and $.CustomCode.UpdateEncoder (not $.NestedQuery ) }}
-{{ "" }}
-{{- end }}
-func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{ customTemplate $ $.CustomCode.Decoder false -}}
-}
-{{- end }}
-{{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
-}
-{{- end }}
-{{- if and $.SchemaVersion $.StateUpgraders }}
-
-    {{ customTemplate $ $.StateMigrationFile false -}}
-{{- end }}
-
-{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
-    {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}

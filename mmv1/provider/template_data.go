@@ -60,6 +60,8 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/flatten_property_method_custom.go.tmpl",
+		"templates/terraform/expand_property_method_custom.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
 		"templates/terraform/nested_query.go.tmpl",
 		"templates/terraform/unordered_list_customize_diff.go.tmpl",
@@ -72,6 +74,23 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 	templates := []string{
 		templatePath,
 		"templates/terraform/schema_property_fw.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateCustomFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource_custom.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/schema_property.go.tmpl",
+		"templates/terraform/schema_subresource.go.tmpl",
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method_custom.go.tmpl",
+		"templates/terraform/expand_property_method_custom.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -258,6 +277,8 @@ func (td *TemplateData) GenerateTGCResourceFile(templatePath, filePath string, r
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/flatten_property_method_custom.go.tmpl",
+		"templates/terraform/expand_property_method_custom.go.tmpl",
 		"templates/tgc_next/tfplan2cai/expand_property_method_tgc.go.tmpl",
 		"templates/tgc_next/cai2hcl/flatten_property_method_tgc.go.tmpl",
 		"templates/tgc_next/cai2hcl/full_to_relative_path.go.tmpl",

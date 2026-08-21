@@ -2112,6 +2112,32 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
+func (r Resource) HasCustomMethods() bool {
+	if r.CustomCode.CustomCreate != "" ||
+		(r.CustomCode.CustomUpdate != "" && r.Updatable()) ||
+		(r.CustomCode.CustomDelete != "" && !r.ExcludeDelete) ||
+		(r.CustomCode.CustomImport != "" && !r.ExcludeImport) ||
+		r.CustomCode.Encoder != "" ||
+		r.CustomCode.UpdateEncoder != "" ||
+		r.CustomCode.Decoder != "" ||
+		r.CustomCode.PostCreateFailure != "" ||
+		(r.SchemaVersion != 0 && r.StateUpgraders) ||
+		(r.IdentitySchemaVersion != 0 && r.IdentityUpgraders && !r.ExcludeRead) {
+		return true
+	}
+	for _, p := range r.AllNestedProperties(r.GettableProperties()) {
+		if p.CustomFlatten != "" && !p.ShouldIgnoreCustomFlatten() {
+			return true
+		}
+	}
+	for _, p := range r.AllNestedProperties(r.SettableProperties()) {
+		if p.CustomExpand != "" {
+			return true
+		}
+	}
+	return false
+}
+
 func (r Resource) TestSamples() []*resource.Sample {
 	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
@@ -2671,5 +2697,15 @@ func (r Resource) CaiResourceName() string {
 }
 
 func (r Resource) IsTgcCompiler() bool {
-	return r.ProductMetadata.Compiler == "terraformgoogleconversionnext-codegen"
+	if r.ProductMetadata != nil {
+		return r.ProductMetadata.IsTgcCompiler()
+	}
+	return false
+}
+
+func (r Resource) IsTerraformProvider() bool {
+	if r.ProductMetadata != nil {
+		return r.ProductMetadata.IsTerraformProvider()
+	}
+	return false
 }

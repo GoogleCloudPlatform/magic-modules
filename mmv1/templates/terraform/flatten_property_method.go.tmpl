@@ -14,8 +14,9 @@
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
 {{- if and (or $.WriteOnlyLegacy $.WriteOnly) }}
-{{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
+{{- else if and (and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten)) (not $.IsTerraformProvider) }}
     {{- customTemplate $ $.CustomFlatten false -}}
+{{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   {{- if or $.IgnoreRead $.ClientSide }}

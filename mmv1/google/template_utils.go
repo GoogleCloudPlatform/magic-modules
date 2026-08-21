@@ -138,6 +138,8 @@ func (t functionsData) customTemplate(e any, templatePath string, appendNewline 
 		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/flatten_property_method_custom.go.tmpl",
+		"templates/terraform/expand_property_method_custom.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
 		"templates/terraform/nested_query.go.tmpl",
 		"templates/terraform/unordered_list_customize_diff.go.tmpl",

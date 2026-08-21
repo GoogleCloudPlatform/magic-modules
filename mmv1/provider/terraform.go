@@ -157,6 +157,10 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		} else {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateResourceFile(targetFilePath, object)
+			if object.HasCustomMethods() {
+				customTargetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_custom.go", t.ResourceGoFilename(object)))
+				templateData.GenerateCustomFile(customTargetFilePath, object)
+			}
 		}
 
 		t.GenerateListResource(object, templateData, targetFolder)
@@ -205,6 +209,10 @@ func (t *Terraform) GenerateResourceFile(object api.Resource, targetFilePath str
 	}
 	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
 	templateData.GenerateResourceFile(targetFilePath, object)
+	if object.HasCustomMethods() {
+		customTargetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_custom.go", t.ResourceGoFilename(object)))
+		templateData.GenerateCustomFile(customTargetFilePath, object)
+	}
 }
 
 func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData TemplateData, outputFolder string) {
