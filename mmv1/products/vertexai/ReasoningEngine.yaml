@@ -80,6 +80,15 @@ samples:
           name: 'reasoning-engine'
         ignore_read_extra:
           - 'deletion_policy'
+  - name: 'vertex_ai_reasoning_engine_agent_config_source'
+    primary_resource_id: 'reasoning_engine'
+    exclude_test: true
+    steps:
+      - name: 'vertex_ai_reasoning_engine_agent_config_source'
+        resource_id_vars:
+          name: 'reasoning-engine'
+        ignore_read_extra:
+          - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_byoc'
     skip_vcr: true # multiple IAM members
     primary_resource_id: 'reasoning_engine'
@@ -868,7 +877,6 @@ properties:
                       The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
           - name: 'agentConfigSource'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Specification for the deploying from agent config.
             properties:
