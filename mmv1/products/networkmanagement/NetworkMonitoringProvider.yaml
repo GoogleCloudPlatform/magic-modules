@@ -13,7 +13,6 @@
 
 ---
 name: 'NetworkMonitoringProvider'
-min_version: beta
 description: |
   A Network Monitoring Provider resource that allows third-party network monitoring
   solutions to integrate with Google Cloud Network Management. A provider acts as
