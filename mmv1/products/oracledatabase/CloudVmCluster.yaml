@@ -22,6 +22,10 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudVmClusters
 immutable: true
+# List generation omitted: generated ListQuery tests create a live VM cluster
+# (insert timeout 120 minutes), which exceeds the VCR recording 6h wall clock.
+# Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudVmClusters?cloudVmClusterId={{cloud_vm_cluster_id}}
 id_format: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}

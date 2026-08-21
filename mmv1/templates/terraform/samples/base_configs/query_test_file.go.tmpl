@@ -20,6 +20,16 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
+{{- $needsFmt := false -}}
+{{- range $key, $val := $.FirstTestConfig.Step.TestVarsOverrides -}}
+	{{- $valStr := printf "%v" $val -}}
+	{{- if contains $valStr "fmt." -}}
+		{{- $needsFmt = true -}}
+	{{- end -}}
+{{- end -}}
+{{- if $needsFmt }}
+	"fmt"
+{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -114,8 +124,9 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 					),
 					listScope.Capture(map[string]string{
 					{{- range $scope := $.ListScopeProperties }}
-						{{- if $scope.Required }}
-							{{- $n := underscore $scope.Name }}
+						{{- $n := underscore $scope.Name }}
+						{{- /* Required scopes plus provider-default auto-scopes. Synthesized `project` is optional on the list schema but must be captured when the sample overrides it (e.g. oracledatabase → oci-terraform-testing-prod). */}}
+						{{- if or $scope.Required (eq $n "project") (eq $n "region") (eq $n "zone") (eq $n "location") }}
 						"{{ $n }}": "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
 						{{- end }}
 					{{- end }}
@@ -142,8 +153,8 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 {{- range $scope := $.ListScopeProperties }}
-	{{- if $scope.Required }}
-		{{- $n := underscore $scope.Name }}
+	{{- $n := underscore $scope.Name }}
+	{{- if or $scope.Required (eq $n "project") (eq $n "region") (eq $n "zone") (eq $n "location") }}
 variable "{{ $n }}" { type = string }
 	{{- end }}
 {{- end }}
@@ -152,8 +163,8 @@ list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
 	limit = 10000
     config {
 {{- range $scope := $.ListScopeProperties }}
-        {{- if $scope.Required }}
-            {{- $n := underscore $scope.Name }}
+        {{- $n := underscore $scope.Name }}
+        {{- if or $scope.Required (eq $n "project") (eq $n "region") (eq $n "zone") (eq $n "location") }}
         {{ $n }} = var.{{ $n }}
         {{- end }}
 {{- end }}

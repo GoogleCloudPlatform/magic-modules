@@ -15,6 +15,10 @@ name: DbSystem
 description: A DbSystem Resource
 base_url: projects/{{project}}/locations/{{location}}/dbSystems
 immutable: true
+# List generation omitted: generated ListQuery tests create a live DbSystem
+# (insert timeout 120 minutes), which exceeds the VCR recording 6h wall clock.
+# Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}
 create_url: projects/{{project}}/locations/{{location}}/dbSystems?dbSystemId={{db_system_id}}
 id_format: projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}

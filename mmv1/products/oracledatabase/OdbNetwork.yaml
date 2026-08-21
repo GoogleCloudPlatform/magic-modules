@@ -19,6 +19,7 @@ references:
     OracleDatabase@Google Cloud: https://cloud.google.com/oracle/database/docs/overview'
 base_url: projects/{{project}}/locations/{{location}}/odbNetworks
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
 create_url: projects/{{project}}/locations/{{location}}/odbNetworks?odbNetworkId={{odb_network_id}}
 id_format: projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}
@@ -61,7 +62,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
-          odb_network_id: fmt.Sprintf("tf-test-odbnetwork-%s", acctest.RandString(t, 10))
+          odb_network_id: fmt.Sprintf("tf-test-odbnetwork-%s", randomSuffix)
   - name: oracledatabase_odbnetwork_full
     primary_resource_id: my-odbnetwork
     steps:
@@ -75,7 +76,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           project: '"oci-terraform-testing-prod"'
-          odb_network_id: fmt.Sprintf("tf-test-odbnetwork-full-%s", acctest.RandString(t, 10))
+          odb_network_id: fmt.Sprintf("tf-test-odbnetwork-full-%s", randomSuffix)
 virtual_fields:
   - name: deletion_protection
     type: Boolean

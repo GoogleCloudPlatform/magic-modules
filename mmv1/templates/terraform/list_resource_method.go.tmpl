@@ -37,11 +37,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
-{{- if $.HasProject }}
-	billingProject := project
-{{- else }}
 	billingProject := ""
-{{- end }}
 	if bp, err := tpgresource.GetBillingProject(resourceData, config); err == nil {
 		billingProject = bp
 	}
@@ -105,7 +101,13 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			}
 {{- end }}
 {{- end }}
-			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
+{{- if $.HasProject }}
+			project := ""
+			if p, err := tpgresource.GetProject(d, config); err == nil {
+				project = p
+			}
+{{- end }}
+			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, {{- if $.HasProject }}config, project, {{ else }}config, {{ end -}}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")

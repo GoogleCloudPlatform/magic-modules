@@ -16,6 +16,10 @@ name: GoldengateDeployment
 description: This resource helps to create a GoldengateDeployment which enables running Oracle GoldenGate in Google Cloud.
 base_url: projects/{{project}}/locations/{{location}}/goldengateDeployments
 immutable: true
+# List generation omitted: generated ListQuery tests create a live GoldenGate
+# deployment (insert timeout 120 minutes; CI recording took ~78 minutes and
+# still failed VCR 6h wall clock with sibling tests). Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}
 create_url: projects/{{project}}/locations/{{location}}/goldengateDeployments?goldengateDeploymentId={{goldengate_deployment_id}}
 id_format: projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}

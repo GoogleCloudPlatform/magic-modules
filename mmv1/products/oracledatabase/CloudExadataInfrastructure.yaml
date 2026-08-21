@@ -20,6 +20,10 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures
 immutable: true
+# List generation omitted: generated ListQuery tests create live Exadata
+# infrastructure (insert timeout 240 minutes), which exceeds the VCR recording
+# 6h wall clock. Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
 create_url: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures?cloudExadataInfrastructureId={{cloud_exadata_infrastructure_id}}
 id_format: projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}
