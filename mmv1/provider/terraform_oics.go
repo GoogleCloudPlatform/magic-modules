@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 type TerraformOiCS struct {
@@ -56,7 +57,7 @@ func (toics TerraformOiCS) GenerateObjects(outputFolder, resourceToGenerate stri
 		object.ExcludeIfNotInVersion(toics.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -68,7 +69,8 @@ func (toics TerraformOiCS) GenerateObject(object api.Resource, outputFolder, res
 	templateData := NewTemplateData(outputFolder, toics.TargetVersionName, toics.templateFS)
 
 	if !object.IsExcluded() {
-		log.Printf("Generating %s resource", object.Name)
+		google.LogVerbose("Generating %s resource", object.Name)
+		google.IncrementResourceGenerated()
 		toics.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 	}
 }

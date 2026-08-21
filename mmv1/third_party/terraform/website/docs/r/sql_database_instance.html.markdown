@@ -496,6 +496,8 @@ The `settings` block supports:
 
 * `data_disk_provisioned_throughput` - (Optional) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
+* `replication_lag_max_seconds` - (Optional) The acceptable replication lag, in seconds, after which a read replica recreates itself. The lag must persist for at least five minutes before recreation is triggered. This is a replica level field, and must be between `300` (five minutes) and `31536000` (one year).
+
 * `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
@@ -724,6 +726,22 @@ The optional `settings.performance_capture_config` (Beta) subblock for instances
 * `seconds_behind_source_threshold` - (Beta) The minimum number of seconds replica must be lagging behind primary to trigger capture on replica.
 
 * `transaction_duration_threshold` - (Beta) The amount of time in seconds that a transaction needs to have been open before the watcher starts recording it.
+
+* `cpu_utilization_threshold_percent` - (Beta) The minimum percentage of CPU utilization that triggers the performance capture. Valid range is 10 to 99. `0` disables the check.
+
+* `memory_usage_threshold_percent` - (Beta) The minimum percentage of memory usage that triggers the performance capture. Valid range is 10 to 99. `0` disables the check.
+
+* `history_list_length_threshold_count` - (Beta) The minimum number of undo log entries in the history list length that triggers the performance capture. Valid range is 10000 to 10000000. `0` disables the check.
+
+* `semaphore_wait_threshold_count` - (Beta) The minimum number of semaphore waits that triggers the performance capture. Valid range is 10 to 10000. `0` disables the check.
+
+* `transaction_lock_wait_threshold_count` - (Beta) The minimum number of transactions in lock wait state that triggers the performance capture. Valid range is 10 to 10000. `0` disables the check.
+
+* `transaction_kill_threshold_seconds` - (Beta) The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it. Valid range is 60 to 604800. `0` disables termination.
+
+* `transaction_kill_type` - (Beta) Determines which transactions are allowed to be terminated when they exceed `transaction_kill_threshold_seconds`. Possible values are: `TRANSACTION_KILL_TYPE_UNSPECIFIED`, `READ_ONLY_TRANSACTIONS`, `ALL_TRANSACTIONS`.
+
+* `transaction_kill_excluded_user_hosts` - (Beta) A list of users to exclude from transaction termination. Entries can be in the format `user@host` or just `user`.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated and supports:
