@@ -220,34 +220,11 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error expanding scheduling: %s", err)
 		}
 		if schedulingBody != nil {
-			instanceBody["scheduling"] = stripNilSchedulingDurations(schedulingBody)
+			instanceBody["scheduling"] = schedulingOmitEmpty(schedulingBody)
 		}
 	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
 		if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
-			// Drop zero-value fields so the marshaled body matches the
-			// behavior of the typed compute.Scheduling JSON tags (omitempty).
-			filtered := map[string]interface{}{}
-			for k, v := range schedulingRaw {
-				switch val := v.(type) {
-				case bool:
-					if val {
-						filtered[k] = v
-					}
-				case string:
-					if val != "" {
-						filtered[k] = v
-					}
-				case float64:
-					if val != 0 {
-						filtered[k] = v
-					}
-				case nil:
-					// skip
-				default:
-					filtered[k] = v
-				}
-			}
-			instanceBody["scheduling"] = filtered
+			instanceBody["scheduling"] = schedulingOmitEmpty(schedulingRaw)
 		}
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
