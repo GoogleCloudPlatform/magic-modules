@@ -17,8 +17,8 @@ import (
 // tests for NetworkMonitoringProvider are executed serially within a single test suite.
 func TestAccNetworkManagementNetworkMonitoringProvider(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":         testAccNetworkManagementNetworkMonitoringProvider_basicTest,
-		"force_destroy": testAccNetworkManagementNetworkMonitoringProvider_forceDestroyTest,
+		"basic":           testAccNetworkManagementNetworkMonitoringProvider_basicTest,
+		"deletion_policy": testAccNetworkManagementNetworkMonitoringProvider_deletionPolicyTest,
 	}
 
 	for name, tc := range testCases {
@@ -47,15 +47,15 @@ func testAccNetworkManagementNetworkMonitoringProvider_basicTest(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				// location and network_monitoring_provider_id are url_param_only and
-				// are not returned in the GET response body; force_destroy is a
+				// are not returned in the GET response body; deletion_policy is a
 				// virtual field that is never read back from the API.
-				ImportStateVerifyIgnore: []string{"force_destroy", "location", "network_monitoring_provider_id"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "location", "network_monitoring_provider_id"},
 			},
 		},
 	})
 }
 
-func testAccNetworkManagementNetworkMonitoringProvider_forceDestroyTest(t *testing.T) {
+func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicyTest(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -66,13 +66,13 @@ func testAccNetworkManagementNetworkMonitoringProvider_forceDestroyTest(t *testi
 		CheckDestroy:             testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkManagementNetworkMonitoringProvider_forceDestroy(context),
+				Config: testAccNetworkManagementNetworkMonitoringProvider_deletionPolicy(context),
 			},
 			{
 				ResourceName:            "google_network_management_network_monitoring_provider.provider",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "location", "network_monitoring_provider_id"},
+				ImportStateVerifyIgnore: []string{"deletion_policy", "location", "network_monitoring_provider_id"},
 			},
 		},
 	})
@@ -81,7 +81,6 @@ func testAccNetworkManagementNetworkMonitoringProvider_forceDestroyTest(t *testi
 func testAccNetworkManagementNetworkMonitoringProvider_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_management_network_monitoring_provider" "provider" {
-  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
   network_monitoring_provider_id = "tf-test-provider-%{random_suffix}"
   location                       = "global"
   provider_type                  = "EXTERNAL"
@@ -89,14 +88,13 @@ resource "google_network_management_network_monitoring_provider" "provider" {
 `, context)
 }
 
-func testAccNetworkManagementNetworkMonitoringProvider_forceDestroy(context map[string]interface{}) string {
+func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_management_network_monitoring_provider" "provider" {
-  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
-  network_monitoring_provider_id = "tf-test-provider-fd-%{random_suffix}"
+  network_monitoring_provider_id = "tf-test-provider-dp-%{random_suffix}"
   location                       = "global"
   provider_type                  = "EXTERNAL"
-  force_destroy                  = true
+  deletion_policy                = "FORCE"
 }
 `, context)
 }

@@ -1,4 +1,4 @@
 url = strings.Replace(url, "/v1beta1/", "/v1/", 1)
-if d.Get("force_destroy").(bool) {
+if policy, ok := d.GetOk("deletion_policy"); ok && strings.EqualFold(policy.(string), "FORCE") {
 	url = url + "?force=true"
 }

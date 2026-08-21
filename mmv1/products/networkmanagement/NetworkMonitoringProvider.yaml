@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,8 @@ description: |
   the parent resource for MonitoringPoints, NetworkPaths, and WebPaths.
 references:
   guides:
-    'Network Monitoring overview': 'https://cloud.google.com/network-intelligence-center/docs/network-monitoring/overview'
-  api: 'https://cloud.google.com/network-intelligence-center/docs/reference/rest'
+    'Network Intelligence Center Documentation': 'https://cloud.google.com/network-intelligence-center/docs'
+  api: 'https://cloud.google.com/network-intelligence-center/docs/reference/networkmanagement/rest/v1/projects.locations.networkMonitoringProviders'
 docs:
 examples:
   - name: 'network_management_network_monitoring_provider_basic'
@@ -34,6 +34,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/networkMonitoringProvide
 create_url: 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders?networkMonitoringProviderId={{network_monitoring_provider_id}}'
 # No UpdateNetworkMonitoringProvider RPC exists; any field change requires recreation.
 immutable: true
+deletion_policy_custom_docs: true
+deletion_policy_exclude: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}'
 sweeper:
@@ -49,12 +51,17 @@ custom_code:
   post_create: 'templates/terraform/post_create/network_management_network_monitoring_provider_wait.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_management_network_monitoring_provider_wait.go.tmpl'
 virtual_fields:
-  - name: 'force_destroy'
+  - name: 'deletion_policy'
     description: |
-      If set to true, all nested resources (MonitoringPoints, NetworkPaths, WebPaths)
-      belonging to this provider will also be deleted on provider deletion.
-    type: Boolean
-    default_value: false
+      The deletion policy for the Network Monitoring Provider.
+      Setting `deletion_policy = "FORCE"` forces the deletion of all nested resources
+      (MonitoringPoints, NetworkPaths, WebPaths) belonging to this provider on deletion.
+      Setting `deletion_policy = "ABANDON"` removes the provider from Terraform state
+      without deleting it in Google Cloud.
+      Setting `deletion_policy = "PREVENT"` prevents Terraform from deleting the provider.
+      Leaving it unset or default (`"DELETE"`) performs standard deletion (which fails if
+      child resources exist).
+    type: String
 parameters:
   - name: 'location'
     type: String
