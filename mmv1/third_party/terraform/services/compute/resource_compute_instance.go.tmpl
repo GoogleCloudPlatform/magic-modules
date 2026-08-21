@@ -4225,21 +4225,23 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 		"source": sourceLink,
 	}
 
-	if v, ok := diskConfig["mode"]; ok {
+	if v, ok := diskConfig["mode"]; ok && v.(string) != "" {
 		disk["mode"] = v.(string)
 	}
 
-	if v, ok := diskConfig["device_name"]; ok {
+	if v, ok := diskConfig["device_name"]; ok && v.(string) != "" {
 		disk["deviceName"] = v.(string)
 	}
 
-	if v, ok := diskConfig["force_attach"]; ok {
-		disk["forceAttach"] = v.(bool)
+	if v, ok := diskConfig["force_attach"]; ok && v.(bool) {
+		disk["forceAttach"] = true
 	}
 
-  if v, ok := d.GetOk("boot_disk.0.interface"); ok && v != "" {
-    disk["interface"] = v.(string)
-  }
+	if v, ok := diskConfig["interface"]; ok && v.(string) != "" {
+		disk["interface"] = v.(string)
+	} else if v, ok := d.GetOk("boot_disk.0.interface"); ok && v.(string) != "" {
+		disk["interface"] = v.(string)
+	}
 
 	var diskEncryptionKey map[string]interface{}
 	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
