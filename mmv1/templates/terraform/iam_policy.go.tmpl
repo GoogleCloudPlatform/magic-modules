@@ -56,8 +56,15 @@ func init() {
         Name: "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Type: registry.SchemaTypeIAMResource,
-        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc, tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser){{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+        Schema: New{{ $.ResourceName }}IamMemberResource(),
     }.Register()
+{{- if and $.IamPolicy $.IamPolicy.GenerateListResource }}
+    registry.FrameworkListResource{
+        Name:        "{{ $.TerraformName }}_iam_member",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Func:        New{{ $.ResourceName -}}IamMemberListResource,
+    }.Register()
+{{- end}}
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_policy",
         ProductName: "{{ $.ProductMetadata.Name }}",
@@ -72,6 +79,21 @@ func init() {
     }.Register()
 }
 {{- end }}
+
+// New{{ $.ResourceName }}IamMemberResource returns the {{ $.TerraformName }}_iam_member
+// managed resource. It is shared by the managed resource registration and the 
+// list resource, so both stay in sync.
+func New{{ $.ResourceName }}IamMemberResource() *schema.Resource {
+    return tpgiamresource.ResourceIamMember(
+        {{ $.ResourceName }}IamSchema,
+        {{ $.ResourceName }}IamUpdaterProducer,
+        {{ $.ResourceName }}IdParseFunc,
+        tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser),
+		{{- if $.IamPolicy.DeprecationMessage }}
+		tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"),
+		{{- end }}
+    )
+}
 
 var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}
