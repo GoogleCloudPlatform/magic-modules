@@ -44,7 +44,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_create: 'templates/terraform/custom_create/ces_app_root_agent_association.go.tmpl'
+  custom_create: 'resourceCESAppRootAgentAssociationCustomCreate'
   custom_update: 'templates/terraform/custom_update/ces_app_root_agent_association.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/ces_app_root_agent_association.go.tmpl'
   custom_import: 'templates/terraform/custom_import/ces_app_root_agent_association.go.tmpl'

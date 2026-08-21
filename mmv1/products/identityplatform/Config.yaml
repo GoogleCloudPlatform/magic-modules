@@ -42,7 +42,7 @@ timeouts:
 exclude_sweeper: true
 exclude_delete: true
 custom_code:
-  custom_create: templates/terraform/custom_create/identity_platform_config.go.tmpl
+  custom_create: 'resourceIdentityPlatformConfigCustomCreate'
 samples:
   - name: identity_platform_config_basic
     primary_resource_id: default

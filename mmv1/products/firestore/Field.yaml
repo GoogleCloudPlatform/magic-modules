@@ -55,7 +55,7 @@ error_retry_predicates:
   - transport_tpg.FirestoreField409RetryUnderlyingDataChanged
 autogen_async: true
 custom_code:
-  custom_create: templates/terraform/custom_create/firestore_field.go.tmpl
+  custom_create: 'resourceFirestoreFieldCustomCreate'
   custom_update: templates/terraform/custom_update/firestore_field.go.tmpl
   encoder: templates/terraform/encoders/firestore_field.go.tmpl
   custom_delete: templates/terraform/custom_delete/firestore_field_delete.go.tmpl
