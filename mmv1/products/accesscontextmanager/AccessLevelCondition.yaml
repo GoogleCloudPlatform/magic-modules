@@ -203,6 +203,9 @@ properties:
                 The minimum allowed OS version. If not set, any version
                 of this OS satisfies the constraint.
                 Format: "major.minor.patch" such as "10.5.301", "9.2.1".
+            - name: requireVerifiedChromeOs
+              type: Boolean
+              description: If you specify DESKTOP_CHROME_OS for osType, you can optionally include requireVerifiedChromeOs to require Chrome Verified Access.
             - name: osType
               type: Enum
               description: |
