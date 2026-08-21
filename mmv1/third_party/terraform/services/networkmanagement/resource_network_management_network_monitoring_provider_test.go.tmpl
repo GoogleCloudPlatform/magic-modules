@@ -81,6 +81,7 @@ func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicyTest(t *tes
 func testAccNetworkManagementNetworkMonitoringProvider_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_management_network_monitoring_provider" "provider" {
+  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
   network_monitoring_provider_id = "tf-test-provider-%{random_suffix}"
   location                       = "global"
   provider_type                  = "EXTERNAL"
@@ -91,6 +92,7 @@ resource "google_network_management_network_monitoring_provider" "provider" {
 func testAccNetworkManagementNetworkMonitoringProvider_deletionPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_management_network_monitoring_provider" "provider" {
+  {{ if ne $.TargetVersionName "ga" }}provider = google-beta{{ end }}
   network_monitoring_provider_id = "tf-test-provider-dp-%{random_suffix}"
   location                       = "global"
   provider_type                  = "EXTERNAL"
