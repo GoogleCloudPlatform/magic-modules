@@ -1,0 +1,23 @@
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "name"}}"
+  description  = "A basic reasoning engine with agent config source"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      agent_config_source {
+        adk_config {
+          json_config = jsonencode({
+            name        = "finance_analyst_agent"
+            model       = "gemini-2.5-flash"
+            description = "A financial analyst that can look up stock values and return them as tables."
+            instruction = "You are a financial analyst. Output data in tables."
+          })
+        }
+      }
+      python_spec {
+        version = "3.11"
+      }
+    }
+  }
+}
