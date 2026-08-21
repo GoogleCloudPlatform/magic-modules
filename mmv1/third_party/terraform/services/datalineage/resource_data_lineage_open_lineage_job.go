@@ -397,6 +397,398 @@ When set to "DELETE", deleting the resource is allowed.
 	}
 }
 
+func resourceDataLineageOpenLineageJobCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*transport_tpg.Config)
+
+	obj := make(map[string]interface{})
+	namespaceProp, err := expandDataLineageOpenLineageJobNamespace(d.Get("namespace"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("namespace"); !tpgresource.IsEmptyValue(reflect.ValueOf(namespaceProp)) && (ok || !reflect.DeepEqual(v, namespaceProp)) {
+		obj["namespace"] = namespaceProp
+	}
+	nameProp, err := expandDataLineageOpenLineageJobName(d.Get("name"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+		obj["name"] = nameProp
+	}
+	descriptionProp, err := expandDataLineageOpenLineageJobDescription(d.Get("description"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+		obj["description"] = descriptionProp
+	}
+	ownerProp, err := expandDataLineageOpenLineageJobOwner(d.Get("owner"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("owner"); !tpgresource.IsEmptyValue(reflect.ValueOf(ownerProp)) && (ok || !reflect.DeepEqual(v, ownerProp)) {
+		obj["owner"] = ownerProp
+	}
+	inputProp, err := expandDataLineageOpenLineageJobInput(d.Get("input"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("input"); !tpgresource.IsEmptyValue(reflect.ValueOf(inputProp)) && (ok || !reflect.DeepEqual(v, inputProp)) {
+		obj["input"] = inputProp
+	}
+	outputProp, err := expandDataLineageOpenLineageJobOutput(d.Get("output"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("output"); !tpgresource.IsEmptyValue(reflect.ValueOf(outputProp)) && (ok || !reflect.DeepEqual(v, outputProp)) {
+		obj["output"] = outputProp
+	}
+
+	event := buildRunEvent(obj)
+
+	log.Printf("[DEBUG] Creating new OpenLineageJob: %#v", obj)
+
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	res, diagnostics := emitEvent(ctx, d, event, config, userAgent, d.Timeout(schema.TimeoutCreate))
+	if diagnostics != nil {
+		return diagnostics
+	}
+
+	process, err := getResponseString(res, "process")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	run, err := getResponseString(res, "run")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, run))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(process)
+
+	log.Printf("[DEBUG] Finished creating OpenLineageJob %q: %#v", d.Id(), res)
+
+	return nil
+}
+
+func resourceDataLineageOpenLineageJobRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	run, diagnostics := getLatestRunForProcess(ctx, d, config, d.Id(), userAgent)
+	if diagnostics != nil {
+		return diagnostics
+	}
+
+	if v, ok := d.GetOk("knowledge_catalog"); ok {
+		r := v.([]interface{})[0].(map[string]interface{})["run"].(string)
+		if run != r {
+			log.Printf("[WARN] Run ID has changed for OpenLineageJob %q: %s -> %s, this suggests external modifications. It will get updated during next apply", d.Id(), r, run)
+		}
+	}
+
+	return nil
+}
+
+func resourceDataLineageOpenLineageJobUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	clientSideFields := map[string]bool{"deletion_policy": true, "description": true}
+	clientSideOnly := true
+	for field := range ResourceDataLineageOpenLineageJob().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			clientSideOnly = false
+			break
+		}
+	}
+	if clientSideOnly {
+		log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
+		return resourceDataLineageOpenLineageJobRead(ctx, d, meta)
+	}
+
+	config := meta.(*transport_tpg.Config)
+
+	obj := make(map[string]interface{})
+	namespaceProp, err := expandDataLineageOpenLineageJobNamespace(d.Get("namespace"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("namespace"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, namespaceProp)) {
+		obj["namespace"] = namespaceProp
+	}
+	nameProp, err := expandDataLineageOpenLineageJobName(d.Get("name"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+		obj["name"] = nameProp
+	}
+	descriptionProp, err := expandDataLineageOpenLineageJobDescription(d.Get("description"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+		obj["description"] = descriptionProp
+	}
+	ownerProp, err := expandDataLineageOpenLineageJobOwner(d.Get("owner"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("owner"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, ownerProp)) {
+		obj["owner"] = ownerProp
+	}
+	inputProp, err := expandDataLineageOpenLineageJobInput(d.Get("input"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("input"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, inputProp)) {
+		obj["input"] = inputProp
+	}
+	outputProp, err := expandDataLineageOpenLineageJobOutput(d.Get("output"), d, config)
+	if err != nil {
+		return diag.FromErr(err)
+	} else if v, ok := d.GetOkExists("output"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, outputProp)) {
+		obj["output"] = outputProp
+	}
+
+	log.Printf("[DEBUG] Updating OpenLineageJob %q: %#v", d.Id(), obj)
+
+	event := buildRunEvent(obj)
+
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	response, diagnostics := emitEvent(ctx, d, event, config, userAgent, d.Timeout(schema.TimeoutUpdate))
+	if diagnostics != nil {
+		return diagnostics
+	}
+
+	process, err := getResponseString(response, "process")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	run, err := getResponseString(response, "run")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, run))
+
+	if err != nil {
+		return diag.Errorf("Error updating OpenLineageJob %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished updating OpenLineageJob %q: %#v", d.Id(), response)
+	}
+
+	return nil
+}
+
+func resourceDataLineageOpenLineageJobDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if d.Get("deletion_policy").(string) == "PREVENT" {
+		return diag.Errorf("cannot destroy DataLineageOpenLineageJob without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+	}
+	if d.Get("deletion_policy").(string) == "ABANDON" {
+		log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing OpenLineageJob %q from Terraform state without deletion", d.Id())
+		return nil
+	}
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = deleteProcess(ctx, d, config, d.Id(), userAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	log.Printf("[DEBUG] Finished deleting OpenLineageJob %q", d.Id())
+	return nil
+}
+
+func getResponseString(res map[string]interface{}, field string) (string, error) {
+	if v, ok := res[field].(string); ok && v != "" {
+		return v, nil
+	}
+	if field == "process" {
+		if v, ok := res["process_name"].(string); ok && v != "" {
+			return v, nil
+		}
+	}
+
+	if v, ok := res["knowledge_catalog"].(map[string]interface{}); ok {
+		if out, ok := v[field].(string); ok && out != "" {
+			return out, nil
+		}
+	}
+
+	return "", fmt.Errorf("response did not include %q", field)
+}
+
+func getOpenLineageBillingProject(d *schema.ResourceData, config *transport_tpg.Config) (string, error) {
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return "", fmt.Errorf("error fetching project for OpenLineageJob: %w", err)
+	}
+
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		project = bp
+	}
+
+	return project, nil
+}
+
+func getOpenLineageProjectAndLocation(d *schema.ResourceData, config *transport_tpg.Config) (string, string, error) {
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil || strings.TrimSpace(project) == "" {
+		if err != nil {
+			return "", "", fmt.Errorf("missing project for processOpenLineageRunEvent: %w", err)
+		}
+		return "", "", fmt.Errorf("missing project for processOpenLineageRunEvent")
+	}
+
+	location, err := tpgresource.GetLocation(d, config)
+	if err != nil || strings.TrimSpace(location) == "" {
+		if err != nil {
+			return "", "", fmt.Errorf("missing location for processOpenLineageRunEvent: %w", err)
+		}
+		return "", "", fmt.Errorf("missing location for processOpenLineageRunEvent")
+	}
+
+	return project, location, nil
+}
+
+func emitEvent(ctx context.Context, d *schema.ResourceData, runEvent map[string]interface{}, config *transport_tpg.Config, userAgent string, timeout time.Duration) (map[string]interface{}, diag.Diagnostics) {
+	_ = ctx
+
+	eventJSON, err := json.Marshal(runEvent)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	payload := map[string]any{}
+	if err := json.Unmarshal(eventJSON, &payload); err != nil {
+		return nil, diag.FromErr(err)
+	}
+
+	project, location, err := getOpenLineageProjectAndLocation(d, config)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
+	url := transport_tpg.BaseUrl(Product, config) + fmt.Sprintf("projects/%s/locations/%s:processOpenLineageRunEvent", project, location)
+
+	billingProject, err := getOpenLineageBillingProject(d, config)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      payload,
+		Timeout:   timeout,
+		Headers:   make(http.Header),
+	})
+	if err != nil {
+		return nil, diag.FromErr(fmt.Errorf("processOpenLineageRunEvent: %w", err))
+	}
+
+	return resp, nil
+}
+
+func getLatestRunForProcess(ctx context.Context, d *schema.ResourceData, config *transport_tpg.Config, process string, userAgent string) (string, diag.Diagnostics) {
+	_ = ctx
+
+	if _, _, err := getOpenLineageProjectAndLocation(d, config); err != nil {
+		return "", diag.FromErr(err)
+	}
+
+	billingProject, err := getOpenLineageBillingProject(d, config)
+	if err != nil {
+		return "", diag.FromErr(err)
+	}
+
+	processURL := transport_tpg.BaseUrl(Product, config) + strings.TrimPrefix(process, "/")
+
+	_, pErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    processURL,
+		UserAgent: userAgent,
+		Headers:   make(http.Header),
+	})
+
+	if pErr != nil {
+		return "", diag.FromErr(transport_tpg.HandleNotFoundError(pErr, d, fmt.Sprintf("DataLineageOpenLineageJob %q", process)))
+	}
+
+	runsURL := strings.TrimSuffix(transport_tpg.BaseUrl(Product, config)+strings.TrimPrefix(process, "/"), "/") + "/runs"
+	runsURL, err = transport_tpg.AddQueryParams(runsURL, map[string]string{"pageSize": "1"})
+	if err != nil {
+		return "", diag.FromErr(err)
+	}
+	runsResponse, rErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    runsURL,
+		UserAgent: userAgent,
+		Headers:   make(http.Header),
+	})
+	if rErr != nil {
+		return "", diag.FromErr(fmt.Errorf("error retrieving latest run for process %s: %w", process, rErr))
+	}
+
+	runs, ok := runsResponse["runs"].([]interface{})
+	if !ok || len(runs) == 0 {
+		return "", diag.Errorf("error retrieving latest run for process %s: no runs found", process)
+	}
+
+	firstRun, ok := runs[0].(map[string]interface{})
+	if !ok {
+		return "", diag.Errorf("error retrieving latest run for process %s: invalid run format", process)
+	}
+
+	runName, ok := firstRun["name"].(string)
+	if !ok || runName == "" {
+		return "", diag.Errorf("error retrieving latest run for process %s: missing run name", process)
+	}
+
+	return runName, nil
+}
+
+func deleteProcess(ctx context.Context, d *schema.ResourceData, config *transport_tpg.Config, process string, userAgent string) error {
+	_ = ctx
+
+	if _, _, err := getOpenLineageProjectAndLocation(d, config); err != nil {
+		return err
+	}
+
+	billingProject, err := getOpenLineageBillingProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	url := transport_tpg.BaseUrl(Product, config) + strings.TrimPrefix(process, "/")
+
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+		Headers:   make(http.Header),
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func flattenDataLineageOpenLineageJobNamespace(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }

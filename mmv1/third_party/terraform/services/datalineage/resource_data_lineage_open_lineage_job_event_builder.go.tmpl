@@ -7,6 +7,12 @@ import (
 )
 
 const (
+    {{/* TODO: make the url point to specific release, not the main branch if possible*/}}
+	{{- if ne $.TargetVersionName "ga" -}}
+	openLineageProducer          = "https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google/services/datalineage/resource_data_lineage_config.go"
+	{{- else }}
+	openLineageProducer          = "https://github.com/hashicorp/terraform-provider-google/blob/main/google/services/datalineage/resource_data_lineage_config.go"
+	{{- end }}
 	openLineageRunEventSchemaURL = "https://openlineage.io/spec/2-0-2/OpenLineage.json#/$defs/RunEvent"
 	openLineageJobFacetSchemaURL = "https://openlineage.io/spec/facets/2-0-4/JobTypeJobFacet.json"
 	openLineageCatalogFacetURL   = "https://openlineage.io/spec/facets/1-1-0/CatalogDatasetFacet.json"
@@ -17,7 +23,7 @@ const (
 func buildRunEvent(in map[string]interface{}) map[string]interface{} {
 	event := map[string]interface{}{
 		"eventTime": time.Now(),
-		"producer":  "_PRODUCER_",
+		"producer":  openLineageProducer,
 		"schemaURL": openLineageRunEventSchemaURL,
 		"eventType": "COMPLETE",
 		"job": map[string]interface{}{
@@ -106,7 +112,7 @@ func buildJobFacets() map[string]interface{} {
 	facets := make(map[string]interface{})
 
 	facets["jobType"] = map[string]interface{}{
-		"_producer":      "_PRODUCER_",
+		"_producer":      openLineageProducer,
 		"_schemaURL":     openLineageJobFacetSchemaURL,
 		"integration":    "TERRAFORM",
 		"processingType": "BYOL",
@@ -159,7 +165,7 @@ func buildSymlinks(v []interface{}) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"_producer":   "_PRODUCER_",
+		"_producer":   openLineageProducer,
 		"_schemaURL":  openLineageSymlinkFacetURL,
 		"identifiers": symlinks,
 	}
@@ -167,7 +173,7 @@ func buildSymlinks(v []interface{}) map[string]interface{} {
 
 func buildCatalog(v map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
-		"_producer":  "_PRODUCER_",
+		"_producer":  openLineageProducer,
 		"_schemaURL": openLineageCatalogFacetURL,
 		"framework":  v["framework"].(string),
 		"name":       v["name"].(string),
@@ -189,7 +195,7 @@ func buildColumnLineage(cll map[string]interface{}) map[string]interface{} {
 
 	di, _ := cll["dataset_input"].([]interface{})
 	return map[string]interface{}{
-		"_producer":  "_PRODUCER_",
+		"_producer":  openLineageProducer,
 		"_schemaURL": openLineageColumnLineageURL,
 		"dataset":    buildCllInputs(di),
 		"fields":     fields,
