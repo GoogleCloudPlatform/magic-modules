@@ -1,9 +1,10 @@
 name: "pull-request"
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
-  pull_request
+  pull_request:
 
 jobs:
   disallow-submodules:
@@ -21,3 +22,39 @@ jobs:
         else
           echo "No submodules found"
         fi
+
+  disallow-legacy-apiary:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      with:
+        fetch-depth: 0
+    - name: Check for legacy Apiary usage
+      run: |
+        BASE_BRANCH="${GITHUB_BASE_REF:-main}"
+        git fetch origin "${BASE_BRANCH}" --quiet
+
+        # Check commit range for bypass tag
+        if git log "origin/${BASE_BRANCH}...HEAD" --format=%B | grep -Fq "LEGACY_APIARY_OK="; then
+          echo "Bypassing check due to LEGACY_APIARY_OK tag."
+          exit 0
+        fi
+
+        # Diff against base branch for added lines in handwritten files and templates
+        DIFF=$(git diff -U0 "origin/${BASE_BRANCH}...HEAD" -- \
+          'mmv1/third_party/terraform/**.go' \
+          'mmv1/third_party/terraform/**.go.tmpl' \
+          'mmv1/third_party/cai2hcl/**.go' \
+          'mmv1/third_party/tgc*/**.go*' 2>/dev/null || true)
+
+        # Match added imports of google.golang.org/api/compute/* or legacy factory invocations
+        MATCHES=$(echo "$DIFF" | grep -E '^\+[[:space:]]*("google\.golang\.org/api/compute/|compute "google\.golang\.org/api/compute/|.*DEPRECATED_LegacyApiaryClient|.*tpgcompute\.(NewClient|DEPRECATED_LegacyApiaryClient)|.*compute_tpg\.(NewClient|DEPRECATED_LegacyApiaryClient))' || true)
+
+        if [ -n "$MATCHES" ]; then
+          echo "::error::New calls or imports of the legacy Apiary Compute client are strictly forbidden:"
+          echo "$MATCHES"
+          echo "Please use transport_tpg.SendRequest instead. See PR #16847 for details."
+          exit 1
+        fi
+
