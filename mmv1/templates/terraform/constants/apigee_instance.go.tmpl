@@ -1,8 +1,34 @@
-// Suppress diffs when the lists of project have the same number of entries to handle the case that
-// API does not return what the user originally provided. Instead, API does some transformation.
-// For example, user provides a list of project number, but API returns a list of project Id.
+// Suppress diffs on consumer_accept_list to account for two server-side behaviors:
+//
+//  1. Normalization: the API may return a project ID where the user supplied the
+//     corresponding project number (e.g. user writes "12345", API returns
+//     "my-project"). These are the same project expressed differently.
+//  2. Auto-managed entries: the API may automatically add extra entries
+//     (e.g. the tenant project "<org>-tp" associated with the Apigee
+//     organization) that the user never specified.
+//
+// In both cases the user's configured projects are still honored, so the diff is
+// spurious and should be suppressed. A genuine user change (replacing one
+// project with a different one, or removing a user-specified project) must NOT
+// be suppressed.
 func projectListDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
     return ProjectListDiffSuppressFunc(d)
+}
+
+// isProjectNumber reports whether s looks like a GCP project number (all digits).
+// The API normalizes project numbers to project IDs, so an old value that is a
+// pure project number changing to a non-numeric new value is treated as
+// normalization rather than a user-initiated change.
+func isProjectNumber(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func ProjectListDiffSuppressFunc(d tpgresource.TerraformResourceDataChange) bool {
@@ -20,5 +46,71 @@ func ProjectListDiffSuppressFunc(d tpgresource.TerraformResourceDataChange) bool
 	}
 	log.Printf("[DEBUG] - suppressing diff with oldInt %d, newInt %d", oldInt, newInt)
 
-	return oldInt == newInt
+	// "old" is the value in state (what the API last returned); "new" is the
+	// user's configured value.
+	getValue := func(which string, i int) string {
+		k := fmt.Sprintf("consumer_accept_list.%d", i)
+		oldVal, newVal := d.GetChange(k)
+		var v interface{}
+		if which == "old" {
+			v = oldVal
+		} else {
+			v = newVal
+		}
+		if s, ok := v.(string); ok {
+			return s
+		}
+		return ""
+	}
+
+	// Collect the API-returned (old) values into a set so we can test membership.
+	oldValues := make(map[string]bool, oldInt)
+	for i := 0; i < oldInt; i++ {
+		if v := getValue("old", i); v != "" {
+			oldValues[v] = true
+		}
+	}
+
+	// Equal lengths: this is either pure normalization (number -> ID) or a
+	// genuine one-for-one swap. Suppress only when every configured (new) value
+	// is either already present in the API response, or is the normalized form
+	// of a project number that the API returned at the same position. A real
+	// swap to an unrelated project is not suppressed.
+	if oldInt == newInt {
+		for i := 0; i < newInt; i++ {
+			newVal := getValue("new", i)
+			if newVal == "" {
+				continue
+			}
+			if oldValues[newVal] {
+				continue
+			}
+			// Not a direct match; allow only if the old value at this position
+			// is a project number being normalized to an ID.
+			if isProjectNumber(getValue("old", i)) {
+				continue
+			}
+			return false
+		}
+		return true
+	}
+
+	// API returned more items than the user configured (e.g. auto-added tenant
+	// project). Suppress only if every configured (new) value is present in the
+	// API response; otherwise the user removed/changed a project and the diff is
+	// real.
+	if oldInt > newInt && newInt > 0 {
+		for i := 0; i < newInt; i++ {
+			newVal := getValue("new", i)
+			if newVal == "" {
+				continue
+			}
+			if !oldValues[newVal] {
+				return false
+			}
+		}
+		return true
+	}
+
+	return false
 }
