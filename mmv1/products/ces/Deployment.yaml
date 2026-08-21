@@ -175,6 +175,20 @@ properties:
       operation. If the etag is empty, the update will overwrite any concurrent
       changes.
     output: true
+  - name: instagramCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring an Instagram channel profile.
+    ignore_read: true
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+        sensitive: true
+      - name: conversationProfileId
+        type: String
+        description: The Conversation Profile ID to use for the deployment.
   - name: name
     type: String
     description: |-
@@ -187,3 +201,34 @@ properties:
     type: String
     description: Timestamp when this deployment was last updated.
     output: true
+  - name: whatsappCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring a WhatsApp channel profile.
+    ignore_read: true
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+        sensitive: true
+      - name: businessAccountId
+        type: String
+        required: true
+        description: The Business Account ID to use for the phone number.
+      - name: conversationProfileId
+        type: String
+        description: The Conversation Profile ID to use for the deployment.
+      - name: phoneNumber
+        type: String
+        required: true
+        description: The phone number to register with WhatsApp.
+      - name: pin
+        type: String
+        required: true
+        description: The 6-digit PIN created by the user for two-step verification.
+        sensitive: true
+      - name: wabaId
+        type: String
+        required: true
+        description: The WhatsApp Business Account ID.
