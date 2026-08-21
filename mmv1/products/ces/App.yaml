@@ -250,6 +250,33 @@ properties:
           - name: webWidgetTitle
             type: String
             description: The title of the web widget.
+      - name: whatsappConfig
+        type: NestedObject
+        description: Configuration specific to WhatsApp deployments.
+        properties:
+          - name: wabaId
+            type: String
+            required: true
+            description: The WhatsApp Business Account ID.
+          - name: phoneNumberId
+            type: String
+            required: true
+            description: The Meta phone number ID.
+          - name: phoneNumber
+            type: String
+            description: The phone number in E.164 format.
+          - name: displayName
+            type: String
+            description: The fetched Meta business page name.
+            output: true
+          - name: thumbnailUrl
+            type: String
+            description: The fetched Meta business profile thumbnail URL.
+            output: true
+          - name: description
+            type: String
+            description: The description of the Meta business page or profile.
+            output: true
   - name: deploymentCount
     type: Integer
     description: Number of deployments in the app.
