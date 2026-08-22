@@ -1,6 +1,7 @@
 name: unit-test-tools
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   pull_request:
@@ -111,6 +112,7 @@ jobs:
         run: |
           cd tools/template-check
           go test ./...
+          go run main.go func-check
 
   test-reader:
     runs-on: ubuntu-22.04
