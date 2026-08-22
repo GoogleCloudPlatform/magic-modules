@@ -1,0 +1,34 @@
+resource "google_vmwareengine_management_dns_zone_binding" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "name"}}"
+  parent      = google_vmwareengine_private_cloud.vmw-engine-pc.id
+  vpc_network = google_compute_network.binding-vpc.id
+}
+
+resource "google_compute_network" "binding-vpc" {
+  name = "binding-vpc"
+}
+
+resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  location    = "{{index $.TestEnvVars "region"}}-a"
+  name        = "{{index $.Vars "private_cloud_id"}}"
+  description = "Sample test PC."
+  network_config {
+    management_cidr       = "192.168.30.0/24"
+    vmware_engine_network = google_vmwareengine_network.pc-nw.id
+  }
+
+  management_cluster {
+    cluster_id = "{{index $.Vars "management_cluster_id"}}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count   = 3
+    }
+  }
+}
+
+resource "google_vmwareengine_network" "pc-nw" {
+  name        = "{{index $.Vars "network_id"}}"
+  type        = "STANDARD"
+  location    = "global"
+  description = "PC network description."
+}
