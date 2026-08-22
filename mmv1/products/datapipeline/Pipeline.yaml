@@ -31,6 +31,12 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  encoder: templates/terraform/encoders/data_pipeline_pipeline.go.tmpl
+  constants: templates/terraform/constants/data_pipeline_pipeline.go.tmpl
+  pre_update: templates/terraform/pre_update/data_pipeline_pipeline.go.tmpl
+  post_create: templates/terraform/post_create/data_pipeline_pipeline.go.tmpl
+custom_diff:
+  - resourceDataPipelinePipelineCustomDiff
 samples:
   - name: data_pipeline_pipeline
     primary_resource_id: primary
@@ -41,6 +47,15 @@ samples:
           account_id: my-account
         ignore_read_extra:
           - schedule_info.0.next_job_time
+virtual_fields:
+  - name: desired_state
+    description: |
+      The desired state of the pipeline. Set this field to `STATE_ACTIVE` to start the pipeline
+      or `STATE_ARCHIVED` to archive the pipeline.
+      Possible values: STATE_ACTIVE, STATE_ARCHIVED.
+    type: String
+    conflicts:
+      - state
 parameters:
   - name: region
     type: String
@@ -75,10 +90,12 @@ properties:
   - name: state
     type: Enum
     description: |
-      The state of the pipeline. When the pipeline is created, the state is set to 'PIPELINE_STATE_ACTIVE' by default. State changes can be requested by setting the state to stopping, paused, or resuming. State cannot be changed through pipelines.patch requests.
+      (Deprecated) The state of the pipeline. Use `desired_state` to control the pipeline state.
       https://cloud.google.com/dataflow/docs/reference/data-pipelines/rest/v1/projects.locations.pipelines#state
-    required: true
-    immutable: true
+    default_from_api: true
+    deprecation_message: 'Use `desired_state` instead to control pipeline state. This field will be removed as an input in a future major version.'
+    conflicts:
+      - desired_state
     enum_values:
       - STATE_UNSPECIFIED
       - STATE_RESUMING
