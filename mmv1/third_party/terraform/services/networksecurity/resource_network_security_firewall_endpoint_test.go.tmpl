@@ -16,7 +16,6 @@ import (
 )
 
 func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	billingProjectId := envvar.GetTestProjectFromEnv()
@@ -81,7 +80,6 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 }
 
 func TestAccNetworkSecurityFirewallEndpoints_enableJumboFrames(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	billingProjectId := envvar.GetTestProjectFromEnv()
@@ -119,6 +117,88 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 
   labels = {
     foo = "bar-updated"
+  }
+}
+`, randomSuffix, orgId, billingProjectId)
+}
+
+func TestAccNetworkSecurityFirewallEndpoints_wildfire(t *testing.T) {
+	t.Parallel()
+
+	billingProjectId := envvar.GetTestProjectFromEnv()
+	orgId := envvar.GetTestOrgFromEnv(t)
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_wildfire(orgId, billingProjectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_wildfireUpdate(orgId, billingProjectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityFirewallEndpoints_wildfire(orgId string, billingProjectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  name     = "tf-test-fw-endpoint%[1]s"
+  parent   = "organizations/%[2]s"
+  location = "us-central1-a"
+  billing_project_id = "%[3]s"
+
+  wildfire_settings {
+    enabled = true
+    wildfire_region = "UNITED_STATES"
+
+    wildfire_realtime_lookup_duration = "3s"
+    wildfire_realtime_lookup_timeout_action = "ALLOW"
+
+    wildfire_inline_cloud_analysis_settings {
+      max_analysis_duration = "10s"
+      timeout_action        = "ALLOW"
+    }
+  }
+}
+`, randomSuffix, orgId, billingProjectId)
+}
+
+func testAccNetworkSecurityFirewallEndpoints_wildfireUpdate(orgId string, billingProjectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  name     = "tf-test-fw-endpoint%[1]s"
+  parent   = "organizations/%[2]s"
+  location = "us-central1-a"
+  billing_project_id = "%[3]s"
+
+  wildfire_settings {
+    enabled = false
+    wildfire_region = "CANADA"
+
+    wildfire_realtime_lookup_duration = "5s"
+    wildfire_realtime_lookup_timeout_action = "DENY"
+
+    wildfire_inline_cloud_analysis_settings {
+      max_analysis_duration = "20s"
+      timeout_action        = "DENY"
+    }
   }
 }
 `, randomSuffix, orgId, billingProjectId)

@@ -73,6 +73,36 @@ samples:
           resource_name: my-firewall-endpoint
         test_env_vars:
           project: PROJECT_NAME
+  - name: "network_security_firewall_endpoint_wildfire"
+    primary_resource_id: "default"
+    # update tests will take care of create and update. Firewall endpoint creation is too long.
+    exclude_test: true
+    min_version: "beta"
+    steps:
+      - name: "network_security_firewall_endpoint_wildfire_basic"
+        resource_id_vars:
+          network_name: "fw-network"
+          subnet_name: "fw-subnet"
+          endpoint_name: "fw-endpoint"
+          inline_timeout_action: "ALLOW"
+        vars:
+          lookup_timeout_action: "ALLOW"
+          max_analysis_duration: "10s"
+        test_env_vars:
+          project: "PROJECT_NAME"
+          org_id: "ORG_ID"
+      - name: "network_security_firewall_endpoint_wildfire_basic"
+        resource_id_vars:
+          network_name: "fw-network"
+          subnet_name: "fw-subnet"
+          endpoint_name: "fw-endpoint"
+          inline_timeout_action: "ALLOW"
+        vars:
+          lookup_timeout_action: "DENY"
+          max_analysis_duration: "20s"
+        test_env_vars:
+          project: "PROJECT_NAME"
+          org_id: "ORG_ID"
 parameters:
   - name: name
     type: String
@@ -152,3 +182,56 @@ properties:
         immutable: true
         description: |
           Indicates whether Jumbo Frames are enabled for the firewall endpoint.
+  - name: 'wildfireSettings'
+    type: 'NestedObject'
+    min_version: beta
+    description: 'Settings for WildFire analysis.'
+    properties:
+      - name: 'enabled'
+        type: 'Boolean'
+        description: 'Indicates whether WildFire analysis is enabled. Default value is false.'
+      - name: 'wildfireRegion'
+        type: 'Enum'
+        enum_values:
+          - 'CANADA'
+          - 'UNITED_STATES'
+          - 'JAPAN'
+          - 'SINGAPORE'
+          - 'UNITED_KINGDOM'
+          - 'AUSTRALIA'
+          - 'GERMANY'
+          - 'INDIA'
+          - 'SWITZERLAND'
+          - 'POLAND'
+          - 'INDONESIA'
+          - 'TAIWAN'
+          - 'FRANCE'
+          - 'QATAR'
+          - 'SOUTH_KOREA'
+          - 'ISRAEL'
+          - 'SAUDI_ARABIA'
+          - 'SPAIN'
+        description: 'The region where WildFire analysis will be performed.'
+      - name: 'wildfireRealtimeLookupDuration'
+        type: 'String'
+        description: 'Duration on a file being held while the WildFire real time signature cloud performs a signature lookup.'
+      - name: 'wildfireRealtimeLookupTimeoutAction'
+        type: 'Enum'
+        enum_values:
+          - 'ALLOW'
+          - 'DENY'
+        description: 'Action to take on WildFire real time signature lookup timeout. Default value is ALLOW.'
+      - name: 'wildfireInlineCloudAnalysisSettings'
+        immutable: true
+        type: 'NestedObject'
+        description: 'Settings for WildFire inline cloud analysis.'
+        properties:
+          - name: 'maxAnalysisDuration'
+            type: 'String'
+            description: 'The maximum duration for inline analysis.'
+          - name: 'timeoutAction'
+            type: 'Enum'
+            enum_values:
+              - 'ALLOW'
+              - 'DENY'
+            description: 'Action to take on timeout.'
