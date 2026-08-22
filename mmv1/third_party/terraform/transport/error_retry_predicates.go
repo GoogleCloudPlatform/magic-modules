@@ -715,3 +715,10 @@ func Is409SyncMutateCannotBeQueuedError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+func IsBigtableTableCreatingOrDeletingError(err error) (bool, string) {
+	if err != nil && strings.Contains(err.Error(), "is either creating or deleting, please try again") {
+		return true, "Parent table is either creating or deleting, retrying"
+	}
+	return false, ""
+}
