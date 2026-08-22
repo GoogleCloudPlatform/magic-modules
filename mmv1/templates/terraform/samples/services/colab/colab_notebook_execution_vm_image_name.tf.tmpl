@@ -66,13 +66,13 @@ resource "google_storage_bucket_object" "notebook" {
 resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   notebook_execution_job_id = "{{index $.ResourceIdVars "notebook_execution_job_id"}}"
-  display_name = "Notebook execution full"
+  display_name = "Notebook execution vm image name"
   location = "us-central1"
 
   execution_timeout = "86400s"
   gcs_notebook_source {
-  uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
-  generation = google_storage_bucket_object.notebook.generation
+    uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
+    generation = google_storage_bucket_object.notebook.generation
   }
   
   service_account = "{{index $.TestEnvVars "service_account"}}"
@@ -83,7 +83,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   workbench_runtime {
     vm_image {
       project = "cloud-notebooks-managed"
-      family  = "workbench-instances-2603"
+      name    = "workbench-2603-20260809-2130-rc0"
     }
   }
 
@@ -92,5 +92,4 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     google_storage_bucket.output_bucket,
     google_colab_runtime_template.my_runtime_template,
   ]
-  
 }
