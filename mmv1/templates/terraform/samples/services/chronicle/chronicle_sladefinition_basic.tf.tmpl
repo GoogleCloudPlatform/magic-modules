@@ -1,0 +1,13 @@
+resource "google_chronicle_sla_definition" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  sla_type                      = "CASE_PRIORITY"
+  sla_type_value                = jsonencode(["HIGH"])
+  sla_period                    = 30
+  sla_period_time_unit          = "MINUTES"
+  critical_sla_period           = 15
+  critical_sla_period_time_unit = "MINUTES"
+  environments                  = ["Default Environment"]
+}

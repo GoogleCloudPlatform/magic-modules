@@ -1,0 +1,129 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SlaDefinition
+description: >
+  A Service Level Agreement (SLA) represents a commitment by the SOC to perform specific tasks, such as investigation or remediation of specific cases within a specified duration of time.
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.slaDefinitions'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/slaDefinitions
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/slaDefinitions/{{sla_definition_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/slaDefinitions
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/slaDefinitions/{{sla_definition_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/slaDefinitions/{{sla_definition_id}}
+autogen_status: U2xhRGVmaW5pdGlvbg==
+samples:
+  - name: chronicle_sladefinition_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_sladefinition_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_sladefinition_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: slaDefinitionId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the SlaDefinition record.
+properties:
+  - name: slaType
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The type of SLA to configure.
+      Possible values:
+      SLA_TYPE_UNSPECIFIED
+      ALERT_RULE_GENERATOR
+      CASE_STAGE
+      CASE_PRIORITY
+      ALERT_PRIORITY
+  - name: alertType
+    type: String
+    description: |-
+      When ALERT_RULE_GENERATOR is chosen, specify which type of alert to set SLA.
+      Possible values:
+      ALERT_TYPE_UNSPECIFIED
+      ALL_ALERTS
+      SPECIFIC_ALERTS
+  - name: slaTypeValue
+    type: String
+    required: true
+    description: |-
+      Can be a specific alert-rule-generator in case SLA_TYPE = ALERT_RULE_GENERATOR,
+      or CASE_STAGE = TRIAGE
+  - name: slaPeriod
+    type: Double
+    required: true
+    description: Amount of time in seconds from SLA starts until SLA time expires.
+  - name: slaPeriodTimeUnit
+    type: String
+    required: true
+    description: |-
+      Specify time unit for the SLA period (minutes, hours, etc.).
+      Possible values:
+      SLA_TIME_UNIT_UNSPECIFIED
+      MINUTES
+      HOURS
+      DAYS
+  - name: criticalSlaPeriod
+    type: Double
+    required: true
+    description: The time period of the SLA until it becomes critical.
+  - name: criticalSlaPeriodTimeUnit
+    type: String
+    required: true
+    description: |-
+      The unit of critical sla period (minutes, hours, etc.).
+      Possible values:
+      SLA_TIME_UNIT_UNSPECIFIED
+      MINUTES
+      HOURS
+      DAYS
+  - name: environments
+    type: Array
+    required: true
+    description: User logical environments.
+    item_type:
+      type: String
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the SlaDefinition.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/slaDefinitions/{sla_definition}
+    output: true
