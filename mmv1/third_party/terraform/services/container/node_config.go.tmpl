@@ -4604,7 +4604,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated guest_accelerator for node pool %s", name)
