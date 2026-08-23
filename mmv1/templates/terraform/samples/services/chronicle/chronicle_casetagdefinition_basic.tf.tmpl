@@ -1,0 +1,12 @@
+resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name      = "Malicious IP Tag"
+  match_criteria    = "BY_PRODUCT"
+  value             = "Palo Alto Networks"
+  comparison_type   = "EXACT"
+  priority          = 1
+  can_be_case_title = false
+}

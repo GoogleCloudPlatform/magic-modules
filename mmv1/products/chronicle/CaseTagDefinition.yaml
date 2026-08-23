@@ -1,0 +1,118 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CaseTagDefinition
+description: >
+  Tags are assigned to cases by Google Security Operations based on predefined rules and can be used to classify cases or find specific cases faster.
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.caseTagDefinitions'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions/{{case_tag_definition_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions/{{case_tag_definition_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions/{{case_tag_definition_id}}
+autogen_status: Q2FzZVRhZ0RlZmluaXRpb24=
+samples:
+  - name: chronicle_casetagdefinition_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_casetagdefinition_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_casetagdefinition_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: caseTagDefinitionId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the CaseTagDefinition record.
+properties:
+  - name: displayName
+    type: String
+    required: true
+    description: This is the name of the tag that will be applied to the case.
+  - name: matchCriteria
+    type: String
+    required: true
+    description: |-
+      The criteria to match the case against.
+      Possible values:
+      MATCH_CRITERIA_UNSPECIFIED
+      BY_VENDOR
+      BY_PRODUCT
+      BY_RULE_GENERATOR
+      BY_ENTITY_PROPERTY_NAME
+      DATA_DRIVEN
+      SYSTEM
+  - name: value
+    type: String
+    required: true
+    description: Specific value to search in case - in addition to SearchIn property.
+  - name: propertyName
+    type: String
+    description: |-
+      Specific Entity property name to search in case.
+      This is relevant only when a SearchIn of type BY_ENTITY_PROPERTY_NAME was chosen.
+  - name: comparisonType
+    type: String
+    required: true
+    description: |-
+      The type of comparison to be used when comparing the value to the case.
+      Possible values:
+      COMPARE_TYPE_UNSPECIFIED
+      EXACT
+      START_WITH
+      CONTAIN
+      ENDS_WITH
+  - name: priority
+    type: Integer
+    required: true
+    description: |-
+      Note that Google Security Operations merges priority with other alerts and
+      entities and events so that the priority here is not absolute.
+  - name: canBeCaseTitle
+    type: Boolean
+    required: true
+    send_empty_value: true
+    description: |-
+      When checked, the tag will be assigned as the title of the case if it meets the conditions.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The unique name(ID) of the CaseTagDefinition.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/caseTagDefinitions/{case_tag_definition}
+    output: true

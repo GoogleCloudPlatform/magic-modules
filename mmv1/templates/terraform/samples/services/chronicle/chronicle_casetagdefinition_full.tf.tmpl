@@ -1,0 +1,12 @@
+resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name      = "Updated Malicious IP Tag"
+  match_criteria    = "BY_PRODUCT"
+  value             = "CrowdStrike Falcon"
+  comparison_type   = "CONTAIN"
+  priority          = 2
+  can_be_case_title = true
+}
