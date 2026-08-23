@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/apikeys"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -89,6 +90,216 @@ resource "google_apikeys_key" "primary" {
       allowed_referrers = ["*.example.com"]
     }
   }
+}
+`, context)
+}
+
+func TestAccApikeysKey_androidKey(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApikeysKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApikeysKey_androidKey(context, "com.example.app123", "1699466a142d4682a5f91b50fdf400f2358e2b0b"),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+			{
+				Config: testAccApikeysKey_androidKey(context, "com.example.app124", "1cf89aa28625da86a7e5a7550cf7fd33d611f6fd"),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccApikeysKey_androidKey(context map[string]interface{}, packageName, sha1Fingerprint string) string {
+	context["package_name"] = packageName
+	context["sha1_fingerprint"] = sha1Fingerprint
+	return acctest.Nprintf(`
+resource "google_apikeys_key" "primary" {
+  name         = "tf-test-key%{random_suffix}"
+  display_name = "sample-key"
+
+  restrictions {
+    android_key_restrictions {
+      allowed_applications {
+        package_name     = "%{package_name}"
+        sha1_fingerprint = "%{sha1_fingerprint}"
+      }
+    }
+
+    api_targets {
+      service = "translate.googleapis.com"
+      methods = ["GET*"]
+    }
+  }
+}
+`, context)
+}
+
+func TestAccApikeysKey_iosKey(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApikeysKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApikeysKey_iosKey(context, "com.google.app.macos"),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+			{
+				Config: testAccApikeysKey_iosKey(context, "com.google.alex.ios"),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccApikeysKey_iosKey(context map[string]interface{}, bundleId string) string {
+	context["bundle_id"] = bundleId
+	return acctest.Nprintf(`
+resource "google_apikeys_key" "primary" {
+  name         = "tf-test-key%{random_suffix}"
+  display_name = "sample-key"
+
+  restrictions {
+    api_targets {
+      service = "translate.googleapis.com"
+      methods = ["GET*"]
+    }
+
+    ios_key_restrictions {
+      allowed_bundle_ids = ["%{bundle_id}"]
+    }
+  }
+}
+`, context)
+}
+
+func TestAccApikeysKey_serverKey(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApikeysKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApikeysKey_serverKey(context, `["127.0.0.1"]`),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+			{
+				Config: testAccApikeysKey_serverKey(context, `["127.0.0.2", "192.168.1.1"]`),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccApikeysKey_serverKey(context map[string]interface{}, allowedIps string) string {
+	context["allowed_ips"] = allowedIps
+	return acctest.Nprintf(`
+resource "google_apikeys_key" "primary" {
+  name         = "tf-test-key%{random_suffix}"
+  display_name = "sample-key"
+
+  restrictions {
+    api_targets {
+      service = "translate.googleapis.com"
+      methods = ["GET*"]
+    }
+
+    server_key_restrictions {
+      allowed_ips = %{allowed_ips}
+    }
+  }
+}
+`, context)
+}
+
+// A key bound to a service account is "auth enabled" and takes no restrictions.
+func TestAccApikeysKey_serviceAccountKey(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApikeysKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApikeysKey_serviceAccountKey(context),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccApikeysKey_serviceAccountKey(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "key_service_account" {
+  account_id   = "tf-test-key-sa%{random_suffix}"
+  display_name = "Test Service Account"
+}
+
+resource "google_apikeys_key" "primary" {
+  name                  = "tf-test-key%{random_suffix}"
+  display_name          = "sample-key"
+  service_account_email = google_service_account.key_service_account.email
 }
 `, context)
 }
