@@ -1,0 +1,12 @@
+resource "google_chronicle_email_template" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name  = "Updated Incident Notification Template"
+  template_type = "HTML_FORMAT"
+  content       = "<html><body><h1>Security Alert</h1><p>An updated security incident notification.</p></body></html>"
+  environments  = jsonencode([
+    "*"
+  ])
+}

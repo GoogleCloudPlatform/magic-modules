@@ -1,0 +1,12 @@
+resource "google_chronicle_email_template" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name  = "Incident Notification Template"
+  template_type = "HTML_FORMAT"
+  content       = "A security incident has been detected on your account. Please review."
+  environments  = jsonencode([
+    "Default Environment"
+  ])
+}
