@@ -224,7 +224,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		}
 	} else if srcProps, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok {
 		if schedulingRaw, ok := srcProps["scheduling"].(map[string]interface{}); ok {
-			instanceBody["scheduling"] = stripNilSchedulingDurations(schedulingRaw)
+			instanceBody["scheduling"] = schedulingOmitEmpty(schedulingRaw)
 		}
 	}
 	if amf := expandAdvancedMachineFeatures(d); amf != nil {
