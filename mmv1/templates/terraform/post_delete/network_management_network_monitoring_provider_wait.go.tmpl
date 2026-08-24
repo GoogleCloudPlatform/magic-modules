@@ -1,7 +1,7 @@
 err = transport_tpg.Retry(transport_tpg.RetryOptions{
 	Timeout: d.Timeout(schema.TimeoutDelete),
 	RetryFunc: func() error {
-		if err := resourceNetworkManagementNetworkMonitoringProviderRead(d, meta); err != nil {
+		if err := resourceNetworkManagementv1NetworkMonitoringProviderRead(d, meta); err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				log.Printf("[DEBUG] NetworkMonitoringProvider not found (404), deletion confirmed")
 				return nil

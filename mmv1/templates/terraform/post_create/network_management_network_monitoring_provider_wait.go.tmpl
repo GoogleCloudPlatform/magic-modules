@@ -1,7 +1,7 @@
 err = transport_tpg.Retry(transport_tpg.RetryOptions{
         Timeout: d.Timeout(schema.TimeoutCreate),
         RetryFunc: func() error {
-                if err := resourceNetworkManagementNetworkMonitoringProviderRead(d, meta); err != nil {
+                if err := resourceNetworkManagementv1NetworkMonitoringProviderRead(d, meta); err != nil {
                         return err
                 }
                 state := d.Get("state").(string)

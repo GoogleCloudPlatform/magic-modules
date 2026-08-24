@@ -1,4 +1,4 @@
-package networkmanagement_test
+package networkmanagementv1_test
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/services/networkmanagement"
+	"github.com/hashicorp/terraform-provider-google/google/services/networkmanagementv1"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -110,7 +110,7 @@ func testAccCheckNetworkManagementNetworkMonitoringProviderDestroyProducer(t *te
 			}
 
 			config := acctest.GoogleProviderConfig(t)
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(networkmanagement.Product, config)+"projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(networkmanagementv1.Product, config)+"projects/{{project}}/locations/{{location}}/networkMonitoringProviders/{{network_monitoring_provider_id}}")
 			if err != nil {
 				return err
 			}
