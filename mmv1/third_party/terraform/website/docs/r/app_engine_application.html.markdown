@@ -16,6 +16,9 @@ Allows creation and management of an App Engine application.
 ~> **Warning:** All arguments including `iap.oauth2_client_secret` will be stored in the raw
 state as plain-text. [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
+~> **Note:** All arguments marked as write-only values will not be stored in the state: `iap.oauth2_client_secret_wo`.
+[Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
+
 ## Example Usage
 
 ```hcl
@@ -62,19 +65,22 @@ The following arguments are supported:
 
 * `iap` - (Optional) Settings for enabling Cloud Identity Aware Proxy
 
+  * `enabled` - (Optional) Whether the serving infrastructure will authenticate and authorize all incoming requests.
+    (default is false)
+
   * `oauth2_client_id` - (Required) OAuth2 client ID to use for the authentication flow.
 
-  * `oauth2_client_secret` - (Required) OAuth2 client secret to use for the authentication flow.
+  * `oauth2_client_secret` - (Optional) OAuth2 client secret to use for the authentication flow.
     The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
+    Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` can be set.
 
-  * `oauth2_client_secret_wo_version` - (Optional) The version of the oauth2_client_secret. For more info see [updating   write-only attributes](/docs/providers/google/guides/using_write_only_attributes.  html#updating-write-only-attributes).
-
-## Ephemeral Attributes Reference
-
-The following write-only attributes are supported:
-
-* `iap.oauth2_client_secret` - (Required) OAuth2 client secret to use for the authentication flow.
+  * `oauth2_client_secret_wo` - (Optional, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) OAuth2 client secret to use for the authentication flow.
     The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
+    **Note**: This property is write-only and will not be read from the API.
+
+    ~> **Note:** Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` can be set.
+
+  * `oauth2_client_secret_wo_version` - (Optional) Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 ## Attributes Reference
 
@@ -98,9 +104,6 @@ exported:
 * `gcr_domain` - The GCR domain used for storing managed Docker images for this app.
 
 * `iap` - Settings for enabling Cloud Identity Aware Proxy
-
-  * `enabled` - (Optional) Whether the serving infrastructure will authenticate and authorize all incoming requests. 
-  (default is false)
 
   * `oauth2_client_secret_sha256` - Hex-encoded SHA-256 hash of the client secret.
 
