@@ -32,7 +32,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 			{
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.password_wo", "cloud_sql.0.credential.0.password_wo_version", "cloud_sql.0.credential.0.username"},
 				ResourceName:            "google_bigquery_connection.connection",
 			},
 			{
@@ -41,7 +41,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 			{
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.password_wo", "cloud_sql.0.credential.0.password_wo_version", "cloud_sql.0.credential.0.username"},
 				ResourceName:            "google_bigquery_connection.connection",
 			},
 		},
@@ -165,7 +165,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic_cmek_wo(t *test
 			{
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.password_wo", "cloud_sql.0.credential.0.password_wo_version", "cloud_sql.0.credential.0.username"},
 				ResourceName:            "google_bigquery_connection.connection",
 			},
 			{
@@ -174,7 +174,7 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic_cmek_wo(t *test
 			{
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.password_wo", "cloud_sql.0.credential.0.password_wo_version", "cloud_sql.0.credential.0.username"},
 				ResourceName:            "google_bigquery_connection.connection",
 			},
 		},
@@ -221,8 +221,8 @@ resource "google_bigquery_connection" "connection" {
         type        = "POSTGRES"
         credential {
             username = google_sql_user.user.name
-            password_wo = google_sql_user.user.password
-			password_wo_version = 1
+            password_wo         = google_sql_user.user.password
+            password_wo_version = "1"
         }
     }
 }
@@ -269,8 +269,8 @@ resource "google_bigquery_connection" "connection" {
         type        = "MYSQL"
         credential {
             username = google_sql_user.user.name
-            password_wo = google_sql_user.user.password
-			password_wo_version = 2
+            password_wo         = google_sql_user.user.password
+            password_wo_version = "2"
         }
     }
 }
