@@ -16,7 +16,7 @@ Allows creation and management of an App Engine application.
 ~> **Warning:** All arguments including `iap.oauth2_client_secret` will be stored in the raw
 state as plain-text. [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
-~> **Note:** All arguments marked as write-only values will not be stored in the state: `iap.oauth2_client_secret_wo`.
+~> **Note:** All arguments marked as write-only values will not be stored in the state: `oauth2_client_secret_wo`.
 [Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 
 ## Example Usage
@@ -69,15 +69,16 @@ The following arguments are supported:
 
   * `oauth2_client_secret` - (Optional) OAuth2 client secret to use for the authentication flow.
     The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
-    Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` can be set.
+    Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` must be set when `iap` is configured.
 
-  * `oauth2_client_secret_wo` - (Optional, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) OAuth2 client secret to use for the authentication flow.
-    The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
-    **Note**: This property is write-only and will not be read from the API.
+* `oauth2_client_secret_wo` - (Optional, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) OAuth2 client secret to use for the authentication flow.
+  The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
+  This is a top-level write-only alternative to `iap.oauth2_client_secret` (`iap` is a Computed block, which cannot contain write-only attributes).
+  **Note**: This property is write-only and will not be read from the API.
 
-    ~> **Note:** Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` can be set.
+  ~> **Note:** Exactly one of `iap.oauth2_client_secret` or `oauth2_client_secret_wo` must be set when `iap` is configured.
 
-  * `oauth2_client_secret_wo_version` - (Optional) Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+* `oauth2_client_secret_wo_version` - (Optional) Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 ## Attributes Reference
 

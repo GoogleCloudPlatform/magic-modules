@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -35,6 +36,7 @@ func ResourceAppEngineApplication() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			appEngineApplicationLocationIDCustomizeDiff,
+			appEngineApplicationIapSecretCustomizeDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -138,10 +140,10 @@ func ResourceAppEngineApplication() *schema.Resource {
 				Description: `The GCR domain used for storing managed Docker images for this app.`,
 			},
 			"iap": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				// Not Computed: Terraform SDK forbids WriteOnly attributes in Computed blocks.
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
 				Description: `Settings for enabling Cloud Identity Aware Proxy`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -157,25 +159,11 @@ func ResourceAppEngineApplication() *schema.Resource {
 							Description: `OAuth2 client ID to use for the authentication flow.`,
 						},
 						"oauth2_client_secret": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Sensitive:    true,
-							ExactlyOneOf: []string{"iap.0.oauth2_client_secret", "iap.0.oauth2_client_secret_wo"},
-							Description:  `OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
-						},
-						"oauth2_client_secret_wo": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							WriteOnly:    true,
-							ExactlyOneOf: []string{"iap.0.oauth2_client_secret", "iap.0.oauth2_client_secret_wo"},
-							RequiredWith: []string{"iap.0.oauth2_client_secret_wo_version"},
-							Description:  `OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
-						},
-						"oauth2_client_secret_wo_version": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							RequiredWith: []string{"iap.0.oauth2_client_secret_wo"},
-							Description:  "Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)",
+							Type:          schema.TypeString,
+							Optional:      true,
+							Sensitive:     true,
+							ConflictsWith: []string{"oauth2_client_secret_wo"},
+							Description:   `OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.`,
 						},
 						"oauth2_client_secret_sha256": {
 							Type:        schema.TypeString,
@@ -185,6 +173,24 @@ func ResourceAppEngineApplication() *schema.Resource {
 						},
 					},
 				},
+			},
+			// Handwritten equivalent of flatten_object: true on the write-only
+			// fields. The SDK forbids WriteOnly inside a Computed block, and iap
+			// must stay Computed. Same pattern as SecretVersion payload.secretData
+			// → top-level secret_data_wo. Expand still sends iap.oauth2ClientSecret.
+			"oauth2_client_secret_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				WriteOnly:     true,
+				ConflictsWith: []string{"iap.0.oauth2_client_secret"},
+				RequiredWith:  []string{"oauth2_client_secret_wo_version", "iap"},
+				Description:   `OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field. Write-only alternative to iap.oauth2_client_secret; expand maps this value into the IAP API body.`,
+			},
+			"oauth2_client_secret_wo_version": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"oauth2_client_secret_wo"},
+				Description:  "Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)",
 			},
 		},
 		UseJSONNumber: true,
@@ -225,6 +231,21 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 	old, new := d.GetChange("location_id")
 	if old != "" && old != new {
 		return fmt.Errorf("Cannot change location_id once the resource is created.")
+	}
+	return nil
+}
+
+func appEngineApplicationIapSecretCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	iapCfg, diags := d.GetRawConfigAt(cty.GetAttrPath("iap"))
+	if len(diags) > 0 || iapCfg.IsNull() || !iapCfg.IsKnown() || iapCfg.LengthInt() == 0 {
+		return nil
+	}
+
+	secret, _ := d.Get("iap.0.oauth2_client_secret").(string)
+	woCfg, woDiags := d.GetRawConfigAt(cty.GetAttrPath("oauth2_client_secret_wo"))
+	woSet := len(woDiags) == 0 && !woCfg.IsNull() && woCfg.IsKnown() && woCfg.AsString() != ""
+	if secret == "" && !woSet {
+		return fmt.Errorf("one of iap.0.oauth2_client_secret or oauth2_client_secret_wo must be set when iap is configured")
 	}
 	return nil
 }
@@ -426,16 +447,22 @@ func expandAppEngineApplicationIap(d *schema.ResourceData) (*appengine.IdentityA
 	if len(blocks) < 1 {
 		return nil, nil
 	}
-	clientSecret := tpgresource.GetRawConfigAttributeAsString(d, "iap.0.oauth2_client_secret_wo")
-	if clientSecret == "" {
-		clientSecret = d.Get("iap.0.oauth2_client_secret").(string)
-	}
 	return &appengine.IdentityAwareProxy{
 		Enabled:                  d.Get("iap.0.enabled").(bool),
 		Oauth2ClientId:           d.Get("iap.0.oauth2_client_id").(string),
-		Oauth2ClientSecret:       clientSecret,
+		Oauth2ClientSecret:       expandAppEngineApplicationIapOauth2ClientSecret(d),
 		Oauth2ClientSecretSha256: d.Get("iap.0.oauth2_client_secret_sha256").(string),
 	}, nil
+}
+
+// expandAppEngineApplicationIapOauth2ClientSecret maps the top-level write-only
+// secret into iap.oauth2ClientSecret on the API request. oauth2_client_secret_wo
+// cannot live in the Computed iap schema block.
+func expandAppEngineApplicationIapOauth2ClientSecret(d *schema.ResourceData) string {
+	if wo := tpgresource.GetRawConfigAttributeAsString(d, "oauth2_client_secret_wo"); wo != "" {
+		return wo
+	}
+	return d.Get("iap.0.oauth2_client_secret").(string)
 }
 
 func flattenAppEngineApplicationFeatureSettings(settings *appengine.FeatureSettings) ([]map[string]interface{}, error) {
@@ -452,18 +479,11 @@ func flattenAppEngineApplicationIap(d *schema.ResourceData, iap *appengine.Ident
 	if iap == nil {
 		return []map[string]interface{}{}, nil
 	}
-	_, configured := d.GetOk("iap")
-	// iap cannot be Computed (it contains write-only attributes), so omit
-	// API-default IAP from state when the user did not configure the block.
-	if !configured && !iap.Enabled && iap.Oauth2ClientId == "" {
-		return []map[string]interface{}{}, nil
-	}
 	result := map[string]interface{}{
-		"enabled":                         iap.Enabled,
-		"oauth2_client_id":                iap.Oauth2ClientId,
-		"oauth2_client_secret":            d.Get("iap.0.oauth2_client_secret"),
-		"oauth2_client_secret_wo_version": d.Get("iap.0.oauth2_client_secret_wo_version"),
-		"oauth2_client_secret_sha256":     iap.Oauth2ClientSecretSha256,
+		"enabled":                     iap.Enabled,
+		"oauth2_client_id":            iap.Oauth2ClientId,
+		"oauth2_client_secret":        d.Get("iap.0.oauth2_client_secret"),
+		"oauth2_client_secret_sha256": iap.Oauth2ClientSecretSha256,
 	}
 	return []map[string]interface{}{result}, nil
 }
