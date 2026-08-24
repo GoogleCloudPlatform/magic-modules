@@ -1,0 +1,4199 @@
+---
+version: 1
+interactions:
+- request:
+    body: ""
+    form: {}
+    headers:
+      User-Agent:
+      - google-api-go-client/0.5 Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1
+        terraform-provider-google-beta/acc
+      X-Goog-Api-Client:
+      - gl-go/1.26.5 gdcl/0.288.0
+    url: https://compute.googleapis.com/compute/beta/projects/debian-cloud/global/images/debian-12?alt=json&prettyPrint=false
+    method: GET
+  response:
+    body: |
+      {
+        "error": {
+          "code": 404,
+          "message": "The resource 'projects/debian-cloud/global/images/debian-12' was not found",
+          "errors": [
+            {
+              "message": "The resource 'projects/debian-cloud/global/images/debian-12' was not found",
+              "domain": "global",
+              "reason": "notFound"
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:18 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 404 Not Found
+    code: 404
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      User-Agent:
+      - google-api-go-client/0.5 Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1
+        terraform-provider-google-beta/acc
+      X-Goog-Api-Client:
+      - gl-go/1.26.5 gdcl/0.288.0
+    url: https://compute.googleapis.com/compute/beta/projects/debian-cloud/global/images/family/debian-12?alt=json&prettyPrint=false
+    method: GET
+  response:
+    body: '{"kind":"compute#image","id":"4922483122153092318","creationTimestamp":"2026-07-27T14:14:26.100-07:00","name":"debian-12-bookworm-v20260727","description":"Debian,
+      Debian GNU/Linux, 12 (bookworm), amd64 built on 20260727","sourceType":"RAW","rawDisk":{"source":"","containerType":"TAR"},"status":"READY","archiveSizeBytes":"35467673600","diskSizeGb":"10","licenses":["https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"],"family":"debian-12","selfLink":"https://www.googleapis.com/compute/beta/projects/debian-cloud/global/images/debian-12-bookworm-v20260727","labels":{"public-image":"true"},"labelFingerprint":"iNBmVNCFF9w=","guestOsFeatures":[{"type":"UEFI_COMPATIBLE"},{"type":"VIRTIO_SCSI_MULTIQUEUE"},{"type":"GVNIC"},{"type":"SEV_CAPABLE"},{"type":"SEV_LIVE_MIGRATABLE_V2"}],"licenseCodes":["2147286739765738111"],"storageLocations":["australia-southeast2","australia-southeast1","europe-west3","me-west1","us-east7","europe-north2","europe-west12","asia-southeast2","southamerica-east1","asia-northeast1","europe-west6","us-east4","me-central1","me-central2","asia-east1","asia-southeast3","us-east5","us-west8","us-south1","us-west2","europe-west15","northamerica-south1","europe-west10","europe-central2","asia-northeast3","us","asia-east2","europe-west8","southamerica-west1","asia-south1","northamerica-northeast1","us-central2","africa-south1","europe-west1","eu","europe-southwest1","asia-southeast1","us-central1","europe-west4","europe-north1","asia-northeast2","asia-south2","us-west3","europe-west9","asia","northamerica-northeast2","us-west4","us-east1","us-west1","europe-west2"],"rolloutOverride":{"locationRolloutPolicies":{"zones/africa-south1-a":"2026-07-29T17:14:22Z","zones/africa-south1-b":"2026-07-30T15:14:22Z","zones/africa-south1-c":"2026-08-02T16:14:22Z","zones/asia-east1-a":"2026-07-28T19:14:22Z","zones/asia-east1-b":"2026-07-31T16:14:22Z","zones/asia-east1-c":"2026-08-01T18:14:22Z","zones/asia-east2-a":"2026-07-29T18:14:22Z","zones/asia-east2-b":"2026-07-30T16:14:22Z","zones/asia-east2-c":"2026-08-02T17:14:22Z","zones/asia-northeast1-a":"2026-07-29T16:14:22Z","zones/asia-northeast1-b":"2026-07-30T14:14:22Z","zones/asia-northeast1-c":"2026-08-02T15:14:22Z","zones/asia-northeast2-a":"2026-07-29T19:14:22Z","zones/asia-northeast2-b":"2026-07-30T17:14:22Z","zones/asia-northeast2-c":"2026-07-31T19:14:22Z","zones/asia-northeast3-a":"2026-07-28T06:14:22Z","zones/asia-northeast3-b":"2026-07-31T03:14:22Z","zones/asia-northeast3-c":"2026-08-01T05:14:22Z","zones/asia-south1-a":"2026-07-29T04:14:22Z","zones/asia-south1-b":"2026-07-30T02:14:22Z","zones/asia-south1-c":"2026-08-02T03:14:22Z","zones/asia-south2-a":"2026-07-29T05:14:22Z","zones/asia-south2-b":"2026-07-30T03:14:22Z","zones/asia-south2-c":"2026-08-02T04:14:22Z","zones/asia-southeast1-a":"2026-07-29T03:14:22Z","zones/asia-southeast1-b":"2026-07-30T01:14:22Z","zones/asia-southeast1-c":"2026-08-02T02:14:22Z","zones/asia-southeast2-a":"2026-07-29T09:14:22Z","zones/asia-southeast2-b":"2026-07-30T07:14:22Z","zones/asia-southeast2-c":"2026-08-02T08:14:22Z","zones/asia-southeast3-a":"2026-07-28T14:14:22Z","zones/asia-southeast3-b":"2026-07-31T11:14:22Z","zones/asia-southeast3-c":"2026-08-01T13:14:22Z","zones/australia-southeast1-a":"2026-07-28T09:14:22Z","zones/australia-southeast1-b":"2026-07-31T06:14:22Z","zones/australia-southeast1-c":"2026-08-01T08:14:22Z","zones/australia-southeast2-a":"2026-07-29T10:14:22Z","zones/australia-southeast2-b":"2026-07-30T08:14:22Z","zones/australia-southeast2-c":"2026-08-02T09:14:22Z","zones/europe-central2-a":"2026-07-29T11:14:22Z","zones/europe-central2-b":"2026-07-30T09:14:22Z","zones/europe-central2-c":"2026-08-02T10:14:22Z","zones/europe-north1-a":"2026-07-28T21:14:22Z","zones/europe-north1-b":"2026-07-31T18:14:22Z","zones/europe-north1-c":"2026-08-01T20:14:22Z","zones/europe-north2-a":"2026-07-28T10:14:22Z","zones/europe-north2-b":"2026-07-31T07:14:22Z","zones/europe-north2-c":"2026-08-01T09:14:22Z","zones/europe-southwest1-a":"2026-07-27T21:14:22Z","zones/europe-southwest1-b":"2026-07-30T18:14:22Z","zones/europe-southwest1-c":"2026-07-31T20:14:22Z","zones/europe-west1-b":"2026-07-29T02:14:22Z","zones/europe-west1-c":"2026-07-30T00:14:22Z","zones/europe-west1-d":"2026-08-02T01:14:22Z","zones/europe-west10-a":"2026-07-28T22:14:22Z","zones/europe-west10-b":"2026-07-29T20:14:22Z","zones/europe-west10-c":"2026-08-01T21:14:22Z","zones/europe-west12-a":"2026-07-27T22:14:22Z","zones/europe-west12-b":"2026-07-30T19:14:22Z","zones/europe-west12-c":"2026-07-31T21:14:22Z","zones/europe-west15-a":"2026-07-28T02:14:22Z","zones/europe-west15-b":"2026-07-30T23:14:22Z","zones/europe-west15-c":"2026-08-01T01:14:22Z","zones/europe-west2-a":"2026-07-28T05:14:22Z","zones/europe-west2-b":"2026-07-31T02:14:22Z","zones/europe-west2-c":"2026-08-01T04:14:22Z","zones/europe-west3-a":"2026-07-28T08:14:22Z","zones/europe-west3-b":"2026-07-31T05:14:22Z","zones/europe-west3-c":"2026-08-01T07:14:22Z","zones/europe-west4-a":"2026-07-28T07:14:22Z","zones/europe-west4-b":"2026-07-31T04:14:22Z","zones/europe-west4-c":"2026-08-01T06:14:22Z","zones/europe-west6-a":"2026-07-29T12:14:22Z","zones/europe-west6-b":"2026-07-30T10:14:22Z","zones/europe-west6-c":"2026-08-02T11:14:22Z","zones/europe-west8-a":"2026-07-29T06:14:22Z","zones/europe-west8-b":"2026-07-30T04:14:22Z","zones/europe-west8-c":"2026-08-02T05:14:22Z","zones/europe-west9-a":"2026-07-28T11:14:22Z","zones/europe-west9-b":"2026-07-31T08:14:22Z","zones/europe-west9-c":"2026-08-01T10:14:22Z","zones/me-central1-a":"2026-07-28T03:14:22Z","zones/me-central1-b":"2026-07-31T00:14:22Z","zones/me-central1-c":"2026-08-01T02:14:22Z","zones/me-central2-a":"2026-07-28T15:14:22Z","zones/me-central2-b":"2026-07-31T12:14:22Z","zones/me-central2-c":"2026-08-01T14:14:22Z","zones/me-west1-a":"2026-07-27T23:14:22Z","zones/me-west1-b":"2026-07-30T20:14:22Z","zones/me-west1-c":"2026-07-31T22:14:22Z","zones/northamerica-northeast1-a":"2026-07-28T23:14:22Z","zones/northamerica-northeast1-b":"2026-07-29T21:14:22Z","zones/northamerica-northeast1-c":"2026-08-01T22:14:22Z","zones/northamerica-northeast2-a":"2026-07-29T07:14:22Z","zones/northamerica-northeast2-b":"2026-07-30T05:14:22Z","zones/northamerica-northeast2-c":"2026-08-02T06:14:22Z","zones/northamerica-south1-a":"2026-07-29T08:14:22Z","zones/northamerica-south1-b":"2026-07-30T06:14:22Z","zones/northamerica-south1-c":"2026-08-02T07:14:22Z","zones/southamerica-east1-a":"2026-07-28T20:14:22Z","zones/southamerica-east1-b":"2026-07-31T17:14:22Z","zones/southamerica-east1-c":"2026-08-01T19:14:22Z","zones/southamerica-west1-a":"2026-07-29T00:14:22Z","zones/southamerica-west1-b":"2026-07-29T22:14:22Z","zones/southamerica-west1-c":"2026-08-01T23:14:22Z","zones/us-central1-a":"2026-07-28T04:14:22Z","zones/us-central1-b":"2026-07-31T01:14:22Z","zones/us-central1-c":"2026-08-01T03:14:22Z","zones/us-central1-f":"2026-08-02T19:14:22Z","zones/us-central2-a":"2026-07-29T01:14:22Z","zones/us-central2-b":"2026-07-29T23:14:22Z","zones/us-central2-c":"2026-08-02T00:14:22Z","zones/us-central2-d":"2026-08-02T18:14:22Z","zones/us-east1-b":"2026-07-28T18:14:22Z","zones/us-east1-c":"2026-07-31T15:14:22Z","zones/us-east1-d":"2026-08-01T17:14:22Z","zones/us-east4-a":"2026-07-28T01:14:22Z","zones/us-east4-b":"2026-07-30T22:14:22Z","zones/us-east4-c":"2026-08-01T00:14:22Z","zones/us-east5-a":"2026-07-28T12:14:22Z","zones/us-east5-b":"2026-07-31T09:14:22Z","zones/us-east5-c":"2026-08-01T11:14:22Z","zones/us-east7-a":"2026-07-29T13:14:22Z","zones/us-east7-b":"2026-07-30T11:14:22Z","zones/us-east7-c":"2026-08-02T12:14:22Z","zones/us-south1-a":"2026-07-28T16:14:22Z","zones/us-south1-b":"2026-07-31T13:14:22Z","zones/us-south1-c":"2026-08-01T15:14:22Z","zones/us-west1-a":"2026-07-28T13:14:22Z","zones/us-west1-b":"2026-07-31T10:14:22Z","zones/us-west1-c":"2026-08-01T12:14:22Z","zones/us-west2-a":"2026-07-28T17:14:22Z","zones/us-west2-b":"2026-07-31T14:14:22Z","zones/us-west2-c":"2026-08-01T16:14:22Z","zones/us-west3-a":"2026-07-29T14:14:22Z","zones/us-west3-b":"2026-07-30T12:14:22Z","zones/us-west3-c":"2026-08-02T13:14:22Z","zones/us-west4-a":"2026-07-28T00:14:22Z","zones/us-west4-b":"2026-07-30T21:14:22Z","zones/us-west4-c":"2026-07-31T23:14:22Z","zones/us-west8-a":"2026-07-29T15:14:22Z","zones/us-west8-b":"2026-07-30T13:14:22Z","zones/us-west8-c":"2026-08-02T14:14:22Z"},"defaultRolloutTime":"2026-08-02T19:14:22Z"},"architecture":"X86_64","enableConfidentialCompute":false}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:19 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: |
+      {"canIpForward":false,"deletionProtection":false,"disks":[{"autoDelete":true,"boot":true,"initializeParams":{"sourceImage":"projects/debian-cloud/global/images/family/debian-12"},"mode":"READ_WRITE"}],"labels":{"goog-terraform-provisioned":"true"},"machineType":"projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1","metadata":{"items":[{"key":"startup-script","value":"#!/bin/bash\necho Hello"}]},"name":"tf-test-9zgjhwttms","networkInterfaces":[{"network":"projects/ci-test-project-188019/global/networks/default"}],"params":{},"scheduling":{"automaticRestart":true},"tags":{}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances?alt=json
+    method: POST
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "409175056217197112",
+        "name": "operation-1785427159085-657d62796f01d-9a222d34-6ddc371b",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:19.930-07:00",
+        "startTime": "2026-07-30T08:59:19.931-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:19 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "409175056217197112",
+        "name": "operation-1785427159085-657d62796f01d-9a222d34-6ddc371b",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:19.930-07:00",
+        "startTime": "2026-07-30T08:59:19.931-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:20 GMT
+      Etag:
+      - RS-apSadmtsXxG2rOxENvCrAArw=/tfQwGc4KqpDTJsMg7Cb3ES3dR88=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "409175056217197112",
+        "name": "operation-1785427159085-657d62796f01d-9a222d34-6ddc371b",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:19.930-07:00",
+        "startTime": "2026-07-30T08:59:19.931-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:30 GMT
+      Etag:
+      - VFkrdXTNWmeZLzuh2hPhhAQDQag=/UspyDA3dYCZD-E07z2H8yMbGsF4=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "409175056217197112",
+        "name": "operation-1785427159085-657d62796f01d-9a222d34-6ddc371b",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-07-30T08:59:19.930-07:00",
+        "startTime": "2026-07-30T08:59:19.931-07:00",
+        "endTime": "2026-07-30T08:59:31.106-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427159085-657d62796f01d-9a222d34-6ddc371b"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:40 GMT
+      Etag:
+      - HOj-eq22Jx52LpblbfZ56apm_do=/WDLM-AKYHvkx_9O_x-DMCJewnys=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms?alt=json&view=FULL
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#instance",
+        "id": "3230650110749100600",
+        "creationTimestamp": "2026-07-30T08:59:19.872-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "tags": {
+          "fingerprint": "42WmSpB8rSM="
+        },
+        "machineType": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1",
+        "status": "RUNNING",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "canIpForward": false,
+        "networkInterfaces": [
+          {
+            "kind": "compute#networkInterface",
+            "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+            "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+            "networkIP": "10.128.0.35",
+            "name": "nic0",
+            "fingerprint": "YtiAL0Mp8o4=",
+            "stackType": "IPV4_ONLY"
+          }
+        ],
+        "disks": [
+          {
+            "kind": "compute#attachedDisk",
+            "type": "PERSISTENT",
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+            "deviceName": "persistent-disk-0",
+            "index": 0,
+            "boot": true,
+            "autoDelete": true,
+            "licenses": [
+              "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+            ],
+            "interface": "SCSI",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              },
+              {
+                "type": "SEV_CAPABLE"
+              },
+              {
+                "type": "SEV_LIVE_MIGRATABLE_V2"
+              }
+            ],
+            "diskSizeGb": "10",
+            "architecture": "X86_64"
+          }
+        ],
+        "metadata": {
+          "kind": "compute#metadata",
+          "fingerprint": "bthBEf2lfrI=",
+          "items": [
+            {
+              "key": "startup-script",
+              "value": "#!/bin/bash\necho Hello"
+            }
+          ]
+        },
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "scheduling": {
+          "onHostMaintenance": "MIGRATE",
+          "automaticRestart": true,
+          "preemptible": false,
+          "provisioningModel": "STANDARD"
+        },
+        "cpuPlatform": "Intel Haswell",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM=",
+        "startRestricted": false,
+        "deletionProtection": false,
+        "shieldedVmConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedVmIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "shieldedInstanceConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedInstanceIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "fingerprint": "Nt661RKS4vQ=",
+        "lastStartTimestamp": "2026-07-30T08:59:31.058-07:00",
+        "satisfiesPzi": true,
+        "resourceStatus": {
+          "effectiveInstanceMetadata": {
+            "vmDnsSettingMetadataValue": "GlobalDefault"
+          },
+          "scheduling": {}
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:45 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms?alt=json&view=FULL
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#instance",
+        "id": "3230650110749100600",
+        "creationTimestamp": "2026-07-30T08:59:19.872-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "tags": {
+          "fingerprint": "42WmSpB8rSM="
+        },
+        "machineType": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1",
+        "status": "RUNNING",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "canIpForward": false,
+        "networkInterfaces": [
+          {
+            "kind": "compute#networkInterface",
+            "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+            "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+            "networkIP": "10.128.0.35",
+            "name": "nic0",
+            "fingerprint": "YtiAL0Mp8o4=",
+            "stackType": "IPV4_ONLY"
+          }
+        ],
+        "disks": [
+          {
+            "kind": "compute#attachedDisk",
+            "type": "PERSISTENT",
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+            "deviceName": "persistent-disk-0",
+            "index": 0,
+            "boot": true,
+            "autoDelete": true,
+            "licenses": [
+              "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+            ],
+            "interface": "SCSI",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              },
+              {
+                "type": "SEV_CAPABLE"
+              },
+              {
+                "type": "SEV_LIVE_MIGRATABLE_V2"
+              }
+            ],
+            "diskSizeGb": "10",
+            "architecture": "X86_64"
+          }
+        ],
+        "metadata": {
+          "kind": "compute#metadata",
+          "fingerprint": "bthBEf2lfrI=",
+          "items": [
+            {
+              "key": "startup-script",
+              "value": "#!/bin/bash\necho Hello"
+            }
+          ]
+        },
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "scheduling": {
+          "onHostMaintenance": "MIGRATE",
+          "automaticRestart": true,
+          "preemptible": false,
+          "provisioningModel": "STANDARD"
+        },
+        "cpuPlatform": "Intel Haswell",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM=",
+        "startRestricted": false,
+        "deletionProtection": false,
+        "shieldedVmConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedVmIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "shieldedInstanceConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedInstanceIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "fingerprint": "Nt661RKS4vQ=",
+        "lastStartTimestamp": "2026-07-30T08:59:31.058-07:00",
+        "satisfiesPzi": true,
+        "resourceStatus": {
+          "effectiveInstanceMetadata": {
+            "vmDnsSettingMetadataValue": "GlobalDefault"
+          },
+          "scheduling": {}
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:45 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#disk",
+        "id": "3355239587223358008",
+        "creationTimestamp": "2026-07-30T08:59:19.878-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "sizeGb": "10",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "status": "READY",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+        "sourceImage": "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/images/debian-12-bookworm-v20260727",
+        "sourceImageId": "4922483122153092318",
+        "type": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/diskTypes/pd-standard",
+        "licenses": [
+          "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+        ],
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "VIRTIO_SCSI_MULTIQUEUE"
+          },
+          {
+            "type": "GVNIC"
+          },
+          {
+            "type": "SEV_CAPABLE"
+          },
+          {
+            "type": "SEV_LIVE_MIGRATABLE_V2"
+          }
+        ],
+        "lastAttachTimestamp": "2026-07-30T08:59:20.575-07:00",
+        "users": [
+          "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "licenseCodes": [
+          "2147286739765738111"
+        ],
+        "physicalBlockSizeBytes": "4096",
+        "multiWriter": false,
+        "enableConfidentialCompute": false,
+        "satisfiesPzi": true,
+        "architecture": "X86_64",
+        "locked": false
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:45 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: |
+      {"name":"tf-test-9zgjhwttms","sourceInstance":"projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms"}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages?alt=json
+    method: POST
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:47 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:47 GMT
+      Etag:
+      - JWxvqllYw70ZMZY0W71QhlVeQGU=/xaqro9i6lNKqNRQBMbi6aAUcPAg=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 15:59:57 GMT
+      Etag:
+      - 7pSChXdxz9uO9sXqjhbmTM_hIn4=/xbs1czzH5b1qbgpdbPywbYLYbfI=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:00:08 GMT
+      Etag:
+      - NVYG0z3ZSQAhDvpovRU6SAIYMNc=/IkzX9j_4tGlqXJkOLQ9AVqH8Z7Q=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:00:18 GMT
+      Etag:
+      - JtzFCuwUa1XyMuJKXVO9tp06QY8=/DF-yLENalCH1wNFcsJkbKHyNmY4=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:00:28 GMT
+      Etag:
+      - 4p5oG0AnrrHpxTHfvGLgVwjGgQw=/qfkpIbp_eNwj-0fDwib6sYt7oIw=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:00:38 GMT
+      Etag:
+      - kz0Y0dMF4vDVL8aCCTRIdDBDjws=/LYGKK7cF1iwRxQvnFi71b-PldRI=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:00:48 GMT
+      Etag:
+      - mLoT-0GXmX45oNVD5-k5efyhdsI=/v2ecBcRymbCgNJwQc8ubPlCqyAI=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:00:59 GMT
+      Etag:
+      - rBnlSC3tnpovrgYBxRGlgvLfk7s=/2UpalwNE4NPuzp8VMnftcowpegM=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "96939111415728669",
+        "name": "operation-1785427185989-657d6293178fc-6b204be4-3e8d2454",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-07-30T08:59:46.958-07:00",
+        "startTime": "2026-07-30T08:59:46.961-07:00",
+        "endTime": "2026-07-30T09:01:01.994-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a machine image with global DNS attributes. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=image-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427185989-657d6293178fc-6b204be4-3e8d2454"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:09 GMT
+      Etag:
+      - 9W68Q59ZQWqLF63lqeyy4qpdHaE=/WXcO79sKXeyOduQ5n3hBRWxAaTo=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#machineImage",
+        "id": "3457016349199878685",
+        "creationTimestamp": "2026-07-30T08:59:46.960-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "sourceInstance": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "status": "READY",
+        "sourceInstanceProperties": {
+          "tags": {
+            "fingerprint": "42WmSpB8rSM="
+          },
+          "machineType": "n1-standard-1",
+          "canIpForward": false,
+          "networkInterfaces": [
+            {
+              "kind": "compute#networkInterface",
+              "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+              "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.35",
+              "name": "nic0",
+              "fingerprint": "YtiAL0Mp8o4=",
+              "stackType": "IPV4_ONLY"
+            }
+          ],
+          "disks": [
+            {
+              "kind": "compute#savedAttachedDisk",
+              "type": "PERSISTENT",
+              "mode": "READ_WRITE",
+              "source": "projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+              "deviceName": "persistent-disk-0",
+              "index": 0,
+              "boot": true,
+              "autoDelete": true,
+              "licenses": [
+                "projects/707281592825/global/licenses/debian-12-bookworm"
+              ],
+              "interface": "SCSI",
+              "guestOsFeatures": [
+                {
+                  "type": "UEFI_COMPATIBLE"
+                },
+                {
+                  "type": "VIRTIO_SCSI_MULTIQUEUE"
+                },
+                {
+                  "type": "GVNIC"
+                },
+                {
+                  "type": "SEV_CAPABLE"
+                },
+                {
+                  "type": "SEV_LIVE_MIGRATABLE_V2"
+                }
+              ],
+              "diskSizeGb": "10",
+              "storageBytes": "709740736",
+              "storageBytesStatus": "UP_TO_DATE",
+              "diskType": "pd-standard"
+            }
+          ],
+          "metadata": {
+            "kind": "compute#metadata",
+            "fingerprint": "bthBEf2lfrI=",
+            "items": [
+              {
+                "key": "startup-script",
+                "value": "#!/bin/bash\necho Hello"
+              }
+            ]
+          },
+          "scheduling": {
+            "onHostMaintenance": "MIGRATE",
+            "automaticRestart": true,
+            "preemptible": false,
+            "provisioningModel": "STANDARD"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "deletionProtection": false
+        },
+        "instanceProperties": {
+          "description": "",
+          "tags": {
+            "fingerprint": "42WmSpB8rSM="
+          },
+          "machineType": "n1-standard-1",
+          "canIpForward": false,
+          "networkInterfaces": [
+            {
+              "kind": "compute#networkInterface",
+              "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+              "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.35",
+              "name": "nic0",
+              "fingerprint": "YtiAL0Mp8o4=",
+              "stackType": "IPV4_ONLY"
+            }
+          ],
+          "disks": [
+            {
+              "kind": "compute#attachedDisk",
+              "type": "PERSISTENT",
+              "mode": "READ_WRITE",
+              "savedState": "DISK_SAVED_STATE_UNSPECIFIED",
+              "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+              "deviceName": "persistent-disk-0",
+              "index": 0,
+              "boot": true,
+              "autoDelete": true,
+              "licenses": [
+                "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+              ],
+              "interface": "SCSI",
+              "guestOsFeatures": [
+                {
+                  "type": "UEFI_COMPATIBLE"
+                },
+                {
+                  "type": "VIRTIO_SCSI_MULTIQUEUE"
+                },
+                {
+                  "type": "GVNIC"
+                },
+                {
+                  "type": "SEV_CAPABLE"
+                },
+                {
+                  "type": "SEV_LIVE_MIGRATABLE_V2"
+                }
+              ],
+              "diskSizeGb": "10",
+              "architecture": "X86_64"
+            }
+          ],
+          "metadata": {
+            "kind": "compute#metadata",
+            "fingerprint": "bthBEf2lfrI=",
+            "items": [
+              {
+                "key": "startup-script",
+                "value": "#!/bin/bash\necho Hello"
+              }
+            ]
+          },
+          "scheduling": {
+            "onHostMaintenance": "MIGRATE",
+            "automaticRestart": true,
+            "preemptible": false,
+            "provisioningModel": "STANDARD"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "minCpuPlatform": ""
+        },
+        "savedDisks": [
+          {
+            "kind": "compute#savedDisk",
+            "sourceDisk": "projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+            "storageBytes": "709740736",
+            "storageBytesStatus": "UP_TO_DATE"
+          }
+        ],
+        "storageLocations": [
+          "us"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "totalStorageBytes": "709740736"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:09 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#machineImage",
+        "id": "3457016349199878685",
+        "creationTimestamp": "2026-07-30T08:59:46.960-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "sourceInstance": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "status": "READY",
+        "sourceInstanceProperties": {
+          "tags": {
+            "fingerprint": "42WmSpB8rSM="
+          },
+          "machineType": "n1-standard-1",
+          "canIpForward": false,
+          "networkInterfaces": [
+            {
+              "kind": "compute#networkInterface",
+              "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+              "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.35",
+              "name": "nic0",
+              "fingerprint": "YtiAL0Mp8o4=",
+              "stackType": "IPV4_ONLY"
+            }
+          ],
+          "disks": [
+            {
+              "kind": "compute#savedAttachedDisk",
+              "type": "PERSISTENT",
+              "mode": "READ_WRITE",
+              "source": "projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+              "deviceName": "persistent-disk-0",
+              "index": 0,
+              "boot": true,
+              "autoDelete": true,
+              "licenses": [
+                "projects/707281592825/global/licenses/debian-12-bookworm"
+              ],
+              "interface": "SCSI",
+              "guestOsFeatures": [
+                {
+                  "type": "UEFI_COMPATIBLE"
+                },
+                {
+                  "type": "VIRTIO_SCSI_MULTIQUEUE"
+                },
+                {
+                  "type": "GVNIC"
+                },
+                {
+                  "type": "SEV_CAPABLE"
+                },
+                {
+                  "type": "SEV_LIVE_MIGRATABLE_V2"
+                }
+              ],
+              "diskSizeGb": "10",
+              "storageBytes": "709740736",
+              "storageBytesStatus": "UP_TO_DATE",
+              "diskType": "pd-standard"
+            }
+          ],
+          "metadata": {
+            "kind": "compute#metadata",
+            "fingerprint": "bthBEf2lfrI=",
+            "items": [
+              {
+                "key": "startup-script",
+                "value": "#!/bin/bash\necho Hello"
+              }
+            ]
+          },
+          "scheduling": {
+            "onHostMaintenance": "MIGRATE",
+            "automaticRestart": true,
+            "preemptible": false,
+            "provisioningModel": "STANDARD"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "deletionProtection": false
+        },
+        "instanceProperties": {
+          "description": "",
+          "tags": {
+            "fingerprint": "42WmSpB8rSM="
+          },
+          "machineType": "n1-standard-1",
+          "canIpForward": false,
+          "networkInterfaces": [
+            {
+              "kind": "compute#networkInterface",
+              "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+              "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.35",
+              "name": "nic0",
+              "fingerprint": "YtiAL0Mp8o4=",
+              "stackType": "IPV4_ONLY"
+            }
+          ],
+          "disks": [
+            {
+              "kind": "compute#attachedDisk",
+              "type": "PERSISTENT",
+              "mode": "READ_WRITE",
+              "savedState": "DISK_SAVED_STATE_UNSPECIFIED",
+              "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+              "deviceName": "persistent-disk-0",
+              "index": 0,
+              "boot": true,
+              "autoDelete": true,
+              "licenses": [
+                "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+              ],
+              "interface": "SCSI",
+              "guestOsFeatures": [
+                {
+                  "type": "UEFI_COMPATIBLE"
+                },
+                {
+                  "type": "VIRTIO_SCSI_MULTIQUEUE"
+                },
+                {
+                  "type": "GVNIC"
+                },
+                {
+                  "type": "SEV_CAPABLE"
+                },
+                {
+                  "type": "SEV_LIVE_MIGRATABLE_V2"
+                }
+              ],
+              "diskSizeGb": "10",
+              "architecture": "X86_64"
+            }
+          ],
+          "metadata": {
+            "kind": "compute#metadata",
+            "fingerprint": "bthBEf2lfrI=",
+            "items": [
+              {
+                "key": "startup-script",
+                "value": "#!/bin/bash\necho Hello"
+              }
+            ]
+          },
+          "scheduling": {
+            "onHostMaintenance": "MIGRATE",
+            "automaticRestart": true,
+            "preemptible": false,
+            "provisioningModel": "STANDARD"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "minCpuPlatform": ""
+        },
+        "savedDisks": [
+          {
+            "kind": "compute#savedDisk",
+            "sourceDisk": "projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+            "storageBytes": "709740736",
+            "storageBytesStatus": "UP_TO_DATE"
+          }
+        ],
+        "storageLocations": [
+          "us"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "totalStorageBytes": "709740736"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:09 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: |
+      {"disks":[{"autoDelete":true,"deviceName":"persistent-disk-0","type":"PERSISTENT"}],"labels":{"goog-terraform-provisioned":"true"},"metadata":{"items":[{"key":"startup-script","value":""}]},"name":"tf-test-generated-c2x6kgm3xf","params":{},"scheduling":{"automaticRestart":true,"onHostMaintenance":"MIGRATE","provisioningModel":"STANDARD"},"serviceAccounts":[{"email":"default"}],"sourceMachineImage":"https://www.googleapis.com/compute/v1/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms","tags":{},"zone":""}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances?alt=json
+    method: POST
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4819829654272002985",
+        "name": "operation-1785427269760-657d62e2fb60d-51623855-68548338",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:10.483-07:00",
+        "startTime": "2026-07-30T09:01:10.483-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:10 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4819829654272002985",
+        "name": "operation-1785427269760-657d62e2fb60d-51623855-68548338",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:10.483-07:00",
+        "startTime": "2026-07-30T09:01:10.483-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:10 GMT
+      Etag:
+      - YEkmKb5FQBRGlviFk7DS7urtWMA=/aXVBRli1bUk-KP0OSgbpLwZrsS0=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4819829654272002985",
+        "name": "operation-1785427269760-657d62e2fb60d-51623855-68548338",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:10.483-07:00",
+        "startTime": "2026-07-30T09:01:10.483-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:20 GMT
+      Etag:
+      - lcfmEnGD5e_pBS5SKmfyul2cE9s=/J87Pi5MZuGFMT91C2ejasSypjlk=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4819829654272002985",
+        "name": "operation-1785427269760-657d62e2fb60d-51623855-68548338",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:10.483-07:00",
+        "startTime": "2026-07-30T09:01:10.483-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:30 GMT
+      Etag:
+      - tFa1iDasSN3BjnFkMxDGI7DH5sE=/rBnQ7XLNMplXRH5VR-KF7PmdVi8=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4819829654272002985",
+        "name": "operation-1785427269760-657d62e2fb60d-51623855-68548338",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:10.483-07:00",
+        "startTime": "2026-07-30T09:01:10.483-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:41 GMT
+      Etag:
+      - rv0scFbyyI-R0tYoI8qRIoo5j4M=/75oGMbO0Al8CmABJ3x6YrT-naVs=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4819829654272002985",
+        "name": "operation-1785427269760-657d62e2fb60d-51623855-68548338",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-07-30T09:01:10.483-07:00",
+        "startTime": "2026-07-30T09:01:10.483-07:00",
+        "endTime": "2026-07-30T09:01:44.307-07:00",
+        "warnings": [
+          {
+            "message": "You are creating a global DNS VM. VM instances using global DNS are vulnerable to cross-regional outages. To reduce the risk of widespread service disruption, use zonal DNS instead. Learn more at https://cloud.google.com/compute/docs/networking/zonal-dns?utm_id=vm-insert"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427269760-657d62e2fb60d-51623855-68548338"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:51 GMT
+      Etag:
+      - QLui9MKR2YGpAQj6z8evw-AJwsk=/0LkRPHAW0cKIXSd8obfFfHbs4vA=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf?alt=json&view=FULL
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#instance",
+        "id": "5409838979694906281",
+        "creationTimestamp": "2026-07-30T09:01:10.410-07:00",
+        "name": "tf-test-generated-c2x6kgm3xf",
+        "tags": {
+          "fingerprint": "42WmSpB8rSM="
+        },
+        "machineType": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1",
+        "status": "RUNNING",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "canIpForward": false,
+        "networkInterfaces": [
+          {
+            "kind": "compute#networkInterface",
+            "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+            "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+            "networkIP": "10.128.0.126",
+            "name": "nic0",
+            "fingerprint": "3mF8x7sBF3Q=",
+            "stackType": "IPV4_ONLY"
+          }
+        ],
+        "disks": [
+          {
+            "kind": "compute#attachedDisk",
+            "type": "PERSISTENT",
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf",
+            "deviceName": "persistent-disk-0",
+            "index": 0,
+            "boot": true,
+            "autoDelete": true,
+            "licenses": [
+              "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+            ],
+            "interface": "SCSI",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              },
+              {
+                "type": "SEV_CAPABLE"
+              },
+              {
+                "type": "SEV_LIVE_MIGRATABLE_V2"
+              }
+            ],
+            "diskSizeGb": "10",
+            "architecture": "X86_64"
+          }
+        ],
+        "metadata": {
+          "kind": "compute#metadata",
+          "fingerprint": "iMG9wa4AnIs=",
+          "items": [
+            {
+              "key": "startup-script",
+              "value": ""
+            }
+          ]
+        },
+        "serviceAccounts": [
+          {
+            "email": "1067888929963-compute@developer.gserviceaccount.com"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "scheduling": {
+          "onHostMaintenance": "MIGRATE",
+          "automaticRestart": true,
+          "preemptible": false,
+          "provisioningModel": "STANDARD"
+        },
+        "cpuPlatform": "Intel Haswell",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM=",
+        "startRestricted": false,
+        "deletionProtection": false,
+        "sourceMachineImage": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "shieldedVmConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedVmIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "shieldedInstanceConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedInstanceIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "fingerprint": "yjgHCKTdk7I=",
+        "lastStartTimestamp": "2026-07-30T09:01:44.252-07:00",
+        "satisfiesPzi": true,
+        "resourceStatus": {
+          "effectiveInstanceMetadata": {
+            "vmDnsSettingMetadataValue": "GlobalDefault"
+          },
+          "scheduling": {}
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:51 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#disk",
+        "id": "8807761128534231977",
+        "creationTimestamp": "2026-07-30T09:01:10.423-07:00",
+        "name": "tf-test-generated-c2x6kgm3xf",
+        "sizeGb": "10",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "status": "READY",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf",
+        "type": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/diskTypes/pd-standard",
+        "licenses": [
+          "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+        ],
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "VIRTIO_SCSI_MULTIQUEUE"
+          },
+          {
+            "type": "GVNIC"
+          },
+          {
+            "type": "SEV_CAPABLE"
+          },
+          {
+            "type": "SEV_LIVE_MIGRATABLE_V2"
+          }
+        ],
+        "lastAttachTimestamp": "2026-07-30T09:01:11.098-07:00",
+        "users": [
+          "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "licenseCodes": [
+          "2147286739765738111"
+        ],
+        "physicalBlockSizeBytes": "4096",
+        "multiWriter": false,
+        "enableConfidentialCompute": false,
+        "satisfiesPzi": true,
+        "architecture": "X86_64",
+        "locked": false
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:51 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf?alt=json&view=FULL
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#instance",
+        "id": "5409838979694906281",
+        "creationTimestamp": "2026-07-30T09:01:10.410-07:00",
+        "name": "tf-test-generated-c2x6kgm3xf",
+        "tags": {
+          "fingerprint": "42WmSpB8rSM="
+        },
+        "machineType": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1",
+        "status": "RUNNING",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "canIpForward": false,
+        "networkInterfaces": [
+          {
+            "kind": "compute#networkInterface",
+            "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+            "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+            "networkIP": "10.128.0.126",
+            "name": "nic0",
+            "fingerprint": "3mF8x7sBF3Q=",
+            "stackType": "IPV4_ONLY"
+          }
+        ],
+        "disks": [
+          {
+            "kind": "compute#attachedDisk",
+            "type": "PERSISTENT",
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf",
+            "deviceName": "persistent-disk-0",
+            "index": 0,
+            "boot": true,
+            "autoDelete": true,
+            "licenses": [
+              "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+            ],
+            "interface": "SCSI",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              },
+              {
+                "type": "SEV_CAPABLE"
+              },
+              {
+                "type": "SEV_LIVE_MIGRATABLE_V2"
+              }
+            ],
+            "diskSizeGb": "10",
+            "architecture": "X86_64"
+          }
+        ],
+        "metadata": {
+          "kind": "compute#metadata",
+          "fingerprint": "iMG9wa4AnIs=",
+          "items": [
+            {
+              "key": "startup-script",
+              "value": ""
+            }
+          ]
+        },
+        "serviceAccounts": [
+          {
+            "email": "1067888929963-compute@developer.gserviceaccount.com"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "scheduling": {
+          "onHostMaintenance": "MIGRATE",
+          "automaticRestart": true,
+          "preemptible": false,
+          "provisioningModel": "STANDARD"
+        },
+        "cpuPlatform": "Intel Haswell",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM=",
+        "startRestricted": false,
+        "deletionProtection": false,
+        "sourceMachineImage": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "shieldedVmConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedVmIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "shieldedInstanceConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedInstanceIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "fingerprint": "yjgHCKTdk7I=",
+        "lastStartTimestamp": "2026-07-30T09:01:44.252-07:00",
+        "satisfiesPzi": true,
+        "resourceStatus": {
+          "effectiveInstanceMetadata": {
+            "vmDnsSettingMetadataValue": "GlobalDefault"
+          },
+          "scheduling": {}
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:52 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms?alt=json&view=FULL
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#instance",
+        "id": "3230650110749100600",
+        "creationTimestamp": "2026-07-30T08:59:19.872-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "tags": {
+          "fingerprint": "42WmSpB8rSM="
+        },
+        "machineType": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1",
+        "status": "RUNNING",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "canIpForward": false,
+        "networkInterfaces": [
+          {
+            "kind": "compute#networkInterface",
+            "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+            "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+            "networkIP": "10.128.0.35",
+            "name": "nic0",
+            "fingerprint": "YtiAL0Mp8o4=",
+            "stackType": "IPV4_ONLY"
+          }
+        ],
+        "disks": [
+          {
+            "kind": "compute#attachedDisk",
+            "type": "PERSISTENT",
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+            "deviceName": "persistent-disk-0",
+            "index": 0,
+            "boot": true,
+            "autoDelete": true,
+            "licenses": [
+              "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+            ],
+            "interface": "SCSI",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              },
+              {
+                "type": "SEV_CAPABLE"
+              },
+              {
+                "type": "SEV_LIVE_MIGRATABLE_V2"
+              }
+            ],
+            "diskSizeGb": "10",
+            "architecture": "X86_64"
+          }
+        ],
+        "metadata": {
+          "kind": "compute#metadata",
+          "fingerprint": "bthBEf2lfrI=",
+          "items": [
+            {
+              "key": "startup-script",
+              "value": "#!/bin/bash\necho Hello"
+            }
+          ]
+        },
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "scheduling": {
+          "onHostMaintenance": "MIGRATE",
+          "automaticRestart": true,
+          "preemptible": false,
+          "provisioningModel": "STANDARD"
+        },
+        "cpuPlatform": "Intel Haswell",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM=",
+        "startRestricted": false,
+        "deletionProtection": false,
+        "shieldedVmConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedVmIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "shieldedInstanceConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedInstanceIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "fingerprint": "Nt661RKS4vQ=",
+        "lastStartTimestamp": "2026-07-30T08:59:31.058-07:00",
+        "satisfiesPzi": true,
+        "resourceStatus": {
+          "effectiveInstanceMetadata": {
+            "vmDnsSettingMetadataValue": "GlobalDefault"
+          },
+          "scheduling": {}
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:53 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#disk",
+        "id": "3355239587223358008",
+        "creationTimestamp": "2026-07-30T08:59:19.878-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "sizeGb": "10",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "status": "READY",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+        "sourceImage": "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/images/debian-12-bookworm-v20260727",
+        "sourceImageId": "4922483122153092318",
+        "type": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/diskTypes/pd-standard",
+        "licenses": [
+          "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+        ],
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "VIRTIO_SCSI_MULTIQUEUE"
+          },
+          {
+            "type": "GVNIC"
+          },
+          {
+            "type": "SEV_CAPABLE"
+          },
+          {
+            "type": "SEV_LIVE_MIGRATABLE_V2"
+          }
+        ],
+        "lastAttachTimestamp": "2026-07-30T08:59:20.575-07:00",
+        "users": [
+          "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "licenseCodes": [
+          "2147286739765738111"
+        ],
+        "physicalBlockSizeBytes": "4096",
+        "multiWriter": false,
+        "enableConfidentialCompute": false,
+        "satisfiesPzi": true,
+        "architecture": "X86_64",
+        "locked": false
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:54 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#machineImage",
+        "id": "3457016349199878685",
+        "creationTimestamp": "2026-07-30T08:59:46.960-07:00",
+        "name": "tf-test-9zgjhwttms",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "sourceInstance": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "status": "READY",
+        "sourceInstanceProperties": {
+          "tags": {
+            "fingerprint": "42WmSpB8rSM="
+          },
+          "machineType": "n1-standard-1",
+          "canIpForward": false,
+          "networkInterfaces": [
+            {
+              "kind": "compute#networkInterface",
+              "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+              "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.35",
+              "name": "nic0",
+              "fingerprint": "YtiAL0Mp8o4=",
+              "stackType": "IPV4_ONLY"
+            }
+          ],
+          "disks": [
+            {
+              "kind": "compute#savedAttachedDisk",
+              "type": "PERSISTENT",
+              "mode": "READ_WRITE",
+              "source": "projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+              "deviceName": "persistent-disk-0",
+              "index": 0,
+              "boot": true,
+              "autoDelete": true,
+              "licenses": [
+                "projects/707281592825/global/licenses/debian-12-bookworm"
+              ],
+              "interface": "SCSI",
+              "guestOsFeatures": [
+                {
+                  "type": "UEFI_COMPATIBLE"
+                },
+                {
+                  "type": "VIRTIO_SCSI_MULTIQUEUE"
+                },
+                {
+                  "type": "GVNIC"
+                },
+                {
+                  "type": "SEV_CAPABLE"
+                },
+                {
+                  "type": "SEV_LIVE_MIGRATABLE_V2"
+                }
+              ],
+              "diskSizeGb": "10",
+              "storageBytes": "709740736",
+              "storageBytesStatus": "UP_TO_DATE",
+              "diskType": "pd-standard"
+            }
+          ],
+          "metadata": {
+            "kind": "compute#metadata",
+            "fingerprint": "bthBEf2lfrI=",
+            "items": [
+              {
+                "key": "startup-script",
+                "value": "#!/bin/bash\necho Hello"
+              }
+            ]
+          },
+          "scheduling": {
+            "onHostMaintenance": "MIGRATE",
+            "automaticRestart": true,
+            "preemptible": false,
+            "provisioningModel": "STANDARD"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "deletionProtection": false
+        },
+        "instanceProperties": {
+          "description": "",
+          "tags": {
+            "fingerprint": "42WmSpB8rSM="
+          },
+          "machineType": "n1-standard-1",
+          "canIpForward": false,
+          "networkInterfaces": [
+            {
+              "kind": "compute#networkInterface",
+              "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+              "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+              "networkIP": "10.128.0.35",
+              "name": "nic0",
+              "fingerprint": "YtiAL0Mp8o4=",
+              "stackType": "IPV4_ONLY"
+            }
+          ],
+          "disks": [
+            {
+              "kind": "compute#attachedDisk",
+              "type": "PERSISTENT",
+              "mode": "READ_WRITE",
+              "savedState": "DISK_SAVED_STATE_UNSPECIFIED",
+              "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+              "deviceName": "persistent-disk-0",
+              "index": 0,
+              "boot": true,
+              "autoDelete": true,
+              "licenses": [
+                "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+              ],
+              "interface": "SCSI",
+              "guestOsFeatures": [
+                {
+                  "type": "UEFI_COMPATIBLE"
+                },
+                {
+                  "type": "VIRTIO_SCSI_MULTIQUEUE"
+                },
+                {
+                  "type": "GVNIC"
+                },
+                {
+                  "type": "SEV_CAPABLE"
+                },
+                {
+                  "type": "SEV_LIVE_MIGRATABLE_V2"
+                }
+              ],
+              "diskSizeGb": "10",
+              "architecture": "X86_64"
+            }
+          ],
+          "metadata": {
+            "kind": "compute#metadata",
+            "fingerprint": "bthBEf2lfrI=",
+            "items": [
+              {
+                "key": "startup-script",
+                "value": "#!/bin/bash\necho Hello"
+              }
+            ]
+          },
+          "scheduling": {
+            "onHostMaintenance": "MIGRATE",
+            "automaticRestart": true,
+            "preemptible": false,
+            "provisioningModel": "STANDARD"
+          },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
+          "minCpuPlatform": ""
+        },
+        "savedDisks": [
+          {
+            "kind": "compute#savedDisk",
+            "sourceDisk": "projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-9zgjhwttms",
+            "storageBytes": "709740736",
+            "storageBytesStatus": "UP_TO_DATE"
+          }
+        ],
+        "storageLocations": [
+          "us"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "totalStorageBytes": "709740736"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:54 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf?alt=json&view=FULL
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#instance",
+        "id": "5409838979694906281",
+        "creationTimestamp": "2026-07-30T09:01:10.410-07:00",
+        "name": "tf-test-generated-c2x6kgm3xf",
+        "tags": {
+          "fingerprint": "42WmSpB8rSM="
+        },
+        "machineType": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/machineTypes/n1-standard-1",
+        "status": "RUNNING",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "canIpForward": false,
+        "networkInterfaces": [
+          {
+            "kind": "compute#networkInterface",
+            "network": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/networks/default",
+            "subnetwork": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/regions/us-central1/subnetworks/default",
+            "networkIP": "10.128.0.126",
+            "name": "nic0",
+            "fingerprint": "3mF8x7sBF3Q=",
+            "stackType": "IPV4_ONLY"
+          }
+        ],
+        "disks": [
+          {
+            "kind": "compute#attachedDisk",
+            "type": "PERSISTENT",
+            "mode": "READ_WRITE",
+            "source": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf",
+            "deviceName": "persistent-disk-0",
+            "index": 0,
+            "boot": true,
+            "autoDelete": true,
+            "licenses": [
+              "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+            ],
+            "interface": "SCSI",
+            "guestOsFeatures": [
+              {
+                "type": "UEFI_COMPATIBLE"
+              },
+              {
+                "type": "VIRTIO_SCSI_MULTIQUEUE"
+              },
+              {
+                "type": "GVNIC"
+              },
+              {
+                "type": "SEV_CAPABLE"
+              },
+              {
+                "type": "SEV_LIVE_MIGRATABLE_V2"
+              }
+            ],
+            "diskSizeGb": "10",
+            "architecture": "X86_64"
+          }
+        ],
+        "metadata": {
+          "kind": "compute#metadata",
+          "fingerprint": "iMG9wa4AnIs=",
+          "items": [
+            {
+              "key": "startup-script",
+              "value": ""
+            }
+          ]
+        },
+        "serviceAccounts": [
+          {
+            "email": "1067888929963-compute@developer.gserviceaccount.com"
+          }
+        ],
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "scheduling": {
+          "onHostMaintenance": "MIGRATE",
+          "automaticRestart": true,
+          "preemptible": false,
+          "provisioningModel": "STANDARD"
+        },
+        "cpuPlatform": "Intel Haswell",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM=",
+        "startRestricted": false,
+        "deletionProtection": false,
+        "sourceMachineImage": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "shieldedVmConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedVmIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "shieldedInstanceConfig": {
+          "enableSecureBoot": false,
+          "enableVtpm": true,
+          "enableIntegrityMonitoring": true
+        },
+        "shieldedInstanceIntegrityPolicy": {
+          "updateAutoLearnPolicy": true
+        },
+        "fingerprint": "yjgHCKTdk7I=",
+        "lastStartTimestamp": "2026-07-30T09:01:44.252-07:00",
+        "satisfiesPzi": true,
+        "resourceStatus": {
+          "effectiveInstanceMetadata": {
+            "vmDnsSettingMetadataValue": "GlobalDefault"
+          },
+          "scheduling": {}
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:54 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#disk",
+        "id": "8807761128534231977",
+        "creationTimestamp": "2026-07-30T09:01:10.423-07:00",
+        "name": "tf-test-generated-c2x6kgm3xf",
+        "sizeGb": "10",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "status": "READY",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/disks/tf-test-generated-c2x6kgm3xf",
+        "type": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/diskTypes/pd-standard",
+        "licenses": [
+          "https://www.googleapis.com/compute/beta/projects/debian-cloud/global/licenses/debian-12-bookworm"
+        ],
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "VIRTIO_SCSI_MULTIQUEUE"
+          },
+          {
+            "type": "GVNIC"
+          },
+          {
+            "type": "SEV_CAPABLE"
+          },
+          {
+            "type": "SEV_LIVE_MIGRATABLE_V2"
+          }
+        ],
+        "lastAttachTimestamp": "2026-07-30T09:01:11.098-07:00",
+        "users": [
+          "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf"
+        ],
+        "labelFingerprint": "42WmSpB8rSM=",
+        "licenseCodes": [
+          "2147286739765738111"
+        ],
+        "physicalBlockSizeBytes": "4096",
+        "multiWriter": false,
+        "enableConfidentialCompute": false,
+        "satisfiesPzi": true,
+        "architecture": "X86_64",
+        "locked": false
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:54 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf?alt=json
+    method: DELETE
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:56 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:01:56 GMT
+      Etag:
+      - Ua_KJ5t52HN8StleNCoGTlA7vvw=/_BWIT1ioangLbjRw2Cki5IyhHkc=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:02:06 GMT
+      Etag:
+      - mWO5ehKZLLohAKha3J6lHU6ANVQ=/H3Oulvr85tWEwaM6lAl82jv8HHQ=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:02:16 GMT
+      Etag:
+      - KDvUZQXanlrXhwpFxuXtONBmOEA=/03T-rFN_v1hvtZzCCX4pf7dTju8=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:02:27 GMT
+      Etag:
+      - YUQdY2ENDZx1E8Ayl4_9Qyn5GK8=/aHv2J2jU9VmAeejCf1H74yAQiRc=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:02:37 GMT
+      Etag:
+      - 55MA8xmVem4QXD1WOZ85AULWDr0=/mJjiuaIoEvlnbdnRKFWduiJQeb0=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:02:47 GMT
+      Etag:
+      - h9laKbvWDeh93z_CFafQwdtKegY=/tEbVMC21-5UdYmP2CuDGhr-dVN0=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:02:57 GMT
+      Etag:
+      - uWALkWC06Er_UuC8dSSGu-rOSp8=/1yW9ap3BQabeUtMNw2RYi9Sy0uY=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:03:07 GMT
+      Etag:
+      - 3VcK1iT6ScNwJIuGhEWIbyVqdUg=/120Z372x_hwhJJC6eorezErg9hQ=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:03:17 GMT
+      Etag:
+      - NskXHKSmbCG0kYZJv5qW_lN2bVc=/S8YOG2jBLv9hoNVmQ9qsq4MjWJE=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:03:28 GMT
+      Etag:
+      - zbFqS1sO1XslZEfP4C0qQYcN8vQ=/W2pCtTMlm1ZPN-EibFKtmCVuI0c=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:03:38 GMT
+      Etag:
+      - X3KEvA95ridL4XO_sV4ITN-nEhs=/4EBAA8xtABcRdX0EwTxHsktEOuY=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:03:48 GMT
+      Etag:
+      - m_sfxuGNBk3kWLnDSkPv-yQcoaU=/9vV1-IhtwSWbhJJ786oARFzrob8=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:03:58 GMT
+      Etag:
+      - wobtdRQqT0frWrcw-_MHmXoBBXY=/A6BbHF1w30Sh3kryMXLzaJ2tbsY=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:08 GMT
+      Etag:
+      - RS-apSadmtsXxG2rOxENvCrAArw=/9_cE49aIbGiJo73jbgraFUZebeU=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:18 GMT
+      Etag:
+      - 3Ab_86_yOQa7PCBRX2QwznK3_cE=/VFINVLaz0OQwTASL4NewGKxKTUo=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "4876381596032617371",
+        "name": "operation-1785427316310-657d630f600e8-9a23ee07-b9480957",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf",
+        "targetId": "5409838979694906281",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-07-30T09:01:56.493-07:00",
+        "startTime": "2026-07-30T09:01:56.514-07:00",
+        "endTime": "2026-07-30T09:04:20.341-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427316310-657d630f600e8-9a23ee07-b9480957"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:28 GMT
+      Etag:
+      - x0HelCOM1d7onZtl6aOnnyCm_88=/jtLd0fn9XtPFWC5v_Od2nMw7K3E=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms?alt=json
+    method: DELETE
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "9067418332806170850",
+        "name": "operation-1785427469088-657d63a113695-7d210f75-712282f9",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:04:29.641-07:00",
+        "startTime": "2026-07-30T09:04:29.646-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427469088-657d63a113695-7d210f75-712282f9"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:29 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427469088-657d63a113695-7d210f75-712282f9?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "9067418332806170850",
+        "name": "operation-1785427469088-657d63a113695-7d210f75-712282f9",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:04:29.641-07:00",
+        "startTime": "2026-07-30T09:04:29.646-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427469088-657d63a113695-7d210f75-712282f9"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:29 GMT
+      Etag:
+      - Qhe5gWyFkHdyrkoeRsBez5TCMS0=/Bn6RK1QV_N8NrbStb5BjhMrJk_c=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427469088-657d63a113695-7d210f75-712282f9?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "9067418332806170850",
+        "name": "operation-1785427469088-657d63a113695-7d210f75-712282f9",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/machineImages/tf-test-9zgjhwttms",
+        "targetId": "3457016349199878685",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-07-30T09:04:29.641-07:00",
+        "startTime": "2026-07-30T09:04:29.646-07:00",
+        "endTime": "2026-07-30T09:04:32.893-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1785427469088-657d63a113695-7d210f75-712282f9"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:40 GMT
+      Etag:
+      - SFXBRkKIX7kjM9m9Z2BMUDeCY_A=/dHU8EO8yF7l4PrqGyP-46EKIwf8=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms?alt=json
+    method: DELETE
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "3328650784723618039",
+        "name": "operation-1785427480224-657d63abb2144-3b2ad92d-de502172",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:04:40.406-07:00",
+        "startTime": "2026-07-30T09:04:40.436-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:40 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "3328650784723618039",
+        "name": "operation-1785427480224-657d63abb2144-3b2ad92d-de502172",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:04:40.406-07:00",
+        "startTime": "2026-07-30T09:04:40.436-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:40 GMT
+      Etag:
+      - 3-_pYuiNwSxtHEWY6DMN_6ltmPQ=/WhvIkWWBTygxN8kXLzU77EpodVU=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "3328650784723618039",
+        "name": "operation-1785427480224-657d63abb2144-3b2ad92d-de502172",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:04:40.406-07:00",
+        "startTime": "2026-07-30T09:04:40.436-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:04:50 GMT
+      Etag:
+      - AGEs_52yMQSOnLYepE9UgynEc1U=/SMrOeXCa9Byl41mF7aYwDWIGf4k=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "3328650784723618039",
+        "name": "operation-1785427480224-657d63abb2144-3b2ad92d-de502172",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-07-30T09:04:40.406-07:00",
+        "startTime": "2026-07-30T09:04:40.436-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:05:00 GMT
+      Etag:
+      - 6cp4J7lDIYpsECz7sIkbDV_quKo=/v9--bRTQTul5xgXUvZ9EsjKAkf4=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "3328650784723618039",
+        "name": "operation-1785427480224-657d63abb2144-3b2ad92d-de502172",
+        "zone": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-9zgjhwttms",
+        "targetId": "3230650110749100600",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-07-30T09:04:40.406-07:00",
+        "startTime": "2026-07-30T09:04:40.436-07:00",
+        "endTime": "2026-07-30T09:05:08.202-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/operations/operation-1785427480224-657d63abb2144-3b2ad92d-de502172"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:05:11 GMT
+      Etag:
+      - 21J86Vo4VT4X1pJJnEhp5NKAHwk=/q9cHbXOpakz9ueOQ3T1J7QgSTbg=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "error": {
+          "code": 404,
+          "message": "The resource 'projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf' was not found",
+          "errors": [
+            {
+              "message": "The resource 'projects/ci-test-project-188019/zones/us-central1-a/instances/tf-test-generated-c2x6kgm3xf' was not found",
+              "domain": "global",
+              "reason": "notFound"
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 30 Jul 2026 16:05:11 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 404 Not Found
+    code: 404
+    duration: ""

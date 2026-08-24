@@ -1,0 +1,2044 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"description":"","name":"tf-test-abv4bulb7e","rules":[{"action":"deny","description":"","match":{"expr":{"expression":"evaluatePreconfiguredWaf('sqli-stable')"},"versionedExpr":""},"preconfiguredWafConfig":{"exclusions":[{"requestCookiesToExclude":[{"op":"EQUALS_ANY","val":""}],"requestHeadersToExclude":[{"op":"EQUALS","val":"Referer"}],"requestQueryParamsToExclude":[{"op":"EQUALS","val":"password"},{"op":"STARTS_WITH","val":"freeform"}],"requestUrisToExclude":[{"op":"STARTS_WITH","val":"/admin"}],"targetRuleIds":null,"targetRuleSet":"sqli-stable"},{"requestCookiesToExclude":[],"requestHeadersToExclude":[],"requestQueryParamsToExclude":[{"op":"CONTAINS","val":"password"},{"op":"STARTS_WITH","val":"freeform"}],"requestUrisToExclude":[],"targetRuleIds":null,"targetRuleSet":"xss-stable"}]},"preview":false,"priority":1000},{"action":"allow","description":"default rule","match":{"config":{"srcIpRanges":["*"]},"versionedExpr":"SRC_IPS_V1"},"preview":false,"priority":2147483647}]}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies?alt=json
+    method: POST
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "7856144148381742641",
+        "name": "operation-1780680926650-6538516176058-dbcd0c04-c152f8c6",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-06-05T10:35:26.918-07:00",
+        "startTime": "2026-06-05T10:35:26.920-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680926650-6538516176058-dbcd0c04-c152f8c6"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:27 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680926650-6538516176058-dbcd0c04-c152f8c6?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "7856144148381742641",
+        "name": "operation-1780680926650-6538516176058-dbcd0c04-c152f8c6",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-06-05T10:35:26.918-07:00",
+        "startTime": "2026-06-05T10:35:26.920-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680926650-6538516176058-dbcd0c04-c152f8c6"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:27 GMT
+      Etag:
+      - mUNiHkTxtAQY3qcFO8RAp4LgdOU=/XoD26zHWnyOCpmJw2620EUDzvDQ=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680926650-6538516176058-dbcd0c04-c152f8c6?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "7856144148381742641",
+        "name": "operation-1780680926650-6538516176058-dbcd0c04-c152f8c6",
+        "operationType": "insert",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-06-05T10:35:26.918-07:00",
+        "startTime": "2026-06-05T10:35:26.920-07:00",
+        "endTime": "2026-06-05T10:35:33.976-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680926650-6538516176058-dbcd0c04-c152f8c6"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:37 GMT
+      Etag:
+      - fvbtz4LiofKTcr0dg49p0hZiPJo=/85XX6MD43MtxU6x7P1uB-6Zc-k4=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labelFingerprint": "42WmSpB8rSM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:37 GMT
+      Etag:
+      - CX-OSDXufAwI8uVZYe9xQbZMtrU=/qjUh_4fQEUrUCNvztm5dcn9ty1k=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: |
+      {"labelFingerprint":"42WmSpB8rSM=","labels":{"goog-terraform-provisioned":"true"}}
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e/setLabels?alt=json
+    method: POST
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "6721973496031655430",
+        "name": "operation-1780680937848-6538516c2407f-fcda450e-d5123f9c",
+        "operationType": "setLabels",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-06-05T10:35:37.910-07:00",
+        "startTime": "2026-06-05T10:35:37.916-07:00",
+        "endTime": "2026-06-05T10:35:37.917-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680937848-6538516c2407f-fcda450e-d5123f9c"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:38 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:38 GMT
+      Etag:
+      - 1GDnRjDOyE1_pg3ukiPDhj7F_9M=/TS-3kLsWs7yVFkla4Mo_Wo3dJJA=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:40 GMT
+      Etag:
+      - YyR_Pgdc3dpDZYh3eU29BrjCoYU=/sLZsOLn8FM2hiQE4EBE4Hyb6lhA=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:42 GMT
+      Etag:
+      - NVer_gqIi129rQ9nNzQ7HJrhZWg=/RPXdyyqXgmr6Ik6v1mYPC4ob-QU=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:43 GMT
+      Etag:
+      - PYs9qtP2tUq8VZPeXOEHUzD_h6c=/2nhGv1_qdkOAZpilCcGhYUxGRwk=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:46 GMT
+      Etag:
+      - _ykXp_r4IpVRrHCC1yxXCY-mlSM=/dmkbG1s4y4Jw8xOQBHJiynrQLf8=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:47 GMT
+      Etag:
+      - 5nuCcZ-ScJ6B8neiQjW5xwrjqPI=/pfnaZ9y7-PiO3epodNQ2Qyh9Nlk=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:49 GMT
+      Etag:
+      - IGATjmZkZlPX65touYRKHoYBHqI=/zwlKAwr4OwYFQwjO6fmvGocPC3A=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:51 GMT
+      Etag:
+      - 9uwnFh7UJgGd7wk2LBkxATNDWk0=/NaCSrnzcmY_oSpQYc1RUGZhVpSs=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:53 GMT
+      Etag:
+      - ROlBtKu6yU6iEdQ30vZ433f2d3I=/AoPtQYm3zDr2b-NmTrGsUSQu5lw=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:54 GMT
+      Etag:
+      - jQ6jnvOvGB1aS5uxr3p7by11fNw=/5pxpnv2g_7iNHPL4TvNoMD0rqCs=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:56 GMT
+      Etag:
+      - W-FKhJYMe7H5BbsoEOhvUvFEd6o=/5OshT32JCmR9dREc4fInqK6H6Ic=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#securityPolicy",
+        "id": "4060131569754355249",
+        "creationTimestamp": "2026-06-05T10:35:26.834-07:00",
+        "name": "tf-test-abv4bulb7e",
+        "description": "",
+        "rules": [
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "",
+            "priority": 1000,
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredWaf('sqli-stable')"
+              }
+            },
+            "action": "deny",
+            "preview": false,
+            "ruleNumber": "1",
+            "preconfiguredWafConfig": {
+              "exclusions": [
+                {
+                  "targetRuleSet": "sqli-stable",
+                  "requestHeadersToExclude": [
+                    {
+                      "val": "Referer",
+                      "op": "EQUALS"
+                    }
+                  ],
+                  "requestCookiesToExclude": [
+                    {
+                      "val": "",
+                      "op": "EQUALS_ANY"
+                    }
+                  ],
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "EQUALS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ],
+                  "requestUrisToExclude": [
+                    {
+                      "val": "/admin",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                },
+                {
+                  "targetRuleSet": "xss-stable",
+                  "requestQueryParamsToExclude": [
+                    {
+                      "val": "password",
+                      "op": "CONTAINS"
+                    },
+                    {
+                      "val": "freeform",
+                      "op": "STARTS_WITH"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "kind": "compute#securityPolicyRule",
+            "description": "default rule",
+            "priority": 2147483647,
+            "match": {
+              "versionedExpr": "SRC_IPS_V1",
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              }
+            },
+            "action": "allow",
+            "preview": false,
+            "ruleNumber": "2"
+          }
+        ],
+        "fingerprint": "kD3YlvIkgVs=",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "selfLinkWithId": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/4060131569754355249",
+        "type": "CLOUD_ARMOR",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "labelFingerprint": "vezUS-42LLM="
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:35:58 GMT
+      Etag:
+      - KXxzJOwSPc8ByJdSzAuDsJKonuw=/AWkkLBwqw2u2SskYbgMStbwPwYk=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: DELETE
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "5983031326306908143",
+        "name": "operation-1780680960202-65385181758b3-59e457d1-981aeaa3",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-06-05T10:36:00.543-07:00",
+        "startTime": "2026-06-05T10:36:00.545-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680960202-65385181758b3-59e457d1-981aeaa3"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:36:00 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680960202-65385181758b3-59e457d1-981aeaa3?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "5983031326306908143",
+        "name": "operation-1780680960202-65385181758b3-59e457d1-981aeaa3",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "RUNNING",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 0,
+        "insertTime": "2026-06-05T10:36:00.543-07:00",
+        "startTime": "2026-06-05T10:36:00.545-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680960202-65385181758b3-59e457d1-981aeaa3"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:36:00 GMT
+      Etag:
+      - q7ICYpY9zQi293c02XZDONzpZKE=/583tMWVKQvuu30LFaihtPq4QbyE=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680960202-65385181758b3-59e457d1-981aeaa3?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "kind": "compute#operation",
+        "id": "5983031326306908143",
+        "name": "operation-1780680960202-65385181758b3-59e457d1-981aeaa3",
+        "operationType": "delete",
+        "targetLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e",
+        "targetId": "4060131569754355249",
+        "status": "DONE",
+        "user": "hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com",
+        "progress": 100,
+        "insertTime": "2026-06-05T10:36:00.543-07:00",
+        "startTime": "2026-06-05T10:36:00.545-07:00",
+        "endTime": "2026-06-05T10:36:06.872-07:00",
+        "selfLink": "https://www.googleapis.com/compute/beta/projects/ci-test-project-188019/global/operations/operation-1780680960202-65385181758b3-59e457d1-981aeaa3"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:36:10 GMT
+      Etag:
+      - hbfjrsjh_zjZLIrLgLiOWiwzh0A=/f4-FVhTItE4gXf9Br3ijWfjs_7g=
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Terraform/1.14.3 (+https://www.terraform.io) Terraform-Plugin-SDK/2.40.1 terraform-provider-google-beta/acc
+    url: https://compute.googleapis.com/compute/beta/projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e?alt=json
+    method: GET
+  response:
+    body: |
+      {
+        "error": {
+          "code": 404,
+          "message": "The resource 'projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e' was not found",
+          "errors": [
+            {
+              "message": "The resource 'projects/ci-test-project-188019/global/securityPolicies/tf-test-abv4bulb7e' was not found",
+              "domain": "global",
+              "reason": "notFound"
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 05 Jun 2026 17:36:11 GMT
+      Server:
+      - ESF
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - "0"
+    status: 404 Not Found
+    code: 404
+    duration: ""
