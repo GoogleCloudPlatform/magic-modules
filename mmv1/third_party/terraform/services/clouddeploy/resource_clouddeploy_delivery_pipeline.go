@@ -1969,7 +1969,9 @@ func flattenClouddeployDeliveryPipelineTaskArray(objs []DeliveryPipelineTask) []
 	for _, item := range objs {
 		i := flattenClouddeployDeliveryPipelineTask(&item)
 		if i != nil {
-			items = append(items, i)
+			if arr, ok := i.([]interface{}); ok && len(arr) > 0 {
+				items = append(items, arr[0])
+			}
 		}
 	}
 	return items
@@ -1993,9 +1995,10 @@ func flattenClouddeployDeliveryPipelineTask(obj *DeliveryPipelineTask) interface
 	if obj == nil {
 		return nil
 	}
-	return map[string]interface{}{
+	transformed := map[string]interface{}{
 		"container": flattenClouddeployDeliveryPipelineTaskContainer(obj.Container),
 	}
+	return []interface{}{transformed}
 }
 
 func expandClouddeployDeliveryPipelineTaskContainer(o interface{}) *DeliveryPipelineContainer {
@@ -2205,12 +2208,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardAnaly
 	transformed := map[string]interface{}{
 		"id":        obj.Id,
 		"frequency": obj.Frequency,
-		"task": func() interface{} {
-			if t := flattenClouddeployDeliveryPipelineTask(obj.Task); t != nil {
-				return []interface{}{t}
-			}
-			return nil
-		}(),
+		"task":      flattenClouddeployDeliveryPipelineTask(obj.Task),
 	}
 	return transformed
 }
