@@ -185,7 +185,7 @@ properties:
         type: String
         required: true
         description: The Meta auth code provided by the embedded signup flow.
-        sensitive: true
+        write_only: true
       - name: conversationProfileId
         type: String
         description: The Conversation Profile ID to use for the deployment.
@@ -211,7 +211,7 @@ properties:
         type: String
         required: true
         description: The Meta auth code provided by the embedded signup flow.
-        sensitive: true
+        write_only: true
       - name: businessAccountId
         type: String
         required: true
@@ -227,7 +227,7 @@ properties:
         type: String
         required: true
         description: The 6-digit PIN created by the user for two-step verification.
-        sensitive: true
+        write_only: true
       - name: wabaId
         type: String
         required: true
