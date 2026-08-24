@@ -13,6 +13,7 @@
 
 ---
 name: ClusterAclPolicy
+api_resource_type_kind: AclPolicy
 description: |
   A Google Cloud Redis Cluster ACL policy.
 base_url: projects/{{project}}/locations/{{location}}/aclPolicies
