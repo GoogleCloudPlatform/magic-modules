@@ -1,0 +1,61 @@
+parent, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/dataTables/{{"{{"}}data_table_id{{"}}"}}")
+if err != nil {
+	return err
+}
+
+getUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config) + "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/dataTables/{{"{{"}}data_table_id{{"}}"}}/dataTableRows")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+// 1. GET existing rows to find row names
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ChronicleDataTableRows %q", d.Id()))
+}
+
+dataTableRows, ok := res["dataTableRows"].([]interface{})
+if !ok || len(dataTableRows) == 0 {
+	log.Printf("[DEBUG] No rows found for DataTable %q, skipping deletion", parent)
+	return nil
+}
+
+for _, rowRaw := range dataTableRows {
+	rowMap, ok := rowRaw.(map[string]interface{})
+	if !ok {
+		continue
+	}
+	name, ok := rowMap["name"].(string)
+	if !ok || name == "" {
+		continue
+	}
+	rowDeleteUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config) + name)
+	if err != nil {
+		return err
+	}
+	log.Printf("[DEBUG] Deleting DataTableRow %q", name)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   billingProject,
+		RawURL:    rowDeleteUrl,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
+	if err != nil {
+		return fmt.Errorf("Error deleting DataTableRow %q: %s", name, err)
+	}
+}
+log.Printf("[DEBUG] Finished deleting all DataTableRows for %q", parent)
+return nil

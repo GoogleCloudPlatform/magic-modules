@@ -1,0 +1,16 @@
+func resourceChronicleDataTableRowHash(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	var buf bytes.Buffer
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	if vals, ok := m["values"].([]interface{}); ok {
+		for _, val := range vals {
+			buf.WriteString(fmt.Sprintf("%v-", val))
+		}
+	}
+	return tpgresource.Hashcode(buf.String())
+}

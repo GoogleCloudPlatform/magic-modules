@@ -1,0 +1,98 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DataTableRows
+description: Represents rows within a Chronicle Data Table, managed in bulk.
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows:bulkReplace
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+update_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows:bulkReplace
+update_verb: POST
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataTables/{{data_table_id}}/dataTableRows
+  - "{{project}}/{{location}}/{{instance}}/{{data_table_id}}"
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.dataTables.dataTableRows'
+samples:
+  - name: 'chronicle_data_table_rows_basic'
+    primary_resource_id: 'example_rows'
+    steps:
+      - name: 'chronicle_data_table_rows_basic'
+        test_env_vars:
+          instance_id: 'CHRONICLE_ID'
+        resource_id_vars:
+          data_table_id: 'terraform_test_rows'
+autogen_status: RGF0YVRhYmxlUm93cw==
+custom_code:
+  constants: 'templates/terraform/constants/chronicle_data_table_rows.go.tmpl'
+  encoder: 'templates/terraform/encoders/chronicle_data_table_rows.go.tmpl'
+  decoder: 'templates/terraform/decoders/chronicle_data_table_rows.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/chronicle_data_table_rows.go.tmpl'
+parameters:
+  - name: location
+    type: String
+    description: The GCP location of the Chronicle instance.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The Chronicle instance ID.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: dataTableId
+    type: String
+    description: The ID of the parent DataTable.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: rows
+    type: Array
+    is_set: true
+    set_hash_func: resourceChronicleDataTableRowHash
+    description: The rows belonging to the data table.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: values
+          type: Array
+          required: true
+          description: |-
+            All column values for a single row. The values should be in the same order
+            as the columns of the data tables.
+          item_type:
+            type: String
+        - name: rowTimeToLive
+          type: String
+          description: User-provided TTL of the data table row.
+        - name: name
+          type: String
+          description: |-
+            Identifier. The resource name of the data table row.
+            Format:
+            projects/{project}/locations/{location}/instances/{instance}/dataTables/{data_table_id}/dataTableRows/{data_table_row}
+          output: true
+        - name: createTime
+          type: String
+          description: DataTableRow create time
+          output: true
+        - name: updateTime
+          type: String
+          description: DataTableRow update time
+          output: true

@@ -1,0 +1,31 @@
+resource "google_chronicle_data_table" "example_dt" {
+  location        = "us"
+  instance        = "{{index $.TestEnvVars "instance_id"}}"
+  data_table_id   = "{{index $.ResourceIdVars "data_table_id"}}"
+  description     = "Sample DataTable for DataTableRows test"
+  deletion_policy = "FORCE"
+  column_info {
+    column_index    = 0
+    original_column = "username"
+    column_type     = "STRING"
+  }
+  column_info {
+    column_index    = 1
+    original_column = "ip_address"
+    column_type     = "CIDR"
+  }
+}
+
+resource "google_chronicle_data_table_rows" "example_rows" {
+  location      = "us"
+  instance      = "{{index $.TestEnvVars "instance_id"}}"
+  data_table_id = google_chronicle_data_table.example_dt.data_table_id
+  rows {
+    values           = ["user1", "192.168.1.1/32"]
+    row_time_to_live = "48h"
+  }
+  rows {
+    values           = ["user2", "10.0.0.1/32"]
+    row_time_to_live = "48h"
+  }
+}
