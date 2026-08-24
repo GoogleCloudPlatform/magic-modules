@@ -39,7 +39,7 @@ func TestAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolFullUpdate(t *testing.T) {
 				ResourceName:            "google_cloud_run_v2_worker_pool.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
 			},
 		},
 	})
@@ -105,7 +105,6 @@ resource "google_cloud_run_v2_worker_pool" "default" {
   name     = "tf-test-cloudrun-worker-pool%{random_suffix}"
   description = "description updating"
   location = "us-central1"
-  launch_stage = "BETA"
   deletion_protection = false
   
   annotations = {
