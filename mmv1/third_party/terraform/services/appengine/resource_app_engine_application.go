@@ -138,10 +138,10 @@ func ResourceAppEngineApplication() *schema.Resource {
 				Description: `The GCR domain used for storing managed Docker images for this app.`,
 			},
 			"iap": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				MaxItems:    1,
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				// Not Computed: Terraform SDK forbids WriteOnly attributes in Computed blocks.
 				Description: `Settings for enabling Cloud Identity Aware Proxy`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -450,6 +450,12 @@ func flattenAppEngineApplicationFeatureSettings(settings *appengine.FeatureSetti
 
 func flattenAppEngineApplicationIap(d *schema.ResourceData, iap *appengine.IdentityAwareProxy) ([]map[string]interface{}, error) {
 	if iap == nil {
+		return []map[string]interface{}{}, nil
+	}
+	_, configured := d.GetOk("iap")
+	// iap cannot be Computed (it contains write-only attributes), so omit
+	// API-default IAP from state when the user did not configure the block.
+	if !configured && !iap.Enabled && iap.Oauth2ClientId == "" {
 		return []map[string]interface{}{}, nil
 	}
 	result := map[string]interface{}{

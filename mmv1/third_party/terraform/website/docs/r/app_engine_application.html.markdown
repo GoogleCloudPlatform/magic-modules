@@ -65,9 +65,6 @@ The following arguments are supported:
 
 * `iap` - (Optional) Settings for enabling Cloud Identity Aware Proxy
 
-  * `enabled` - (Optional) Whether the serving infrastructure will authenticate and authorize all incoming requests.
-    (default is false)
-
   * `oauth2_client_id` - (Required) OAuth2 client ID to use for the authentication flow.
 
   * `oauth2_client_secret` - (Optional) OAuth2 client secret to use for the authentication flow.
@@ -104,6 +101,9 @@ exported:
 * `gcr_domain` - The GCR domain used for storing managed Docker images for this app.
 
 * `iap` - Settings for enabling Cloud Identity Aware Proxy
+
+  * `enabled` - (Optional) Whether the serving infrastructure will authenticate and authorize all incoming requests. 
+  (default is false)
 
   * `oauth2_client_secret_sha256` - Hex-encoded SHA-256 hash of the client secret.
 
