@@ -15,6 +15,10 @@
 name: ExadbVmCluster
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/exadbVmClusters
+# List generation omitted: generated ListQuery tests create a live ExadbVmCluster
+# (insert timeout 120 minutes), which exceeds the VCR recording 6h wall clock.
+# Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/exadbVmClusters/{{exadb_vm_cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/exadbVmClusters?exadbVmClusterId={{exadb_vm_cluster_id}}
 update_mask: true

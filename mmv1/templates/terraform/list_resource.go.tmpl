@@ -25,6 +25,12 @@ package {{ lower $.ProductMetadata.Name }}
     {{- $hasIntegerIdentity = true -}}
   {{- end -}}
 {{- end -}}
+{{ $hasListScopeProperties := false -}}
+{{- if $.ListScopeProperties -}}
+  {{- if gt (len $.ListScopeProperties) 0 -}}
+    {{- $hasListScopeProperties = true -}}
+  {{- end -}}
+{{- end -}}
 
 import (
 	"context"
@@ -37,7 +43,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
+	{{- if $hasListScopeProperties }}
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	{{- end }}
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 

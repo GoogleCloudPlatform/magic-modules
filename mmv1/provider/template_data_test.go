@@ -16,8 +16,14 @@ package provider
 import (
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
 func TestGenerateFile(t *testing.T) {
@@ -109,5 +115,50 @@ func TestGenerateFile(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestGenerateQueryTestFileCapturesOptionalProjectScope(t *testing.T) {
+	productVersion := &product.Version{Name: "ga", BaseUrl: "https://example.googleapis.com/v1/"}
+	prod := &api.Product{Name: "Example", Versions: []*product.Version{productVersion}, Version: productVersion}
+	res := api.Resource{
+		Name:                 "Foo",
+		GenerateListResource: true,
+		ImportPath:           "github.com/hashicorp/terraform-provider-google/google",
+		ProductMetadata:      prod,
+		TargetVersionName:    "ga",
+		BaseUrl:              "projects/{{project}}/locations/{{location}}/foos",
+		IdFormat:             "projects/{{project}}/locations/{{location}}/foos/{{name}}",
+		ImportFormat:         []string{"projects/{{project}}/locations/{{location}}/foos/{{name}}"},
+		Parameters: []*api.Type{
+			{Name: "location", Type: "String", UrlParamOnly: true, Required: true},
+			{Name: "name", Type: "String", UrlParamOnly: true, Required: true},
+		},
+		Properties: []*api.Type{
+			{Name: "displayName", Type: "String"},
+		},
+		Samples: []*resource.Sample{{
+			Name:              "example_foo",
+			PrimaryResourceId: "example_foo",
+			Steps: []*resource.Step{{
+				Name: "example_foo",
+			}},
+		}},
+	}
+	filePath := filepath.Join(t.TempDir(), "list_google_example_foo_generated_test.go")
+	NewTemplateData(t.TempDir(), "ga", os.DirFS("..")).GenerateQueryTestFile(filePath, res)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("query file should be generated: %v", err)
+	}
+	generated := string(content)
+	if !regexp.MustCompile(`"project":\s+"google_example_foo.example_foo"`).MatchString(generated) {
+		t.Fatalf("query test did not capture optional project scope:\n%s", generated)
+	}
+	if !strings.Contains(generated, "project = var.project") {
+		t.Fatalf("query test list config missing project = var.project:\n%s", generated)
+	}
+	if !strings.Contains(generated, `variable "project" { type = string }`) {
+		t.Fatalf("query test missing project input variable:\n%s", generated)
 	}
 }

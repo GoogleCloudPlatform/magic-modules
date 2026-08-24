@@ -20,6 +20,10 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/autonomousDatabases
 immutable: true
+# List generation omitted: generated ListQuery tests create a live Autonomous
+# Database (insert timeout 240 minutes), which exceeds the VCR recording 6h wall
+# clock when run with sibling tests. Revisit in a dedicated PR.
+# generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}
 create_url: projects/{{project}}/locations/{{location}}/autonomousDatabases?autonomousDatabaseId={{autonomous_database_id}}
 id_format: projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}
