@@ -186,6 +186,11 @@ properties:
       - name: fleetobservability
         type: NestedObject
         description: Fleet Observability feature spec.
+        # The API requires this sub-block to be PRESENT to enable the feature, even
+        # with nothing inside it: {"spec":{"fleetobservability":{}}} returns 200
+        # while {"spec":{}} is a 400 MissingFieldError. Without this flag the
+        # empty object is dropped by the IsEmptyValue guard and nothing is sent.
+        send_empty_value: true
         properties:
           - name: loggingConfig
             type: NestedObject
@@ -282,6 +287,10 @@ properties:
       - name: workloadidentity
         type: NestedObject
         description: Workload Identity feature spec.
+        # Same as fleetobservability above: the feature is enabled by sending an
+        # EMPTY sub-block, which is also what GCP stores when it enables this
+        # itself on first cluster registration.
+        send_empty_value: true
         properties:
           - name: scopeTenancyPool
             type: String
