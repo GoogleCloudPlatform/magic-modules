@@ -136,7 +136,7 @@ resource "google_cloud_run_v2_worker_pool" "default" {
     containers {
       name = "container-update"
       image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
-      sandbox_launcher = true
+      sandbox_launcher = false
       args    = ["arg1", "arg2"]
       command = ["/bin/sh", "-c"]
       env {
