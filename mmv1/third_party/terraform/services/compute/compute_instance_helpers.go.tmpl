@@ -1147,6 +1147,18 @@ func stripNilSchedulingDurations(scheduling map[string]interface{}) map[string]i
 	if scheduling == nil {
 		return nil
 	}
+	for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
+		if v, ok := scheduling[k]; ok && isNilSchedulingValue(v) {
+			delete(scheduling, k)
+		}
+	}
+	return scheduling
+}
+
+func stripNilScheduling(scheduling map[string]interface{}) map[string]interface{} {
+	if scheduling == nil {
+		return nil
+	}
 	for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "onInstanceStopAction", "gracefulShutdown", "preemptionNoticeDuration"} {
 		if v, ok := scheduling[k]; ok && isNilSchedulingValue(v) {
 			delete(scheduling, k)
