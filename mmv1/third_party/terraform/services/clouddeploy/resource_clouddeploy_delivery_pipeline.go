@@ -1472,15 +1472,10 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDe
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy
 	}
 	obj := objArr[0].(map[string]interface{})
-	result := &DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy{
-		Tasks: expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
+	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy{
+		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
-	if v, ok := obj["actions"]; ok && v != nil {
-		if actions := tpgdclresource.ExpandStringArray(v); len(actions) > 0 {
-			result.Actions = actions
-		}
-	}
-	return result
 }
 
 func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(obj *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy) interface{} {
@@ -1505,15 +1500,10 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDe
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy
 	}
 	obj := objArr[0].(map[string]interface{})
-	result := &DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy{
-		Tasks: expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
+	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy{
+		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
-	if v, ok := obj["actions"]; ok && v != nil {
-		if actions := tpgdclresource.ExpandStringArray(v); len(actions) > 0 {
-			result.Actions = actions
-		}
-	}
-	return result
 }
 
 func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(obj *DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy) interface{} {
@@ -1633,15 +1623,10 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCa
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy
 	}
 	obj := objArr[0].(map[string]interface{})
-	result := &DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy{
-		Tasks: expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
+	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy{
+		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
-	if v, ok := obj["actions"]; ok && v != nil {
-		if actions := tpgdclresource.ExpandStringArray(v); len(actions) > 0 {
-			result.Actions = actions
-		}
-	}
-	return result
 }
 
 func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(obj *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy) interface{} {
@@ -1666,15 +1651,10 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCa
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy
 	}
 	obj := objArr[0].(map[string]interface{})
-	result := &DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy{
-		Tasks: expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
+	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy{
+		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
-	if v, ok := obj["actions"]; ok && v != nil {
-		if actions := tpgdclresource.ExpandStringArray(v); len(actions) > 0 {
-			result.Actions = actions
-		}
-	}
-	return result
 }
 
 func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(obj *DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy) interface{} {
@@ -1919,15 +1899,10 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPostde
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy
 	}
 	obj := objArr[0].(map[string]interface{})
-	result := &DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy{
-		Tasks: expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
+	return &DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy{
+		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
-	if v, ok := obj["actions"]; ok && v != nil {
-		if actions := tpgdclresource.ExpandStringArray(v); len(actions) > 0 {
-			result.Actions = actions
-		}
-	}
-	return result
 }
 
 func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(obj *DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy) interface{} {
@@ -1952,15 +1927,10 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPredep
 		return EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy
 	}
 	obj := objArr[0].(map[string]interface{})
-	result := &DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy{
-		Tasks: expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
+	return &DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy{
+		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
-	if v, ok := obj["actions"]; ok && v != nil {
-		if actions := tpgdclresource.ExpandStringArray(v); len(actions) > 0 {
-			result.Actions = actions
-		}
-	}
-	return result
 }
 
 func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(obj *DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy) interface{} {
