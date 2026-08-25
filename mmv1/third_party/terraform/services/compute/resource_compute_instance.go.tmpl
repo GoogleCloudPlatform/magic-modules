@@ -3921,11 +3921,15 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 		if d.HasChange("service_account.0.email") || scopesChange {
 			sa := d.Get("service_account").([]interface{})
-			body := map[string]interface{}{"email": ""}
+			body := map[string]interface{}{}
 			if !isEmptyServiceAccountBlock(d) && len(sa) > 0 && sa[0] != nil {
 				saMap := sa[0].(map[string]interface{})
-				body["email"] = saMap["email"].(string)
-				body["scopes"] = tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(saMap["scopes"].(*schema.Set)))
+				if email, ok := saMap["email"].(string); ok && email != "" {
+					body["email"] = email
+				}
+				if scopesSet, ok := saMap["scopes"].(*schema.Set); ok && scopesSet.Len() > 0 {
+					body["scopes"] = tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(scopesSet))
+				}
 			}
 			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setServiceAccount")
 			if err != nil {

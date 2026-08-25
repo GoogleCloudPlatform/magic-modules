@@ -1019,10 +1019,13 @@ func expandServiceAccounts(configs []interface{}) []interface{} {
 			email = "default"
 		}
 
-		accounts[i] = map[string]interface{}{
-			"email":  email,
-			"scopes": tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(data["scopes"].(*schema.Set))),
+		account := map[string]interface{}{
+			"email": email,
 		}
+		if scopes := tpgresource.CanonicalizeServiceScopes(tpgresource.ConvertStringSet(data["scopes"].(*schema.Set))); len(scopes) > 0 {
+			account["scopes"] = scopes
+		}
+		accounts[i] = account
 	}
 	return accounts
 }
@@ -1143,24 +1146,16 @@ func isNilSchedulingValue(v interface{}) bool {
 	return false
 }
 
-func stripNilSchedulingKeys(scheduling map[string]interface{}, keys []string) map[string]interface{} {
+func stripNilSchedulingDurations(scheduling map[string]interface{}) map[string]interface{} {
 	if scheduling == nil {
 		return nil
 	}
-	for _, k := range keys {
+	for _, k := range []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"} {
 		if v, ok := scheduling[k]; ok && isNilSchedulingValue(v) {
 			delete(scheduling, k)
 		}
 	}
 	return scheduling
-}
-
-func stripNilSchedulingDurations(scheduling map[string]interface{}) map[string]interface{} {
-	return stripNilSchedulingKeys(scheduling, []string{"localSsdRecoveryTimeout", "maxRunDuration", "gracefulShutdown", "preemptionNoticeDuration"})
-}
-
-func stripNilScheduling(scheduling map[string]interface{}) map[string]interface{} {
-	return stripNilSchedulingKeys(scheduling, []string{"localSsdRecoveryTimeout", "maxRunDuration", "onInstanceStopAction", "gracefulShutdown", "preemptionNoticeDuration"})
 }
 
 func omitZeroIndex(disk map[string]interface{}) {
