@@ -226,6 +226,15 @@ properties:
           type: String
           description: Human readable message indicating details about the current status.
           output: true
+        - name: details
+          type: Array
+          description: |
+            A list of messages that carry the error details.
+          output: true
+          deprecation_message: '`details` is deprecated and will be removed in a future major release. This field is no longer populated from the API.'
+          ignore_read: true
+          item_type:
+            type: KeyValuePairs
   - name: tags
     type: KeyValuePairs
     description: |
