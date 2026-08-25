@@ -614,6 +614,35 @@ properties:
                     type: String
                     description: The title of the web widget.
                     output: true
+              - name: whatsappConfig
+                type: NestedObject
+                description: Configuration specific to WhatsApp deployments.
+                output: true
+                properties:
+                  - name: wabaId
+                    type: String
+                    description: The WhatsApp Business Account ID.
+                    output: true
+                  - name: phoneNumberId
+                    type: String
+                    description: The Meta phone number ID.
+                    output: true
+                  - name: phoneNumber
+                    type: String
+                    description: The phone number in E.164 format.
+                    output: true
+                  - name: displayName
+                    type: String
+                    description: The fetched Meta business page name.
+                    output: true
+                  - name: thumbnailUrl
+                    type: String
+                    description: The fetched Meta business profile thumbnail URL.
+                    output: true
+                  - name: description
+                    type: String
+                    description: The description of the Meta business page or profile.
+                    output: true
           - name: deploymentCount
             type: Integer
             description: Number of deployments in the app.
@@ -793,6 +822,12 @@ properties:
                   - name: disableConversationLogging
                     type: Boolean
                     description: Whether to disable conversation logging for the sessions.
+                    output: true
+                  - name: retentionWindow
+                    type: String
+                    description: |-
+                      Controls the retention window for the conversation.
+                      If not set, the conversation will be retained for 365 days.
                     output: true
               - name: redactionConfig
                 type: NestedObject
@@ -1024,6 +1059,22 @@ properties:
                   The passphrase to decrypt the private key.
                   Should be left unset if the private key is not encrypted.
                 output: true
+          - name: vpcScSettings
+            type: NestedObject
+            description: VPC-SC settings for the app.
+            output: true
+            properties:
+              - name: allowedOrigins
+                type: Array
+                description: |-
+                  The allowed HTTP(s) origins that OpenAPI tools in the App are
+                  able to directly call when VPC Service Controls are enabled. These strings
+                  must match the origin exactly, including the port if specified. For
+                  example, "https://example.com" or "https://example.com:443". This list does
+                  not yet apply to Python tools that may make direct HTTP calls.
+                output: true
+                item_type:
+                  type: String
       - name: examples
         type: Array
         description: List of examples in the app.

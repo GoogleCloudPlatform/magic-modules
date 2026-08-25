@@ -338,8 +338,9 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{
-		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/compute/image.go":                             "third_party/terraform/services/compute/image.go",
+		"pkg/tfplan2cai/converters/services/compute/disk_type.go":                         "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/bigtable/bigtable_app_profile_handwritten.go": "third_party/terraform/services/bigtable/bigtable_app_profile_handwritten.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
