@@ -1,8 +1,26 @@
+if state, ok := res["state"].(string); ok && state == "ARCHIVED" {
+	return nil, nil
+}
+
 if name, ok := res["name"].(string); ok {
 	parts := strings.Split(name, "/versions/")
 	if len(parts) == 2 {
 		res["version"] = parts[1]
 	}
+}
+
+// Filter out server-injected transient parameters so they don't cause non-empty diffs
+if rawParams, ok := res["integrationParameters"].([]interface{}); ok {
+	var userParams []interface{}
+	for _, p := range rawParams {
+		if pMap, ok := p.(map[string]interface{}); ok {
+			if isTransient, ok := pMap["isTransient"].(bool); ok && isTransient {
+				continue
+			}
+			userParams = append(userParams, pMap)
+		}
+	}
+	res["integrationParameters"] = userParams
 }
 
 return res, nil

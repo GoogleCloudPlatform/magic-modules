@@ -1,27 +1,42 @@
-resource "google_integrations_client" "client" {
-  location = "us-west1"
-}
-
 resource "google_integrations_integration_version" "version_full" {
   location = "us-west1"
   integration = "%{integration_name}"
   description = "%{description}"
-  database_persistence_policy = "DATABASE_PERSISTENCE_POLICY_UNSPECIFIED"
 
   trigger_configs {
-    label = "api_trigger"
+    label = "test_trigger"
     trigger_type = "API"
     trigger_number = "1"
     trigger_id = "api_trigger/test_trigger"
+    properties = {
+      "Trigger name" = "test_trigger"
+    }
+    start_tasks {
+      task_id = "1"
+    }
   }
 
   task_configs {
-    task = "GenericRestEndpointTask"
+    task = "GenericRestV2Task"
     task_id = "1"
+    external_task_type = "NORMAL_TASK"
+    task_execution_strategy = "WHEN_ALL_SUCCEED"
     parameters {
-      key = "endpointUrl"
+      key = "url"
+      masked = false
       value {
+        boolean_value = false
+        double_value = 0
         string_value = "https://example.com"
+      }
+    }
+    parameters {
+      key = "httpMethod"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "GET"
       }
     }
   }
@@ -35,6 +50,4 @@ resource "google_integrations_integration_version" "version_full" {
     display_name = "param1"
     input_output_type = "IN"
   }
-
-  depends_on = [google_integrations_client.client]
 }

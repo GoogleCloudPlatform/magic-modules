@@ -35,7 +35,7 @@ timeouts:
 immutable: true
 custom_code:
   decoder: templates/terraform/decoders/integrations_version_deployment.go.tmpl
-  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/integrations_version_deployment.go.tmpl
 samples:
   - name: integrations_integration_version_deployment_basic
     primary_resource_id: deployment_basic

@@ -1,0 +1,25 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}IntegrationsBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/integrations/{{"{{"}}integration{{"}}"}}/versions/{{"{{"}}version{{"}}"}}")
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+    billingProject = config.BillingProject
+}
+
+resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    Project:   billingProject,
+    RawURL:    url,
+    UserAgent: config.UserAgent,
+})
+if err == nil && resp != nil {
+	if state, ok := resp["state"].(string); ok && state == "ACTIVE" {
+		return fmt.Errorf("IntegrationsIntegrationVersionDeployment still active at %s with state %s", url, state)
+	}
+}

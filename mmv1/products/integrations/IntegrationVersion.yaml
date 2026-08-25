@@ -21,20 +21,21 @@ references:
   api: https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.integrations.versions
 docs: null
 base_url: projects/{{project}}/locations/{{location}}/integrations/{{integration}}/versions
-self_link: '{{name}}'
-id_format: '{{name}}'
+self_link: projects/{{project}}/locations/{{location}}/integrations/{{integration}}/versions/{{version}}
+id_format: projects/{{project}}/locations/{{location}}/integrations/{{integration}}/versions/{{version}}
 update_verb: PATCH
 update_mask: true
 import_format:
-- '{{name}}'
 - projects/{{project}}/locations/{{location}}/integrations/{{integration}}/versions/{{version}}
+- '{{project}}/{{location}}/{{integration}}/{{version}}'
+- '{{location}}/{{integration}}/{{version}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
   decoder: templates/terraform/decoders/integrations_version.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/integrations_version.go.tmpl
 autogen_status: SW50ZWdyYXRpb25WZXJzaW9uQXV0b2dlblYyQWdlbnQ=
 samples:
 - name: integrations_integration_version_basic
@@ -608,6 +609,7 @@ properties:
   output: true
 - name: origin
   type: String
+  output: true
   description: 'Possible values:
 
     UNSPECIFIED
@@ -894,6 +896,7 @@ properties:
         RUN_FIRST_MATCH'
     - name: parameters
       type: Map
+      custom_expand: templates/terraform/custom_expand/integrations_version_parameters.go.tmpl
       description: The customized parameters the user can pass to this task.
       value_type:
         type: NestedObject
