@@ -73,6 +73,15 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
+  - name: 'colab_notebook_execution_workbench_runtime_container'
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_workbench_runtime_container'
+        resource_id_vars:
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_full'
     min_version: beta
     primary_resource_id: 'notebook-execution'
@@ -247,9 +256,25 @@ properties:
     ignore_read: true
     description: 'Configuration for a Workbench Instances-based environment.'
     properties:
+      - name: customContainerImage
+        type: NestedObject
+        exactly_one_of:
+          - workbench_runtime.0.custom_container_image
+          - workbench_runtime.0.vm_image
+        description: 'Use a user-provided container image to run the notebook execution in. The notebook execution will run in a container based on this image.'
+        properties:
+          - name: repository
+            type: String
+            required: true
+            description: 'The path to the Container Registry or Artifact Registry image. For example: gcr.io/{project_id}/{image_name}'
+          - name: tag
+            type: String
+            description: 'The tag of the container image. If not specified, this defaults to the latest tag.'
       - name: vmImage
         type: NestedObject
-        required: true
+        exactly_one_of:
+          - workbench_runtime.0.custom_container_image
+          - workbench_runtime.0.vm_image
         description: 'Custom Compute Engine VM image for the Workbench instance.'
         properties:
           - name: family
