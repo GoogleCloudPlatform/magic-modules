@@ -1081,21 +1081,31 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-// TestAccGKEHubFeature_EmptySpecSubBlock covers the one shape send_empty_value
-// exists for on this resource: a spec sub-block that is PRESENT but EMPTY.
+// TestAccGKEHubFeature_EmptySpecSubBlock covers a spec sub-block that is PRESENT
+// but EMPTY — the shape the GKE Hub API requires to enable these two features.
 //
-// The GKE Hub API enables workloadidentity and fleetobservability by receiving
-// exactly that — {"spec":{"workloadidentity":{}}} returns 200, while {"spec":{}}
-// is a 400 MissingFieldError. Without the flag the generated expander drops the
-// empty object (tpgresource.IsEmptyValue), spec collapses to an empty map and is
-// dropped in turn, and the request carries no spec at all — so neither feature
-// could be created by Terraform.
+// {"spec":{"workloadidentity":{}}} returns 200, while BOTH {"spec":{}} and
+// {"spec":{"workloadidentity":null}} are a 400 MissingFieldError. Getting the
+// empty object onto the wire needs two flags doing different jobs:
+//
+//	allow_empty_object  the expander returns an empty map rather than nil for a
+//	                    block whose optional values are all unset, and the
+//	                    flattener keeps it on read
+//	send_empty_value    that empty map then survives the IsEmptyValue guard
+//	                    instead of being dropped from the request
+//
+// Both halves are load-bearing, which is what this test pins. With only the guard
+// removed the request carries "workloadidentity": null and the create fails; with
+// only the expander fixed the object never reaches the wire. And without the
+// flatten half the resource creates but never converges — the second plan re-adds
+// `+ workloadidentity {}` forever, which is why the import steps below matter as
+// much as the create.
 //
 // Every other test in this file supplies a value inside the block
 // (workloadidentity.scope_tenancy_pool, fleetobservability.logging_config), which
-// survives the guard on its own. That is why the empty path was never exercised.
-// Both features are asserted in one config so a single acceptance run covers both
-// patched properties.
+// is non-empty and survives on its own. That is why the empty path was never
+// exercised. Both features are asserted in one config so a single acceptance run
+// covers both patched properties.
 func TestAccGKEHubFeature_EmptySpecSubBlock(t *testing.T) {
 	t.Parallel()
 
