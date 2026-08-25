@@ -14,7 +14,6 @@
 ---
 name: 'User'
 kind: 'storageftp#user'
-min_version: beta
 description: |
   A Storage FTP User resource supporting directory mappings and user credentials for an SFTP Server.
 base_url: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}/users'
@@ -39,11 +38,9 @@ custom_code:
   constants: 'templates/terraform/constants/storage_ftp_user.go.tmpl'
 samples:
   - name: 'storage_ftp_user_basic'
-    min_version: beta
     primary_resource_id: 'user_ftp'
     steps:
       - name: 'storage_ftp_user_basic'
-        min_version: beta
         resource_id_vars:
           user_id: 'sftp-user'
           server_id: 'sftp-srv'

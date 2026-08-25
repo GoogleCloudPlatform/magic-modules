@@ -1,5 +1,4 @@
 resource "google_storage_ftp_server" "{{$.PrimaryResourceId}}" {
-  provider     = google-beta
   location     = "us-west1"
   server_id    = "{{index $.ResourceIdVars "server_id"}}"
   display_name = "My SFTP Server"
@@ -20,5 +19,4 @@ resource "google_storage_ftp_server" "{{$.PrimaryResourceId}}" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }

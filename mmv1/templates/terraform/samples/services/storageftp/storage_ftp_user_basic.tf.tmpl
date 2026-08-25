@@ -1,18 +1,15 @@
 resource "google_storage_bucket" "bucket" {
-  provider                    = google-beta
   name                        = "{{index $.ResourceIdVars "bucket_name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
 }
 
 resource "google_service_account" "sa" {
-  provider     = google-beta
   account_id   = "{{index $.ResourceIdVars "account_id"}}"
   display_name = "Storage FTP Service Account"
 }
 
 resource "google_storage_ftp_server" "server" {
-  provider     = google-beta
   location     = "us-west1"
   server_id    = "{{index $.ResourceIdVars "server_id"}}"
   display_name = "My SFTP Server"
@@ -27,7 +24,6 @@ resource "google_storage_ftp_server" "server" {
 }
 
 resource "google_storage_ftp_user" "{{$.PrimaryResourceId}}" {
-  provider                 = google-beta
   location                 = "us-west1"
   server_id                = google_storage_ftp_server.server.server_id
   user_id                  = "{{index $.ResourceIdVars "user_id"}}"

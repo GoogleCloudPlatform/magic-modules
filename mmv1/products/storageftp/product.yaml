@@ -18,6 +18,6 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
   - name: beta
-    base_url: https://ftp.googleapis.com/v1alpha/
+    base_url: https://ftp.googleapis.com/v1/
   - name: ga
-    base_url: https://ftp.googleapis.com/v1alpha/
+    base_url: https://ftp.googleapis.com/v1/

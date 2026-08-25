@@ -1,7 +1,5 @@
 package storageftp_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"fmt"
 	"testing"
@@ -21,7 +19,7 @@ func TestAccStorageFtpServer_updateInternal(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageFtpServerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -76,7 +74,7 @@ func TestAccStorageFtpServer_updateExternal(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckStorageFtpServerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -126,7 +124,6 @@ func TestAccStorageFtpServer_updateExternal(t *testing.T) {
 func testAccStorageFtpServer_internalInitial(serverId string) string {
 	return fmt.Sprintf(`
 resource "google_storage_ftp_server" "internal_server" {
-  provider     = google-beta
   location     = "us-west1"
   server_id    = "%s"
   display_name = "Initial Internal SFTP Server"
@@ -144,7 +141,6 @@ resource "google_storage_ftp_server" "internal_server" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }
 `, serverId)
 }
@@ -152,7 +148,6 @@ data "google_project" "project" {
 func testAccStorageFtpServer_internalUpdated(serverId string) string {
 	return fmt.Sprintf(`
 resource "google_storage_ftp_server" "internal_server" {
-  provider     = google-beta
   location     = "us-west1"
   server_id    = "%s"
   display_name = "Updated Internal SFTP Server"
@@ -173,7 +168,6 @@ resource "google_storage_ftp_server" "internal_server" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }
 `, serverId)
 }
@@ -181,7 +175,6 @@ data "google_project" "project" {
 func testAccStorageFtpServer_externalInitial(serverId string) string {
 	return fmt.Sprintf(`
 resource "google_storage_ftp_server" "external_server" {
-  provider     = google-beta
   location     = "us-west1"
   server_id    = "%s"
   display_name = "Initial External SFTP Server"
@@ -200,7 +193,6 @@ resource "google_storage_ftp_server" "external_server" {
 func testAccStorageFtpServer_externalUpdated(serverId string) string {
 	return fmt.Sprintf(`
 resource "google_storage_ftp_server" "external_server" {
-  provider     = google-beta
   location     = "us-west1"
   server_id    = "%s"
   display_name = "Updated External SFTP Server"
@@ -216,5 +208,3 @@ resource "google_storage_ftp_server" "external_server" {
 }
 `, serverId)
 }
-
-{{- end }}
