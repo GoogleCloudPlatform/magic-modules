@@ -21,7 +21,6 @@ references:
     Configure auto labeling rules using the API: https://cloud.google.com/contact-center/insights/docs/auto-labeling-rule
   api: https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.autoLabelingRules
 base_url: projects/{{project}}/locations/{{location}}/autoLabelingRules
-generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/autoLabelingRules/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/autoLabelingRules?autoLabelingRuleId={{auto_labeling_rule_id}}
 update_mask: true
