@@ -48,11 +48,10 @@ func BootstrapIntegrationsClient(t *testing.T, locationID string) BootstrapClien
 			t.Fatalf("Error reading client from response")
 		}
 
-		shouldDeprovision := true
-		if isGmekVal, ok := client["isGmek"]; ok {
-			if isGmek, ok := isGmekVal.(bool); ok {
-				shouldDeprovision = !isGmek
-			}
+		// A client is GMEK if it does not have a CMEK cloudKmsConfig configured.
+		shouldDeprovision := false
+		if kmsVal, ok := client["cloudKmsConfig"]; ok && kmsVal != nil {
+			shouldDeprovision = true
 		}
 
 		if shouldDeprovision {
@@ -66,6 +65,12 @@ func BootstrapIntegrationsClient(t *testing.T, locationID string) BootstrapClien
 			})
 			if err != nil {
 				t.Fatalf("Unable to deprovision client: %s", err)
+			}
+		} else {
+			return BootstrapClient{
+				ProjectID: projectID,
+				Region:    locationID,
+				IsGMEK:    true,
 			}
 		}
 	}

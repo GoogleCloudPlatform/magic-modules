@@ -1,9 +1,5 @@
-resource "google_integrations_client" "client" {
-  location = "us-west1"
-}
-
 resource "google_integrations_integration_version" "version" {
-  location = "us-west1"
+  location = "us-east4"
   integration = "%{integration_name}"
   description = "Integration version created via terraform"
 
@@ -44,12 +40,10 @@ resource "google_integrations_integration_version" "version" {
       }
     }
   }
-
-  depends_on = [google_integrations_client.client]
 }
 
 resource "google_integrations_integration_version_deployment" "deployment_basic" {
-  location = "us-west1"
+  location = "us-east4"
   integration = "%{integration_name}"
   version = google_integrations_integration_version.version.version
 }

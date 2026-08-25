@@ -44,6 +44,8 @@ samples:
   - name: integrations_integration_version_basic
     resource_id_vars:
       integration_name: test-integration
+    test_vars_overrides:
+      client: BootstrapIntegrationsClient(t, "us-east4")
 - name: integrations_integration_version_full
   primary_resource_id: version_full
   steps:
@@ -52,11 +54,15 @@ samples:
       integration_name: test-integration
     vars:
       description: "Initial description"
+    test_vars_overrides:
+      client: BootstrapIntegrationsClient(t, "us-east4")
   - name: integrations_integration_version_full
     resource_id_vars:
       integration_name: test-integration
     vars:
       description: "Updated description"
+    test_vars_overrides:
+      client: BootstrapIntegrationsClient(t, "us-east4")
 parameters:
 - name: location
   type: String

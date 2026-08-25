@@ -1,9 +1,5 @@
-resource "google_integrations_client" "client" {
-  location = "us-west1"
-}
-
 resource "google_integrations_integration_version" "version_full" {
-  location = "us-west1"
+  location = "us-east4"
   integration = "%{integration_name}"
   description = "%{description}"
   user_label = "v1.0.0"
@@ -176,6 +172,4 @@ resource "google_integrations_integration_version" "version_full" {
     masked = false
     description = "double parameter"
   }
-
-  depends_on = [google_integrations_client.client]
 }

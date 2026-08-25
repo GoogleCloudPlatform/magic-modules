@@ -43,6 +43,8 @@ samples:
       - name: integrations_integration_version_deployment_basic
         resource_id_vars:
           integration_name: test-integration
+        test_vars_overrides:
+          client: BootstrapIntegrationsClient(t, "us-east4")
 parameters:
   - name: location
     type: String
