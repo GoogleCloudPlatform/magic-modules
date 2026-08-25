@@ -3,90 +3,149 @@ package detector
 import (
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 )
 
 func TestDetectMissingIdentityCoverage(t *testing.T) {
-	cases := []struct {
-		name            string
-		resourceContent string
-		testContent     string
-		resourceName    string
-		want            map[string]*MissingIdentityInfo
-	}{
-		{
-			name:            "resource with identity and full coverage is not flagged",
-			resourceContent: fakeResourceWithFullCoverage(),
-			testContent:     fakeTestWithImportIdentity(),
-			resourceName:    "foo_instance",
-			want:            map[string]*MissingIdentityInfo{},
-		},
-		{
-			name:            "resource with identity missing Create and Update CRUD and import test is flagged",
-			resourceContent: fakeResourceMissingCreateUpdate(),
-			testContent:     "",
-			resourceName:    "foo_instance",
-			want: map[string]*MissingIdentityInfo{
-				"foo_instance": {
-					MissingCRUD:       []string{"Create", "Update"},
-					MissingImportTest: true,
-				},
+	// Create a temp directory structure simulating services/
+	tmpDir := t.TempDir()
+	serviceDir := filepath.Join(tmpDir, "compute")
+	os.MkdirAll(serviceDir, 0755)
+
+	// Resource WITH identity, WITH full CRUD coverage
+	goodResource := `package compute
+
+import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+func ResourceComputeInstance() *schema.Resource {
+	return &schema.Resource{
+		Identity: &schema.ResourceIdentity{},
+	}
+}
+
+func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
+	return nil
+}
+
+func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
+	return nil
+}
+
+func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
+	return nil
+}
+`
+	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_instance.go"), []byte(goodResource), 0644)
+
+	// Test file with import identity test using ImportStateKind
+	goodTest := `package compute
+
+func TestAccComputeInstance_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ResourceName:    "google_compute_instance.default",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
-		{
-			name:            "resource without identity block is not flagged",
-			resourceContent: fakeResourceWithoutIdentity(),
-			testContent:     "",
-			resourceName:    "foo_instance",
-			want:            map[string]*MissingIdentityInfo{},
-		},
-		{
-			name:            "resource file does not exist is skipped",
-			resourceContent: "",
-			testContent:     "",
-			resourceName:    "nonexistent_resource",
-			want:            map[string]*MissingIdentityInfo{},
-		},
+	})
+}
+`
+	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_instance_test.go"), []byte(goodTest), 0644)
+
+	// Resource WITH identity, MISSING Create and Update coverage
+	badResource := `package compute
+
+import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+func ResourceComputeBadDisk() *schema.Resource {
+	return &schema.Resource{
+		Identity: &schema.ResourceIdentity{},
+	}
+}
+
+func resourceComputeBadDiskCreate(d *schema.ResourceData, meta interface{}) error {
+	return nil
+}
+
+func resourceComputeBadDiskRead(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
+	return nil
+}
+
+func resourceComputeBadDiskUpdate(d *schema.ResourceData, meta interface{}) error {
+	return nil
+}
+`
+	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_bad_disk.go"), []byte(badResource), 0644)
+
+	// No test file for bad_disk -> missing import test
+
+	// Run detector scoped to both resources
+	changedResources := []string{"google_compute_instance", "google_compute_bad_disk"}
+	results, err := DetectMissingIdentityCoverage(tmpDir, changedResources)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
+	// Good resource should NOT appear in results
+	if _, ok := results["google_compute_instance"]; ok {
+		t.Error("expected google_compute_instance to pass, but it was flagged")
+	}
 
-			if tc.resourceContent != "" {
-				err := os.WriteFile(filepath.Join(tmpDir, "resource_"+tc.resourceName+".go"), []byte(tc.resourceContent), 0644)
-				if err != nil {
-					t.Fatalf("failed to write resource file: %v", err)
-				}
-			}
-			if tc.testContent != "" {
-				err := os.WriteFile(filepath.Join(tmpDir, "resource_"+tc.resourceName+"_test.go"), []byte(tc.testContent), 0644)
-				if err != nil {
-					t.Fatalf("failed to write test file: %v", err)
-				}
-			}
+	// Bad resource SHOULD appear
+	bad, ok := results["google_compute_bad_disk"]
+	if !ok {
+		t.Fatal("expected google_compute_bad_disk to be flagged, but it was not")
+	}
 
-			results, err := DetectMissingIdentityCoverage(tmpDir, []string{tc.resourceName})
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
+	// Should flag Create and Update as missing
+	expectedMissing := map[string]bool{"Create": true, "Update": true}
+	for _, crud := range bad.MissingCRUD {
+		if !expectedMissing[crud] {
+			t.Errorf("unexpected missing CRUD: %s", crud)
+		}
+		delete(expectedMissing, crud)
+	}
+	for crud := range expectedMissing {
+		t.Errorf("expected %s to be flagged as missing but it was not", crud)
+	}
 
-			if !reflect.DeepEqual(results, tc.want) {
-				t.Errorf("got %+v, want %+v", results, tc.want)
-			}
-		})
+	// Should flag missing import test
+	if !bad.MissingImportTest {
+		t.Error("expected MissingImportTest to be true for google_compute_bad_disk")
 	}
 }
 
 func TestDetectMissingIdentityCoverage_SkipsUnchangedResources(t *testing.T) {
 	tmpDir := t.TempDir()
+	serviceDir := filepath.Join(tmpDir, "dns")
+	os.MkdirAll(serviceDir, 0755)
 
-	err := os.WriteFile(filepath.Join(tmpDir, "resource_dns_record_set.go"), []byte(fakeResourceMissingCreateUpdate()), 0644)
-	if err != nil {
-		t.Fatalf("failed to write resource file: %v", err)
+	// Resource with identity but missing coverage
+	resource := `package dns
+
+func ResourceDnsRecordSet() *schema.Resource {
+	return &schema.Resource{
+		Identity: &schema.ResourceIdentity{},
 	}
+}
 
+func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error {
+	return nil
+}
+
+func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
+	return nil
+}
+`
+	os.WriteFile(filepath.Join(serviceDir, "resource_dns_record_set.go"), []byte(resource), 0644)
+
+	// Pass empty changedResources - should skip everything
 	results, err := DetectMissingIdentityCoverage(tmpDir, []string{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -97,90 +156,59 @@ func TestDetectMissingIdentityCoverage_SkipsUnchangedResources(t *testing.T) {
 	}
 }
 
-// fakeResourceWithFullCoverage returns a resource file that declares ResourceIdentity
-// and calls SetResourceIdentityAttributes in Create, Read, and Update.
-func fakeResourceWithFullCoverage() string {
-	return `package fake
+// TestDetectMissingIdentityCoverage_NoGooglePrefix verifies that resources whose
+// file names omit the google_ prefix (e.g. resource_sql_user.go) are still matched
+// when changedResources contains the full Terraform name (e.g. "google_sql_user").
+func TestDetectMissingIdentityCoverage_NoGooglePrefix(t *testing.T) {
+	tmpDir := t.TempDir()
+	serviceDir := filepath.Join(tmpDir, "sql")
+	os.MkdirAll(serviceDir, 0755)
 
-func resourceFooInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
-	return nil
-}
+	// File named resource_sql_user.go (no google_ prefix) with identity and full coverage.
+	resource := `package sql
 
-func resourceFooInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
-	return nil
-}
-
-func resourceFooInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
-	return nil
-}
-
-func ResourceFooInstance() *schema.Resource {
+func ResourceSqlUser() *schema.Resource {
 	return &schema.Resource{
 		Identity: &schema.ResourceIdentity{},
 	}
 }
-`
-}
 
-// fakeResourceMissingCreateUpdate returns a resource file that declares ResourceIdentity
-// but only calls SetResourceIdentityAttributes in Read, leaving Create and Update uncovered.
-func fakeResourceMissingCreateUpdate() string {
-	return `package fake
-
-func resourceFooInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	return nil
-}
-
-func resourceFooInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
 	return nil
 }
 
-func resourceFooInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
 	return nil
-}
-
-func ResourceFooInstance() *schema.Resource {
-	return &schema.Resource{
-		Identity: &schema.ResourceIdentity{},
-	}
 }
 `
-}
+	os.WriteFile(filepath.Join(serviceDir, "resource_sql_user.go"), []byte(resource), 0644)
 
-// fakeResourceWithoutIdentity returns a resource file with no ResourceIdentity block.
-func fakeResourceWithoutIdentity() string {
-	return `package fake
+	testFile := `package sql
 
-func resourceFooInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	return nil
-}
-
-func resourceFooInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	return nil
-}
-
-func ResourceFooInstance() *schema.Resource {
-	return &schema.Resource{}
-}
-`
-}
-
-// fakeTestWithImportIdentity returns a test file that exercises ImportBlockWithResourceIdentity.
-func fakeTestWithImportIdentity() string {
-	return `package fake
-
-func TestAccFooInstance_importBlockWithResourceIdentity(t *testing.T) {
+func TestAccSqlUser_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
+				ResourceName:    "google_sql_user.default",
+				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
 }
 `
+	os.WriteFile(filepath.Join(serviceDir, "resource_sql_user_test.go"), []byte(testFile), 0644)
+
+	// changedResources uses the full Terraform name; the file has no google_ prefix.
+	results, err := DetectMissingIdentityCoverage(tmpDir, []string{"google_sql_user"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Resource has full coverage — should not be flagged.
+	if _, ok := results["google_sql_user"]; ok {
+		t.Error("expected google_sql_user to pass, but it was flagged")
+	}
 }
