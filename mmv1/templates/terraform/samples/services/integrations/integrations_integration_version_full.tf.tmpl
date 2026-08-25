@@ -1,0 +1,40 @@
+resource "google_integrations_client" "client" {
+  location = "us-west1"
+}
+
+resource "google_integrations_integration_version" "version_full" {
+  location = "us-west1"
+  integration = "%{integration_name}"
+  description = "%{description}"
+  database_persistence_policy = "DATABASE_PERSISTENCE_POLICY_UNSPECIFIED"
+
+  trigger_configs {
+    label = "api_trigger"
+    trigger_type = "API"
+    trigger_number = "1"
+    trigger_id = "api_trigger/test_trigger"
+  }
+
+  task_configs {
+    task = "GenericRestEndpointTask"
+    task_id = "1"
+    parameters {
+      key = "endpointUrl"
+      value {
+        string_value = "https://example.com"
+      }
+    }
+  }
+
+  integration_parameters {
+    key = "param1"
+    data_type = "STRING_VALUE"
+    default_value {
+      string_value = "default_val"
+    }
+    display_name = "param1"
+    input_output_type = "IN"
+  }
+
+  depends_on = [google_integrations_client.client]
+}

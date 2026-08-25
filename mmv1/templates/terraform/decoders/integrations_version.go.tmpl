@@ -1,0 +1,8 @@
+if name, ok := res["name"].(string); ok {
+	parts := strings.Split(name, "/versions/")
+	if len(parts) == 2 {
+		res["version"] = parts[1]
+	}
+}
+
+return res, nil
