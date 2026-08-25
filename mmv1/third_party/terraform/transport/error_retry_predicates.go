@@ -741,3 +741,12 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+func IsCloudIdentityGroup409(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 {
+			return true, "saw a 409 - The operation was aborted"
+		}
+	}
+	return false, ""
+}
