@@ -1081,6 +1081,90 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
+// TestAccGKEHubFeature_EmptySpecSubBlock covers the one shape send_empty_value
+// exists for on this resource: a spec sub-block that is PRESENT but EMPTY.
+//
+// The GKE Hub API enables workloadidentity and fleetobservability by receiving
+// exactly that — {"spec":{"workloadidentity":{}}} returns 200, while {"spec":{}}
+// is a 400 MissingFieldError. Without the flag the generated expander drops the
+// empty object (tpgresource.IsEmptyValue), spec collapses to an empty map and is
+// dropped in turn, and the request carries no spec at all — so neither feature
+// could be created by Terraform.
+//
+// Every other test in this file supplies a value inside the block
+// (workloadidentity.scope_tenancy_pool, fleetobservability.logging_config), which
+// survives the guard on its own. That is why the empty path was never exercised.
+// Both features are asserted in one config so a single acceptance run covers both
+// patched properties.
+func TestAccGKEHubFeature_EmptySpecSubBlock(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGKEHubFeature_EmptySpecSubBlock(context),
+				Check: resource.ComposeTestCheckFunc(
+					// The block must round-trip as present-and-empty. Asserting the
+					// count rather than a value is the point: there is no value to
+					// assert, and its absence is precisely the bug.
+					resource.TestCheckResourceAttr(
+						"google_gke_hub_feature.workloadidentity", "spec.0.workloadidentity.#", "1"),
+					resource.TestCheckResourceAttr(
+						"google_gke_hub_feature.fleetobservability", "spec.0.fleetobservability.#", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.workloadidentity",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project", "labels", "terraform_labels"},
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.fleetobservability",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccGKEHubFeature_EmptySpecSubBlock(context map[string]interface{}) string {
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_feature" "workloadidentity" {
+  name     = "workloadidentity"
+  location = "global"
+  project  = google_project.project.project_id
+  spec {
+    workloadidentity {}
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+
+resource "google_gke_hub_feature" "fleetobservability" {
+  name     = "fleetobservability"
+  location = "global"
+  project  = google_project.project.project_id
+  spec {
+    fleetobservability {}
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
 func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
