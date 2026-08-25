@@ -35,7 +35,7 @@ func testAccOracleDatabaseAutonomousDatabase_basic() string {
 data "google_oracle_database_autonomous_database" "my-adb"{
 	autonomous_database_id = "do-not-delete-tf-adb"
 	location = "us-east4"
-	project = "oci-terraform-testing-prod"
+	project = "oasis-terraform-testing-prod"
 }
 `)
 }
