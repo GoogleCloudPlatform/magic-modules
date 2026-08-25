@@ -1,5 +1,10 @@
+resource "google_integrations_client" "client" {
+  location = "us-west1"
+}
+
 resource "google_integrations_integration_version" "{{$.PrimaryResourceId}}" {
   location = "us-west1"
   integration = "{{index $.ResourceIdVars "integration_name"}}"
   description = "Integration version created via terraform"
+  depends_on = [google_integrations_client.client]
 }
