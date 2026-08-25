@@ -40,10 +40,20 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 `
 	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_instance.go"), []byte(goodResource), 0644)
 
-	// Test file with import identity test
+	// Test file with import identity test using ImportStateKind
 	goodTest := `package compute
 
-func TestAccComputeInstance_importBlockWithResourceIdentity(t *testing.T) {}
+func TestAccComputeInstance_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ResourceName:    "google_compute_instance.default",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
 `
 	os.WriteFile(filepath.Join(serviceDir, "resource_google_compute_instance_test.go"), []byte(goodTest), 0644)
 
@@ -143,5 +153,62 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(results) != 0 {
 		t.Errorf("expected no results when no resources changed, got %d", len(results))
+	}
+}
+
+// TestDetectMissingIdentityCoverage_NoGooglePrefix verifies that resources whose
+// file names omit the google_ prefix (e.g. resource_sql_user.go) are still matched
+// when changedResources contains the full Terraform name (e.g. "google_sql_user").
+func TestDetectMissingIdentityCoverage_NoGooglePrefix(t *testing.T) {
+	tmpDir := t.TempDir()
+	serviceDir := filepath.Join(tmpDir, "sql")
+	os.MkdirAll(serviceDir, 0755)
+
+	// File named resource_sql_user.go (no google_ prefix) with identity and full coverage.
+	resource := `package sql
+
+func ResourceSqlUser() *schema.Resource {
+	return &schema.Resource{
+		Identity: &schema.ResourceIdentity{},
+	}
+}
+
+func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
+	return nil
+}
+
+func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
+	tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{})
+	return nil
+}
+`
+	os.WriteFile(filepath.Join(serviceDir, "resource_sql_user.go"), []byte(resource), 0644)
+
+	testFile := `package sql
+
+func TestAccSqlUser_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				ResourceName:    "google_sql_user.default",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+`
+	os.WriteFile(filepath.Join(serviceDir, "resource_sql_user_test.go"), []byte(testFile), 0644)
+
+	// changedResources uses the full Terraform name; the file has no google_ prefix.
+	results, err := DetectMissingIdentityCoverage(tmpDir, []string{"google_sql_user"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Resource has full coverage — should not be flagged.
+	if _, ok := results["google_sql_user"]; ok {
+		t.Error("expected google_sql_user to pass, but it was flagged")
 	}
 }

@@ -13,7 +13,7 @@ import (
 type MissingIdentityInfo struct {
 	// MissingCRUD lists which CRUD functions are missing SetResourceIdentityAttributes.
 	MissingCRUD []string `json:"missingCRUD,omitempty"`
-	// MissingImportTest is true if no TestAcc*_importBlockWithResourceIdentity test exists.
+	// MissingImportTest is true if no test step uses ImportStateKind: resource.ImportBlockWithResourceIdentity.
 	MissingImportTest bool `json:"missingImportTest"`
 }
 
@@ -39,11 +39,19 @@ func DetectMissingIdentityCoverage(servicesDir string, changedResources []string
 		}
 
 		baseName := filepath.Base(path)
-		resourceName := strings.TrimPrefix(baseName, "resource_")
-		resourceName = strings.TrimSuffix(resourceName, ".go")
+		fileResourceName := strings.TrimPrefix(baseName, "resource_")
+		fileResourceName = strings.TrimSuffix(fileResourceName, ".go")
 
+		// changedResources uses Terraform resource names (e.g. "google_sql_user")
+		// while file names omit the google_ prefix (e.g. "resource_sql_user.go").
+		// Check both forms so we match either convention.
+		resourceName := fileResourceName
 		if !changedSet[resourceName] {
-			return nil
+			if changedSet["google_"+resourceName] {
+				resourceName = "google_" + resourceName
+			} else {
+				return nil
+			}
 		}
 
 		hasIdentity, err := fileContainsIdentityBlock(path)
@@ -173,8 +181,6 @@ func checkImportTest(resourcePath string) (bool, error) {
 	baseName := filepath.Base(resourcePath)
 	resourcePrefix := strings.TrimSuffix(baseName, ".go")
 
-	testPattern := regexp.MustCompile(`func\s+(TestAcc\w*_importBlockWithResourceIdentity)`)
-
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return true, fmt.Errorf("error reading directory %s: %w", dir, err)
@@ -192,7 +198,7 @@ func checkImportTest(resourcePath string) (bool, error) {
 		if err != nil {
 			return true, err
 		}
-		if testPattern.Match(content) {
+		if strings.Contains(string(content), "ImportStateKind: resource.ImportBlockWithResourceIdentity,") {
 			return false, nil
 		}
 	}
