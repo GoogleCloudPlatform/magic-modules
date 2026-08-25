@@ -4134,6 +4134,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	runClusterOperation := func(doCall func() (*container.Operation, error), updateDescription string) error {
 		var op *container.Operation
 
+		// TODO: remove this when we switch to Context CRUD methods
 		remaining := timeout - time.Since(startTime)
 		if remaining <= 0 {
 			return fmt.Errorf("timeout exhausted before starting %s", updateDescription)
