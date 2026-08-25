@@ -53,11 +53,6 @@ virtual_fields:
       The deletion policy for the Network Monitoring Provider.
       Setting `deletion_policy = "FORCE"` forces the deletion of all nested resources
       (MonitoringPoints, NetworkPaths, WebPaths) belonging to this provider on deletion.
-      Setting `deletion_policy = "ABANDON"` removes the provider from Terraform state
-      without deleting it in Google Cloud.
-      Setting `deletion_policy = "PREVENT"` prevents Terraform from deleting the provider.
-      Leaving it unset or default (`"DELETE"`) performs standard deletion (which fails if
-      child resources exist).
     type: String
 parameters:
   - name: 'location'
