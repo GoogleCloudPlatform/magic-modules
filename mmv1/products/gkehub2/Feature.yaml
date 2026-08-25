@@ -187,9 +187,19 @@ properties:
         type: NestedObject
         description: Fleet Observability feature spec.
         # The API requires this sub-block to be PRESENT to enable the feature, even
-        # with nothing inside it: {"spec":{"fleetobservability":{}}} returns 200
-        # while {"spec":{}} is a 400 MissingFieldError. Without this flag the
-        # empty object is dropped by the IsEmptyValue guard and nothing is sent.
+        # with nothing inside it: {"spec":{"fleetobservability":{}}} returns 200,
+        # while both {"spec":{}} and {"spec":{"fleetobservability":null}} are a
+        # 400 MissingFieldError.
+        #
+        # BOTH flags are needed, and they fix different halves:
+        #   allow_empty_object  the expander returns an empty map instead of nil
+        #                       for a block whose optional values are all unset,
+        #                       and the flattener keeps it on read (without this
+        #                       the resource creates but never converges — every
+        #                       later plan re-adds `+ fleetobservability {}`)
+        #   send_empty_value    that empty map then survives the IsEmptyValue
+        #                       guard instead of being dropped from the request
+        allow_empty_object: true
         send_empty_value: true
         properties:
           - name: loggingConfig
@@ -287,9 +297,10 @@ properties:
       - name: workloadidentity
         type: NestedObject
         description: Workload Identity feature spec.
-        # Same as fleetobservability above: the feature is enabled by sending an
-        # EMPTY sub-block, which is also what GCP stores when it enables this
-        # itself on first cluster registration.
+        # Same as fleetobservability above, and for the same two reasons: the
+        # feature is enabled by sending an EMPTY sub-block, which is also what GCP
+        # stores when it enables this itself on first cluster registration.
+        allow_empty_object: true
         send_empty_value: true
         properties:
           - name: scopeTenancyPool
