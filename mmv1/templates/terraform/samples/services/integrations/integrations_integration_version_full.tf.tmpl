@@ -2,25 +2,46 @@ resource "google_integrations_integration_version" "version_full" {
   location = "us-west1"
   integration = "%{integration_name}"
   description = "%{description}"
+  user_label = "v1.0.0"
+  database_persistence_policy = "DATABASE_PERSISTENCE_DISABLED"
+  enable_variable_masking = true
+
+  cloud_logging_details {
+    cloud_logging_severity = "INFO"
+    enable_cloud_logging = true
+  }
 
   trigger_configs {
     label = "test_trigger"
     trigger_type = "API"
     trigger_number = "1"
     trigger_id = "api_trigger/test_trigger"
+    description = "API trigger description"
     properties = {
       "Trigger name" = "test_trigger"
     }
+    position {
+      x = "50"
+      y = "50"
+    }
     start_tasks {
       task_id = "1"
+      display_name = "start"
     }
   }
 
   task_configs {
     task = "GenericRestV2Task"
     task_id = "1"
+    description = "Task 1 description"
+    display_name = "REST Caller Task"
     external_task_type = "NORMAL_TASK"
     task_execution_strategy = "WHEN_ALL_SUCCEED"
+    json_validation_option = "SKIP"
+    position {
+      x = "100"
+      y = "100"
+    }
     parameters {
       key = "url"
       masked = false
@@ -39,6 +60,65 @@ resource "google_integrations_integration_version" "version_full" {
         string_value = "GET"
       }
     }
+    conditional_failure_policies {
+      failure_policies {
+        condition = "true"
+        interval_time = "1970-01-01T00:00:10Z"
+        max_retries = 3
+        retry_strategy = "FIXED_INTERVAL"
+      }
+    }
+    next_tasks {
+      task_id = "2"
+      condition = "true"
+      display_name = "Next Task"
+    }
+    next_tasks_execution_policy = "RUN_ALL_MATCH"
+  }
+
+  task_configs {
+    task = "GenericRestV2Task"
+    task_id = "2"
+    description = "Task 2 description"
+    display_name = "REST Caller Task 2"
+    external_task_type = "NORMAL_TASK"
+    task_execution_strategy = "WHEN_ALL_SUCCEED"
+    position {
+      x = "200"
+      y = "200"
+    }
+    parameters {
+      key = "url"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "https://example.com/api"
+      }
+    }
+    parameters {
+      key = "httpMethod"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "POST"
+      }
+    }
+  }
+
+  error_catcher_configs {
+    error_catcher_id = "ERROR_CATCHER_1"
+    error_catcher_number = "1"
+    label = "Catch Flow"
+    description = "Error catcher description"
+    position {
+      x = 100
+      y = 100
+    }
+    start_error_tasks {
+      task_id = "2"
+    }
   }
 
   integration_parameters {
@@ -49,5 +129,47 @@ resource "google_integrations_integration_version" "version_full" {
     }
     display_name = "param1"
     input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "string parameter"
+  }
+
+  integration_parameters {
+    key = "param2"
+    data_type = "INT_VALUE"
+    default_value {
+      int_value = "10"
+    }
+    display_name = "param2"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "int parameter"
+  }
+
+  integration_parameters {
+    key = "param3"
+    data_type = "BOOLEAN_VALUE"
+    default_value {
+      boolean_value = true
+    }
+    display_name = "param3"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "bool parameter"
+  }
+
+  integration_parameters {
+    key = "param4"
+    data_type = "DOUBLE_VALUE"
+    default_value {
+      double_value = 3.14
+    }
+    display_name = "param4"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "double parameter"
   }
 }
