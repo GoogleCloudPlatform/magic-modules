@@ -58,6 +58,28 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_scaling_controls'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_scaling_controls'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        vars:
+          cpu_util: '0.75'
+          concurrency_util: '0.5'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: 'cloudrunv2_service_scaling_controls'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        vars:
+          cpu_util: '0.6'
+          concurrency_util: '0.8'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     steps:
@@ -218,6 +240,27 @@ samples:
     exclude_test: true
     steps:
       - name: 'cloudrunv2_service_tags'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_service_sandbox'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_service_sandbox'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_service_sandbox_templates'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_service_sandbox_templates'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: 'cloudrunv2_service_sandbox_templates_update'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
@@ -453,9 +496,20 @@ properties:
               Minimum number of serving instances that this resource should have. Defaults to 0. Must not be greater than maximum instance count.
           - name: 'maxInstanceCount'
             type: Integer
+            default_from_api: true
             description: |-
               Maximum number of serving instances that this resource should have. Must not be less than minimum instance count. If absent, Cloud Run will calculate
               a default value based on the project's available container instances quota in the region and specified instance size.
+          - name: 'cpuUtilization'
+            type: Double
+            min_version: 'beta'
+            description: |-
+              Determines a threshold for CPU utilization before scaling begins. Accepted values are between 0.1 and 0.95 (inclusive) or 0.0 to disable CPU utilization as threshold for scaling. CPU and concurrency scaling cannot both be disabled.
+          - name: 'concurrencyUtilization'
+            type: Double
+            min_version: 'beta'
+            description: |-
+              Determines a threshold for concurrency utilization before scaling begins. Accepted values are between 0.1 and 0.95 (inclusive) or 0.0 to disable concurrency utilization as threshold for scaling. CPU and concurrency scaling cannot both be disabled.
       - name: 'vpcAccess'
         type: NestedObject
         description: |-
@@ -603,6 +657,7 @@ properties:
                   description: |-
                     Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6' and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
+                  diff_suppress_func: 'cloudRunV2ServiceResourceLimitsDiffSuppress'
                 - name: 'cpuIdle'
                   type: Boolean
                   description: |-
@@ -632,6 +687,9 @@ properties:
                     description: |-
                       Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
               max_size: 1
+            - name: 'sandboxLauncher'
+              type: Boolean
+              description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
             - name: 'volumeMounts'
               type: Array
               description: |-
@@ -1154,6 +1212,83 @@ properties:
       - name: 'healthCheckDisabled'
         type: Boolean
         description: Disables health checking containers during deployment.
+      - name: 'sandboxes'
+        type: NestedObject
+        description: |-
+          Configuration for sandboxes.
+        properties:
+          - name: 'templates'
+            type: Array
+            description: |-
+              Sandbox templates that can be launched through the `sandbox` CLI.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'name'
+                  type: String
+                  description: |-
+                    Name of the sandbox specified as a DNS_LABEL (RFC 1123).
+                  required: true
+                - name: 'image'
+                  type: String
+                  description: |-
+                    Name of the container image in Dockerhub or Artifact Registry. If the host is not provided, Dockerhub is assumed.
+                  required: true
+                - name: 'command'
+                  type: Array
+                  description: |-
+                    Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided.
+                  item_type:
+                    type: String
+                - name: 'args'
+                  type: Array
+                  description: |-
+                    Arguments to the entrypoint. The docker image's CMD is used if this is not provided.
+                  item_type:
+                    type: String
+                - name: 'env'
+                  type: Array
+                  description: |-
+                    List of environment variables to set in the sandbox.
+                  is_set: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        description: |-
+                          Name of the environment variable. Must be a C_IDENTIFIER, and may not exceed 32768 characters.
+                        required: true
+                      - name: 'value'
+                        type: String
+                        default_value: ""
+                        description: |-
+                          Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
+                - name: 'volumeMounts'
+                  type: Array
+                  description: |-
+                    Volume to mount into the container's filesystem.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        description: |-
+                          This must match the Name of a Volume.
+                        required: true
+                      - name: 'mountPath'
+                        type: String
+                        description: |-
+                          Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
+                        required: true
+                      - name: 'subPath'
+                        type: String
+                        description: |-
+                          Path within the volume from which the container's volume should be mounted.
+                - name: 'workingDir'
+                  type: String
+                  description: |-
+                    Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
   - name: 'traffic'
     type: Array
     description: |-

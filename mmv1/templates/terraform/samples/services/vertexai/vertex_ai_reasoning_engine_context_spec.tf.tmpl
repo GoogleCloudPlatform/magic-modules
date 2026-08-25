@@ -12,6 +12,12 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
     memory_bank_config {
       generation_config {
         model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+        generation_trigger_config {
+          generation_rule {
+            idle_duration       = "300s"
+            overlap_event_count = 1
+          }
+        }
       }
       similarity_search_config {
         embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
@@ -28,6 +34,56 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
         memory_topics {
           managed_memory_topic {
             managed_topic_enum = "USER_PREFERENCES"
+          }
+        }
+        generate_memories_examples {
+          conversation_source {
+            events {
+              content {
+                role = "user"
+                parts {
+                  text = "I like pepperoni pizza"
+                }
+                parts {
+                  function_call {
+                    id   = "fn-call-1"
+                    name = "order_pizza"
+                    args = jsonencode({
+                      type = "pepperoni"
+                    })
+                  }
+                }
+                parts {
+                  function_response {
+                    id   = "fn-resp-1"
+                    name = "order_pizza"
+                    response = jsonencode({
+                      status = "ordered"
+                    })
+                  }
+                }
+                parts {
+                  executable_code {
+                    id       = "exec-code-1"
+                    language = "PYTHON"
+                    code     = "print('pizza')"
+                  }
+                }
+                parts {
+                  code_execution_result {
+                    id      = "exec-result-1"
+                    outcome = "OUTCOME_OK"
+                    output  = "pizza"
+                  }
+                }
+              }
+            }
+          }
+          generated_memories {
+            fact = "User likes pepperoni pizza."
+            topics {
+              managed_memory_topic = "USER_PREFERENCES"
+            }
           }
         }
       }

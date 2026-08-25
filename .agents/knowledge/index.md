@@ -37,6 +37,8 @@ Read this index at decision points; open only the source the task needs. Format 
 - Create a PR — `docs/content/code-review/create-pr.md`
 - Write release notes — `docs/content/code-review/release-notes.md`
 - Review a PR — `docs/content/code-review/review-pr.md`
+- Make a breaking change / deprecations / removals — `docs/content/breaking-changes/make-a-breaking-change.md`
+- Types of breaking changes — `docs/content/breaking-changes/breaking-changes.md`
 
 **Documentation:**
 
@@ -53,4 +55,14 @@ Read this index at decision points; open only the source the task needs. Format 
 
 ## Agent-only entries
 
+### Field (`field/`)
+
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
+
+### Template (`template/`)
+
+- **template-modifications** — Safety rules and blast radius precautions for modifying Magic Modules engine templates (mmv1/templates/). — [template/template-modifications.md](template/template-modifications.md)
+
+### Bugs (`bug/`)
+
+*(No entries yet)*

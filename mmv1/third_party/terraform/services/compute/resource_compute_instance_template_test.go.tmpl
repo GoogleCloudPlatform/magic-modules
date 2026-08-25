@@ -218,7 +218,6 @@ func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceTemplate_hostErrorTimeoutSeconds(t *testing.T) {
 	t.Parallel()
 
@@ -254,7 +253,6 @@ func TestAccComputeInstanceTemplate_hostErrorTimeoutSeconds(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 	t.Parallel()
@@ -3462,6 +3460,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
+{{ end }}
 
 func testAccComputeInstanceTemplate_hostErrorTimeoutSeconds(suffix string) string {
 	return fmt.Sprintf(`
@@ -3504,8 +3503,6 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-
-{{ end }}
 
 func testAccComputeInstanceTemplate_ip(suffix string) string {
 	return fmt.Sprintf(`
