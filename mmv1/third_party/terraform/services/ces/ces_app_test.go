@@ -235,6 +235,21 @@ resource "google_ces_app" "ces_app_basic" {
     private_key = google_secret_manager_secret_version.fake_secret_version.name
   }
 
+  locked = false
+
+  error_handling_settings {
+    error_handling_strategy = "FALLBACK_RESPONSE"
+    fallback_response_config {
+      custom_fallback_messages = {
+        "en-US" = "Sorry, something went wrong."
+      }
+      max_fallback_attempts = 3
+    }
+  }
+
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com"]
+  }
 
   # Root agent should not be specified when creating an app
 }
@@ -328,6 +343,7 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
+      retention_window = "2592000s"
     }
   }
 
@@ -424,6 +440,45 @@ resource "google_ces_app" "ces_app_basic" {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
+  }
+
+  locked = false
+
+  error_handling_settings {
+    error_handling_strategy = "FALLBACK_RESPONSE"
+    fallback_response_config {
+      custom_fallback_messages = {
+        "en-US" = "Sorry, something went wrong updated."
+      }
+      max_fallback_attempts = 5
+    }
+  }
+
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com", "https://updated.example.com"]
+  }
+
+  evaluation_settings {
+    golden_run_method = "LATEST"
+    golden_evaluation_tool_call_behaviour = "RUN_LIVE"
+    scenario_conversation_initiator = "USER"
+    scenario_evaluation_tool_call_behaviour = "RUN_LIVE"
+    scenario_execution_mode = "QUALITY_OPTIMIZED"
+    evaluation_run_caching_settings {
+      enable_caching = true
+    }
+  }
+
+  evaluation_personas {
+    name         = "projects/${data.google_project.project.name}/locations/us/apps/tf-test-app-id-%{random_suffix}/evaluationPersonas/persona-1"
+    display_name = "Persona 1"
+    personality  = "Friendly customer seeking assistance."
+    description  = "Customer persona for evaluation"
+    speech_config {
+      speaking_rate = 1.0
+      environment   = "CALL_CENTER"
+      voice_id      = "en-US-Standard-A"
+    }
   }
 
   # Root agent should not be specified when creating an app

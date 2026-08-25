@@ -158,6 +158,15 @@ properties:
   - name: pinned
     type: Boolean
     description: Whether the app is pinned in the app list.
+  - name: dashboardSettings
+    type: NestedObject
+    description: App-specific dashboard settings for linking and configuring Contact Center Insights dashboards.
+    properties:
+      - name: defaultDashboard
+        type: String
+        description: |-
+          The resource name of the default Contact Center Insights dashboard associated with the app.
+          Format: projects/{project}/locations/{location}/dashboards/{dashboard}
   - name: dataStoreSettings
     type: NestedObject
     description: Data store related settings for the app.
@@ -261,6 +270,38 @@ properties:
     type: String
     required: true
     description: Display name of the app.
+  - name: errorHandlingSettings
+    type: NestedObject
+    description: Settings to describe how errors should be handled in the app.
+    properties:
+      - name: endSessionConfig
+        type: NestedObject
+        description: Configuration for ending the session in case of system errors.
+        properties:
+          - name: escalateSession
+            type: Boolean
+            description: Whether to escalate the session in EndSession.
+      - name: errorHandlingStrategy
+        type: String
+        description: |-
+          Defines the strategy for handling errors.
+          Possible values:
+          ERROR_HANDLING_STRATEGY_UNSPECIFIED
+          NONE
+          FALLBACK_RESPONSE
+          END_SESSION
+      - name: fallbackResponseConfig
+        type: NestedObject
+        description: Configuration for handling fallback responses.
+        properties:
+          - name: customFallbackMessages
+            type: KeyValuePairs
+            description: |-
+              The fallback messages in case of system errors (e.g. LLM errors),
+              mapped by supported language code.
+          - name: maxFallbackAttempts
+            type: Integer
+            description: The maximum number of fallback attempts to make before the agent emitting EndSession Signal.
   - name: etag
     type: String
     description: |-
@@ -299,6 +340,104 @@ properties:
                 description: |-
                   The success threshold for semantic similarity. Must be an integer
                   between 0 and 4. Default is >= 3.
+  - name: evaluationPersonas
+    type: Array
+    description: |-
+      The evaluation personas for the app. This field is used to define the personas that can be used for evaluation.
+      Maximum of 30 personas can be defined.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: description
+          type: String
+          description: The description of the persona.
+        - name: displayName
+          type: String
+          required: true
+          description: The display name of the persona. Unique within an app.
+        - name: name
+          type: String
+          required: true
+          description: |-
+            The unique identifier of the persona.
+            Format: `projects/{project}/locations/{location}/apps/{app}/evaluationPersonas/{evaluationPersona}`
+        - name: personality
+          type: String
+          required: true
+          description: An instruction for the agent on how to behave in the evaluation.
+        - name: speechConfig
+          type: NestedObject
+          description: Configuration for how the persona sounds (TTS settings).
+          properties:
+            - name: environment
+              type: String
+              description: |-
+                The simulated audio environment.
+                Possible values:
+                BACKGROUND_ENVIRONMENT_UNSPECIFIED
+                CALL_CENTER
+                TRAFFIC
+                KIDS_NOISE
+                CAFE
+            - name: speakingRate
+              type: Double
+              description: The speaking rate. 1.0 is normal.
+            - name: voiceId
+              type: String
+              description: |-
+                The specific voice identifier/accent to use.
+                Example: "en-US-Wavenet-D" or "en-GB-Standard-A"
+  - name: evaluationSettings
+    type: NestedObject
+    description: Settings for evaluation.
+    properties:
+      - name: evaluationRunCachingSettings
+        type: NestedObject
+        description: The caching settings to use for the evaluation run.
+        properties:
+          - name: enableCaching
+            type: Boolean
+            description: Whether caching is enabled for the evaluation run.
+      - name: goldenEvaluationToolCallBehaviour
+        type: String
+        description: |-
+          Configures the default tool call behaviour for golden evaluations.
+          Possible values:
+          EVALUATION_TOOL_CALL_BEHAVIOUR_UNSPECIFIED
+          MOCK_ALL
+          RUN_LIVE
+      - name: goldenRunMethod
+        type: String
+        description: |-
+          The default method used to run golden evaluations.
+          Possible values:
+          GOLDEN_RUN_METHOD_UNSPECIFIED
+          PREVIOUS_BEST
+          LATEST
+      - name: scenarioConversationInitiator
+        type: String
+        description: |-
+          Determines who starts the conversation in a scenario evaluation session.
+          Possible values:
+          SCENARIO_CONVERSATION_INITIATOR_UNSPECIFIED
+          USER
+          AGENT
+      - name: scenarioEvaluationToolCallBehaviour
+        type: String
+        description: |-
+          Configures the default tool call behaviour for scenario evaluations.
+          Possible values:
+          EVALUATION_TOOL_CALL_BEHAVIOUR_UNSPECIFIED
+          MOCK_ALL
+          RUN_LIVE
+      - name: scenarioExecutionMode
+        type: String
+        description: |-
+          The execution mode for scenario evaluations.
+          Possible values:
+          SCENARIO_EXECUTION_MODE_UNSPECIFIED
+          QUALITY_OPTIMIZED
+          SPEED_OPTIMIZED
   - name: globalInstruction
     type: String
     description: |-
@@ -343,6 +482,11 @@ properties:
           `default_language_code`.
         item_type:
           type: String
+  - name: locked
+    type: Boolean
+    description: |-
+      Indicates whether the app is locked for changes. If the app is locked,
+      modifications to the app resources will be rejected.
   - name: loggingSettings
     type: NestedObject
     default_from_api: true
@@ -404,6 +548,11 @@ properties:
           - name: disableConversationLogging
             type: Boolean
             description: Whether to disable conversation logging for the sessions.
+          - name: retentionWindow
+            type: String
+            description: |-
+              Controls the retention window for the conversation.
+              If not set, the conversation will be retained for 365 days.
       - name: redactionConfig
         type: NestedObject
         description: Configuration to instruct how sensitive data should be handled.
@@ -455,6 +604,90 @@ properties:
       Format: `projects/{project}/locations/{location}/apps/{app}`
     output: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: predefinedVariableDeclarations
+    type: Array
+    output: true
+    description: The declarations of predefined variables for the app.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: description
+          type: String
+          output: true
+          description: The description of the variable.
+        - name: name
+          type: String
+          output: true
+          description: The name of the variable.
+        - name: schema
+          type: NestedObject
+          output: true
+          description: Represents a select subset of an OpenAPI 3.0 schema object.
+          properties:
+            - name: additionalProperties
+              type: String
+              output: true
+              description: Schema for additional properties.
+            - name: anyOf
+              type: String
+              output: true
+              description: Schemas of which the value must validate against at least one.
+            - name: default
+              type: String
+              output: true
+              description: Default value.
+            - name: defs
+              type: String
+              output: true
+              description: Schema definitions.
+            - name: description
+              type: String
+              output: true
+              description: The description of the data.
+            - name: enum
+              type: Array
+              output: true
+              description: Possible values of the element of primitive type with enum format.
+              item_type:
+                type: String
+            - name: items
+              type: String
+              output: true
+              description: Schema of the items in an array.
+            - name: nullable
+              type: Boolean
+              output: true
+              description: Indicates if the value may be null.
+            - name: prefixItems
+              type: String
+              output: true
+              description: Schemas for array prefix items.
+            - name: properties
+              type: String
+              output: true
+              description: Properties of an object.
+            - name: ref
+              type: String
+              output: true
+              description: Allows indirect references between schema nodes.
+            - name: required
+              type: Array
+              output: true
+              description: Required properties of an object.
+              item_type:
+                type: String
+            - name: title
+              type: String
+              output: true
+              description: The title of the schema.
+            - name: type
+              type: String
+              output: true
+              description: The type of the data.
+            - name: uniqueItems
+              type: Boolean
+              output: true
+              description: Indicates if the items in the array must be unique.
   - name: rootAgent
     type: String
     description: |-
@@ -476,6 +709,12 @@ properties:
     type: String
     description: Timestamp when the app was last updated.
     output: true
+  - name: validationErrors
+    type: Array
+    output: true
+    description: Misconfigurations or warnings in the app.
+    item_type:
+      type: String
   - name: variableDeclarations
     type: Array
     description: The declarations of the variables.
@@ -644,3 +883,14 @@ properties:
         description: |-
           The passphrase to decrypt the private key.
           Should be left unset if the private key is not encrypted.
+  - name: vpcScSettings
+    type: NestedObject
+    description: VPC-SC settings for the app.
+    properties:
+      - name: allowedOrigins
+        type: Array
+        description: |-
+          The allowed HTTP(s) origins that OpenAPI tools in the App are able to
+          directly call when VPC Service Controls are enabled.
+        item_type:
+          type: String
