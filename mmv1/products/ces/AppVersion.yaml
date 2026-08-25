@@ -1075,6 +1075,54 @@ properties:
                 output: true
                 item_type:
                   type: String
+          - name: errorHandlingSettings
+            type: NestedObject
+            description: |-
+              Settings to describe how errors should be handled in the app.
+            output: true
+            properties:
+              - name: errorHandlingStrategy
+                type: String
+                description: |-
+                  The strategy to use for error handling.
+                  Possible values:
+                  NONE
+                  FALLBACK_RESPONSE
+                  END_SESSION
+                output: true
+              - name: fallbackResponseConfig
+                type: NestedObject
+                description: |-
+                  Configuration for handling fallback responses.
+                output: true
+                properties:
+                  - name: customFallbackMessages
+                    type: KeyValuePairs
+                    description: |-
+                      The fallback messages in case of system errors (e.g. LLM errors),
+                      mapped by supported language code
+                      (https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/language).
+                    output: true
+                  - name: maxFallbackAttempts
+                    type: Integer
+                    description: |-
+                      The maximum number of fallback attempts to make before the agent
+                      emitting EndSession Signal.
+                    output: true
+              - name: endSessionConfig
+                type: NestedObject
+                allow_empty_object: true
+                description: |-
+                  Configuration for ending the session in case of system errors (e.g. LLM
+                  errors).
+                output: true
+                properties:
+                  - name: escalateSession
+                    type: Boolean
+                    description: |-
+                      Whether to escalate the session in EndSession. If session is escalated,
+                      metadata in EndSession will contain session_escalated = true.
+                    output: true
       - name: examples
         type: Array
         description: List of examples in the app.
