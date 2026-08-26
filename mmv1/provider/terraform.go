@@ -92,7 +92,7 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 		object.ExcludeIfNotInVersion(t.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -104,7 +104,8 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 
 	if !object.IsExcluded() {
-		log.Printf("Generating %s resource", object.Name)
+		google.LogVerbose("Generating %s resource", object.Name)
+		google.IncrementResourceGenerated()
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		t.GenerateSingularDataSource(object, *templateData, outputFolder, generateCode, generateDocs)
 
@@ -448,7 +449,7 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files for %s", ProviderName(t))
+	google.LogVerbose("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
 	t.CopyFileList(outputFolder, files, generateCode)
@@ -610,7 +611,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 
 // Compiles files that are shared at the provider level
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	log.Printf("Generating common files for %s", ProviderName(t))
+	google.LogVerbose("Generating common files for %s", ProviderName(t))
 	if t.Product == nil {
 		t.generateResourcesForVersion(products)
 	}

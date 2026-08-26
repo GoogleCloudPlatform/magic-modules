@@ -69,16 +69,19 @@ resource "google_compute_backend_service" "default" {
     group = google_compute_instance_group.default[each.key].self_link
   }
 
-  health_checks = [google_compute_http_health_check.default[each.key].self_link]
+  health_checks = [google_compute_health_check.default[each.key].self_link]
   port_name     = "http"
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_health_check" "default" {
   for_each           = local.instances
   name               = "${each.key}-hc"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
 }
 
 

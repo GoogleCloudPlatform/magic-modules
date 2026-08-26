@@ -13,6 +13,7 @@
 
 ---
 name: HiveCatalog
+api_resource_type_kind: Catalog
 description: |
   Hive Catalogs in Biglake Metastore
 references:
