@@ -745,9 +745,7 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 func IsCloudIdentityGroup409(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation was aborted") {
-			return true, "saw a 409 - The operation was aborted"
-		}
-			return true, "saw a 409 - The operation was aborted"
+			return true, "Retrying aborted operation"
 		}
 	}
 	return false, ""
