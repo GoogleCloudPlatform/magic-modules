@@ -10,8 +10,10 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
@@ -1039,4 +1041,72 @@ func TestUnitExpandNodeConfig_nilNodePoolRawConfig(t *testing.T) {
 	if nc == nil || nc.KubeletConfig == nil {
 		t.Fatalf("expected non-nil NodeConfig.KubeletConfig, got %#v", nc)
 	}
+}
+
+// hashicorp/terraform-provider-google#28190 (second panic vector). The raw-config
+// sub-fixes deref nc.KubeletConfig, which is produced by expandKubeletConfig from
+// the diff value nodeConfig["kubelet_config"]. That value and d.GetRawConfig() come
+// from different sources and can diverge: programmatic SDK bridges (Crossplane's
+// upjet-generated provider, Config Connector, etc.) can present an empty/absent
+// diff kubelet_config (expandKubeletConfig returns nil) while raw config still
+// carries a populated kubelet_config block (so vKC.LengthInt() > 0 enters the
+// sub-fix). Without the nc.KubeletConfig != nil guard the deref panics. In vanilla
+// Terraform the two sources agree, so the guard never changes behaviour.
+func TestUnitExpandNodeConfig_nilKubeletConfigFromEmptyDiff(t *testing.T) {
+	t.Parallel()
+
+	// Raw config carries a populated node_config.kubelet_config so the sub-fix
+	// block is entered (vKC.LengthInt() > 0).
+	rawConfig := cty.ObjectVal(map[string]cty.Value{
+		"node_config": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"kubelet_config": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"cpu_cfs_quota": cty.NullVal(cty.Bool),
+					}),
+				}),
+			}),
+		}),
+	})
+
+	res := &schema.Resource{Schema: map[string]*schema.Schema{
+		"node_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"kubelet_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+						"cpu_cfs_quota": {Type: schema.TypeBool, Optional: true},
+					}},
+				},
+			}},
+		},
+	}}
+	// (*Resource).Data preserves InstanceState.RawConfig into d.state.RawConfig,
+	// which GetRawConfig() returns. This is the SDK-supported way to seed a
+	// populated raw config in a unit test (there is no public SetRawConfig).
+	d := res.Data(&terraform.InstanceState{RawConfig: rawConfig})
+
+	// Diff kubelet_config is an EMPTY list -> expandKubeletConfig returns nil ->
+	// nc.KubeletConfig is nil at the sub-fix deref.
+	nodeConfig := []interface{}{
+		map[string]interface{}{
+			"preemptible":    false,
+			"spot":           false,
+			"kubelet_config": []interface{}{},
+		},
+	}
+
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Fatalf("expandNodeConfig panicked with nil KubeletConfig and populated raw config: %v", r)
+			}
+		}()
+		// prefix == "" keeps rawConfigNPRoot at the root, so the node_config
+		// sub-fix runs directly against the raw config built above.
+		_ = expandNodeConfig(d, "", nodeConfig)
+	}()
 }

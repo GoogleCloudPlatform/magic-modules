@@ -1961,7 +1961,16 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			}
 		}
 
-		if !skipRawConfigSubFixes {
+		// Guard: nc.KubeletConfig can be nil here even when raw config shows a
+		// populated kubelet_config block. expandKubeletConfig (above) operates on
+		// the diff value nodeConfig["kubelet_config"], while the sub-fixes below
+		// read d.GetRawConfig(); programmatic SDK bridges (Crossplane's
+		// upjet-generated provider, Config Connector, etc.) can present an
+		// empty/absent diff kubelet_config while raw config still carries it,
+		// so expandKubeletConfig returns nil and the derefs below would panic.
+		// In vanilla Terraform these two sources agree, so this guard never
+		// changes behaviour. See hashicorp/terraform-provider-google#28190.
+		if !skipRawConfigSubFixes && nc.KubeletConfig != nil {
 			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
 				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
 					v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
