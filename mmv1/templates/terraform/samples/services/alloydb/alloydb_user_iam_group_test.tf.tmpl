@@ -36,6 +36,6 @@ resource "google_alloydb_user" "{{$.PrimaryResourceId}}" {
   user_id   = "{{index $.ResourceIdVars "alloydb_user_name"}}"
   user_type = "ALLOYDB_IAM_GROUP"
 
-  database_roles = ["alloydbiamuser"]
+  database_roles = ["alloydbiamgroup"]
   depends_on     = [google_alloydb_instance.default]
 }
