@@ -55,19 +55,21 @@ parameters:
     url_param_only: true
 properties:
   - name: 'enableRules'
-    type: NestedObject
+    type: Array
     required: true
     description: |
       The consumer policy rule that defines enabled services. The structure is documented below.
-    properties:
-      - name: 'services'
-        type: Array
-        send_empty_value: true
-        is_set: true
-        description: |
-          (Optional): List of service names to be enabled in the format of services/<service_name>
-        item_type:
-          type: String
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'services'
+          type: Array
+          send_empty_value: true
+          is_set: true
+          description: |
+            (Optional): List of service names to be enabled in the format of services/<service_name>
+          item_type:
+            type: String
   - name: 'etag'
     type: Fingerprint
     description: |
