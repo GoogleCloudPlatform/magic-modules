@@ -483,7 +483,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	var user *sqladmin.User
 	for _, currentUser := range users.Items {
 		var username string
-		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
+		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP" || currentUser.Type == "ENTRAID_USER") {
 			username = strings.Split(name, "@")[0]
 		} else if strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
 			splitName := strings.SplitN(name, "@", 2)
