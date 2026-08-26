@@ -103,6 +103,34 @@ samples:
           'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
           # for backward compatible
           alloydb_user_name: '"user2@foo.com" + randomSuffix'
+  - name: 'alloydb_user_iam_group'
+    primary_resource_id: 'user3'
+    min_version: 'beta'
+    exclude_test: true
+    steps:
+      - name: 'alloydb_user_iam_group'
+        min_version: 'beta'
+        resource_id_vars:
+          alloydb_cluster_name: 'alloydb-cluster'
+          alloydb_instance_name: 'alloydb-instance'
+          alloydb_cluster_pass: 'cluster_secret'
+          alloydb_user_name: 'group@foo.com'
+          network_name: 'alloydb-network'
+  - name: 'alloydb_user_iam_group_test'
+    primary_resource_id: 'user3'
+    min_version: 'beta'
+    exclude_basic_doc: true
+    steps:
+      - name: 'alloydb_user_iam_group_test'
+        min_version: 'beta'
+        resource_id_vars:
+          alloydb_cluster_name: 'alloydb-cluster'
+          alloydb_instance_name: 'alloydb-instance'
+          alloydb_cluster_pass: 'cluster_secret'
+          alloydb_user_name: 'group@foo.com'
+          network_name: 'alloydb-network'
+        test_vars_overrides:
+          'network_name': 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
 parameters:
   - name: 'cluster'
     type: ResourceRef
@@ -121,15 +149,29 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  # userType is duplicated because ALLOYDB_IAM_GROUP is only supported by the
+  # v1beta API. Drop the GA copy once it is available in v1.
   - name: 'userType'
     type: Enum
     description: |
       The type of this user.
+    exact_version: 'ga'
     required: true
     immutable: true
     enum_values:
       - 'ALLOYDB_BUILT_IN'
       - 'ALLOYDB_IAM_USER'
+  - name: 'userType'
+    type: Enum
+    description: |
+      The type of this user.
+    exact_version: 'beta'
+    required: true
+    immutable: true
+    enum_values:
+      - 'ALLOYDB_BUILT_IN'
+      - 'ALLOYDB_IAM_USER'
+      - 'ALLOYDB_IAM_GROUP'
 properties:
   - name: 'name'
     type: String
