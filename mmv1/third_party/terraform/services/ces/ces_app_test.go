@@ -136,6 +136,7 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
+      retention_window = "86400s"
     }
   }
 
@@ -237,18 +238,21 @@ resource "google_ces_app" "ces_app_basic" {
 
   locked = false
 
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com"]
+  }
+
   error_handling_settings {
     error_handling_strategy = "FALLBACK_RESPONSE"
     fallback_response_config {
       custom_fallback_messages = {
-        "en-US" = "Sorry, something went wrong."
+        "en-US" = "An error occurred, please try again."
       }
       max_fallback_attempts = 3
     }
-  }
-
-  vpc_sc_settings {
-    allowed_origins = ["https://example.com"]
+    end_session_config {
+      escalate_session = true
+    }
   }
 
   # Root agent should not be specified when creating an app
@@ -343,7 +347,7 @@ resource "google_ces_app" "ces_app_basic" {
 
     conversation_logging_settings {
       disable_conversation_logging = true
-      retention_window = "2592000s"
+      retention_window = "172800s"
     }
   }
 
@@ -427,6 +431,11 @@ resource "google_ces_app" "ces_app_basic" {
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
     }
+    whatsapp_config {
+      waba_id = "123456789012345"
+      phone_number_id = "987654321098765"
+      phone_number = "+15551234567"
+    }
   }
 
   metadata = {
@@ -444,18 +453,22 @@ resource "google_ces_app" "ces_app_basic" {
 
   locked = false
 
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com", "https://example.org:443"]
+  }
+
   error_handling_settings {
-    error_handling_strategy = "FALLBACK_RESPONSE"
+    error_handling_strategy = "END_SESSION"
     fallback_response_config {
       custom_fallback_messages = {
-        "en-US" = "Sorry, something went wrong updated."
+        "en-US" = "Sorry, something went wrong."
+        "es-ES" = "Lo siento, algo salió mal."
       }
       max_fallback_attempts = 5
     }
-  }
-
-  vpc_sc_settings {
-    allowed_origins = ["https://example.com", "https://updated.example.com"]
+    end_session_config {
+      escalate_session = false
+    }
   }
 
   evaluation_settings {

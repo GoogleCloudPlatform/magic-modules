@@ -13,6 +13,7 @@
 
 ---
 name: IcebergTable
+api_resource_type_kind: Table
 description: |
   IcebergTables are the primary objects in an IcebergCatalog.
 base_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables
