@@ -48,10 +48,11 @@ func BootstrapIntegrationsClient(t *testing.T, locationID string) BootstrapClien
 			t.Fatalf("Error reading client from response")
 		}
 
-		// A client is GMEK if it does not have a CMEK cloudKmsConfig configured.
-		shouldDeprovision := false
-		if kmsVal, ok := client["cloudKmsConfig"]; ok && kmsVal != nil {
-			shouldDeprovision = true
+		shouldDeprovision := true
+		if isGmekVal, ok := client["isGmek"]; ok {
+			if isGmek, ok := isGmekVal.(bool); ok && isGmek {
+				shouldDeprovision = false
+			}
 		}
 
 		if shouldDeprovision {
