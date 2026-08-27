@@ -54,77 +54,84 @@ func datasourceGoogleComputeServiceAttachmentsRead(d *schema.ResourceData, meta 
 		return err
 	}
 
+	billingProject := project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	id := fmt.Sprintf("projects/%s/regions/%s/serviceAttachments", project, region)
 	d.SetId(id)
 
-	call := NewClient(config, userAgent).ServiceAttachments.List(project, region)
-	if filter, ok := d.GetOk("filter"); ok {
-		call = call.Filter(filter.(string))
+	baseURL, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/serviceAttachments")
+	if err != nil {
+		return err
 	}
 
 	serviceAttachments := make([]map[string]interface{}, 0)
+	pageToken := ""
 
 	for {
-		list, err := call.Do()
+		params := map[string]string{}
+		if filter, ok := d.GetOk("filter"); ok {
+			params["filter"] = filter.(string)
+		}
+		if pageToken != "" {
+			params["pageToken"] = pageToken
+		}
+
+		url, err := transport_tpg.AddQueryParams(baseURL, params)
+		if err != nil {
+			return err
+		}
+
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Attachments Not Found in project %s, region %s", project, region))
 		}
 
-		for _, sa := range list.Items {
-			consumerAcceptLists := make([]map[string]interface{}, 0, len(sa.ConsumerAcceptLists))
-			for _, cal := range sa.ConsumerAcceptLists {
-				consumerAcceptLists = append(consumerAcceptLists, map[string]interface{}{
-					"project_id_or_num": cal.ProjectIdOrNum,
-					"connection_limit":  cal.ConnectionLimit,
-					"network_url":       cal.NetworkUrl,
-				})
-			}
-
-			connectedEndpoints := make([]map[string]interface{}, 0, len(sa.ConnectedEndpoints))
-			for _, ce := range sa.ConnectedEndpoints {
-				connectedEndpoints = append(connectedEndpoints, map[string]interface{}{
-					"endpoint":          ce.Endpoint,
-					"status":            ce.Status,
-					"psc_connection_id": ce.PscConnectionId,
-					"consumer_network":  ce.ConsumerNetwork,
-				})
-			}
-
-			var pscId []map[string]interface{}
-			if sa.PscServiceAttachmentId != nil {
-				pscId = []map[string]interface{}{
-					{
-						"high": fmt.Sprintf("%d", sa.PscServiceAttachmentId.High),
-						"low":  fmt.Sprintf("%d", sa.PscServiceAttachmentId.Low),
-					},
+		if items, ok := resp["items"].([]interface{}); ok {
+			for _, raw := range items {
+				sa, ok := raw.(map[string]interface{})
+				if !ok {
+					continue
 				}
-			}
 
-			mapped := map[string]interface{}{
-				"name":                        sa.Name,
-				"description":                 sa.Description,
-				"self_link":                   sa.SelfLink,
-				"target_service":              sa.TargetService,
-				"connection_preference":       sa.ConnectionPreference,
-				"nat_subnets":                 sa.NatSubnets,
-				"enable_proxy_protocol":       sa.EnableProxyProtocol,
-				"domain_names":                sa.DomainNames,
-				"fingerprint":                 sa.Fingerprint,
-				"region":                      sa.Region,
-				"reconcile_connections":       sa.ReconcileConnections,
-				"propagated_connection_limit": sa.PropagatedConnectionLimit,
-				"consumer_reject_lists":       sa.ConsumerRejectLists,
-				"consumer_accept_lists":       consumerAcceptLists,
-				"connected_endpoints":         connectedEndpoints,
-				"psc_service_attachment_id":   pscId,
+				consumerAcceptLists := flattenServiceAttachmentConsumerAcceptLists(sa["consumerAcceptLists"])
+				connectedEndpoints := flattenServiceAttachmentConnectedEndpoints(sa["connectedEndpoints"])
+				pscId := flattenServiceAttachmentPscServiceAttachmentId(sa["pscServiceAttachmentId"])
+
+				mapped := map[string]interface{}{
+					"name":                        sa["name"],
+					"description":                 sa["description"],
+					"self_link":                   sa["selfLink"],
+					"target_service":              sa["targetService"],
+					"connection_preference":       sa["connectionPreference"],
+					"nat_subnets":                 sa["natSubnets"],
+					"enable_proxy_protocol":       sa["enableProxyProtocol"],
+					"domain_names":                sa["domainNames"],
+					"fingerprint":                 sa["fingerprint"],
+					"region":                      sa["region"],
+					"reconcile_connections":       sa["reconcileConnections"],
+					"propagated_connection_limit": flattenInt64FromFloat(sa["propagatedConnectionLimit"]),
+					"consumer_reject_lists":       sa["consumerRejectLists"],
+					"consumer_accept_lists":       consumerAcceptLists,
+					"connected_endpoints":         connectedEndpoints,
+					"psc_service_attachment_id":   pscId,
+				}
+				serviceAttachments = append(serviceAttachments, mapped)
 			}
-			serviceAttachments = append(serviceAttachments, mapped)
 		}
 
-		if list.NextPageToken == "" {
+		pageToken, _ = resp["nextPageToken"].(string)
+		if pageToken == "" {
 			break
 		}
-		call = call.PageToken(list.NextPageToken)
 	}
 
 	if err := d.Set("service_attachments", serviceAttachments); err != nil {
@@ -140,6 +147,79 @@ func datasourceGoogleComputeServiceAttachmentsRead(d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+func flattenServiceAttachmentConsumerAcceptLists(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	items, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(items))
+	for _, raw := range items {
+		cal, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"project_id_or_num": cal["projectIdOrNum"],
+			"connection_limit":  flattenInt64FromFloat(cal["connectionLimit"]),
+			"network_url":       cal["networkUrl"],
+		})
+	}
+	return result
+}
+
+func flattenServiceAttachmentConnectedEndpoints(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	items, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(items))
+	for _, raw := range items {
+		ce, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"endpoint":          ce["endpoint"],
+			"status":            ce["status"],
+			"psc_connection_id": ce["pscConnectionId"],
+			"consumer_network":  ce["consumerNetwork"],
+		})
+	}
+	return result
+}
+
+func flattenServiceAttachmentPscServiceAttachmentId(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	psc, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"high": psc["high"],
+			"low":  psc["low"],
+		},
+	}
+}
+
+func flattenInt64FromFloat(v interface{}) interface{} {
+	if v == nil {
+		return nil
+	}
+	if f, ok := v.(float64); ok {
+		return int(f)
+	}
+	return v
 }
 
 func init() {
