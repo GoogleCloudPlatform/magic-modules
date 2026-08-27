@@ -13,6 +13,7 @@
 
 ---
 name: 'HiveDatabase'
+api_resource_type_kind: Database
 description: |
   Hive Databases in Biglake Metastore. Hive Databases exist within a Hive Catalog.
 references:

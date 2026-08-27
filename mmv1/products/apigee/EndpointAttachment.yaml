@@ -22,7 +22,7 @@ references:
     'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments/create'
 docs:
-base_url: 'endpointAttachments'
+base_url: '{{org_id}}/endpointAttachments'
 self_link: '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
 create_url: '{{org_id}}/endpointAttachments?endpointAttachmentId={{endpoint_attachment_id}}'
 delete_url: '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
@@ -30,6 +30,8 @@ immutable: true
 import_format:
   - '{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}'
   - '{{org_id}}/{{endpoint_attachment_id}}'
+generate_list_resource: true
+
 timeouts:
   insert_minutes: 30
   update_minutes: 20
