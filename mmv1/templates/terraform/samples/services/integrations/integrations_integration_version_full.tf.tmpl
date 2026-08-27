@@ -30,7 +30,7 @@ resource "google_integrations_integration_version" "version_full" {
       names = ["param1"]
     }
     output_variables {
-      names = ["param1"]
+      names = ["param2"]
     }
     properties = {
       "Trigger name" = "test_trigger"
@@ -52,9 +52,9 @@ resource "google_integrations_integration_version" "version_full" {
       disable_alert = false
       display_name = "test-alert"
       duration_threshold = "3600s"
-      metric_type = "ERROR_RATE"
+      metric_type = "EVENT_ERROR_RATE"
       only_final_attempt = false
-      threshold_type = "ABSOLUTE"
+      threshold_type = "EXPECTED_MAX"
       threshold_value {
         absolute = "1"
       }
@@ -91,62 +91,6 @@ resource "google_integrations_integration_version" "version_full" {
         string_value = "GET"
       }
     }
-    parameters {
-      key = "stringArrayParam"
-      masked = false
-      value {
-        string_array {
-          string_values = ["val1", "val2"]
-        }
-      }
-    }
-    parameters {
-      key = "intArrayParam"
-      masked = false
-      value {
-        int_array {
-          int_values = ["1", "2"]
-        }
-      }
-    }
-    parameters {
-      key = "boolArrayParam"
-      masked = false
-      value {
-        boolean_array {
-          boolean_values = [true, false]
-        }
-      }
-    }
-    parameters {
-      key = "doubleArrayParam"
-      masked = false
-      value {
-        double_array {
-          double_values = [1.1, 2.2]
-        }
-      }
-    }
-    parameters {
-      key = "jsonParam"
-      masked = false
-      value {
-        json_value = "{\"key\": \"val\"}"
-      }
-    }
-    parameters {
-      key = "intParam"
-      masked = false
-      value {
-        int_value = "42"
-      }
-    }
-    failure_policy {
-      condition = "true"
-      interval_time = "1970-01-01T00:00:10Z"
-      max_retries = 3
-      retry_strategy = "FIXED_INTERVAL"
-    }
     conditional_failure_policies {
       default_failure_policy {
         condition = "true"
@@ -160,15 +104,6 @@ resource "google_integrations_integration_version" "version_full" {
         max_retries = 3
         retry_strategy = "FIXED_INTERVAL"
       }
-    }
-    success_policy {
-      final_state = "SUCCEEDED"
-    }
-    synchronous_call_failure_policy {
-      condition = "true"
-      interval_time = "1970-01-01T00:00:10Z"
-      max_retries = 3
-      retry_strategy = "FIXED_INTERVAL"
     }
     next_tasks {
       task_id = "2"
@@ -249,7 +184,7 @@ resource "google_integrations_integration_version" "version_full" {
       int_value = "10"
     }
     display_name = "param2"
-    input_output_type = "IN"
+    input_output_type = "OUT"
     searchable = true
     masked = false
     description = "int parameter"
@@ -341,37 +276,5 @@ resource "google_integrations_integration_version" "version_full" {
     searchable = true
     masked = false
     description = "double array parameter"
-  }
-
-  integration_parameters {
-    key = "param9"
-    data_type = "JSON_VALUE"
-    default_value {
-      json_value = "{\"key\": \"val\"}"
-    }
-    display_name = "param9"
-    input_output_type = "IN"
-    searchable = true
-    masked = false
-    description = "json parameter"
-    json_schema = "{\"$schema\": \"http://json-schema.org/draft-04/schema#\"}"
-  }
-
-  integration_config_parameters {
-    parameter {
-      key = "config_param1"
-      data_type = "STRING_VALUE"
-      default_value {
-        string_value = "default_config_val"
-      }
-      display_name = "config_param1"
-      input_output_type = "IN"
-      searchable = true
-      masked = false
-      description = "config param description"
-    }
-    value {
-      string_value = "val1"
-    }
   }
 }

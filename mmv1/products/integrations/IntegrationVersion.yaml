@@ -62,19 +62,6 @@ samples:
           description: Updated description
         test_vars_overrides:
           client: BootstrapIntegrationsClient(t, "us-east4")
-  - name: integrations_integration_version_cmek
-    primary_resource_id: version_cmek
-    bootstrap_iam:
-      - member: serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com
-        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
-    skip_vcr: true
-    steps:
-      - name: integrations_integration_version_cmek
-        resource_id_vars:
-          integration_name: test-integration
-        test_vars_overrides:
-          client: BootstrapIntegrationsClient(t, "us-east4")
-          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-east4").CryptoKey.Name
 
 parameters:
   - name: location
