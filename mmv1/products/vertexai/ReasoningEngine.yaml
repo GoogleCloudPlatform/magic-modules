@@ -937,7 +937,6 @@ properties:
           function: 'validation.StringIsJSON'
       - name: 'buildSpec'
         type: NestedObject
-        min_version: 'beta'
         description: |-
           Optional. Configuration for building container image.
         properties:
