@@ -116,6 +116,18 @@ properties:
                       handle the conversation from this point forward.
                       Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
                     required: true
+              - name: blob
+                type: NestedObject
+                description: Represents a blob input or output in the conversation.
+                properties:
+                  - name: data
+                    type: String
+                    description: Raw bytes of the blob.
+                    required: true
+                  - name: mimeType
+                    type: String
+                    description: The IANA standard MIME type of the source data.
+                    required: true
               - name: image
                 type: NestedObject
                 description: Represents an image input or output in the conversation.
