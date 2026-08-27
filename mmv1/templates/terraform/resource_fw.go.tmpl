@@ -307,7 +307,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
         return 
     }
@@ -527,7 +527,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 {{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
         return 
     }
@@ -671,7 +671,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
 {{- end}}
 		diags.AddError(fmt.Sprintf("Error deleting {{ $.Name -}}: %s", data.Id.ValueString()), err.Error())
         return 

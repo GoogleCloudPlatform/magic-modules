@@ -398,7 +398,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     })
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
@@ -436,7 +436,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
@@ -516,7 +516,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{ end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
@@ -542,7 +542,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{-        else }}
 {{- if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
 {{- end}}
@@ -1050,7 +1050,7 @@ if len(updateMask) > 0 {
 
     if err != nil {
 {{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
         return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
     } else {
@@ -1069,7 +1069,7 @@ if len(updateMask) > 0 {
 
     if err != nil {
 {{- if $.CustomCode.PostUpdateFailure -}}
-        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
         return err
     }
@@ -1083,7 +1083,7 @@ if len(updateMask) > 0 {
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{                      else -}}
 {{- if $.CustomCode.PostUpdateFailure -}}
-        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
         return err
 {{-                     end}}
@@ -1247,7 +1247,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         })
         if err != nil {
 {{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
-            resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+            err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
             return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
         } else {
@@ -1265,7 +1265,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
 {{- if $.CustomCode.PostUpdateFailure -}}
-	        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+	        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
 	        return err
 	    }
@@ -1276,7 +1276,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{-                          else -}}
 {{- if $.CustomCode.PostUpdateFailure -}}
-	        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+	        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
 {{- end}}
 	        return err
 {{-                         end}}
@@ -1421,7 +1421,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     })
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
 {{- end}}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
@@ -1433,7 +1433,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
             {{- else }}
 {{- if $.CustomCode.PostDeleteFailure -}}
-        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
 {{- end}}
         return fmt.Errorf("Error waiting to delete {{ $.Name }}: %s", err)
             {{- end }}
@@ -1449,7 +1449,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     if err != nil {
 {{- if $.CustomCode.PostDeleteFailure -}}
-        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
 {{- end}}
         return err
     }
@@ -1533,17 +1533,17 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
     {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostUpdateFailure }}
-func resource{{ $.ResourceName -}}PostUpdateFailure(d *schema.ResourceData, meta interface{}) {
+func resource{{ $.ResourceName -}}PostUpdateFailure(d *schema.ResourceData, meta interface{}, err error) error {
     {{- customTemplate $ $.CustomCode.PostUpdateFailure false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostDeleteFailure }}
-func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta interface{}) {
+func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta interface{}, err error) error {
     {{- customTemplate $ $.CustomCode.PostDeleteFailure false -}}
 }
 {{- end }}
