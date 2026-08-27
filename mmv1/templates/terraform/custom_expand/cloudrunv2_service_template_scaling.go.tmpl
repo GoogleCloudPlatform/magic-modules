@@ -40,6 +40,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 		transformed["maxInstanceCount"] = max
 	}
 
+{{- if ne $.ResourceMetadata.TargetVersionName "ga" }}
 {{- if not (contains $.ResourceMetadata.ProductMetadata.Compiler "terraformgoogleconversion") }}
 	if rd, ok := d.(*schema.ResourceData); ok {
 		cpuPath := cty.GetAttrPath("template").IndexInt(0).GetAttr("scaling").IndexInt(0).GetAttr("cpu_utilization")
@@ -58,6 +59,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	if concurrency, ok := original["concurrency_utilization"].(float64); ok && concurrency > 0 {
 		transformed["concurrencyUtilization"] = concurrency
 	}
+{{- end }}
 {{- end }}
 
 	return transformed, nil
