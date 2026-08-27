@@ -114,7 +114,7 @@ PROVIDER_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 # Stop if downstream has uncommitted work
 ( cd "$PROVIDER_PATH" && git status --porcelain ) && echo "Confirm clean before continuing"
 
-make provider VERSION=ga OUTPUT_PATH="$PROVIDER_PATH" PRODUCT=<PRODUCT>
+make provider VERSION=ga OUTPUT_PATH="$PROVIDER_PATH"
 ```
 
 Expected new files in the downstream per opted-in resource:

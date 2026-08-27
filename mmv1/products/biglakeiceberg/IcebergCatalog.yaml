@@ -13,6 +13,7 @@
 
 ---
 name: IcebergCatalog
+api_resource_type_kind: Catalog
 description: |
   IcebergCatalogs are top-level containers for Apache Iceberg REST Catalog served Namespaces and Tables.
 references:

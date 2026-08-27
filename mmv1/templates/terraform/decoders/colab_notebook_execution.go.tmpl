@@ -1,0 +1,4 @@
+if v, ok := res["name"].(string); ok && v != "" {
+	res["notebookExecutionJobId"] = tpgresource.GetResourceNameFromSelfLink(v)
+}
+return res, nil

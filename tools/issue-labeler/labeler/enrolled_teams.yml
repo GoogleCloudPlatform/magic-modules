@@ -39,13 +39,11 @@ service/aiplatform-matching-engine:
 service/aiplatform-metadata:
   resources:
   - google_vertex_ai_metadata_store
-  - google_vertex_ai_schedule
 service/aiplatform-prediction:
   resources:
   - google_vertex_ai_cache_config
   - google_vertex_ai_endpoint
   - google_vertex_ai_deployment_resource_pool
-  - google_ml_engine_model
   - google_vertex_ai_endpoint_with_model_garden_deployment
   - google_vertex_ai_model_garden_enable_model
 service/aiplatform-rag-engine:
@@ -592,6 +590,7 @@ service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
   - google_monitoring_alert_policy
+  - google_monitoring_snooze
 service/monitoring-metrics:
   resources:
   - google_monitoring_metric_descriptor
