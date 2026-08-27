@@ -192,6 +192,10 @@ properties:
         output: true
         item_type:
           type: String
+  - name: 'bootstrapAddress'
+    type: String
+    description: "The bootstrap address of the Kafka cluster. Use port :9092 for SASL connection and :9192 for mTLS connection"
+    output: true
   - name: 'tlsConfig'
     type: NestedObject
     default_from_api: true
