@@ -862,6 +862,29 @@ properties:
                       Format:
                       `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
                     output: true
+              - name: unredactedBigqueryExportSettings
+                type: NestedObject
+                description: |-
+                  Settings to describe the BigQuery export behaviors for the app for
+                  unredacted conversation data.
+                output: true
+                properties:
+                  - name: dataset
+                    type: String
+                    description: The BigQuery dataset to export the data to.
+                    output: true
+                  - name: enabled
+                    type: Boolean
+                    description: Indicates whether the BigQuery export is enabled.
+                    output: true
+                  - name: project
+                    type: String
+                    description: |-
+                      The project ID of the BigQuery dataset to export the data to.
+                      Note: If the BigQuery dataset is in a different project from the app, you should grant
+                      roles/bigquery.admin role to the CES service agent service-<PROJECT-
+                      NUMBER>@gcp-sa-ces.iam.gserviceaccount.com.
+                    output: true
           - name: metadata
             type: KeyValuePairs
             description: |-
