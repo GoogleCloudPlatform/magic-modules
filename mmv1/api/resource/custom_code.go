@@ -82,8 +82,7 @@ type CustomCode struct {
 	PostCreate string `yaml:"post_create,omitempty"`
 
 	// This code is run after the Create call fails before the error is
-	// returned. It's placed in the Create function directly without
-	// modification.
+	// returned. It is wrapped in a function.
 	PostCreateFailure string `yaml:"post_create_failure,omitempty"`
 
 	// This code replaces the entire contents of the Create call. It
@@ -112,8 +111,7 @@ type CustomCode struct {
 	PostUpdate string `yaml:"post_update,omitempty"`
 
 	// This code is run after the Update call fails before the error is
-	// returned. It's placed in the Update function directly without
-	// modification.
+	// returned. It is wrapped in a function.
 	PostUpdateFailure string `yaml:"post_update_failure,omitempty"`
 
 	// This code replaces the entire contents of the Update call. It
@@ -130,8 +128,7 @@ type CustomCode struct {
 	PostDelete string `yaml:"post_delete,omitempty"`
 
 	// This code is run after the Delete call fails before the error is
-	// returned. It's placed in the Delete function directly without
-	// modification.
+	// returned. It is wrapped in a function.
 	PostDeleteFailure string `yaml:"post_delete_failure,omitempty"`
 
 	// This code replaces the entire delete method.  Since the delete
