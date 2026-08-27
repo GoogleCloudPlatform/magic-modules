@@ -1049,6 +1049,9 @@ if len(updateMask) > 0 {
     })
 
     if err != nil {
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+{{- end}}
         return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
     } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1065,6 +1068,9 @@ if len(updateMask) > 0 {
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
+{{- if $.CustomCode.PostUpdateFailure -}}
+        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+{{- end}}
         return err
     }
 {{-             if not $.FieldSpecificUpdateMethods }}
@@ -1076,6 +1082,9 @@ if len(updateMask) > 0 {
 {{                      if $.GetAsync.SuppressError -}}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{                      else -}}
+{{- if $.CustomCode.PostUpdateFailure -}}
+        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+{{- end}}
         return err
 {{-                     end}}
     }
@@ -1237,6 +1246,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 			Headers:   headers,
         })
         if err != nil {
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+            resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+{{- end}}
             return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
         } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1252,6 +1264,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
+{{- if $.CustomCode.PostUpdateFailure -}}
+	        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+{{- end}}
 	        return err
 	    }
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
@@ -1260,6 +1275,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{-                          else -}}
+{{- if $.CustomCode.PostUpdateFailure -}}
+	        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
+{{- end}}
 	        return err
 {{-                         end}}
         }
@@ -1402,6 +1420,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- end }}
     })
     if err != nil {
+{{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
+        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+{{- end}}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
@@ -1411,6 +1432,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
             {{- else }}
+{{- if $.CustomCode.PostDeleteFailure -}}
+        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+{{- end}}
         return fmt.Errorf("Error waiting to delete {{ $.Name }}: %s", err)
             {{- end }}
     }
@@ -1424,6 +1448,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
+{{- if $.CustomCode.PostDeleteFailure -}}
+        resource{{ $.ResourceName -}}PostDeleteFailure(d, meta)
+{{- end}}
         return err
     }
     {{- end }}
@@ -1508,6 +1535,16 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
     {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
+}
+{{- end }}
+{{- if $.CustomCode.PostUpdateFailure }}
+func resource{{ $.ResourceName -}}PostUpdateFailure(d *schema.ResourceData, meta interface{}) {
+    {{- customTemplate $ $.CustomCode.PostUpdateFailure false -}}
+}
+{{- end }}
+{{- if $.CustomCode.PostDeleteFailure }}
+func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta interface{}) {
+    {{- customTemplate $ $.CustomCode.PostDeleteFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}

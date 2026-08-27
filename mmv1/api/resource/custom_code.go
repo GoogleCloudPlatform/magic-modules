@@ -111,6 +111,11 @@ type CustomCode struct {
 	// false.
 	PostUpdate string `yaml:"post_update,omitempty"`
 
+	// This code is run after the Update call fails before the error is
+	// returned. It's placed in the Update function directly without
+	// modification.
+	PostUpdateFailure string `yaml:"post_update_failure,omitempty"`
+
 	// This code replaces the entire contents of the Update call. It
 	// should be used for resources that don't have normal update
 	// semantics that cannot be supported well by other MM features.
@@ -123,6 +128,11 @@ type CustomCode struct {
 
 	// This code is run just after the Delete call happens.
 	PostDelete string `yaml:"post_delete,omitempty"`
+
+	// This code is run after the Delete call fails before the error is
+	// returned. It's placed in the Delete function directly without
+	// modification.
+	PostDeleteFailure string `yaml:"post_delete_failure,omitempty"`
 
 	// This code replaces the entire delete method.  Since the delete
 	// method's function header can't be changed, the template
