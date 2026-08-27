@@ -91,6 +91,9 @@ resource "google_integrations_integration_version" "version_full" {
         string_value = "GET"
       }
     }
+    success_policy {
+      final_state = "SUCCEEDED"
+    }
     conditional_failure_policies {
       default_failure_policy {
         condition = "true"
@@ -276,5 +279,34 @@ resource "google_integrations_integration_version" "version_full" {
     searchable = true
     masked = false
     description = "double array parameter"
+  }
+
+  integration_parameters {
+    key = "param9"
+    data_type = "JSON_VALUE"
+    default_value {
+      json_value = jsonencode({ "key" = "val" })
+    }
+    display_name = "param9"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "json parameter"
+    json_schema = jsonencode({ "$schema" = "http://json-schema.org/draft-04/schema#" })
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param1`" + `"
+      data_type = "STRING_VALUE"
+      default_value {
+        string_value = "default_config_val"
+      }
+      display_name = "` + "`CONFIG_param1`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "config param description"
+    }
   }
 }

@@ -33,6 +33,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  constants: templates/terraform/constants/integrations_json_diff_suppress.go.tmpl
   decoder: templates/terraform/decoders/integrations_version.go.tmpl
   test_check_destroy: templates/terraform/custom_check_destroy/integrations_version.go.tmpl
 autogen_status: SW50ZWdyYXRpb25WZXJzaW9uQXV0b2dlblYyQWdlbnQ=
@@ -295,6 +296,7 @@ properties:
                 - name: jsonValue
                   type: String
                   description: Json.
+                  diff_suppress_func: integrationsJsonDiffSuppress
                 - name: stringArray
                   type: NestedObject
                   description: This message only contains a field of string array.
@@ -331,6 +333,7 @@ properties:
               description: |-
                 This schema will be used to validate runtime JSON-typed values of this
                 parameter.
+              diff_suppress_func: integrationsJsonDiffSuppress
             - name: key
               type: String
               description: |-
@@ -391,6 +394,7 @@ properties:
             - name: jsonValue
               type: String
               description: Json.
+              diff_suppress_func: integrationsJsonDiffSuppress
             - name: stringArray
               type: NestedObject
               description: This message only contains a field of string array.
@@ -484,6 +488,7 @@ properties:
             - name: jsonValue
               type: String
               description: Json.
+              diff_suppress_func: integrationsJsonDiffSuppress
             - name: stringArray
               type: NestedObject
               description: This message only contains a field of string array.
@@ -520,6 +525,7 @@ properties:
           description: |-
             This schema will be used to validate runtime JSON-typed values of this
             parameter.
+          diff_suppress_func: integrationsJsonDiffSuppress
         - name: key
           type: String
           description: |-
@@ -837,6 +843,7 @@ properties:
                   - name: jsonValue
                     type: String
                     description: Json.
+                    diff_suppress_func: integrationsJsonDiffSuppress
                   - name: stringArray
                     type: NestedObject
                     description: This message only contains a field of string array.
