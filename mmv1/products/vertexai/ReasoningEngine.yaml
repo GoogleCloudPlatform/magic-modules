@@ -677,7 +677,6 @@ properties:
               - 'EXPERIMENTAL'
           - name: 'agentGatewayConfig'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Agent Gateway configuration for a Reasoning Engine deployment.
             properties:
@@ -868,7 +867,6 @@ properties:
                       The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
           - name: 'agentConfigSource'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Specification for the deploying from agent config.
             properties:
@@ -947,6 +945,10 @@ properties:
             type: String
             description: |-
               Optional. The resource name of the Cloud Build WorkerPool to use for the build.
+          - name: 'serviceAccount'
+            type: String
+            description: |-
+              Optional. The service account that the Cloud Build builder runs as.
   - name: 'contextSpec'
     min_version: 'beta'
     type: NestedObject
