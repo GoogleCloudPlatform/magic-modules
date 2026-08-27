@@ -27,9 +27,9 @@ references:
   api: 'https://docs.cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
 import_format: ['{{%parent}}/consumerPolicies/{{name}}']
 id_format: '{{parent}}/consumerPolicies/{{name}}'
+autogen_async: true
 async:
   type: 'OpAsync'
-  autogen_async: true
   actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
