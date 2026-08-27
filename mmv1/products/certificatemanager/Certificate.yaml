@@ -28,7 +28,6 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/certificates/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/certificates/{{name}}
-generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

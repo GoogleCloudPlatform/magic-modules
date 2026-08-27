@@ -22,7 +22,6 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs
 immutable: true
-generate_list_resource: true
 create_url: projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs?certificateIssuanceConfigId={{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}
