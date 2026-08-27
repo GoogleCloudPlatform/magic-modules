@@ -374,11 +374,13 @@ properties:
           properties:
             - name: network
               type: String
+              diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
               description: |
                 The name of the VPC network to which the version connects (e.g. `projects/my-project/global/networks/default`).
             - name: subnetwork
               api_name: subnet
               type: String
+              diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
               description: |
                 The name of the subnetwork to which the version connects (e.g. `projects/my-project/regions/us-central1/subnetworks/default`).
             - name: tags
