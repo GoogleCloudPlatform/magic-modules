@@ -684,6 +684,73 @@ properties:
                       description: |-
                         Optional. Service is the name of the service to place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md ). If this is not specified, the default behavior is defined by gRPC
                       type: String
+            - name: 'baseImageUri'
+              type: String
+              description: |-
+                Base image for this container. If set, it indicates that the service is enrolled into automatic base image update.
+            - name: 'buildInfo'
+              type: NestedObject
+              description: |-
+                The build info of the container image.
+              output: true
+              properties:
+                - name: 'functionTarget'
+                  type: String
+                  description: |-
+                    Entry point of the function when the image is a Cloud Run function.
+                  output: true
+                - name: 'source_location'
+                  type: String
+                  description: |-
+                    Source code location of the image.
+                  output: true
+            - name: 'sourceCode'
+              type: NestedObject
+              description: |-
+                Location of the source.
+              properties:
+                - name: 'cloudStorageSource'
+                  type: NestedObject
+                  description: |-
+                    Cloud Storage source.
+                  properties:
+                    - name: 'bucket'
+                      type: String
+                      description: |-
+                        The Cloud Storage bucket name.
+                      required: true
+                    - name: 'object'
+                      type: String
+                      description: |-
+                        The Cloud Storage object name.
+                      required: true
+                    - name: 'generation'
+                      type: String
+                      description: |-
+                        The Cloud Storage object generation. This is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
+                - name: 'inlinedSource'
+                  type: NestedObject
+                  description: |-
+                    Inlined source.
+                  properties:
+                    - name: 'sources'
+                      type: Array
+                      description: |-
+                        The source code.
+                      required: true
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'filename'
+                            type: String
+                            description: |-
+                              The relative path of the file to the root of the source directory.
+                            required: true
+                          - name: 'content'
+                            type: String
+                            description: |-
+                              Represents the exact, literal, and complete source code of the file.
+                            required: true
       - name: 'volumes'
         type: Array
         description: |-

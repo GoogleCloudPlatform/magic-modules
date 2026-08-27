@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolFullUpdate(t *testing.T) {
@@ -604,5 +605,137 @@ resource "google_cloud_run_v2_worker_pool" "default" {
   }
 }
 
+`, context)
+}
+
+func TestAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolSourceCodeUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2WorkerPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolSourceCode(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_worker_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+			},
+			{
+				Config: testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolSourceCodeUpdate(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_worker_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolSourceCode(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "sourcebucket" {
+  provider                    = google-beta
+  name                        = "tf-test-worker-pool-src%{random_suffix}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "source_tar_1" {
+  provider = google-beta
+  name     = "source-1.tar.gz"
+  bucket   = google_storage_bucket.sourcebucket.name
+  source   = "./test-fixtures/cr-zip-nodejs-hello.tar.gz"
+}
+
+resource "google_storage_bucket_object" "source_tar_2" {
+  provider = google-beta
+  name     = "source-2.tar.gz"
+  bucket   = google_storage_bucket.sourcebucket.name
+  source   = "./test-fixtures/cr-zip-py-hello.tar.gz"
+}
+
+resource "google_cloud_run_v2_worker_pool" "default" {
+  provider            = google-beta
+  name                = "tf-test-cloudrun-worker-pool%{random_suffix}"
+  location            = "us-central1"
+  deletion_protection = false
+
+  template {
+    containers {
+      image          = "scratch"
+      base_image_uri = "us-central1-docker.pkg.dev/serverless-runtimes/google-24-full/runtimes/nodejs24"
+      command        = ["node"]
+      args           = ["index.js"]
+      source_code {
+        cloud_storage_source {
+          bucket     = google_storage_bucket.sourcebucket.name
+          object     = google_storage_bucket_object.source_tar_1.name
+          generation = google_storage_bucket_object.source_tar_1.generation
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolSourceCodeUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "sourcebucket" {
+  provider                    = google-beta
+  name                        = "tf-test-worker-pool-src%{random_suffix}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "source_tar_1" {
+  provider = google-beta
+  name     = "source-1.tar.gz"
+  bucket   = google_storage_bucket.sourcebucket.name
+  source   = "./test-fixtures/cr-zip-nodejs-hello.tar.gz"
+}
+
+resource "google_storage_bucket_object" "source_tar_2" {
+  provider = google-beta
+  name     = "source-2.tar.gz"
+  bucket   = google_storage_bucket.sourcebucket.name
+  source   = "./test-fixtures/cr-zip-py-hello.tar.gz"
+}
+
+resource "google_cloud_run_v2_worker_pool" "default" {
+  provider            = google-beta
+  name                = "tf-test-cloudrun-worker-pool%{random_suffix}"
+  location            = "us-central1"
+  deletion_protection = false
+
+  template {
+    containers {
+      image          = "scratch"
+      base_image_uri = "us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/python313"
+      command        = ["python"]
+      args           = ["main.py"]
+      source_code {
+        cloud_storage_source {
+          bucket     = google_storage_bucket.sourcebucket.name
+          object     = google_storage_bucket_object.source_tar_2.name
+          generation = google_storage_bucket_object.source_tar_2.generation
+        }
+      }
+    }
+  }
+}
 `, context)
 }
