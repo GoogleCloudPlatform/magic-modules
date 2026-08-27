@@ -150,6 +150,15 @@ samples:
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
+  - name: workstation_config_reservation_affinity
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: workstation_config_reservation_affinity
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          reservation_name: workstation-reservation
 parameters:
   - name: workstationConfigId
     type: String
