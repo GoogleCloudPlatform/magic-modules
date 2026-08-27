@@ -81,6 +81,14 @@ samples:
           cluster_id: custom-urls-cluster
         resource_id_vars:
           cluster_network_name: workstations-network
+  - name: workstation_cluster_console_url
+    primary_resource_id: default
+    steps:
+      - name: workstation_cluster_console_url
+        vars:
+          cluster_id: console-url-cluster
+        resource_id_vars:
+          cluster_network_name: workstations-network
 parameters:
   - name: workstationClusterId
     type: String
