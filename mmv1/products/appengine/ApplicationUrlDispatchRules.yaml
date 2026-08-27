@@ -30,6 +30,7 @@ import_format:
   - '{{project}}'
 mutex: apps/{{project}}
 exclude_sweeper: true
+generate_list_resource: true
 async:
   operation:
     base_url: '{{op_id}}'

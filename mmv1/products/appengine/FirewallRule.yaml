@@ -34,6 +34,7 @@ timeouts:
   delete_minutes: 20
 mutex: apps/{{project}}
 exclude_sweeper: true
+generate_list_resource: true
 async:
   type: PollAsync
   actions: [create]
