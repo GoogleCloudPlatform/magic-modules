@@ -1,3 +1,8 @@
+resource "google_service_account" "test_sa" {
+  account_id   = "tf-test-sa%{random_suffix}"
+  display_name = "Test Service Account"
+}
+
 resource "google_integrations_integration_version" "version_full" {
   location = "us-east4"
   integration = "%{integration_name}"
@@ -5,6 +10,7 @@ resource "google_integrations_integration_version" "version_full" {
   user_label = "v1.0.0"
   database_persistence_policy = "DATABASE_PERSISTENCE_DISABLED"
   enable_variable_masking = true
+  run_as_service_account = google_service_account.test_sa.email
 
   cloud_logging_details {
     cloud_logging_severity = "INFO"
@@ -17,6 +23,15 @@ resource "google_integrations_integration_version" "version_full" {
     trigger_number = "1"
     trigger_id = "api_trigger/test_trigger"
     description = "API trigger description"
+    trigger = "API Trigger"
+    error_catcher_id = "ERROR_CATCHER_1"
+    next_tasks_execution_policy = "RUN_ALL_MATCH"
+    input_variables {
+      names = ["param1"]
+    }
+    output_variables {
+      names = ["param1"]
+    }
     properties = {
       "Trigger name" = "test_trigger"
     }
@@ -26,7 +41,23 @@ resource "google_integrations_integration_version" "version_full" {
     }
     start_tasks {
       task_id = "1"
+      condition = "true"
+      description = "Start task description"
       display_name = "start"
+      task_config_id = "1"
+    }
+    alert_config {
+      aggregation_period = "3600s"
+      alert_threshold = 1
+      disable_alert = false
+      display_name = "test-alert"
+      duration_threshold = "3600s"
+      metric_type = "ERROR_RATE"
+      only_final_attempt = false
+      threshold_type = "ABSOLUTE"
+      threshold_value {
+        absolute = "1"
+      }
     }
   }
 
@@ -60,7 +91,69 @@ resource "google_integrations_integration_version" "version_full" {
         string_value = "GET"
       }
     }
+    parameters {
+      key = "stringArrayParam"
+      masked = false
+      value {
+        string_array {
+          string_values = ["val1", "val2"]
+        }
+      }
+    }
+    parameters {
+      key = "intArrayParam"
+      masked = false
+      value {
+        int_array {
+          int_values = ["1", "2"]
+        }
+      }
+    }
+    parameters {
+      key = "boolArrayParam"
+      masked = false
+      value {
+        boolean_array {
+          boolean_values = [true, false]
+        }
+      }
+    }
+    parameters {
+      key = "doubleArrayParam"
+      masked = false
+      value {
+        double_array {
+          double_values = [1.1, 2.2]
+        }
+      }
+    }
+    parameters {
+      key = "jsonParam"
+      masked = false
+      value {
+        json_value = "{\"key\": \"val\"}"
+      }
+    }
+    parameters {
+      key = "intParam"
+      masked = false
+      value {
+        int_value = "42"
+      }
+    }
+    failure_policy {
+      condition = "true"
+      interval_time = "1970-01-01T00:00:10Z"
+      max_retries = 3
+      retry_strategy = "FIXED_INTERVAL"
+    }
     conditional_failure_policies {
+      default_failure_policy {
+        condition = "true"
+        interval_time = "1970-01-01T00:00:10Z"
+        max_retries = 3
+        retry_strategy = "FIXED_INTERVAL"
+      }
       failure_policies {
         condition = "true"
         interval_time = "1970-01-01T00:00:10Z"
@@ -68,10 +161,21 @@ resource "google_integrations_integration_version" "version_full" {
         retry_strategy = "FIXED_INTERVAL"
       }
     }
+    success_policy {
+      final_state = "SUCCEEDED"
+    }
+    synchronous_call_failure_policy {
+      condition = "true"
+      interval_time = "1970-01-01T00:00:10Z"
+      max_retries = 3
+      retry_strategy = "FIXED_INTERVAL"
+    }
     next_tasks {
       task_id = "2"
       condition = "true"
       display_name = "Next Task"
+      description = "Next task description"
+      task_config_id = "2"
     }
     next_tasks_execution_policy = "RUN_ALL_MATCH"
   }
@@ -118,6 +222,10 @@ resource "google_integrations_integration_version" "version_full" {
     }
     start_error_tasks {
       task_id = "2"
+      condition = "true"
+      description = "Start error task description"
+      display_name = "Start Error Task"
+      task_config_id = "2"
     }
   }
 
@@ -171,5 +279,99 @@ resource "google_integrations_integration_version" "version_full" {
     searchable = true
     masked = false
     description = "double parameter"
+  }
+
+  integration_parameters {
+    key = "param5"
+    data_type = "STRING_ARRAY"
+    default_value {
+      string_array {
+        string_values = ["val1", "val2"]
+      }
+    }
+    display_name = "param5"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "string array parameter"
+    is_transient = false
+    producer = "1_1"
+  }
+
+  integration_parameters {
+    key = "param6"
+    data_type = "INT_ARRAY"
+    default_value {
+      int_array {
+        int_values = ["1", "2"]
+      }
+    }
+    display_name = "param6"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "int array parameter"
+  }
+
+  integration_parameters {
+    key = "param7"
+    data_type = "BOOLEAN_ARRAY"
+    default_value {
+      boolean_array {
+        boolean_values = [true, false]
+      }
+    }
+    display_name = "param7"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "bool array parameter"
+  }
+
+  integration_parameters {
+    key = "param8"
+    data_type = "DOUBLE_ARRAY"
+    default_value {
+      double_array {
+        double_values = [1.1, 2.2]
+      }
+    }
+    display_name = "param8"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "double array parameter"
+  }
+
+  integration_parameters {
+    key = "param9"
+    data_type = "JSON_VALUE"
+    default_value {
+      json_value = "{\"key\": \"val\"}"
+    }
+    display_name = "param9"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "json parameter"
+    json_schema = "{\"$schema\": \"http://json-schema.org/draft-04/schema#\"}"
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "config_param1"
+      data_type = "STRING_VALUE"
+      default_value {
+        string_value = "default_config_val"
+      }
+      display_name = "config_param1"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "config param description"
+    }
+    value {
+      string_value = "val1"
+    }
   }
 }
