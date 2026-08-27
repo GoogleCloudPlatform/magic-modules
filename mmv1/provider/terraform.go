@@ -210,10 +210,13 @@ func (t *Terraform) GenerateIamListResource(object api.Resource, templateData Te
 		if !object.IamPolicy.GeneratesListResource(kind) {
 			continue
 		}
+		tmpls, ok := iamListTemplates[kind]
+		if !ok {
+			log.Fatalf("no templates registered for IAM list kind %q", kind)
+		}
 
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_%s.go", t.ResourceGoFilename(object), kind))
-		templatePath := fmt.Sprintf("templates/terraform/iam_%s_list_resource.go.tmpl", kind)
-		templateData.GenerateFile(targetFilePath, templatePath, object, true, templatePath)
+		templateData.GenerateFile(targetFilePath, tmpls.Resource, object, true, tmpls.Resource)
 		t.GenerateIamListResourceQueryTest(object, templateData, targetFolder, kind)
 	}
 }

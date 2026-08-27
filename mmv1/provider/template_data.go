@@ -45,6 +45,21 @@ var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
 
+// iamListTemplatePaths holds the template paths for one IAM list resource kind.
+type iamListTemplatesPaths struct {
+	Resource string
+	Doc      string
+	Test     string
+}
+
+var iamListTemplates = map[string]iamListTemplatesPaths{
+	"member": {
+		Resource: "templates/terraform/iam_member_list_resource.go.tmpl",
+		Doc:      "templates/terraform/iam_member_list_resource.html.markdown.tmpl",
+		Test:     "templates/terraform/samples/base_configs/iam_member_query_test_file.go.tmpl",
+	},
+}
+
 func NewTemplateData(outputFolder string, versionName string, templateFS fs.FS) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName, templateFS: templateFS}
 	return &td
@@ -131,7 +146,7 @@ func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, r
 }
 
 func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource, kind string) {
-	templatePath := fmt.Sprintf("templates/terraform/iam_%s_list_resource.html.markdown.tmpl", kind)
+	templatePath := iamListTemplates[kind].Doc
 	templates := []string{
 		templatePath,
 	}
@@ -253,7 +268,7 @@ func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Reso
 // GenerateIamQueryTestFile emits a Terraform query-mode acceptance test for Iam
 // list resource of given kind (iam_policy.generate_list_resource)
 func (td *TemplateData) GenerateIamQueryTestFile(filePath string, resource api.Resource, kind string) {
-	templatePath := fmt.Sprintf("templates/terraform/samples/base_configs/iam_%s_query_test_file.go.tmpl", kind)
+	templatePath := iamListTemplates[kind].Test
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
