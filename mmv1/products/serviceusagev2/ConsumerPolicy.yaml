@@ -29,7 +29,8 @@ import_format: ['{{%parent}}/consumerPolicies/{{name}}']
 id_format: '{{parent}}/consumerPolicies/{{name}}'
 async:
   type: 'OpAsync'
-  actions: ['create', 'update']
+  autogen_async: true
+  actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
   result:
