@@ -11,15 +11,7 @@
 	limitations under the License.
 */ -}}
 
-// Custom error handling for Service Usage v2 backend constraints
-if err != nil {
-    // 1. Handle ETag mismatch (Concurrent Modifications)
-    if strings.Contains(err.Error(), "SU_CONFLICTING_CONCURRENT_MODIFICATION") {
-        log.Printf("[WARN] The consumer policy might have been changed from other toolings. Please try again.") 
-    }
-    
-    // 2. Handle 30-day active usage restrictions blocking removal
-    if strings.Contains(err.Error(), "COMMON_SU_SERVICES_HAVE_USAGE") || strings.Contains(err.Error(), "COMMON_SU_SERVICES_HAVE_HIERARCHICAL_USAGE") {
-        log.Printf("[WARN] The service has been used in the last 30 days or was enabled in the past 3 days. To bypass this check and force removal, set check_usage_on_remove to false.")
-    }
-}
+// Post-create failure QoL log hints
+log.Printf("[WARN] Service Usage Policy creation failed.")
+log.Printf("[WARN] Hint 1: If due to concurrent modification (SU_CONFLICTING_CONCURRENT_MODIFICATION), re-sync and retry.")
+log.Printf("[WARN] Hint 2: If due to active service usage (COMMON_SU_SERVICES_HAVE_USAGE), set check_usage_on_remove to false.")
