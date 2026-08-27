@@ -35,6 +35,12 @@ samples:
           framework_name: "example-framework"
         test_env_vars:
           org_id: "ORG_ID"
+      - name: "cloudsecuritycompliance_framework_deployment_org_update"
+        resource_id_vars:
+          deployment_name: "example-deployment"
+          framework_name: "example-framework"
+        test_env_vars:
+          org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_framework_deployment_project_basic"
     primary_resource_id: "example"
     steps:
