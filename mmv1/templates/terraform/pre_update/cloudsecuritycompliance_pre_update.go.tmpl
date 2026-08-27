@@ -3,7 +3,7 @@ if d.Get("parent").(string) == "" && d.Get("organization").(string) != "" {
         return err
     }
 }
-url, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
+url, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}?updateMask=" + strings.Join(updateMask, ","))
 if err != nil {
     return err
 }
