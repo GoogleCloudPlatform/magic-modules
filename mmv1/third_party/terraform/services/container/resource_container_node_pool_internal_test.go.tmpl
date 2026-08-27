@@ -15,6 +15,29 @@ import (
 {{ end }}
 )
 
+func TestPerformanceMonitoringUnitStandardPlan(t *testing.T) {
+	t.Parallel()
+
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+		"node_config": schemaNodeConfig(),
+	}, map[string]interface{}{
+		"node_config": []interface{}{
+			map[string]interface{}{
+				"advanced_machine_features": []interface{}{
+					map[string]interface{}{
+						"threads_per_core":            2,
+						"performance_monitoring_unit": "STANDARD",
+					},
+				},
+			},
+		},
+	})
+
+	if got := d.Get("node_config.0.advanced_machine_features.0.performance_monitoring_unit"); got != "STANDARD" {
+		t.Fatalf("performance_monitoring_unit = STANDARD planned as %q", got)
+	}
+}
+
 func TestUnitFlattenNodePool(t *testing.T) {
 	t.Parallel()
 
