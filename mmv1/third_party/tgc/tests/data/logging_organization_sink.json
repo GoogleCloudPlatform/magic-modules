@@ -92,7 +92,6 @@
         "datasetReference": {
           "datasetId": "my_dataset"
         },
-        "defaultCollation": "",
         "friendlyName": "",
         "labels": {
             "goog-terraform-provisioned": "true"
