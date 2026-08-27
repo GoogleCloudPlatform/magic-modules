@@ -13,6 +13,7 @@
 
 ---
 name: 'HiveTable'
+api_resource_type_kind: Table
 description: 'Hive Tables in BigLake Metastore that exist within a Hive Catalog and Database.'
 min_version: 'beta'
 # hive/v1beta is added here instead of into the base url of the product.yaml.

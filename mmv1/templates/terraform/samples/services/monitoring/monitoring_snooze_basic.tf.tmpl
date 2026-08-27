@@ -1,0 +1,31 @@
+resource "google_monitoring_alert_policy" "alert_policy" {
+  display_name = "{{index $.ResourceIdVars "alert_policy_display_name"}}"
+  combiner     = "OR"
+  conditions {
+    display_name = "test condition"
+    condition_threshold {
+      filter     = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+      duration   = "60s"
+      comparison = "COMPARISON_GT"
+      aggregations {
+        alignment_period   = "60s"
+        per_series_aligner = "ALIGN_RATE"
+      }
+    }
+  }
+}
+
+resource "google_monitoring_snooze" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "snooze_display_name"}}"
+
+  interval {
+    start_time = "{{index $.ResourceIdVars "snooze_start_time"}}"
+    end_time   = "{{index $.ResourceIdVars "snooze_end_time"}}"
+  }
+
+  criteria {
+    policies = [
+      google_monitoring_alert_policy.alert_policy.id
+    ]
+  }
+}
