@@ -39,20 +39,21 @@ custom_code:
   constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
   pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+  post_update: templates/terraform/post_update/serviceusagev2_consumer_policy.go.tmpl
 
 parameters:
-  - name: 'parent'
-    type: String
-    description: |
-      The name of the parent. It can be a project, folder or organization in the format of  projects/<project_id or project_number>, folders/<folder_number> or organizations/<org_number> .
-    required: true
-    url_param_only: true
-  - name: 'name'
-    type: String
-    description: |
-      The name of the policy. Currently only the “default” policy name is supported.
-    required: true
-    url_param_only: true
+- name: 'parent'
+  type: String
+  description: |
+    The name of the parent. It can be a project, folder or organization in the format of  projects/<project_id or project_number>, folders/<folder_number> or organizations/<org_number> .
+  required: true
+  url_param_only: true
+- name: 'name'
+  type: String
+  description: |
+    The name of the policy. Currently only the “default” policy name is supported.
+  required: true
+  url_param_only: true
 properties:
   - name: 'enableRules'
     type: Array
