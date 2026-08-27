@@ -44,7 +44,6 @@ custom_code:
   post_create_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
 
 
-
 parameters:
   - name: 'parent'
     type: String
