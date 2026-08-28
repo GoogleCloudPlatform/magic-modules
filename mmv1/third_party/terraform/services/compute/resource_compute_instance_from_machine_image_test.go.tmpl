@@ -1273,6 +1273,14 @@ resource "google_project_service" "monitoring" {
 	depends_on = [google_project_service.service]
 }
 
+resource "google_compute_network" "net" {
+  provider                = google-beta
+  project                 = google_project.project.project_id
+  name                    = "default"
+  auto_create_subnetworks = true
+  depends_on              = [google_project_service.service]
+}
+
 resource "google_compute_instance" "vm" {
   provider     = google-beta
   project = google_project.project.project_id
@@ -1286,7 +1294,7 @@ resource "google_compute_instance" "vm" {
   machine_type = "n1-standard-1"
 
   network_interface {
-    network = "default"
+    network = google_compute_network.net.id
   }
 
   metadata = {
@@ -1317,6 +1325,9 @@ resource "google_compute_instance_from_machine_image" "foobar" {
   source_machine_image = google_compute_machine_image.foobar.self_link
 
   // Overrides
+  network_interface {
+    network = "default"
+  }
   can_ip_forward = false
   labels = {
     my_key = "my_value"
