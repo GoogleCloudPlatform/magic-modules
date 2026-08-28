@@ -177,6 +177,7 @@ resource "google_integrations_integration_version" "version_full" {
     input_output_type = "IN"
     searchable = true
     masked = false
+    contains_large_data = false
     description = "string parameter"
   }
 
@@ -306,6 +307,7 @@ resource "google_integrations_integration_version" "version_full" {
       input_output_type = "IN"
       searchable = true
       masked = false
+      contains_large_data = false
       description = "config param description"
     }
   }
