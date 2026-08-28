@@ -97,10 +97,8 @@ resource "google_database_migration_service_migration_job" "{{$.PrimaryResourceI
       }
       object_configs {
         object_identifier {
-          type     = "TABLE"
+          type     = "DATABASE"
           database = "my_other_database"
-          schema   = "public"
-          table    = "users"
         }
       }
     }
