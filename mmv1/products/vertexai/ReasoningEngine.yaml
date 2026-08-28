@@ -17,8 +17,8 @@ description: |-
   ReasoningEngine provides a customizable runtime for models to determine which actions to take and in which order.
 references:
   guides:
-    'Develop and deploy agents on Vertex AI Agent Engine': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.reasoningEngines/'
+    'Scale your agents': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale'
+  api: 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.reasoningEngines'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
@@ -937,7 +937,6 @@ properties:
           function: 'validation.StringIsJSON'
       - name: 'buildSpec'
         type: NestedObject
-        min_version: 'beta'
         description: |-
           Optional. Configuration for building container image.
         properties:
