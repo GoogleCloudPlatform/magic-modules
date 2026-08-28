@@ -11,10 +11,12 @@ resource "google_compute_subnetwork" "subnet" {
   private_ip_google_access = true
 }
 
-resource "time_sleep" "wait_60_seconds" {
+# Destroy subnetwork 10 minutes after metastore service is deleted.
+# It guarantees that the background PSC IP address cleanup has completed.
+resource "time_sleep" "wait_10_minutes" {
   depends_on = [google_compute_subnetwork.subnet]
 
-  destroy_duration = "60s"
+  destroy_duration = "10m"
 }
 
 resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
@@ -32,5 +34,5 @@ resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
     }
   }
 
-  depends_on = [time_sleep.wait_60_seconds]
+  depends_on = [time_sleep.wait_10_minutes]
 }
