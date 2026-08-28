@@ -38,6 +38,17 @@ func TestPerformanceMonitoringUnitStandardPlan(t *testing.T) {
 	}
 }
 
+func TestPerformanceMonitoringUnitChangeRequiresReplacement(t *testing.T) {
+	t.Parallel()
+
+	nodeConfigResource := schemaNodeConfig().Elem.(*schema.Resource)
+	advancedMachineFeatures := nodeConfigResource.Schema["advanced_machine_features"].Elem.(*schema.Resource)
+	pmu := advancedMachineFeatures.Schema["performance_monitoring_unit"]
+	if !pmu.ForceNew {
+		t.Fatal("performance_monitoring_unit changes must require node pool replacement")
+	}
+}
+
 func TestUnitFlattenNodePool(t *testing.T) {
 	t.Parallel()
 
