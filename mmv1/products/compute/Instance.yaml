@@ -94,6 +94,8 @@ properties:
       properties:
         - name: 'autoDelete'
           type: Boolean
+          update_url: '/projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDiskAutoDelete'
+          update_verb: 'POST'
           description: |
             Specifies whether the disk will be auto-deleted when the
             instance is deleted (but not when the disk is detached from
