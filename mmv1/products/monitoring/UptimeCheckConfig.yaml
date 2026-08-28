@@ -149,7 +149,7 @@ properties:
                 - REGEX_MATCH
   - name: selectedRegions
     type: Array
-    description: The list of regions from which the check will be run. Some regions contain one location, and others contain more than one. If this field is specified, enough regions to include a minimum of 3 locations must be provided, or an error message is returned. Not specifying this field will result in uptime checks running from all regions.
+    description: The list of regions from which the check will be run. Some regions contain one location, and others contain more than one. If this field is specified, enough regions to include a minimum of 3 locations must be provided, or an error message is returned. Not specifying this field will result in uptime checks running from all 6 available checker locations (USA_OREGON, USA_IOWA, USA_VIRGINIA, EUROPE, SOUTH_AMERICA, ASIA_PACIFIC), which incurs 6 probe executions per period. To meet the 3-location API minimum and avoid 6x checker executions, you can specify `["USA"]` (covering Oregon, Iowa, and Virginia) or any 3 individual checker locations.
     item_type:
       type: String
   - name: logCheckFailures
