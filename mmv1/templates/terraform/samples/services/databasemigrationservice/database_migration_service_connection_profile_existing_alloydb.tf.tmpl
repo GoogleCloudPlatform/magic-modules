@@ -46,7 +46,7 @@ resource "google_compute_network" "default" {
 resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location              = "us-central1"
   connection_profile_id = "{{index $.ResourceIdVars "destination_cp"}}"
-  display_name          = "{{index $.ResourceIdVars "destination_cp"}}_display"
+  display_name          = "{{index $.ResourceIdVars "destination_cp"}}-display"
   labels = {
     foo = "bar"
   }
