@@ -539,11 +539,20 @@ func TestResourceAddExtraFields(t *testing.T) {
 				if !prop.WriteOnly {
 					t.Error("passwordWo field should have WriteOnly=true")
 				}
+				if prop.Required {
+					t.Error("passwordWo field should have Required=false")
+				}
+				if !prop.IgnoreRead {
+					t.Error("passwordWo field should have IgnoreRead=true")
+				}
 			}
 			if prop.Name == "passwordWoVersion" {
 				foundVersionField = true
 				if !prop.ClientSide {
 					t.Error("passwordWoVersion field should have ClientSide=true")
+				}
+				if prop.Required {
+					t.Error("passwordWoVersion field should have Required=false")
 				}
 			}
 		}
@@ -819,6 +828,77 @@ func TestResourceAddExtraFields(t *testing.T) {
 			if !names[expected] {
 				t.Errorf("Expected to find property named %s", expected)
 			}
+		}
+	})
+
+	t.Run("WriteOnly inside FlattenObject generates correct constraint paths", func(t *testing.T) {
+		t.Parallel()
+
+		// Reproduces the SecretVersion case: secretData is write_only and nested
+		// under payload which has flatten_object: true. After AddExtraFields the
+		// generated companion fields (secretDataWo, secretDataWoVersion) must
+		// produce non-empty ConflictsWith / RequiredWith lists when
+		// GetPropertySchemaPathList is called, because GetPropertySchemaPath must
+		// search inside FlattenObject nested objects.
+		p := &api.Product{Name: "testproduct"}
+		p.SetCompiler("terraform")
+		resource := createTestResource("testresource", "terraform")
+
+		secretData := &api.Type{Name: "secretData", Type: "String", WriteOnly: true}
+		payload := &api.Type{Name: "payload", Type: "NestedObject", FlattenObject: true, Properties: []*api.Type{secretData}}
+
+		resource.Properties = []*api.Type{payload}
+
+		// SetDefault before AddExtraFields wires up ResourceMetadata on all
+		// pre-existing properties so that initializeConstraintGroups won't panic.
+		resource.SetDefault(p)
+		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+		// SetDefault again to wire up ResourceMetadata on newly created companion fields.
+		resource.SetDefault(p)
+
+		// payload.Properties should now contain: secretData, secretDataWo, secretDataWoVersion
+		if len(payload.Properties) != 3 {
+			t.Fatalf("Expected 3 nested properties in payload after AddExtraFields, got %d", len(payload.Properties))
+		}
+
+		var woField, versionField *api.Type
+		for _, prop := range payload.Properties {
+			if prop.Name == "secretDataWo" {
+				woField = prop
+			}
+			if prop.Name == "secretDataWoVersion" {
+				versionField = prop
+			}
+		}
+		if woField == nil {
+			t.Fatal("Expected to find secretDataWo in payload.Properties")
+		}
+		if versionField == nil {
+			t.Fatal("Expected to find secretDataWoVersion in payload.Properties")
+		}
+
+		// secretDataWo must ConflictWith secretData (not empty).
+		conflicts := woField.GetPropertySchemaPathList(woField.Conflicting())
+		if len(conflicts) == 0 {
+			t.Error("secretDataWo.ConflictsWith should not be empty; GetPropertySchemaPath must find secretData inside FlattenObject payload")
+		} else if conflicts[0] != "secret_data" {
+			t.Errorf("secretDataWo.ConflictsWith[0] = %q, want %q", conflicts[0], "secret_data")
+		}
+
+		// secretDataWo must RequireWith secretDataWoVersion (not empty).
+		required := woField.GetPropertySchemaPathList(woField.RequiredWithList())
+		if len(required) == 0 {
+			t.Error("secretDataWo.RequiredWith should not be empty; GetPropertySchemaPath must find secretDataWoVersion inside FlattenObject payload")
+		} else if required[0] != "secret_data_wo_version" {
+			t.Errorf("secretDataWo.RequiredWith[0] = %q, want %q", required[0], "secret_data_wo_version")
+		}
+
+		// secretData must ConflictWith secretDataWo (not empty).
+		secretDataConflicts := secretData.GetPropertySchemaPathList(secretData.Conflicting())
+		if len(secretDataConflicts) == 0 {
+			t.Error("secretData.ConflictsWith should not be empty")
+		} else if secretDataConflicts[0] != "secret_data_wo" {
+			t.Errorf("secretData.ConflictsWith[0] = %q, want %q", secretDataConflicts[0], "secret_data_wo")
 		}
 	})
 }

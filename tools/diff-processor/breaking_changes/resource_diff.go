@@ -141,14 +141,18 @@ func isContainedInNewOptionalAncestor(field string, diff diff.ResourceDiff) bool
 	if len(parts) < 2 {
 		return false
 	}
-	ancestorName := strings.Join(parts[:len(parts)-1], ".")
-	ancestorDiff, ok := diff.Fields[ancestorName]
-	if !ok {
-		return false
+	for i := len(parts) - 1; i >= 1; i-- {
+		ancestorName := strings.Join(parts[:i], ".")
+		ancestorDiff, ok := diff.Fields[ancestorName]
+		if !ok {
+			continue
+		}
+
+		isAncestorNew := ancestorDiff.Old == nil && ancestorDiff.New != nil
+		isAncestorOptional := ancestorDiff.New != nil && ancestorDiff.New.Optional
+		if isAncestorNew && isAncestorOptional {
+			return true
+		}
 	}
-
-	isAncestorNew := ancestorDiff.Old == nil && ancestorDiff.New != nil
-	isAncestorOptional := ancestorDiff.New != nil && ancestorDiff.New.Optional
-
-	return isAncestorNew && isAncestorOptional
+	return false
 }

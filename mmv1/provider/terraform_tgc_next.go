@@ -91,7 +91,7 @@ func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenera
 		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -107,6 +107,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.ExcludeResource {
+		google.IncrementResourceGenerated()
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 	}
 	tgc.addTestsFromSamples(&object)
@@ -262,7 +263,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		return
 	}
 
-	log.Printf("Copying common files for tgc.")
+	google.LogVerbose("Copying common files for tgc.")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
@@ -337,8 +338,9 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{
-		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/compute/image.go":                             "third_party/terraform/services/compute/image.go",
+		"pkg/tfplan2cai/converters/services/compute/disk_type.go":                         "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/bigtable/bigtable_app_profile_handwritten.go": "third_party/terraform/services/bigtable/bigtable_app_profile_handwritten.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
