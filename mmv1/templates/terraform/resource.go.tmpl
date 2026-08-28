@@ -397,9 +397,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     })
     if err != nil {
-{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
+{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) }}
         err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
 {{- /* Set computed resource properties required for building the ID from create API response (as long as Create doesn't use an async operation) */}}
@@ -435,9 +435,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
-{{if $.CustomCode.PostCreateFailure -}}
+{{- if $.CustomCode.PostCreateFailure }}
         err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
@@ -515,9 +515,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
-{{if $.CustomCode.PostCreateFailure -}}
+{{- if $.CustomCode.PostCreateFailure }}
         err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
-{{ end}}
+{{ end -}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
@@ -540,10 +540,10 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
 
-{{-        else }}
-{{- if $.CustomCode.PostCreateFailure -}}
+{{-        else -}}
+{{- if $.CustomCode.PostCreateFailure }}
         err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
 {{- end}}
     }
@@ -1049,9 +1049,9 @@ if len(updateMask) > 0 {
     })
 
     if err != nil {
-{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) }}
         err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
     } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1068,9 +1068,9 @@ if len(updateMask) > 0 {
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
-{{- if $.CustomCode.PostUpdateFailure -}}
+{{- if $.CustomCode.PostUpdateFailure }}
         err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return err
     }
 {{-             if not $.FieldSpecificUpdateMethods }}
@@ -1082,9 +1082,9 @@ if len(updateMask) > 0 {
 {{                      if $.GetAsync.SuppressError -}}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{                      else -}}
-{{- if $.CustomCode.PostUpdateFailure -}}
+{{- if $.CustomCode.PostUpdateFailure }}
         err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return err
 {{-                     end}}
     }
@@ -1246,9 +1246,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 			Headers:   headers,
         })
         if err != nil {
-{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) }}
             err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
             return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
         } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1264,9 +1264,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
-{{- if $.CustomCode.PostUpdateFailure -}}
+{{- if $.CustomCode.PostUpdateFailure }}
 	        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
 	        return err
 	    }
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
@@ -1275,9 +1275,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{-                          else -}}
-{{- if $.CustomCode.PostUpdateFailure -}}
+{{- if $.CustomCode.PostUpdateFailure }}
 	        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+{{- end -}}
 	        return err
 {{-                         end}}
         }
@@ -1420,9 +1420,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- end }}
     })
     if err != nil {
-{{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
+{{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) }}
         err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
@@ -1431,10 +1431,10 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
-            {{- else }}
-{{- if $.CustomCode.PostDeleteFailure -}}
+            {{- else -}}
+{{- if $.CustomCode.PostDeleteFailure }}
         err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return fmt.Errorf("Error waiting to delete {{ $.Name }}: %s", err)
             {{- end }}
     }
@@ -1448,9 +1448,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
-{{- if $.CustomCode.PostDeleteFailure -}}
+{{- if $.CustomCode.PostDeleteFailure }}
         err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
-{{- end}}
+{{- end -}}
         return err
     }
     {{- end }}
