@@ -1081,6 +1081,100 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
+// TestAccGKEHubFeature_EmptySpecSubBlock covers a spec sub-block that is PRESENT
+// but EMPTY — the shape the GKE Hub API requires to enable these two features.
+//
+// {"spec":{"workloadidentity":{}}} returns 200, while BOTH {"spec":{}} and
+// {"spec":{"workloadidentity":null}} are a 400 MissingFieldError. Getting the
+// empty object onto the wire needs two flags doing different jobs:
+//
+//	allow_empty_object  the expander returns an empty map rather than nil for a
+//	                    block whose optional values are all unset, and the
+//	                    flattener keeps it on read
+//	send_empty_value    that empty map then survives the IsEmptyValue guard
+//	                    instead of being dropped from the request
+//
+// Both halves are load-bearing, which is what this test pins. With only the guard
+// removed the request carries "workloadidentity": null and the create fails; with
+// only the expander fixed the object never reaches the wire. And without the
+// flatten half the resource creates but never converges — the second plan re-adds
+// `+ workloadidentity {}` forever, which is why the import steps below matter as
+// much as the create.
+//
+// Every other test in this file supplies a value inside the block
+// (workloadidentity.scope_tenancy_pool, fleetobservability.logging_config), which
+// is non-empty and survives on its own. That is why the empty path was never
+// exercised. Both features are asserted in one config so a single acceptance run
+// covers both patched properties.
+func TestAccGKEHubFeature_EmptySpecSubBlock(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGKEHubFeature_EmptySpecSubBlock(context),
+				Check: resource.ComposeTestCheckFunc(
+					// The block must round-trip as present-and-empty. Asserting the
+					// count rather than a value is the point: there is no value to
+					// assert, and its absence is precisely the bug.
+					resource.TestCheckResourceAttr(
+						"google_gke_hub_feature.workloadidentity", "spec.0.workloadidentity.#", "1"),
+					resource.TestCheckResourceAttr(
+						"google_gke_hub_feature.fleetobservability", "spec.0.fleetobservability.#", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.workloadidentity",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project", "labels", "terraform_labels"},
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.fleetobservability",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccGKEHubFeature_EmptySpecSubBlock(context map[string]interface{}) string {
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_feature" "workloadidentity" {
+  name     = "workloadidentity"
+  location = "global"
+  project  = google_project.project.project_id
+  spec {
+    workloadidentity {}
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+
+resource "google_gke_hub_feature" "fleetobservability" {
+  name     = "fleetobservability"
+  location = "global"
+  project  = google_project.project.project_id
+  spec {
+    fleetobservability {}
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
 func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
