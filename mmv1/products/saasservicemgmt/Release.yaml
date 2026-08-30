@@ -25,6 +25,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 autogen_status: UmVsZWFzZQ==
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: saas_runtime_release_basic
     primary_resource_id: example

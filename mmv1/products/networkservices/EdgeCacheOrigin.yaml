@@ -50,6 +50,8 @@ samples:
       - name: network_services_edge_cache_origin_basic
         resource_id_vars:
           resource_name: my-origin
+        vars:
+          location: global
         ignore_read_extra:
           - timeout
   - name: network_services_edge_cache_origin_advanced

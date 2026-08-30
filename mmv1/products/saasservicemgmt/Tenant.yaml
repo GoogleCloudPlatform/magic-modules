@@ -25,6 +25,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/tenants/{{tenant_id}}
 autogen_status: VGVuYW50
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: saas_runtime_tenant_basic
     primary_resource_id: example
