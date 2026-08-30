@@ -45,6 +45,7 @@ async:
     resource_inside_response: false
 autogen_async: true
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: netapp_active_directory_full

@@ -49,6 +49,7 @@ deletion_policy_custom_docs: true
 deletion_policy_default: DEFAULT
 autogen_async: true
 include_in_tgc_next: true
+generate_list_resource: true
 sweeper:
   url_substitutions:
     - location: us-central1
