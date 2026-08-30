@@ -18,15 +18,8 @@ To get more information about Gateway, see:
 ## Example Usage
 
 ```hcl
-resource "google_network_services_gateway" "default" {
-  name  = "my-gateway"
-  type  = "OPEN_MESH"
-  ports = [443]
-  scope = "default-scope-basic"
-}
-
 data "google_network_services_gateway" "default" {
-  name     = google_network_services_gateway.default.name
+  name     = "my-gateway"
   location = "global"
 }
 ```
