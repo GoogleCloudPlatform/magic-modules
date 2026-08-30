@@ -123,7 +123,6 @@ var (
 		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
     performanceCaptureConfigKeys = []string{
 		"settings.0.performance_capture_config.0.enabled",
 		"settings.0.performance_capture_config.0.probing_interval_seconds",
@@ -140,7 +139,6 @@ var (
 		"settings.0.performance_capture_config.0.transaction_kill_type",
 		"settings.0.performance_capture_config.0.transaction_kill_excluded_user_hosts",
 	}
-{{- end }}
 
 	sqlServerAuditConfigurationKeys = []string{
 		"settings.0.sql_server_audit_config.0.bucket",
@@ -939,7 +937,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 							Description: `Configuration of Query Insights.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"performance_capture_config": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -994,42 +991,42 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Optional:     true,
 										Computed:     true,
 										AtLeastOneOf: performanceCaptureConfigKeys,
-										Description:  `The minimum percentage of CPU utilization that triggers the performance capture. Valid range is 10 to 99. 0 disables the check.`,
+										Description:  `The minimum percentage of CPU utilization that triggers the performance capture.`,
 									},
 									"memory_usage_threshold_percent": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										Computed:     true,
 										AtLeastOneOf: performanceCaptureConfigKeys,
-										Description:  `The minimum percentage of memory usage that triggers the performance capture. Valid range is 10 to 99. 0 disables the check.`,
+										Description:  `The minimum percentage of memory usage that triggers the performance capture.`,
 									},
 									"history_list_length_threshold_count": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										Computed:     true,
 										AtLeastOneOf: performanceCaptureConfigKeys,
-										Description:  `The minimum number of undo log entries in the history list length that triggers the performance capture. Valid range is 10000 to 10000000. 0 disables the check.`,
+										Description:  `The minimum number of undo log entries in the history list length that triggers the performance capture.`,
 									},
 									"semaphore_wait_threshold_count": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										Computed:     true,
 										AtLeastOneOf: performanceCaptureConfigKeys,
-										Description:  `The minimum number of semaphore waits that triggers the performance capture. Valid range is 10 to 10000. 0 disables the check.`,
+										Description:  `The minimum number of semaphore waits that triggers the performance capture.`,
 									},
 									"transaction_lock_wait_threshold_count": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										Computed:     true,
 										AtLeastOneOf: performanceCaptureConfigKeys,
-										Description:  `The minimum number of transactions in lock wait state that triggers the performance capture. Valid range is 10 to 10000. 0 disables the check.`,
+										Description:  `The minimum number of transactions in lock wait state that triggers the performance capture.`,
 									},
 									"transaction_kill_threshold_seconds": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										Computed:     true,
 										AtLeastOneOf: performanceCaptureConfigKeys,
-										Description:  `The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it. Valid range is 60 to 604800. 0 disables termination.`,
+										Description:  `The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it.`,
 									},
 									"transaction_kill_type": {
 										Type:         schema.TypeString,
@@ -1050,7 +1047,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 							Description: `Configuration of Performance Capture.`,
 						},
-{{- end }}
 						"entraid_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -2111,9 +2107,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
 		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
-{{- if ne $.TargetVersionName "ga" }}
 		PerformanceCaptureConfig:      expandPerformanceCaptureConfig(_settings["performance_capture_config"].([]interface{})),
-{{- end }}
 		ReadPoolAutoScaleConfig:       expandReadPoolAutoScaleConfig(_settings["read_pool_auto_scale_config"].([]interface{})),
 	}
 
@@ -2500,7 +2494,6 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 	}
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandPerformanceCaptureConfig(configured []interface{}) *sqladmin.PerformanceCaptureConfig {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
@@ -2525,7 +2518,6 @@ func expandPerformanceCaptureConfig(configured []interface{}) *sqladmin.Performa
 		ForceSendFields:              []string{"Enabled"},
 	}
 }
-{{- end }}
 
 func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.PasswordValidationPolicy {
 	if len(configured) == 0 || configured[0] == nil {
@@ -3441,11 +3433,9 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["insights_config"] = flattenInsightsConfig(settings.InsightsConfig)
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
 	if settings.PerformanceCaptureConfig != nil {
 		data["performance_capture_config"] = flattenPerformanceCaptureConfig(settings.PerformanceCaptureConfig)
 	}
-{{- end }}
 
 	if settings.ReadPoolAutoScaleConfig != nil {
 		data["read_pool_auto_scale_config"] = flattenReadPoolAutoScaleConfig(settings.ReadPoolAutoScaleConfig)
@@ -3868,7 +3858,6 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 	return []map[string]interface{}{data}
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func flattenPerformanceCaptureConfig(performanceCaptureConfig *sqladmin.PerformanceCaptureConfig) interface{} {
 	data := map[string]interface{}{
 		"enabled":                         performanceCaptureConfig.Enabled,
@@ -3889,7 +3878,6 @@ func flattenPerformanceCaptureConfig(performanceCaptureConfig *sqladmin.Performa
 
 	return []map[string]interface{}{data}
 }
-{{- end }}
 
 func flattenTargetMetrics(targetMetrics []*sqladmin.TargetMetric) []interface{} {
 	if len(targetMetrics) == 0 { // Handles nil or empty slice

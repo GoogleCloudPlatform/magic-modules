@@ -2837,7 +2837,6 @@ func TestAccSqlDatabaseInstance_insights(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_performanceCaptureConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2876,7 +2875,6 @@ func TestAccSqlDatabaseInstance_performanceCaptureConfig(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccSqlDatabaseInstance_insights_enhanced_postgres17(t *testing.T) {
 	t.Parallel()
@@ -8853,7 +8851,6 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-{{- if ne $.TargetVersionName "ga" }}
 var testGoogleSqlDatabaseInstance_performanceCaptureConfig = `
 resource "google_sql_database_instance" "instance" {
   name                = "tf-test-%d"
@@ -8923,7 +8920,6 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
-{{- end }}
 
 func testGoogleSqlDatabaseInstance_insights_enhanced_postgres17(instanceName string, enhanced bool) string {
 	return fmt.Sprintf(`resource "google_sql_database_instance" "instance" {
