@@ -22,6 +22,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs
 immutable: true
+generate_list_resource: true
 create_url: projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs?certificateIssuanceConfigId={{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs/{{name}}
@@ -40,11 +41,15 @@ schema_version: 1
 state_upgraders: true
 autogen_async: true
 include_in_tgc_next: true
+custom_code:
+  decoder: templates/terraform/decoders/colab_runtime.go.tmpl
 samples:
   - name: certificate_manager_certificate_issuance_config
     primary_resource_id: default
     steps:
       - name: certificate_manager_certificate_issuance_config
+        vars:
+          location: 'global'
         resource_id_vars:
           ca_name: ca-authority
           pool_name: ca-pool
@@ -57,6 +62,7 @@ parameters:
       CertificateIssuanceConfig names must be unique globally.
     url_param_only: true
     required: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: location
     type: String
     description: |
