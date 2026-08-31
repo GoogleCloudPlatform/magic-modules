@@ -20,7 +20,7 @@ references:
     Manage certificate issuance configs: https://cloud.google.com/certificate-manager/docs/issuance-configs
   api: https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.certificateIssuanceConfigs
 docs:
-base_url: projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs
+base_url: projects/{{project}}/locations/global/certificateIssuanceConfigs
 immutable: true
 generate_list_resource: true
 create_url: projects/{{project}}/locations/{{location}}/certificateIssuanceConfigs?certificateIssuanceConfigId={{name}}
@@ -48,8 +48,6 @@ samples:
     primary_resource_id: default
     steps:
       - name: certificate_manager_certificate_issuance_config
-        vars:
-          location: 'global'
         resource_id_vars:
           ca_name: ca-authority
           pool_name: ca-pool

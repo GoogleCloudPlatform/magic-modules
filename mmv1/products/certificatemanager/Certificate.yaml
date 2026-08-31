@@ -64,12 +64,15 @@ custom_code:
   tgc_encoder: templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl
   tgc_decoder: templates/tgc_next/decoders/certificatemanager_certificate.go.tmpl
 samples:
-  - name: certificate_manager_google_managed_certificate_dns
+  - name: certificate_manager_self_managed_certificate_regional
     primary_resource_id: default
     steps:
+      - name: certificate_manager_self_managed_certificate_regional
+        resource_id_vars:
+          cert_name: self-managed-cert
+  - name: certificate_manager_google_managed_certificate_dns
+    steps:
       - name: certificate_manager_google_managed_certificate_dns
-        vars:
-          location: 'global'
         resource_id_vars:
           dns_auth_name: dns-auth
           dns_auth_subdomain: subdomain
@@ -107,12 +110,6 @@ samples:
     skip_vcr: true
     steps:
       - name: certificate_manager_self_managed_certificate_write_only
-        resource_id_vars:
-          cert_name: self-managed-cert
-  - name: certificate_manager_self_managed_certificate_regional
-    primary_resource_id: default
-    steps:
-      - name: certificate_manager_self_managed_certificate_regional
         resource_id_vars:
           cert_name: self-managed-cert
   - name: certificate_manager_google_managed_certificate_issuance_config_all_regions

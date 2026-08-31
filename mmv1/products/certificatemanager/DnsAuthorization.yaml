@@ -46,12 +46,10 @@ include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/colab_runtime.go.tmpl
 samples:
-  - name: certificate_manager_dns_authorization_basic
+  - name: certificate_manager_dns_authorization_regional
     primary_resource_id: default
     steps:
-      - name: certificate_manager_dns_authorization_basic
-        vars:
-          location: 'global'
+      - name: certificate_manager_dns_authorization_regional
         resource_id_vars:
           dns_auth_name: dns-auth
           zone_name: my-zone
@@ -59,10 +57,9 @@ samples:
         test_vars_overrides:
           # for backward compatible
           subdomain: '"subdomain" + randomSuffix'
-  - name: certificate_manager_dns_authorization_regional
-    primary_resource_id: default
+  - name: certificate_manager_dns_authorization_basic
     steps:
-      - name: certificate_manager_dns_authorization_regional
+      - name: certificate_manager_dns_authorization_basic
         resource_id_vars:
           dns_auth_name: dns-auth
           zone_name: my-zone
