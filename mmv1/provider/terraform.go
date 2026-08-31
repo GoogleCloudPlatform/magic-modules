@@ -204,7 +204,7 @@ func (t *Terraform) GenerateListResource(object api.Resource, templateData Templ
 }
 
 // GenerateIamListResource emits list_iam_<resource>_<kind>.go for each IAM
-// kindrequested via iam_policy.generate_list_resource.
+// kind requested via iam_policy.generate_list_resource.
 func (t *Terraform) GenerateIamListResource(object api.Resource, templateData TemplateData, targetFolder string) {
 	for _, kind := range resource.IamListKinds {
 		if !object.IamPolicy.GeneratesListResource(kind) {
@@ -291,13 +291,13 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
 
-// GenerateIamListResqourceQueryTest emits list_iam_<resource>_<kind>_generated_test.go.
+// GenerateIamListResourceQueryTest emits list_iam_<resource>_<kind>_generated_test.go.
 func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder, kind string) {
 	samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
 	})
 	if len(samples) == 0 {
-		log.Printf("[WARNING] No IAM %s list resource test generated for %s: no non-exculded samples available", kind, object.Name)
+		log.Printf("[WARNING] No IAM %s list resource test generated for %s: no non-excluded samples available", kind, object.Name)
 		return
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_%s_generated_test.go", t.ResourceGoFilename(object), kind))

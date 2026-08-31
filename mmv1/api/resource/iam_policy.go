@@ -147,7 +147,7 @@ type IamPolicy struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 
-	// [Optional] Which IAM list resources (terraform query) to henrate for this
+	// [Optional] Which IAM list resources (terraform query) to generate for this
 	// resource. Valid kinds: "member", "binding", "policy".
 	// Example: generate_list_resources: [member, binding]
 	GenerateListResource []string `yaml:"generate_list_resource,omitempty"`

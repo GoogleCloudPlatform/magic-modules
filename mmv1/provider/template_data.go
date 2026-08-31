@@ -45,7 +45,7 @@ var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
 
-// iamListTemplatePaths holds the template paths for one IAM list resource kind.
+// iamListTemplatesPaths holds the template paths for one IAM list resource kind.
 type iamListTemplatesPaths struct {
 	Resource string
 	Doc      string
