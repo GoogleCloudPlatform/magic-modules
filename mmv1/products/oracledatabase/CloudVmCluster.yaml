@@ -261,7 +261,7 @@ properties:
       - name: scanListenerPortTcp
         type: Integer
         description: 'SCAN listener port - TCP '
-        default_from_api:: true
+        default_from_api: true
       - name: scanListenerPortTcpSsl
         type: Integer
         description: 'SCAN listener port - TLS '
