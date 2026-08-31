@@ -63,8 +63,8 @@ func TestAccAppEngineApplication_withIAPWriteOnly(t *testing.T) {
 			{
 				Config: testAccAppEngineApplication_withIAPWriteOnly(pid, org, billingAccount),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("google_app_engine_application.acceptance", "oauth2_client_secret_wo"),
-					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "oauth2_client_secret_wo_version", "1"),
+					resource.TestCheckNoResourceAttr("google_app_engine_application.acceptance", "iap.0.oauth2_client_secret_wo"),
+					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "iap.0.oauth2_client_secret_wo_version", "1"),
 					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "iap.0.oauth2_client_secret_sha256"),
 				),
 			},
@@ -74,13 +74,13 @@ func TestAccAppEngineApplication_withIAPWriteOnly(t *testing.T) {
 				ImportStateVerify: true,
 				// oauth2_client_secret is never returned by the API (only the SHA-256 hash is).
 				// oauth2_client_secret_wo_version is client-side and is not returned by the API.
-				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret", "oauth2_client_secret_wo_version"},
+				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret", "iap.0.oauth2_client_secret_wo_version"},
 			},
 			{
 				Config: testAccAppEngineApplication_withIAPWriteOnlyUpdate(pid, org, billingAccount),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("google_app_engine_application.acceptance", "oauth2_client_secret_wo"),
-					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "oauth2_client_secret_wo_version", "2"),
+					resource.TestCheckNoResourceAttr("google_app_engine_application.acceptance", "iap.0.oauth2_client_secret_wo"),
+					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "iap.0.oauth2_client_secret_wo_version", "2"),
 					resource.TestCheckResourceAttrSet("google_app_engine_application.acceptance", "iap.0.oauth2_client_secret_sha256"),
 				),
 			},
@@ -90,7 +90,7 @@ func TestAccAppEngineApplication_withIAPWriteOnly(t *testing.T) {
 				ImportStateVerify: true,
 				// oauth2_client_secret is never returned by the API (only the SHA-256 hash is).
 				// oauth2_client_secret_wo_version is client-side and is not returned by the API.
-				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret", "oauth2_client_secret_wo_version"},
+				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret", "iap.0.oauth2_client_secret_wo_version"},
 			},
 		},
 	})
@@ -204,16 +204,16 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_app_engine_application" "acceptance" {
-  project                         = google_project.acceptance.project_id
-  auth_domain                     = "hashicorptest.com"
-  location_id                     = "us-central"
-  serving_status                  = "SERVING"
-  oauth2_client_secret_wo         = "test"
-  oauth2_client_secret_wo_version = "1"
+  project        = google_project.acceptance.project_id
+  auth_domain    = "hashicorptest.com"
+  location_id    = "us-central"
+  serving_status = "SERVING"
 
   iap {
-    enabled          = false
-    oauth2_client_id = "test"
+    enabled                         = false
+    oauth2_client_id                = "test"
+    oauth2_client_secret_wo         = "test"
+    oauth2_client_secret_wo_version = "1"
   }
 }
 `, pid, pid, org, billingAccount)
@@ -230,16 +230,16 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_app_engine_application" "acceptance" {
-  project                         = google_project.acceptance.project_id
-  auth_domain                     = "hashicorptest.com"
-  location_id                     = "us-central"
-  serving_status                  = "SERVING"
-  oauth2_client_secret_wo         = "test_2"
-  oauth2_client_secret_wo_version = "2"
+  project        = google_project.acceptance.project_id
+  auth_domain    = "hashicorptest.com"
+  location_id    = "us-central"
+  serving_status = "SERVING"
 
   iap {
-    enabled          = false
-    oauth2_client_id = "test"
+    enabled                         = false
+    oauth2_client_id                = "test"
+    oauth2_client_secret_wo         = "test_2"
+    oauth2_client_secret_wo_version = "2"
   }
 }
 `, pid, pid, org, billingAccount)
