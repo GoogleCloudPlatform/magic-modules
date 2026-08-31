@@ -39,6 +39,7 @@ exclude_delete: true
 taint_resource_on_failed_create: true
 generate_list_resource: true
 custom_code:
+  decoder: templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl
 samples:
   - name: gkeonprem_vmware_admin_cluster_basic
     primary_resource_id: admin-cluster-basic
