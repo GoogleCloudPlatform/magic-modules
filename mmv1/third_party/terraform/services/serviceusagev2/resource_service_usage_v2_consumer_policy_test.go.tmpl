@@ -98,7 +98,7 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 				},
 			},
       {
-        Config: testAccServiceUsageV2ConsumerPolicy_allowDeletion(orgId, serviceName),
+        Config: testAccServiceUsageV2ConsumerPolicy_allowDeletion(context),
       },
 		},
 	})
@@ -131,7 +131,7 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 `, context)
 }
 
-func testAccServiceUsageV2ConsumerPolicy_allowDeletion(orgId, serviceName string) string {
+func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interface{}) string {
     return fmt.Sprintf(`
 resource "google_service_usage_v2_consumer_policy" "basic" {
   parent = "organizations/%s"
@@ -141,11 +141,10 @@ resource "google_service_usage_v2_consumer_policy" "basic" {
     services = []
   }
 
-  # 🚀 Allow deletion / destructive changes on teardown
   check_usage_on_remove = false
   validate_dependencies = false
 }
-`, orgId)
+`, context)
 }
 
 
