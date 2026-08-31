@@ -40,6 +40,7 @@ async:
 exclude_delete: true
 taint_resource_on_failed_create: true
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: gkeonprem_bare_metal_admin_cluster_basic

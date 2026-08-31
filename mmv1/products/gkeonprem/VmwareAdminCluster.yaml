@@ -37,6 +37,7 @@ async:
     resource_inside_response: true
 exclude_delete: true
 taint_resource_on_failed_create: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: gkeonprem_vmware_admin_cluster_basic
