@@ -19,7 +19,7 @@ references:
   guides:
   api: https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.authorizationPolicies
 docs:
-base_url: projects/{{project}}/locations/{{location}}/authorizationPolicies
+base_url: projects/{{project}}/locations/global/authorizationPolicies
 min_version: beta
 create_url: projects/{{project}}/locations/{{location}}/authorizationPolicies?authorizationPolicyId={{name}}
 update_mask: true

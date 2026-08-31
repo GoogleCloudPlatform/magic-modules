@@ -19,7 +19,7 @@ references:
     Use TlsInspectionPolicy: https://cloud.google.com/secure-web-proxy/docs/tls-inspection-overview
   api: https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.tlsInspectionPolicies
 docs:
-base_url: projects/{{project}}/locations/{{location}}/tlsInspectionPolicies
+base_url: projects/{{project}}/locations/us-central1/tlsInspectionPolicies
 self_link: projects/{{project}}/locations/{{location}}/tlsInspectionPolicies/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/tlsInspectionPolicies?tlsInspectionPolicyId={{name}}
 update_mask: true

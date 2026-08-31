@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     Backend mTLS: https://cloud.google.com/load-balancing/docs/backend-authenticated-tls-backend-mtls#backend-authentication-config
-base_url: projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs
+base_url: projects/{{project}}/locations/global/backendAuthenticationConfigs
 self_link: projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs?backendAuthenticationConfigId={{name}}
 update_mask: true
