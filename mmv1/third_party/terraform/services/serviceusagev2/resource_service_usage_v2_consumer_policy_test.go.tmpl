@@ -20,6 +20,7 @@ package serviceusagev2_test
 import (
 	"regexp"
 	"testing"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -95,10 +96,10 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"validate_dependencies", "check_usage_on_remove",
 				},
+			},
       {
         Config: testAccServiceUsageV2ConsumerPolicy_allowDeletion(orgId, serviceName),
-       },
-			},
+      },
 		},
 	})
 }
