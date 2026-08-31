@@ -149,10 +149,8 @@ samples:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_granular_ttl'
     primary_resource_id: 'reasoning_engine'
-    min_version: beta
     steps:
       - name: 'vertex_ai_reasoning_engine_granular_ttl'
-        min_version: beta
         resource_id_vars:
           name: 're-gran-ttl'
         ignore_read_extra:
@@ -949,7 +947,6 @@ properties:
             description: |-
               Optional. The service account that the Cloud Build builder runs as.
   - name: 'contextSpec'
-    min_version: 'beta'
     type: NestedObject
     default_from_api: true
     description: |-
