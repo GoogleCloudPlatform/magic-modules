@@ -119,3 +119,8 @@ properties:
     required: true
     immutable: true
     description: Environment data retention in months.
+  - name: environmentAllowedForAllUsers
+    type: Boolean
+    immutable: true
+    description: |-
+      If set to true, automatically assigns the new environment to all existing users and API keys.
