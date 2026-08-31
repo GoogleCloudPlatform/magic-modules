@@ -245,11 +245,11 @@ properties:
       - name: 'scanListenerPortTcp'
         type: Integer
         description: 'SCAN listener port - TCP '
-        output: true
+        default_from_api: true
       - name: 'scanListenerPortTcpSsl'
         type: Integer
         description: 'SCAN listener port - TLS '
-        output: true
+        default_from_api: true
       - name: 'domain'
         type: String
         description: "Parent DNS domain where SCAN DNS and hosts names are
