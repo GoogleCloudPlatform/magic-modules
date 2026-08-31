@@ -2522,6 +2522,27 @@ func (r *Resource) ShouldGenerateEphemeralResourceTests() bool {
 	return !r.Ephemeral.ExcludeTest
 }
 
+// HasEphemeralNestedProperties reports whether this resource has any top-level
+// property shaped as a nested object (directly, or as the item/value type of
+// an Array/Map) — i.e. whether the generated ephemeral resource's schema needs
+// the "attr" package import at all. Resources with only flat properties (no
+// nested/repeated/keyed object fields) never reference attr.Type/attr.Value in
+// their generated code, so importing "attr" unconditionally leaves it unused.
+func (r Resource) HasEphemeralNestedProperties() bool {
+	for _, p := range r.AllUserProperties() {
+		if p.Type == "NestedObject" {
+			return true
+		}
+		if p.Type == "Array" && p.ItemType != nil && p.ItemType.Type == "NestedObject" {
+			return true
+		}
+		if p.Type == "Map" && p.ValueType != nil && p.ValueType.Type == "NestedObject" {
+			return true
+		}
+	}
+	return false
+}
+
 func (r Resource) ShouldDatasourceSetLabels() bool {
 	for _, p := range r.Properties {
 		if p.Name == "labels" && p.Type == "KeyValueLabels" {

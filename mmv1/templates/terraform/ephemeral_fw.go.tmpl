@@ -21,7 +21,9 @@ import (
 	"context"
 	"fmt"
 
+{{- if $.HasEphemeralNestedProperties }}
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+{{- end }}
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -53,6 +55,23 @@ type ephemeral{{$.ResourceName}}Model struct {
 {{- range $prop := $.OrderProperties $.AllUserProperties }}
 	{{ camelize $prop.Name "upper" }} types.{{ $prop.GetFWType }} `tfsdk:"{{ underscore $prop.Name }}"`
 {{- end }}
+	{{/* project/region/zone are frequently referenced via {{var}} in create_url/
+	  self_link (HasProject/HasRegion/HasZone just check for that substring) but
+	  are NOT necessarily properties in AllUserProperties — MMv1 only adds them
+	  there for identity/list-scope purposes, not generally. Hardcoded here,
+	  matching how resource_fw.go.tmpl handles the exact same gap for the schema
+	  (not the model, which is unique to the FW resource template — this mirrors
+	  its schema-level "project"/"self_link"/"id" fields, adapted for the model
+	  struct too, since ephemeral resources have no separate Read-only container). */}}
+{{- if $.HasProject }}
+	Project types.String `tfsdk:"project"`
+{{- end }}
+{{- if $.HasRegion }}
+	Region types.String `tfsdk:"region"`
+{{- end }}
+{{- if $.HasZone }}
+	Zone types.String `tfsdk:"zone"`
+{{- end }}
 }
 
 func (p *googleEphemeral{{$.ResourceName}}) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
@@ -74,6 +93,24 @@ func (p *googleEphemeral{{$.ResourceName}}) Schema(ctx context.Context, req ephe
 		Attributes: map[string]schema.Attribute{
 {{- range $prop := $.OrderProperties $.AllUserProperties }}
 			{{ template "SchemaFieldsEphemeralFW" $prop -}}
+{{- end }}
+{{- if $.HasProject }}
+			"project": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end }}
+{{- if $.HasRegion }}
+			"region": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end }}
+{{- if $.HasZone }}
+			"zone": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
 {{- end }}
 		},
 	}

@@ -1345,3 +1345,88 @@ func TestShouldGenerateEphemeralResourceTests(t *testing.T) {
 		})
 	}
 }
+
+func TestHasEphemeralNestedProperties(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no properties returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "only flat properties returns false",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+					{Name: "keyId", Type: "String"},
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "a NestedObject property returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+					{Name: "filter", Type: "NestedObject"},
+				},
+			},
+			expected: true,
+		},
+		{
+			description: "an Array of NestedObject returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:     "items",
+						Type:     "Array",
+						ItemType: &api.Type{Type: "NestedObject"},
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			description: "an Array of scalars returns false",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:     "items",
+						Type:     "Array",
+						ItemType: &api.Type{Type: "String"},
+					},
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "a Map of NestedObject returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:      "labelsLike",
+						Type:      "Map",
+						ValueType: &api.Type{Type: "NestedObject"},
+					},
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.HasEphemeralNestedProperties(); got != tc.expected {
+				t.Errorf("HasEphemeralNestedProperties() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
