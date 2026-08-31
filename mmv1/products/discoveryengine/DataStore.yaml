@@ -52,6 +52,9 @@ sweeper:
   url_substitutions:
     - region: "eu"
     - region: "global"
+tgc_tests:
+  - name: 'TestAccDiscoveryEngineDataStore_discoveryengineDatastoreKmsKeyNameExample'
+    skip: 'The underlying cmek config for that kms key is invalid'
 samples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'
