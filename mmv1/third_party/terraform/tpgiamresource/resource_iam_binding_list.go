@@ -112,7 +112,7 @@ func (r *IamBindingListResource) yieldPolicyBindings(ctx context.Context, req li
 			return true
 		}
 
-		res, err := r.buildBindingResult(ctx, req, targetRd, updater, binding, normalized, p.Etag)
+		res, err := r.buildBindingResult(ctx, req, targetRd, updater, binding, p.Etag)
 		if err != nil {
 			res = req.NewListResult(ctx)
 			res.Diagnostics.AddError("Error building IAM binding result", err.Error())
