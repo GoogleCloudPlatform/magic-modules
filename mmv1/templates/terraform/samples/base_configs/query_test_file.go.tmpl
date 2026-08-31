@@ -21,6 +21,7 @@ package {{ lower $.ProductMetadata.Name }}_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
@@ -33,6 +34,7 @@ import (
 
 var (
 	_ = envvar.TestEnvVar
+	_ = time.Now
 )
 
 {{ $sample := $.FirstTestConfig.Sample }}
