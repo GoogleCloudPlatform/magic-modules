@@ -21,7 +21,6 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	"github.com/hashicorp/terraform-provider-google/tpgresource"
 )
 
 var _ list.ListResource = &IamBindingListResource{}
