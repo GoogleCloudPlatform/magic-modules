@@ -72,7 +72,7 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 			},
 			{
 				Config:      testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_removeCheckUsageError(context),
-				ExpectError: regexp.MustCompile(".*has been used in the last 30 days or was enabled in the past 3 days\\. If you still wish to remove the service\\{s}, please set the check_usage_on_remove flag to false to proceed.*"),
+				ExpectError: regexp.MustCompile(".*has been used in the last 30 days or was enabled in the past 3 days\\. If you still wish to remove the service\\{s}, please set the force flag to false to proceed.*"),
 			},
 			{
 				Config: testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependnecyValidationOff(context),
