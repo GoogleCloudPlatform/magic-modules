@@ -36,7 +36,6 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-  decoder: templates/terraform/decoders/serviceusagev2_consumer_policy.go.tmpl
   constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
   pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl

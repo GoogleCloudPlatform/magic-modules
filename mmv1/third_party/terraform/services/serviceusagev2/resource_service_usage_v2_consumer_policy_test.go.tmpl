@@ -95,6 +95,9 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"validate_dependencies", "check_usage_on_remove",
 				},
+      {
+        Config: testAccServiceUsageV2ConsumerPolicy_allowDeletion(orgId, serviceName),
+       },
 			},
 		},
 	})
@@ -126,6 +129,24 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 }
 `, context)
 }
+
+func testAccServiceUsageV2ConsumerPolicy_allowDeletion(orgId, serviceName string) string {
+    return fmt.Sprintf(`
+resource "google_service_usage_v2_consumer_policy" "basic" {
+  parent = "organizations/%s"
+  name   = "default"
+
+  enable_rules {
+    services = []
+  }
+
+  # 🚀 Allow deletion / destructive changes on teardown
+  check_usage_on_remove = false
+  validate_dependencies = false
+}
+`, orgId)
+}
+
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependencyOK(context map[string]interface{}) string {
 	return acctest.Nprintf(`
