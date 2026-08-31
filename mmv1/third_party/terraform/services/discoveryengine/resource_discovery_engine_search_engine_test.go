@@ -147,6 +147,10 @@ resource "google_discovery_engine_search_engine" "basic" {
       disable_private_kg_query_ui_chips = true
     }
   }
+  observability_config {
+    observability_enabled = true
+    sensitive_logging_enabled = true
+  }
 }
 `, context)
 }
