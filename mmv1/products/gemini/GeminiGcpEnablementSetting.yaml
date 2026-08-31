@@ -80,3 +80,17 @@ properties:
       Possible values:
       GROUNDING_WITH_GOOGLE_SEARCH
       WEB_GROUNDING_FOR_ENTERPRISE
+  - name: geminiEnterpriseProject
+    type: String
+    description: |-
+      The Gemini enterprise project for this setting.
+      Format: projects/{project}
+      The `{project}` segment can be the project ID or project number.
+  - name: releaseChannel
+    type: String
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("CHANNEL_TYPE_UNSPECIFIED")'
+    description: |-
+      Specifies the release channel for Gemini features. The release channel determines which set of features are available to the user.
+      Possible values:
+      STABLE
+      EXPERIMENTAL
