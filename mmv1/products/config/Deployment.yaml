@@ -120,6 +120,7 @@ properties:
   - name: artifactsGcsBucket
     type: String
     description: Location for Cloud Build logs and artifacts.
+    default_from_api: true
   - name: workerPool
     type: String
     description: Custom Cloud Build worker pool resource name.
