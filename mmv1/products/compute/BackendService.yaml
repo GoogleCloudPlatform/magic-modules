@@ -918,6 +918,7 @@ properties:
     description: |
       Settings for enabling Cloud Identity Aware Proxy.
       If OAuth client is not set, the Google-managed OAuth client is used.
+    diff_suppress_func: 'suppressIapDiffWhenUnset'
     send_empty_value: true
     properties:
       - name: 'enabled'
