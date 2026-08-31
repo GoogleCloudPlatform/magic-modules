@@ -158,7 +158,7 @@ The following arguments are supported:
 
 * `check_existing_usage` -
   (Optional)
-  Defines the behavior for checking existing usage when updating a key. Possible values: `CHECK_EXISTING_USAGE_UNSPECIFIED`, `SKIP`, `CHECK`.
+  Defines the behavior for checking existing usage when updating a key. Possible values: `SKIP`, `CHECK`.
 
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
     When a 'terraform destroy' or 'terraform apply' would delete the resource,

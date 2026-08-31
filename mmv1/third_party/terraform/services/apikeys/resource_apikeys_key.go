@@ -102,8 +102,8 @@ When set to "FORCE", deleting the resource will bypass the active traffic usage 
 			"check_existing_usage": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"CHECK_EXISTING_USAGE_UNSPECIFIED", "SKIP", "CHECK"}, false),
-				Description:  "Defines the behavior for checking existing usage when updating a key. Possible values: 'CHECK_EXISTING_USAGE_UNSPECIFIED', 'SKIP', 'CHECK'.",
+				ValidateFunc: validation.StringInSlice([]string{"SKIP", "CHECK"}, false),
+				Description:  "Defines the behavior for checking existing usage when updating a key. Possible values: 'SKIP', 'CHECK'.",
 			},
 
 			//UDP schema start
