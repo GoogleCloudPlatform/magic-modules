@@ -3,8 +3,10 @@ name: override-labels
 permissions: {}
 
 on:
+  # zizmor: ignore[dangerous-triggers] - pull_request_target needed to write commit status checks on fork PRs without checking out code
   pull_request_target:
     types: [labeled, unlabeled]
+
 
 
 jobs:

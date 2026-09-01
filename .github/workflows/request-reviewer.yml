@@ -3,6 +3,7 @@ name: request-reviewer
 permissions: {}
 
 on:
+  # zizmor: ignore[dangerous-triggers] - pull_request_target needed to assign reviewers on fork PRs, checks out trusted ref: main
   pull_request_target:
     types:
       - opened
@@ -12,6 +13,7 @@ on:
   issue_comment:
     types:
       - created
+
 
 jobs:
   request-review:
