@@ -75,7 +75,7 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 func testAccSnapshot_name(project, suffix string) string {
 	return acctest.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
@@ -107,7 +107,7 @@ func testAccSnapshot_name(project, suffix string) string {
 func testAccSnapshot_filter(project, suffix string) string {
 	return acctest.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
@@ -158,7 +158,7 @@ func testAccSnapshot_filter(project, suffix string) string {
 func testAccSnapshot_filter_mostRecent(project, suffix string) string {
 	return acctest.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
