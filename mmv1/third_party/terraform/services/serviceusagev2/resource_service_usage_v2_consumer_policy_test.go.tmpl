@@ -133,7 +133,8 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interface{}) string {
     return fmt.Sprintf(`
-resource "google_service_usage_v2_consumer_policy" "basic" {
+    resource "google_service_usage_v2_consumer_policy" "basic" {
+      provider = google-beta
   parent = "organizations/%s"
   name   = "default"
 
