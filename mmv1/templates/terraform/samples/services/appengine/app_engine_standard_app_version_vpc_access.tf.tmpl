@@ -1,31 +1,31 @@
 resource "google_service_account" "service_account" {
-  provider     = google-beta
+  provider     = google
   account_id   = "{{index $.ResourceIdVars "sa_email"}}"
   display_name = "Test Service Account for GAE"
 }
 
 resource "google_project_iam_member" "gae_api" {
-  provider = google-beta
+  provider = google
   project  = google_service_account.service_account.project
   role     = "roles/compute.networkUser"
   member   = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_project_iam_member" "storage_viewer" {
-  provider = google-beta
+  provider = google
   project  = google_service_account.service_account.project
   role     = "roles/storage.objectViewer"
   member   = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_compute_network" "custom" {
-  provider                = google-beta
+  provider                = google
   name                    = "custom-net-{{index $.ResourceIdVars "service_id"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "custom" {
-  provider      = google-beta
+  provider      = google
   name          = "custom-sub-{{index $.ResourceIdVars "service_id"}}"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -33,28 +33,28 @@ resource "google_compute_subnetwork" "custom" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  provider                    = google-beta
+  provider                    = google
   name                        = "{{index $.ResourceIdVars "bucket_name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "requirements" {
-  provider = google-beta
+  provider = google
   name     = "requirements.txt"
   bucket   = google_storage_bucket.bucket.name
   source   = "./test-fixtures/hello-world-flask/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "main" {
-  provider = google-beta
+  provider = google
   name     = "main.py"
   bucket   = google_storage_bucket.bucket.name
   source   = "./test-fixtures/hello-world-flask/main.py"
 }
 
 resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
-  provider     = google-beta
+  provider     = google
   version_id   = "v1"
   service      = "{{index $.ResourceIdVars "service_id"}}"
   runtime      = "python310"
