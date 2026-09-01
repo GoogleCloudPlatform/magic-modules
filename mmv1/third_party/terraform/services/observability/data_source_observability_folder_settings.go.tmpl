@@ -1,6 +1,5 @@
 package observability
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 
@@ -46,4 +45,3 @@ func init() {
 		Schema: DataSourceObservabilityFolderSettings(),
 	}.Register()
 }
-{{- end }}

@@ -1,5 +1,4 @@
 resource "google_project" "project" {
-	provider        = "google-beta"
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
@@ -7,7 +6,6 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "observability_api" {
-	provider           = "google-beta"
   project            = google_project.project.project_id
   service            = "observability.googleapis.com"
   disable_on_destroy = false
@@ -15,7 +13,6 @@ resource "google_project_service" "observability_api" {
 
 # Actively force the creation of the Service Agent identity
 resource "google_project_service_identity" "observability_sa" {
-	provider = "google-beta"
   project  = google_project.project.project_id
   service  = "observability.googleapis.com"
 
@@ -33,7 +30,6 @@ resource "time_sleep" "wait_for_sa_propagation" {
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-	provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
@@ -44,7 +40,6 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 
 resource "google_observability_project_settings" "primary" {
-	provider     = "google-beta"
   location     = "us"
   project      = google_project.project.project_id
   kms_key_name = "%{kms_key_name}"

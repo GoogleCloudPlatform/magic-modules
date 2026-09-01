@@ -1,6 +1,5 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"testing"
 
@@ -23,7 +22,7 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -35,10 +34,7 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "time_sleep" "wait_for_org" {
@@ -46,7 +42,6 @@ func testAccObservabilityOrganizationSettings_datasource(context map[string]inte
 	}
 
 	resource "google_observability_organization_settings" "settings" {
-		provider 	      						= "google-beta"
 		organization 	  						= "%{org_id}"
 		location 	           				= "global"
 		default_storage_location    = "%{location}"
@@ -54,12 +49,9 @@ func testAccObservabilityOrganizationSettings_datasource(context map[string]inte
 	}
 
 	data "google_observability_organization_settings" "settings" {
-		provider 	      = "google-beta"
 		organization 	  = "%{org_id}"
 		location 	      = "global"
 		depends_on 	    = [google_observability_organization_settings.settings]
 	}
 `, context)
 }
-{{- else }}
-{{- end }}
