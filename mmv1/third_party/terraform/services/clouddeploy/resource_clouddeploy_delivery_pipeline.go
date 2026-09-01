@@ -1474,6 +1474,7 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDe
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy{
 		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
 }
 
@@ -1483,6 +1484,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryD
 	}
 	transformed := map[string]interface{}{
 		"actions": obj.Actions,
+		"tasks":   flattenClouddeployDeliveryPipelineTaskArray(obj.Tasks),
 	}
 
 	return []interface{}{transformed}
@@ -1500,6 +1502,7 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDe
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy{
 		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
 }
 
@@ -1509,6 +1512,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryD
 	}
 	transformed := map[string]interface{}{
 		"actions": obj.Actions,
+		"tasks":   flattenClouddeployDeliveryPipelineTaskArray(obj.Tasks),
 	}
 
 	return []interface{}{transformed}
@@ -1621,6 +1625,7 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCa
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy{
 		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
 }
 
@@ -1630,6 +1635,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomC
 	}
 	transformed := map[string]interface{}{
 		"actions": obj.Actions,
+		"tasks":   flattenClouddeployDeliveryPipelineTaskArray(obj.Tasks),
 	}
 
 	return []interface{}{transformed}
@@ -1647,6 +1653,7 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCa
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy{
 		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
 }
 
@@ -1656,6 +1663,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomC
 	}
 	transformed := map[string]interface{}{
 		"actions": obj.Actions,
+		"tasks":   flattenClouddeployDeliveryPipelineTaskArray(obj.Tasks),
 	}
 
 	return []interface{}{transformed}
@@ -1893,6 +1901,7 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPostde
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy{
 		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
 }
 
@@ -1902,6 +1911,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPostd
 	}
 	transformed := map[string]interface{}{
 		"actions": obj.Actions,
+		"tasks":   flattenClouddeployDeliveryPipelineTaskArray(obj.Tasks),
 	}
 
 	return []interface{}{transformed}
@@ -1919,6 +1929,7 @@ func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPredep
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy{
 		Actions: tpgdclresource.ExpandStringArray(obj["actions"]),
+		Tasks:   expandClouddeployDeliveryPipelineTaskArray(obj["tasks"]),
 	}
 }
 
@@ -1928,6 +1939,7 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardPrede
 	}
 	transformed := map[string]interface{}{
 		"actions": obj.Actions,
+		"tasks":   flattenClouddeployDeliveryPipelineTaskArray(obj.Tasks),
 	}
 
 	return []interface{}{transformed}
@@ -1941,7 +1953,7 @@ func expandClouddeployDeliveryPipelineTaskArray(o interface{}) []DeliveryPipelin
 	objs := o.([]interface{})
 	items := make([]DeliveryPipelineTask, 0, len(objs))
 	for _, item := range objs {
-		i := expandClouddeployDeliveryPipelineTask(item)
+		i := expandClouddeployDeliveryPipelineTask([]interface{}{item})
 		if i != nil {
 			items = append(items, *i)
 		}
@@ -1957,7 +1969,9 @@ func flattenClouddeployDeliveryPipelineTaskArray(objs []DeliveryPipelineTask) []
 	for _, item := range objs {
 		i := flattenClouddeployDeliveryPipelineTask(&item)
 		if i != nil {
-			items = append(items, i)
+			if arr, ok := i.([]interface{}); ok && len(arr) > 0 {
+				items = append(items, arr[0])
+			}
 		}
 	}
 	return items

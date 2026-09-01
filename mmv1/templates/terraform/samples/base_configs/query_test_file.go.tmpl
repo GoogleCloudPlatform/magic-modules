@@ -20,6 +20,7 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -29,9 +30,13 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
+{{- range $pkg, $alias := ($.FirstTestConfig.Sample.TestDependencies $.Runtime.ResourcePrefixPkgMap) }}
+	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
+{{- end }}
 )
 
 var (
+	_ = strings.Trim
 	_ = envvar.TestEnvVar
 )
 
@@ -63,15 +68,13 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 	{{- end }}
 	{{- range $scope := $.ListScopeProperties }}
 		{{- $n := underscore $scope.Name }}
-		{{- if not (index $step.TestContextVars $n) }}
+		{{- if and (not (index $step.TestContextVars $n)) (not (index $step.TestEnvVars $n)) }}
 		{{- if or (eq $n "region") (eq $n "location") }}
 		"{{$n}}": envvar.GetTestRegionFromEnv(),
 		{{- else if eq $n "zone" }}
 		"zone": envvar.GetTestZoneFromEnv(),
 		{{- else if eq $n "project" }}
-		{{- if not (index $step.TestEnvVars "project") }}
 		"project": envvar.GetTestProjectFromEnv(),
-		{{- end }}
 		{{- end }}
 		{{- end }}
 	{{- end }}

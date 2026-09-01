@@ -11,6 +11,7 @@
                 "datasetReference": {
                     "datasetId": "stpostgres"
                 },
+                "defaultCollation": "",
                 "description": "Database of postgres",
                 "friendlyName": "stpostgres",
                 "labels": {

@@ -42,9 +42,9 @@ async:
   actions: [create]
   result:
     resource_inside_response: true
-exclude_read: true
 autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
 custom_code:
+  decoder: templates/terraform/decoders/vertex_ai_endpoint_with_model_garden_deployment.go.tmpl
   custom_update: templates/terraform/custom_update/vertex_ai_endpoint_with_model_garden_deployment.go.tmpl
   post_create: templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl
   custom_delete: templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl
@@ -165,6 +165,7 @@ properties:
       - hugging_face_model_id
   - name: modelConfig
     type: NestedObject
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_endpoint_with_model_garden_deployment_model_config.go.tmpl'
     description: The model config to use for the deployment.
     properties:
       - name: huggingFaceCacheEnabled
@@ -845,6 +846,7 @@ properties:
           artifacts of gated models.
   - name: endpointConfig
     type: NestedObject
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_endpoint_with_model_garden_deployment_endpoint_config.go.tmpl'
     description: The endpoint config to use for the deployment.
     properties:
       - name: endpointDisplayName
@@ -922,6 +924,7 @@ properties:
             output: true
   - name: deployConfig
     type: NestedObject
+    default_from_api: true
     description: The deploy config to use for the deployment.
     properties:
       - name: systemLabels
@@ -937,6 +940,7 @@ properties:
         properties:
           - name: machineSpec
             type: NestedObject
+            custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_endpoint_with_model_garden_deployment_machine_spec.go.tmpl'
             description: Specification of a single machine.
             required: true
             properties:
@@ -1032,6 +1036,7 @@ properties:
             required: true
           - name: maxReplicaCount
             type: Integer
+            default_from_api: true
             description: |-
               The maximum number of replicas that may be deployed on when the traffic
               against it increases. If the requested value is too large, the deployment

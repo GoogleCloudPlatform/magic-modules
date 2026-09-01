@@ -13,6 +13,7 @@
 
 ---
 name: IcebergNamespace
+api_resource_type_kind: Namespace
 description: |
   IcebergNamespaces are containers for Apache Iceberg Tables within an IcebergCatalog.
 base_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces

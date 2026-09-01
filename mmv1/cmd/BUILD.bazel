@@ -8,6 +8,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//mmv1/api",
+        "//mmv1/google",
         "//mmv1/provider",
     ],
 )
