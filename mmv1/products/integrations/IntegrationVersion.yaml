@@ -56,6 +56,14 @@ samples:
           description: Initial description
         test_vars_overrides:
           client: BootstrapIntegrationsClient(t, "us-east4")
+        # The API server automatically migrates task_configs.failure_policy and
+        # task_configs.synchronous_call_failure_policy into conditional_failure_policies
+        # on the backend. When importing without configuration context, the decoder receives
+        # conditional_failure_policies from the API, causing ImportStateVerify differences.
+        ignore_read_extra:
+          - task_configs.1.conditional_failure_policies
+          - task_configs.1.failure_policy
+          - task_configs.1.synchronous_call_failure_policy
       - name: integrations_integration_version_full
         resource_id_vars:
           integration_name: test-integration
@@ -63,6 +71,14 @@ samples:
           description: Updated description
         test_vars_overrides:
           client: BootstrapIntegrationsClient(t, "us-east4")
+        # The API server automatically migrates task_configs.failure_policy and
+        # task_configs.synchronous_call_failure_policy into conditional_failure_policies
+        # on the backend. When importing without configuration context, the decoder receives
+        # conditional_failure_policies from the API, causing ImportStateVerify differences.
+        ignore_read_extra:
+          - task_configs.1.conditional_failure_policies
+          - task_configs.1.failure_policy
+          - task_configs.1.synchronous_call_failure_policy
   - name: integrations_integration_version_cmek
     primary_resource_id: version_cmek
     bootstrap_iam:
@@ -826,6 +842,7 @@ properties:
         - name: parameters
           type: Map
           custom_expand: templates/terraform/custom_expand/integrations_version_parameters.go.tmpl
+          set_hash_func: integrationsTaskConfigParametersHash
           description: The customized parameters the user can pass to this task.
           value_type:
             type: NestedObject

@@ -23,4 +23,123 @@ if rawParams, ok := res["integrationParameters"].([]interface{}); ok {
 	res["integrationParameters"] = userParams
 }
 
+
+
+// Reconstruct failurePolicy and synchronousCallFailurePolicy if user configured them instead of conditionalFailurePolicies
+if rawTasks, ok := res["taskConfigs"].([]interface{}); ok {
+	dTasksById := make(map[string]map[string]interface{})
+	if d != nil {
+		if dt, ok := d.GetOk("task_configs"); ok {
+			for _, item := range dt.([]interface{}) {
+				if m, ok := item.(map[string]interface{}); ok {
+					if tid, ok := m["task_id"].(string); ok && tid != "" {
+						dTasksById[tid] = m
+					}
+				}
+			}
+		}
+	}
+	for _, rawTask := range rawTasks {
+		t, ok := rawTask.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		taskId, _ := t["taskId"].(string)
+		userTask := dTasksById[taskId]
+		if userTask != nil {
+			condPoliciesConfig, _ := userTask["conditional_failure_policies"].([]interface{})
+			failPolicyConfig, _ := userTask["failure_policy"].([]interface{})
+			syncPolicyConfig, _ := userTask["synchronous_call_failure_policy"].([]interface{})
+
+			if len(condPoliciesConfig) == 0 && (len(failPolicyConfig) > 0 || len(syncPolicyConfig) > 0) {
+				if condRaw, ok := t["conditionalFailurePolicies"].(map[string]interface{}); ok {
+					if defaultPolicy, ok := condRaw["defaultFailurePolicy"].(map[string]interface{}); ok && len(failPolicyConfig) > 0 {
+						if origCond, ok := failPolicyConfig[0].(map[string]interface{})["condition"].(string); ok && origCond != "" {
+							defaultPolicy["condition"] = origCond
+						}
+						t["failurePolicy"] = defaultPolicy
+					}
+					if failurePolicies, ok := condRaw["failurePolicies"].([]interface{}); ok {
+						for _, pRaw := range failurePolicies {
+							p, ok := pRaw.(map[string]interface{})
+							if !ok {
+								continue
+							}
+							cond, _ := p["condition"].(string)
+							if strings.Contains(cond, "ASYNC") && len(failPolicyConfig) > 0 {
+								if origCond, ok := failPolicyConfig[0].(map[string]interface{})["condition"].(string); ok && origCond != "" {
+									p["condition"] = origCond
+								}
+								t["failurePolicy"] = p
+							} else if strings.Contains(cond, "SYNC") && len(syncPolicyConfig) > 0 {
+								if origCond, ok := syncPolicyConfig[0].(map[string]interface{})["condition"].(string); ok && origCond != "" {
+									p["condition"] = origCond
+								}
+								t["synchronousCallFailurePolicy"] = p
+							} else if len(failPolicyConfig) > 0 {
+								if origCond, ok := failPolicyConfig[0].(map[string]interface{})["condition"].(string); ok && origCond != "" {
+									p["condition"] = origCond
+								}
+								t["failurePolicy"] = p
+							}
+						}
+					}
+					delete(t, "conditionalFailurePolicies")
+				}
+			}
+		}
+	}
+}
+
+// Preserve integrationConfigParameters value from d if not returned by the API
+if rawConfigParams, ok := res["integrationConfigParameters"].([]interface{}); ok && d != nil {
+	if dConfigParams, ok := d.GetOk("integration_config_parameters"); ok {
+		dConfigMap := make(map[string]map[string]interface{})
+		for _, item := range dConfigParams.([]interface{}) {
+			if m, ok := item.(map[string]interface{}); ok {
+				if paramList, ok := m["parameter"].([]interface{}); ok && len(paramList) > 0 {
+					if param, ok := paramList[0].(map[string]interface{}); ok {
+						if k, ok := param["key"].(string); ok && k != "" {
+							dConfigMap[k] = m
+						}
+					}
+				}
+			}
+		}
+		for _, rawCP := range rawConfigParams {
+			if cpMap, ok := rawCP.(map[string]interface{}); ok {
+				if param, ok := cpMap["parameter"].(map[string]interface{}); ok {
+					if k, ok := param["key"].(string); ok {
+						if dItem, ok := dConfigMap[k]; ok {
+							if valList, ok := dItem["value"].([]interface{}); ok && len(valList) > 0 {
+								if valMap, ok := valList[0].(map[string]interface{}); ok {
+									apiVal := make(map[string]interface{})
+									if sv, ok := valMap["string_value"].(string); ok && sv != "" {
+										apiVal["stringValue"] = sv
+									}
+									if iv, ok := valMap["int_value"].(string); ok && iv != "" {
+										apiVal["intValue"] = iv
+									}
+									if bv, ok := valMap["boolean_value"].(bool); ok {
+										apiVal["booleanValue"] = bv
+									}
+									if dv, ok := valMap["double_value"].(float64); ok {
+										apiVal["doubleValue"] = dv
+									}
+									if jv, ok := valMap["json_value"].(string); ok && jv != "" {
+										apiVal["jsonValue"] = jv
+									}
+									if len(apiVal) > 0 {
+										cpMap["value"] = apiVal
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 return res, nil

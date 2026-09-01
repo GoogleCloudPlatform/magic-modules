@@ -177,6 +177,18 @@ resource "google_integrations_integration_version" "version_full" {
         string_value = "POST"
       }
     }
+    failure_policy {
+      condition = "true"
+      interval_time = "1970-01-01T00:00:10Z"
+      max_retries = 3
+      retry_strategy = "FIXED_INTERVAL"
+    }
+    synchronous_call_failure_policy {
+      condition = "true"
+      interval_time = "1970-01-01T00:00:10Z"
+      max_retries = 3
+      retry_strategy = "FIXED_INTERVAL"
+    }
   }
 
   error_catcher_configs {
@@ -341,6 +353,9 @@ resource "google_integrations_integration_version" "version_full" {
       description = "config param description"
       is_transient = false
       producer = "1_1"
+    }
+    value {
+      string_value = "custom_config_val"
     }
   }
 

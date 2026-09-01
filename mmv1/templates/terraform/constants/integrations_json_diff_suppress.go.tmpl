@@ -14,3 +14,46 @@ func integrationsJsonDiffSuppress(k, old, new string, d *schema.ResourceData) bo
 	}
 	return reflect.DeepEqual(oldObj, newObj)
 }
+
+func integrationsTaskConfigParametersHash(v interface{}) int {
+	var buf bytes.Buffer
+	if m, ok := v.(map[string]interface{}); ok {
+		buf.WriteString(fmt.Sprintf("%s-", m["key"]))
+		if masked, ok := m["masked"].(bool); ok && masked {
+			buf.WriteString("masked-")
+		}
+		if valList, ok := m["value"].([]interface{}); ok && len(valList) > 0 {
+			if valMap, ok := valList[0].(map[string]interface{}); ok {
+				if sv, ok := valMap["string_value"].(string); ok && sv != "" {
+					buf.WriteString(fmt.Sprintf("sv:%s-", sv))
+				}
+				if iv, ok := valMap["int_value"].(string); ok && iv != "" {
+					buf.WriteString(fmt.Sprintf("iv:%s-", iv))
+				}
+				if jv, ok := valMap["json_value"].(string); ok && jv != "" {
+					buf.WriteString(fmt.Sprintf("jv:%s-", jv))
+				}
+				if bv, ok := valMap["boolean_value"].(bool); ok && bv {
+					buf.WriteString("bv:true-")
+				}
+				if dv, ok := valMap["double_value"].(float64); ok && dv != 0 {
+					buf.WriteString(fmt.Sprintf("dv:%v-", dv))
+				}
+				if ba, ok := valMap["boolean_array"].([]interface{}); ok && len(ba) > 0 {
+					buf.WriteString(fmt.Sprintf("ba:%v-", ba))
+				}
+				if da, ok := valMap["double_array"].([]interface{}); ok && len(da) > 0 {
+					buf.WriteString(fmt.Sprintf("da:%v-", da))
+				}
+				if ia, ok := valMap["int_array"].([]interface{}); ok && len(ia) > 0 {
+					buf.WriteString(fmt.Sprintf("ia:%v-", ia))
+				}
+				if sa, ok := valMap["string_array"].([]interface{}); ok && len(sa) > 0 {
+					buf.WriteString(fmt.Sprintf("sa:%v-", sa))
+				}
+			}
+		}
+	}
+	hash := schema.HashString(buf.String())
+	return hash
+}
