@@ -57,7 +57,37 @@ resource "google_integrations_integration_version" "version_full" {
       threshold_type = "EXPECTED_MAX"
       threshold_value {
         absolute = "1"
+        percentage = 50
       }
+    }
+  }
+
+  trigger_configs {
+    label = "schedule_trigger"
+    trigger_type = "CRON"
+    trigger_number = "2"
+    trigger_id = "cron_trigger/schedule_trigger/0+0+*+*+*"
+    description = "Cloud scheduler trigger description"
+    trigger = "Cloud Scheduler Trigger"
+    properties = {
+      "Timer Name" = "schedule_trigger"
+      "Scheduled Time spec" = "0 0 * * *"
+    }
+    position {
+      x = "150"
+      y = "150"
+    }
+    start_tasks {
+      task_id = "1"
+      condition = "true"
+      description = "Start task from scheduler"
+      display_name = "start"
+      task_config_id = "1"
+    }
+    cloud_scheduler_config {
+      cron_tab = "0 0 * * *"
+      location = "us-east4"
+      service_account_email = google_service_account.test_sa.email
     }
   }
 
@@ -309,6 +339,137 @@ resource "google_integrations_integration_version" "version_full" {
       masked = false
       contains_large_data = false
       description = "config param description"
+      is_transient = false
+      producer = "1_1"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param2`" + `"
+      data_type = "INT_VALUE"
+      default_value {
+        int_value = "10"
+      }
+      display_name = "` + "`CONFIG_param2`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "int config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param3`" + `"
+      data_type = "BOOLEAN_VALUE"
+      default_value {
+        boolean_value = true
+      }
+      display_name = "` + "`CONFIG_param3`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "bool config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param4`" + `"
+      data_type = "DOUBLE_VALUE"
+      default_value {
+        double_value = 3.14
+      }
+      display_name = "` + "`CONFIG_param4`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "double config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param5`" + `"
+      data_type = "STRING_ARRAY"
+      default_value {
+        string_array {
+          string_values = ["val1", "val2"]
+        }
+      }
+      display_name = "` + "`CONFIG_param5`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "string array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param6`" + `"
+      data_type = "INT_ARRAY"
+      default_value {
+        int_array {
+          int_values = ["1", "2"]
+        }
+      }
+      display_name = "` + "`CONFIG_param6`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "int array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param7`" + `"
+      data_type = "BOOLEAN_ARRAY"
+      default_value {
+        boolean_array {
+          boolean_values = [true, false]
+        }
+      }
+      display_name = "` + "`CONFIG_param7`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "bool array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param8`" + `"
+      data_type = "DOUBLE_ARRAY"
+      default_value {
+        double_array {
+          double_values = [1.1, 2.2]
+        }
+      }
+      display_name = "` + "`CONFIG_param8`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "double array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param9`" + `"
+      data_type = "JSON_VALUE"
+      default_value {
+        json_value = jsonencode({ "key" = "val" })
+      }
+      display_name = "` + "`CONFIG_param9`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "json config param"
+      json_schema = jsonencode({ "$schema" = "http://json-schema.org/draft-04/schema#" })
     }
   }
 }
