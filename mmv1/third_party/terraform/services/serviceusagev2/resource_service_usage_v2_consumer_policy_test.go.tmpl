@@ -20,7 +20,6 @@ package serviceusagev2_test
 import (
 	"regexp"
 	"testing"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -132,19 +131,33 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 }
 
 func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interface{}) string {
-    return fmt.Sprintf(`
-    resource "google_service_usage_v2_consumer_policy" "basic" {
+    return acctest.Nprintf(`
+    provider "google-beta" {
+      user_project_override = true
+      billing_project = "%{project_id}"
+    }
+
+    resource "google_project" "basic" {
       provider = google-beta
-  parent = "organizations/%s"
-  name   = "default"
+      project_id = "tf-test-suv2%s"
+      name       = "tf-test-suv2%s"
+      org_id     = "%{org_id}"
+      deletion_policy = "DELETE"
+    }
 
-  enable_rules {
-    services = []
-  }
+    resource "google_service_usage_v2_consumer_policy" "default" {
+      provider = google-beta
+      parent = "projects/${google_project.basic.project_id}"
+      name   = "default"
 
-  check_usage_on_remove = false
-  validate_dependencies = false
-}
+      enable_rules {
+        services = []
+      }
+
+      # 🚀 Override strict validations to allow clean teardown
+      check_usage_on_remove = false
+      validate_dependencies = false
+    }
 `, context)
 }
 
