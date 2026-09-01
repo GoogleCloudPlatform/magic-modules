@@ -19,12 +19,11 @@ description: |
 references:
   guides:
     'QUICKSTART_TITLE': 'https://docs.cloud.google.com/lakehouse/docs/about-spark-hive-metastore'
-min_version: beta
-# hive/v1beta is added here instead of into the base url of the product.yaml.
+# hive/v1 is added here instead of into the base url of the product.yaml.
 # This is because the IAM policy does not contain this prefix, so it must be separated.
-base_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases'
-self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{name}}'
-create_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases?hiveDatabaseId={{name}}'
+base_url: 'hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases'
+self_link: 'hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases/{{name}}'
+create_url: 'hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases?hiveDatabaseId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 # The IAM policy is shared with Iceberg Catalog (biglakeiceberg).
@@ -41,7 +40,6 @@ iam_policy:
 samples:
   - name: 'biglake_hive_database'
     primary_resource_id: 'my_hive_database'
-    min_version: beta
     steps:
       - name: 'biglake_hive_database'
         resource_id_vars:

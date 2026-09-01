@@ -15,12 +15,11 @@
 name: 'HiveTable'
 api_resource_type_kind: Table
 description: 'Hive Tables in BigLake Metastore that exist within a Hive Catalog and Database.'
-min_version: 'beta'
-# hive/v1beta is added here instead of into the base url of the product.yaml.
+# hive/v1 is added here instead of into the base url of the product.yaml.
 # This is because the IAM policy does not contain this prefix, so it must be separated.
-base_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables'
-self_link: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables/{{name}}'
-create_url: 'hive/v1beta/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables?hiveTableId={{name}}'
+base_url: 'hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables'
+self_link: 'hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables/{{name}}'
+create_url: 'hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases/{{database}}/tables?hiveTableId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 
@@ -37,7 +36,6 @@ iam_policy:
 samples:
   - name: 'biglake_hive_table'
     primary_resource_id: 'my_hive_table'
-    min_version: beta
     steps:
       - name: 'biglake_hive_table'
         resource_id_vars:
