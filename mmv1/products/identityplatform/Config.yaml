@@ -41,7 +41,6 @@ timeouts:
   delete_minutes: 20
 exclude_sweeper: true
 exclude_delete: true
-generate_list_resource: true
 custom_code:
   custom_create: templates/terraform/custom_create/identity_platform_config.go.tmpl
 samples:
