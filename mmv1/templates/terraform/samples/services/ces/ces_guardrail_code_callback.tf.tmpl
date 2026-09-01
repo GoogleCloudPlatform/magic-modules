@@ -47,6 +47,7 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
   }
 }

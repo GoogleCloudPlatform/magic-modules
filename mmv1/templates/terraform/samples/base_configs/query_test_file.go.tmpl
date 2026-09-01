@@ -20,6 +20,7 @@
 package {{ lower $.ProductMetadata.Name }}_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -29,9 +30,13 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
+{{- range $pkg, $alias := ($.FirstTestConfig.Sample.TestDependencies $.Runtime.ResourcePrefixPkgMap) }}
+	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
+{{- end }}
 )
 
 var (
+	_ = strings.Trim
 	_ = envvar.TestEnvVar
 )
 
