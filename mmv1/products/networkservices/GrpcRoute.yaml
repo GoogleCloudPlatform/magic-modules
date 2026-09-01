@@ -19,6 +19,7 @@ references:
   guides:
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.grpcRoutes
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/{{location}}/grpcRoutes
 self_link: projects/{{project}}/locations/{{location}}/grpcRoutes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/grpcRoutes?grpcRouteId={{name}}

@@ -22,6 +22,7 @@ references:
   guides:
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1/projects.locations.gateways
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/{{location}}/gateways
 self_link: projects/{{project}}/locations/{{location}}/gateways/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}
