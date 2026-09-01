@@ -21,7 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Valid values for iam_policy.generate_list_resources.
+// Valid values for iam_policy.generate_list_resource.
 const (
 	IamListKindMember  = "member"
 	IamListKindBinding = "binding"
@@ -149,7 +149,7 @@ type IamPolicy struct {
 
 	// [Optional] Which IAM list resources (terraform query) to generate for this
 	// resource. Valid kinds: "member", "binding", "policy".
-	// Example: generate_list_resources: [member, binding]
+	// Example: generate_list_resource: [member, binding]
 	GenerateListResource []string `yaml:"generate_list_resource,omitempty"`
 
 	// EnableListRoleFilter controls whether the generated list resource exposes a role filter.

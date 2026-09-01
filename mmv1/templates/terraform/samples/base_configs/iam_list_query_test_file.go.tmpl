@@ -141,7 +141,7 @@ list "{{ $.TerraformName }}_iam_member" "members" {
 	{{- if $.IamPolicy.RoleFilterEnabled }}
 		role = "{{ $.IamPolicy.AllowedIamRole }}"
 	{{- end }}	
-	{{if $.IamPolicy.MemberFilterEnabled }}
+	{{- if $.IamPolicy.MemberFilterEnabled }}
 		member = "%{iam_member}"
 	{{- end }}
     }

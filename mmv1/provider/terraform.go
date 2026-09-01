@@ -199,7 +199,7 @@ func (t *Terraform) GenerateListResource(object api.Resource, templateData Templ
 }
 
 // GenerateIamListResource emits list_iam_<resource>.go containing every IAM list
-// kind requested via iam-policy.generate_list_resource, mirroring iam_<resource>.go.tmpl.
+// kind requested via iam_policy.generate_list_resource, mirroring iam_policy.go.tmpl.
 func (t *Terraform) GenerateIamListResource(object api.Resource, templateData TemplateData, targetFolder string) {
 	if !object.IamPolicy.AnyListResource() {
 		return
