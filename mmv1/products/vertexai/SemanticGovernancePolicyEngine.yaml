@@ -126,3 +126,62 @@ properties:
       INACTIVE. `FAILED` indicates provisioning did not succeed; recover by
       destroying the resource (deprovision) or re-applying (re-provision).
     output: true
+  - name: 'gatewayConfigs'
+    type: Map
+    description: |
+      Configurations for gateways. The keys are user-defined names for each gateway.
+      At most 5 gateway configurations are allowed.
+    key_name: 'name'
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'network'
+          type: String
+          description: |
+            The URI of the network resource where PSC-E will be provisioned. If not
+            provided 'default' network will be used. Format:
+            projects/{project}/global/networks/{network}
+        - name: 'subnetwork'
+          type: String
+          description: |
+            The URI of the subnetwork resource where PSC-E will be provisioned. If
+            not provided 'default' subnet will be used from the same {location}
+            Format: projects/{project}/regions/{region}/subnetworks/{subnetwork}
+        - name: 'dnsZoneName'
+          type: String
+          description: |
+            FQDN of the private DNS zone to create DNS record set for PSC endpoint.
+        - name: 'allowedProjects'
+          type: Array
+          description: |
+            Additional consumer projects permitted to attach their own PSC endpoint
+            to this gateway's ServiceAttachment. This is the "decoupled" mode, where
+            the customer creates the PSC endpoint in a project other than this
+            gateway's network project. Each listed project is VPC-SC enforced: it
+            must be within the caller's service perimeter. The owning
+            SemanticGovernancePolicyEngine's own project is always permitted
+            implicitly and need not be listed. Format: projects/{project} (ID or number).
+          item_type:
+            type: String
+        - name: 'state'
+          type: String
+          description: |
+            The state of the Gateway configuration. One of: STATE_UNSPECIFIED,
+            PROVISIONING, ACTIVE, DEPROVISIONING, INACTIVE, FAILED.
+          output: true
+        - name: 'ipAddress'
+          type: String
+          description: |
+            The private IP address of the PSC endpoint.
+          output: true
+        - name: 'pscEndpoint'
+          type: String
+          description: |
+            The self-link or name of the Private Service Connect endpoint forwarding
+            rule.
+          output: true
+        - name: 'dnsRecord'
+          type: String
+          description: |
+            The fully qualified record name of the created A-record in Cloud DNS.
+          output: true
