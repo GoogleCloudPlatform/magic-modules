@@ -2,7 +2,7 @@
 
 ## Background and problem
 
-Our nightly tests are implemented as a build per package in the provider. A cron schedule on the Service Sweeper at 4am UTC starts a build chain: every package test build, then the composite All Nightly Tests build, then the Service Sweeper. Snapshot dependencies make those package builds share one sources snapshot (the same git revision). When builds are triggered they enter the build queue and wait for an agent to be available to run the build. Overall the test suite takes approximately 8-10 hours to complete (excluding sweeper builds) and builds are leaving the queue at various times.
+Our nightly tests are implemented as a build per package in the provider. A cron schedule triggers builds from each build configuration at 4am UTC and we use locks to prevent builds conflicting with each other. The composite All Nightly Tests build snapshot-depends on every package test so they share one sources snapshot; the Service Sweeper snapshot-depends on that composite and is triggered five hours later. When builds are triggered they enter the build queue and wait for an agent to be available to run the build. Overall the test suite takes approximately 8-10 hours to complete (excluding sweeper builds) and builds are leaving the queue at various times.
 
 Builds in TeamCity use the latest commit from the branch they’re testing at the point that they leave the build queue and start to run. This can result in situations where the build queue contains multiple builds, early-running builds use the latest commit (A) on the main branch, a PR is merged and introduces a subsequent commit (B), and then builds that exit the queue later will run tests using commit B.
 
@@ -24,7 +24,7 @@ The solution we've implemented includes:
     * Renames the previous day's `nightly-test` branch to `UTC-nightly-test-YYYY-MM-DD`, where the date corresponds to when the base commit was made in UTC.
     * Creates a new `nightly-test` branch using the latest commit on the `main` branch
     * Sweeps up old `UTC-nightly-test-YYYY-MM-DD` branches [over 3 days old](https://github.com/hashicorp/terraform-provider-google/blob/5bce89216324fcf9165ef5fc8d1634e55465282b/.github/workflows/teamcity-nightly-workflow.yaml#L83)
-* [Updates to TeamCity](https://github.com/GoogleCloudPlatform/magic-modules/pull/10785) so that any builds triggered by the nightly cron at **4am UTC** check out the `nightly-test` branch. The Service Sweeper is the cron entry point; package tests are pulled in through snapshot dependencies and therefore use that same revision. 
+* [Updates to TeamCity](https://github.com/GoogleCloudPlatform/magic-modules/pull/10785) so that any builds triggered by the nightly cron at **4am UTC** check out the `nightly-test` branch. The Service Sweeper is triggered five hours later and snapshot-depends on the composite All Nightly Tests build, so it waits for that night's package tests. 
 
 <p align="center">
 <img src="./docs/images/clock-timings-of-branch-making-and-usage.png">

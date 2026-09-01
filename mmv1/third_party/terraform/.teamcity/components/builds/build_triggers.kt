@@ -20,9 +20,7 @@ class NightlyTriggerConfiguration(
     val nightlyTestsEnabled: Boolean = true,
     var startHour: Int = DefaultStartHour,
     var daysOfWeek: String = DefaultDaysOfWeek,
-    val daysOfMonth: String = DefaultDaysOfMonth,
-    var startMinute: Int = 0,
-    val timezone: String = "SERVER"
+    val daysOfMonth: String = DefaultDaysOfMonth
 ){
     fun clone(): NightlyTriggerConfiguration{
         return NightlyTriggerConfiguration(
@@ -30,9 +28,7 @@ class NightlyTriggerConfiguration(
             this.nightlyTestsEnabled,
             this.startHour,
             this.daysOfWeek,
-            this.daysOfMonth,
-            this.startMinute,
-            this.timezone
+            this.daysOfMonth
         )
     }
 }
@@ -48,8 +44,7 @@ fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
 
         schedulingPolicy = cron {
             hours = config.startHour.toString()
-            minutes = config.startMinute.toString()
-            timezone = config.timezone
+            timezone = "SERVER"
 
             dayOfWeek = config.daysOfWeek
             dayOfMonth = config.daysOfMonth

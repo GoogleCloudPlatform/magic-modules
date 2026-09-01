@@ -18,7 +18,7 @@ import projects.googleCloudRootProject
 
 class NightlyTestProjectsTests {
     @Test
-    fun onlyServiceSweeperShouldHaveTrigger() {
+    fun allBuildsShouldHaveTrigger() {
         val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
@@ -27,31 +27,34 @@ class NightlyTestProjectsTests {
         // Find Beta nightly test project
         var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
-        // Package tests and the composite are triggered via snapshot dependencies from the sweeper.
-        // Only the Service Sweeper should have a CRON trigger.
+        // Package tests and the Service Sweeper keep their upstream CRON triggers.
+        // The composite All Nightly Tests build is started via snapshot dependency only.
         (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->
-            if (bt.name == ServiceSweeperName) {
-                assertTrue("Build configuration `${bt.name}` should contain at least one trigger", bt.triggers.items.isNotEmpty())
-                var found: Boolean = false
-                lateinit var schedulingTrigger: ScheduleTrigger
-                for (item in bt.triggers.items){
-                    if (item.type == "schedulingTrigger") {
-                        schedulingTrigger = item as ScheduleTrigger
-                        found = true
-                        break
-                    }
-                }
-
-                assertTrue("Build configuration `${bt.name}` should contain a CRON/'schedulingTrigger' trigger", found)
-
-                var isNightlyTestBranch: Boolean = false
-                if (schedulingTrigger.branchFilter == "+:refs/heads/nightly-test"){
-                    isNightlyTestBranch = true
-                }
-                assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
-            } else {
+            if (bt.name == AllNightlyTestsName) {
                 assertTrue("Build configuration `${bt.name}` should not have a trigger; it is started via snapshot dependency", bt.triggers.items.isEmpty())
+                return@forEach
             }
+
+            assertTrue("Build configuration `${bt.name}` should contain at least one trigger", bt.triggers.items.isNotEmpty())
+             // Look for at least one CRON trigger
+            var found: Boolean = false
+            lateinit var schedulingTrigger: ScheduleTrigger
+            for (item in bt.triggers.items){
+                if (item.type == "schedulingTrigger") {
+                    schedulingTrigger = item as ScheduleTrigger
+                    found = true
+                    break
+                }
+            }
+
+            assertTrue("Build configuration `${bt.name}` should contain a CRON/'schedulingTrigger' trigger", found)
+
+            // Check that nightly test is being ran on the nightly-test branch
+            var isNightlyTestBranch: Boolean = false
+            if (schedulingTrigger.branchFilter == "+:refs/heads/nightly-test"){
+                isNightlyTestBranch = true
+            }
+            assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
         }
     }
 
