@@ -1,6 +1,8 @@
 name: build
 
-permissions: read-all
+permissions:
+  contents: read
+
 
 on:
   workflow_call:
