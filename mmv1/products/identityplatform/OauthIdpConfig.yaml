@@ -24,6 +24,9 @@ docs:
 base_url: projects/{{project}}/oauthIdpConfigs
 self_link: projects/{{project}}/oauthIdpConfigs/{{name}}
 create_url: projects/{{project}}/oauthIdpConfigs?oauthIdpConfigId={{name}}
+# api_resource_type_kind is OAuthIdpConfig, which camelizes to oAuthIdpConfigs.
+# The ListOAuthIdpConfigsResponse key is oauthIdpConfigs.
+collection_url_key: oauthIdpConfigs
 update_mask: true
 update_verb: PATCH
 timeouts:
