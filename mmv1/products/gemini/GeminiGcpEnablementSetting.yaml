@@ -80,3 +80,6 @@ properties:
       Possible values:
       GROUNDING_WITH_GOOGLE_SEARCH
       WEB_GROUNDING_FOR_ENTERPRISE
+  - name: mutationsEnabled
+    type: Boolean
+    description: Whether resource mutations should be enabled.
