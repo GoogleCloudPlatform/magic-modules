@@ -157,7 +157,7 @@ class SweeperTests {
         assertEquals("Project sweeper should snapshot-depend on GA and Beta All Nightly Tests", 2, projectSweeper.dependencies.items.size)
         assertEquals("Folder sweeper should snapshot-depend on GA and Beta All Nightly Tests", 2, folderSweeper.dependencies.items.size)
 
-        // Cron hours match upstream: nightly chain at DefaultStartHour (4 UTC), global sweepers at 12 UTC
+        // Cron hours match upstream: service sweeper at DefaultStartHour+5 (9 UTC), global sweepers at 12 UTC
         val stGa = sweeperGa.triggers.items[0] as ScheduleTrigger
         val cronGa = stGa.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
         val stBeta = sweeperBeta.triggers.items[0] as ScheduleTrigger
@@ -167,8 +167,8 @@ class SweeperTests {
         val stFolder = folderSweeper.triggers.items[0] as ScheduleTrigger
         val cronFolder = stFolder.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
 
-        assertEquals("GA nightly Service Sweeper should trigger at ${DefaultStartHour}00 UTC", DefaultStartHour, cronGa.hours.toString().toInt())
-        assertEquals("Beta nightly Service Sweeper should trigger at ${DefaultStartHour}00 UTC", DefaultStartHour, cronBeta.hours.toString().toInt())
+        assertEquals("GA nightly Service Sweeper should trigger 5 hours after package tests", DefaultStartHour + 5, cronGa.hours.toString().toInt())
+        assertEquals("Beta nightly Service Sweeper should trigger 5 hours after package tests", DefaultStartHour + 5, cronBeta.hours.toString().toInt())
         assertEquals("Project sweeper should trigger at 12:00 UTC", 12, cronProject.hours.toString().toInt())
         assertEquals("Folder sweeper should trigger at 12:00 UTC", 12, cronFolder.hours.toString().toInt())
     }

@@ -42,8 +42,12 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     }
 
     // Create build configs to run acceptance tests for each package defined in packages.kt and services.kt files
+    // and add cron trigger to them all
     val allPackages = getAllPackageInProviderVersion(providerName)
     val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, sharedResources, config)
+    packageBuildConfigs.forEach { buildConfiguration ->
+        buildConfiguration.addTrigger(cron)
+    }
 
     // Create a composite build that runs all package tests
     val compositeConfig = BuildType {
@@ -84,8 +88,9 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
         }
     }
 
-    // Trigger the sweeper, which will recursively trigger the composite build and all package tests
-    serviceSweeperConfig.addTrigger(cron)
+    val sweeperCron = cron.clone()
+    sweeperCron.startHour += 5  // Ensure triggered after the package test builds are triggered
+    serviceSweeperConfig.addTrigger(sweeperCron)
 
     return Project {
         id(projectId)

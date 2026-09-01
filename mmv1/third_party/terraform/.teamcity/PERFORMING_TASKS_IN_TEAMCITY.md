@@ -51,7 +51,7 @@ You can find the builds for nightly tests at:
 * [Google > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
 * [Google Beta > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
 
-These projects contain a build configuration per service package, plus a composite **All Nightly Tests** build that aggregates them. A cron on the Service Sweeper at 4am UTC starts the chain (all package tests → All Nightly Tests → Service Sweeper).
+These projects contain a build configuration per service package, plus a composite **All Nightly Tests** build that aggregates them. Package tests are still triggered at 4am UTC; the Service Sweeper runs five hours later and snapshot-depends on the composite.
 
 To view all the failed tests for a given commit:
 
@@ -125,7 +125,7 @@ In REPLAYING mode the build will download VCR cassettes from a GCS Bucket and ru
 
 ### Sweeping the Nightly Test Projects
 
-The Service Sweeper builds in [`Google > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects) and [`Google Beta > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects) run every night via CRON at 4am UTC. That cron is the entry point for the nightly chain: the sweeper snapshot-depends on the composite All Nightly Tests build, which snapshot-depends on every package test. Triggering the sweeper therefore queues all package tests first; the sweeper itself runs only after those tests finish. Package-test failures are recorded on the composite but do not skip the sweeper.
+The Service Sweeper builds in [`Google > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects) and [`Google Beta > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects) run every night via CRON, five hours after the package tests. They snapshot-depend on the composite All Nightly Tests build, which snapshot-depends on every package test, so the sweeper waits until that night's tests have finished. Package-test failures are recorded on the composite but do not skip the sweeper.
 
 ### Sweeping the VCR Project
 
