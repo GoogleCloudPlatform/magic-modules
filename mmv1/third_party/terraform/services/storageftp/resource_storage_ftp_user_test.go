@@ -16,10 +16,10 @@ func TestAccStorageFtpUser_updateMappingsAndCredentials(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	userId := fmt.Sprintf("tf-usr-%s", suffix)
-	bucketName := fmt.Sprintf("tf-sftp-bkt-%s", suffix)
-	saName := fmt.Sprintf("tf-sftp-sa-%s", suffix)
-	serverId := fmt.Sprintf("tf-sftp-srv-%s", suffix)
+	userId := fmt.Sprintf("tf-test-u-%s", suffix)
+	bucketName := fmt.Sprintf("tf-test-sftp-bkt-%s", suffix)
+	saName := fmt.Sprintf("tf-test-sa-%s", suffix)
+	serverId := fmt.Sprintf("tf-test-srv-%s", suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -59,11 +59,11 @@ func TestAccStorageFtpUser_forceNewOnUserIdChange(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	userId1 := fmt.Sprintf("tf-usr1-%s", suffix)
-	userId2 := fmt.Sprintf("tf-usr2-%s", suffix)
-	bucketName := fmt.Sprintf("tf-sftp-bkt-%s", suffix)
-	saName := fmt.Sprintf("tf-sftp-sa-%s", suffix)
-	serverId := fmt.Sprintf("tf-sftp-srv-%s", suffix)
+	userId1 := fmt.Sprintf("tf-test-u1-%s", suffix)
+	userId2 := fmt.Sprintf("tf-test-u2-%s", suffix)
+	bucketName := fmt.Sprintf("tf-test-bkt-%s", suffix)
+	saName := fmt.Sprintf("tf-test-sa-%s", suffix)
+	serverId := fmt.Sprintf("tf-test-srv-%s", suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

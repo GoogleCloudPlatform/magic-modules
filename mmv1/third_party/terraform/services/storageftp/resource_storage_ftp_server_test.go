@@ -14,8 +14,8 @@ import (
 func TestAccStorageFtpServer_updateInternal(t *testing.T) {
 	t.Parallel()
 
-	serverId1 := fmt.Sprintf("tf-sftp-int-%s", acctest.RandString(t, 10))
-	serverId2 := fmt.Sprintf("tf-sftp-int2-%s", acctest.RandString(t, 10))
+	serverId1 := fmt.Sprintf("tf-test-si1-%s", acctest.RandString(t, 10))
+	serverId2 := fmt.Sprintf("tf-test-si2-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -69,8 +69,9 @@ func TestAccStorageFtpServer_updateInternal(t *testing.T) {
 func TestAccStorageFtpServer_updateExternal(t *testing.T) {
 	t.Parallel()
 
-	serverId1 := fmt.Sprintf("tf-sftp-ext-%s", acctest.RandString(t, 10))
-	serverId2 := fmt.Sprintf("tf-sftp-ext2-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
+	serverId1 := fmt.Sprintf("tf-test-se1-%s", suffix)
+	serverId2 := fmt.Sprintf("tf-test-se2-%s", suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
