@@ -117,12 +117,15 @@ properties:
     item_type:
       type: String
     description: |
-      Api auth scopes for which refresh token needs to be obtained.
+      Api auth scopes for which refresh token needs to be obtained. These are
+      scopes needed by a data source to prepare data and ingest them into
+      BigQuery, e.g., https://www.googleapis.com/auth/bigquery
   - name: 'updateDeadlineSeconds'
     type: Integer
     output: true
     description: |
-      The number of seconds to wait for a transfer to start before declaring the failure.
+      The number of seconds to wait for an update from the data source
+      before the Data Transfer Service marks the transfer as FAILED.
   - name: 'defaultSchedule'
     type: String
     output: true
@@ -132,7 +135,9 @@ properties:
     type: Boolean
     output: true
     description: |
-      Specifies whether the data source supports a user defined schedule.
+      Specifies whether the data source supports a user defined schedule, or
+      operates on the default schedule. When set to `true`, user can override
+      default schedule.
   - name: 'parameters'
     type: Array
     output: true
@@ -148,7 +153,7 @@ properties:
           type: String
           output: true
           description: |
-            User friendly parameter name.
+            Parameter display name in the user interface.
         - name: 'description'
           type: String
           output: true
@@ -175,7 +180,7 @@ properties:
           item_type:
             type: String
           description: |
-            All possible values for parameters with fixed list of options.
+            All possible values for the parameter.
         - name: 'minValue'
           type: Double
           output: true
@@ -190,7 +195,8 @@ properties:
           type: String
           output: true
           description: |
-            Description of the requirements for this field, in case the user input does not fulfill the regex.
+            Description of the requirements for this field, in case the user input does
+            not fulfill the regex pattern or min/max values.
         - name: 'validationHelpUrl'
           type: String
           output: true
@@ -200,12 +206,13 @@ properties:
           type: Boolean
           output: true
           description: |
-            Cannot be changed after initial transfer config creation. Applies only to custom data sources.
+            Cannot be changed after initial creation.
         - name: 'deprecated'
           type: Boolean
           output: true
           description: |
-            If true, it should not be used in new transfers, and it should not be visible to users.
+            If true, it should not be used in new transfers, and it should not be
+            visible to users.
         - name: 'maxListSize'
           type: Integer
           output: true
@@ -217,7 +224,7 @@ properties:
     type: String
     output: true
     description: |
-      Url to the documentation about the data source.
+      Url for the help document for this data source.
   - name: 'authorizationType'
     type: String
     output: true
@@ -227,19 +234,23 @@ properties:
     type: String
     output: true
     description: |
-      Data refresh type.
+      Specifies whether the data source supports automatic data refresh for the
+      past few days, and how it's supported. For some data sources, data might
+      not be complete until a few days later, so it's useful to refresh data
+      automatically.
   - name: 'defaultDataRefreshWindowDays'
     type: Integer
     output: true
     description: |
       Default data refresh window on days.
+      Only meaningful when `data_refresh_type` = `SLIDING_WINDOW`.
   - name: 'manualRunsDisabled'
     type: Boolean
     output: true
     description: |
-      Disables support for manual transfer runs.
+      Disables backfilling and manual run scheduling for the data source.
   - name: 'minimumScheduleInterval'
     type: String
     output: true
     description: |
-      The minimum interval between two scheduled runs.
+      The minimum interval for scheduler to schedule runs.
