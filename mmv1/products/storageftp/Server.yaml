@@ -73,6 +73,10 @@ properties:
     description: |
       A display name for the server.
     required: false
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to the Storage FTP Server.
   - name: 'accessType'
     type: Enum
     description: |
