@@ -37,7 +37,7 @@ var (
 {{ $sample := $.FirstTestConfig.Sample }}
 {{ $step := $.FirstTestConfig.Step }}
 
-{{- if $.IamPolicy.GeneratesListResource "member"}}
+{{- if $.IamPolicy.MemberListResource.ShouldGenerate }}
 
 func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 	t.Parallel()
@@ -138,10 +138,10 @@ list "{{ $.TerraformName }}_iam_member" "members" {
 	limit = 1000
     config {
         {{ underscore $.IamParentResourceName }} =  var.{{ underscore $.IamParentResourceName }}
-	{{- if $.IamPolicy.RoleFilterEnabled }}
+	{{- if $.IamPolicy.MemberListResource.RoleFilterEnabled }}
 		role = "{{ $.IamPolicy.AllowedIamRole }}"
 	{{- end }}	
-	{{- if $.IamPolicy.MemberFilterEnabled }}
+	{{- if $.IamPolicy.MemberListResource.MemberFilterEnabled }}
 		member = "%{iam_member}"
 	{{- end }}
     }

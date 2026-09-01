@@ -25,7 +25,7 @@ For how list resources work in this provider, file layout, Terraform version req
 shared `list` block arguments, refer to the guide 
 [Use list resources with terraform query (Google Cloud provider)](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_list_resources_with_terraform_query).
 
-{{- if $.IamPolicy.GeneratesListResource "member"}}
+{{- if $.IamPolicy.MemberListResource.ShouldGenerate }}
 
 ## {{$.TerraformName}}_iam_member (list)
 

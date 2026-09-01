@@ -58,7 +58,7 @@ func init() {
         Type: registry.SchemaTypeIAMResource,
         Schema: New{{ $.ResourceName }}IamMemberResource(),
     }.Register()
-{{- if $.IamPolicy.GeneratesListResource "member" }}
+{{- if $.IamPolicy.MemberListResource.ShouldGenerate }}
     registry.FrameworkListResource{
         Name:        "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",

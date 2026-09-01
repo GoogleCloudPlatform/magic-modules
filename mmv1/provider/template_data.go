@@ -130,7 +130,7 @@ func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, r
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-// GeneratedIamListResourceDocumentationFile emits one docs page covering every IAM
+// GenerateIamListResourceDocumentationFile emits one docs page covering every IAM
 // list kind the resource opts into, mirroring resource_iam.hyml.markdown.tmpl.
 func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/iam_list_resource.html.markdown.tmpl"

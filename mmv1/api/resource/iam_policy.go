@@ -21,15 +21,42 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Valid values for iam_policy.generate_list_resource.
-const (
-	IamListKindMember  = "member"
-	IamListKindBinding = "binding"
-	IamListKindPolicy  = "policy"
-)
+// IamListResourceOptions configures generation of a single IAM list resource kind.
+type IamListResourceOptions struct {
+	// Generate emits the list resource, its registration,an acceptance test,
+	// and documentation for this kind.
+	Generate bool `yaml:"generate,omitempty"`
 
-// IamListKinds is the generation order for Iam List resources.
-var IamListKinds = []string{IamListKindMember, IamListKindBinding, IamListKindPolicy}
+	//EnableRoleFilter controls whether the generated list resource exposes a
+	// role filter. Defaults to true when unset.
+	EnableRoleFilter *bool `yaml:"enable_role_filter,omitempty"`
+
+	//EnableMemberFilter controls whether the generated list resource exposes a
+	// member filter. Defaults to true when unset.
+	EnableMemberFilter *bool `yaml:"enable_member_filter,omitempty"`
+}
+
+// ShouldGenerate reports whether this kind should be generated. Nil-safe.
+func (o *IamListResourceOptions) ShouldGenerate() bool {
+	return o != nil && o.Generate
+}
+
+// RoleFilterEnabled reports whether the list role filter should be enabled (default true).
+func (o *IamListResourceOptions) RoleFilterEnabled() bool {
+	return o != nil && (o.EnableRoleFilter == nil || *o.EnableRoleFilter)
+}
+
+// MemberFilterEnabled reports whether the list member filter should be enabled (default true).
+func (o *IamListResourceOptions) MemberFilterEnabled() bool {
+	return o != nil && (o.EnableMemberFilter == nil || *o.EnableMemberFilter)
+}
+
+// IamListResources holds per-kind IAM list resources generation options.
+type IamListResources struct {
+	MemberIamResource  *IamListResourceOptions `yaml:"member_iam_resource,omitempty"`
+	BindingIamResource *IamListResourceOptions `yaml:"binding_iam_resource,omitempty"`
+	PolicyIamResource  *IamListResourceOptions `yaml:"policy_iam_resource,omitempty"`
+}
 
 // Information about the IAM policy for this resource
 // Several GCP resources have IAM policies that are scoped to
@@ -147,18 +174,15 @@ type IamPolicy struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 
-	// [Optional] Which IAM list resources (terraform query) to generate for this
-	// resource. Valid kinds: "member", "binding", "policy".
-	// Example: generate_list_resource: [member, binding]
-	GenerateListResource []string `yaml:"generate_list_resource,omitempty"`
-
-	// EnableListRoleFilter controls whether the generated list resource exposes a role filter.
-	// Defaults to true when unset; set to false to disable the role filter.
-	EnableListRoleFilter *bool `yaml:"enable_list_role_filter,omitempty"`
-
-	// EnableListMemberFilter controls whether the generated list resource exposes a member filter.
-	// Defaults to true when unset; set to false to disable the member filter.
-	EnableListMemberFilter *bool `yaml:"enable_list_member_filter,omitempty"`
+	// [Optional] IAM list resources (terrafrom query) to generate for this resource.
+	//
+	// list_resource:
+	//   member_iam_resource:
+	//     generate: true
+	//     enable_member_filter: false
+	//   binding_iam_resource:
+	//     generate: true
+	ListResource *IamListResources `yaml:"list_resource,omitempty"`
 }
 
 // newIamPolicyWithDefaults returns an IamPolicy object with default values set.
@@ -226,33 +250,36 @@ func (p *IamPolicy) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName))
 	}
 
-	for _, kind := range p.GenerateListResource {
-		if !slices.Contains(IamListKinds, kind) {
-			es = append(es, fmt.Errorf("%s: invalid generate_list_resource kind %q (valid: %v)", rName, kind, IamListKinds))
-		}
-	}
 	return es
 }
 
-// RoleFilterEnabled reports whether the list role filter should be enabled (default true).
-func (p *IamPolicy) RoleFilterEnabled() bool {
-	return p.EnableListRoleFilter == nil || *p.EnableListRoleFilter
-}
-
-// MemberFilterEnabled reports whether the list member filter should be enabled (default true).
-func (p *IamPolicy) MemberFilterEnabled() bool {
-	return p.EnableListMemberFilter == nil || *p.EnableListMemberFilter
-}
-
-// GeneratesListResource reports whether the given IAM list kind should be generated.
-func (p *IamPolicy) GeneratesListResource(kind string) bool {
-	if p == nil {
-		return false
+// MemberListResource returns the member  IAM List Resource options, or nil.
+func (p *IamPolicy) MemberListResource() *IamListResourceOptions {
+	if p == nil || p.ListResource == nil {
+		return nil
 	}
-	return slices.Contains(p.GenerateListResource, kind)
+	return p.ListResource.MemberIamResource
 }
 
-// AnyListResource reports whether any IAM List resource should be generated.
+// BindingListResource returns the binding IAM List Resource options, or nil.
+func (p *IamPolicy) BindingListResource() *IamListResourceOptions {
+	if p == nil || p.ListResource == nil {
+		return nil
+	}
+	return p.ListResource.BindingIamResource
+}
+
+// PolicyListResource returns the policy IAM List Resource options, or nil.
+func (p *IamPolicy) PolicyListResource() *IamListResourceOptions {
+	if p == nil || p.ListResource == nil {
+		return nil
+	}
+	return p.ListResource.PolicyIamResource
+}
+
+// Any ListResource reports whether any IAM list resource should be generated.
 func (p *IamPolicy) AnyListResource() bool {
-	return p != nil && len(p.GenerateListResource) > 0
+	return p.MemberListResource().ShouldGenerate() ||
+		p.BindingListResource().ShouldGenerate() ||
+		p.PolicyListResource().ShouldGenerate()
 }

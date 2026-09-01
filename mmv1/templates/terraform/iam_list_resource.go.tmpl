@@ -23,7 +23,7 @@ import (
 	"{{ $.ImportPath }}/tpgiamresource"
 )
 
-{{- if $.IamPolicy.GeneratesListResource "member"}}
+{{- if $.IamPolicy.MemberListResource.ShouldGenerate }}
 
 func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
     return tpgiamresource.NewIamMemberListResource(
@@ -32,8 +32,8 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
         {{ $.ResourceName }}IamUpdaterProducer,
         tpgiamresource.IamMemberListCallConfig{ 
         ParentResourceField: "{{ underscore $.IamParentResourceName }}",
-        EnableRoleFilter:    {{ $.IamPolicy.RoleFilterEnabled }},
-        EnableMemberFilter:  {{ $.IamPolicy.MemberFilterEnabled }},
+        EnableRoleFilter:    {{ $.IamPolicy.MemberListResource.RoleFilterEnabled }},
+        EnableMemberFilter:  {{ $.IamPolicy.MemberListResource.MemberFilterEnabled }},
     },
  )
 }
