@@ -174,13 +174,8 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 
 		if object.IamPolicy.AnyListResource() {
 			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
-			for _, kind := range resource.IamListKinds {
-				if !object.IamPolicy.GeneratesListResource(kind) {
-					continue
-				}
-				listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s_iam_%s.html.markdown", object.TerraformName(), kind))
-				templateData.GenerateIamListResourceDocumentationFile(listDocFilePath, object, kind)
-			}
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s_iam.html.markdown", object.TerraformName()))
+			templateData.GenerateIamListResourceDocumentationFile(listDocFilePath, object)
 		}
 	}
 }
@@ -203,22 +198,17 @@ func (t *Terraform) GenerateListResource(object api.Resource, templateData Templ
 	}
 }
 
-// GenerateIamListResource emits list_iam_<resource>_<kind>.go for each IAM
-// kind requested via iam_policy.generate_list_resource.
+// GenerateIamListResource emits list_iam_<resource>.go containing every IAM list
+// kind requested via iam-policy.generate_list_resource, mirroring iam_<resource>.go.tmpl.
 func (t *Terraform) GenerateIamListResource(object api.Resource, templateData TemplateData, targetFolder string) {
-	for _, kind := range resource.IamListKinds {
-		if !object.IamPolicy.GeneratesListResource(kind) {
-			continue
-		}
-		tmpls, ok := iamListTemplates[kind]
-		if !ok {
-			log.Fatalf("no templates registered for IAM list kind %q", kind)
-		}
-
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_%s.go", t.ResourceGoFilename(object), kind))
-		templateData.GenerateFile(targetFilePath, tmpls.Resource, object, true, tmpls.Resource)
-		t.GenerateIamListResourceQueryTest(object, templateData, targetFolder, kind)
+	if !object.IamPolicy.AnyListResource() {
+		return
 	}
+
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s.go", t.ResourceGoFilename(object)))
+	templatePath := "templates/terraform/iam_list_resource.go.tmpl"
+	templateData.GenerateFile(targetFilePath, templatePath, object, true, templatePath)
+	t.GenerateIamListResourceQueryTest(object, templateData, targetFolder)
 }
 
 // GenerateResourceFile is the Bazel counterpart to GenerateResource(), generating *only() the .go file and
@@ -291,17 +281,17 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	templateData.GenerateQueryTestFile(targetFilePath, object)
 }
 
-// GenerateIamListResourceQueryTest emits list_iam_<resource>_<kind>_generated_test.go.
-func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder, kind string) {
+// GenerateIamListResourceQueryTest emits list_iam_<resource>_generated_test.go.
+func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
 	samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
 	})
 	if len(samples) == 0 {
-		log.Printf("[WARNING] No IAM %s list resource test generated for %s: no non-excluded samples available", kind, object.Name)
+		log.Printf("[WARNING] No IAM list resource test generated for %s: no non-excluded samples available", object.Name)
 		return
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_%s_generated_test.go", t.ResourceGoFilename(object), kind))
-	templateData.GenerateIamQueryTestFile(targetFilePath, object, kind)
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateIamQueryTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {

@@ -45,21 +45,6 @@ var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
 
-// iamListTemplatesPaths holds the template paths for one IAM list resource kind.
-type iamListTemplatesPaths struct {
-	Resource string
-	Doc      string
-	Test     string
-}
-
-var iamListTemplates = map[string]iamListTemplatesPaths{
-	"member": {
-		Resource: "templates/terraform/iam_member_list_resource.go.tmpl",
-		Doc:      "templates/terraform/iam_member_list_resource.html.markdown.tmpl",
-		Test:     "templates/terraform/samples/base_configs/iam_member_query_test_file.go.tmpl",
-	},
-}
-
 func NewTemplateData(outputFolder string, versionName string, templateFS fs.FS) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName, templateFS: templateFS}
 	return &td
@@ -145,8 +130,10 @@ func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, r
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource, kind string) {
-	templatePath := iamListTemplates[kind].Doc
+// GeneratedIAmListResourceDocumentationFile emits one docs page covering every IAM
+// list kind the resource opts into, mirroring resource_iam.hyml.markdown.tmpl.
+func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_list_resource.html.markdown.tmpl"
 	templates := []string{
 		templatePath,
 	}
@@ -265,10 +252,10 @@ func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Reso
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
-// GenerateIamQueryTestFile emits a Terraform query-mode acceptance test for Iam
-// list resource of given kind (iam_policy.generate_list_resource)
-func (td *TemplateData) GenerateIamQueryTestFile(filePath string, resource api.Resource, kind string) {
-	templatePath := iamListTemplates[kind].Test
+// GenerateIamQueryTestFile emits a Terraform query-mode acceptance test for every Iam
+// list kind the resource opts into (iam_policy.generate_list_resource)
+func (td *TemplateData) GenerateIamQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/iam_list_query_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",

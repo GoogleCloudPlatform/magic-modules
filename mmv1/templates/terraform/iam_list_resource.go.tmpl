@@ -23,6 +23,8 @@ import (
 	"{{ $.ImportPath }}/tpgiamresource"
 )
 
+{{- if $.IamPolicy.GeneratesListResource "member"}}
+
 func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
     return tpgiamresource.NewIamMemberListResource(
         "{{ $.TerraformName }}_iam_member",
@@ -34,6 +36,6 @@ func New{{ $.ResourceName }}IamMemberListResource() list.ListResource {
         EnableMemberFilter:  {{ $.IamPolicy.MemberFilterEnabled }},
     },
  )
-
+{{end }}
 }
 

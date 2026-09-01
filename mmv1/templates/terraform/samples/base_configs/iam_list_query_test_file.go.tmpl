@@ -37,6 +37,8 @@ var (
 {{ $sample := $.FirstTestConfig.Sample }}
 {{ $step := $.FirstTestConfig.Step }}
 
+{{- if $.IamPolicy.GeneratesListResource "member"}}
+
 func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 	t.Parallel()
 
@@ -146,3 +148,4 @@ list "{{ $.TerraformName }}_iam_member" "members" {
 }
 `, context)
 }
+{{- end }}
