@@ -801,7 +801,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy || p.WriteOnly
+		return p.WriteOnly
 	})
 }
 
@@ -2591,7 +2591,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide {
 			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}
