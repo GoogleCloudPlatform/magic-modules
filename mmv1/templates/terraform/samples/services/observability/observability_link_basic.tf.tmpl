@@ -3,7 +3,6 @@ data "google_project" "project" {}
 # Instantiating observability settings will create the service account if it doesn't already exist
 resource "google_observability_project_settings" "global" {
   location                 = "global"
-  # project                  = data.google_project.project.project_id
   default_storage_location = "us"
 }
 

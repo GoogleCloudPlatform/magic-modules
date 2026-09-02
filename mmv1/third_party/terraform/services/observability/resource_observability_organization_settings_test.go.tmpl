@@ -132,20 +132,32 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 
 func testAccObservabilityOrganizationSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
+data "google_observability_organization_settings" "settings_data" {
+  organization = "%%{org_id}"
+  location     = "global"
+}
+
 resource "google_observability_organization_settings" "primary_global" {
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
+  depends_on = [data.google_observability_organization_settings.settings_data]
 }
 `, defaultLocation), context)
 }
 
 func testAccObservabilityOrganizationSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
+data "google_observability_organization_settings" "settings_data" {
+  organization = "%%{org_id}"
+  location     = "global"
+}
+
 resource "google_observability_organization_settings" "primary_global" {
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
+  depends_on = [data.google_observability_organization_settings.settings_data]
 }
 `, defaultLocation), context)
 }
