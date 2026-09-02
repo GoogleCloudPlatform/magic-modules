@@ -101,6 +101,14 @@ properties:
                   description: |-
                     Specifies the time limit for created instances. Instances will be
                     terminated at the end of this duration.
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: zone
                   type: String
                   required: true
@@ -121,6 +129,14 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: zone
                   type: String
                   required: true
@@ -135,6 +151,14 @@ properties:
                 be created from a
                 [reservation](https://cloud.google.com/compute/docs/instances/reservations-overview).
               properties:
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: reservation
                   type: String
                   description: |-
@@ -154,6 +178,14 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: terminationAction
                   type: String
                   description: |-
@@ -358,6 +390,14 @@ properties:
                   Name of the Compute Engine [machine
                   type](https://cloud.google.com/compute/docs/machine-resource) to use for
                   login nodes, e.g. `n2-standard-2`.
+              - name: networkTags
+                type: Array
+                min_version: beta
+                description: |-
+                  A list of network tags to attach to the VM instances.
+                  A maximum of 64 network tags are allowed.
+                item_type:
+                  type: String
               - name: startupScript
                 type: String
                 description: |-
@@ -594,6 +634,26 @@ properties:
                   description: |-
                     Name of the Managed Lustre instance to import, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
+            - name: existingNfs
+              type: NestedObject
+              min_version: beta
+              description: |-
+                When set in a StorageResourceConfig, indicates that an existing NFS
+                share should be imported.
+              properties:
+                - name: mountOptions
+                  type: String
+                  description: |-
+                    Options to mount the NFS share, as expected by fs_mntops field in fstab(5),
+                    for example: "rw,vers=4.1,nconnect=2,noatime".
+                - name: remoteMount
+                  type: String
+                  required: true
+                  description: Remote mount path of the NFS share.
+                - name: serverIpAddress
+                  type: String
+                  required: true
+                  description: Server IP address of the NFS share.
             - name: newBucket
               type: NestedObject
               description: |-
