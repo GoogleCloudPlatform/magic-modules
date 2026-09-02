@@ -788,6 +788,8 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 		}
 	} else if t.IsA("Array") && t.ItemType.IsA("NestedObject") {
 		t.ItemType.ExcludeIfNotInVersion(version)
+	} else if t.IsA("Map") && t.ValueType != nil {
+		t.ValueType.ExcludeIfNotInVersion(version)
 	}
 }
 
