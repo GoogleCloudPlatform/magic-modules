@@ -13,7 +13,7 @@
 
 ---
 name: Connection
-description: A connection for GitHub, GitHub Enterprise, GitLab, and GitLab Enterprise.
+description: A connection for GitHub, GitHub Enterprise, GitLab, GitLab Enterprise, Bitbucket Cloud, Bitbucket Data Center, and Secure Source Manager.
 references:
   guides:
     Official Documentation: https://cloud.google.com/developer-connect/docs/overview
@@ -139,6 +139,13 @@ samples:
       - name: developer_connect_connection_http_conn_bearer
         resource_id_vars:
           connection_name: tf-test-connection
+  - name: developer_connect_connection_securesourcemanager
+    primary_resource_id: my-connection
+    steps:
+      - name: developer_connect_connection_securesourcemanager
+        resource_id_vars:
+          connection_name: tf-test-connection
+          instance_id: tf-test-instance
 parameters:
   - name: location
     type: String
@@ -631,3 +638,14 @@ properties:
           in Cloud KMS, the key should be in the format of
           `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
         required: true
+  - name: secureSourceManagerInstanceConfig
+    type: NestedObject
+    description: Configuration for connections to an instance of Secure Source Manager.
+    properties:
+      - name: instance
+        type: String
+        description: |-
+          Required. Immutable. The Secure Source Manager instance resource name,
+          formatted as `projects/*/locations/*/instances/*`.
+        required: true
+        immutable: true
