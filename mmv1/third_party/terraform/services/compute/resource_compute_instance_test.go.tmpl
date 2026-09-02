@@ -5703,7 +5703,7 @@ func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
 	var instance map[string]interface{}
 	context_1 := map[string]interface{}{
 		"instance_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"guest_os_features": `["UEFI_COMPATIBLE", "VIRTIO_SCSI_MULTIQUEUE", "GVNIC", "IDPF"]`,
+		"guest_os_features": `["UEFI_COMPATIBLE", "VIRTIO_SCSI_MULTIQUEUE", "GVNIC", "SEV_CAPABLE", "SEV_SNP_CAPABLE", "SEV_LIVE_MIGRATABLE_V2", "IDPF"]`,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5717,7 +5717,10 @@ func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.0", "UEFI_COMPATIBLE"),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.1", "VIRTIO_SCSI_MULTIQUEUE"),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.2", "GVNIC"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.3", "IDPF"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.3", "SEV_CAPABLE"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.4", "SEV_SNP_CAPABLE"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.5", "SEV_LIVE_MIGRATABLE_V2"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.6", "IDPF"),
 				),
 			},
 		},
@@ -9998,16 +10001,25 @@ resource "google_compute_image" "foobar" {
   name              = "%s"
   source_disk       = google_compute_disk.foobar.self_link
   guest_os_features {
-    type = "GVNIC"
+    type = "UEFI_COMPATIBLE"
   }
   guest_os_features {
     type = "VIRTIO_SCSI_MULTIQUEUE"
   }
   guest_os_features {
-    type = "UEFI_COMPATIBLE"
+    type = "GVNIC"
   }
   guest_os_features {
     type = "SEV_CAPABLE"
+  }
+  guest_os_features {
+    type = "SEV_SNP_CAPABLE"
+  }
+  guest_os_features {
+    type = "SEV_LIVE_MIGRATABLE_V2"
+  }
+  guest_os_features {
+    type = "IDPF"
   }
 }
 
