@@ -14,6 +14,8 @@
 ---
 name: HiveCatalog
 api_resource_type_kind: Catalog
+api_variant_patterns:
+  - projects/{project}/catalogs/{catalog}
 description: |
   Hive Catalogs in Biglake Metastore
 references:
