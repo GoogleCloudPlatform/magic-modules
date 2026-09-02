@@ -14,6 +14,8 @@
 ---
 name: IcebergCatalog
 api_resource_type_kind: Catalog
+api_variant_patterns:
+  - projects/{project}/catalogs/{catalog}
 description: |
   IcebergCatalogs are top-level containers for Apache Iceberg REST Catalog served Namespaces and Tables.
 references:
