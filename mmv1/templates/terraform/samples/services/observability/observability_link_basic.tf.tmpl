@@ -1,20 +1,24 @@
-# Force the creation of the Service Agent identity
-resource "google_project_service_identity" "observability_sa" {
-  service = "observability.googleapis.com"
+data "google_project" "project" {}
+
+# Instantiating observability settings will create the service account if it doesn't already exist
+resource "google_observability_project_settings" "global" {
+  location                 = "global"
+  # project                  = data.google_project.project.project_id
+  default_storage_location = "us"
 }
 
 # Buffer for the new identity to propagate to global IAM indexes
 resource "time_sleep" "wait_for_sa_propagation" {
   create_duration = "30s"
   depends_on      = [
-    google_project_service_identity.observability_sa
+    google_observability_project_settings.global
   ]
 }
 
 resource "google_project_iam_member" "observability_sa_bq_admin" {
-  project = google_project_service_identity.observability_sa.project
+  project = data.google_project.project.project_id
   role    = "roles/bigquery.admin"
-  member  = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-observability.iam.gserviceaccount.com"
 
   depends_on = [
     time_sleep.wait_for_sa_propagation

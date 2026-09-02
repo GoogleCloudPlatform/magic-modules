@@ -1,6 +1,5 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 	"testing"
@@ -57,10 +56,7 @@ func TestAccObservabilityProjectSettings_update(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
@@ -76,26 +72,32 @@ resource "google_project_service" "observability_api" {
   disable_on_destroy = false
 }
 
-# Actively force the creation of the Service Agent identity
-resource "google_project_service_identity" "observability_sa" {
-  project  = google_project.project.project_id
-  service  = "observability.googleapis.com"
+resource "google_observability_project_settings" "primary_global" {
+  location                 = "global"
+  project                  = google_project.project.project_id
+  default_storage_location = "us"
 
-  depends_on = [google_project_service.observability_api]
+  depends_on = [
+    google_project_service.observability_api
+  ]
 }
 
-# Short buffer for the new identity to propagate to global IAM indexes
+# Buffer for the new identity to propagate to global IAM indexes
 resource "time_sleep" "wait_for_sa_propagation" {
   create_duration = "30s"
-  depends_on      = [google_project_service_identity.observability_sa]
+  depends_on      = [
+    google_observability_project_settings.primary_global
+  ]
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+  member        = "serviceAccount:service-${google_project.project.number}@gcp-sa-observability.iam.gserviceaccount.com"
 
-  depends_on = [time_sleep.wait_for_sa_propagation]
+  depends_on = [
+    time_sleep.wait_for_sa_propagation
+  ]
 }
 
 resource "google_observability_project_settings" "primary" {
@@ -109,10 +111,7 @@ resource "google_observability_project_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
@@ -128,26 +127,32 @@ resource "google_project_service" "observability_api" {
   disable_on_destroy = false
 }
 
-# This resource actively forces the Service Agent to be created in IAM
-resource "google_project_service_identity" "observability_sa" {
-  project  = google_project.project.project_id
-  service  = "observability.googleapis.com"
+resource "google_observability_project_settings" "primary_global" {
+  location                 = "global"
+  project                  = google_project.project.project_id
+  default_storage_location = "us"
 
-  depends_on = [google_project_service.observability_api]
+  depends_on = [
+    google_project_service.observability_api
+  ]
 }
 
-# A shorter delay is still needed for global IAM propagation (news to travel to KMS)
+# Buffer for the new identity to propagate to global IAM indexes
 resource "time_sleep" "wait_for_sa_propagation" {
   create_duration = "30s"
-  depends_on      = [google_project_service_identity.observability_sa]
+  depends_on      = [
+    google_observability_project_settings.primary_global
+  ]
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+  member        = "serviceAccount:service-${google_project.project.number}@gcp-sa-observability.iam.gserviceaccount.com"
 
-  depends_on = [time_sleep.wait_for_sa_propagation]
+  depends_on = [
+    time_sleep.wait_for_sa_propagation
+  ]
 }
 
 resource "google_observability_project_settings" "primary" {
@@ -161,10 +166,7 @@ resource "google_observability_project_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -206,10 +208,7 @@ func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_project" "project" {
@@ -225,30 +224,15 @@ resource "google_project_service" "observability_api" {
 	disable_on_destroy = false
 }
 
-# Data source read to wait for project/API propagation
-resource "time_sleep" "wait_for_propagation" {
-	create_duration = "90s"
-	depends_on      = [google_project_service.observability_api]
-}
-
-data "google_observability_project_settings" "wait_for_propagation" {
-	location   = "global"
-	project    = google_project.project.project_id
-	depends_on = [time_sleep.wait_for_propagation]
-}
-
 resource "google_observability_project_settings" "primary_global" {
 	location                 = "global"
 	project                  = google_project.project.project_id
 	default_storage_location = "%s"
-	depends_on = [data.google_observability_project_settings.wait_for_propagation]
+	depends_on               = [google_project_service.observability_api]
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_project" "project" {
@@ -264,25 +248,11 @@ resource "google_project_service" "observability_api" {
 	disable_on_destroy = false
 }
 
-# Data source read to wait for project/API propagation
-resource "time_sleep" "wait_for_propagation" {
-	create_duration = "90s"
-	depends_on      = [google_project_service.observability_api]
-}
-
-data "google_observability_project_settings" "wait_for_propagation" {
-	location   = "global"
-	project    = google_project.project.project_id
-	depends_on = [time_sleep.wait_for_propagation]
-}
-
 resource "google_observability_project_settings" "primary_global" {
 	location                 = "global"
 	project                  = google_project.project.project_id
 	default_storage_location = "%s"
-	depends_on = [data.google_observability_project_settings.wait_for_propagation]
+	depends_on               = [google_project_service.observability_api]
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}

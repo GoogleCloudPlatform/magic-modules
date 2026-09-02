@@ -1,6 +1,5 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 	"testing"
@@ -54,10 +53,7 @@ func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_observability_organization_settings" "settings_data" {
@@ -86,10 +82,7 @@ resource "google_observability_organization_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_observability_organization_settings" "primary" {
@@ -99,10 +92,7 @@ resource "google_observability_organization_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
@@ -139,43 +129,23 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
-data "google_observability_organization_settings" "settings_data" {
-  organization = "%%{org_id}"
-  location     = "global"
-}
-
 resource "google_observability_organization_settings" "primary_global" {
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
-  depends_on = [data.google_observability_organization_settings.settings_data]
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
-data "google_observability_organization_settings" "settings_data" {
-  organization = "%%{org_id}"
-  location     = "global"
-}
-
 resource "google_observability_organization_settings" "primary_global" {
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
-  depends_on = [data.google_observability_organization_settings.settings_data]
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}
