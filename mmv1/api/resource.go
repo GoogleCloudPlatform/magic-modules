@@ -1838,6 +1838,25 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
+// FirstRunnableTestConfig is FirstTestConfig plus skip_test. List-query tests
+// use this so they do not apply a skipped sample as setup.
+func (r Resource) FirstRunnableTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || sample.SkipTest != "" || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) SamplePrimaryResourceId() string {
 	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest

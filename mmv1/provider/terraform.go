@@ -256,7 +256,7 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	if object.Examples != nil {
 		log.Fatalf("Examples block exists in %v", object.Name)
 	}
-	if object.Samples == nil || !t.hasEligibleSample(object) {
+	if object.Samples == nil || object.FirstRunnableTestConfig().Sample == nil {
 		return
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
