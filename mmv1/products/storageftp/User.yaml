@@ -123,3 +123,7 @@ properties:
           diff_suppress_func: 'resourceStorageFtpUserSshPublicKeyDiffSuppress'
           description: |
             The SSH public key body. A file either absolute or relative path should be provided which contains the ssh public key using file() interpolation in Terraform, not recommended to have key as a literal string in config.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels that can contain user-provided metadata.
