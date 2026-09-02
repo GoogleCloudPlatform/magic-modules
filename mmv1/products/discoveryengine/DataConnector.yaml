@@ -36,7 +36,7 @@ import_format:
 custom_code:
   constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
 state_upgraders: true
-schema_version: 1
+schema_version: 2
 timeouts:
   insert_minutes: 20
   update_minutes: 5
@@ -172,9 +172,15 @@ properties:
       The version of the data source. For example, `3` for Jira v3.
     default_from_api: true
   - name: 'params'
-    type: KeyValuePairs
+    type: String
     description: |
-      Params needed to access the source in the format of String-to-String (Key, Value) pairs.
+      Params needed to access the source in structured json format.
+    diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    validation:
+      function: 'validation.StringIsJSON'
     ignore_read: true
     exactly_one_of:
       - params
