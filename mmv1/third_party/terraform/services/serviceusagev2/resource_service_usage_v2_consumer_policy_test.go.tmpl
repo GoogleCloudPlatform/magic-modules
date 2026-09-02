@@ -139,8 +139,8 @@ func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interf
 
     resource "google_project" "basic" {
       provider = google-beta
-      project_id = "tf-test-suv2%s"
-      name       = "tf-test-suv2%s"
+      project_id = "tf-test-suv2%{random_suffix}"
+      name       = "tf-test-suv2%{random_suffix}"
       org_id     = "%{org_id}"
       deletion_policy = "DELETE"
     }
