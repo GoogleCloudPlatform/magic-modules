@@ -18,7 +18,9 @@ func TestAccStorageBucketIamMemberListResource_queryIdentity(t *testing.T) {
 
 	bucket := "tf-test-bucket-iam-" + acctest.RandString(t, 10)
 	account := "tf-test-storage-iam-" + acctest.RandString(t, 10)
+	otherAccount := "tf-test-storage-iam-" + acctest.RandString(t, 10)
 	role := "roles/storage.objectViewer"
+	otherRole := "roles/storage.legacyBucketReader"
 	member := "serviceAccount:" + envvar.ServiceAccountCanonicalEmail(account)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -29,7 +31,7 @@ func TestAccStorageBucketIamMemberListResource_queryIdentity(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucketIamMember(bucket, account, role),
+				Config: testAccStorageBucketIamMember(bucket, account, otherAccount, role, otherRole),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_storage_bucket_iam_member.member", "bucket", "b/"+bucket),
 					resource.TestCheckResourceAttr("google_storage_bucket_iam_member.member", "role", role),
@@ -40,8 +42,11 @@ func TestAccStorageBucketIamMemberListResource_queryIdentity(t *testing.T) {
 				Query:  true,
 				Config: testAccStorageBucketIamMemberListQueryWithFilters(bucket, role, member),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("google_storage_bucket_iam_member.test", 1),
-					querycheck.ExpectIdentity("google_storage_bucket_iam_member.test", map[string]knownvalue.Check{
+					querycheck.ExpectLength("google_storage_bucket_iam_member.by_role", 2),
+					querycheck.ExpectLength("google_storage_bucket_iam_member.by_member", 2),
+					querycheck.ExpectLength("google_storage_bucket_iam_member.combined", 1),
+					querycheck.ExpectLength("google_storage_bucket_iam_member.no_match", 0),
+					querycheck.ExpectIdentity("google_storage_bucket_iam_member.combined", map[string]knownvalue.Check{
 						"bucket":          knownvalue.StringExact("b/" + bucket),
 						"role":            knownvalue.StringExact(role),
 						"member":          knownvalue.StringExact(member),
@@ -53,7 +58,7 @@ func TestAccStorageBucketIamMemberListResource_queryIdentity(t *testing.T) {
 	})
 }
 
-func testAccStorageBucketIamMember(bucket, account, role string) string {
+func testAccStorageBucketIamMember(bucket, account, otherAccount, role, otherRole string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name                        = "%s"
@@ -66,17 +71,52 @@ resource "google_service_account" "test-account" {
   display_name = "Storage Bucket IAM Testing Account"
 }
 
+resource "google_service_account" "other-account" {
+  account_id   = "%s"
+  display_name = "Other Storage Bucket IAM Testing Account"
+}
+
 resource "google_storage_bucket_iam_member" "member" {
   bucket = google_storage_bucket.bucket.name
   role   = "%s"
   member = "serviceAccount:${google_service_account.test-account.email}"
 }
-`, bucket, account, role)
+
+resource "google_storage_bucket_iam_member" "same-role" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "%s"
+  member = "serviceAccount:${google_service_account.other-account.email}"
+}
+
+resource "google_storage_bucket_iam_member" "same-member" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "%s"
+  member = "serviceAccount:${google_service_account.test-account.email}"
+}
+`, bucket, account, otherAccount, role, role, otherRole)
 }
 
 func testAccStorageBucketIamMemberListQueryWithFilters(bucket, role, member string) string {
 	return fmt.Sprintf(`
-list "google_storage_bucket_iam_member" "test" {
+list "google_storage_bucket_iam_member" "by_role" {
+  provider = google
+
+  config {
+    bucket = %q
+    role   = %q
+  }
+}
+
+list "google_storage_bucket_iam_member" "by_member" {
+  provider = google
+
+  config {
+    bucket = %q
+    member = %q
+  }
+}
+
+list "google_storage_bucket_iam_member" "combined" {
   provider = google
   include_resource = true
 
@@ -86,5 +126,15 @@ list "google_storage_bucket_iam_member" "test" {
     member = %q
   }
 }
-`, bucket, role, member)
+
+list "google_storage_bucket_iam_member" "no_match" {
+  provider = google
+
+  config {
+    bucket = %q
+    role   = "roles/storage.admin"
+    member = %q
+  }
+}
+`, bucket, role, bucket, member, bucket, role, member, bucket, member)
 }
