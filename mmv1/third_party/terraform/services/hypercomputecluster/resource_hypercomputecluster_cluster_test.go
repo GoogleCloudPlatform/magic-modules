@@ -141,6 +141,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         machine_type = "n2-standard-2"
         zone = "us-central1-a"
         termination_action = "STOP"
+        network_tags = ["tag1", "tag2"]
       }
     }
   }
@@ -168,6 +169,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         labels = {
           old-key = "old-value"
         }
+        network_tags = ["tag1", "tag2"]
         startup_script = "#! /bin/bash"
         storage_configs {
           id = "storage-old"
@@ -238,6 +240,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         machine_type = "n2-standard-2"
         zone = "us-central1-a"
         termination_action = "DELETE"
+        network_tags = ["tag1"]
       }
     }
   }
@@ -265,6 +268,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         labels = {
           new-key = "new-value"
         }
+        network_tags = ["tag1"]
         storage_configs {
           id = "storage-new"
           local_mount = "/home"
@@ -409,6 +413,16 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     config {
       existing_filestore {
         filestore = google_filestore_instance.filestore_instance.id
+      }
+    }
+  }
+  storage_resources {
+    id = "nfs-existing"
+    config {
+      existing_nfs {
+        server_ip_address = google_filestore_instance.filestore_instance.networks[0].ip_addresses[0]
+        remote_mount      = "/${google_filestore_instance.filestore_instance.file_shares[0].name}"
+        mount_options     = "ro,no_subtree_check"
       }
     }
   }
@@ -564,6 +578,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
       new_on_demand_instances {
         machine_type = "n2-standard-2"
         zone = "us-central1-a"
+        network_tags = ["tag1", "tag2"]
       }
     }
   }
@@ -574,6 +589,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         machine_type = "a3-megagpu-8g"
         max_duration = "6000s"
         zone = "us-central1-a"
+        network_tags = ["tag1", "tag2"]
       }
     }
   }
@@ -582,6 +598,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     config {
       new_reserved_instances {
         reservation = google_compute_reservation.gce_reservation.id
+        network_tags = ["tag1", "tag2"]
       }
     }
   }
