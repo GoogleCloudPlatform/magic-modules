@@ -1,0 +1,7 @@
+if d.Get("organization").(string) == "" && d.Get("parent").(string) != "" {
+    if strings.HasPrefix(d.Get("parent").(string), "organizations/") {
+        if err := d.Set("organization", strings.TrimPrefix(d.Get("parent").(string), "organizations/")); err != nil {
+            return nil, err
+        }
+    }
+}

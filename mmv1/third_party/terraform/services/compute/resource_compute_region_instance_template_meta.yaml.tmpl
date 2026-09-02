@@ -6,7 +6,7 @@ api_version: 'beta'
 {{- else }}
 api_version: 'v1'
 {{- end }}
-api_resource_type_kind: 'InstanceTemplate'
+api_resource_type_kind: 'RegionInstanceTemplate'
 fields:
   - field: 'advanced_machine_features.enable_nested_virtualization'
     api_field: 'properties.advancedMachineFeatures.enableNestedVirtualization'
@@ -207,10 +207,8 @@ fields:
   - api_field: 'properties.scheduling.gracefulShutdown.maxDuration.seconds'
     field: 'scheduling.graceful_shutdown.max_duration.seconds'
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'scheduling.host_error_timeout_seconds'
     api_field: 'properties.scheduling.hostErrorTimeoutSeconds'
-{{- end }}
   - field: 'scheduling.instance_termination_action'
     api_field: 'properties.scheduling.instanceTerminationAction'
   - field: 'scheduling.local_ssd_recovery_timeout.nanos'
@@ -270,3 +268,7 @@ fields:
     provider_only: true
   - field: 'deletion_policy'
     provider_only: true
+  - field: 'workload_identity_config.identity'
+    api_field: 'properties.workloadIdentityConfig.identity'
+  - field: 'workload_identity_config.identity_certificate_enabled'
+    api_field: 'properties.workloadIdentityConfig.identityCertificateEnabled'

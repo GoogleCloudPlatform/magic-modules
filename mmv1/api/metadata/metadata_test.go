@@ -53,6 +53,40 @@ func TestFromResource(t *testing.T) {
 				ApiVersion:          "beta",
 				ApiResourceTypeKind: "Test",
 				AutogenStatus:       true,
+				AutogenVersion:      1,
+				Fields: []Field{
+					{
+						ApiField: "field",
+					},
+					{
+						Field:        "deletion_policy",
+						ProviderOnly: true,
+					},
+				},
+			},
+		},
+		{
+			name: "autogen version v2 agent",
+			resource: api.Resource{
+				Name:           "Test",
+				AutogenStatus:  "VGVzdEF1dG9nZW5WMkFnZW50", // base64 of "TestAutogenV2Agent"
+				SourceYamlFile: "Test.yaml",
+				Properties: []*api.Type{
+					{
+						Name:    "field",
+						ApiName: "field",
+					},
+				},
+			},
+			wantMetadata: Metadata{
+				Resource:            "google_product_test",
+				GenerationType:      "mmv1",
+				SourceFile:          "Test.yaml",
+				ApiServiceName:      "compute.googleapis.com",
+				ApiVersion:          "beta",
+				ApiResourceTypeKind: "Test",
+				AutogenStatus:       true,
+				AutogenVersion:      2,
 				Fields: []Field{
 					{
 						ApiField: "field",
@@ -86,6 +120,7 @@ func TestFromResource(t *testing.T) {
 				ApiVersion:          "beta",
 				ApiResourceTypeKind: "Test",
 				AutogenStatus:       true,
+				AutogenVersion:      1,
 				Fields: []Field{
 					{
 						ApiField: "field",

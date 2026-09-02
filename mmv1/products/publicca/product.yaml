@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'PublicCA'
-display_name: 'Public CA'
-versions:
-  - name: 'ga'
-    base_url: 'https://publicca.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://publicca.googleapis.com/v1beta1/'
+name: PublicCA
+display_name: Public CA
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://publicca.googleapis.com/v1/
+  - name: beta
+    base_url: https://publicca.googleapis.com/v1beta1/

@@ -1,6 +1,6 @@
 ---
 name: default-workflow
-description: "Fallback workflow for general implementation and debugging tasks that do not involve creating a new resource."
+description: "Fallback workflow for general implementation and debugging tasks without a more specific workflow"
 ---
 
 # `default-workflow`
@@ -14,6 +14,7 @@ This document outlines the structured 5-step lifecycle for formal implementation
 
 ### 2. Triage
 *   Gather context on the change or bug. Plan the change (New feature or bug fix) within schema or logic. 
+*   Consult `.agents/knowledge/index.md` for the topics the change touches and open the relevant sources.
 *   Execute the `triage` skill (located in `.agents/skills/operations/triage/`) to perform this work.
 *   **Transfers to Step 3:** Approved implementation plan and file paths file.
 
@@ -26,7 +27,7 @@ This document outlines the structured 5-step lifecycle for formal implementation
 *   **Transfers to Step 5:** Human-readable Markdown report explaining whether the test succeeded or failed, and what discrepancy was found.
 
 ### 5. Fix
-*   This is a Remediation Planning step (similar to Triage). Take the results from `qa-test-runner` and compare against reference guides or user suggestions. Propose a specific fix code change to the user. 
+*   This is a Remediation Planning step (similar to Triage). Take the results from `qa-test-runner`, classify symptoms against `.agents/skills/utils/test-failure-decision-tree/SKILL.md` (all catalog scenarios), and compare against reference guides or user suggestions. Propose a specific fix code change to the user (or invoke `test-fixer` subagent). 
 *   Execute the `fix` skill (located in `.agents/skills/operations/fix/`) to perform this planning.
 
 ---

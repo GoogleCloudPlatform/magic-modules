@@ -26,6 +26,22 @@ func diffSuppressIamUserName(_, old, new string, d *schema.ResourceData) bool {
 		return true
 	}
 
+	// MySQL casts all hostnames to lowercase. For MySQL Cloud IAM Groups
+	// make sure comparison checks lowercase everything after the "@" symbol.
+	// Only MySQL has "%" populated for empty hostnames so we can use
+	// that to identify MySQL Cloud IAM Groups.
+	if strings.Contains(userType, "CLOUD_IAM_GROUP") && d.Get("host") == "%" {
+		splitName := strings.SplitN(new, "@", 2)
+		if len(splitName) == 2 {
+			groupUsername := splitName[0]
+			groupHostname := splitName[1]
+			groupName := groupUsername + "@" + strings.ToLower(groupHostname)
+			if old == groupName {
+				return true
+			}
+		}
+	}
+
 	return false
 }
 
@@ -65,6 +81,30 @@ func ResourceSqlUser() *schema.Resource {
 
 		SchemaVersion: 1,
 		MigrateState:  resourceSqlUserMigrateState,
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"instance": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"host": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"host": {
@@ -347,71 +387,18 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			"into %s: %s", name, instance, err)
 	}
 
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": instance,
+		"host":     user.Host,
+		"name":     name,
+	}); err != nil {
+		return err
+	}
 	return resourceSqlUserRead(d, meta)
 }
 
-func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
-
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	instance := d.Get("instance").(string)
-	name := d.Get("name").(string)
-	host := d.Get("host").(string)
-	databaseInstance, err := NewClient(config, userAgent).Instances.Get(project, instance).Do()
-	if err != nil {
-		return err
-	}
-	if databaseInstance.Settings.ActivationPolicy != "ALWAYS" {
-		return nil
-	}
-
-	var users *sqladmin.UsersListResponse
-	err = nil
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() error {
-			users, err = NewClient(config, userAgent).Users.List(project, instance).Do()
-			return err
-		},
-		Timeout: 5 * time.Minute,
-	})
-	if err != nil {
-		// move away from transport_tpg.HandleNotFoundError() as we need to handle both 404 and 403
-		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
-	}
-
-	var user *sqladmin.User
-	for _, currentUser := range users.Items {
-		var username string
-		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
-			username = strings.Split(name, "@")[0]
-		} else {
-			username = name
-		}
-		if currentUser.Name == username {
-			// Host can only be empty for postgres instances,
-			// so don't compare the host if the API host is empty.
-			if host == "" || currentUser.Host == host {
-				user = currentUser
-				break
-			}
-		}
-	}
-
-	if user == nil {
-		log.Printf("[WARN] Removing SQL User %q because it's gone", d.Get("name").(string))
-		d.SetId("")
-
-		return nil
-	}
-
+func flattenSqlUser(user *sqladmin.User, d *schema.ResourceData, project string) error {
 	if err := d.Set("host", user.Host); err != nil {
 		return fmt.Errorf("Error setting host: %s", err)
 	}
@@ -443,6 +430,100 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+
+	return nil
+}
+
+func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	instance := d.Get("instance").(string)
+	name := d.Get("name").(string)
+	host := d.Get("host").(string)
+	databaseInstance, err := NewClient(config, userAgent).Instances.Get(project, instance).Do()
+	if err != nil {
+		return err
+	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": instance,
+		"host":     host,
+		"name":     name,
+	}); err != nil {
+		return err
+	}
+
+	if databaseInstance.Settings.ActivationPolicy != "ALWAYS" {
+		return nil
+	}
+
+	var users *sqladmin.UsersListResponse
+	err = nil
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			users, err = NewClient(config, userAgent).Users.List(project, instance).Do()
+			return err
+		},
+		Timeout: 5 * time.Minute,
+	})
+	if err != nil {
+		// move away from transport_tpg.HandleNotFoundError() as we need to handle both 404 and 403
+		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
+	}
+
+	var user *sqladmin.User
+	for _, currentUser := range users.Items {
+		var username string
+		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
+			username = strings.Split(name, "@")[0]
+		} else if strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
+			splitName := strings.SplitN(name, "@", 2)
+			if len(splitName) == 2 {
+				groupUsername := splitName[0]
+				groupHostname := splitName[1]
+				username = groupUsername + "@" + strings.ToLower(groupHostname)
+			}
+		} else {
+			username = name
+		}
+		if currentUser.Name == username {
+			// Host can only be empty for postgres instances,
+			// so don't compare the host if the API host is empty.
+			if host == "" || currentUser.Host == host {
+				user = currentUser
+				break
+			}
+		}
+	}
+
+	if user == nil {
+		log.Printf("[WARN] Removing SQL User %q because it's gone", d.Get("name").(string))
+		d.SetId("")
+
+		return nil
+	}
+
+	if err := flattenSqlUser(user, d, project); err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": user.Instance,
+		"host":     user.Host,
+		"name":     user.Name,
+	}); err != nil {
+		return err
+	}
 
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
@@ -570,6 +651,14 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				"in %s: %s", name, instance, err)
 		}
 
+		if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+			"project":  project,
+			"instance": instance,
+			"host":     host,
+			"name":     name,
+		}); err != nil {
+			return err
+		}
 		return resourceSqlUserRead(d, meta)
 	}
 
@@ -629,8 +718,59 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	if d.Id() == "" {
+		// Import via identity block - identity attributes are already set
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("error getting identity: %s", err)
+		}
 
+		var projectStr string
+		if v, ok := identity.GetOk("project"); ok {
+			projectStr = v.(string)
+		}
+		if projectStr == "" {
+			projectStr = meta.(*transport_tpg.Config).Project
+		}
+		if err := d.Set("project", projectStr); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+
+		var instanceStr string
+		if v, ok := identity.GetOk("instance"); ok {
+			instanceStr = v.(string)
+		}
+		if err := d.Set("instance", instanceStr); err != nil {
+			return nil, fmt.Errorf("Error setting instance: %s", err)
+		}
+
+		var hostStr string
+		if v, ok := identity.GetOk("host"); ok {
+			hostStr = v.(string)
+		}
+		if hostStr != "" {
+			if err := d.Set("host", hostStr); err != nil {
+				return nil, fmt.Errorf("Error setting host: %s", err)
+			}
+		}
+
+		var nameStr string
+		if v, ok := identity.GetOk("name"); ok {
+			nameStr = v.(string)
+		}
+		if err := d.Set("name", nameStr); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
+
+		if hostStr != "" {
+			d.SetId(fmt.Sprintf("%s/%s/%s/%s", projectStr, instanceStr, hostStr, nameStr))
+		} else {
+			d.SetId(fmt.Sprintf("%s/%s/%s", projectStr, instanceStr, nameStr))
+		}
+		return []*schema.ResourceData{d}, nil
+	}
+
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) == 3 {
 		if err := d.Set("project", parts[0]); err != nil {
 			return nil, fmt.Errorf("Error setting project: %s", err)
@@ -667,6 +807,7 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 		if err := d.Set("name", parts[4]); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
+
 	} else {
 		return nil, fmt.Errorf("Invalid specifier. Expecting {project}/{instance}/{name} for postgres instance and {project}/{instance}/{host}/{name} for MySQL instance")
 	}

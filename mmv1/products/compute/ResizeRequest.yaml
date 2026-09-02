@@ -52,12 +52,13 @@ async:
 # deleted. If a resize request is NOT in the ACCEPTED state, it can be directly deleted.
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/compute_mig_resize_request_delete.go.tmpl'
-# Examples for testing
-examples:
+samples:
   - name: 'compute_mig_resize_request'
     primary_resource_id: 'a3_resize_request'
-    vars:
-      resize_request_name: 'a3-dws'
+    steps:
+      - name: 'compute_mig_resize_request'
+        resource_id_vars:
+          resize_request_name: 'a3-dws'
 # Resize request parameters injected via URL
 parameters:
   - name: 'zone'

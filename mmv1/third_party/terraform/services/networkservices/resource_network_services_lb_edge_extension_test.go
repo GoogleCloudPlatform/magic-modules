@@ -146,6 +146,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = false
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
     }
   }
 
@@ -275,6 +276,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = false
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      forward_attributes = ["request.host", "request.path", "request.scheme"]
     }
   }
 
@@ -291,6 +293,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = true
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["testing-header"]
+      forward_attributes = ["request.host"]
     }
   }
 

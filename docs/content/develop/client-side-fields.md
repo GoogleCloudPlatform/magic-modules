@@ -7,11 +7,6 @@ weight: 150
 
 Client-side fields are most often used as flags to modify the behavior of a Terraform resource. Because they don't correspond to an API field, there are some additional considerations in terms of how to implement them.
 
-Common client-side fields include:
-
-- [`deletion_protection`]({{< ref "/best-practices/deletion-behaviors#deletion_protection" >}})
-- [`deletion_policy`]({{< ref "/best-practices/deletion-behaviors#deletion_policy" >}})
-
 {{% tabs "schema" %}}
 {{< tab "MMv1" >}}
 ## Add to the schema
@@ -21,17 +16,16 @@ Instead of adding the field in `parameters` or `properties`, use a section calle
 Example:
 ```yaml
 virtual_fields:
-  - name: 'deletion_protection'
+  - name: 'send_propagated_connection_limit_if_zero'
     type: Boolean
-    default_value: true
+    default_value: false
     description: |
-      Whether Terraform will be prevented from destroying the CertificateAuthority.
-      When the field is set to true or unset in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the CertificateAuthority will fail.
-      When the field is set to false, deleting the CertificateAuthority is allowed.
+      Controls the behavior of propagated_connection_limit.
+      When false, setting propagated_connection_limit to zero causes the provider to use to the API's default value.
+      When true, the provider will set propagated_connection_limit to zero.
+      Defaults to false.
 ```
 
-This will automatically ensure that the field works as users expect.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ## Add to the schema
@@ -41,11 +35,14 @@ Add the field to the schema as usual.
 Example:
 
 ```go
-"deletion_protection": {
-	Type:        schema.TypeBool,
-	Optional:    true,
-	Default:     true,
-	Description: `Whether Terraform will be prevented from destroying the instance. When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the table will fail. When the field is set to false, deleting the table is allowed.`,
+"send_propagated_connection_limit_if_zero": {
+  Type:     schema.TypeBool,
+  Optional: true,
+  Description: `Controls the behavior of propagated_connection_limit.
+When false, setting propagated_connection_limit to zero causes the provider to use to the API's default value.
+When true, the provider will set propagated_connection_limit to zero.
+Defaults to false.`,
+  Default: false,
 },
 ```
 ## Set on read
@@ -56,9 +53,9 @@ Example:
 
 ```go
 // Explicitly set client-side fields to default values if unset
-if _, ok := d.GetOkExists("deletion_protection"); !ok {
-	if err := d.Set("deletion_protection", true); err != nil {
-		return fmt.Errorf("Error setting deletion_protection: %s", err)
+if _, ok := d.GetOkExists("send_propagated_connection_limit_if_zero"); !ok {
+	if err := d.Set("send_propagated_connection_limit_if_zero", false); err != nil {
+		return fmt.Errorf("Error setting send_propagated_connection_limit_if_zero: %s", err)
 	}
 }
 ```
@@ -70,9 +67,9 @@ Client-side fields can always be updated in-place. However, if the resource is o
 If only client-side fields were modified, you can short-circuit the Update function to avoid sending an API request. This is important because the update request will be empty (which causes errors for some APIs.) This can go at the top of the Update function:
 
 ```go
-clientSideFields := map[string]bool{"deletion_protection": true}
+clientSideFields := map[string]bool{"send_propagated_connection_limit_if_zero": true}
 clientSideOnly := true
-for field := range ResourceSpannerInstance().Schema {
+for field := range ResourceComputeServiceAttachment().Schema {
 	if d.HasChange(field) && !clientSideFields[field] {
 		clientSideOnly = false
 		break
@@ -83,7 +80,7 @@ if clientSideOnly {
 }
 ```
 
-Replace `ResourceSpannerInstance` with the appropriate resource function.
+Replace `ResourceComputeServiceAttachment` with the appropriate resource function.
 {{< /tab >}}
 {{% /tabs %}}
 
@@ -94,7 +91,7 @@ If the resource has a corresponding data source that calls the resource's Read f
 1. Add the client-side field to the data source's Schema as an output-only field. (This will happen automatically for data sources that use `tpgresource.DatasourceSchemaFromResourceSchema`.)
 
    ```go
-   "deletion_protection": {
+   "send_propagated_connection_limit_if_zero": {
      Type:        schema.TypeBool,
      Computed:    true,
    },
@@ -102,31 +99,53 @@ If the resource has a corresponding data source that calls the resource's Read f
 2. Unset the field in the data source's Read function.
 
    ```go
-   if err := d.Set("deletion_protection", nil); err != nil {
-     return fmt.Errorf("Error setting deletion_protection: %s", err)
+   if err := d.Set("send_propagated_connection_limit_if_zero", nil); err != nil {
+     return fmt.Errorf("Error setting send_propagated_connection_limit_if_zero: %s", err)
    }
    ```
 
 ## Implement logic
 
-At this point, you should be ready to implement your logic! For example, a `deletion_protection` field short-ciruits the deletion process if it is not explicitly set to `false`.
+At this point, you should be ready to implement your logic! For example, the `send_propagated_connection_limit_if_zero` field used here flags if an explicit 0 should be sent to the API for the `propagated_connection_limit` field.
 
 {{% tabs "implementation" %}}
 {{< tab "MMv1" >}}
-Add the following as [pre_delete custom code]({{< ref "/develop/custom-code#pre_post_injection" >}}).
+Add the following as [encoder (and update_encoder) custom code]({{< ref "/develop/custom-code#encoder" >}}).
 
 ```go
-if d.Get("deletion_protection").(bool) {
-	return fmt.Errorf("cannot destroy folder without setting deletion_protection=false and running `terraform apply`")
+propagatedConnectionLimitProp := d.Get("propagated_connection_limit")
+if sv, ok := d.GetOk("send_propagated_connection_limit_if_zero"); ok && sv.(bool) {
+  if v, ok := d.GetOkExists("propagated_connection_limit"); ok || !reflect.DeepEqual(v, propagatedConnectionLimitProp) {
+    obj["propagatedConnectionLimit"] = propagatedConnectionLimitProp
+  }
 }
+
+return obj, nil
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-Add the following at the beginning of the resource's Delete function.
-
+Add the following encoders that are referenced within the Create and Update functions respectively, prior to the resource `obj` being sent as a request to the API.
 ```go
-if d.Get("deletion_protection").(bool) {
-	return fmt.Errorf("cannot destroy folder without setting deletion_protection=false and running `terraform apply`")
+func resourceComputeServiceAttachmentEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  propagatedConnectionLimitProp := d.Get("propagated_connection_limit")
+  if sv, ok := d.GetOk("send_propagated_connection_limit_if_zero"); ok && sv.(bool) {
+    if v, ok := d.GetOkExists("propagated_connection_limit"); ok || !reflect.DeepEqual(v, propagatedConnectionLimitProp) {
+      obj["propagatedConnectionLimit"] = propagatedConnectionLimitProp
+    }
+  }
+
+  return obj, nil
+}
+
+func resourceComputeServiceAttachmentUpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  propagatedConnectionLimitProp := d.Get("propagated_connection_limit")
+  if sv, ok := d.GetOk("send_propagated_connection_limit_if_zero"); ok && sv.(bool) {
+    if v, ok := d.GetOkExists("propagated_connection_limit"); ok || !reflect.DeepEqual(v, propagatedConnectionLimitProp) {
+      obj["propagatedConnectionLimit"] = propagatedConnectionLimitProp
+    }
+  }
+
+  return obj, nil
 }
 ```
 {{< /tab >}}

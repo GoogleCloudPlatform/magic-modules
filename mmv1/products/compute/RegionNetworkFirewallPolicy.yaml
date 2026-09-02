@@ -20,6 +20,7 @@ base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
 self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'
 create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
 update_verb: 'PATCH'
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -33,15 +34,21 @@ async:
     resource_inside_response: false
 legacy_long_form_project: true
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'region_network_firewall_policy_full'
     primary_resource_id: 'policy'
-    vars:
-      policy_name: 'tf-test-policy'
+    steps:
+      - name: 'region_network_firewall_policy_full'
+        resource_id_vars:
+          policy_name: 'tf-test-policy'
   - name: 'region_network_firewall_policy_roce'
     primary_resource_id: 'policy'
-    vars:
-      policy_name: 'rnf-policy'
+    steps:
+      - name: 'region_network_firewall_policy_roce'
+        resource_id_vars:
+          policy_name: 'rnf-policy'
+iam_policy:
+  parent_resource_attribute: 'name'
 parameters:
   - name: 'region'
     type: String

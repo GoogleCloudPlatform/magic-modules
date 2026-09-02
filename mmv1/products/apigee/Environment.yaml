@@ -47,59 +47,72 @@ iam_policy:
     - '{{name}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_environment.go.tmpl'
-examples:
+samples:
   - name: 'apigee_environment_basic'
-    vars:
-      environment_name: 'my-environment'
     exclude_test: true
+    steps:
+      - name: 'apigee_environment_basic'
+        resource_id_vars:
+          environment_name: 'my-environment'
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
   - name: 'apigee_environment_basic_test'
     primary_resource_id: 'apigee_environment'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_environment_basic_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
     primary_resource_id: 'apigee_environment'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'apigee_environment_basic_properties_test'
     primary_resource_id: 'apigee_environment'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_environment_basic_properties_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
     min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_environment_patch_update_test'
+        min_version: 'beta'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
   - name: 'apigee_environment_client_ip_resolution_config_test'
     primary_resource_id: 'apigee_environment'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    exclude_basic_doc: true
     # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+    steps:
+      - name: 'apigee_environment_client_ip_resolution_config_test'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
 parameters:
   - name: 'orgId'
     type: String
@@ -239,3 +252,4 @@ properties:
             description: |
               The index of the ip in the header. Positive indices 0, 1, 2, 3 chooses indices from the left (first ips). Negative indices -1, -2, -3 chooses indices from the right (last ips).
             required: true
+            send_empty_value: true

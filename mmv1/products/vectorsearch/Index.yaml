@@ -1,0 +1,188 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Index
+description: |-
+  An Index defines an approximate nearest-neighbor search structure over a
+  field of a Vector Search Collection.
+base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/indexes
+self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/indexes/{{index_id}}
+create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/indexes?indexId={{index_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/indexes/{{index_id}}
+timeouts:
+  insert_minutes: 90
+  update_minutes: 60
+  delete_minutes: 60
+async:
+  operation:
+    timeouts:
+      insert_minutes: 90
+      update_minutes: 60
+      delete_minutes: 60
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: SW5kZXg=
+autogen_async: true
+samples:
+  - name: vectorsearch_index_basic
+    primary_resource_id: example-index
+    steps:
+      - name: vectorsearch_index_basic
+        resource_id_vars:
+          index_id: example-index
+          collection_id: example-collection
+  - name: vectorsearch_index_dedicated
+    primary_resource_id: example-dedicated-index
+    steps:
+      - name: vectorsearch_index_dedicated
+        resource_id_vars:
+          index_id: example-dedicated-index
+          collection_id: example-dedicated-collection
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: collectionId
+    type: String
+    required: true
+    description: |-
+      The ID of the parent Collection.
+    immutable: true
+    url_param_only: true
+  - name: indexId
+    type: String
+    required: true
+    description: |-
+      ID of the Index to create.
+      The id must be 1-63 characters long, and comply with
+      [RFC1035](https://www.ietf.org/rfc/rfc1035.txt).
+      Specifically, it must be 1-63 characters long and match the regular
+      expression `[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: Identifier. name of resource
+    output: true
+  - name: createTime
+    type: String
+    description: '[Output only] Create time stamp'
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] Update time stamp'
+    output: true
+  - name: displayName
+    type: String
+    description: User-specified display name of the index
+  - name: description
+    type: String
+    description: User-specified description of the index
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: distanceMetric
+    type: Enum
+    description: |-
+      Distance metric used for indexing. If not specified, will default to
+      `DOT_PRODUCT`.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'DOT_PRODUCT'
+      - 'COSINE_DISTANCE'
+  - name: indexField
+    type: String
+    required: true
+    immutable: true
+    description: The collection schema field to index.
+  - name: filterFields
+    type: Array
+    immutable: true
+    description: The fields to push into the index to enable fast ANN inline filtering.
+    item_type:
+      type: String
+  - name: storeFields
+    type: Array
+    immutable: true
+    description: The fields to push into the index to enable inline data retrieval.
+    item_type:
+      type: String
+  - name: dedicatedInfrastructure
+    type: NestedObject
+    default_from_api: true
+    description: |-
+      Dedicated infrastructure for the index. This field belongs to the
+      `infra_type` oneof; if omitted, the server populates it with the
+      default `PERFORMANCE_OPTIMIZED` mode and an autoscaling spec of
+      `min_replica_count=2`, `max_replica_count=2`.
+    properties:
+      - name: mode
+        type: Enum
+        immutable: true
+        default_from_api: true
+        description: |-
+          Mode of the dedicated infrastructure. Defaults to `PERFORMANCE_OPTIMIZED`.
+        enum_values:
+          - 'MODE_UNSPECIFIED'
+          - 'STORAGE_OPTIMIZED'
+          - 'PERFORMANCE_OPTIMIZED'
+      - name: autoscalingSpec
+        type: NestedObject
+        default_from_api: true
+        description: Autoscaling specification.
+        properties:
+          - name: minReplicaCount
+            type: Integer
+            default_from_api: true
+            description: |-
+              The minimum number of replicas. If not set or set to `0`, defaults
+              to `2`. Must be >= `1` and <= `1000`.
+          - name: maxReplicaCount
+            type: Integer
+            default_from_api: true
+            description: |-
+              The maximum number of replicas. Must be >= `min_replica_count`
+              and <= `1000`. If not set or set to `0`, defaults to the greater
+              of `min_replica_count` and `2` (or `5` for the v1beta version).
+  - name: denseScann
+    type: NestedObject
+    immutable: true
+    default_from_api: true
+    description: |-
+      Dense ScaNN index configuration. This field belongs to the
+      `index_type` oneof; if omitted, the server populates it with default
+      ScaNN settings.
+    properties:
+      - name: featureNormType
+        type: Enum
+        immutable: true
+        default_from_api: true
+        description: Feature norm type for the ScaNN index.
+        enum_values:
+          - 'FEATURE_NORM_TYPE_UNSPECIFIED'
+          - 'NONE'
+          - 'UNIT_L2_NORM'

@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'ServiceDirectory'
-display_name: 'Service Directory'
-versions:
-  - name: 'ga'
-    base_url: 'https://servicedirectory.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://servicedirectory.googleapis.com/v1beta1/'
+name: ServiceDirectory
+display_name: Service Directory
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://servicedirectory.googleapis.com/v1/
+  - name: beta
+    base_url: https://servicedirectory.googleapis.com/v1beta1/

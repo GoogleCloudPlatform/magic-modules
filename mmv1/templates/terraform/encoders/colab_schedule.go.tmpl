@@ -9,15 +9,25 @@ if err != nil {
     return nil, err
 }
 
-// createNotebookExecutionJobRequest does not exist in update requests
-if obj["createNotebookExecutionJobRequest"] == nil {
-    return obj, nil
+// Handle parent injection for creation requests if parent is not explicitly provided
+if obj["createNotebookExecutionJobRequest"] != nil {
+	jobRequest, ok := obj["createNotebookExecutionJobRequest"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("createNotebookExecutionJobRequest is not of type map[string]interface{} or is nil")
+	}
+	if jobRequest["parent"] == nil || jobRequest["parent"] == "" {
+		jobRequest["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+	}
 }
 
-jobRequest, ok := obj["createNotebookExecutionJobRequest"].(map[string]interface{})
-if !ok {
-    return nil, fmt.Errorf("createNotebookExecutionJobRequest is not of type map[string]interface{} or is nil")
+if obj["createPipelineJobRequest"] != nil {
+	pipelineRequest, ok := obj["createPipelineJobRequest"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("createPipelineJobRequest is not of type map[string]interface{} or is nil")
+	}
+	if pipelineRequest["parent"] == nil || pipelineRequest["parent"] == "" {
+		pipelineRequest["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+	}
 }
-jobRequest["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
 
 return obj, nil

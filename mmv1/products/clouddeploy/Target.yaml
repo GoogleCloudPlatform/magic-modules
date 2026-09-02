@@ -34,11 +34,13 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
+samples:
   - name: 'clouddeploy_target_basic'
     primary_resource_id: 'default'
-    vars:
-      target: 'cd-target'
+    steps:
+      - name: 'clouddeploy_target_basic'
+        resource_id_vars:
+          target: 'cd-target'
 parameters:
 properties:
   - name: 'name'

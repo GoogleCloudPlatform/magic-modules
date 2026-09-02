@@ -23,6 +23,7 @@ references:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.siteSearchEngine.targetSites'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
+generate_list_resource: true
 self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
 delete_url: '{{name}}'
@@ -44,19 +45,23 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl'
-examples:
+samples:
   - name: 'discoveryengine_targetsite_basic'
     primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
+    steps:
+      - name: 'discoveryengine_targetsite_basic'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+        ignore_read_extra:
+          - 'project'
   - name: 'discoveryengine_targetsite_advanced'
     primary_resource_id: 'advanced'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
+    steps:
+      - name: 'discoveryengine_targetsite_advanced'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+        ignore_read_extra:
+          - 'project'
 parameters:
   - name: 'location'
     type: String

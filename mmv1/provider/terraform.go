@@ -59,14 +59,16 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 		IAMResourceCount:  0,
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
 		templateFS:        templateFS,
 	}
 
-	t.Product.ImportPath = ImportPathFromVersion(versionName)
-	for _, r := range t.Product.Objects {
-		r.ImportPath = t.Product.ImportPath
+	if product != nil {
+		t.Version = *product.VersionObjOrClosest(versionName)
+		t.Product.ImportPath = ImportPathFromVersion(versionName)
+		for _, r := range t.Product.Objects {
+			r.ImportPath = t.Product.ImportPath
+		}
 	}
 
 	return t
@@ -90,7 +92,7 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 		object.ExcludeIfNotInVersion(t.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -102,7 +104,8 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 
 	if !object.IsExcluded() {
-		log.Printf("Generating %s resource", object.Name)
+		google.LogVerbose("Generating %s resource", object.Name)
+		google.IncrementResourceGenerated()
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		t.GenerateSingularDataSource(object, *templateData, outputFolder, generateCode, generateDocs)
 
@@ -223,18 +226,6 @@ func (t *Terraform) GenerateResourceMetadataFile(object api.Resource, targetFile
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
-func (t *Terraform) hasEligibleExample(object api.Resource) bool {
-	for _, example := range object.Examples {
-		if example.ExcludeTest {
-			continue
-		}
-		if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func (t *Terraform) hasEligibleSample(object api.Resource) bool {
 	for _, sample := range object.Samples {
 		if sample.ExcludeTest {
@@ -247,23 +238,9 @@ func (t *Terraform) hasEligibleSample(object api.Resource) bool {
 	return false
 }
 
-func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
-	if !t.hasEligibleExample(object) {
-		return
-	}
-
-	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
-	templateData.GenerateTestFileLegacy(targetFilePath, object)
-}
-
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		t.GenerateResourceTestsLegacy(object, templateData, outputFolder)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if !t.hasEligibleSample(object) {
@@ -276,8 +253,8 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 }
 
 func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	if object.Examples != nil {
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 	if object.Samples == nil || !t.hasEligibleSample(object) {
 		return
@@ -328,24 +305,9 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 	}
 }
 
-func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
-	if !object.ShouldGenerateSingularDataSourceTests() {
-		return
-	}
-
-	targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
-	templateData.GenerateDataSourceTestFileLegacy(targetFilePath, object)
-
-}
-
 func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		t.GenerateSingularDataSourceTestsLegacy(object, templateData, outputFolder)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if !object.ShouldGenerateSingularDataSourceTests() {
@@ -404,38 +366,9 @@ func (t *Terraform) GenerateOperationFile(object api.Resource, targetFilePath st
 	templateData.GenerateOperationFile(targetFilePath, object)
 }
 
-// Generate the IAM policy for this object. This is used to query and test
-// IAM policies separately from the resource itself
-func (t *Terraform) GenerateIamPolicyLegacy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if object.IamPolicy.ExampleConfigBody == "" {
-		object.IamPolicy.ExampleConfigBody = "templates/terraform/iam/iam_attributes_legacy.go.tmpl"
-	}
-	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
-		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
-		templateData.GenerateIamPolicyFile(targetFilePath, object)
-
-		// Only generate test if testable examples exist.
-		examples := google.Reject(object.Examples, func(e *resource.Examples) bool {
-			return e.ExcludeTest
-		})
-		if len(examples) != 0 {
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
-			templateData.GenerateIamPolicyTestFileLegacy(targetFilePath, object)
-		}
-	}
-	if generateDocs {
-		t.GenerateIamDocumentation(object, templateData, outputFolder, generateCode, generateDocs)
-	}
-}
-
 func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
-	if object.Samples != nil && object.Examples != nil {
-		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
-	}
 	if object.Examples != nil {
-		t.GenerateIamPolicyLegacy(object, templateData, outputFolder, generateCode, generateDocs)
-		return
+		log.Fatalf("Examples block exists in %v", object.Name)
 	}
 
 	if object.IamPolicy.SampleConfigBody == "" {
@@ -516,7 +449,7 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files for %s", ProviderName(t))
+	google.LogVerbose("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
 	t.CopyFileList(outputFolder, files, generateCode)
@@ -527,6 +460,20 @@ func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDo
 func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generateDocs bool) map[string]string {
 	// key is the target file and value is the source file
 	commonCopyFiles := make(map[string]string, 0)
+
+	// Case 0: If we're generating a specific product, only copy files for that product.
+	if t.Product != nil {
+		if !generateCode {
+			return commonCopyFiles
+		}
+		googleDir := "google"
+		if versionName != "ga" {
+			googleDir = fmt.Sprintf("google-%s", versionName)
+		}
+		files := t.getCopyFilesInFolder("third_party/terraform/services/"+t.Product.ApiName, googleDir)
+		maps.Copy(commonCopyFiles, files)
+		return commonCopyFiles
+	}
 
 	// Case 1: When copy all of files except .tmpl in a folder to the root directory of downstream repository,
 	// save the folder name to foldersCopiedToRootDir
@@ -563,7 +510,6 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 			"third_party/terraform/fwvalidators",
 			"third_party/terraform/provider",
 			"third_party/terraform/registry",
-			"third_party/terraform/services",
 			"third_party/terraform/sweeper",
 			"third_party/terraform/test-fixtures",
 			"third_party/terraform/tpgdclresource",
@@ -665,8 +611,10 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 
 // Compiles files that are shared at the provider level
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	log.Printf("Generating common files for %s", ProviderName(t))
-	t.generateResourcesForVersion(products)
+	google.LogVerbose("Generating common files for %s", ProviderName(t))
+	if t.Product == nil {
+		t.generateResourcesForVersion(products)
+	}
 	files := t.getCommonCompileFiles(t.TargetVersionName)
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	t.CompileFileList(outputFolder, files, *templateData, products)
@@ -677,6 +625,14 @@ func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Produ
 func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 	// key is the target file and the value is the source file
 	commonCompileFiles := make(map[string]string, 0)
+
+	if t.Product != nil {
+		googleDir := "google"
+		if versionName != "ga" {
+			googleDir = fmt.Sprintf("google-%s", versionName)
+		}
+		return t.getCompileFilesInFolder("third_party/terraform/services/"+t.Product.ApiName, googleDir)
+	}
 
 	// Case 1: When compile all of files except .tmpl in a folder to the root directory of downstream repository,
 	// save the folder name to foldersCopiedToRootDir
@@ -698,7 +654,6 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 		"third_party/terraform/fwresource",
 		"third_party/terraform/fwtransport",
 		"third_party/terraform/provider",
-		"third_party/terraform/services",
 		"third_party/terraform/sweeper",
 		"third_party/terraform/test-fixtures",
 		"third_party/terraform/tpgdclresource",

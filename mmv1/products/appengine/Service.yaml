@@ -12,20 +12,20 @@
 # limitations under the License.
 
 ---
-name: 'Service'
+name: Service
 description: |
   A Service resource is a logical component of an application that can share state and communicate in a secure fashion with other services.
   For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices.
   Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
-# Used as a resource reference
-exclude: true
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
-  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+    Official Documentation: https://cloud.google.com/appengine/docs/admin-api/deploying-overview
+  api: https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services
 docs:
-base_url: 'apps/{{project}}/services'
-self_link: 'apps/{{project}}/services/{{id}}'
+base_url: apps/{{project}}/services
+# Used as a resource reference
+exclude: true
+self_link: apps/{{project}}/services/{{id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -33,13 +33,13 @@ timeouts:
 custom_code:
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Full path to the Service resource in the API. Example apps/myapp/services/default.
       This field is used in responses only. Any value specified here in a request is ignored.
     output: true
-  - name: 'id'
+  - name: id
     type: String
     description: |
       Relative name of the service within the application. Example default.

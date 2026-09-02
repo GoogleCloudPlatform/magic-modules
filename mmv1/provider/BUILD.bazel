@@ -28,7 +28,15 @@ go_library(
 
 go_test(
     name = "provider_test",
-    srcs = ["terraform_tgc_next_test.go"],
+    srcs = [
+        "provider_test.go",
+        "template_data_test.go",
+        "terraform_tgc_next_test.go",
+    ],
     embed = [":provider"],
-    deps = ["//mmv1/api"],
+    deps = [
+        "//mmv1/api",
+        "//mmv1/api/product",
+        "//mmv1/google",
+    ],
 )

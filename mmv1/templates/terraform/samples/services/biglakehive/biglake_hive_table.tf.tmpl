@@ -1,0 +1,52 @@
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google-beta"
+    }
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  name          = "{{index $.ResourceIdVars "bucket_name"}}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_hive_catalog" "catalog" {
+  name             = "tf_test_catalog%{random_suffix}"
+  primary_location = "us-central1"
+  location_uri     = "gs://${google_storage_bucket.bucket.name}"
+}
+
+resource "google_biglake_hive_database" "database" {
+  catalog      = google_biglake_hive_catalog.catalog.name
+  name         = "tf_test_database%{random_suffix}"
+  location_uri = "gs://${google_storage_bucket.bucket.name}"
+}
+
+resource "google_biglake_hive_table" "{{$.PrimaryResourceId}}" {
+  catalog  = google_biglake_hive_catalog.catalog.name
+  database = google_biglake_hive_database.database.name
+  name     = "tf_test_table%{random_suffix}"
+
+  description = "{{index $.Vars "description"}}"
+  storage_descriptor {
+    {{index $.Vars "columns"}}
+    input_format         = "org.apache.hadoop.mapred.TextInputFormat"
+    output_format        = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    compressed           = {{index $.Vars "compressed"}}
+    num_buckets          = {{index $.Vars "num_buckets"}}
+    bucket_cols          = {{index $.Vars "bucket_cols"}}
+    {{index $.Vars "sort_cols"}}
+    {{index $.Vars "skewed_info"}}
+    serde_info {
+      name               = "LazySimpleSerDe"
+      serialization_lib  = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
+    }
+    parameters           = {{index $.Vars "parameters"}}
+    stored_as_sub_dirs   = {{index $.Vars "stored_as_sub_dirs"}}
+  }
+  {{index $.Vars "partition_keys"}}
+  parameters = {{index $.Vars "parameters"}}
+}

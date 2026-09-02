@@ -1,0 +1,12 @@
+resource "google_chronicle_findings_refinement" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}" 
+  type = "DETECTION_EXCLUSION" 
+  query = "{{index $.Vars "query"}}"  
+  outcome_filters {
+    outcome_variable = "{{index $.Vars "query"}}"
+    outcome_filter_operator = "{{index $.Vars "outcome_filter_operator"}}"
+    outcome_value = "{{index $.Vars "outcome_value"}}"
+  }
+}

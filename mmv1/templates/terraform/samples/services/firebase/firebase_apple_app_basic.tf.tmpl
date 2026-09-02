@@ -1,0 +1,6 @@
+resource "google_firebase_apple_app" "default" {
+  provider = google-beta
+  project = "{{index $.TestEnvVars "project_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  bundle_id = "{{index $.ResourceIdVars "bundle_id"}}"
+}

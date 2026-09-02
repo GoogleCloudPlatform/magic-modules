@@ -28,6 +28,7 @@ package {{ $.Res.PackageName }}_test
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -42,8 +43,8 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/services/{{ lower $.Res.ProductMetadata.Name }}"
-{{- range $service, $alias := $.Res.TestServiceDependencies }}
-	{{ $alias }} "{{ $.ImportPath  }}/services/{{ $service }}"
+{{- range $pkg, $alias := $.Res.TestDependencies }}
+	{{ $alias }} "{{ $.ImportPath  }}/{{ $pkg }}"
 {{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
@@ -59,6 +60,7 @@ import (
 var (
 	_ = fmt.Sprintf
 	_ = log.Print
+	_ = regexp.MatchString
 	_ = strconv.Atoi
 	_ = strings.Trim
 	_ = time.Now

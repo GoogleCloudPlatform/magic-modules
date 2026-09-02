@@ -1,0 +1,22 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+	"^(?P<parent>.*)/locations/(?P<location>[^/]+)/cloudControls/(?P<cloud_control_id>[^/]+)$",
+	"^organizations/(?P<organization>[^/]+)/locations/(?P<location>[^/]+)/cloudControls/(?P<cloud_control_id>[^/]+)$",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// Seamlessly map the overlapping parameters
+if d.Get("organization").(string) == "" && d.Get("parent").(string) != "" {
+	if strings.HasPrefix(d.Get("parent").(string), "organizations/") {
+		d.Set("organization", strings.TrimPrefix(d.Get("parent").(string), "organizations/"))
+	}
+} else if d.Get("parent").(string) == "" && d.Get("organization").(string) != "" {
+	d.Set("parent", "organizations/" + d.Get("organization").(string))
+}
+
+// Manually construct the ID without relying on the identity generator
+id := fmt.Sprintf("%s/locations/%s/cloudControls/%s", d.Get("parent").(string), d.Get("location").(string), d.Get("cloud_control_id").(string))
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

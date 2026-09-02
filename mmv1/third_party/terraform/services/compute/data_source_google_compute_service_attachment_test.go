@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceGoogleComputeServiceAttachment_basic(t *testing.T) {
@@ -88,7 +89,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
 
   enable_proxy_protocol = false
   connection_preference = "ACCEPT_AUTOMATIC"
-  nat_subnets           = [google_compute_subnetwork.psc_ilb_nat.id]
+  nat_subnets           = [google_compute_subnetwork.psc_ilb_nat.self_link]
   target_service        = google_compute_forwarding_rule.psc_ilb_target_service.id
 }
 

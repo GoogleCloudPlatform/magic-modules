@@ -17,30 +17,43 @@ description: |-
   A resource that manages the lock state of a PromptTemplate.
   When this resource is created, the template is locked.
   When this resource is deleted, the template is unlocked.
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+min_version: beta
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false
+create_verb: POST
+delete_verb: POST
+id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 exclude_sweeper: true
-examples:
+custom_code:
+  pre_create: templates/terraform/pre_create/firebase_ai_logic_prompt_template_lock.go.tmpl
+  # We read the PromptTemplate to verify it is locked
+  post_read: templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl
+  pre_delete: templates/terraform/pre_delete/firebase_ai_logic_prompt_template_lock.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl
+samples:
   - name: firebaseailogic_prompt_template_lock_basic
     min_version: beta
     primary_resource_id: basic_lock
-    vars:
-      template_id: 'lock-template'
-    test_env_vars:
-      project_id: PROJECT_NAME
-create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
-create_verb: POST
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false
-delete_verb: POST
-custom_code:
-  # We read the PromptTemplate to verify it is locked
-  post_read: 'templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl'
+    steps:
+      - name: firebaseailogic_prompt_template_lock_basic
+        min_version: beta
+        resource_id_vars:
+          template_id: lock-template
+        test_env_vars:
+          project_id: PROJECT_NAME
+  - name: firebaseailogic_prompt_template_lock_global_only
+    min_version: beta
+    primary_resource_id: global_only_lock
+    steps:
+      - name: firebaseailogic_prompt_template_lock_global_only
+        min_version: beta
+        resource_id_vars:
+          template_id: global-only-lock-template
 parameters:
   - name: location
     type: String
@@ -54,6 +67,14 @@ parameters:
     api_name: templateId
     url_param_only: true
     required: true
+    immutable: true
+  - name: regionalPropagationDisabled
+    type: Boolean
+    description: |-
+      For the `global` location only. If true, the modifyLock operation will
+      apply to the global region only. Otherwise, the operation will also
+      propagate to all applicable regions.
+    url_param_only: true
     immutable: true
 properties:
   - name: name

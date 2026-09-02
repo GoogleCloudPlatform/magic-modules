@@ -1,0 +1,17 @@
+func identityCloudSecurityComplianceCloudControlResourceV1() tftypes.Type {
+	return tftypes.Object{
+		AttributeTypes: map[string]tftypes.Type{
+			"organization":     tftypes.String,
+			"location":         tftypes.String,
+			"cloud_control_id": tftypes.String,
+		},
+	}
+}
+
+func IdentityCloudSecurityComplianceCloudControlUpgradeV1(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	if org, ok := rawState["organization"].(string); ok && org != "" {
+		rawState["parent"] = "organizations/" + org
+		delete(rawState, "organization")
+	}
+	return rawState, nil
+}

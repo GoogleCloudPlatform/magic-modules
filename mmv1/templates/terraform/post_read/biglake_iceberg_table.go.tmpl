@@ -78,6 +78,48 @@ if metadata, ok := res["metadata"].(map[string]interface{}); ok {
 		}
 	}
 
+	// Same for sort order. The create request sends "write-order", but the
+	// table metadata returns the list of "sort-orders" plus the id of the
+	// current one in "default-sort-order-id".
+	if sortOrders, ok := metadata["sort-orders"].([]interface{}); ok {
+		defaultSortOrderId := -1
+		if id, ok := metadata["default-sort-order-id"]; ok {
+			switch v := id.(type) {
+			case json.Number:
+				id64, _ := v.Int64()
+				defaultSortOrderId = int(id64)
+			case float64:
+				defaultSortOrderId = int(v)
+			case int:
+				defaultSortOrderId = v
+			}
+		}
+
+		for _, s := range sortOrders {
+			if sm, ok := s.(map[string]interface{}); ok {
+				sid := -1
+				if id, ok := sm["order-id"]; ok {
+					switch v := id.(type) {
+					case json.Number:
+						id64, _ := v.Int64()
+						sid = int(id64)
+					case float64:
+						sid = int(v)
+					case int:
+						sid = v
+					}
+				}
+				if sid == defaultSortOrderId {
+					res["write-order"] = sm
+					break
+				}
+			}
+		}
+		if _, ok := res["write-order"]; !ok && len(sortOrders) > 0 {
+			res["write-order"] = sortOrders[0]
+		}
+	}
+
 	res["location"] = metadata["location"]
 	res["properties"] = metadata["properties"]
 }

@@ -1,0 +1,29 @@
+// After successful update, check and perform submit if requested
+if d.Get("submit").(bool) {
+	// If the update succeeded, we can assume the state is DRAFTED
+	log.Printf("[DEBUG] Attempting to submit BigQuery Analytics Hub QueryTemplate %q (ID: %s)", d.Get("name").(string), d.Id())
+
+	submitUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/dataExchanges/{{"{{"}}data_exchange_id{{"}}"}}/queryTemplates/{{"{{"}}query_template_id{{"}}"}}:submit")
+	if err != nil {
+		return fmt.Errorf("Error constructing submit URL for QueryTemplate %q: %s", d.Id(), err)
+	}
+
+	submitBodyMap := map[string]interface{}{} 
+	submitHeaders := make(http.Header)
+	submitHeaders.Set("Content-Type", "application/json")
+
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    submitUrl,
+		UserAgent: userAgent,
+		Headers:   submitHeaders,
+		Body:      submitBodyMap,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error submitting QueryTemplate %q: %s", d.Id(), err)
+	}
+	log.Printf("[DEBUG] Successfully submitted QueryTemplate %q", d.Id())
+}

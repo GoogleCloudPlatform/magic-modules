@@ -394,12 +394,17 @@ func attachStandardFunctionality(resource api.Resource) api.Resource {
 	resource.IdFormat = resource.SelfLink
 	resource.ImportFormat = []string{resource.SelfLink}
 
-	example := r.Examples{}
-	example.Name = "name_of_example_file"
-	example.PrimaryResourceId = "example"
-	example.Vars = map[string]string{"resource_name": "test-resource"}
+	sample := r.Sample{}
+	sample.Name = "name_of_sample_file"
+	sample.PrimaryResourceId = "example"
 
-	resource.Examples = []*r.Examples{&example}
+	step := r.Step{}
+	step.Name = "name_of_sample_file"
+	step.Vars = map[string]string{"resource_name": "test-resource"}
+
+	sample.Steps = []*r.Step{&step}
+
+	resource.Samples = []*r.Sample{&sample}
 
 	resourceNameBytes := []byte(resource.Name)
 	// Write the status as an encoded string to flag when a YAML file has been
@@ -430,6 +435,10 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 			description = "No description"
 		}
 		paramObj.Description = trimDescription(description)
+
+		if strings.HasPrefix(paramObj.Description, "Deprecated.") {
+			continue
+		}
 
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" || paramObj.Name == "updateMask" {
 			continue
@@ -679,5 +688,6 @@ func trimDescription(description string) string {
 	for _, line := range lines {
 		trimmedDescription = append(trimmedDescription, strings.Trim(line, " "))
 	}
+
 	return strings.Join(trimmedDescription, "\n")
 }

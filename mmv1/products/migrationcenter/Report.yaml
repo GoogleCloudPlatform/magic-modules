@@ -28,18 +28,18 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: UmVwb3J0
+autogen_status: UmVwb3J0QXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 samples:
-  - name: 'migration_center_report_basic'
-    primary_resource_id: 'default'
+  - name: migration_center_report_basic
+    primary_resource_id: default
     steps:
-      - name: 'migration_center_report_basic'
+      - name: migration_center_report_basic
         resource_id_vars:
-          report_id: 'report-test'
-          report_config_id: 'report-config-test'
-          pref_set_id: 'pref-set-test'
-          group_id: 'group-test'
+          report_id: report-test
+          report_config_id: report-config-test
+          pref_set_id: pref-set-test
+          group_id: group-test
 parameters:
   - name: location
     type: String

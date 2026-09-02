@@ -33,4 +33,4 @@ python3 <PATH_TO_MAGIC_MODULES>/.agents/scripts/tf_debug_parser.py /path/to/test
 ### 3. Verification & Handoff
 * Use the `view_file` tool to read the generated `outline.txt` INSIDE the output directory (or its subdirectory if the script creates one). It contains a compressed timeline of API requests/responses and Terraform state transitions.
 * If you find an API error (HTTP 4xx or 5xx) or an unexpected default field, use `view_file` on the specific JSON payload file referenced in `outline.txt` (e.g., `01_REQUEST_POST.json`) found in that same directory.
-* Pivot to the `.agents/workflows/troubleshooting_reference.md` document to map the failure to a known fix strategy before invoking the `fix` workflow.
+* Pivot to the `.agents/skills/operations/troubleshooting_reference.md` document to map the failure to a known fix strategy before invoking the `fix` workflow.

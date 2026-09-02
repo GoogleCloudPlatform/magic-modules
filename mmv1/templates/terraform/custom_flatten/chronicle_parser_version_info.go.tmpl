@@ -1,0 +1,17 @@
+// Custom flattener for the version_info field of Chronicle Parser.
+// If the API returns nil (common for custom parsers), it preserves the local state
+// to prevent Terraform from detecting a drift and showing an empty plan.
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		// If the API returned nil (common for custom parsers), preserve local state.
+		return d.Get("version_info")
+	}
+	original := v.(map[string]interface{})
+	transformed := make(map[string]interface{})
+	transformed["auto_upgrade_disabled"] = original["autoUpgradeDisabled"]
+	transformed["latest_parser"] = original["latestParser"]
+	transformed["latest_parser_version"] = original["latestParserVersion"]
+	transformed["rollback_available"] = original["rollbackAvailable"]
+	transformed["version"] = original["version"]
+	return []interface{}{transformed}
+}

@@ -27,20 +27,22 @@ func NewContainerNodePoolCai2hclConverter(provider *schema.Provider) models.Cai2
 	}
 }
 
-// Convert converts asset resource data.
-func (c *ContainerNodePoolCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset.Resource == nil || asset.Resource.Data == nil {
-		return nil, fmt.Errorf("asset resource data is nil")
+// Convert converts assets resource data.
+func (c *ContainerNodePoolCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
 	}
 
-	block, err := c.convertResourceData(asset)
+	var blocks []*models.TerraformResourceBlock
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
-	return []*models.TerraformResourceBlock{block}, nil
+	blocks = append(blocks, block)
+	return blocks, nil
 }
 
-func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -73,8 +75,14 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = asset.Resource.Data["name"].(string)
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, asset.Resource.Data["name"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
@@ -219,9 +227,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["placementPolicy"].(map[string]interface{}); ok {
+		policyType := v["type"]
+		if policyType == nil {
+			policyType = ""
+		}
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
-				"type":         v["type"],
+				"type":         policyType,
 				"policy_name":  v["policyName"],
 				"tpu_topology": v["tpuTopology"],
 			},
@@ -229,9 +241,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["queuedProvisioning"].(map[string]interface{}); ok {
+		enabled := v["enabled"]
+		if enabled == nil {
+			enabled = false
+		}
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
-				"enabled": v["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}

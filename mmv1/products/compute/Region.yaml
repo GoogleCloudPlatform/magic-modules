@@ -111,9 +111,7 @@ properties:
           output: true
         - name: 'owner'
           type: String
-          description:
-            'Owning resource. This is the resource on which this quota is
-            applied.'
+          description: 'Owning resource. This is the resource on which this quota is applied.'
           output: true
   - name: 'status'
     type: Enum

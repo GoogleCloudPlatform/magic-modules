@@ -15,11 +15,10 @@
 name: 'QuotaAdjusterSettings'
 description: |
   QuotaAdjusterSettings resource represents your quota adjuster settings for a particular project. When enabled, the quota adjuster monitors your usage for the specified resources and issues quota adjustment requests when resource usage approaches its quota value.
-min_version: beta
 references:
   guides:
     'Cloud Quotas Overview': 'https://cloud.google.com/docs/quotas/overview'
-  api: 'https://cloud.google.com/docs/quotas/reference/rest/v1beta/projects.locations.quotaAdjusterSettings'
+  api: 'https://cloud.google.com/docs/quotas/reference/rest/v1/projects.locations.quotaAdjusterSettings'
 docs:
 id_format: '{{parent}}/locations/global/quotaAdjusterSettings'
 base_url: '{{parent}}/locations/global/quotaAdjusterSettings'
@@ -39,18 +38,20 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
+samples:
   - name: 'cloudquotas_quota_adjuster_settings_basic'
     primary_resource_id: 'adjuster_settings'
-    vars:
-      parent: "projects/104740170505"
-      enablement: "ENABLED"
-    test_vars_overrides:
-      # for backward compatible
-      parent: '"projects/104740170505" + randomSuffix'
-      # for backward compatible
-      enablement: '"ENABLED" + randomSuffix'
     exclude_test: true
+    steps:
+      - name: 'cloudquotas_quota_adjuster_settings_basic'
+        resource_id_vars:
+          parent: "projects/104740170505"
+          enablement: "ENABLED"
+        test_vars_overrides:
+          # for backward compatible
+          parent: '"projects/104740170505" + randomSuffix'
+          # for backward compatible
+          enablement: '"ENABLED" + randomSuffix'
 parameters:
   - name: 'parent'
     type: String

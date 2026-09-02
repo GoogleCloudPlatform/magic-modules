@@ -1,0 +1,4049 @@
+package bigquery
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log"
+	"reflect"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+
+	"golang.org/x/exp/slices"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func bigQueryTableSortArrayByName(array []interface{}) {
+	sort.Slice(array, func(i, k int) bool {
+		return array[i].(map[string]interface{})["name"].(string) < array[k].(map[string]interface{})["name"].(string)
+	})
+}
+
+func bigQueryArrayToMapIndexedByName(array []interface{}) map[string]interface{} {
+	out := map[string]interface{}{}
+	for _, v := range array {
+		name := v.(map[string]interface{})["name"].(string)
+		out[name] = v
+	}
+	return out
+}
+
+func bigQueryTablecheckNameExists(jsonList []interface{}) error {
+	for _, m := range jsonList {
+		if _, ok := m.(map[string]interface{})["name"]; !ok {
+			return fmt.Errorf("No name in schema %+v", m)
+		}
+	}
+
+	return nil
+}
+
+// Compares two json's while optionally taking in a compareMapKeyVal function.
+// This function will override any comparison of a given map[string]interface{}
+// on a specific key value allowing for a separate equality in specific scenarios
+func jsonCompareWithMapKeyOverride(key string, a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}, d *schema.ResourceData) bool, d *schema.ResourceData) (bool, error) {
+	switch a.(type) {
+	case []interface{}:
+		arrayA := a.([]interface{})
+		arrayB, ok := b.([]interface{})
+		if !ok {
+			return false, nil
+		} else if len(arrayA) != len(arrayB) {
+			return false, nil
+		}
+
+		// Sort fields by name so reordering them doesn't cause a diff.
+		if key == "schema" || key == "fields" {
+			if err := bigQueryTablecheckNameExists(arrayA); err != nil {
+				return false, err
+			}
+			bigQueryTableSortArrayByName(arrayA)
+			if err := bigQueryTablecheckNameExists(arrayB); err != nil {
+				return false, err
+			}
+			bigQueryTableSortArrayByName(arrayB)
+		}
+		for i := range arrayA {
+			eq, err := jsonCompareWithMapKeyOverride(strconv.Itoa(i), arrayA[i], arrayB[i], compareMapKeyVal, d)
+			if err != nil {
+				return false, err
+			} else if !eq {
+				return false, nil
+			}
+		}
+		return true, nil
+	case map[string]interface{}:
+		objectA := a.(map[string]interface{})
+		objectB, ok := b.(map[string]interface{})
+		if !ok {
+			return false, nil
+		}
+
+		var unionOfKeys map[string]bool = make(map[string]bool)
+		for subKey := range objectA {
+			unionOfKeys[subKey] = true
+		}
+		for subKey := range objectB {
+			unionOfKeys[subKey] = true
+		}
+
+		// Disregard "type" and "fields" if "foreignTypeDefinition" is present since they may have been modified by the server.
+		if _, ok := unionOfKeys["foreignTypeDefinition"]; ok {
+			delete(unionOfKeys, "type")
+			delete(unionOfKeys, "fields")
+		}
+
+		for subKey := range unionOfKeys {
+			eq := compareMapKeyVal(subKey, objectA, objectB, d)
+			if !eq {
+				valA, ok1 := objectA[subKey]
+				valB, ok2 := objectB[subKey]
+				if !ok1 || !ok2 {
+					return false, nil
+				}
+				eq, err := jsonCompareWithMapKeyOverride(subKey, valA, valB, compareMapKeyVal, d)
+				if err != nil || !eq {
+					return false, err
+				}
+			}
+		}
+		return true, nil
+	case string, float64, bool, nil:
+		return a == b, nil
+	default:
+		log.Printf("[DEBUG] tried to iterate through json but encountered a non native type to json deserialization... please ensure you are passing a json object from json.Unmarshall")
+		return false, errors.New("unable to compare values")
+	}
+}
+
+// checks if the value is within the array, only works for generics
+// because objects and arrays will take the reference comparison
+func valueIsInArray(value interface{}, array []interface{}) bool {
+	for _, item := range array {
+		if item == value {
+			return true
+		}
+	}
+	return false
+}
+
+// If the same table column is found in both the TF config and live state,
+// and the column in the live state has data policies when the column in the TF config doesn't,
+// copy the data policies from live state into the TF config.
+func mergeDataPoliciesIntoMap(old, new []interface{}) {
+	oldMap := make(map[string]map[string]interface{})
+	for _, v := range old {
+		if m, ok := v.(map[string]interface{}); ok {
+			if name, ok := m["name"].(string); ok {
+				oldMap[name] = m
+			}
+		}
+	}
+
+	for _, v := range new {
+		newField, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name := newField["name"].(string)
+
+		if oldField, exists := oldMap[name]; exists {
+			// If config doesn't have dataPolicies, but backend does, copy them over
+			if _, specified := newField["dataPolicies"]; !specified {
+				if dp, hasDP := oldField["dataPolicies"]; hasDP {
+					newField["dataPolicies"] = dp
+					log.Printf("[DEBUG] Added live data policy to schema: %v", dp)
+				}
+			}
+
+			// Recursively handle nested fields (RECORD types)
+			if oldNested, ok1 := oldField["fields"].([]interface{}); ok1 {
+				if newNested, ok2 := newField["fields"].([]interface{}); ok2 {
+					mergeDataPoliciesIntoMap(oldNested, newNested)
+				}
+			}
+		}
+	}
+}
+
+func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}, d *schema.ResourceData) bool {
+	// we rely on the fallback to nil if the object does not have the key
+	valA := objectA[key]
+	valB := objectB[key]
+	switch key {
+	case "mode":
+		eq := bigQueryTableNormalizeMode(valA) == bigQueryTableNormalizeMode(valB)
+		return eq
+	case "description":
+		equivalentSet := []interface{}{nil, ""}
+		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
+		return eq
+	case "type":
+		if valA == nil || valB == nil {
+			return false
+		}
+		return bigQueryTableTypeEq(valA.(string), valB.(string))
+	case "collation":
+		// If the configuration (valB) is nil or missing, it implies "inherit from dataset".
+		// We suppress the diff by returning true, accepting whatever actual value (valA)
+		// the server returned (e.g., "und:ci").
+		if valB == nil {
+			return true
+		}
+		equivalentSet := []interface{}{nil, ""}
+		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
+		return eq
+	case "policyTags":
+		eq := bigQueryTableNormalizePolicyTags(valA) == nil && bigQueryTableNormalizePolicyTags(valB) == nil
+		return eq
+	case "dataGovernanceTagsInfo":
+		eq := bigQueryTableNormalizeDataGovernanceTagsInfo(valA) == nil && bigQueryTableNormalizeDataGovernanceTagsInfo(valB) == nil
+		return eq
+	case "dataPolicies":
+		if d == nil {
+			return false
+		}
+		// Access the ignore_schema_changes list from the Terraform configuration
+		var ignoreSchemaChanges []interface{}
+		if val := d.Get("ignore_schema_changes"); val != nil {
+			ignoreSchemaChanges = val.([]interface{})
+		}
+
+		// If dataPolicies is ignored...
+		if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+			// Check if the NEW value (valB) is empty or nil.
+			// If it is empty, we suppress the diff (return true) to keep backend values.
+			if valB == nil {
+				return true
+			}
+			if s, ok := valB.([]interface{}); ok && len(s) == 0 {
+				return true
+			}
+
+			// If the user EXPLICITLY provided dataPolicies, we return false.
+			// This tells Terraform "There is a difference, and I want you to apply it."
+			return false
+		}
+		return false
+	}
+
+	// otherwise rely on default behavior
+	return false
+}
+
+// Compare the JSON strings are equal
+func bigQueryTableSchemaDiffSuppress(name, old, new string, d *schema.ResourceData) bool {
+	// The API can return an empty schema which gets encoded to "null" during read.
+	if old == "null" {
+		old = "[]"
+	}
+	var a, b interface{}
+	if err := json.Unmarshal([]byte(old), &a); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal old json - %v", err)
+	}
+	if err := json.Unmarshal([]byte(new), &b); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal new json - %v", err)
+	}
+
+	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride, d)
+	if err != nil {
+		log.Printf("[DEBUG] %v", err)
+		log.Printf("[DEBUG] Error comparing JSON: %v, %v", old, new)
+	}
+
+	return eq
+}
+
+func bigQueryTableConnectionIdSuppress(name, old, new string, _ *schema.ResourceData) bool {
+	// API accepts connectionId in below two formats
+	// "<project>.<location>.<connection_id>" or
+	// "projects/<project}>locations/<location>/connections/<connection_id>".
+	// but always returns "<project>.<location>.<connection_id>"
+
+	if tpgresource.IsEmptyValue(reflect.ValueOf(old)) || tpgresource.IsEmptyValue(reflect.ValueOf(new)) {
+		return false
+	}
+
+	// Old is in the dot format, and new is in the slash format.
+	// They represent the same connection if the project, locaition, and IDs are
+	// the same.
+	// Location should use a case-insenstive comparison.
+	dotRe := regexp.MustCompile(`(.+)\.(.+)\.(.+)`)
+	slashRe := regexp.MustCompile("projects/(.+)/(?:locations|regions)/(.+)/connections/(.+)")
+	dotMatches := dotRe.FindStringSubmatch(old)
+	slashMatches := slashRe.FindStringSubmatch(new)
+	if dotMatches != nil && slashMatches != nil {
+		sameProject := dotMatches[1] == slashMatches[1]
+		sameLocation := strings.EqualFold(dotMatches[2], slashMatches[2])
+		sameId := dotMatches[3] == slashMatches[3]
+		return sameProject && sameLocation && sameId
+	}
+
+	return false
+}
+
+func bigQueryTableTypeEq(old, new string) bool {
+	// Do case-insensitive comparison. https://github.com/hashicorp/terraform-provider-google/issues/9472
+	oldUpper := strings.ToUpper(old)
+	newUpper := strings.ToUpper(new)
+
+	equivalentSet1 := []interface{}{"INTEGER", "INT64"}
+	equivalentSet2 := []interface{}{"FLOAT", "FLOAT64"}
+	equivalentSet3 := []interface{}{"BOOLEAN", "BOOL"}
+	eq0 := oldUpper == newUpper
+	eq1 := valueIsInArray(oldUpper, equivalentSet1) && valueIsInArray(newUpper, equivalentSet1)
+	eq2 := valueIsInArray(oldUpper, equivalentSet2) && valueIsInArray(newUpper, equivalentSet2)
+	eq3 := valueIsInArray(oldUpper, equivalentSet3) && valueIsInArray(newUpper, equivalentSet3)
+	eq := eq0 || eq1 || eq2 || eq3
+	return eq
+}
+
+func bigQueryTableNormalizeMode(mode interface{}) string {
+	if mode == nil {
+		return "NULLABLE"
+	}
+	// Upper-case to get case-insensitive comparisons. https://github.com/hashicorp/terraform-provider-google/issues/9472
+	return strings.ToUpper(mode.(string))
+}
+
+func bigQueryTableModeIsForceNew(old, new string) bool {
+	eq := old == new
+	reqToNull := old == "REQUIRED" && new == "NULLABLE"
+	return !eq && !reqToNull
+}
+
+func bigQueryTableNormalizePolicyTags(val interface{}) interface{} {
+	if val == nil {
+		return nil
+	}
+	if policyTags, ok := val.(map[string]interface{}); ok {
+		// policyTags = {} is same as nil.
+		if len(policyTags) == 0 {
+			return nil
+		}
+		// policyTags = {names = []} is same as nil.
+		if names, ok := policyTags["names"].([]interface{}); ok && len(names) == 0 {
+			return nil
+		}
+	}
+	return val
+}
+
+func bigQueryTableNormalizeDataGovernanceTagsInfo(val interface{}) interface{} {
+	if val == nil {
+		return nil
+	}
+	if dgTagsInfo, ok := val.(map[string]interface{}); ok {
+		// dgTagsInfo = {} is same as nil.
+		if len(dgTagsInfo) == 0 {
+			return nil
+		}
+		// dgTagsInfo = {dataGovernanceTags = {}} is same as nil.
+		if dgTags, ok := dgTagsInfo["dataGovernanceTags"].(map[string]interface{}); ok && len(dgTags) == 0 {
+			return nil
+		}
+	}
+	return val
+}
+
+func bigQueryTableHasRowAccessPolicy(config *transport_tpg.Config, project, datasetId, tableId string) (bool, error) {
+	url := fmt.Sprintf("https://bigquery.googleapis.com/bigquery/v2/projects/%s/datasets/%s/tables/%s/rowAccessPolicies", project, datasetId, tableId)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	if policies, ok := res["rowAccessPolicies"]; ok {
+		if policiesList, ok := policies.([]interface{}); ok && len(policiesList) > 0 {
+			log.Printf("[INFO] Table has row access policies, schema change detected dropped columns and will force the table to recreate.")
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func bigQueryTableHasRowAccessPolicyFunc(config *transport_tpg.Config, project, datasetId, tableId string) func() (bool, error) {
+	return func() (bool, error) {
+		return bigQueryTableHasRowAccessPolicy(config, project, datasetId, tableId)
+	}
+}
+
+// Compares two existing schema implementations and decides if
+// it is changeable.. pairs with a force new on not changeable
+func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTable bool, topLevel bool, hasRowAccessPolicyFunc func() (bool, error)) (bool, error) {
+	switch old.(type) {
+	case []interface{}:
+		arrayOld := old.([]interface{})
+		arrayNew, ok := new.([]interface{})
+		sameNameColumns := 0
+		droppedColumns := 0
+		if !ok {
+			// if not both arrays not changeable
+			return false, nil
+		}
+		if err := bigQueryTablecheckNameExists(arrayOld); err != nil {
+			return false, err
+		}
+		mapOld := bigQueryArrayToMapIndexedByName(arrayOld)
+		if err := bigQueryTablecheckNameExists(arrayNew); err != nil {
+			return false, err
+		}
+		mapNew := bigQueryArrayToMapIndexedByName(arrayNew)
+		for key := range mapNew {
+			// making unchangeable if an newly added column is with REQUIRED mode
+			if _, ok := mapOld[key]; !ok {
+				items := mapNew[key].(map[string]interface{})
+				for k := range items {
+					if k == "mode" && fmt.Sprintf("%v", items[k]) == "REQUIRED" {
+						return false, nil
+					}
+				}
+			}
+		}
+		for key := range mapOld {
+			// dropping top level columns can happen in-place
+			// but this doesn't apply to external tables
+			if _, ok := mapNew[key]; !ok {
+				if !topLevel || isExternalTable {
+					return false, nil
+				}
+				droppedColumns += 1
+				continue
+			}
+
+			isChangable, err := resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], isExternalTable, false, hasRowAccessPolicyFunc)
+			if err != nil || !isChangable {
+				return false, err
+			} else if isChangable && topLevel {
+				// top level column that exists in the new schema
+				sameNameColumns += 1
+			}
+		}
+		// In-place column dropping is not supported when there are row access
+		// policies on the table.
+		hasDroppedColumns := droppedColumns > 0
+		if hasDroppedColumns && topLevel {
+			hasRowAccessPolicy, err := hasRowAccessPolicyFunc()
+			if err == nil && hasRowAccessPolicy {
+				return false, nil
+			}
+		}
+		// In-place column dropping alongside column additions is not allowed
+		// as of now because user intention can be ambiguous (e.g. column renaming)
+		newColumns := len(arrayNew) - sameNameColumns
+		isSchemaChangeable := (droppedColumns == 0) || (newColumns == 0)
+		return isSchemaChangeable, nil
+	case map[string]interface{}:
+		objectOld := old.(map[string]interface{})
+		objectNew, ok := new.(map[string]interface{})
+		if !ok {
+			// if both aren't objects
+			return false, nil
+		}
+		var unionOfKeys map[string]bool = make(map[string]bool)
+		for key := range objectOld {
+			unionOfKeys[key] = true
+		}
+		for key := range objectNew {
+			unionOfKeys[key] = true
+		}
+
+		// Disregard "type" and "fields" if "foreignTypeDefinition" is present since they may have been modified by the server.
+		if _, ok := unionOfKeys["foreignTypeDefinition"]; ok {
+			delete(unionOfKeys, "type")
+			delete(unionOfKeys, "fields")
+		}
+
+		for key := range unionOfKeys {
+			valOld := objectOld[key]
+			valNew := objectNew[key]
+			switch key {
+			case "name":
+				if valOld != valNew {
+					return false, nil
+				}
+			case "type":
+				if valOld == nil || valNew == nil {
+					// This is invalid, so it shouldn't require a ForceNew
+					return true, nil
+				}
+				if !bigQueryTableTypeEq(valOld.(string), valNew.(string)) {
+					return false, nil
+				}
+			case "mode":
+				if bigQueryTableModeIsForceNew(
+					bigQueryTableNormalizeMode(valOld),
+					bigQueryTableNormalizeMode(valNew),
+				) {
+					return false, nil
+				}
+			case "fields":
+				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew, isExternalTable, false, hasRowAccessPolicyFunc)
+
+				// other parameters: description, policyTags and
+				// policyTags.names[] are changeable
+			}
+		}
+		return true, nil
+	case string, float64, bool, nil:
+		// realistically this shouldn't hit
+		log.Printf("[DEBUG] comparison of generics hit... not expected")
+		return old == new, nil
+	default:
+		log.Printf("[DEBUG] tried to iterate through json but encountered a non native type to json deserialization... please ensure you are passing a json object from json.Unmarshall")
+		return false, errors.New("unable to compare values")
+	}
+}
+
+func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourceDiff, hasRowAccessPolicyFunc func() (bool, error)) error {
+	if _, hasSchema := d.GetOk("schema"); hasSchema {
+		oldSchema, newSchema := d.GetChange("schema")
+		oldSchemaText := oldSchema.(string)
+		newSchemaText := newSchema.(string)
+		if oldSchemaText == "null" {
+			// The API can return an empty schema which gets encoded to "null" during read.
+			oldSchemaText = "[]"
+		}
+		if newSchemaText == "null" {
+			newSchemaText = "[]"
+		}
+		var old, new interface{}
+		if err := json.Unmarshal([]byte(oldSchemaText), &old); err != nil {
+			// don't return error, its possible we are going from no schema to schema
+			// this case will be cover on the conparision regardless.
+			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
+		}
+		if err := json.Unmarshal([]byte(newSchemaText), &new); err != nil {
+			// same as above
+			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
+		}
+
+		var ignoreSchemaChanges []interface{}
+		if val := d.Get("ignore_schema_changes"); val != nil {
+			ignoreSchemaChanges = val.([]interface{})
+		}
+
+		if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+			oldList, okOld := old.([]interface{})
+			newList, okNew := new.([]interface{})
+			if okOld && okNew {
+				// Modify the 'new' object in memory to include hidden backend policies
+				mergeDataPoliciesIntoMap(oldList, newList)
+
+				// Marshal the modified 'new' state back to JSON
+				updatedNewJSON, err := json.Marshal(newList)
+				if err == nil {
+					// Update the diff so Terraform's UI sees the policies as "present" in the new state
+					if err := d.SetNew("schema", string(updatedNewJSON)); err != nil {
+						return err
+					}
+					// Update local variable for subsequent logic in this function
+					new = newList
+				}
+			}
+		}
+
+		if ignore, ok := d.Get("ignore_auto_generated_schema").(bool); ok && ignore {
+			oldSchemaObj, err1 := expandSchema(oldSchemaText, false)
+			newSchemaObj, err2 := expandSchema(newSchemaText, false)
+			if err1 == nil && err2 == nil && oldSchemaObj != nil && newSchemaObj != nil {
+				oldSchemaFields, _ := oldSchemaObj["fields"].([]interface{})
+				newSchemaFields, _ := newSchemaObj["fields"].([]interface{})
+				filteredOldSchema, autogenFields := filterLiveSchemaByConfig(oldSchemaFields, newSchemaFields)
+				if len(autogenFields) > 0 {
+					filteredOldJsonStr, err := flattenSchema(filteredOldSchema)
+					if err == nil {
+						if bigQueryTableSchemaDiffSuppress("schema", filteredOldJsonStr, newSchemaText, nil) {
+							// Suppress diff by setting new to old in diff
+							if err := d.SetNew("schema", oldSchemaText); err != nil {
+								return err
+							}
+							// Update local variable so reflect.DeepEqual returns true
+							new = old
+						}
+					}
+				}
+			}
+		}
+
+		// no is schema changeable check needed, if new schema is old schema
+		if reflect.DeepEqual(old, new) {
+			return nil
+		}
+		_, isExternalTable := d.GetOk("external_data_configuration")
+		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, isExternalTable, true, hasRowAccessPolicyFunc)
+		if err != nil {
+			return err
+		}
+		if !isChangeable {
+			if err := d.ForceNew("schema"); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	return nil
+}
+
+func resourceBigQueryTableSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	project, err := tpgresource.GetProjectFromDiff(d, config)
+	if err != nil {
+		return err
+	}
+	datasetId := d.Get("dataset_id").(string)
+	tableId := d.Get("table_id").(string)
+	hasRowAccessPolicyFunc := bigQueryTableHasRowAccessPolicyFunc(config, project, datasetId, tableId)
+	return resourceBigQueryTableSchemaCustomizeDiffFunc(d, hasRowAccessPolicyFunc)
+}
+
+func validateBigQueryTableSchema(v interface{}, k string) (warnings []string, errs []error) {
+	if v == nil {
+		return
+	}
+
+	if _, e := validation.StringIsJSON(v, k); e != nil {
+		errs = append(errs, e...)
+		return
+	}
+
+	var jsonList []interface{}
+	if err := json.Unmarshal([]byte(v.(string)), &jsonList); err != nil {
+		errs = append(errs, fmt.Errorf("\"schema\" is not a JSON array: %s", err))
+		return
+	}
+
+	for _, v := range jsonList {
+		if v == nil {
+			errs = append(errs, errors.New("\"schema\" contains a nil element"))
+			return
+		}
+	}
+
+	return
+}
+
+func ResourceBigQueryTable() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceBigQueryTableCreate,
+		Read:   resourceBigQueryTableRead,
+		Delete: resourceBigQueryTableDelete,
+		Update: resourceBigQueryTableUpdate,
+		Importer: &schema.ResourceImporter{
+			State: resourceBigQueryTableImport,
+		},
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
+			tpgresource.DefaultProviderProject,
+			resourceBigQueryTableSchemaCustomizeDiff,
+			tpgresource.SetLabelsDiff,
+		),
+
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"dataset_id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"table_id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
+		Schema: map[string]*schema.Schema{
+			// TableId: [Required] The ID of the table. The ID must contain only
+			// letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
+			// length is 1,024 characters.
+			"table_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `A unique ID for the resource. Changing this forces a new resource to be created.`,
+			},
+
+			// DatasetId: [Required] The ID of the dataset containing this table.
+			"dataset_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `The dataset ID to create the table in. Changing this forces a new resource to be created.`,
+			},
+
+			// ProjectId: [Required] The ID of the project containing this table.
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: `The ID of the project in which the resource belongs.`,
+			},
+
+			// Description: [Optional] A user-friendly description of this table.
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The field description.`,
+			},
+
+			// ExpirationTime: [Optional] The time when this table expires, in
+			// milliseconds since the epoch. If not present, the table will persist
+			// indefinitely. Expired tables will be deleted and their storage
+			// reclaimed.
+			"expiration_time": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: `The time when this table expires, in milliseconds since the epoch. If not present, the table will persist indefinitely. Expired tables will be deleted and their storage reclaimed.`,
+			},
+
+			// ExternalDataConfiguration [Optional] Describes the data format,
+			// location, and other properties of a table stored outside of BigQuery.
+			// By defining these properties, the data source can then be queried as
+			// if it were a standard BigQuery table.
+			"external_data_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Describes the data format, location, and other properties of a table stored outside of BigQuery. By defining these properties, the data source can then be queried as if it were a standard BigQuery table.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// Autodetect : [Required] If true, let BigQuery try to autodetect the
+						// schema and format of the table.
+						"autodetect": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Let BigQuery try to autodetect the schema and format of the table.`,
+						},
+						// SourceFormat [Required] The data format.
+						"source_format": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Please see sourceFormat under ExternalDataConfiguration in Bigquery's public API documentation (https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration) for supported formats. To use "GOOGLE_SHEETS" the scopes must include "googleapis.com/auth/drive.readonly".`,
+							ValidateFunc: validation.StringInSlice([]string{
+								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "ICEBERG", "DATASTORE_BACKUP", "PARQUET", "ORC", "BIGTABLE", "DELTA_LAKE",
+							}, false),
+						},
+						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
+						"source_uris": {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: `A list of the fully-qualified URIs that point to your data in Google Cloud.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+						// FileSetSpecType: [Optional] Specifies how source URIs are interpreted for constructing the file set to load.  By default source URIs are expanded against the underlying storage.  Other options include specifying manifest files. Only applicable to object storage systems.
+						"file_set_spec_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Specifies how source URIs are interpreted for constructing the file set to load.  By default source URIs are expanded against the underlying storage.  Other options include specifying manifest files. Only applicable to object storage systems.`,
+						},
+						// Compression: [Optional] The compression type of the data source.
+						"compression": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NONE", "GZIP"}, false),
+							Default:      "NONE",
+							Description:  `The compression type of the data source. Valid values are "NONE" or "GZIP".`,
+						},
+						// Schema: [Optional] The schema for the data.
+						// Schema is required for CSV and JSON formats if autodetect is not on.
+						// Schema is disallowed for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC, and Parquet formats.
+						"schema": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ForceNew:     true,
+							ValidateFunc: validateBigQueryTableSchema,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
+							DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
+							Description:      `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
+						},
+						// CsvOptions: [Optional] Additional properties to set if
+						// sourceFormat is set to CSV.
+						"csv_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional properties to set if source_format is set to "CSV".`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Quote: [Required] The value that is used to quote data
+									// sections in a CSV file.
+									"quote": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `The value that is used to quote data sections in a CSV file. If your data does not contain quoted sections, set the property value to an empty string. If your data contains quoted newline characters, you must also set the allow_quoted_newlines property to true. The API-side default is ", specified in Terraform escaped as \". Due to limitations with Terraform default values, this value is required to be explicitly set.`,
+									},
+									// AllowJaggedRows: [Optional] Indicates if BigQuery should
+									// accept rows that are missing trailing optional columns.
+									"allow_jagged_rows": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: `Indicates if BigQuery should accept rows that are missing trailing optional columns.`,
+									},
+									// AllowQuotedNewlines: [Optional] Indicates if BigQuery
+									// should allow quoted data sections that contain newline
+									// characters in a CSV file. The default value is false.
+									"allow_quoted_newlines": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: `Indicates if BigQuery should allow quoted data sections that contain newline characters in a CSV file. The default value is false.`,
+									},
+									// Encoding: [Optional] The character encoding of the data.
+									// The supported values are UTF-8 or ISO-8859-1.
+									"encoding": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"ISO-8859-1", "UTF-8"}, false),
+										Default:      "UTF-8",
+										Description:  `The character encoding of the data. The supported values are UTF-8 or ISO-8859-1.`,
+									},
+									// FieldDelimiter: [Optional] The separator for fields in a CSV file.
+									"field_delimiter": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Default:     ",",
+										Description: `The separator for fields in a CSV file.`,
+									},
+									// SkipLeadingRows: [Optional] The number of rows at the top
+									// of a CSV file that BigQuery will skip when reading the data.
+									"skip_leading_rows": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Default:     0,
+										Description: `The number of rows at the top of a CSV file that BigQuery will skip when reading the data.`,
+									},
+									"source_column_match": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"POSITION", "NAME"}, false),
+										Description:  `Specifies how source columns are matched to the table schema. Valid values are POSITION (columns matched by position, assuming same ordering) or NAME (columns matched by name, reads header row and reorders columns to align with schema field names).`,
+									},
+								},
+							},
+						},
+						// jsonOptions: [Optional] Additional properties to set if sourceFormat is set to JSON.
+						"json_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional properties to set if sourceFormat is set to JSON.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"encoding": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Default:      "UTF-8",
+										ValidateFunc: validation.StringInSlice([]string{"UTF-8", "UTF-16BE", "UTF-16LE", "UTF-32BE", "UTF-32LE"}, false),
+										Description:  `The character encoding of the data. The supported values are UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, and UTF-32LE. The default value is UTF-8.`,
+									},
+								},
+							},
+						},
+
+						"json_extension": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"GEOJSON"}, false),
+							Description:  `Load option to be used together with sourceFormat newline-delimited JSON to indicate that a variant of JSON is being loaded. To load newline-delimited GeoJSON, specify GEOJSON (and sourceFormat must be set to NEWLINE_DELIMITED_JSON).`,
+						},
+
+						"bigtable_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional options if sourceFormat is set to BIGTABLE.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"column_family": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: `A list of column families to expose in the table schema along with their types. This list restricts the column families that can be referenced in queries and specifies their value types. You can use this list to do type conversions - see the 'type' field for more details. If you leave this list empty, all column families are present in the table schema and their values are read as BYTES. During a query only the column families referenced in that query are read from Bigtable.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"column": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Description: `A List of columns that should be exposed as individual fields as opposed to a list of (column name, value) pairs. All columns whose qualifier matches a qualifier in this list can be accessed as Other columns can be accessed as a list through column field`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"qualifier_encoded": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `Qualifier of the column. Columns in the parent column family that has this exact qualifier are exposed as . field. If the qualifier is valid UTF-8 string, it can be specified in the qualifierString field. Otherwise, a base-64 encoded value must be set to qualifierEncoded. The column field name is the same as the column qualifier. However, if the qualifier is not a valid BigQuery field identifier i.e. does not match [a-zA-Z][a-zA-Z0-9_]*, a valid identifier must be provided as fieldName.`,
+															},
+															"qualifier_string": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `Qualifier string.`,
+															},
+															"field_name": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `If the qualifier is not a valid BigQuery field identifier i.e. does not match [a-zA-Z][a-zA-Z0-9_]*, a valid identifier must be provided as the column field name and is used as field name in queries.`,
+															},
+															"type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The type to convert the value in cells of this column. The values are expected to be encoded using HBase Bytes.toBytes function when using the BINARY encoding value. Following BigQuery types are allowed (case-sensitive): "BYTES", "STRING", "INTEGER", "FLOAT", "BOOLEAN", "JSON", Default type is "BYTES". 'type' can also be set at the column family level. However, the setting at this level takes precedence if 'type' is set at both levels.`,
+															},
+															"encoding": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The encoding of the values when the type is not STRING. Acceptable encoding values are: TEXT - indicates values are alphanumeric text strings. BINARY - indicates values are encoded using HBase Bytes.toBytes family of functions. 'encoding' can also be set at the column family level. However, the setting at this level takes precedence if 'encoding' is set at both levels.`,
+															},
+															"only_read_latest": {
+																Type:        schema.TypeBool,
+																Optional:    true,
+																Description: `If this is set, only the latest version of value in this column are exposed. 'onlyReadLatest' can also be set at the column family level. However, the setting at this level takes precedence if 'onlyReadLatest' is set at both levels.`,
+															},
+														},
+													},
+												},
+												"family_id": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Identifier of the column family.`,
+												},
+												"type": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The type to convert the value in cells of this column family. The values are expected to be encoded using HBase Bytes.toBytes function when using the BINARY encoding value. Following BigQuery types are allowed (case-sensitive): "BYTES", "STRING", "INTEGER", "FLOAT", "BOOLEAN", "JSON". Default type is BYTES. This can be overridden for a specific column by listing that column in 'columns' and specifying a type for it.`,
+												},
+												"encoding": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The encoding of the values when the type is not STRING. Acceptable encoding values are: TEXT - indicates values are alphanumeric text strings. BINARY - indicates values are encoded using HBase Bytes.toBytes family of functions. This can be overridden for a specific column by listing that column in 'columns' and specifying an encoding for it.`,
+												},
+												"only_read_latest": {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Description: `If this is set only the latest version of value are exposed for all columns in this column family. This can be overridden for a specific column by listing that column in 'columns' and specifying a different setting for that column.`,
+												},
+											},
+										},
+									},
+									"ignore_unspecified_column_families": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `If field is true, then the column families that are not specified in columnFamilies list are not exposed in the table schema. Otherwise, they are read with BYTES type values. The default value is false.`,
+									},
+									"read_rowkey_as_string": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `If field is true, then the rowkey column families will be read and converted to string. Otherwise they are read with BYTES type values and users need to manually cast them with CAST if necessary. The default value is false.`,
+									},
+									"output_column_families_as_json": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `If field is true, then each column family will be read as a single JSON column. Otherwise they are read as a repeated cell structure containing timestamp/value tuples. The default value is false.`,
+									},
+								},
+							},
+						},
+
+						"parquet_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional properties to set if sourceFormat is set to PARQUET.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enum_as_string": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `Indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.`,
+									},
+									"enable_list_inference": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `Indicates whether to use schema inference specifically for Parquet LIST logical type.`,
+									},
+								},
+							},
+						},
+						// GoogleSheetsOptions: [Optional] Additional options if sourceFormat is set to GOOGLE_SHEETS.
+						"google_sheets_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional options if source_format is set to "GOOGLE_SHEETS".`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
+									// Typical format: !:
+									"range": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Range of a sheet to query from. Only used when non-empty. At least one of range or skip_leading_rows must be set. Typical format: "sheet_name!top_left_cell_id:bottom_right_cell_id" For example: "sheet1!A1:B20`,
+										AtLeastOneOf: []string{
+											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
+											"external_data_configuration.0.google_sheets_options.0.range",
+										},
+									},
+									// SkipLeadingRows: [Optional] The number of rows at the top
+									// of the sheet that BigQuery will skip when reading the data.
+									"skip_leading_rows": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `The number of rows at the top of the sheet that BigQuery will skip when reading the data. At least one of range or skip_leading_rows must be set.`,
+										AtLeastOneOf: []string{
+											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
+											"external_data_configuration.0.google_sheets_options.0.range",
+										},
+									},
+								},
+							},
+						},
+
+						// HivePartitioningOptions:: [Optional] Options for configuring hive partitioning detect.
+						"hive_partitioning_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `When set, configures hive partitioning support. Not all storage formats support hive partitioning -- requesting hive partitioning on an unsupported format will lead to an error, as will providing an invalid specification.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Mode: [Optional] [Experimental] When set, what mode of hive partitioning to use when reading data.
+									// Two modes are supported.
+									//* AUTO: automatically infer partition key name(s) and type(s).
+									//* STRINGS: automatically infer partition key name(s).
+									"mode": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `When set, what mode of hive partitioning to use when reading data.`,
+									},
+									// RequirePartitionFilter: [Optional] If set to true, queries over this table
+									// require a partition filter that can be used for partition elimination to be
+									// specified.
+									"require_partition_filter": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+									},
+									// SourceUriPrefix: [Optional] [Experimental] When hive partition detection is requested, a common for all source uris must be required.
+									// The prefix must end immediately before the partition key encoding begins.
+									"source_uri_prefix": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `When hive partition detection is requested, a common for all source uris must be required. The prefix must end immediately before the partition key encoding begins.`,
+									},
+								},
+							},
+						},
+						// AvroOptions: [Optional] Additional options if sourceFormat is set to AVRO.
+						"avro_options": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Additional options if source_format is set to "AVRO"`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"use_avro_logical_types": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `If sourceFormat is set to "AVRO", indicates whether to interpret logical types as the corresponding BigQuery data type (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).`,
+									},
+								},
+							},
+						},
+
+						// IgnoreUnknownValues: [Optional] Indicates if BigQuery should
+						// allow extra values that are not represented in the table schema.
+						// If true, the extra values are ignored. If false, records with
+						// extra columns are treated as bad records, and if there are too
+						// many bad records, an invalid error is returned in the job result.
+						// The default value is false.
+						"ignore_unknown_values": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Indicates if BigQuery should allow extra values that are not represented in the table schema. If true, the extra values are ignored. If false, records with extra columns are treated as bad records, and if there are too many bad records, an invalid error is returned in the job result. The default value is false.`,
+						},
+						// MaxBadRecords: [Optional] The maximum number of bad records that
+						// BigQuery can ignore when reading data.
+						"max_bad_records": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: `The maximum number of bad records that BigQuery can ignore when reading data.`,
+						},
+						// ConnectionId: [Optional] The connection specifying the credentials
+						// to be used to read external storage, such as Azure Blob,
+						// Cloud Storage, or S3. The connectionId can have the form
+						// "<project>.<location>.<connection_id>" or
+						// "projects/<project>/locations/<location>/connections/<connection_id>".
+						"connection_id": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: bigQueryTableConnectionIdSuppress,
+							Description:      `The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connectionId can have the form "<project>.<location>.<connection_id>" or "projects/<project>/locations/<location>/connections/<connection_id>".`,
+						},
+						"reference_file_schema_uri": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `When creating an external table, the user can provide a reference file with the table schema. This is enabled for the following formats: AVRO, PARQUET, ORC.`,
+						},
+						"metadata_cache_mode": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  `Metadata Cache Mode for the table. Set this to enable caching of metadata from external data source.`,
+							ValidateFunc: validation.StringInSlice([]string{"AUTOMATIC", "MANUAL"}, false),
+						},
+						"object_metadata": {
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   `Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If ObjectMetadata is set, sourceFormat should be omitted.`,
+							ConflictsWith: []string{"external_data_configuration.0.source_format"},
+						},
+						"decimal_target_types": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: `The data types that could be used as a target type when converting decimal values.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+
+			// BiglakeConfiguration [Optional] Specifies the configuration of a BigLake managed table.
+			"biglake_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				ForceNew:    true,
+				Description: "Specifies the configuration of a BigLake managed table.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// ConnectionId: [Required] The connection specifying the credentials to be used to read
+						// and write to external storage, such as Cloud Storage. The connection_id can have the
+						// form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or
+						// "projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".
+						"connection_id": {
+							Type:             schema.TypeString,
+							Required:         true,
+							DiffSuppressFunc: bigQueryTableConnectionIdSuppress,
+							ForceNew:         true,
+							Description:      `The connection specifying the credentials to be used to read and write to external storage, such as Cloud Storage. The connection_id can have the form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or "projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".`,
+						},
+						// StorageUri: [Required] The fully qualified location prefix of the external folder where
+						// table data is stored. The '*' wildcard character is not allowed.
+						// The URI should be in the format "gs://bucket/path_to_table/"
+						"storage_uri": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The fully qualified location prefix of the external folder where table data is stored. The '*' wildcard character is not allowed. The URI should be in the format "gs://bucket/path_to_table/"`,
+						},
+						// FileFormat: [Required] The file format the data is stored in.
+						"file_format": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The file format the data is stored in.",
+						},
+						// TableFormat: [Required]
+						"table_format": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The table format the metadata only snapshots are stored in.",
+						},
+					},
+				},
+			},
+
+			// FriendlyName: [Optional] A descriptive name for this table.
+			"friendly_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `A descriptive name for the table.`,
+			},
+
+			// max_staleness: [Optional] The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+			"max_staleness": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of [SQL IntervalValue type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#interval_type).`,
+			},
+
+			// Labels: [Experimental] The labels associated with this table. You can
+			// use these to organize and group your tables. Label keys and values
+			// can be no longer than 63 characters, can only contain lowercase
+			// letters, numeric characters, underscores and dashes. International
+			// characters are allowed. Label values are optional. Label keys must
+			// start with a letter and each label in the list must have a different
+			// key.
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `A mapping of labels to assign to the resource.
+
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			// Schema: [Optional] Describes the schema of this table.
+			"schema": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateBigQueryTableSchema,
+				StateFunc: func(v interface{}) string {
+					json, _ := structure.NormalizeJsonString(v)
+					return json
+				},
+				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
+				Description:      `A JSON schema for the table.`,
+			},
+			// SchemaForeignTypeInfo: [Optional] Specifies metadata of the foreign data type definition in field schema.
+			"schema_foreign_type_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: "Specifies metadata of the foreign data type definition in field schema.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// TypeSystem: [Required] Specifies the system which defines the foreign data type.
+						"type_system": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `Specifies the system which defines the foreign data type.`,
+						},
+					},
+				},
+			},
+			// View: [Optional] If specified, configures this table as a view.
+			"view": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `If specified, configures this table as a view.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// Query: [Required] A query that BigQuery executes when the view is
+						// referenced.
+						"query": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `A query that BigQuery executes when the view is referenced.`,
+						},
+
+						// UseLegacySQL: [Optional] Specifies whether to use BigQuery's
+						// legacy SQL for this view. If set to false, the view will use
+						// BigQuery's standard SQL:
+						"use_legacy_sql": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: `Specifies whether to use BigQuery's legacy SQL for this view. If set to false, the view will use BigQuery's standard SQL`,
+						},
+					},
+				},
+			},
+
+			// Materialized View: [Optional] If specified, configures this table as a materialized view.
+			"materialized_view": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `If specified, configures this table as a materialized view.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// EnableRefresh: [Optional] Enable automatic refresh of
+						// the materialized view when the base table is updated. The default
+						// value is "true".
+						"enable_refresh": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: `Specifies if BigQuery should automatically refresh materialized view when the base table is updated. The default is true.`,
+						},
+
+						// RefreshIntervalMs: [Optional] The maximum frequency
+						// at which this materialized view will be refreshed. The default value
+						// is 1800000 (30 minutes).
+						"refresh_interval_ms": {
+							Type:        schema.TypeInt,
+							Default:     1800000,
+							Optional:    true,
+							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000.`,
+						},
+
+						"allow_non_incremental_definition": {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Allow non incremental materialized view definition. The default value is false.`,
+						},
+
+						// Query: [Required] A query whose result is persisted
+						"query": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `A query whose result is persisted.`,
+						},
+					},
+				},
+			},
+
+			// TimePartitioning: [Experimental] If specified, configures time-based
+			// partitioning for this table.
+			"time_partitioning": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `If specified, configures time-based partitioning for this table.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// ExpirationMs: [Optional] Number of milliseconds for which to keep the storage for a
+						// partition. If unspecified when the table is created in a dataset that has
+						// `defaultPartitionExpirationMs`, it will inherit the value of
+						// `defaultPartitionExpirationMs` from the dataset.
+						// To specify a unlimited expiration, set the value to 0.
+						"expiration_ms": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: `Number of milliseconds for which to keep the storage for a partition.`,
+						},
+
+						// Type: [Required] The supported types are DAY, HOUR, MONTH, and YEAR, which will generate
+						// one partition per day, hour, month, and year, respectively.
+						"type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							Description:  `The supported types are DAY, HOUR, MONTH, and YEAR, which will generate one partition per day, hour, month, and year, respectively.`,
+							ValidateFunc: validation.StringInSlice([]string{"DAY", "HOUR", "MONTH", "YEAR"}, false),
+						},
+
+						// Field: [Optional] The field used to determine how to create a time-based
+						// partition. If time-based partitioning is enabled without this value, the
+						// table is partitioned based on the load time.
+						"field": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `The field used to determine how to create a time-based partition. If time-based partitioning is enabled without this value, the table is partitioned based on the load time.`,
+						},
+
+						// RequirePartitionFilter: [Optional] If set to true, queries over this table
+						// require a partition filter that can be used for partition elimination to be
+						// specified.
+						"require_partition_filter": {
+							Type:          schema.TypeBool,
+							Optional:      true,
+							Description:   `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+							Deprecated:    `This field is deprecated and will be removed in a future major release; please use the top level field with the same name instead.`,
+							ConflictsWith: []string{"require_partition_filter"},
+						},
+					},
+				},
+			},
+
+			// RangePartitioning: [Optional] If specified, configures range-based
+			// partitioning for this table.
+			"range_partitioning": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `If specified, configures range-based partitioning for this table.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// Field: [Required] The field used to determine how to create a range-based
+						// partition.
+						"field": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The field used to determine how to create a range-based partition.`,
+						},
+
+						// Range: [Required] Information required to partition based on ranges.
+						"range": {
+							Type:        schema.TypeList,
+							Required:    true,
+							MaxItems:    1,
+							Description: `Information required to partition based on ranges. Structure is documented below.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Start: [Required] Start of the range partitioning, inclusive.
+									"start": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: `Start of the range partitioning, inclusive.`,
+									},
+
+									// End: [Required] End of the range partitioning, exclusive.
+									"end": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: `End of the range partitioning, exclusive.`,
+									},
+
+									// Interval: [Required] The width of each range within the partition.
+									"interval": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: `The width of each range within the partition.`,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
+			// RequirePartitionFilter: [Optional] If set to true, queries over this table
+			// require a partition filter that can be used for partition elimination to be
+			// specified.
+			"require_partition_filter": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Description:   `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+				ConflictsWith: []string{"time_partitioning.0.require_partition_filter"},
+			},
+
+			// Clustering: [Optional] Specifies column names to use for data clustering.  Up to four
+			// top-level columns are allowed, and should be specified in descending priority order.
+			"clustering": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    4,
+				Description: `Specifies column names to use for data clustering. Up to four top-level columns are allowed, and should be specified in descending priority order.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"encryption_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Specifies how the table should be encrypted. If left blank, the table will be encrypted with a Google-managed key; that process is transparent to the user.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kms_key_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `The self link or full name of a key which should be used to encrypt this table. Note that the default bigquery service account will need to have encrypt/decrypt permissions on this key - you may want to see the google_bigquery_default_service_account datasource and the google_kms_crypto_key_iam_binding resource.`,
+						},
+						"kms_key_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The self link or full name of the kms key version used to encrypt this table.`,
+						},
+					},
+				},
+			},
+
+			// CreationTime: [Output-only] The time when this table was created, in
+			// milliseconds since the epoch.
+			"creation_time": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: `The time when this table was created, in milliseconds since the epoch.`,
+			},
+
+			// Etag: [Output-only] A hash of this resource.
+			"etag": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `A hash of the resource.`,
+			},
+			"ignore_schema_changes": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    10,
+				Description: `Mention which fields in schema are to be ignored`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			// LastModifiedTime: [Output-only] The time when this table was last
+			// modified, in milliseconds since the epoch.
+			"last_modified_time": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: `The time when this table was last modified, in milliseconds since the epoch.`,
+			},
+
+			// Location: [Output-only] The geographic location where the table
+			// resides. This value is inherited from the dataset.
+			"location": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The geographic location where the table resides. This value is inherited from the dataset.`,
+			},
+
+			// NumBytes: [Output-only] The size of this table in bytes, excluding
+			// any data in the streaming buffer.
+			"num_bytes": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: `The geographic location where the table resides. This value is inherited from the dataset.`,
+			},
+
+			// NumLongTermBytes: [Output-only] The number of bytes in the table that
+			// are considered "long-term storage".
+			"num_long_term_bytes": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: `The number of bytes in the table that are considered "long-term storage".`,
+			},
+
+			// NumRows: [Output-only] The number of rows of data in this table,
+			// excluding any data in the streaming buffer.
+			"num_rows": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: `The number of rows of data in this table, excluding any data in the streaming buffer.`,
+			},
+
+			// SelfLink: [Output-only] A URL that can be used to access this
+			// resource again.
+			"self_link": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The URI of the created resource.`,
+			},
+
+			// Type: [Output-only] Describes the table type. The following values
+			// are supported: TABLE: A normal BigQuery table. VIEW: A virtual table
+			// defined by a SQL query. EXTERNAL: A table that references data stored
+			// in an external storage system, such as Google Cloud Storage. The
+			// default value is TABLE.
+			"type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `Describes the table type.`,
+			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `Whether Terraform will be prevented from destroying the instance. When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the table will fail. When the field is set to false, deleting the table is allowed.`,
+			},
+
+			"ignore_auto_generated_schema": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `Whether Terraform will prevent implicitly added columns in schema from showing diff.`,
+			},
+
+			"generated_schema_columns": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `(Output-only) A list of autogenerated schema fields.`,
+			},
+
+			// TableConstraints: [Optional] Defines the primary key and foreign keys.
+			"table_constraints": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Defines the primary key and foreign keys.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// PrimaryKey: [Optional] Represents the primary key constraint
+						// on a table's columns. Present only if the table has a primary key.
+						// The primary key is not enforced.
+						"primary_key": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `Represents a primary key constraint on a table's columns. Present only if the table has a primary key. The primary key is not enforced.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									//Columns: [Required] The columns that are composed of the primary key constraint.
+									"columns": {
+										Type:        schema.TypeList,
+										Required:    true,
+										Description: `The columns that are composed of the primary key constraint.`,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
+						},
+
+						// ForeignKeys: [Optional] Present only if the table has a foreign key.
+						// The foreign key is not enforced.
+						"foreign_keys": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `Present only if the table has a foreign key. The foreign key is not enforced.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Name: [Optional] Set only if the foreign key constraint is named.
+									"name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Set only if the foreign key constraint is named.`,
+									},
+
+									// ReferencedTable: [Required] The table that holds the primary key
+									// and is referenced by this foreign key.
+									"referenced_table": {
+										Type:        schema.TypeList,
+										Required:    true,
+										MaxItems:    1,
+										Description: `The table that holds the primary key and is referenced by this foreign key.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												// ProjectId: [Required] The ID of the project containing this table.
+												"project_id": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `The ID of the project containing this table.`,
+												},
+
+												// DatasetId: [Required] The ID of the dataset containing this table.
+												"dataset_id": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `The ID of the dataset containing this table.`,
+												},
+
+												// TableId: [Required] The ID of the table. The ID must contain only
+												// letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
+												// length is 1,024 characters. Certain operations allow suffixing of
+												// the table ID with a partition decorator, such as
+												// sample_table$20190123.
+												"table_id": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `The ID of the table. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters. Certain operations allow suffixing of the table ID with a partition decorator, such as sample_table$20190123.`,
+												},
+											},
+										},
+									},
+
+									// ColumnReferences: [Required] The pair of the foreign key column and primary key column.
+									"column_references": {
+										Type:        schema.TypeList,
+										Required:    true,
+										MaxItems:    1,
+										Description: `The pair of the foreign key column and primary key column.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												// ReferencingColumn: [Required] The column that composes the foreign key.
+												"referencing_column": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `The column that composes the foreign key.`,
+												},
+
+												// ReferencedColumn: [Required] The column in the primary key that are
+												// referenced by the referencingColumn
+												"referenced_column": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `The column in the primary key that are referenced by the referencingColumn.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"table_metadata_view": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `View sets the optional parameter "view": Specifies the view that determines which table information is returned. By default, basic table information and storage statistics (STORAGE_STATS) are returned. Possible values: TABLE_METADATA_VIEW_UNSPECIFIED, BASIC, STORAGE_STATS, FULL`,
+			},
+			// TableReplicationInfo: [Optional] Replication info of a table created using `AS REPLICA` DDL like: `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+			"table_replication_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Replication info of a table created using "AS REPLICA" DDL like: "CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv".`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_project_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source project.`,
+						},
+						"source_dataset_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source dataset.`,
+						},
+						"source_table_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source materialized view.`,
+						},
+						"replication_interval_ms": {
+							Type:        schema.TypeInt,
+							Default:     300000,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `The interval at which the source materialized view is polled for updates. The default is 300000.`,
+						},
+					},
+				},
+			},
+			"resource_tags": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `The tags attached to this table. Tag keys are globally unique. Tag key is expected to be in the namespaced format, for example "123456789012/environment" where 123456789012 is the ID of the parent organization or project resource for this tag key. Tag value is expected to be the short name, for example "Production".`,
+			},
+			// ExternalCatalogTableOptions: [Optional] Options defining open source compatible table.
+			"external_catalog_table_options": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Options defining open source compatible table.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// Parameters: [Optional] The parameters of the table.
+						"parameters": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Description: `A map of key value pairs defining the parameters and properties of the open source table. Corresponds with hive meta store table parameters. Maximum size of 4Mib.`,
+						},
+						// StorageDescriptor: [Optional] A storage descriptor containing information about the physical storage of this table.
+						"storage_descriptor": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `A storage descriptor containing information about the physical storage of this table.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// LocationUri: [Optional] The physical location of the table (e.g. 'gs://spark-dataproc-data/pangea-data/case_sensitive/' or 'gs://spark-dataproc-data/pangea-data/*'). The maximum length is 2056 bytes.
+									"location_uri": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The physical location of the table (e.g. 'gs://spark-dataproc-data/pangea-data/case_sensitive/' or 'gs://spark-dataproc-data/pangea-data/*'). The maximum length is 2056 bytes.`,
+									},
+									// InputFormat: [Optional] Specifies the fully qualified class name of the InputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat"). The maximum length is 128 characters.
+									"input_format": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Specifies the fully qualified class name of the InputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat"). The maximum length is 128 characters.`,
+									},
+									// OutputFormat: [Optional] Specifies the fully qualified class name of the OutputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat"). The maximum length is 128 characters.
+									"output_format": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Specifies the fully qualified class name of the OutputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat"). The maximum length is 128 characters.`,
+									},
+									// SerdeInfo: [Optional] Serializer and deserializer information.
+									"serde_info": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: `Serializer and deserializer information.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												// Name: [Optional] Name of the SerDe. The maximum length is 256 characters.
+												"name": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Name of the SerDe. The maximum length is 256 characters.`,
+												},
+												// SerializationLibrary: [Required] Specifies a fully-qualified class name of the serialization library that is responsible for the translation of data between table representation and the underlying low-level input and output format structures. The maximum length is 256 characters.
+												"serialization_library": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `Specifies a fully-qualified class name of the serialization library that is responsible for the translation of data between table representation and the underlying low-level input and output format structures. The maximum length is 256 characters.`,
+												},
+												// Parameters: [Optional] Key-value pairs that define the initialization parameters for the serialization library. Maximum size 10 Kib.
+												"parameters": {
+													Type:        schema.TypeMap,
+													Optional:    true,
+													Elem:        &schema.Schema{Type: schema.TypeString},
+													Description: `Key-value pairs that define the initialization parameters for the serialization library. Maximum size 10 Kib.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						// ConnectionId: [Optional] The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table from BigQuery Engine. The connection_id can have the form `<project_id>.<location_id>.<connection_id>` or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
+						"connection_id": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: bigQueryTableConnectionIdSuppress,
+							Description:      `The connection specifying the credentials to be used to read external storage, such as Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table from BigQuery Engine. The connection_id can have the form <project_id>.<location_id>.<connection_id> or projects/<project_id>/locations/<location_id>/connections/<connection_id>.`,
+						},
+					},
+				},
+			},
+			//UDP schema start
+			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
+			//UDP schema end
+		},
+		UseJSONNumber: true,
+	}
+}
+
+// filterLiveSchemaByConfig compares a live schema from the BQ API with a schema from
+// the Terraform config. It returns two values:
+// 1. A filtered []interface{} of fields that are defined in the config,
+// effectively removing any columns that were auto-generated by the service (e.g., hive partitioning keys).
+// 2. A []interface{} of fields that were auto-generated by the service.
+// Parameters:
+//   - liveSchema: The schema returned from a BigQuery API Read/Get call. This may contain extra columns.
+//   - configSchema: The schema built from the user's Terraform configuration (`d.Get("schema")`). This is the source of truth.
+func filterLiveSchemaByConfig(liveFields, configFields []interface{}) ([]interface{}, []interface{}) {
+	if len(liveFields) == 0 {
+		// If live schema is nil, there's nothing to filter or collect.
+		return []interface{}{}, nil
+	}
+	if len(configFields) == 0 {
+		// If config schema is nil or empty, all live fields are considered auto-generated.
+		return []interface{}{}, liveFields
+	}
+
+	// 1. Create a lookup map of all column names defined in the configuration.
+	configFieldsMap := make(map[string]bool)
+	for _, f := range configFields {
+		name, _ := f.(map[string]interface{})["name"].(string)
+		configFieldsMap[name] = true
+	}
+
+	// 2. Iterate through the fields in the live schema and keep only the ones
+	//    that exist in our configuration map.
+	var filteredFields []interface{}
+	var autogeneratedFields []interface{}
+	for _, liveField := range liveFields {
+		name, _ := liveField.(map[string]interface{})["name"].(string)
+		if configFieldsMap[name] {
+			filteredFields = append(filteredFields, liveField)
+		} else {
+			log.Printf("[DEBUG] auto-generated column `%s` collected during Table read.", name)
+			autogeneratedFields = append(autogeneratedFields, liveField)
+		}
+	}
+
+	return filteredFields, autogeneratedFields
+}
+
+func resourceTable(d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
+	config := meta.(*transport_tpg.Config)
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	table := map[string]interface{}{
+		"tableReference": map[string]interface{}{
+			"datasetId": d.Get("dataset_id").(string),
+			"tableId":   d.Get("table_id").(string),
+			"projectId": project,
+		},
+	}
+
+	if _, ok := d.GetOk("view"); ok {
+		table["view"] = expandView(d)
+	}
+
+	if v, ok := d.GetOk("materialized_view"); ok {
+		table["materializedView"] = expandMaterializedView(v)
+	}
+
+	if v, ok := d.GetOk("description"); ok {
+		table["description"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("expiration_time"); ok {
+		table["expirationTime"] = strconv.FormatInt(int64(v.(int)), 10)
+	}
+
+	if v, ok := d.GetOk("external_data_configuration"); ok {
+		externalDataConfiguration, err := expandExternalDataConfiguration(v)
+		if err != nil {
+			return nil, err
+		}
+
+		table["externalDataConfiguration"] = externalDataConfiguration
+	}
+
+	if v, ok := d.GetOk("biglake_configuration"); ok {
+		biglakeConfiguration, err := expandBigLakeConfiguration(v)
+		if err != nil {
+			return nil, err
+		}
+		table["biglakeConfiguration"] = biglakeConfiguration
+	}
+
+	if v, ok := d.GetOk("friendly_name"); ok {
+		table["friendlyName"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("max_staleness"); ok {
+		table["maxStaleness"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("encryption_configuration.0.kms_key_name"); ok {
+		table["encryptionConfiguration"] = map[string]interface{}{
+			"kmsKeyName": v.(string),
+		}
+	}
+
+	if v, ok := d.GetOk("effective_labels"); ok {
+		labels := map[string]string{}
+
+		for k, v := range v.(map[string]interface{}) {
+			labels[k] = v.(string)
+		}
+
+		table["labels"] = labels
+	}
+
+	if v, ok := d.GetOk("schema"); ok {
+		_, viewPresent := d.GetOk("view")
+		_, materializedViewPresent := d.GetOk("materialized_view")
+		managePolicyTags := !viewPresent && !materializedViewPresent
+		schemaMap, err := expandSchema(v, managePolicyTags)
+		if err != nil {
+			return nil, err
+		}
+		table["schema"] = schemaMap
+	}
+
+	if v, ok := d.GetOk("schema_foreign_type_info"); ok {
+		if tableSchema, ok := table["schema"].(map[string]interface{}); ok {
+			tableSchema["foreignTypeInfo"] = expandForeignTypeInfo(v)
+		}
+	}
+
+	if v, ok := d.GetOk("time_partitioning"); ok {
+		table["timePartitioning"] = expandTimePartitioning(v)
+	}
+
+	if v, ok := d.GetOk("range_partitioning"); ok {
+		rangePartitioning, err := expandRangePartitioning(v)
+		if err != nil {
+			return nil, err
+		}
+
+		table["rangePartitioning"] = rangePartitioning
+	}
+
+	if v, ok := d.GetOk("require_partition_filter"); ok {
+		table["requirePartitionFilter"] = v.(bool)
+	}
+
+	if v, ok := d.GetOk("clustering"); ok {
+		table["clustering"] = map[string]interface{}{
+			"fields": tpgresource.ConvertStringArr(v.([]interface{})),
+		}
+	}
+
+	if v, ok := d.GetOk("table_constraints"); ok {
+		tableConstraints, err := expandTableConstraints(v)
+		if err != nil {
+			return nil, err
+		}
+
+		table["tableConstraints"] = tableConstraints
+	}
+
+	if _, ok := d.GetOk("resource_tags"); ok {
+		table["resourceTags"] = tpgresource.ExpandStringMap(d, "resource_tags")
+	}
+
+	if v, ok := d.GetOk("external_catalog_table_options"); ok {
+		table["externalCatalogTableOptions"] = expandExternalCatalogTableOptions(v)
+	}
+
+	return table, nil
+}
+
+func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	table, err := resourceTable(d, meta)
+	if err != nil {
+		return err
+	}
+
+	datasetID := d.Get("dataset_id").(string)
+
+	if v, ok := d.GetOk("table_replication_info"); ok {
+		_, hasSchema := table["schema"]
+		_, hasView := table["view"]
+		_, hasMaterializedView := table["materializedView"]
+		if hasSchema || hasView || hasMaterializedView {
+			return errors.New("Schema, view, or materialized view cannot be specified when table replication info is present")
+		}
+
+		replicationDDL := fmt.Sprintf("CREATE MATERIALIZED VIEW %s.%s.%s", d.Get("project").(string), d.Get("dataset_id").(string), d.Get("table_id").(string))
+
+		tableReplicationInfo := expandTableReplicationInfo(v)
+		replicationIntervalMs := tableReplicationInfo["replication_interval_ms"].(int64)
+		if replicationIntervalMs > 0 {
+			replicationIntervalSeconds := replicationIntervalMs / 1000
+			replicationDDL = fmt.Sprintf("%s OPTIONS(replication_interval_seconds=%d)", replicationDDL, replicationIntervalSeconds)
+		}
+
+		replicationDDL = fmt.Sprintf("%s AS REPLICA OF %s.%s.%s", replicationDDL, tableReplicationInfo["source_project_id"], tableReplicationInfo["source_dataset_id"], tableReplicationInfo["source_table_id"])
+
+		log.Printf("[INFO] Creating a replica materialized view with DDL: '%s'", replicationDDL)
+
+		queriesURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/queries")
+		if err != nil {
+			return err
+		}
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    queriesURL,
+			UserAgent: userAgent,
+			Body: map[string]any{
+				"query":        replicationDDL,
+				"useLegacySql": false,
+			},
+		})
+
+		id := fmt.Sprintf("projects/%s/datasets/%s/tables/%s", project, datasetID, d.Get("table_id").(string))
+		if err != nil {
+			if deleteErr := resourceBigQueryTableDelete(d, meta); deleteErr != nil {
+				log.Printf("[INFO] Unable to clean up table %s: %s", id, deleteErr)
+			}
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", id)
+		d.SetId(id)
+
+		return resourceBigQueryTableRead(d, meta)
+	}
+
+	if _, hasView := table["view"]; hasView {
+		tableSchema, hasSchema := table["schema"].(map[string]interface{})
+		if hasSchema {
+			if schemaHasRequiredFields(tableSchema) {
+				return errors.New("Schema cannot contain required fields when creating a view")
+			}
+
+			log.Printf("[INFO] Removing schema from table definition because BigQuery does not support setting schema on view creation")
+			schemaBack := table["schema"]
+			delete(table, "schema")
+
+			tableRef := table["tableReference"].(map[string]interface{})
+			log.Printf("[INFO] Creating BigQuery table: %s without schema", tableRef["tableId"])
+
+			tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
+			if err != nil {
+				return err
+			}
+			insertRawRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   project,
+				RawURL:    tableInsertURL,
+				UserAgent: userAgent,
+				Body:      table,
+			})
+			if err != nil {
+				return err
+			}
+			insertedRef := insertRawRes["tableReference"].(map[string]interface{})
+			insertedID := fmt.Sprintf("projects/%s/datasets/%s/tables/%s", insertedRef["projectId"], insertedRef["datasetId"], insertedRef["tableId"])
+
+			log.Printf("[INFO] BigQuery table %s has been created", insertedID)
+			d.SetId(insertedID)
+
+			table["schema"] = schemaBack
+			log.Printf("[INFO] Updating BigQuery table: %s with schema", tableRef["tableId"])
+			tableUpdateURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+			if err != nil {
+				return err
+			}
+			if _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   project,
+				RawURL:    tableUpdateURL,
+				UserAgent: userAgent,
+				Body:      table,
+			}); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] BigQuery table %s has been updated with schema", insertedID)
+		} else {
+			tableRef := table["tableReference"].(map[string]interface{})
+			log.Printf("[INFO] Creating BigQuery table: %s", tableRef["tableId"])
+
+			tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
+			if err != nil {
+				return err
+			}
+			insertRawRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   project,
+				RawURL:    tableInsertURL,
+				UserAgent: userAgent,
+				Body:      table,
+			})
+			if err != nil {
+				return err
+			}
+			insertedRef := insertRawRes["tableReference"].(map[string]interface{})
+			insertedID := fmt.Sprintf("projects/%s/datasets/%s/tables/%s", insertedRef["projectId"], insertedRef["datasetId"], insertedRef["tableId"])
+
+			log.Printf("[INFO] BigQuery table %s has been created", insertedID)
+			d.SetId(insertedID)
+		}
+	} else {
+		tableRef := table["tableReference"].(map[string]interface{})
+		log.Printf("[INFO] Creating BigQuery table: %s", tableRef["tableId"])
+
+		tableInsertURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables")
+		if err != nil {
+			return err
+		}
+		insertRawRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    tableInsertURL,
+			UserAgent: userAgent,
+			Body:      table,
+		})
+		if err != nil {
+			return err
+		}
+		insertedRef := insertRawRes["tableReference"].(map[string]interface{})
+		insertedID := fmt.Sprintf("projects/%s/datasets/%s/tables/%s", insertedRef["projectId"], insertedRef["datasetId"], insertedRef["tableId"])
+
+		log.Printf("[INFO] BigQuery table %s has been created", insertedID)
+		d.SetId(insertedID)
+	}
+
+	return resourceBigQueryTableRead(d, meta)
+}
+
+func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	tableID := d.Get("table_id").(string)
+
+	tableURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	if err != nil {
+		return err
+	}
+	if tableMetadataViewRaw, ok := d.GetOk("table_metadata_view"); ok {
+		tableURL = tableURL + "?view=" + tableMetadataViewRaw.(string)
+	}
+	rawRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    tableURL,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
+	}
+
+	if err := d.Set("description", rawRes["description"]); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if v, ok := rawRes["expirationTime"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			if err := d.Set("expiration_time", i); err != nil {
+				return fmt.Errorf("Error setting expiration_time: %s", err)
+			}
+		}
+	}
+	if err := d.Set("friendly_name", rawRes["friendlyName"]); err != nil {
+		return fmt.Errorf("Error setting friendly_name: %s", err)
+	}
+	if err := d.Set("max_staleness", rawRes["maxStaleness"]); err != nil {
+		return fmt.Errorf("Error setting max_staleness: %s", err)
+	}
+
+	labelsRaw, _ := rawRes["labels"].(map[string]interface{})
+	var labels map[string]string
+	if len(labelsRaw) > 0 {
+		labels = make(map[string]string, len(labelsRaw))
+		for k, v := range labelsRaw {
+			labels[k] = v.(string)
+		}
+	}
+	if v, ok := rawRes["creationTime"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			if err := d.Set("creation_time", i); err != nil {
+				return fmt.Errorf("Error setting creation_time: %s", err)
+			}
+		}
+	}
+	if err := d.Set("etag", rawRes["etag"]); err != nil {
+		return fmt.Errorf("Error setting etag: %s", err)
+	}
+	if v, ok := rawRes["lastModifiedTime"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			if err := d.Set("last_modified_time", i); err != nil {
+				return fmt.Errorf("Error setting last_modified_time: %s", err)
+			}
+		}
+	}
+	if err := d.Set("location", rawRes["location"]); err != nil {
+		return fmt.Errorf("Error setting location: %s", err)
+	}
+	if v, ok := rawRes["numBytes"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil && i != 0 {
+			if err := d.Set("num_bytes", i); err != nil {
+				return fmt.Errorf("Error setting num_bytes: %s", err)
+			}
+		}
+	}
+	var datasetID, tableIDFromRef string
+	if tableRef, ok := rawRes["tableReference"].(map[string]interface{}); ok {
+		if v, ok := tableRef["tableId"].(string); ok {
+			tableIDFromRef = v
+		}
+		if v, ok := tableRef["datasetId"].(string); ok {
+			datasetID = v
+		}
+	}
+	if v, ok := rawRes["numLongTermBytes"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil && i != 0 {
+			if err := d.Set("num_long_term_bytes", i); err != nil {
+				return fmt.Errorf("Error setting num_long_term_bytes: %s", err)
+			}
+		}
+	}
+	if v, ok := rawRes["numRows"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil && i != 0 {
+			if err := d.Set("num_rows", i); err != nil {
+				return fmt.Errorf("Error setting num_rows: %s", err)
+			}
+		}
+	}
+	if err := d.Set("self_link", rawRes["selfLink"]); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	tableType, _ := rawRes["type"].(string)
+	if err := populateBigQueryTableCommonResourceData(d, config, project, datasetID, tableIDFromRef, tableType, labels); err != nil {
+		return err
+	}
+
+	// determine whether the deprecated require_partition_filter field is used
+	use_old_rpf := false
+	if _, ok := d.GetOk("time_partitioning.0.require_partition_filter"); ok {
+		use_old_rpf = true
+	} else if requirePartitionFilter, _ := rawRes["requirePartitionFilter"].(bool); requirePartitionFilter {
+		if err := d.Set("require_partition_filter", requirePartitionFilter); err != nil {
+			return fmt.Errorf("Error setting require_partition_filter: %s", err)
+		}
+	}
+
+	if edcRaw, ok := rawRes["externalDataConfiguration"].(map[string]interface{}); ok {
+		externalDataConfiguration, err := flattenExternalDataConfiguration(edcRaw)
+		if err != nil {
+			return err
+		}
+
+		if v, ok := d.GetOk("external_data_configuration"); ok {
+			// The API response doesn't return the `external_data_configuration.schema`
+			// used when creating the table and it cannot be queried.
+			// After creation, a computed schema is stored in the toplevel `schema`,
+			// which combines `external_data_configuration.schema`
+			// with any hive partioning fields found in the `source_uri_prefix`.
+			// So just assume the configured schema has been applied after successful
+			// creation, by copying the configured value back into the resource schema.
+			// This avoids that reading back this field will be identified as a change.
+			// The `ForceNew=true` on `external_data_configuration.schema` will ensure
+			// the users' expectation that changing the configured  input schema will
+			// recreate the resource.
+			edc := v.([]interface{})[0].(map[string]interface{})
+			if edc["schema"] != nil {
+				externalDataConfiguration[0]["schema"] = edc["schema"]
+			}
+		}
+
+		if err := d.Set("external_data_configuration", externalDataConfiguration); err != nil {
+			return fmt.Errorf("Error setting external_data_configuration: %s", err)
+		}
+	}
+
+	if blcRaw, ok := rawRes["biglakeConfiguration"].(map[string]interface{}); ok {
+		bigLakeConfiguration, err := flattenBigLakeConfiguration(blcRaw)
+		if err != nil {
+			return err
+		}
+
+		if err := d.Set("biglake_configuration", bigLakeConfiguration); err != nil {
+			return fmt.Errorf("Error setting biglake_configuration: %s", err)
+		}
+	}
+
+	if tpRaw, ok := rawRes["timePartitioning"].(map[string]interface{}); ok {
+		if err := d.Set("time_partitioning", flattenTimePartitioning(tpRaw, use_old_rpf)); err != nil {
+			return err
+		}
+	}
+
+	if rpRaw, ok := rawRes["rangePartitioning"].(map[string]interface{}); ok {
+		if err := d.Set("range_partitioning", flattenRangePartitioning(rpRaw)); err != nil {
+			return err
+		}
+	}
+
+	if clusteringRaw, ok := rawRes["clustering"].(map[string]interface{}); ok {
+		if fields, ok := clusteringRaw["fields"].([]interface{}); ok {
+			if err := d.Set("clustering", fields); err != nil {
+				return fmt.Errorf("Error setting clustering: %s", err)
+			}
+		}
+	}
+	if ecRaw, ok := rawRes["encryptionConfiguration"].(map[string]interface{}); ok {
+		if err := d.Set("encryption_configuration", flattenEncryptionConfiguration(ecRaw)); err != nil {
+			return err
+		}
+	}
+
+	if schemaRaw, ok := rawRes["schema"].(map[string]interface{}); ok {
+		liveSchemaFields, _ := schemaRaw["fields"].([]interface{})
+
+		var configSchemaFields []interface{}
+		if v, ok := d.GetOk("schema"); ok {
+			_, viewPresent := d.GetOk("view")
+			_, materializedViewPresent := d.GetOk("materialized_view")
+			managePolicyTags := !viewPresent && !materializedViewPresent
+			configSchemaMap, err := expandSchema(v, managePolicyTags)
+			if err != nil {
+				return err
+			}
+			if configSchemaMap != nil {
+				configSchemaFields, _ = configSchemaMap["fields"].([]interface{})
+			}
+		}
+
+		schemaFields := liveSchemaFields
+		ignore, ok := d.Get("ignore_auto_generated_schema").(bool)
+		if ok && ignore {
+			var autogeneratedFields []interface{}
+			schemaFields, autogeneratedFields = filterLiveSchemaByConfig(liveSchemaFields, configSchemaFields)
+			if len(autogeneratedFields) > 0 {
+				autogeneratedFieldsJson, err := json.Marshal(autogeneratedFields)
+				if err != nil {
+					return fmt.Errorf("error marshalling autogenerated schema fields: %w", err)
+				}
+				if err := d.Set("generated_schema_columns", string(autogeneratedFieldsJson)); err != nil {
+					return fmt.Errorf("error setting generated_schema_columns: %w", err)
+				}
+			} else {
+				d.Set("generated_schema_columns", "")
+			}
+		} else {
+			// If not ignoring, ensure the field is cleared
+			d.Set("generated_schema_columns", "")
+		}
+		schema, err := flattenSchema(schemaFields)
+		if err != nil {
+			return err
+		}
+		if err := d.Set("schema", schema); err != nil {
+			return fmt.Errorf("Error setting schema: %s", err)
+		}
+		if foreignTypeInfoRaw, ok := schemaRaw["foreignTypeInfo"].(map[string]interface{}); ok {
+			foreignTypeInfo := flattenForeignTypeInfo(foreignTypeInfoRaw)
+			if err := d.Set("schema_foreign_type_info", foreignTypeInfo); err != nil {
+				return fmt.Errorf("Error setting schema_foreign_type_info: %s", err)
+			}
+		}
+	}
+
+	if viewRaw, ok := rawRes["view"].(map[string]interface{}); ok {
+		view := flattenView(viewRaw)
+		if err := d.Set("view", view); err != nil {
+			return fmt.Errorf("Error setting view: %s", err)
+		}
+	}
+
+	if mvRaw, ok := rawRes["materializedView"].(map[string]interface{}); ok {
+		materialized_view := flattenMaterializedView(mvRaw)
+
+		if err := d.Set("materialized_view", materialized_view); err != nil {
+			return fmt.Errorf("Error setting materialized view: %s", err)
+		}
+	}
+
+	if tcRaw, ok := rawRes["tableConstraints"].(map[string]interface{}); ok {
+		table_constraints := flattenTableConstraints(tcRaw)
+
+		if err := d.Set("table_constraints", table_constraints); err != nil {
+			return fmt.Errorf("Error setting table constraints: %s", err)
+		}
+	}
+
+	if err := d.Set("resource_tags", rawRes["resourceTags"]); err != nil {
+		return fmt.Errorf("Error setting resource tags: %s", err)
+	}
+
+	if v, ok := rawRes["tableReplicationInfo"]; ok {
+		tableReplicationInfo := flattenTableReplicationInfo(v.(map[string]interface{}))
+
+		if err := d.Set("table_replication_info", tableReplicationInfo); err != nil {
+			return fmt.Errorf("Error setting table replication info: %s", err)
+		}
+	}
+
+	if ectoRaw, ok := rawRes["externalCatalogTableOptions"].(map[string]interface{}); ok {
+		externalCatalogTableOptions := flattenExternalCatalogTableOptions(ectoRaw)
+
+		if err := d.Set("external_catalog_table_options", externalCatalogTableOptions); err != nil {
+			return fmt.Errorf("Error setting external_catalog_table_options: %s", err)
+		}
+	}
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func populateBigQueryTableCommonResourceData(d *schema.ResourceData, config *transport_tpg.Config, project, datasetID, tableID, tableType string, labels map[string]string) error {
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("dataset_id", datasetID); err != nil {
+		return fmt.Errorf("Error setting dataset_id: %s", err)
+	}
+	if err := d.Set("table_id", tableID); err != nil {
+		return fmt.Errorf("Error setting table_id: %s", err)
+	}
+	if err := tpgresource.SetLabels(labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	terraformLabels := make(map[string]string)
+	if config != nil {
+		for key, value := range config.DefaultLabels {
+			terraformLabels[key] = value
+		}
+	}
+	if configuredLabels, ok := d.GetOk("labels"); ok {
+		for key, value := range configuredLabels.(map[string]interface{}) {
+			terraformLabels[key] = value.(string)
+		}
+	}
+	if _, hasAttributionLabel := labels[transport_tpg.AttributionKey]; hasAttributionLabel {
+		terraformLabels[transport_tpg.AttributionKey] = transport_tpg.AttributionValue
+	}
+	if err := d.Set("terraform_labels", terraformLabels); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
+	}
+	if err := d.Set("type", tableType); err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
+	}
+	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", project, datasetID, tableID))
+
+	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":    project,
+		"dataset_id": datasetID,
+		"table_id":   tableID,
+	})
+}
+
+type TableReference struct {
+	project   string
+	datasetID string
+	tableID   string
+}
+
+func addAutoGenSchemaFields(d *schema.ResourceData, tableBody map[string]interface{}) error {
+	// When ignore_auto_generated_schema is true, we must include the autogenerated fields
+	// in the update payload to avoid the API thinking we're trying to delete them.
+	if ignore, enabled := d.Get("ignore_auto_generated_schema").(bool); enabled && ignore {
+		// Only proceed if the table has a schema to begin with.
+		if schemaMap, ok := tableBody["schema"].(map[string]interface{}); ok {
+			if autogenStr, ok := d.Get("generated_schema_columns").(string); ok && autogenStr != "" {
+				var autogenFields []interface{}
+				if err := json.Unmarshal([]byte(autogenStr), &autogenFields); err != nil {
+					return fmt.Errorf("failed to unmarshal autogenerated schema fields: %w", err)
+				}
+				fields, _ := schemaMap["fields"].([]interface{})
+				schemaMap["fields"] = append(fields, autogenFields...)
+				log.Printf("[DEBUG] Appended %d autogenerated fields to schema for update", len(autogenFields))
+			}
+		}
+	}
+	return nil
+}
+
+func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
+	// If only client-side fields were modified, short-circuit the Update function to avoid sending an update API request.
+	clientSideFields := map[string]bool{"deletion_protection": true, "ignore_schema_changes": true, "ignore_auto_generated_schema": true, "table_metadata_view": true, "deletion_policy": true}
+	clientSideOnly := true
+	for field := range ResourceBigQueryTable().Schema {
+		if d.HasChange(field) && !clientSideFields[field] {
+			clientSideOnly = false
+			break
+		}
+	}
+	if clientSideOnly {
+		return resourceBigQueryTableRead(d, meta)
+	}
+
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	table, err := resourceTable(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if err := addAutoGenSchemaFields(d, table); err != nil {
+		return err
+	}
+
+	if edcMap, ok := table["externalDataConfiguration"].(map[string]interface{}); ok {
+		if _, hasSchema := edcMap["schema"]; hasSchema {
+			log.Printf("[INFO] Removing ExternalDataConfiguration.Schema when updating BigQuery table %s", d.Id())
+			delete(edcMap, "schema")
+		}
+	}
+
+	log.Printf("[INFO] Updating BigQuery table: %s", d.Id())
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	datasetID := d.Get("dataset_id").(string)
+	tableID := d.Get("table_id").(string)
+	var tableMetadataView string
+	if tableMetadataViewRaw, ok := d.GetOk("table_metadata_view"); ok {
+		tableMetadataView = tableMetadataViewRaw.(string)
+	}
+
+	tableReference := &TableReference{
+		project:   project,
+		datasetID: datasetID,
+		tableID:   tableID,
+	}
+
+	// Logic to fetch oldTable if needed for Dropping Columns OR Merging Data Policies
+	ignoreSchemaChanges := d.Get("ignore_schema_changes").([]interface{})
+	shouldIgnoreDataPolicies := slices.Contains(ignoreSchemaChanges, "dataPolicies")
+	shouldDropColumns := !d.Get("ignore_auto_generated_schema").(bool)
+
+	var oldTableRaw map[string]interface{}
+
+	if shouldDropColumns || shouldIgnoreDataPolicies {
+		oldTableURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+		if err != nil {
+			return err
+		}
+		if len(tableMetadataView) > 0 {
+			oldTableURL = oldTableURL + "?view=" + tableMetadataView
+		}
+		oldTableRaw, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    oldTableURL,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	// 1. Column Drop Logic
+	if shouldDropColumns && oldTableRaw != nil {
+		if err = resourceBigQueryTableColumnDrop(config, userAgent, table, oldTableRaw, tableReference, tableMetadataView); err != nil {
+			return err
+		}
+	}
+
+	// 2. Data Policy Merge Logic
+	// If we are ignoring dataPolicies, check if we need to preserve existing ones
+	if shouldIgnoreDataPolicies && oldTableRaw != nil {
+		if tableSchemaMap, ok := table["schema"].(map[string]interface{}); ok {
+			if oldTableSchemaMap, ok := oldTableRaw["schema"].(map[string]interface{}); ok {
+				tableFields, _ := tableSchemaMap["fields"].([]interface{})
+				oldTableFields, _ := oldTableSchemaMap["fields"].([]interface{})
+				mergeDataPoliciesIntoMap(oldTableFields, tableFields)
+			}
+		}
+	}
+
+	tableUpdateURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	if err != nil {
+		return err
+	}
+	if _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PUT",
+		Project:   project,
+		RawURL:    tableUpdateURL,
+		UserAgent: userAgent,
+		Body:      table,
+	}); err != nil {
+		return err
+	}
+
+	return resourceBigQueryTableRead(d, meta)
+}
+
+func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent string, tableBody map[string]interface{}, oldTableRaw map[string]interface{}, tableReference *TableReference, tableMetadataView string) error {
+	tableSchema, ok := tableBody["schema"].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	oldTableSchema, ok := oldTableRaw["schema"].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	tableFields, _ := tableSchema["fields"].([]interface{})
+	oldTableFields, _ := oldTableSchema["fields"].([]interface{})
+
+	newTableFields := map[string]bool{}
+	for _, field := range tableFields {
+		name, _ := field.(map[string]interface{})["name"].(string)
+		newTableFields[name] = true
+	}
+
+	droppedColumns := []string{}
+	for _, field := range oldTableFields {
+		name, _ := field.(map[string]interface{})["name"].(string)
+		if !newTableFields[name] {
+			droppedColumns = append(droppedColumns, name)
+		}
+	}
+
+	if len(droppedColumns) > 0 {
+		backquotedDroppedColumns := []string{}
+		for _, column := range droppedColumns {
+			backquotedDroppedColumns = append(backquotedDroppedColumns, fmt.Sprintf("`%s`", column))
+		}
+		droppedColumnsString := strings.Join(backquotedDroppedColumns, ", DROP COLUMN ")
+
+		dropColumnsDDL := fmt.Sprintf("ALTER TABLE `%s.%s.%s` DROP COLUMN %s", tableReference.project, tableReference.datasetID, tableReference.tableID, droppedColumnsString)
+		log.Printf("[INFO] Dropping columns in-place: %s", dropColumnsDDL)
+
+		queriesURL := transport_tpg.BaseUrl(Product, config) + "projects/" + tableReference.project + "/queries"
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   tableReference.project,
+			RawURL:    queriesURL,
+			UserAgent: userAgent,
+			Body: map[string]any{
+				"query":        dropColumnsDDL,
+				"useLegacySql": false,
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("cannot destroy table %v without setting deletion_protection=false and running `terraform apply`", d.Id())
+	}
+
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	tableDeleteURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	if err != nil {
+		return err
+	}
+	if _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    tableDeleteURL,
+		UserAgent: userAgent,
+	}); err != nil {
+		return err
+	}
+
+	d.SetId("")
+
+	return nil
+}
+
+func expandExternalDataConfiguration(cfg interface{}) (map[string]interface{}, error) {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	edc := map[string]interface{}{
+		"autodetect": raw["autodetect"].(bool),
+	}
+
+	sourceUris := []string{}
+	for _, rawSourceUri := range raw["source_uris"].([]interface{}) {
+		sourceUris = append(sourceUris, rawSourceUri.(string))
+	}
+	if len(sourceUris) > 0 {
+		edc["sourceUris"] = sourceUris
+	}
+
+	if v, ok := raw["decimal_target_types"]; ok {
+		decimalTargetTypes := []string{}
+		for _, rawDecimalTargetType := range v.(*schema.Set).List() {
+			decimalTargetTypes = append(decimalTargetTypes, rawDecimalTargetType.(string))
+		}
+		if len(decimalTargetTypes) > 0 {
+			edc["decimalTargetTypes"] = decimalTargetTypes
+		}
+	}
+
+	if v, ok := raw["file_set_spec_type"]; ok && v.(string) != "" {
+		edc["fileSetSpecType"] = v.(string)
+	}
+
+	if v, ok := raw["compression"]; ok && v.(string) != "" {
+		edc["compression"] = v.(string)
+	}
+
+	if v, ok := raw["json_extension"]; ok && v.(string) != "" {
+		edc["jsonExtension"] = v.(string)
+	}
+
+	if v, ok := raw["csv_options"]; ok {
+		if expanded := expandCsvOptions(v); expanded != nil {
+			edc["csvOptions"] = expanded
+		}
+	}
+	if v, ok := raw["json_options"]; ok {
+		if expanded := expandJsonOptions(v); expanded != nil {
+			edc["jsonOptions"] = expanded
+		}
+	}
+	if v, ok := raw["bigtable_options"]; ok {
+		if expanded := expandBigtableOptions(v); expanded != nil {
+			edc["bigtableOptions"] = expanded
+		}
+	}
+	if v, ok := raw["google_sheets_options"]; ok {
+		if expanded := expandGoogleSheetsOptions(v); expanded != nil {
+			edc["googleSheetsOptions"] = expanded
+		}
+	}
+	if v, ok := raw["hive_partitioning_options"]; ok {
+		if expanded := expandHivePartitioningOptions(v); expanded != nil {
+			edc["hivePartitioningOptions"] = expanded
+		}
+	}
+	if v, ok := raw["avro_options"]; ok {
+		if expanded := expandAvroOptions(v); expanded != nil {
+			edc["avroOptions"] = expanded
+		}
+	}
+	if v, ok := raw["parquet_options"]; ok {
+		if expanded := expandParquetOptions(v); expanded != nil {
+			edc["parquetOptions"] = expanded
+		}
+	}
+
+	if v, ok := raw["ignore_unknown_values"]; ok && v.(bool) {
+		edc["ignoreUnknownValues"] = v.(bool)
+	}
+	if v, ok := raw["max_bad_records"]; ok && v.(int) != 0 {
+		edc["maxBadRecords"] = int64(v.(int))
+	}
+	if v, ok := raw["schema"]; ok {
+		managePolicyTags := true
+		schemaMap, err := expandSchema(v, managePolicyTags)
+		if err != nil {
+			return nil, err
+		}
+		if schemaMap != nil {
+			edc["schema"] = schemaMap
+		}
+	}
+	if v, ok := raw["source_format"]; ok && v.(string) != "" {
+		edc["sourceFormat"] = v.(string)
+	}
+	if v, ok := raw["connection_id"]; ok && v.(string) != "" {
+		edc["connectionId"] = v.(string)
+	}
+	if v, ok := raw["reference_file_schema_uri"]; ok && v.(string) != "" {
+		edc["referenceFileSchemaUri"] = v.(string)
+	}
+	if v, ok := raw["metadata_cache_mode"]; ok && v.(string) != "" {
+		edc["metadataCacheMode"] = v.(string)
+	}
+	if v, ok := raw["object_metadata"]; ok && v.(string) != "" {
+		edc["objectMetadata"] = v.(string)
+	}
+
+	return edc, nil
+}
+
+func flattenExternalDataConfiguration(edc map[string]interface{}) ([]map[string]interface{}, error) {
+	result := map[string]interface{}{}
+
+	result["autodetect"], _ = edc["autodetect"].(bool)
+	result["source_uris"] = edc["sourceUris"]
+
+	if v, ok := edc["decimalTargetTypes"].([]interface{}); ok {
+		interfaceSlice := make([]interface{}, len(v))
+		copy(interfaceSlice, v)
+		result["decimal_target_types"] = schema.NewSet(schema.HashString, interfaceSlice)
+	}
+
+	if v, ok := edc["fileSetSpecType"].(string); ok && v != "" {
+		result["file_set_spec_type"] = v
+	}
+
+	if v, ok := edc["compression"].(string); ok && v != "" {
+		result["compression"] = v
+	}
+
+	if v, ok := edc["jsonExtension"].(string); ok && v != "" {
+		result["json_extension"] = v
+	}
+
+	if v, ok := edc["csvOptions"].(map[string]interface{}); ok {
+		result["csv_options"] = flattenCsvOptions(v)
+	}
+
+	if v, ok := edc["googleSheetsOptions"].(map[string]interface{}); ok {
+		result["google_sheets_options"] = flattenGoogleSheetsOptions(v)
+	}
+
+	if v, ok := edc["hivePartitioningOptions"].(map[string]interface{}); ok {
+		result["hive_partitioning_options"] = flattenHivePartitioningOptions(v)
+	}
+
+	if v, ok := edc["avroOptions"].(map[string]interface{}); ok {
+		result["avro_options"] = flattenAvroOptions(v)
+	}
+
+	if v, ok := edc["parquetOptions"].(map[string]interface{}); ok {
+		result["parquet_options"] = flattenParquetOptions(v)
+	}
+
+	if v, ok := edc["jsonOptions"].(map[string]interface{}); ok {
+		result["json_options"] = flattenJsonOptions(v)
+	}
+
+	if v, ok := edc["bigtableOptions"].(map[string]interface{}); ok {
+		result["bigtable_options"] = flattenBigtableOptions(v)
+	}
+
+	if v, _ := edc["ignoreUnknownValues"].(bool); v {
+		result["ignore_unknown_values"] = v
+	}
+	if v, ok := edc["maxBadRecords"].(float64); ok && v != 0 {
+		result["max_bad_records"] = int64(v)
+	}
+
+	if v, ok := edc["sourceFormat"].(string); ok && v != "" {
+		result["source_format"] = v
+	}
+
+	if v, ok := edc["connectionId"].(string); ok && v != "" {
+		result["connection_id"] = v
+	}
+
+	if v, ok := edc["referenceFileSchemaUri"].(string); ok && v != "" {
+		result["reference_file_schema_uri"] = v
+	}
+	if v, ok := edc["metadataCacheMode"].(string); ok && v != "" {
+		result["metadata_cache_mode"] = v
+	}
+
+	if v, ok := edc["objectMetadata"].(string); ok && v != "" {
+		result["object_metadata"] = v
+	}
+
+	return []map[string]interface{}{result}, nil
+}
+
+func expandCsvOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["allow_jagged_rows"]; ok && v.(bool) {
+		opts["allowJaggedRows"] = v.(bool)
+	}
+
+	if v, ok := raw["allow_quoted_newlines"]; ok && v.(bool) {
+		opts["allowQuotedNewlines"] = v.(bool)
+	}
+
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
+		opts["encoding"] = v.(string)
+	}
+
+	if v, ok := raw["field_delimiter"]; ok && v.(string) != "" {
+		opts["fieldDelimiter"] = v.(string)
+	}
+
+	if v, ok := raw["skip_leading_rows"]; ok && v.(int) != 0 {
+		opts["skipLeadingRows"] = strconv.FormatInt(int64(v.(int)), 10)
+	}
+
+	if v, ok := raw["source_column_match"]; ok && v.(string) != "" {
+		opts["sourceColumnMatch"] = v.(string)
+	}
+
+	// Always send quote to match previous ForceSendFields["Quote"] behavior
+	quote, _ := raw["quote"].(string)
+	opts["quote"] = quote
+
+	return opts
+}
+
+func flattenCsvOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, _ := opts["allowJaggedRows"].(bool); v {
+		result["allow_jagged_rows"] = v
+	}
+
+	if v, _ := opts["allowQuotedNewlines"].(bool); v {
+		result["allow_quoted_newlines"] = v
+	}
+
+	if v, ok := opts["encoding"].(string); ok && v != "" {
+		result["encoding"] = v
+	}
+
+	if v, ok := opts["fieldDelimiter"].(string); ok && v != "" {
+		result["field_delimiter"] = v
+	}
+
+	if v, ok := opts["skipLeadingRows"].(string); ok {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil && i != 0 {
+			result["skip_leading_rows"] = i
+		}
+	}
+
+	if v, ok := opts["sourceColumnMatch"].(string); ok && v != "" {
+		result["source_column_match"] = v
+	}
+
+	if v, ok := opts["quote"].(string); ok {
+		result["quote"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandGoogleSheetsOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["range"]; ok && v.(string) != "" {
+		opts["range"] = v.(string)
+	}
+
+	if v, ok := raw["skip_leading_rows"]; ok && v.(int) != 0 {
+		opts["skipLeadingRows"] = strconv.FormatInt(int64(v.(int)), 10)
+	}
+	return opts
+}
+
+func flattenGoogleSheetsOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := opts["range"].(string); ok && v != "" {
+		result["range"] = v
+	}
+
+	if v, ok := opts["skipLeadingRows"].(string); ok {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil && i != 0 {
+			result["skip_leading_rows"] = i
+		}
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandHivePartitioningOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 || configured.([]interface{})[0] == nil {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["mode"]; ok && v.(string) != "" {
+		opts["mode"] = v.(string)
+	}
+
+	if v, ok := raw["require_partition_filter"]; ok && v.(bool) {
+		opts["requirePartitionFilter"] = v.(bool)
+	}
+
+	if v, ok := raw["source_uri_prefix"]; ok && v.(string) != "" {
+		opts["sourceUriPrefix"] = v.(string)
+	}
+
+	return opts
+}
+
+func flattenHivePartitioningOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := opts["mode"].(string); ok && v != "" {
+		result["mode"] = v
+	}
+
+	if v, _ := opts["requirePartitionFilter"].(bool); v {
+		result["require_partition_filter"] = v
+	}
+
+	if v, ok := opts["sourceUriPrefix"].(string); ok && v != "" {
+		result["source_uri_prefix"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandAvroOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["use_avro_logical_types"]; ok && v.(bool) {
+		opts["useAvroLogicalTypes"] = v.(bool)
+	}
+
+	return opts
+}
+
+func flattenAvroOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, _ := opts["useAvroLogicalTypes"].(bool); v {
+		result["use_avro_logical_types"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandParquetOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["enum_as_string"]; ok && v.(bool) {
+		opts["enumAsString"] = v.(bool)
+	}
+
+	if v, ok := raw["enable_list_inference"]; ok && v.(bool) {
+		opts["enableListInference"] = v.(bool)
+	}
+
+	return opts
+}
+
+func flattenParquetOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, _ := opts["enumAsString"].(bool); v {
+		result["enum_as_string"] = v
+	}
+
+	if v, _ := opts["enableListInference"].(bool); v {
+		result["enable_list_inference"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandBigtableOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["column_family"]; ok {
+		columnFamilies := []interface{}{}
+		for _, columnFamily := range v.([]interface{}) {
+			columnFamilies = append(columnFamilies, expandBigtableColumnFamily(columnFamily))
+		}
+		if len(columnFamilies) > 0 {
+			opts["columnFamilies"] = columnFamilies
+		}
+	}
+
+	if v, ok := raw["ignore_unspecified_column_families"]; ok && v.(bool) {
+		opts["ignoreUnspecifiedColumnFamilies"] = v.(bool)
+	}
+
+	if v, ok := raw["read_rowkey_as_string"]; ok && v.(bool) {
+		opts["readRowkeyAsString"] = v.(bool)
+	}
+
+	if v, ok := raw["output_column_families_as_json"]; ok && v.(bool) {
+		opts["outputColumnFamiliesAsJson"] = v.(bool)
+	}
+
+	return opts
+}
+
+func flattenBigtableOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := opts["columnFamilies"].([]interface{}); ok {
+		result["column_family"] = flattenBigtableColumnFamily(v)
+	}
+
+	if v, _ := opts["ignoreUnspecifiedColumnFamilies"].(bool); v {
+		result["ignore_unspecified_column_families"] = v
+	}
+
+	if v, _ := opts["readRowkeyAsString"].(bool); v {
+		result["read_rowkey_as_string"] = v
+	}
+
+	if v, _ := opts["outputColumnFamiliesAsJson"].(bool); v {
+		result["output_column_families_as_json"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandBigtableColumnFamily(configured interface{}) map[string]interface{} {
+	raw := configured.(map[string]interface{})
+
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["column"]; ok {
+		columns := []interface{}{}
+		for _, column := range v.([]interface{}) {
+			columns = append(columns, expandBigtableColumn(column))
+		}
+		if len(columns) > 0 {
+			opts["columns"] = columns
+		}
+	}
+
+	if v, ok := raw["family_id"]; ok && v.(string) != "" {
+		opts["familyId"] = v.(string)
+	}
+
+	if v, ok := raw["type"]; ok && v.(string) != "" {
+		opts["type"] = v.(string)
+	}
+
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
+		opts["encoding"] = v.(string)
+	}
+
+	if v, ok := raw["only_read_latest"]; ok && v.(bool) {
+		opts["onlyReadLatest"] = v.(bool)
+	}
+
+	return opts
+}
+
+func flattenBigtableColumnFamily(edc []interface{}) []map[string]interface{} {
+	results := []map[string]interface{}{}
+
+	for _, item := range edc {
+		fr, _ := item.(map[string]interface{})
+		result := map[string]interface{}{}
+		if v, ok := fr["columns"].([]interface{}); ok {
+			result["column"] = flattenBigtableColumn(v)
+		}
+		result["family_id"], _ = fr["familyId"].(string)
+		result["type"], _ = fr["type"].(string)
+		result["encoding"], _ = fr["encoding"].(string)
+		result["only_read_latest"], _ = fr["onlyReadLatest"].(bool)
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func expandBigtableColumn(configured interface{}) map[string]interface{} {
+	raw := configured.(map[string]interface{})
+
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["qualifier_encoded"]; ok && v.(string) != "" {
+		opts["qualifierEncoded"] = v.(string)
+	}
+
+	if v, ok := raw["qualifier_string"]; ok && v.(string) != "" {
+		opts["qualifierString"] = v.(string)
+	}
+
+	if v, ok := raw["field_name"]; ok && v.(string) != "" {
+		opts["fieldName"] = v.(string)
+	}
+
+	if v, ok := raw["type"]; ok && v.(string) != "" {
+		opts["type"] = v.(string)
+	}
+
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
+		opts["encoding"] = v.(string)
+	}
+
+	if v, ok := raw["only_read_latest"]; ok && v.(bool) {
+		opts["onlyReadLatest"] = v.(bool)
+	}
+
+	return opts
+}
+
+func flattenBigtableColumn(edc []interface{}) []map[string]interface{} {
+	results := []map[string]interface{}{}
+
+	for _, item := range edc {
+		fr, _ := item.(map[string]interface{})
+		result := map[string]interface{}{}
+		result["qualifier_encoded"], _ = fr["qualifierEncoded"].(string)
+		result["qualifier_string"], _ = fr["qualifierString"].(string)
+		result["field_name"], _ = fr["fieldName"].(string)
+		result["type"], _ = fr["type"].(string)
+		result["encoding"], _ = fr["encoding"].(string)
+		result["only_read_latest"], _ = fr["onlyReadLatest"].(bool)
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func expandJsonOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := map[string]interface{}{}
+
+	if v, ok := raw["encoding"]; ok && v.(string) != "" {
+		opts["encoding"] = v.(string)
+	}
+
+	return opts
+}
+
+func flattenJsonOptions(opts map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := opts["encoding"].(string); ok && v != "" {
+		result["encoding"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandSchema(raw interface{}, managePolicyTags bool) (map[string]interface{}, error) {
+	if len(raw.(string)) == 0 {
+		return nil, nil
+	}
+
+	var rawFields []interface{}
+	if err := json.Unmarshal([]byte(raw.(string)), &rawFields); err != nil {
+		return nil, err
+	}
+
+	if managePolicyTags {
+		for _, field := range rawFields {
+			setEmptyPolicyTagsInSchemaMap(field.(map[string]interface{}))
+		}
+	}
+
+	return map[string]interface{}{"fields": rawFields}, nil
+}
+
+func flattenSchema(fields []interface{}) (string, error) {
+	schema, err := json.Marshal(fields)
+	if err != nil {
+		return "", err
+	}
+
+	return string(schema), nil
+}
+
+// setEmptyPolicyTagsInSchemaMap recursively sets empty policyTags on leaf fields
+// unless the policyTags field is already specified.
+func setEmptyPolicyTagsInSchemaMap(field map[string]interface{}) {
+	// Field has children fields.
+	if subfields, ok := field["fields"].([]interface{}); ok && len(subfields) > 0 {
+		for _, sf := range subfields {
+			setEmptyPolicyTagsInSchemaMap(sf.(map[string]interface{}))
+		}
+		return
+	}
+	// Field is a leaf.
+	if _, ok := field["policyTags"]; !ok {
+		field["policyTags"] = map[string]interface{}{"names": []interface{}{}}
+	}
+}
+
+func schemaHasRequiredFields(schema map[string]interface{}) bool {
+	fields, _ := schema["fields"].([]interface{})
+	for _, field := range fields {
+		if mode, _ := field.(map[string]interface{})["mode"].(string); mode == "REQUIRED" {
+			return true
+		}
+	}
+	return false
+}
+
+func expandForeignTypeInfo(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	fti := map[string]interface{}{}
+
+	if v, ok := raw["type_system"]; ok {
+		fti["typeSystem"] = v.(string)
+	}
+
+	return fti
+}
+
+func flattenForeignTypeInfo(fti map[string]interface{}) []map[string]interface{} {
+	if fti == nil {
+		return nil
+	}
+
+	result := map[string]interface{}{"type_system": fti["typeSystem"]}
+	return []map[string]interface{}{result}
+}
+
+func expandTimePartitioning(configured interface{}) map[string]interface{} {
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	tp := map[string]interface{}{"type": raw["type"].(string)}
+
+	if v, ok := raw["field"]; ok && v.(string) != "" {
+		tp["field"] = v.(string)
+	}
+
+	if v, ok := raw["expiration_ms"]; ok && v.(int) != 0 {
+		tp["expirationMs"] = strconv.FormatInt(int64(v.(int)), 10)
+	}
+
+	if v, ok := raw["require_partition_filter"]; ok {
+		tp["requirePartitionFilter"] = v.(bool)
+	}
+
+	return tp
+}
+
+func expandRangePartitioning(configured interface{}) (map[string]interface{}, error) {
+	if configured == nil {
+		return nil, nil
+	}
+
+	rpList := configured.([]interface{})
+	if len(rpList) == 0 || rpList[0] == nil {
+		return nil, errors.New("Error casting range partitioning interface to expected structure")
+	}
+
+	rangePartJson := rpList[0].(map[string]interface{})
+	rp := map[string]interface{}{
+		"field": rangePartJson["field"].(string),
+	}
+
+	if v, ok := rangePartJson["range"]; ok && v != nil {
+		rangeLs := v.([]interface{})
+		if len(rangeLs) != 1 || rangeLs[0] == nil {
+			return nil, errors.New("Non-empty range must be given for range partitioning")
+		}
+
+		rangeJson := rangeLs[0].(map[string]interface{})
+		rp["range"] = map[string]interface{}{
+			"start":    strconv.FormatInt(int64(rangeJson["start"].(int)), 10),
+			"end":      strconv.FormatInt(int64(rangeJson["end"].(int)), 10),
+			"interval": strconv.FormatInt(int64(rangeJson["interval"].(int)), 10),
+		}
+	}
+
+	return rp, nil
+}
+
+func flattenEncryptionConfiguration(ec map[string]interface{}) []map[string]interface{} {
+	kmsKeyName, _ := ec["kmsKeyName"].(string)
+	re := regexp.MustCompile(`(projects/.*/locations/.*/keyRings/.*/cryptoKeys/.*)/cryptoKeyVersions/.*`)
+	paths := re.FindStringSubmatch(kmsKeyName)
+
+	if len(kmsKeyName) == 0 {
+		return nil
+	}
+
+	if len(paths) > 0 {
+		return []map[string]interface{}{
+			{
+				"kms_key_name":    paths[1],
+				"kms_key_version": kmsKeyName,
+			},
+		}
+	}
+
+	//	The key name was returned, no need to set the version
+	return []map[string]interface{}{{"kms_key_name": kmsKeyName, "kms_key_version": ""}}
+}
+
+func flattenTimePartitioning(tp map[string]interface{}, use_old_rpf bool) []map[string]interface{} {
+	result := map[string]interface{}{"type": tp["type"]}
+
+	if field, ok := tp["field"].(string); ok && field != "" {
+		result["field"] = field
+	}
+
+	if v, ok := tp["expirationMs"].(string); ok && v != "" {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil && i != 0 {
+			result["expiration_ms"] = i
+		}
+	}
+
+	if requirePartitionFilter, _ := tp["requirePartitionFilter"].(bool); requirePartitionFilter && use_old_rpf {
+		result["require_partition_filter"] = requirePartitionFilter
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func flattenRangePartitioning(rp map[string]interface{}) []map[string]interface{} {
+	rangeMap, _ := rp["range"].(map[string]interface{})
+
+	startInt, _ := strconv.ParseInt(rangeMap["start"].(string), 10, 64)
+	endInt, _ := strconv.ParseInt(rangeMap["end"].(string), 10, 64)
+	intervalInt, _ := strconv.ParseInt(rangeMap["interval"].(string), 10, 64)
+
+	result := map[string]interface{}{
+		"field": rp["field"],
+		"range": []map[string]interface{}{
+			{
+				"start":    startInt,
+				"end":      endInt,
+				"interval": intervalInt,
+			},
+		},
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandView(d *schema.ResourceData) map[string]interface{} {
+	v, _ := d.GetOk("view")
+	raw := v.([]interface{})[0].(map[string]interface{})
+	vd := map[string]interface{}{"query": raw["query"].(string)}
+
+	configValue := d.GetRawConfig().GetAttr("view").Index(cty.NumberIntVal(0)).AsValueMap()
+	useLegacySQLValue := configValue["use_legacy_sql"]
+	if !useLegacySQLValue.IsNull() {
+		vd["useLegacySql"] = useLegacySQLValue.RawEquals(cty.True)
+	}
+
+	return vd
+}
+
+func flattenView(vd map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{"query": vd["query"]}
+	useLegacySql, _ := vd["useLegacySql"].(bool)
+	result["use_legacy_sql"] = useLegacySql
+
+	return []map[string]interface{}{result}
+}
+
+func expandMaterializedView(configured interface{}) map[string]interface{} {
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	mvd := map[string]interface{}{"query": raw["query"].(string)}
+
+	if v, ok := raw["enable_refresh"]; ok {
+		mvd["enableRefresh"] = v.(bool)
+	}
+
+	if v, ok := raw["refresh_interval_ms"]; ok {
+		mvd["refreshIntervalMs"] = strconv.FormatInt(int64(v.(int)), 10)
+	}
+
+	if v, ok := raw["allow_non_incremental_definition"]; ok {
+		mvd["allowNonIncrementalDefinition"] = v.(bool)
+	}
+
+	return mvd
+}
+
+func flattenMaterializedView(mvd map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{"query": mvd["query"]}
+	enableRefresh, _ := mvd["enableRefresh"].(bool)
+	result["enable_refresh"] = enableRefresh
+	if v, ok := mvd["refreshIntervalMs"].(string); ok {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			result["refresh_interval_ms"] = i
+		}
+	}
+	allowNonIncremental, _ := mvd["allowNonIncrementalDefinition"].(bool)
+	result["allow_non_incremental_definition"] = allowNonIncremental
+
+	return []map[string]interface{}{result}
+}
+
+func flattenBigLakeConfiguration(blc map[string]interface{}) ([]map[string]interface{}, error) {
+	result := map[string]interface{}{}
+
+	result["connection_id"], _ = blc["connectionId"].(string)
+	result["storage_uri"], _ = blc["storageUri"].(string)
+	result["file_format"], _ = blc["fileFormat"].(string)
+	result["table_format"], _ = blc["tableFormat"].(string)
+
+	return []map[string]interface{}{result}, nil
+}
+
+func expandBigLakeConfiguration(cfg interface{}) (map[string]interface{}, error) {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	blc := map[string]interface{}{}
+
+	if v, ok := raw["connection_id"]; ok {
+		blc["connectionId"] = v.(string)
+	}
+
+	if v, ok := raw["storage_uri"]; ok {
+		blc["storageUri"] = v.(string)
+	}
+
+	if v, ok := raw["file_format"]; ok {
+		blc["fileFormat"] = v.(string)
+	}
+
+	if v, ok := raw["table_format"]; ok {
+		blc["tableFormat"] = v.(string)
+	}
+
+	return blc, nil
+}
+
+func expandPrimaryKey(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	pk := map[string]interface{}{}
+
+	columns := []string{}
+	for _, rawColumn := range raw["columns"].([]interface{}) {
+		if rawColumn == nil {
+			// Terraform reads "" as nil, which ends up crashing when we cast below
+			// sending "" to the API triggers a 400, which is okay.
+			rawColumn = ""
+		}
+		columns = append(columns, rawColumn.(string))
+	}
+	if len(columns) > 0 {
+		pk["columns"] = columns
+	}
+
+	return pk
+}
+
+func flattenPrimaryKey(edc map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := edc["columns"].([]interface{}); ok {
+		result["columns"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandReferencedTable(configured interface{}) map[string]interface{} {
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	rt := map[string]interface{}{}
+
+	if v, ok := raw["project_id"]; ok {
+		rt["projectId"] = v.(string)
+	}
+	if v, ok := raw["dataset_id"]; ok {
+		rt["datasetId"] = v.(string)
+	}
+	if v, ok := raw["table_id"]; ok {
+		rt["tableId"] = v.(string)
+	}
+
+	return rt
+}
+
+func flattenReferencedTable(edc map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	result["project_id"], _ = edc["projectId"].(string)
+	result["dataset_id"], _ = edc["datasetId"].(string)
+	result["table_id"], _ = edc["tableId"].(string)
+
+	return []map[string]interface{}{result}
+}
+
+func expandColumnReference(configured interface{}) map[string]interface{} {
+	raw := configured.(map[string]interface{})
+
+	cr := map[string]interface{}{}
+
+	if v, ok := raw["referencing_column"]; ok {
+		cr["referencingColumn"] = v.(string)
+	}
+	if v, ok := raw["referenced_column"]; ok {
+		cr["referencedColumn"] = v.(string)
+	}
+
+	return cr
+}
+
+func flattenColumnReferences(edc []interface{}) []map[string]interface{} {
+	results := []map[string]interface{}{}
+
+	for _, item := range edc {
+		cr, _ := item.(map[string]interface{})
+		result := map[string]interface{}{}
+		result["referenced_column"], _ = cr["referencedColumn"].(string)
+		result["referencing_column"], _ = cr["referencingColumn"].(string)
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func expandForeignKey(configured interface{}) map[string]interface{} {
+	raw := configured.(map[string]interface{})
+
+	fk := map[string]interface{}{}
+	if v, ok := raw["name"]; ok {
+		fk["name"] = v.(string)
+	}
+	if v, ok := raw["referenced_table"]; ok {
+		fk["referencedTable"] = expandReferencedTable(v)
+	}
+	crs := []interface{}{}
+	if v, ok := raw["column_references"]; ok {
+		for _, rawColumnReferences := range v.([]interface{}) {
+			crs = append(crs, expandColumnReference(rawColumnReferences))
+		}
+	}
+
+	if len(crs) > 0 {
+		fk["columnReferences"] = crs
+	}
+
+	return fk
+}
+
+func flattenForeignKeys(edc []interface{}) []map[string]interface{} {
+	results := []map[string]interface{}{}
+
+	for _, item := range edc {
+		fr, _ := item.(map[string]interface{})
+		result := map[string]interface{}{}
+		result["name"], _ = fr["name"].(string)
+		if v, ok := fr["columnReferences"].([]interface{}); ok {
+			result["column_references"] = flattenColumnReferences(v)
+		}
+		if v, ok := fr["referencedTable"].(map[string]interface{}); ok {
+			result["referenced_table"] = flattenReferencedTable(v)
+		}
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func expandTableConstraints(cfg interface{}) (map[string]interface{}, error) {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	edc := map[string]interface{}{}
+
+	if v, ok := raw["primary_key"]; ok {
+		edc["primaryKey"] = expandPrimaryKey(v)
+	}
+
+	fks := []interface{}{}
+
+	if v, ok := raw["foreign_keys"]; ok {
+		for _, rawForeignKey := range v.([]interface{}) {
+			fks = append(fks, expandForeignKey(rawForeignKey))
+		}
+	}
+
+	if len(fks) > 0 {
+		edc["foreignKeys"] = fks
+	}
+
+	return edc, nil
+
+}
+
+func flattenTableConstraints(edc map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := edc["primaryKey"].(map[string]interface{}); ok {
+		result["primary_key"] = flattenPrimaryKey(v)
+	}
+	if v, ok := edc["foreignKeys"].([]interface{}); ok {
+		result["foreign_keys"] = flattenForeignKeys(v)
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandTableReplicationInfo(cfg interface{}) map[string]interface{} {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	result := map[string]interface{}{}
+
+	if v, ok := raw["source_project_id"]; ok {
+		result["source_project_id"] = v.(string)
+	}
+
+	if v, ok := raw["source_dataset_id"]; ok {
+		result["source_dataset_id"] = v.(string)
+	}
+
+	if v, ok := raw["source_table_id"]; ok {
+		result["source_table_id"] = v.(string)
+	}
+
+	if v, ok := raw["replication_interval_ms"]; ok {
+		result["replication_interval_ms"] = int64(v.(int))
+	}
+
+	return result
+}
+
+func flattenTableReplicationInfo(tableReplicationInfo map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := tableReplicationInfo["sourceTable"]; ok {
+		sourceTable := v.(map[string]interface{})
+		if v, ok := sourceTable["projectId"]; ok {
+			result["source_project_id"] = v.(string)
+		}
+		if v, ok := sourceTable["datasetId"]; ok {
+			result["source_dataset_id"] = v.(string)
+		}
+		if v, ok := sourceTable["tableId"]; ok {
+			result["source_table_id"] = v.(string)
+		}
+	}
+
+	if v, ok := tableReplicationInfo["replicationIntervalMs"]; ok {
+		replicationIntervalMs := v.(string)
+		if i, err := strconv.Atoi(replicationIntervalMs); err == nil {
+			result["replication_interval_ms"] = int64(i)
+		}
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandExternalCatalogTableOptions(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	ecto := map[string]interface{}{}
+
+	if v, ok := raw["parameters"]; ok {
+		parameters := map[string]string{}
+
+		for k, v := range v.(map[string]interface{}) {
+			parameters[k] = v.(string)
+		}
+
+		ecto["parameters"] = parameters
+	}
+
+	if v, ok := raw["storage_descriptor"]; ok {
+		ecto["storageDescriptor"] = expandStorageDescriptor(v)
+	}
+
+	if v, ok := raw["connection_id"]; ok && v.(string) != "" {
+		ecto["connectionId"] = v.(string)
+	}
+
+	return ecto
+}
+
+func flattenExternalCatalogTableOptions(ecto map[string]interface{}) []map[string]interface{} {
+	if ecto == nil {
+		return nil
+	}
+
+	result := map[string]interface{}{}
+
+	if v, ok := ecto["parameters"].(map[string]interface{}); ok {
+		result["parameters"] = v
+	}
+
+	if v, ok := ecto["storageDescriptor"].(map[string]interface{}); ok {
+		result["storage_descriptor"] = flattenStorageDescriptor(v)
+	}
+
+	if v, ok := ecto["connectionId"].(string); ok && v != "" {
+		result["connection_id"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandStorageDescriptor(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	sd := map[string]interface{}{}
+
+	if v, ok := raw["location_uri"]; ok && v.(string) != "" {
+		sd["locationUri"] = v.(string)
+	}
+
+	if v, ok := raw["input_format"]; ok && v.(string) != "" {
+		sd["inputFormat"] = v.(string)
+	}
+
+	if v, ok := raw["output_format"]; ok && v.(string) != "" {
+		sd["outputFormat"] = v.(string)
+	}
+
+	if v, ok := raw["serde_info"]; ok {
+		if expanded := expandSerDeInfo(v); expanded != nil {
+			sd["serdeInfo"] = expanded
+		}
+	}
+
+	return sd
+}
+
+func flattenStorageDescriptor(sd map[string]interface{}) []map[string]interface{} {
+	if sd == nil {
+		return nil
+	}
+
+	result := map[string]interface{}{}
+
+	if v, ok := sd["locationUri"].(string); ok && v != "" {
+		result["location_uri"] = v
+	}
+
+	if v, ok := sd["inputFormat"].(string); ok && v != "" {
+		result["input_format"] = v
+	}
+
+	if v, ok := sd["outputFormat"].(string); ok && v != "" {
+		result["output_format"] = v
+	}
+
+	if v, ok := sd["serdeInfo"].(map[string]interface{}); ok {
+		result["serde_info"] = flattenSerDeInfo(v)
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandSerDeInfo(configured interface{}) map[string]interface{} {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	si := map[string]interface{}{
+		"serializationLibrary": raw["serialization_library"].(string),
+	}
+
+	if v, ok := raw["name"]; ok && v.(string) != "" {
+		si["name"] = v.(string)
+	}
+
+	if v, ok := raw["parameters"]; ok {
+		parameters := map[string]string{}
+
+		for k, v := range v.(map[string]interface{}) {
+			parameters[k] = v.(string)
+		}
+
+		if len(parameters) > 0 {
+			si["parameters"] = parameters
+		}
+	}
+
+	return si
+}
+
+func flattenSerDeInfo(si map[string]interface{}) []map[string]interface{} {
+	if si == nil {
+		return nil
+	}
+
+	result := map[string]interface{}{}
+	result["serialization_library"], _ = si["serializationLibrary"].(string)
+
+	if v, ok := si["name"].(string); ok && v != "" {
+		result["name"] = v
+	}
+
+	if v, ok := si["parameters"].(map[string]interface{}); ok {
+		result["parameters"] = v
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*transport_tpg.Config)
+	if err := tpgresource.ParseImportId([]string{
+		"^projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/tables/(?P<table_id>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/(?P<table_id>[^/]+)$",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	// Explicitly set virtual fields to default values on import
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
+	}
+
+	// Explicitly set virtual fields with default values to their default values on import
+	if err := d.Set("ignore_auto_generated_schema", false); err != nil {
+		return nil, fmt.Errorf("Error setting ignore_auto_generated_schema: %s", err)
+	}
+
+	// Replace import id for the resource id
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_bigquery_table",
+		ProductName: "bigquery",
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceBigQueryTable(),
+	}.Register()
+}

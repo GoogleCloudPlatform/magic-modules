@@ -8,7 +8,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
-func TestStep_TestServiceDependencies(t *testing.T) {
+func TestStep_TestDependencies(t *testing.T) {
 	cases := []struct {
 		name                     string
 		step                     resource.Step
@@ -34,7 +34,7 @@ func TestStep_TestServiceDependencies(t *testing.T) {
 			},
 			resourcePrefixServiceMap: map[string]string{},
 			want: map[string]string{
-				"compute": "",
+				"services/compute": "",
 			},
 		},
 		{
@@ -47,7 +47,7 @@ func TestStep_TestServiceDependencies(t *testing.T) {
 			},
 			resourcePrefixServiceMap: map[string]string{},
 			want: map[string]string{
-				"kms": "",
+				"services/kms": "",
 			},
 		},
 		{
@@ -60,7 +60,7 @@ func TestStep_TestServiceDependencies(t *testing.T) {
 			},
 			resourcePrefixServiceMap: map[string]string{},
 			want: map[string]string{
-				"servicenetworking": "",
+				"services/servicenetworking": "",
 			},
 		},
 		{
@@ -83,8 +83,8 @@ resource "google_kms_crypto_key" "foobar" {
 				TestHCLText:     "",
 			},
 			resourcePrefixServiceMap: map[string]string{
-				"google_compute_": "compute",
-				"google_kms_":     "kms",
+				"google_compute_": "services/compute",
+				"google_kms_":     "services/kms",
 			},
 			want: map[string]string{},
 		},
@@ -99,12 +99,12 @@ resource "google_kms_crypto_key" "foobar" {
 }`,
 			},
 			resourcePrefixServiceMap: map[string]string{
-				"google_compute_": "compute",
-				"google_kms_":     "kms",
+				"google_compute_": "services/compute",
+				"google_kms_":     "services/kms",
 			},
 			want: map[string]string{
-				"compute": "_",
-				"kms":     "_",
+				"services/compute": "_",
+				"services/kms":     "_",
 			},
 		},
 		{
@@ -121,21 +121,21 @@ resource "google_kms_crypto_key" "foobar" {
 }`,
 			},
 			resourcePrefixServiceMap: map[string]string{
-				"google_compute_": "compute",
-				"google_kms_":     "kms",
+				"google_compute_": "services/compute",
+				"google_kms_":     "services/kms",
 			},
 			want: map[string]string{
-				"compute": "",
-				"kms":     "",
+				"services/compute": "",
+				"services/kms":     "",
 			},
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			got := tc.step.TestServiceDependencies(tc.resourcePrefixServiceMap)
+			got := tc.step.TestDependencies(tc.resourcePrefixServiceMap)
 			if diff := cmp.Diff(tc.want, got); diff != "" {
-				t.Errorf("TestServiceDependencies() mismatch (-want +got:\n%s", diff)
+				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
 			}
 		})
 	}

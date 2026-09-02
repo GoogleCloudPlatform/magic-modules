@@ -1480,25 +1480,29 @@ func (t *Type) ProviderOnly() bool {
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	nestedProps := t.ResourceMetadata.UserProperites()
 
+	pathSegments := strings.Split(schemaPath, ".0.")
 	var pathTkns []string
-	for _, pname := range strings.Split(schemaPath, ".0.") {
+	for i, pname := range pathSegments {
 		camelPname := google.Camelize(pname, "lower")
-		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
-			return p.Name == camelPname
-		})
+		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
 		// if we couldn't find it, see if it was renamed at the top level
-		if index == -1 {
-			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
-				return p.Name == schemaPath
-			})
+		if prop == nil {
+			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
 		}
 
-		if index == -1 {
+		if prop == nil {
 			return ""
 		}
 
-		prop := nestedProps[index]
+		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
+		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
+		// intermediate segment. The terminal segment itself may be any type, so
+		// only apply this guard to non-final path tokens.
+		isIntermediate := i < len(pathSegments)-1
+		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			return ""
+		}
 
 		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
@@ -1511,6 +1515,23 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	}
 
 	return strings.Join(pathTkns[:], ".0.")
+}
+
+// findPropByNameInFlattenedList searches for a property by camelCase name in a
+// list of properties. It also searches recursively inside any FlattenObject
+// nested objects, since those appear as top-level fields in the Terraform schema.
+func findPropByNameInFlattenedList(props []*Type, name string) *Type {
+	for _, p := range props {
+		if p.Name == name {
+			return p
+		}
+		if p.FlattenObject {
+			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {

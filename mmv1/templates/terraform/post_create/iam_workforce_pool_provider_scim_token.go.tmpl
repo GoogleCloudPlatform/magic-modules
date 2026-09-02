@@ -1,0 +1,9 @@
+// Sleep to wait for the token to be replicated.
+time.Sleep(5 * time.Second)
+
+// Save the security_token to state
+if val, ok := res["securityToken"]; ok {
+    if err := d.Set("security_token", val); err != nil {
+        return fmt.Errorf("Error setting security_token: %v", err)
+    }
+}

@@ -37,12 +37,15 @@ iam_policy:
   iam_conditions_request_type: 'REQUEST_BODY'
 custom_code:
 exclude_tgc: true
-examples:
+samples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'region_backend_service_basic'
+        config_path: templates/terraform/samples/services/compute/region_backend_service_basic.tf.tmpl
+        resource_id_vars:
+          region_backend_service_name: 'region-backend-service'
+          health_check_name: 'health-check'
 parameters:
 properties:
   - name: 'name'

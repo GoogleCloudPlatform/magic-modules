@@ -15,22 +15,12 @@
 name: Collection
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/collections
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections?collectionId={{collection_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}
-examples:
-  - name: vectorsearch_collection_basic
-    primary_resource_id: "example-collection"
-    vars:
-      collection_id: "example-collection"
-  - name: vectorsearch_collection_cmek
-    primary_resource_id: "example-cmek-collection"
-    vars:
-      collection_id: "example-cmek-collection"
-autogen_async: true
 async:
   operation:
     timeouts:
@@ -45,6 +35,20 @@ async:
   result:
     resource_inside_response: true
 autogen_status: Q29sbGVjdGlvbg==
+autogen_async: true
+samples:
+  - name: vectorsearch_collection_basic
+    primary_resource_id: example-collection
+    steps:
+      - name: vectorsearch_collection_basic
+        resource_id_vars:
+          collection_id: example-collection
+  - name: vectorsearch_collection_cmek
+    primary_resource_id: example-cmek-collection
+    steps:
+      - name: vectorsearch_collection_cmek
+        resource_id_vars:
+          collection_id: example-cmek-collection
 parameters:
   - name: location
     type: String
@@ -74,11 +78,11 @@ properties:
       JSON Schema for data.
       Field names must contain only alphanumeric characters,
       underscores, and hyphens.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
     validation:
-      function: 'validation.StringIsJSON'
+      function: validation.StringIsJSON
   - name: description
     type: String
     description: User-specified description of the collection
@@ -115,7 +119,7 @@ properties:
     output: true
   - name: vectorSchema
     type: Map
-    key_name: 'field_name'
+    key_name: field_name
     description: |-
       Schema for vector fields. Only vector fields in this schema will be
       searchable.

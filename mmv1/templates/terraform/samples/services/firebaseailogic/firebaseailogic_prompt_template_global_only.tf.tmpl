@@ -1,0 +1,7 @@
+resource "google_firebase_ai_logic_prompt_template" "global_only" {
+  provider = google-beta
+  location = "global"
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  regional_propagation_disabled = true
+  template_string = file("test-fixtures/hello_world.prompt")
+}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/oracledatabase"
 )
 
 func TestAccOracleDatabaseOdbSubnet_basic(t *testing.T) {
@@ -34,7 +35,7 @@ data "google_oracle_database_odb_subnet" "my-subnet" {
   odb_subnet_id = "tf-test-permanent-client-odbsubnet"
   odbnetwork = "tf-test-permanent-odbnetwork"
   location = "europe-west2"
-  project = "oci-terraform-testing-prod"
+  project = "oasis-terraform-testing-prod"
 }
 `)
 }

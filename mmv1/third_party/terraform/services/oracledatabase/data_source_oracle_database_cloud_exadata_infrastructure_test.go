@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/oracledatabase"
 	"testing"
 )
 
@@ -35,7 +36,7 @@ func testAccOracleDatabaseCloudExadataInfrastructure_basic() string {
 	return fmt.Sprintf(`
 data "google_oracle_database_cloud_exadata_infrastructure" "my-exadata"{
   cloud_exadata_infrastructure_id = "ofake-do-not-delete-tf-exadata"
-  project = "oci-terraform-testing-prod"
+  project = "oasis-terraform-testing-prod"
   location = "us-east4"
 }
 `)

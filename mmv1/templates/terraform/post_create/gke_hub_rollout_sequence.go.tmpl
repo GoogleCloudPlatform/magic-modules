@@ -1,0 +1,59 @@
+if err := func() error {
+	var minCPVer string
+	if rawCP, ok := d.GetOk("min_control_plane_version"); ok {
+		minCPVer = rawCP.(string)
+	}
+
+	var minNodeVer string
+	if rawNode, ok := d.GetOk("min_node_version"); ok {
+		minNodeVer = rawNode.(string)
+	}
+
+	if minCPVer == "" && minNodeVer == "" {
+		return nil
+	}
+
+	log.Printf("[DEBUG] Polling RolloutSequence initialization.")
+	if err := pollSequenceInitialization(d, meta); err != nil {
+		return err
+	}
+
+	// There is a delay between the state of a RolloutSequence switching to ACTIVE, and the UpdateRolloutSequence endpoint
+	// releasing the lock on the resource. We sleep here to avoid conflict errors when making the UpgradeRolloutSequence call.
+	time.Sleep(1 * time.Minute)
+
+	log.Printf("[DEBUG] Fetching current RolloutSequence target versions.")
+	targetCPVer, targetNodeVer, err := fetchCurrentTargetVersions(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if minCPVer != "" {
+		shouldUpgrade, err := shouldUpgradeRolloutSequence(minCPVer, targetCPVer)
+		if err != nil {
+			return err
+		}
+		if shouldUpgrade {
+			log.Printf("[DEBUG] min_control_plane_version (%s) specified on RolloutSequence creation. Upgrading RolloutSequence.", minCPVer)
+			if err := triggerUpgradeRolloutSequence(d, meta, "CONTROL_PLANE", minCPVer); err != nil {
+				return err
+			}
+		}
+	}
+	if minNodeVer != "" {
+		shouldUpgrade, err := shouldUpgradeRolloutSequence(minNodeVer, targetNodeVer)
+		if err != nil {
+			return err
+		}
+		if shouldUpgrade {
+			log.Printf("[DEBUG] min_node_version (%s) specified on RolloutSequence creation. Upgrading RolloutSequence.", minNodeVer)
+			if err := triggerUpgradeRolloutSequence(d, meta, "NODE", minNodeVer); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}(); err != nil {
+	resourceGKEHub2RolloutSequencePostCreateFailure(d, meta)
+	return err
+}

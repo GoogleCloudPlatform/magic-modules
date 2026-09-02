@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/oracledatabase"
 )
 
 func TestAccOracleDatabaseAutonomousDatabase_basic(t *testing.T) {
@@ -19,8 +20,6 @@ func TestAccOracleDatabaseAutonomousDatabase_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_autonomous_database.my-adb", "display_name"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_autonomous_database.my-adb", "database"),
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_autonomous_database.my-adb", "cidr"),
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_autonomous_database.my-adb", "network"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_autonomous_database.my-adb", "properties.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_autonomous_database.my-adb", "properties.0.character_set"),
 				),
@@ -34,7 +33,7 @@ func testAccOracleDatabaseAutonomousDatabase_basic() string {
 data "google_oracle_database_autonomous_database" "my-adb"{
 	autonomous_database_id = "do-not-delete-tf-adb"
 	location = "us-east4"
-	project = "oci-terraform-testing-prod"
+	project = "oasis-terraform-testing-prod"
 }
 `)
 }

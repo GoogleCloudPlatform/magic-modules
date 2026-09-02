@@ -32,16 +32,20 @@ import_format:
   - projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}
 include_in_tgc_next: true
 cai_asset_name_format: projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}
-examples:
+samples:
   - name: dataproc_autoscaling_policy_basic
     primary_resource_id: basic
-    exclude_docs: true
-    vars:
-      name: dataproc-policy
+    exclude_basic_doc: true
+    steps:
+      - name: dataproc_autoscaling_policy_basic
+        resource_id_vars:
+          name: dataproc-policy
   - name: dataproc_autoscaling_policy
     primary_resource_id: asp
-    vars:
-      name: dataproc-policy
+    steps:
+      - name: dataproc_autoscaling_policy
+        resource_id_vars:
+          name: dataproc-policy
 parameters:
   - name: location
     type: String
@@ -56,6 +60,7 @@ properties:
     api_name: id
     type: String
     required: true
+    immutable: true
     description: |
       The policy id. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
       and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of between

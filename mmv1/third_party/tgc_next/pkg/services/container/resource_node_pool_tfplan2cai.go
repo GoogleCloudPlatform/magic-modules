@@ -202,6 +202,13 @@ func expandContainerNodePoolNodeConfig(v interface{}, d tpgresource.TerraformRes
 		transformed["taints"] = transformedTaint
 	}
 
+	transformedTaintConfig, err := expandContainerNodePoolNodeConfigTaintConfig(original["taint_config"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedTaintConfig); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["taintConfig"] = transformedTaintConfig
+	}
+
 	return transformed, nil
 }
 
@@ -345,6 +352,28 @@ func expandContainerNodePoolNodeConfigTaintValue(v interface{}, d tpgresource.Te
 }
 
 func expandContainerNodePoolNodeConfigTaintEffect(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandContainerNodePoolNodeConfigTaintConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	original := l[0].(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedArchitectureTaintBehavior, err := expandContainerNodePoolNodeConfigTaintConfigArchitectureTaintBehavior(original["architecture_taint_behavior"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedArchitectureTaintBehavior); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["architectureTaintBehavior"] = transformedArchitectureTaintBehavior
+	}
+
+	return transformed, nil
+}
+
+func expandContainerNodePoolNodeConfigTaintConfigArchitectureTaintBehavior(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 

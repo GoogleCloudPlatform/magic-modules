@@ -1,0 +1,92 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ModelGardenEnableModel
+api_resource_type_kind: PublisherModel
+description: |
+  Enables a Model Garden publisher model for a project so that it can be
+  deployed. This calls the synchronous
+  `ModelGardenService.EnableModel` method, which checks that the prerequisites
+  for the model are met (for example, a completed questionnaire and accepted
+  consents, or an active Private Offer) before enabling it.
+
+  ~> **Note:** The underlying API does not provide a way to disable a model
+  once it has been enabled, so destroying this resource only removes it from
+  Terraform state and does not affect the project's enablement status.
+references:
+  guides:
+    Use models in Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models
+    Overview of Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.publishers.models/enableModel
+docs:
+base_url: projects/{{project}}/{{publisher_model_name}}:enableModel
+# Only available in the v1beta1 (beta) API surface.
+min_version: beta
+immutable: true
+self_link: projects/{{project}}/{{publisher_model_name}}
+create_url: projects/{{project}}/{{publisher_model_name}}:enableModel
+id_format: projects/{{project}}/{{publisher_model_name}}
+timeouts:
+  insert_minutes: 20
+exclude_import: true
+exclude_sweeper: true
+exclude_delete: true
+# EnableModel is a synchronous action-only method with no Read, Delete, or
+# Import support, so the lifecycle is create-only.
+exclude_read: true
+custom_code:
+  post_create: templates/terraform/post_create/resource_vertexai_model_garden_enable_model.go.tmpl
+samples:
+  - name: vertex_ai_model_garden_enable_model_basic
+    min_version: beta
+    primary_resource_id: enable
+    # Handwritten test required since the resource does not support read,
+    # delete, or import.
+    exclude_test: true
+    steps:
+      - name: vertex_ai_model_garden_enable_model_basic
+        min_version: beta
+        resource_id_vars:
+          publisher_model_name: publishers/google/models/paligemma@paligemma-224-float32
+parameters:
+  - name: publisherModelName
+    type: String
+    description: |-
+      The resource name of the Model Garden publisher model to enable.
+      Format: `publishers/{publisher}/models/{publisher_model}`, optionally
+      with a version suffix, for example
+      `publishers/google/models/paligemma@paligemma-224-float32`.
+    min_version: beta
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: publisherEndpoint
+    type: String
+    description: |
+      Output only. The publisher endpoint that the project is enabled for.
+      Format:
+      `projects/{project}/locations/{location}/publishers/{publisher}/models/{publisher_model}`.
+    min_version: beta
+    output: true
+  - name: enablementState
+    type: Enum
+    description: |
+      Output only. The result of the model enablement.
+    min_version: beta
+    output: true
+    enum_values:
+      - ENABLEMENT_STATE_UNSPECIFIED
+      - ENABLEMENT_STATE_SUCCEEDED
+      - ENABLEMENT_STATE_FAILED

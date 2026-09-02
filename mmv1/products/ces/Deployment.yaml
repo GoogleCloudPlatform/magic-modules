@@ -22,19 +22,27 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
 autogen_status: RGVwbG95bWVudA==
-examples:
+samples:
   - name: ces_deployment_basic
     primary_resource_id: my-deployment
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      deployment_display_name: my-deployment
+    steps:
+      - name: ces_deployment_basic
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
+          deployment_display_name: my-deployment
   - name: ces_deployment_full
     primary_resource_id: my-deployment
-    vars:
-      app_display_name: my-app
-      app_id: app-id
-      deployment_display_name: my-deployment
+    steps:
+      - name: ces_deployment_full
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
+          deployment_display_name: my-deployment
 parameters:
   - name: location
     type: String
@@ -167,6 +175,20 @@ properties:
       operation. If the etag is empty, the update will overwrite any concurrent
       changes.
     output: true
+  - name: instagramCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring an Instagram channel profile.
+    ignore_read: true
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+        write_only: true
+      - name: conversationProfileId
+        type: String
+        description: The Conversation Profile ID to use for the deployment.
   - name: name
     type: String
     description: |-
@@ -179,3 +201,34 @@ properties:
     type: String
     description: Timestamp when this deployment was last updated.
     output: true
+  - name: whatsappCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring a WhatsApp channel profile.
+    ignore_read: true
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+        write_only: true
+      - name: businessAccountId
+        type: String
+        required: true
+        description: The Business Account ID to use for the phone number.
+      - name: conversationProfileId
+        type: String
+        description: The Conversation Profile ID to use for the deployment.
+      - name: phoneNumber
+        type: String
+        required: true
+        description: The phone number to register with WhatsApp.
+      - name: pin
+        type: String
+        required: true
+        description: The 6-digit PIN created by the user for two-step verification.
+        write_only: true
+      - name: wabaId
+        type: String
+        required: true
+        description: The WhatsApp Business Account ID.

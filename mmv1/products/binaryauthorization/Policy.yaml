@@ -35,19 +35,23 @@ timeouts:
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_policy.tmpl'
   pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.tmpl'
-examples:
+samples:
   - name: 'binary_authorization_policy_basic'
     primary_resource_id: 'policy'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
     exclude_test: true
+    steps:
+      - name: 'binary_authorization_policy_basic'
+        resource_id_vars:
+          attestor_name: 'test-attestor'
+          note_name: 'test-attestor-note'
   - name: 'binary_authorization_policy_global_evaluation'
     primary_resource_id: 'policy'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
     exclude_test: true
+    steps:
+      - name: 'binary_authorization_policy_global_evaluation'
+        resource_id_vars:
+          attestor_name: 'test-attestor'
+          note_name: 'test-attestor-note'
 parameters:
 properties:
   - name: 'description'
@@ -88,7 +92,6 @@ properties:
       to by one or more attestors, that all pod creations will be allowed,
       or that all pod creations will be denied. There can be at most one
       admission rule per cluster spec.
-
 
       Identifier format: `{{location}}.{{clusterId}}`.
       A location is either a compute zone (e.g. `us-central1-a`) or a region

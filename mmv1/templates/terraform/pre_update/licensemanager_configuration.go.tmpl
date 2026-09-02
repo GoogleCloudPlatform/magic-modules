@@ -1,0 +1,15 @@
+// Reference design doc: go/lima-terraform
+// Filter out "active" from updateMask because state transitions are handled via POST in post_update.
+var filteredMask []string
+for _, m := range updateMask {
+	if m != "active" {
+		filteredMask = append(filteredMask, m)
+	}
+}
+updateMask = filteredMask
+
+// Re-calculate the url query param with the filtered updateMask
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}

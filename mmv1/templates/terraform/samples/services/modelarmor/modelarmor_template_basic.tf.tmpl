@@ -1,0 +1,12 @@
+resource "google_model_armor_template" "template-basic" {
+  location    = "{{index $.ResourceIdVars "location"}}"
+  template_id = "{{index $.ResourceIdVars "templateId"}}"
+
+  filter_config {
+
+  }
+
+  template_metadata {
+
+  }
+}

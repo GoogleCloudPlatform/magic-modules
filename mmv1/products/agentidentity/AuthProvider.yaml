@@ -1,0 +1,219 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AuthProvider
+description: An AuthProvider resource in Agent Identity to manage cloud authentication delegation.
+base_url: projects/{{project}}/locations/{{location}}/authProviders
+self_link: projects/{{project}}/locations/{{location}}/authProviders/{{auth_provider_id}}
+create_url: projects/{{project}}/locations/{{location}}/authProviders?authProviderId={{auth_provider_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/authProviders/{{auth_provider_id}}
+custom_diff:
+  - agentIdentityAuthProviderCustomizeDiff
+custom_code:
+  constants: "templates/terraform/constants/agent_identity_auth_provider.go.tmpl"
+  post_read: "templates/terraform/post_read/agent_identity_auth_provider.go.tmpl"
+  decoder: "templates/terraform/decoders/agent_identity_auth_provider.go.tmpl"
+  post_create: "templates/terraform/post_create/sleep.go.tmpl"
+  post_update: "templates/terraform/post_create/sleep.go.tmpl"
+  post_delete: "templates/terraform/post_delete/sleep.go.tmpl"
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: authProviderId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the AuthProvider, which will become the final segment
+      of the AuthProvider's resource name.
+      This value should be 1-63 characters, and valid characters
+      are /a-z-/. The first character must be a lowercase letter, and the
+      last character must be a lowercase letter or a number.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: allowedScopes
+    type: Array
+    description: |-
+      List of scopes that are allowed to be requested for this auth_provider.
+      If this list is non-empty, only scopes within this list may be requested.
+      If this list is empty, all scopes may be requested.
+      Scopes appearing in `blocked_scopes` are disallowed even if they appear in
+      `allowed_scopes`.
+      The number of allowed scopes is limited to 200.
+    item_type:
+      type: String
+  - name: authProviderTypeParams
+    type: NestedObject
+    required: true
+    description: |-
+      AuthProvider type specific parameters.
+      Required when creating an auth_provider.
+    properties:
+      - name: apiKey
+        type: NestedObject
+        description: Message describing ApiKeyParams object.
+        ignore_read: true
+        exactly_one_of:
+          - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.three_legged_oauth
+          - auth_provider_type_params.0.two_legged_oauth
+        properties:
+          - name: apiKey
+            type: String
+            description: Input only. The API key for this auth_provider.
+            sensitive: true
+            ignore_read: true
+      - name: geAuthProvider
+        type: NestedObject
+        send_empty_value: true
+        allow_empty_object: true
+        output: true
+        description: |-
+          Message describing GeminiEnterpriseAuthProviderParams object.
+          Since GeminiEnterpriseAuthProviderParams currently takes no subfields, defining this empty block selects the ge_auth_provider type.
+        properties: [] # Explicitly show no properties
+      - name: threeLeggedOauth
+        type: NestedObject
+        description: Message describing ThreeLeggedOAuth object.
+        ignore_read: true
+        exactly_one_of:
+          - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.three_legged_oauth
+          - auth_provider_type_params.0.two_legged_oauth
+        properties:
+          - name: authorizationUrl
+            type: String
+            description: |-
+              The authorization endpoint to send users to for consenting to delegate
+              to the agent.
+              eg. "https://auth.atlassian.com/authorize"
+          - name: clientId
+            type: String
+            description: The client ID of the OAuth client.
+          - name: clientSecret
+            type: String
+            description: Input only. The client secret of the OAuth client.
+            write_only: true
+          - name: defaultContinueUri
+            type: String
+            description: |-
+              The default continue URI for 3LO flow and it will be used when no continue
+              URI is provided in the RetrieveCredentials request.
+          - name: enablePkce
+            type: Boolean
+            description: |-
+              Enables Proof Key for Code Exchange (PKCE) for the OAuth flow to prevent
+              authorization code interception attacks.
+          - name: redirectUrl
+            type: String
+            description: |-
+              The redirect URL this auth_provider uses for the OAuth exchange.
+              This is deterministic based on the name of the auth_provider.
+            output: true
+          - name: tokenUrl
+            type: String
+            description: |-
+              The token endpoint for requesting tokens on behalf of an end user.
+              eg. "https://auth.atlassian.com/oauth/token"
+      - name: twoLeggedOauth
+        type: NestedObject
+        description: Message describing TwoLeggedOAuth object.
+        ignore_read: true
+        exactly_one_of:
+          - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.three_legged_oauth
+          - auth_provider_type_params.0.two_legged_oauth
+        properties:
+          - name: clientId
+            type: String
+            description: The client ID of the OAuth client.
+          - name: clientSecret
+            type: String
+            description: Input only. The client secret of the OAuth client.
+            write_only: true
+          - name: tokenUrl
+            type: String
+            description: The token endpoint of the OAuth client.
+  - name: blockedScopes
+    type: Array
+    description: |-
+      List of scopes that are blocked from being requested for this
+      auth_provider. If a scope appears in this list, it will not be requested,
+      even if it also appears in `allowed_scopes`. `blocked_scopes` takes
+      precedence over `allowed_scopes`. The number of blocked scopes is limited
+      to 200.
+    item_type:
+      type: String
+  - name: createTime
+    type: String
+    description: "[Output only] Create time stamp"
+    output: true
+  - name: deleted
+    type: Boolean
+    description: This is set to true if the auth_provider is deleted.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      Description of the resource.
+      Must be less than 256 characters.
+  - name: expireTime
+    type: String
+    description: The time when the auth_provider will expire.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs
+  - name: name
+    type: String
+    description: |-
+      Identifier. The full resource name of the auth_provider. Format:
+      projects/{project}/locations/{location}/authProviders/{auth_provider}
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The state of the auth_provider.
+      Possible values:
+      ENABLED
+      DISABLED
+    output: true
+  - name: updateTime
+    type: String
+    description: "[Output only] Update time stamp"
+    output: true
+  - name: workloadIds
+    type: Array
+    description: |-
+      Input only. Represents the workload identity in IAM `principal://` format of the
+      agent(s) that will use this AuthProvider. Example:
+      `principal://agents.global.org-${ORG_ID}.system.id.goog/resources/aiplatform/projects/{PROJECT_ID}/locations/{LOCATIONS}/reasoningEngines/{ID}`
+    item_type:
+      type: String
+    ignore_read: true
+samples:
+  - name: "agent_identity_auth_provider_basic"
+    primary_resource_id: "default"
+    exclude_test: true
+    steps:
+      - name: "agent_identity_auth_provider_basic"
+        resource_id_vars:
+          auth_provider_id: "example-provider"

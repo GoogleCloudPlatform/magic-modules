@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Metric'
+name: Metric
 api_resource_type_kind: LogMetric
 description: |
   Logs-based metric can also be used to extract values from logs and create a a distribution
@@ -20,51 +20,61 @@ description: |
   an optional histogram of the values as specified by the bucket options.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
-  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.metrics/create'
+    Official Documentation: https://cloud.google.com/logging/docs/apis
+  api: https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.metrics/create
 docs:
-id_format: '{{name}}'
-base_url: 'projects/{{project}}/metrics'
+base_url: projects/{{project}}/metrics
 # The % in self_link indicates that the name value should be URL-encoded.
-self_link: 'projects/{{project}}/metrics/{{%name}}'
-cai_asset_name_format: 'projects/{{project}}/metrics/{{%name}}'
-mutex: 'customMetric/{{project}}'
+self_link: projects/{{project}}/metrics/{{%name}}
+id_format: '{{name}}'
 import_format:
   - '{{name}}'
   - '{{project}} {{name}}'
-include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+mutex: customMetric/{{project}}
+include_in_tgc_next: true
+cai_asset_name_format: projects/{{project}}/metrics/{{%name}}
 custom_code:
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-examples:
-  - name: 'logging_metric_basic'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-  - name: 'logging_metric_counter_basic'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-  - name: 'logging_metric_counter_labels'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-  - name: 'logging_metric_logging_bucket'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_metric_disabled'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
+  custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
+samples:
+  - name: logging_metric_basic
+    primary_resource_id: logging_metric
+    steps:
+      - name: logging_metric_basic
+        resource_id_vars:
+          logging_metric_name: my-(custom)/metric
+  - name: logging_metric_counter_basic
+    primary_resource_id: logging_metric
+    steps:
+      - name: logging_metric_counter_basic
+        resource_id_vars:
+          logging_metric_name: my-(custom)/metric
+  - name: logging_metric_counter_labels
+    primary_resource_id: logging_metric
+    steps:
+      - name: logging_metric_counter_labels
+        resource_id_vars:
+          logging_metric_name: my-(custom)/metric
+  - name: logging_metric_logging_bucket
+    primary_resource_id: logging_metric
+    steps:
+      - name: logging_metric_logging_bucket
+        resource_id_vars:
+          logging_metric_name: my-(custom)/metric
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: logging_metric_disabled
+    primary_resource_id: logging_metric
+    steps:
+      - name: logging_metric_disabled
+        resource_id_vars:
+          logging_metric_name: my-(custom)/metric
 parameters:
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The client-assigned metric identifier. Examples - "error_count", "nginx/requests".
@@ -73,28 +83,28 @@ properties:
       character (/) denotes a hierarchy of name pieces, and it cannot be the first character
       of the name.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       A description of this metric, which is used in documentation. The maximum length of the
       description is 8000 characters.
     required: false
-  - name: 'bucketName'
+  - name: bucketName
     type: String
     description: |
       The resource name of the Log Bucket that owns the Log Metric. Only Log Buckets in projects
       are supported. The bucket has to be in the same project as the metric.
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       If set to True, then this metric is disabled and it does not generate any points.
-  - name: 'filter'
+  - name: filter
     type: String
     description: |
       An advanced logs filter (https://cloud.google.com/logging/docs/view/advanced-filters) which
       is used to match log entries.
     required: true
-  - name: 'metricDescriptor'
+  - name: metricDescriptor
     type: NestedObject
     description: |
       The optional metric descriptor associated with the logs-based metric.
@@ -103,14 +113,14 @@ properties:
       number of log entries matching the filter expression.
     default_from_api: true
     properties:
-      - name: 'unit'
+      - name: unit
         type: String
         description: |
           The unit in which the metric value is reported. It is only applicable if the valueType is
           `INT64`, `DOUBLE`, or `DISTRIBUTION`. The supported units are a subset of
           [The Unified Code for Units of Measure](http://unitsofmeasure.org/ucum.html) standard
         default_value: "1"
-      - name: 'valueType'
+      - name: valueType
         type: Enum
         description: |
           Whether the measurement is an integer, a floating-point number, etc.
@@ -118,13 +128,13 @@ properties:
           For counter metrics, set this to INT64.
         required: true
         enum_values:
-          - 'BOOL'
-          - 'INT64'
-          - 'DOUBLE'
-          - 'STRING'
-          - 'DISTRIBUTION'
-          - 'MONEY'
-      - name: 'metricKind'
+          - BOOL
+          - INT64
+          - DOUBLE
+          - STRING
+          - DISTRIBUTION
+          - MONEY
+      - name: metricKind
         type: Enum
         description: |
           Whether the metric records instantaneous values, changes to a value, etc.
@@ -132,10 +142,10 @@ properties:
           For counter metrics, set this to DELTA.
         required: true
         enum_values:
-          - 'DELTA'
-          - 'GAUGE'
-          - 'CUMULATIVE'
-      - name: 'labels'
+          - DELTA
+          - GAUGE
+          - CUMULATIVE
+      - name: labels
         type: Array
         description: |
           The set of labels that can be used to describe a specific instance of this metric type. For
@@ -147,43 +157,43 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'key'
+            - name: key
               type: String
               description: |
                 The label key.
               required: true
               immutable: true
-            - name: 'description'
+            - name: description
               type: String
               description: |
                 A human-readable description for the label.
               required: false
-            - name: 'valueType'
+            - name: valueType
               type: Enum
               description: |
                 The type of data that can be assigned to the label.
               required: false
               immutable: true
-              custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-              default_value: "STRING"
+              custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+              default_value: STRING
               enum_values:
-                - 'BOOL'
-                - 'INT64'
-                - 'STRING'
-      - name: 'displayName'
+                - BOOL
+                - INT64
+                - STRING
+      - name: displayName
         type: String
         description: |
           A concise name for the metric, which can be displayed in user interfaces. Use sentence case
           without an ending period, for example "Request count". This field is optional but it is
           recommended to be set for any metrics associated with user-visible concepts, such as Quota.
-  - name: 'labelExtractors'
+  - name: labelExtractors
     type: KeyValuePairs
     description: |
       A map from a label key string to an extractor expression which is used to extract data from a log
       entry field and assign as the label value. Each label key specified in the LabelDescriptor must
       have an associated extractor expression in this map. The syntax of the extractor expression is
       the same as for the valueExtractor field.
-  - name: 'valueExtractor'
+  - name: valueExtractor
     type: String
     description: |
       A valueExtractor is required when using a distribution logs-based metric to extract the values to
@@ -193,72 +203,72 @@ properties:
       (https://github.com/google/re2/wiki/Syntax) with a single capture group to extract data from the specified
       log entry field. The value of the field is converted to a string before applying the regex. It is an
       error to specify a regex that does not include exactly one capture group.
-  - name: 'bucketOptions'
+  - name: bucketOptions
     type: NestedObject
     description: |
       The bucketOptions are required when the logs-based metric is using a DISTRIBUTION value type and it
       describes the bucket boundaries used to create a histogram of the extracted values.
     properties:
-      - name: 'linearBuckets'
+      - name: linearBuckets
         type: NestedObject
         description: |
           Specifies a linear sequence of buckets that all have the same width (except overflow and underflow).
           Each bucket represents a constant absolute uncertainty on the specific value in the bucket.
         at_least_one_of:
-          - 'bucket_options.0.linear_buckets'
-          - 'bucket_options.0.exponential_buckets'
-          - 'bucket_options.0.explicit_buckets'
+          - bucket_options.0.linear_buckets
+          - bucket_options.0.exponential_buckets
+          - bucket_options.0.explicit_buckets
         properties:
-          - name: 'numFiniteBuckets'
+          - name: numFiniteBuckets
             type: Integer
             description: |
               Must be greater than 0.
             required: true
-          - name: 'width'
+          - name: width
             type: Double
             description: |
               Must be greater than 0.
             required: true
-          - name: 'offset'
+          - name: offset
             type: Double
             description: |
               Lower bound of the first bucket.
             required: true
-      - name: 'exponentialBuckets'
+      - name: exponentialBuckets
         type: NestedObject
         description: |
           Specifies an exponential sequence of buckets that have a width that is proportional to the value of
           the lower bound. Each bucket represents a constant relative uncertainty on a specific value in the bucket.
         at_least_one_of:
-          - 'bucket_options.0.linear_buckets'
-          - 'bucket_options.0.exponential_buckets'
-          - 'bucket_options.0.explicit_buckets'
+          - bucket_options.0.linear_buckets
+          - bucket_options.0.exponential_buckets
+          - bucket_options.0.explicit_buckets
         properties:
-          - name: 'numFiniteBuckets'
+          - name: numFiniteBuckets
             type: Integer
             description: |
               Must be greater than 0.
             required: true
-          - name: 'growthFactor'
+          - name: growthFactor
             type: Double
             description: |
               Must be greater than 1.
             required: true
-          - name: 'scale'
+          - name: scale
             type: Double
             description: |
               Must be greater than 0.
             required: true
-      - name: 'explicitBuckets'
+      - name: explicitBuckets
         type: NestedObject
         description: |
           Specifies a set of buckets with arbitrary widths.
         at_least_one_of:
-          - 'bucket_options.0.linear_buckets'
-          - 'bucket_options.0.exponential_buckets'
-          - 'bucket_options.0.explicit_buckets'
+          - bucket_options.0.linear_buckets
+          - bucket_options.0.exponential_buckets
+          - bucket_options.0.explicit_buckets
         properties:
-          - name: 'bounds'
+          - name: bounds
             type: Array
             description: |
               The values must be monotonically increasing.

@@ -1,0 +1,353 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Parser
+description: |-
+  A parser is a configuration that parses raw logs of a specific log type into Unified Data Model (UDM) events.
+  Chronicle supports both customer-created custom parsers and Google-provided prebuilt parsers.
+references:
+  guides:
+    'Custom parsers overview': 'https://cloud.google.com/chronicle/docs/detection/custom-parsers-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.logTypes.parsers'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers/{{parser}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/logTypes/{{logtype}}/parsers/{{parser}}
+autogen_status: UGFyc2Vy
+autogen_async: false
+samples:
+  - name: 'chronicle_parser_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'chronicle_parser_basic'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'state'
+          - 'validation_report'
+          - 'validation_stage'
+          - 'validated_on_empty_logs'
+  - name: 'chronicle_parser_full'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'chronicle_parser_full'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        ignore_read_extra:
+          - 'state'
+          - 'validation_report'
+          - 'validation_stage'
+          - 'validated_on_empty_logs'
+          - 'low_code.0.field_extractors.0.append_repeated_fields'
+          - 'version_info'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: logtype
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: parser
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: Output only. The server-generated ID of the parser.
+properties:
+  - name: cbn
+    type: String
+    immutable: true
+    description: |-
+      if the parser is built using config
+      documentation:
+      https://cloud.google.com/chronicle/docs/preview/parser-extensions/parsing-overview
+  - name: changelogs
+    type: NestedObject
+    output: true
+    description: Changelogs of a parser.
+    properties:
+      - name: entries
+        type: Array
+        description: all the changelog of a parser.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: changeMessage
+              type: String
+              description: The changelog message.
+              output: true
+            - name: createTime
+              type: String
+              description: Time at which changelog was created.
+              output: true
+            - name: deleted
+              type: Boolean
+              description: |-
+                Flag whether the entry is added or deleted.
+                This will be true in case of rollback and false in case of upgrade.
+              output: true
+            - name: parserVersion
+              type: String
+              description: The parser version for which the changelog is created.
+              output: true
+  - name: createTime
+    type: String
+    description: Time at which parser was created.
+    output: true
+  - name: creator
+    type: NestedObject
+    output: true
+    description: Information about the creator of the parser.
+    properties:
+      - name: author
+        type: String
+        description: The name of the author, who created this parser.
+        output: true
+      - name: customer
+        type: String
+        description: |-
+          The customer who created it, This can represent the partner as well.
+          In case of prebuilt parser this will be empty.
+        output: true
+      - name: source
+        type: String
+        description: |-
+          The source of the parser.
+          Possible values:
+          GOOGLE
+          CUSTOM_GOOGLE_OVERRIDE
+          PARTNER
+          CUSTOMER
+        output: true
+  - name: dynamicParsingConfig
+    type: String
+    description: Dynamic parsing config applied over the parser, if any.
+    output: true
+  - name: lowCode
+    type: NestedObject
+    immutable: true
+    description: Message to represent LowCodeParser.
+    properties:
+      - name: fieldExtractors
+        type: NestedObject
+        description: A representation of a parser extension as a set of field extractors.
+        properties:
+          - name: appendRepeatedFields
+            type: Boolean
+            ignore_read: true
+            description: |-
+              Whether to append repeated fields or not.
+              When false, repeated fields will be replaced.
+          - name: extractors
+            type: Array
+            description: List of FieldExtractors.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: destinationPath
+                  type: String
+                  description: |-
+                    Path in generated event which is to be populated. This is required if the
+                    FieldExtractor is used to specify the parser extension.
+                - name: fieldPath
+                  type: String
+                  description: |-
+                    Field path could be a json path, xml path or csv column name
+                    depending on log format. It refers to a section or substring in raw log.
+                    This is required if the FieldExtractor is used to specify the parser
+                    extension.
+                - name: preconditionOp
+                  type: String
+                  description: |-
+                    Operator used for precondition.
+                    Possible values:
+                    EQUALS
+                    NOT_EQUALS
+                - name: preconditionPath
+                  type: String
+                  description: |-
+                    Precondition path could be a json path, xml path or csv column name
+                    depending on log format. It refers to a section or substring in raw log.
+                - name: preconditionValue
+                  type: String
+                  description: Precondition value.
+                - name: value
+                  type: String
+                  description: Value to be mapped to the destination path directly.
+          - name: logFormat
+            type: String
+            description: |-
+              Possible values:
+              JSON
+              CSV
+              XML
+          - name: preprocessConfig
+            type: NestedObject
+            description: PreProcessConfig holds the GROK expression to extract the syslog header.
+            properties:
+              - name: grokRegex
+                type: String
+                description: |-
+                  GROK Regex to extract the structured part of the log.
+                  syntax documentation:
+                  www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
+              - name: target
+                type: String
+                description: |-
+                  Target field name for the structured part of the log.
+                  This should match a SEMANTIC identifier from the grok expression.
+          - name: transformedCbnSnippet
+            type: String
+            description: CBN snippet generated from field extractors.
+            output: true
+      - name: log
+        type: String
+        description: The log used to create this low code parser in the UI.
+  - name: name
+    type: String
+    description: name of the parser resource.
+    output: true
+  - name: parserExtension
+    type: String
+    description: Extension applied over the parser, if any.
+    output: true
+  - name: releaseStage
+    type: String
+    description: |-
+      The release stage of the parser
+      After internal validations the prebuilt parser will directly start as
+      Release Candidate. The release_stage of prebuilt parsers are changed
+      after every release cycle:
+      The prebuilt Release Candidate parser is promoted as Release parser.
+      The existing prebuilt Release parser is moved to Rollback state.
+      and existing prebuilt rollback parser is moved to Archived.
+      In case of custom parser:
+      When the customer submits a validation passed custom parser it starts as
+      Release state.
+      And existing one is moved to Rollback stage.
+      And the existing rollback is moved to Archived.
+      In case a release or release candidate parser is found faulty,
+      the parser is marked FAULTY,
+      if it is release parser then rollback candidate is moved to release.
+      Possible values:
+      RELEASE
+      RELEASE_CANDIDATE
+      ROLLBACK_CANDIDATE
+      ARCHIVED
+      FAULTY
+      ARCHIVED_IN_USE
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The state of the parser
+      Possible values:
+      ACTIVE
+      INACTIVE
+    output: true
+  - name: type
+    type: String
+    description: |-
+      The type of the parser
+      Possible values:
+      CUSTOM
+      PREBUILT
+    output: true
+  - name: validatedOnEmptyLogs
+    type: Boolean
+    immutable: true
+    ignore_read: true
+    description: |-
+      Flag to bypass parser validation when no logs are found.
+      If enabled, the parser won't be be rejected during the validation
+      phase when no logs are found.
+  - name: validationReport
+    type: String
+    description: The Validation report generated during parser validation.
+    output: true
+  - name: validationSkipped
+    type: Boolean
+    immutable: true
+    description: |-
+      If true, bypasses parser validation.
+      If enabled, the parser won't be rejected during the validation
+      phase and validation will be skipped.
+  - name: validationStage
+    type: String
+    description: |-
+      The validation stage of the parser
+      When a customer submits a new parser for validation, it starts with a
+      new stage.
+      When parser is picked for validation, it changes to Validation state.
+      If validation failed it is marked as failed, and
+      existing failed is moved to delete_candidate stage.
+      If passes it is moved to passed stage.
+      If customer opts to submit it, the parser is moved to Release State.
+      Possible values:
+      NEW
+      VALIDATING
+      PASSED
+      FAILED
+      DELETE_CANDIDATE
+      INTERNAL_ERROR
+      VALIDATION_SKIPPED
+    output: true
+  - name: versionInfo
+    type: NestedObject
+    custom_flatten: 'templates/terraform/custom_flatten/chronicle_parser_version_info.go.tmpl'
+    description: |-
+      ParserVersionInfo gives the version information of the parser and related
+      properties like pinned etc.
+    update_mask_fields:
+      - 'version_info.auto_upgrade_disabled'
+    properties:
+      - name: autoUpgradeDisabled
+        type: Boolean
+        required: true
+        description: |-
+          Signifies if the parser is disabled for auto upgrade. If true, the parser
+          will not be upgraded by the auto upgrade process.
+      - name: latestParser
+        type: String
+        description: |-
+          The resource name of latest Parser for this logtype.
+          Format:
+          projects/{project}/locations/{region}/instances/{instance}/logTypes/{log_type}/parsers/{parser}/{id}
+        output: true
+      - name: latestParserVersion
+        type: String
+        description: The version for the latest available stable version of the parser.
+        output: true
+      - name: rollbackAvailable
+        type: Boolean
+        description: Signifies if rollback is available for this parser version.
+        output: true
+      - name: version
+        type: String
+        description: The version of the parser.
+        output: true

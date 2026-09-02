@@ -1,0 +1,42 @@
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "{{index $.ResourceIdVars "secret_resource_id"}}" {
+  secret_id = "{{index $.ResourceIdVars "secret_id"}}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "{{index $.ResourceIdVars "secret_resource_id"}}_version" {
+  secret = google_secret_manager_secret.{{index $.ResourceIdVars "secret_resource_id"}}.id
+  secret_data = "{{index $.ResourceIdVars "secret_data"}}"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret-access" {
+  secret_id = google_secret_manager_secret.{{index $.ResourceIdVars "secret_resource_id"}}.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
+resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
+  location      = "us-central1"
+  repository_id = "{{index $.ResourceIdVars "repository_id"}}"
+  description   = "{{index $.ResourceIdVars "desc"}}"
+  format        = "NPM"
+  mode          = "REMOTE_REPOSITORY"
+  remote_repository_config {
+    description = "custom npm with credentials"
+    disable_upstream_validation = true
+    npm_repository {
+      custom_repository {
+        uri = "https://my.npm.registry"
+      }
+    }
+    upstream_credentials {
+      username_password_credentials {
+        username = "{{index $.ResourceIdVars "username"}}"
+        password_secret_version = google_secret_manager_secret_version.{{index $.ResourceIdVars "secret_resource_id"}}_version.name
+      }
+    }
+  }
+}

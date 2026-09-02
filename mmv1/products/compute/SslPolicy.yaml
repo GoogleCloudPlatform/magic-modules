@@ -43,17 +43,21 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/ssl_policy.tmpl'
   update_encoder: 'templates/terraform/update_encoder/ssl_policy.tmpl'
-examples:
+samples:
   - name: 'ssl_policy_basic'
     primary_resource_id: 'prod-ssl-policy'
-    vars:
-      production_ssl_policy_name: 'production-ssl-policy'
-      nonprod_ssl_policy_name: 'nonprod-ssl-policy'
-      custom_ssl_policy_name: 'custom-ssl-policy'
+    steps:
+      - name: 'ssl_policy_basic'
+        resource_id_vars:
+          production_ssl_policy_name: 'production-ssl-policy'
+          nonprod_ssl_policy_name: 'nonprod-ssl-policy'
+          custom_ssl_policy_name: 'custom-ssl-policy'
   - name: 'ssl_policy_post_quantum'
     primary_resource_id: 'post-quantum-ssl-policy'
-    vars:
-      post_quantum_ssl_policy_name: 'post-quantum-ssl-policy'
+    steps:
+      - name: 'ssl_policy_post_quantum'
+        resource_id_vars:
+          post_quantum_ssl_policy_name: 'post-quantum-ssl-policy'
 parameters:
 properties:
   - name: 'creationTimestamp'

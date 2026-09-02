@@ -16,6 +16,7 @@ name: AssetsExportJob
 description: AssetsExportJob represents a batch job that exports Migration Center assets to external destinations such as Cloud Storage.
 base_url: projects/{{project}}/locations/{{location}}/assetsExportJobs
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/assetsExportJobs/{{assets_export_job_id}}
 create_url: projects/{{project}}/locations/{{location}}/assetsExportJobs?assetsExportJobId={{assets_export_job_id}}
 import_format:
@@ -28,13 +29,15 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: QXNzZXRzRXhwb3J0Sm9i
+autogen_status: QXNzZXRzRXhwb3J0Sm9iQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
-examples:
-  - name: 'migration_center_assets_export_job_basic'
-    primary_resource_id: 'default'
-    vars:
-      assets_export_job_id: 'assets-export-job-test'
+samples:
+  - name: migration_center_assets_export_job_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_assets_export_job_basic
+        resource_id_vars:
+          assets_export_job_id: assets-export-job-test
 parameters:
   - name: location
     type: String

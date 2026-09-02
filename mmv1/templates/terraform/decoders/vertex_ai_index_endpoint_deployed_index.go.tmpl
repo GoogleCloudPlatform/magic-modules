@@ -1,3 +1,12 @@
+if d.Get("region").(string) == "" {
+	re := regexp.MustCompile(`^projects/[^/]+/locations/(?P<region>[^/]+)/indexEndpoints/[^/]+$`)
+	if m := re.FindStringSubmatch(d.Get("index_endpoint").(string)); m != nil {
+		if err := d.Set("region", m[1]); err != nil {
+			return nil, fmt.Errorf("Error setting region: %s", err)
+		}
+	}
+}
+
 v, ok := res["deployedIndexes"]
 if !ok || v == nil { // CREATE
 	res["name"] = res["deployedIndexId"]

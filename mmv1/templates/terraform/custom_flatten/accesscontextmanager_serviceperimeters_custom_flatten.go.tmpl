@@ -126,6 +126,10 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAcces
 		flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesEnableRestriction(original["enableRestriction"], d, config)
 	transformed["allowed_services"] =
 		flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServices(original["allowedServices"], d, config)
+	transformed["allowed_service_patterns"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatterns(original["allowedServicePatterns"], d, config)
+	transformed["service_patterns_enforcement_scopes"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesServicePatternsEnforcementScopes(original["servicePatternsEnforcementScopes"], d, config)
 	return []interface{}{transformed}
 }
 func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesEnableRestriction(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -202,6 +206,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressP
 		transformed = append(transformed, map[string]interface{}{
 			"access_level": flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFromSourcesAccessLevel(original["accessLevel"], d, config),
 			"resource":     flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFromSourcesResource(original["resource"], d, config),
+			"psc_endpoint": flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFromSourcesPscEndpoint(original["pscEndpoint"], d, config),
 		})
 	}
 	return transformed
@@ -357,6 +362,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPo
 		transformed = append(transformed, map[string]interface{}{
 			"access_level": flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesAccessLevel(original["accessLevel"], d, config),
 			"resource":     flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesResource(original["resource"], d, config),
+			"psc_endpoint": flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesPscEndpoint(original["pscEndpoint"], d, config),
 		})
 	}
 	return transformed
@@ -518,6 +524,10 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessi
 		flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesEnableRestriction(original["enableRestriction"], d, config)
 	transformed["allowed_services"] =
 		flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServices(original["allowedServices"], d, config)
+	transformed["allowed_service_patterns"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatterns(original["allowedServicePatterns"], d, config)
+	transformed["service_patterns_enforcement_scopes"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesServicePatternsEnforcementScopes(original["servicePatternsEnforcementScopes"], d, config)
 	return []interface{}{transformed}
 }
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesEnableRestriction(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -594,6 +604,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPol
 		transformed = append(transformed, map[string]interface{}{
 			"access_level": flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFromSourcesAccessLevel(original["accessLevel"], d, config),
 			"resource":     flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFromSourcesResource(original["resource"], d, config),
+			"psc_endpoint": flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFromSourcesPscEndpoint(original["pscEndpoint"], d, config),
 		})
 	}
 	return transformed
@@ -749,6 +760,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoli
 		transformed = append(transformed, map[string]interface{}{
 			"access_level": flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesAccessLevel(original["accessLevel"], d, config),
 			"resource":     flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesResource(original["resource"], d, config),
+			"psc_endpoint": flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesPscEndpoint(original["pscEndpoint"], d, config),
 		})
 	}
 	return transformed
@@ -854,5 +866,207 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoli
 }
 
 func flattenAccessContextManagerServicePerimetersServicePerimetersUseExplicitDryRunSpec(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFromSourcesPscEndpoint(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["forwarding_rule"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFromSourcesPscEndpointForwardingRule(original["forwardingRule"], d, config)
+	return []interface{}{transformed}
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFromSourcesPscEndpointForwardingRule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesPscEndpoint(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["forwarding_rule"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesPscEndpointForwardingRule(original["forwardingRule"], d, config)
+	return []interface{}{transformed}
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesPscEndpointForwardingRule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFromSourcesPscEndpoint(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["forwarding_rule"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFromSourcesPscEndpointForwardingRule(original["forwardingRule"], d, config)
+	return []interface{}{transformed}
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFromSourcesPscEndpointForwardingRule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesPscEndpoint(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["forwarding_rule"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesPscEndpointForwardingRule(original["forwardingRule"], d, config)
+	return []interface{}{transformed}
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesPscEndpointForwardingRule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatterns(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"service":   flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsService(original["service"], d, config),
+			"pattern":   flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsPattern(original["pattern"], d, config),
+			"modifiers": flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiers(original["modifiers"], d, config),
+		})
+	}
+	return transformed
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsService(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsPattern(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiers(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"add_request_header": flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeader(original["addRequestHeader"], d, config),
+		})
+	}
+	return transformed
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeader(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["key"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderKey(original["key"], d, config)
+	transformed["value"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderValue(original["value"], d, config)
+	return []interface{}{transformed}
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderKey(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderValue(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusVpcAccessibleServicesServicePatternsEnforcementScopes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatterns(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"service":   flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsService(original["service"], d, config),
+			"pattern":   flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsPattern(original["pattern"], d, config),
+			"modifiers": flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiers(original["modifiers"], d, config),
+		})
+	}
+	return transformed
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsService(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsPattern(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiers(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"add_request_header": flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeader(original["addRequestHeader"], d, config),
+		})
+	}
+	return transformed
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeader(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["key"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderKey(original["key"], d, config)
+	transformed["value"] =
+		flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderValue(original["value"], d, config)
+	return []interface{}{transformed}
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderKey(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesAllowedServicePatternsModifiersAddRequestHeaderValue(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecVpcAccessibleServicesServicePatternsEnforcementScopes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }

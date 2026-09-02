@@ -110,23 +110,23 @@ func (s *Sample) TestSteps() []*Step {
 	})
 }
 
-// TestServiceDependencies returns a map of service names to import aliases that are required
+// TestDependencies returns a map of service names to import aliases that are required
 // by this sample's steps.
-func (s *Sample) TestServiceDependencies(resourcePrefixServiceMap map[string]string) map[string]string {
+func (s *Sample) TestDependencies(resourcePrefixPkgMap map[string]string) map[string]string {
 	deps := map[string]string{}
 	if len(s.BootstrapIam) > 0 {
-		deps["resourcemanager"] = ""
+		deps["services/resourcemanager"] = ""
 	}
 	for _, step := range s.TestSteps() {
-		for service, alias := range step.TestServiceDependencies(resourcePrefixServiceMap) {
-			if depsAlias, ok := deps[service]; ok && alias != depsAlias {
+		for pkg, alias := range step.TestDependencies(resourcePrefixPkgMap) {
+			if depsAlias, ok := deps[pkg]; ok && alias != depsAlias {
 				if (alias == "_" && depsAlias == "") || (alias == "" && depsAlias == "_") {
-					deps[service] = ""
+					deps[pkg] = ""
 					continue
 				}
-				log.Fatalf("Conflicting aliases (%s vs %s) for service dependency %s for sample %s", depsAlias, alias, service, s.Name)
+				log.Fatalf("Conflicting aliases (%s vs %s) for pkg dependency %s for sample %s", depsAlias, alias, pkg, s.Name)
 			}
-			deps[service] = alias
+			deps[pkg] = alias
 		}
 	}
 	return deps

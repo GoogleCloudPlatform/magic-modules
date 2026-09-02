@@ -37,8 +37,56 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   return sorted
 }
 
-{{- if $.NestedProperties }}
-    {{- range $prop := $.NestedProperties }}
-      {{ template "flattenPropertyMethod" $prop -}}
-    {{- end }}
-{{- end }}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectKey(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Aspect(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if v == nil {
+    return nil
+  }
+  original := v.(map[string]interface{})
+  if len(original) == 0 {
+    return nil
+  }
+  transformed := make(map[string]interface{})
+  transformed["aspect_type"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectType(original["aspectType"], d, config)
+  transformed["path"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectPath(original["path"], d, config)
+  transformed["create_time"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectCreateTime(original["createTime"], d, config)
+  transformed["update_time"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectUpdateTime(original["updateTime"], d, config)
+  transformed["data"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectData(original["data"], d, config)
+  return []interface{}{transformed}
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectPath(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectCreateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectUpdateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectData(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if v == nil {
+    return nil
+  }
+  b, err := json.Marshal(v)
+  if err != nil {
+    // TODO: return error once https://github.com/GoogleCloudPlatform/magic-modules/issues/3257 is fixed.
+    log.Printf("[ERROR] failed to marshal schema to JSON: %v", err)
+  }
+  return string(b)
+}

@@ -258,64 +258,6 @@ An update test ensures that updatable fields can be changed without recreating t
 {{< /tab >}}
 {{% /tabs %}}
 
-## Legacy: Examples-based Framework
-
-> [!WARNING]
-> The `examples` block is legacy and has been replaced by `samples`. This footprint is still supported for approximately 2 months to allow for transition. New tests should use the `samples` framework.
-
-Tests within the legacy `examples` generator are configured directly on the resource YAML. **Note that this legacy framework only supports generating create tests;** multi-step update tests must be configured via the new `samples` framework or handwritten manual testing procedures.
-
-### Steps
-
-1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
-   ```yaml
-   examples:
-     # name must correspond to a configuration file that you'll create in the next step.
-     # The name should include the product name, resource name, and a basic description
-     # of the test. This will be used to generate the test name and the documentation
-     # header.
-     - name: "PRODUCT_RESOURCE_basic"
-       # primary_resource_id will be used for the Terraform resource id in the configuration file.
-       primary_resource_id: "example"
-       # vars contains key/value pairs of variables to inject into the configuration file.
-       # These can be referenced in the configuration file as a key inside `{{$.Vars}}`.
-       # All resource IDs (even for resources not under test) should be declared
-       # with variables that contain a `-` or `_`; this will ensure that, in tests,
-       # the resources are created with a `tf-test` prefix to allow automatic cleanup
-       # of dangling resources and a random suffix to avoid name collisions.
-       vars:
-         network_name: "example-network"
-       # test_vars_overrides contains key/value pairs of literal overrides for
-       # variables used in tests. This can be used to call functions to
-       # generate or determine a variable's value – for example, bootstrapping
-       # a shared network for your product to avoid test failures due to limits
-       # on the default network.
-       test_vars_overrides:
-         network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
-       # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
-       min_version: beta
-   ```
-
-2. Create a `.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should match the name of the example created in the previous step. For example, `PRODUCT_RESOURCE_basic.tf.tmpl`.
-3. In that file, write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
-   ```tf
-   resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
-     name          = "{{index $.Vars "subnetwork_name"}}"
-     ip_cidr_range = "10.1.0.0/16"
-     region        = "us-central1"
-     network       = google_compute_network.network.name
-   }
-
-   resource "google_compute_network" "network" {
-     name                    = "{{index $.Vars "network_name"}}"
-     auto_create_subnetworks = false
-   }
-   ```
-4. If the resource or the example is beta-only:
-   - Add `provider = google-beta` to every resource in the file.
-
-For instructions on how to migrate existing `examples` over to `samples`, see the [Test Template Migration Guide]({{< ref "/reference/update-test-changes" >}}).
-
 ## Bootstrap API resources {#bootstrapping}
 
 Most acceptance tests run in a the default org and default test project, which means that they can conflict for quota, resource namespaces, and control over shared resources. You can work around these limitations with "bootstrapped" resources.

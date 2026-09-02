@@ -1,0 +1,18 @@
+resource "google_oracle_database_goldengate_connection_assignment" "{{$.PrimaryResourceId}}" {
+  goldengate_connection_assignment_id = "{{index $.ResourceIdVars "goldengate_connection_assignment_id"}}"
+  display_name                        = "{{index $.ResourceIdVars "goldengate_connection_assignment_id"}}"
+  location                            = "us-east4"
+  project                             = "{{index $.ResourceIdVars "project"}}"
+  labels = {
+    "label-one" = "value-one"
+  }
+
+  properties {
+    goldengate_connection = "projects/{{index $.ResourceIdVars "project"}}/locations/us-east4/goldengateConnections/{{index $.ResourceIdVars "goldengate_connection_id"}}"
+    goldengate_deployment = "projects/{{index $.ResourceIdVars "project"}}/locations/us-east4/goldengateDeployments/{{index $.ResourceIdVars "goldengate_deployment_id"}}"
+  }
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}
+
+
+

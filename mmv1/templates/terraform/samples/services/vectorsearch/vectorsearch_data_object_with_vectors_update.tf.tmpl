@@ -1,0 +1,77 @@
+# NOTE: This resource issues one CreateDataObject request per block.
+# It does NOT batch across resources. Terraform will parallelize a
+# 'for_each' up to '-parallelism', but each item is still a separate
+# HTTP call.
+#
+# For bulk ingestion of many items, prefer one of these out-of-band
+# paths instead of Terraform:
+#   * 'importDataObjects' (from Cloud Storage) -- highest throughput,
+#     but only available *before* any Index is created on the Collection.
+#   * 'batchCreate' (up to ~1000 items per call) -- available at any
+#     time, but must be driven from client code, not Terraform.
+resource "google_vector_search_collection" "parent" {
+  location      = "us-central1"
+  collection_id = "{{index $.ResourceIdVars "collection_id"}}"
+
+  display_name = "My BYO-Embedding Collection"
+  description  = "Collection whose vectors are supplied by the client."
+
+  data_schema = <<EOF
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    }
+  }
+}
+EOF
+
+  # Two vector fields, both without vertex_embedding_config -- the client
+  # (this Terraform config) is responsible for supplying vector values on
+  # each DataObject.
+  vector_schema {
+    field_name = "dense_embedding"
+    dense_vector {
+      dimensions = 4
+    }
+  }
+  vector_schema {
+    field_name = "sparse_embedding"
+    sparse_vector {}
+  }
+}
+
+# Update step: exercises in-place updates of the two mutable fields on
+# google_vector_search_data_object -- 'data' and 'vectors'. Both fields
+# above are changed relative to the create step. The identity fields
+# (location, collection_id, data_object_id) are unchanged so this is an
+# update, not a replace.
+resource "google_vector_search_data_object" "{{$.PrimaryResourceId}}" {
+  location       = "us-central1"
+  collection_id  = google_vector_search_collection.parent.collection_id
+  data_object_id = "{{index $.ResourceIdVars "data_object_id"}}"
+
+  data = jsonencode({
+    title    = "The Matrix Reloaded"
+    category = "sequel"
+  })
+
+  vectors {
+    field_name = "dense_embedding"
+    dense {
+      values = [0.55, 0.66, 0.77, 0.88]
+    }
+  }
+
+  vectors {
+    field_name = "sparse_embedding"
+    sparse {
+      values  = [0.4, 0.3, 0.2, 0.1]
+      indices = [1, 5, 9, 13]
+    }
+  }
+}

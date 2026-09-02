@@ -66,15 +66,17 @@ custom_diff:
   - 'resourceSpannerEncryptionConfigCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
-examples:
+samples:
   - name: 'spanner_database_basic'
     primary_resource_id: 'database'
-    vars:
-      database_name: 'my-database'
-      instance_name: 'my-instance'
-    ignore_read_extra:
-      - 'deletion_protection'
-      - 'default_time_zone'
+    steps:
+      - name: 'spanner_database_basic'
+        resource_id_vars:
+          database_name: 'my-database'
+          instance_name: 'my-instance'
+        ignore_read_extra:
+          - 'deletion_protection'
+          - 'default_time_zone'
 virtual_fields:
   - name: 'deletion_protection'
     description: |

@@ -1,0 +1,26 @@
+data "google_project" "project" {
+  project_id = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_storage_bucket" "test_bucket" {
+  name          = "chronicle-test-bucket-{{index $.TestEnvVars "project_name"}}-%{random_suffix}"
+  project       = "{{index $.TestEnvVars "project_name"}}"
+  location      = "{{index $.Vars "location"}}"
+  force_destroy = true
+}
+
+resource "google_chronicle_data_export" "{{$.PrimaryResourceId}}" {
+  location    = "{{index $.Vars "location"}}"
+  instance    = "{{index $.TestEnvVars "chronicle_id"}}"
+  gcs_bucket  = "projects/${data.google_project.project.number}/buckets/${google_storage_bucket.test_bucket.name}"
+  start_time  = "{{index $.Vars "start_time"}}"
+  end_time    = "{{index $.Vars "end_time"}}"
+  include_log_types = ["projects/{{index $.TestEnvVars "project_name"}}/locations/{{index $.Vars "location"}}/instances/{{index $.TestEnvVars "chronicle_id"}}/logTypes/GCP_CLOUDAUDIT"]
+
+  ingestion_labels {
+    key   = "key1"
+    value = "val1"
+  }
+
+  namespaces = ["my-namespace"]
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/oracledatabase"
 )
 
 func TestAccOracleDatabaseDbServers_basic(t *testing.T) {
@@ -33,7 +34,7 @@ func TestAccOracleDatabaseDbServers_basic(t *testing.T) {
 const testAccOracleDatabaseDbServers_basic = `
 data "google_oracle_database_db_servers" "my_db_servers"{
 	location = "us-east4"
-	project = "oci-terraform-testing-prod"
+	project = "oasis-terraform-testing-prod"
 	cloud_exadata_infrastructure = "ofake-do-not-delete-tf-exadata"
 }
 `

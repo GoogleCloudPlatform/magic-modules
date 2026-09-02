@@ -1,0 +1,6 @@
+{
+  "name": "test-monitor",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

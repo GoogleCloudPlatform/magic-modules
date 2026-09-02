@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/oracledatabase"
 )
 
 func TestAccOracleDatabaseCloudVmCluster_basic(t *testing.T) {
@@ -38,7 +39,7 @@ func testAccOracleDatabaseCloudVmCluster_basic() string {
 	return fmt.Sprintf(`
 data "google_oracle_database_cloud_vm_cluster" "my-vmcluster"{
   cloud_vm_cluster_id = "ofake-do-not-delete-tf-vmcluster"
-  project = "oci-terraform-testing-prod"
+  project = "oasis-terraform-testing-prod"
   location = "us-east4"
 }
 `)

@@ -67,6 +67,11 @@ type MissingTestInfo struct {
 	Tests         []string
 }
 
+type MissingIdentityInfo struct {
+	MissingCRUD       []string `json:"MissingCRUD"`
+	MissingImportTest bool     `json:"MissingImportTest"`
+}
+
 type MissingDocInfo struct {
 	Name     string
 	FilePath string
@@ -90,6 +95,7 @@ type diffCommentData struct {
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
+	MissingIdentity      map[string]*MissingIdentityInfo
 	MultipleResources    []string
 	Errors               []Errors
 }
@@ -352,6 +358,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing doc detector failed to run.")
 			}
 			data.MissingDocs = missingDocs
+
+			missingIdentity, err := detectMissingIdentity(diffProcessorPath, repo.Path, rnr)
+			if err != nil {
+				fmt.Println("Error running missing identity detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The missing identity detector failed to run.")
+			}
+			data.MissingIdentity = missingIdentity
 
 			errStrs := checkDocumentFrontmatter(repo)
 			if len(errStrs) > 0 {
@@ -634,6 +647,24 @@ func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) 
 		return nil, err
 	}
 	return missingDocs, rnr.PopDir()
+}
+
+// Run the missing identity detector and return the results.
+func detectMissingIdentity(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (map[string]*MissingIdentityInfo, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-identity", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var missingIdentity map[string]*MissingIdentityInfo
+	if err = json.Unmarshal([]byte(output), &missingIdentity); err != nil {
+		return nil, err
+	}
+	return missingIdentity, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {

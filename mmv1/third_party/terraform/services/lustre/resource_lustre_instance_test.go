@@ -10,6 +10,7 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/lustre"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccLustreInstance_withMaintenancePolicy(t *testing.T) {
@@ -414,7 +415,7 @@ resource "google_lustre_instance" "instance" {
 }
 
 resource "google_compute_resource_policy" "lustre_policy" {
-  name   = "gce-policy"
+  name   = "tf-test-gce-policy-%{random_suffix}"
   region = "us-central1"
   snapshot_schedule_policy {
     schedule {
