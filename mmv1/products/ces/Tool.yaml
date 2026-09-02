@@ -20,87 +20,94 @@ docs:
 
     Individual tools of type `openApiTool`, `mcpTool`, `connectorTool`, and `remoteAgentTool` **cannot** be created, updated, or managed directly using the `google_ces_tool` resource.
 
-    `openApiTool`, `mcpTool`, and `connectorTool` are dynamically generated at runtime based on their corresponding **toolsets** (configured via the `google_ces_toolset` resource). `remoteAgentTool` represents A2A connections configured externally, and `systemTool` represents pre-defined platform tools managed entirely by Google Cloud.
+    `openApiTool`, `mcpTool`, and `connectorTool` are dynamically generated at runtime based on their corresponding **toolsets** (configured via the `google_ces_toolset` resource), `remoteAgentTool` represents A2A connections configured externally, and `systemTool` represents pre-defined platform tools managed entirely by Google Cloud.
 
     Consequently, blocks like `open_api_tool`, `mcp_tool`, `connector_tool`, `remote_agent_tool`, and `system_tool` are marked as **read-only (output-only)** in this resource. They are populated by the server for reference purposes only (e.g., after importing an existing tool into your state) and **cannot** be configured in your Terraform HCL configuration.
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools
 update_mask: true
-self_link:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
-create_url:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/tools?toolId={{tool_id}}
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools?toolId={{tool_id}}
 update_verb: PATCH
-id_format:
-  projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
+id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
-examples:
+samples:
   - name: "ces_tool_client_function_basic"
     primary_resource_id: "ces_tool_client_function_basic"
-    vars:
-      tool_display_name: 'ces_tool_client_function_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic1'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_tool_client_function_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_client_function_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic1'
+          app_id: 'app-id'
   - name: "ces_tool_data_store_tool_engine_source_basic"
     primary_resource_id: "ces_tool_data_store_tool_engine_source_basic"
-    vars:
-      tool_display_name: 'ces_tool_data_store_tool_engine_source_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic2'
-      app_id: 'app-id'
-      data_store_id: "tool_data_store_id"
-      engine_id: "tool_engine_id"
+    steps:
+      - name: "ces_tool_data_store_tool_engine_source_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_data_store_tool_engine_source_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic2'
+          app_id: 'app-id'
+          data_store_id: "tool_data_store_id"
+          engine_id: "tool_engine_id"
   - name: "ces_tool_google_search_tool_basic"
     primary_resource_id: "ces_tool_google_search_tool_basic"
-    vars:
-      tool_display_name: 'ces_tool_google_search_tool_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic3'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_tool_google_search_tool_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_google_search_tool_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic3'
+          app_id: 'app-id'
   - name: "ces_tool_python_function_basic"
     primary_resource_id: "ces_tool_python_function_basic"
-    vars:
-      tool_display_name: 'ces_tool_python_function_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic4'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_tool_python_function_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_python_function_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic4'
+          app_id: 'app-id'
   - name: "ces_tool_agent_basic"
     primary_resource_id: "ces_tool_agent_basic"
-    vars:
-      tool_display_name: 'ces_tool_agent_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic5'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_tool_agent_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_agent_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic5'
+          app_id: 'app-id'
   - name: "ces_tool_file_search_basic"
     primary_resource_id: "ces_tool_file_search_basic"
-    vars:
-      tool_display_name: 'ces_tool_file_search_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic6'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_tool_file_search_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_file_search_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic6'
+          app_id: 'app-id'
   - name: "ces_tool_widget_basic"
     primary_resource_id: "ces_tool_widget_basic"
-    vars:
-      tool_display_name: 'ces_tool_widget_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic7'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_tool_widget_basic"
+        resource_id_vars:
+          tool_display_name: 'ces_tool_widget_basic'
+          app_display_name: 'my-app'
+          tool_id: 'ces_tool_basic7'
+          app_id: 'app-id'
 autogen_status: VG9vbA==
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
   - name: app
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the
-      resource within its parent collection as described in
-      https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -162,8 +169,7 @@ properties:
               function: 'validation.StringIsJSON'
           - name: anyOf
             type: String
-            description: The instance value should be valid against at least
-              one of the schemas in this list.
+            description: The instance value should be valid against at least one of the schemas in this list.
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -178,8 +184,7 @@ properties:
               with the defined 'type' and other schema constraints.
           - name: defs
             type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -281,8 +286,7 @@ properties:
             required: true
           - name: uniqueItems
             type: Boolean
-            description: Indicate the items in the array must be unique. Only applies
-              to TYPE.ARRAY.
+            description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
       - name: response
         type: NestedObject
         description: Represents a select subset of an OpenAPI 3.0 schema object.
@@ -300,8 +304,7 @@ properties:
               function: 'validation.StringIsJSON'
           - name: anyOf
             type: String
-            description: The instance value should be valid against at least
-              one of the schemas in this list.
+            description: The instance value should be valid against at least one of the schemas in this list.
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -316,8 +319,7 @@ properties:
               with the defined 'type' and other schema constraints.
           - name: defs
             type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -419,8 +421,7 @@ properties:
             required: true
           - name: uniqueItems
             type: Boolean
-            description: Indicate the items in the array must be unique. Only applies
-              to TYPE.ARRAY.
+            description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
   - name: connectorTool
     type: NestedObject
     description: A ConnectorTool allows connections to different integrations.
@@ -700,13 +701,11 @@ properties:
                       properties:
                         - name: collection
                           type: String
-                          description: Resource name of the collection the data store
-                            belongs to.
+                          description: Resource name of the collection the data store belongs to.
                           output: true
                         - name: collectionDisplayName
                           type: String
-                          description: Display name of the collection the data store belongs
-                            to.
+                          description: Display name of the collection the data store belongs to.
                           output: true
                         - name: dataSource
                           type: String
@@ -827,8 +826,7 @@ properties:
                   description: Whether the rewriter is disabled.
                 - name: modelSettings
                   type: NestedObject
-                  description: Model settings contains various configurations for the
-                    LLM model.
+                  description: Model settings contains various configurations for the LLM model.
                   required: true
                   properties:
                     - name: model
@@ -845,8 +843,16 @@ properties:
                         responses that are more creative.
                 - name: prompt
                   type: String
-                  description: The prompt definition. If not set, default prompt will be
-                    used.
+                  description: The prompt definition. If not set, default prompt will be used.
+            - name: snippetsConfig
+              type: NestedObject
+              description: Snippets configuration.
+              diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+              properties:
+                - name: enableSnippets
+                  type: Boolean
+                  description: Whether snippets are enabled.
+                  send_empty_value: true
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.
@@ -856,8 +862,7 @@ properties:
                   description: Whether summarization is disabled.
                 - name: modelSettings
                   type: NestedObject
-                  description: Model settings contains various configurations for the
-                    LLM model.
+                  description: Model settings contains various configurations for the LLM model.
                   properties:
                     - name: model
                       type: String
@@ -873,8 +878,7 @@ properties:
                         responses that are more creative.
                 - name: prompt
                   type: String
-                  description: The prompt definition. If not set, default prompt will be
-                    used.
+                  description: The prompt definition. If not set, default prompt will be used.
       - name: name
         type: String
         description: The data store tool name.
@@ -1101,8 +1105,7 @@ properties:
                   type: String
               - name: tokenEndpoint
                 type: String
-                description: The token endpoint in the OAuth provider to exchange for an
-                  access token.
+                description: The token endpoint in the OAuth provider to exchange for an access token.
                 output: true
           - name: serviceAccountAuthConfig
             type: NestedObject
@@ -1277,13 +1280,11 @@ properties:
                   type: String
               - name: tokenEndpoint
                 type: String
-                description: The token endpoint in the OAuth provider to exchange for an
-                  access token.
+                description: The token endpoint in the OAuth provider to exchange for an access token.
                 output: true
           - name: serviceAccountAuthConfig
             type: NestedObject
-            description: Configurations for authentication using a custom service
-              account.
+            description: Configurations for authentication using a custom service account.
             output: true
             properties:
               - name: serviceAccount
@@ -1306,7 +1307,7 @@ properties:
             allow_empty_object: true
             send_empty_value: true
             output: true
-            properties: []  # Explicitly show no properties
+            properties: [] # Explicitly show no properties
       - name: description
         type: String
         description: |-
@@ -1316,8 +1317,7 @@ properties:
         output: true
       - name: ignoreUnknownFields
         type: Boolean
-        description: If true, the agent will ignore unknown fields in the API
-          response.
+        description: If true, the agent will ignore unknown fields in the API response.
         output: true
       - name: name
         type: String
@@ -1408,6 +1408,16 @@ properties:
       - name: pythonCode
         type: String
         description: The Python code to execute for the tool.
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: Service Directory configuration for the tool.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              The name of Service Directory service.
+              Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}
+            required: true
   - name: updateTime
     type: String
     description: Timestamp when the tool was last updated.
@@ -1521,6 +1531,118 @@ properties:
                   output: true
                   item_type:
                     type: String
+      - name: apiAuthentication
+        type: NestedObject
+        description: Authentication information required for calling the remote agent.
+        output: true
+        properties:
+          - name: apiKeyConfig
+            type: NestedObject
+            description: Configurations for authentication with API key.
+            output: true
+            properties:
+              - name: apiKeySecretVersion
+                type: String
+                description: |-
+                  The name of the SecretManager secret version resource storing the API key.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                  Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
+                  service agent
+                  `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
+                output: true
+              - name: keyName
+                type: String
+                description: |-
+                  The parameter name or the header name of the API key.
+                  E.g., If the API request is "https://example.com/act?X-Api-Key=", "X-Api-Key" would be the parameter name.
+                output: true
+              - name: requestLocation
+                type: String
+                description: |-
+                  Key location in the request.
+                  Possible values:
+                  HEADER
+                  QUERY_STRING
+                output: true
+          - name: bearerTokenConfig
+            type: NestedObject
+            description: Configurations for authentication with a bearer token.
+            output: true
+            properties:
+              - name: token
+                type: String
+                description: The bearer token. Must be in the format $context.variables.<name_of_variable>.
+                output: true
+          - name: oauthConfig
+            type: NestedObject
+            description: Configurations for authentication with OAuth.
+            output: true
+            properties:
+              - name: clientId
+                type: String
+                description: The client ID from the OAuth provider.
+                output: true
+              - name: clientSecretVersion
+                type: String
+                description: |-
+                  The name of the SecretManager secret version resource storing the
+                  client secret.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                  Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
+                  service agent
+                  `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
+                output: true
+              - name: oauthGrantType
+                type: String
+                description: |-
+                  OAuth grant types.
+                  Possible values:
+                  CLIENT_CREDENTIAL
+                output: true
+              - name: scopes
+                type: Array
+                description: The OAuth scopes to grant.
+                output: true
+                item_type:
+                  type: String
+              - name: tokenEndpoint
+                type: String
+                description: The token endpoint in the OAuth provider to exchange for an access token.
+                output: true
+          - name: serviceAccountAuthConfig
+            type: NestedObject
+            description: Configurations for authentication using a custom service account.
+            output: true
+            properties:
+              - name: serviceAccount
+                type: String
+                description: |-
+                  The email address of the service account used for authenticatation. CES
+                  uses this service account to exchange an access token and the access token
+                  is then sent in the `Authorization` header of the request.
+                  The service account must have the
+                  `roles/iam.serviceAccountTokenCreator` role granted to the
+                  CES service agent
+                  `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
+                output: true
+              - name: scopes
+                type: Array
+                description: |-
+                  The OAuth scopes to grant. If not specified, the default scope
+                  `https://www.googleapis.com/auth/cloud-platform` is used.
+                output: true
+                item_type:
+                  type: String
+          - name: serviceAgentIdTokenAuthConfig
+            type: NestedObject
+            description: |-
+              Configurations for authentication with [ID
+              token](https://cloud.google.com/docs/authentication/token-types#id) generated
+              from service agent.
+            allow_empty_object: true
+            send_empty_value: true
+            output: true
+            properties: [] # Explicitly show no properties
   - name: systemTool
     type: NestedObject
     description: The system tool.
@@ -1699,8 +1821,7 @@ properties:
               function: 'validation.StringIsJSON'
           - name: anyOf
             type: String
-            description: The instance value should be valid against at least
-              one of the schemas in this list.
+            description: The instance value should be valid against at least one of the schemas in this list.
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -1720,8 +1841,7 @@ properties:
               function: 'validation.StringIsJSON'
           - name: defs
             type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -1823,5 +1943,4 @@ properties:
             required: true
           - name: uniqueItems
             type: Boolean
-            description: Indicate the items in the array must be unique. Only applies
-              to TYPE.ARRAY.
+            description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.

@@ -1,8 +1,9 @@
-// For list responses, each item has an "organization" field instead of "name".
-// Map it to "name" so the rest of the flattener can find it.
-if _, hasName := res["name"]; !hasName {
-	if org, ok := res["organization"]; ok && org != nil {
-		res["name"] = org
+// The list response returns items where the org name is in "organization".
+// For a direct read response the org name is already in "name". Normalise so
+// the identity field ("name") is always populated.
+if name, ok := res["name"].(string); !ok || name == "" {
+	if orgName, ok := res["organization"].(string); ok && orgName != "" {
+		res["name"] = orgName
 	}
 }
 return res, nil

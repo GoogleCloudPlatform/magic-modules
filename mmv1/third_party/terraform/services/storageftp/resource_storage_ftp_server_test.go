@@ -1,0 +1,258 @@
+package storageftp_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storageftp"
+)
+
+func TestAccStorageFtpServer_updateInternal(t *testing.T) {
+	t.Parallel()
+
+	serverId1 := fmt.Sprintf("tf-test-si1-%s", acctest.RandString(t, 10))
+	serverId2 := fmt.Sprintf("tf-test-si2-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageFtpServerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageFtpServer_internalInitial(serverId1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "labels.env", "default"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.env", "default"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.env", "default"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.internal_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels"},
+			},
+			{
+				Config: testAccStorageFtpServer_internalUpdated(serverId1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.internal_server", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "labels.env", "updated"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "labels.foo", "bar"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.%", "3"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.env", "updated"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "terraform_labels.foo", "bar"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.%", "3"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.env", "updated"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.internal_server", "effective_labels.foo", "bar"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.internal_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels"},
+			},
+			{
+				Config: testAccStorageFtpServer_internalUpdated(serverId2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.internal_server", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.internal_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccStorageFtpServer_updateExternal(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	serverId1 := fmt.Sprintf("tf-test-se1-%s", suffix)
+	serverId2 := fmt.Sprintf("tf-test-se2-%s", suffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageFtpServerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageFtpServer_externalInitial(serverId1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_storage_ftp_server.external_server", "labels.%"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "terraform_labels.%", "1"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "effective_labels.%", "1"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "effective_labels.goog-terraform-provisioned", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.external_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels"},
+			},
+			{
+				Config: testAccStorageFtpServer_externalUpdated(serverId1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.external_server", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "labels.%", "1"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "labels.env", "test"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "terraform_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "terraform_labels.env", "test"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "effective_labels.goog-terraform-provisioned", "true"),
+					resource.TestCheckResourceAttr("google_storage_ftp_server.external_server", "effective_labels.env", "test"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.external_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels"},
+			},
+			{
+				Config: testAccStorageFtpServer_externalUpdated(serverId2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_storage_ftp_server.external_server", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_storage_ftp_server.external_server",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccStorageFtpServer_internalInitial(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "internal_server" {
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Initial Internal SFTP Server"
+  access_type  = "INTERNAL"
+
+  labels = {
+    env = "default"
+  }
+
+  internal_config {
+    consumer_accept_list {
+      project          = "projects/${data.google_project.project.project_id}"
+      connection_limit = 10
+    }
+    consumer_reject_list {
+      project = "projects/${data.google_project.project.number}"
+    }
+  }
+}
+
+data "google_project" "project" {
+}
+`, serverId)
+}
+
+func testAccStorageFtpServer_internalUpdated(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "internal_server" {
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Updated Internal SFTP Server"
+  access_type  = "INTERNAL"
+
+  labels = {
+    env = "updated"
+    foo = "bar"
+  }
+
+  internal_config {
+    consumer_accept_list {
+      project          = "projects/${data.google_project.project.project_id}"
+      connection_limit = 25
+    }
+    consumer_reject_list {
+      project = "projects/${data.google_project.project.number}"
+    }
+    consumer_reject_list {
+      project = "projects/920946329098"
+    }
+  }
+}
+
+data "google_project" "project" {
+}
+`, serverId)
+}
+
+func testAccStorageFtpServer_externalInitial(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "external_server" {
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Initial External SFTP Server"
+  access_type  = "EXTERNAL"
+
+  external_config {
+    allowed_cidr_blocks = [
+      "192.168.1.0/24",
+      "10.0.0.0/8",
+    ]
+  }
+}
+`, serverId)
+}
+
+func testAccStorageFtpServer_externalUpdated(serverId string) string {
+	return fmt.Sprintf(`
+resource "google_storage_ftp_server" "external_server" {
+  location     = "us-west1"
+  server_id    = "%s"
+  display_name = "Updated External SFTP Server"
+  access_type  = "EXTERNAL"
+
+  labels = {
+    env = "test"
+  }
+
+  external_config {
+    allowed_cidr_blocks = [
+      "172.16.0.0/12",
+      "10.0.0.0/16",
+      "192.168.0.0/16",
+    ]
+  }
+}
+`, serverId)
+}

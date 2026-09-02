@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
@@ -460,9 +461,21 @@ func TestAccSqlUser_instanceWithActivationPolicy(t *testing.T) {
 			{
 				Config: testGoogleSqlUser_instanceWithActivationPolicy(instance, "NEVER"),
 			},
-			// Step 3: Refresh to verify no errors
+			// Step 3: Refresh with instance stopped — identity attributes must still be set
 			{
 				Config: testGoogleSqlUser_instanceWithActivationPolicy(instance, "NEVER"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_sql_user.user", "project"),
+					resource.TestCheckResourceAttr("google_sql_user.user", "instance", instance),
+					resource.TestCheckResourceAttr("google_sql_user.user", "name", "admin"),
+				),
+			},
+			// Step 3a: ImportState with instance stopped — verifies identity survives a round-trip
+			{
+				ResourceName:            "google_sql_user.user",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "deletion_policy"},
 			},
 			// Step 4: Update activation_policy to ALWAYS so that post-test destroy code is able to delete the google_sql_user resource
 			{
@@ -1218,4 +1231,49 @@ resource "google_sql_user" "user" {
   type     = "CLOUD_IAM_GROUP"
 }
 `, instance, username)
+}
+
+func TestAccSqlUser_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlUser_postgres(instance, "password"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user"),
+				),
+			},
+			{
+				Config:          testGoogleSqlUser_postgresNoPassword(instance),
+				ResourceName:    "google_sql_user.user",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
+func testGoogleSqlUser_postgresNoPassword(instance string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "POSTGRES_9_6"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+  }
+}
+resource "google_sql_user" "user" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+}
+`, instance)
 }

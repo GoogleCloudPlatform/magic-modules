@@ -68,6 +68,7 @@ jobs:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.tgc-branch }}
         fetch-depth: 2
+        persist-credentials: false
     - name: Check for Code Changes
       id: pull_request
       run: |
@@ -89,6 +90,7 @@ jobs:
         repository: ${{ github.event.inputs.owner }}/terraform-provider-google-beta
         ref: ${{ github.event.inputs.tpgb-branch }}
         path: tpgb
+        persist-credentials: false
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |

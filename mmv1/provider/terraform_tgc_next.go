@@ -75,9 +75,11 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 		templateFS:                 templateFS,
 	}
 
-	t.Product.ImportPath = ImportPathFromVersion(versionName)
-	for _, r := range t.Product.Objects {
-		r.ImportPath = ImportPathFromVersion(versionName)
+	if product != nil {
+		t.Product.ImportPath = ImportPathFromVersion(versionName)
+		for _, r := range t.Product.Objects {
+			r.ImportPath = ImportPathFromVersion(versionName)
+		}
 	}
 
 	return t
@@ -89,7 +91,7 @@ func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenera
 		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -105,6 +107,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.ExcludeResource {
+		google.IncrementResourceGenerated()
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 	}
 	tgc.addTestsFromSamples(&object)
@@ -180,8 +183,6 @@ func (tgc *TerraformGoogleConversionNext) GenerateProduct(outputFolder string) {
 }
 
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	tgc.generateResourcesForVersion(products)
-
 	resourceConverters := map[string]string{
 		// common
 		"pkg/transport/config.go":                    "third_party/terraform/transport/config.go.tmpl",
@@ -192,10 +193,11 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/registry/registry.go":                   "third_party/terraform/registry/registry.go",
 
 		// services
-		"pkg/services/compute/client.go":                   "third_party/terraform/services/compute/client.go.tmpl",
-		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
-		"pkg/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
-		"pkg/services/container/client.go":                 "third_party/terraform/services/container/client.go.tmpl",
+		"pkg/services/compute/client.go":                        "third_party/terraform/services/compute/client.go.tmpl",
+		"pkg/services/compute/compute_instance_helpers.go":      "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"pkg/services/compute/compute_instance_http_helpers.go": "third_party/terraform/services/compute/compute_instance_http_helpers.go.tmpl",
+		"pkg/services/compute/metadata.go":                      "third_party/terraform/services/compute/metadata.go.tmpl",
+		"pkg/services/container/client.go":                      "third_party/terraform/services/container/client.go.tmpl",
 
 		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go": "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
@@ -206,7 +208,25 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
-	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
+	filteredFiles := make(map[string]string)
+
+	if tgc.Product != nil {
+		for target, source := range resourceConverters {
+			if strings.Contains(target, "/services/"+tgc.Product.ApiName+"/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+	} else {
+		// Shared compilation
+		tgc.generateResourcesForVersion(products)
+		for target, source := range resourceConverters {
+			if !strings.Contains(target, "/services/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
@@ -243,14 +263,10 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		return
 	}
 
-	log.Printf("Copying common files for tgc.")
+	google.LogVerbose("Copying common files for tgc.")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
-	}
-
-	if err := copy.Copy("third_party/tgc_next", outputFolder); err != nil {
-		log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
 	}
 
 	resourceConverters := map[string]string{
@@ -284,13 +300,47 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/services/resourcemanagerv3/client.go":      "third_party/terraform/services/resourcemanagerv3/client.go",
 		"pkg/services/storage/client.go":                "third_party/terraform/services/storage/client.go",
 	}
-	tgc.CopyFileList(outputFolder, resourceConverters)
+
+	filteredFiles := make(map[string]string)
+
+	if tgc.Product != nil {
+		// Service-specific copying
+		for target, source := range resourceConverters {
+			if strings.Contains(target, "/services/"+tgc.Product.ApiName+"/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CopyFileList(outputFolder, filteredFiles)
+
+		srcDir := filepath.Join("third_party/tgc_next/pkg/services", tgc.Product.ApiName)
+		dstDir := filepath.Join(outputFolder, "pkg/services", tgc.Product.ApiName)
+		if err := copy.Copy(srcDir, dstDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Println(fmt.Errorf("error copying service directory %v: %v", srcDir, err))
+		}
+	} else {
+		// Shared copying
+		if err := copy.Copy("third_party/tgc_next", outputFolder, copy.Options{
+			Skip: func(srcinfo os.FileInfo, src, dest string) (bool, error) {
+				return strings.Contains(src, "pkg/services/"), nil
+			},
+		}); err != nil {
+			log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
+		}
+
+		for target, source := range resourceConverters {
+			if !strings.Contains(target, "/services/") {
+				filteredFiles[target] = source
+			}
+		}
+		tgc.CopyFileList(outputFolder, filteredFiles)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{
-		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/compute/image.go":                             "third_party/terraform/services/compute/image.go",
+		"pkg/tfplan2cai/converters/services/compute/disk_type.go":                         "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/bigtable/bigtable_app_profile_handwritten.go": "third_party/terraform/services/bigtable/bigtable_app_profile_handwritten.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

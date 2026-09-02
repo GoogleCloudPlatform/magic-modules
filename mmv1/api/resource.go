@@ -253,6 +253,16 @@ type Resource struct {
 
 	GenerateListResource bool `yaml:"generate_list_resource,omitempty"`
 
+	// [Optional] A static filter string appended as a ?filter= query parameter when
+	// listing this resource. Useful when the list endpoint returns multiple resource
+	// types that share the same API URL (e.g. engines filtered by solutionType).
+	ListFilter string `yaml:"list_filter,omitempty"`
+
+	// [Optional] If true, the list API response is a bare JSON array instead of
+	// a wrapped object with a named key. Use ListArrayPages instead of ListPages
+	// when generating the list function.
+	ListResponseIsArray bool `yaml:"list_response_is_array,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -1337,7 +1347,7 @@ func (r Resource) PackageName() string {
 // general defined timeouts, or default Timeouts
 func (r Resource) GetTimeouts() *Timeouts {
 	timeoutsFiltered := r.Timeouts
-	if timeoutsFiltered == nil {
+	if timeoutsFiltered == nil || timeoutsFiltered.IsZero() {
 		if async := r.GetAsync(); async != nil && async.Operation != nil {
 			timeoutsFiltered = async.Operation.Timeouts
 		}
@@ -1387,7 +1397,7 @@ func (r Resource) Updatable() bool {
 	if !r.Immutable {
 		return true
 	}
-	for _, p := range r.AllPropertiesInVersion() {
+	for _, p := range r.AllNestedProperties(r.RootProperties()) {
 		if p.UpdateUrl != "" {
 			return true
 		}
@@ -1840,6 +1850,9 @@ func (r Resource) SamplePrimaryResourceId() string {
 		samples = google.Reject(r.Samples, func(s *resource.Sample) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
 		})
+	}
+	if len(samples) == 0 {
+		return ""
 	}
 	return samples[0].PrimaryResourceId
 }

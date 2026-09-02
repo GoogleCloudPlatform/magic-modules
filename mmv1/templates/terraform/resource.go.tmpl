@@ -119,11 +119,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
+            Create: schema.DefaultTimeout({{ $.GetTimeouts.InsertMinutes -}} * time.Minute),
 {{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
-            Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
+            Update: schema.DefaultTimeout({{ $.GetTimeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
-            Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
+            Delete: schema.DefaultTimeout({{ $.GetTimeouts.DeleteMinutes -}} * time.Minute),
         },
 {{ if $.SchemaVersion }}
         SchemaVersion: {{ $.SchemaVersion -}},
@@ -143,7 +143,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{-       end }}
         },
 {{- end }}
-{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff $.UnorderedListProperties }}
         CustomizeDiff: customdiff.All(
 {{-   if $.UnorderedListProperties }}
 {{-     range $prop := $.UnorderedListProperties }}
@@ -996,9 +996,6 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-              if $.UpdateMask }}
 {{ customTemplate $ "templates/terraform/update_mask.go.tmpl" false -}}
 {{              end}}
-{{-             if $.CustomCode.PreUpdate -}}{{""}}
-    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
-{{              end}}
 {{              if $.NestedQuery -}}
 {{                  if $.NestedQuery.ModifyByPatch -}}
 {{/*#       Keep this after mutex - patch request data relies on current resource state */}}
@@ -1008,6 +1005,9 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
 {{-                 end}}
 {{-             end}}
+{{-             if $.CustomCode.PreUpdate -}}{{""}}
+    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
+{{              end}}
 {{-              if $.SupportsIndirectUserProjectOverride -}}
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
@@ -1604,8 +1604,10 @@ if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName
 {{- end}}
 {{- end}}
 {{if $.HasSelfLink -}}
-    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    if selfLink, ok := res["selfLink"].(string); ok && selfLink != "" {
+        if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(selfLink)); err != nil {
+            return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+        }
     }
 {{- end }}
     return nil

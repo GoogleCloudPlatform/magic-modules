@@ -392,13 +392,13 @@ func schemaNodeConfig() *schema.Schema {
 								Type:         schema.TypeString,
 								Optional:     true,
 								Computed:     true,
-								Description:  `The name of the image to use for this node.`,
+								Description:  `The Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.`,
 							},
 							"image_project": {
 								Type:         schema.TypeString,
 								Optional:     true,
 								Computed:     true,
-								Description:  `The project containing the image to use for this node.`,
+								Description:  `The GCP project storing the Operating System image for the node pool. This is a private feature, please contact your Google account team for allowlisting this feature.`,
               },
 						},
 					},
@@ -601,7 +601,7 @@ func schemaNodeConfig() *schema.Schema {
 								Required:     true,
 								ForceNew:     true,
 								Description:  `Corresponds to the type of reservation consumption.`,
-								ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION", "ANY_RESERVATION_THEN_FAIL"}, false),
 							},
 							"key": {
 								Type:        schema.TypeString,
@@ -912,6 +912,18 @@ func schemaNodeConfig() *schema.Schema {
                                                                 Optional:    true,
                                                                 Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
                                                         },
+							"shutdown_grace_period_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the total duration of time (in seconds) the node delays shutdown.`,
+							},
+							"shutdown_grace_period_critical_pods_seconds": {
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Computed:    true,
+								Description: `Controls the portion of total grace period (in seconds) that is specifically reserved for terminating critical pods.`,
+							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -1224,6 +1236,42 @@ func schemaNodeConfig() *schema.Schema {
 									},
 								},
 							},
+							"custom_node_init": {
+								Type:             schema.TypeList,
+								Optional:         true,
+								MaxItems: 1,
+								Description:      `The custom node init settings.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"init_script": {
+											Type:             schema.TypeList,
+											Optional:         true,
+											MaxItems: 1,
+											Description:      `The init script configuration.`,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"gcs_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The GCS URI of the init script.`,
+													},
+													"gcs_generation": {
+														Type:        schema.TypeInt,
+														Optional:    true,
+														Computed:    true,
+														Description: `The GCS generation of the init script.`,
+													},
+													"gcp_secret_manager_secret_uri": {
+														Type:        schema.TypeString,
+														Optional:    true,
+														Description: `The Secret Manager secret URI of the init script.`,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -1275,6 +1323,7 @@ func schemaNodeConfig() *schema.Schema {
 							"performance_monitoring_unit": {
 								Type: schema.TypeString,
 								Optional: true,
+								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
 								ValidateFunc: verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
 								Description: `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
 							},
@@ -1342,6 +1391,37 @@ func schemaNodeConfig() *schema.Schema {
 								Description:  `.`,
 								ValidateFunc: validation.StringInSlice([]string{"MAINTENANCE_INTERVAL_UNSPECIFIED", "AS_NEEDED", "PERIODIC"}, false),
 							},
+	{{ if ne $.TargetVersionName `ga` -}}
+							"opportunistic_maintenance_strategy": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								ForceNew:    true,
+								MaxItems:    1,
+								Description: `Strategy that will trigger maintenance on behalf of the customer.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"node_idle_time_window": {
+											Type:        schema.TypeString,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The amount of time that a node can remain idle (no customer owned workloads running), before triggering maintenance.`,
+										},
+										"maintenance_availability_window": {
+											Type:        schema.TypeString,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The window of time that opportunistic maintenance can run. Example: A setting of 14 days implies that opportunistic maintenance can only be ran in the 2 weeks leading up to the scheduled maintenance date. Setting 28 days allows opportunistic maintenance to run at any time in the scheduled maintenance window (all PERIODIC maintenance is set 28 days in advance).`,
+										},
+										"min_nodes_per_pool": {
+											Type:        schema.TypeInt,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The minimum nodes required to be available in a pool. Blocks maintenance if it would cause the number of running nodes to dip below this value.`,
+										},
+									},
+								},
+							},
+	{{- end }}
 						},
 					},
 				},
@@ -1875,6 +1955,21 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			}
 		}
 		// end cpu_cfs_quota fix
+
+		// start shutdown_grace_period ForceSendFields fix
+		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+				vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
+				if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
+					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+				}
+				vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
+				if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
+					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+				}
+			}
+		}
+		// end shutdown_grace_period ForceSendFields fix
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -2079,6 +2174,12 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
                 kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
         }
+	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
+		kConfig.ShutdownGracePeriodSeconds = int64(shutdownGracePeriodSeconds.(int))
+	}
+	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
+		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
+	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
 		evictionSoft := &container.EvictionSignals{}
@@ -2261,6 +2362,10 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		linuxNodeConfig.AccurateTimeConfig = expandAccurateTimeConfig(v)
 	}
 
+	if v, ok := cfg["custom_node_init"]; ok {
+		linuxNodeConfig.CustomNodeInit = expandCustomNodeInit(v)
+	}
+
 	return linuxNodeConfig
 }
 
@@ -2393,6 +2498,52 @@ func expandAccurateTimeConfig(v interface{}) *container.AccurateTimeConfig {
 	}
 
 	return accurateTimeConfig
+}
+
+func expandCustomNodeInit(v interface{}) *container.CustomNodeInit {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.CustomNodeInit{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	customNodeInit := &container.CustomNodeInit{}
+	if v, ok := cfg["init_script"]; ok {
+		customNodeInit.InitScript = expandInitScript(v)
+	}
+	return customNodeInit
+}
+
+func expandInitScript(v interface{}) *container.InitScript {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.InitScript{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	initScript := &container.InitScript{}
+	if v, ok := cfg["gcs_uri"]; ok {
+		initScript.GcsUri = v.(string)
+	}
+	if v, ok := cfg["gcs_generation"]; ok {
+		initScript.GcsGeneration = int64(v.(int))
+	}
+	if v, ok := cfg["gcp_secret_manager_secret_uri"]; ok {
+		initScript.GcpSecretManagerSecretUri = v.(string)
+	}
+	return initScript
 }
 
 func expandSwapConfig(v interface{}) *container.SwapConfig {
@@ -2823,8 +2974,36 @@ func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy
 	if maintenanceInterval, ok := cfg["maintenance_interval"]; ok {
 		mPolicy.MaintenanceInterval = maintenanceInterval.(string)
 	}
+	if v, ok := cfg["opportunistic_maintenance_strategy"]; ok {
+		mPolicy.OpportunisticMaintenanceStrategy = expandOpportunisticMaintenanceStrategy(v)
+	}
 
 	return mPolicy
+}
+
+func expandOpportunisticMaintenanceStrategy(v interface{}) *container.OpportunisticMaintenanceStrategy {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	strategy := &container.OpportunisticMaintenanceStrategy{
+		ForceSendFields: []string{"MinNodesPerPool"},
+	}
+	if nodeIdleTimeWindow, ok := cfg["node_idle_time_window"]; ok {
+		strategy.NodeIdleTimeWindow = nodeIdleTimeWindow.(string)
+	}
+	if maintenanceAvailabilityWindow, ok := cfg["maintenance_availability_window"]; ok {
+		strategy.MaintenanceAvailabilityWindow = maintenanceAvailabilityWindow.(string)
+	}
+	if minNodesPerPool, ok := cfg["min_nodes_per_pool"]; ok {
+		strategy.MinNodesPerPool = int64(minNodesPerPool.(int))
+	}
+
+	return strategy
 }
 {{- end }}
 
@@ -3323,6 +3502,8 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"single_process_oom_kill":                c.SingleProcessOomKill,
 			"max_parallel_image_pulls":               c.MaxParallelImagePulls,
 			"eviction_max_pod_grace_period_seconds":  c.EvictionMaxPodGracePeriodSeconds,
+			"shutdown_grace_period_seconds":          c.ShutdownGracePeriodSeconds,
+			"shutdown_grace_period_critical_pods_seconds": c.ShutdownGracePeriodCriticalPodsSeconds,
 			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
 			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
 			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
@@ -3430,6 +3611,7 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c.NodeKernelModuleLoading),
 			"swap_config":                  flattenSwapConfig(c.SwapConfig),
 			"accurate_time_config":         flattenAccurateTimeConfig(c.AccurateTimeConfig),
+			"custom_node_init":             flattenCustomNodeInit(c.CustomNodeInit),
 		})
 	}
 	return result
@@ -3440,6 +3622,28 @@ func flattenAccurateTimeConfig(c *container.AccurateTimeConfig) []map[string]int
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"enable_ptp_kvm_time_sync": c.EnablePtpKvmTimeSync,
+		})
+	}
+	return result
+}
+
+func flattenCustomNodeInit(c *container.CustomNodeInit) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"init_script": flattenInitScript(c.InitScript),
+		})
+	}
+	return result
+}
+
+func flattenInitScript(c *container.InitScript) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"gcs_uri":                       c.GcsUri,
+			"gcs_generation":                c.GcsGeneration,
+			"gcp_secret_manager_secret_uri": c.GcpSecretManagerSecretUri,
 		})
 	}
 	return result
@@ -3761,7 +3965,21 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"maintenance_interval": c.MaintenanceInterval,
+			"maintenance_interval":               c.MaintenanceInterval,
+			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(c.OpportunisticMaintenanceStrategy),
+		})
+	}
+
+	return result
+}
+
+func flattenOpportunisticMaintenanceStrategy(c *container.OpportunisticMaintenanceStrategy) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"node_idle_time_window":           c.NodeIdleTimeWindow,
+			"maintenance_availability_window": c.MaintenanceAvailabilityWindow,
+			"min_nodes_per_pool":              c.MinNodesPerPool,
 		})
 	}
 
@@ -4231,7 +4449,8 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated labels for node pool %s", name)
 		}
 
-		if d.HasChange(prefix + "node_config.0.image_type") {
+    // The case updating both image_type and node_image_config will be handled in the node_image_config section.
+		if d.HasChange(prefix + "node_config.0.image_type") && !d.HasChange(prefix + "node_config.0.node_image_config") {
 			req := &container.UpdateClusterRequest{
 				Update: &container.ClusterUpdate{
 					DesiredNodePoolId: name,
@@ -4466,19 +4685,31 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.node_image_config") {
-			imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config"))
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-				Image: imageConfig.Image,
-				ImageProject: imageConfig.ImageProject,
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodePoolId: name,
+				},
+			}
+			if imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config")); imageConfig!=nil {
+			  req.Update.DesiredImage = imageConfig.Image
+			  req.Update.DesiredImageProject = imageConfig.ImageProject
+			}
+
+			if d.HasChange(prefix + "node_config.0.image_type") {
+				req.Update.DesiredImageType = d.Get(prefix + "node_config.0.image_type").(string)
+			} else {
+			  // If only updating the node_image_config (DesiredImage and/or DesiredImage) and
+			  // the image_type unspecified, then it is an use case of custom image feature, where
+			  // the DesiredImageType should be CUSTOM_CONTAINERD (go/gke-custom-image-builder-ug-edit)
+			  req.Update.DesiredImageType = "CUSTOM_CONTAINERD"
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
 				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				op, err := clusterUpdateCall.Do()
 				if err != nil {
 					return err
 				}
@@ -4486,8 +4717,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
 					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool custom image config", userAgent,
+					nodePoolInfo.location, "updating GKE node pool", userAgent,
 					timeout)
 			}
 

@@ -454,15 +454,6 @@ func FirestoreUserCreds409Retry(err error) (bool, string) {
 	return false, ""
 }
 
-func IapClient409Operation(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation was aborted") {
-			return true, "operation was aborted possibly due to concurrency issue - retrying"
-		}
-	}
-	return false, ""
-}
-
 func HealthcareDatasetNotInitialized(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 404 && strings.Contains(strings.ToLower(gerr.Body), "dataset not initialized") {
@@ -709,6 +700,52 @@ func IsDataplex1PEntryNotFoundError(err error) (bool, string) {
 		if gerr.Code == 404 && strings.Contains(gerr.Body, "Entry `") && strings.Contains(gerr.Body, "` does not exist.") && (strings.Contains(gerr.Body, "@dataplex/entries/") || strings.Contains(gerr.Body, "@bigquery/entries/")) {
 			return true, fmt.Sprintf("Retry 404s for Dataplex Entry Ingestion")
 		}
+	}
+	return false, ""
+}
+
+// Retry on Cloud Scheduler 'Sync Mutate Cannot Be Queued'
+func Is409SyncMutateCannotBeQueuedError(err error) (bool, string) {
+	if err == nil {
+		return false, ""
+	}
+	errStr := err.Error()
+	if strings.Contains(errStr, "Error 409") && strings.Contains(errStr, "sync mutate calls cannot be queued") {
+		return true, "sync mutate calls cannot be queued"
+	}
+	return false, ""
+}
+
+// Retry when the Bigtable API instructs us to.
+func IsBigtableTableCreatingOrDeletingError(err error) (bool, string) {
+	if err != nil && strings.Contains(err.Error(), "is either creating or deleting, please try again") {
+		return true, "Parent table is either creating or deleting, retrying"
+	}
+	return false, ""
+}
+
+// Retry on Agent Gateway 400 error when the gateway is still in use by a dependent resource being deleted.
+func IsAgentGatewayInUseError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "is already being used by resource") {
+			return true, "Agent Gateway is still being used by another resource"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "is already being used by resource") {
+		return true, "Agent Gateway is still being used by another resource"
+	}
+	return false, ""
+}
+
+// Retry on Network Attachment 412 error when the attachment still has connected endpoints being deleted.
+func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 412 && strings.Contains(gerr.Body, "Network Attachment with connected endpoints cannot be deleted") {
+			return true, "Network Attachment still has connected endpoints"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "Network Attachment with connected endpoints cannot be deleted") {
+		return true, "Network Attachment still has connected endpoints"
 	}
 	return false, ""
 }

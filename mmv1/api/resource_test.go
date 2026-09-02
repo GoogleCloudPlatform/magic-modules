@@ -539,11 +539,20 @@ func TestResourceAddExtraFields(t *testing.T) {
 				if !prop.WriteOnly {
 					t.Error("passwordWo field should have WriteOnly=true")
 				}
+				if prop.Required {
+					t.Error("passwordWo field should have Required=false")
+				}
+				if !prop.IgnoreRead {
+					t.Error("passwordWo field should have IgnoreRead=true")
+				}
 			}
 			if prop.Name == "passwordWoVersion" {
 				foundVersionField = true
 				if !prop.ClientSide {
 					t.Error("passwordWoVersion field should have ClientSide=true")
+				}
+				if prop.Required {
+					t.Error("passwordWoVersion field should have Required=false")
 				}
 			}
 		}
@@ -821,6 +830,77 @@ func TestResourceAddExtraFields(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("WriteOnly inside FlattenObject generates correct constraint paths", func(t *testing.T) {
+		t.Parallel()
+
+		// Reproduces the SecretVersion case: secretData is write_only and nested
+		// under payload which has flatten_object: true. After AddExtraFields the
+		// generated companion fields (secretDataWo, secretDataWoVersion) must
+		// produce non-empty ConflictsWith / RequiredWith lists when
+		// GetPropertySchemaPathList is called, because GetPropertySchemaPath must
+		// search inside FlattenObject nested objects.
+		p := &api.Product{Name: "testproduct"}
+		p.SetCompiler("terraform")
+		resource := createTestResource("testresource", "terraform")
+
+		secretData := &api.Type{Name: "secretData", Type: "String", WriteOnly: true}
+		payload := &api.Type{Name: "payload", Type: "NestedObject", FlattenObject: true, Properties: []*api.Type{secretData}}
+
+		resource.Properties = []*api.Type{payload}
+
+		// SetDefault before AddExtraFields wires up ResourceMetadata on all
+		// pre-existing properties so that initializeConstraintGroups won't panic.
+		resource.SetDefault(p)
+		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+		// SetDefault again to wire up ResourceMetadata on newly created companion fields.
+		resource.SetDefault(p)
+
+		// payload.Properties should now contain: secretData, secretDataWo, secretDataWoVersion
+		if len(payload.Properties) != 3 {
+			t.Fatalf("Expected 3 nested properties in payload after AddExtraFields, got %d", len(payload.Properties))
+		}
+
+		var woField, versionField *api.Type
+		for _, prop := range payload.Properties {
+			if prop.Name == "secretDataWo" {
+				woField = prop
+			}
+			if prop.Name == "secretDataWoVersion" {
+				versionField = prop
+			}
+		}
+		if woField == nil {
+			t.Fatal("Expected to find secretDataWo in payload.Properties")
+		}
+		if versionField == nil {
+			t.Fatal("Expected to find secretDataWoVersion in payload.Properties")
+		}
+
+		// secretDataWo must ConflictWith secretData (not empty).
+		conflicts := woField.GetPropertySchemaPathList(woField.Conflicting())
+		if len(conflicts) == 0 {
+			t.Error("secretDataWo.ConflictsWith should not be empty; GetPropertySchemaPath must find secretData inside FlattenObject payload")
+		} else if conflicts[0] != "secret_data" {
+			t.Errorf("secretDataWo.ConflictsWith[0] = %q, want %q", conflicts[0], "secret_data")
+		}
+
+		// secretDataWo must RequireWith secretDataWoVersion (not empty).
+		required := woField.GetPropertySchemaPathList(woField.RequiredWithList())
+		if len(required) == 0 {
+			t.Error("secretDataWo.RequiredWith should not be empty; GetPropertySchemaPath must find secretDataWoVersion inside FlattenObject payload")
+		} else if required[0] != "secret_data_wo_version" {
+			t.Errorf("secretDataWo.RequiredWith[0] = %q, want %q", required[0], "secret_data_wo_version")
+		}
+
+		// secretData must ConflictWith secretDataWo (not empty).
+		secretDataConflicts := secretData.GetPropertySchemaPathList(secretData.Conflicting())
+		if len(secretDataConflicts) == 0 {
+			t.Error("secretData.ConflictsWith should not be empty")
+		} else if secretDataConflicts[0] != "secret_data_wo" {
+			t.Errorf("secretData.ConflictsWith[0] = %q, want %q", secretDataConflicts[0], "secret_data_wo")
+		}
+	})
 }
 
 func TestResource_TestDependencies(t *testing.T) {
@@ -988,5 +1068,130 @@ func TestIdentityPropertiesFlattenObject(t *testing.T) {
 
 	if !slices.Contains(got, "datasetId") {
 		t.Errorf("expected IdentityProperties to include flattened identifier \"datasetId\", got %v", got)
+	}
+}
+
+func TestSamplePrimaryResourceId(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name: "test",
+		Versions: []*product.Version{
+			{
+				Name:    "ga",
+				BaseUrl: "ga_url",
+			},
+			{
+				Name:    "beta",
+				BaseUrl: "beta_url",
+			},
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    string
+	}{
+		{
+			description: "empty samples returns empty string",
+			resource: api.Resource{
+				Samples:           []*resource.Sample{},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "samples with higher min_version returns empty string",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "beta-res",
+						MinVersion:        "beta",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "",
+		},
+		{
+			description: "valid sample returns primary resource id",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "ga-res",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "ga-res",
+		},
+		{
+			description: "only the first sample should be used",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "first-res",
+						MinVersion:        "ga",
+					},
+					{
+						PrimaryResourceId: "second-res",
+						MinVersion:        "ga",
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "first-res",
+		},
+		{
+			description: "excludetest should be honored using first non-excluded sample",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-res",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "included-res",
+						ExcludeTest:       false,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "included-res",
+		},
+		{
+			description: "fallback to first matching excluded sample when all are excluded",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{
+						PrimaryResourceId: "excluded-first",
+						ExcludeTest:       true,
+					},
+					{
+						PrimaryResourceId: "excluded-second",
+						ExcludeTest:       true,
+					},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			expected: "excluded-first",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.SamplePrimaryResourceId(); got != tc.expected {
+				t.Errorf("SamplePrimaryResourceId() = %q, want %q", got, tc.expected)
+			}
+		})
 	}
 }

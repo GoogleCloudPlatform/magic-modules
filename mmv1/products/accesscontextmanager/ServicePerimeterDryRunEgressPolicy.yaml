@@ -24,9 +24,6 @@ description: |
   perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
   or query against a BigQuery dataset).
 
-  ~> **Note:** By default, updates to this resource will remove the EgressPolicy from the
-  from the perimeter and add it back in a non-atomic manner. To ensure that the new EgressPolicy
-  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
   ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
   the service perimeter resource must have a `lifecycle` block with `ignore_changes = [spec[0].egress_policies]` so
   they don't fight over which egress rules should be in the policy.
@@ -36,11 +33,12 @@ references:
   api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#egresspolicy
 docs:
 base_url: ""
-immutable: true
 self_link: '{{perimeter}}'
 create_url: '{{perimeter}}'
-update_mask: true
+delete_url: '{{perimeter}}'
+update_url: '{{perimeter}}'
 create_verb: PATCH
+update_verb: PATCH
 delete_verb: PATCH
 identity:
   - egressFrom
@@ -77,7 +75,7 @@ custom_code:
   constants: templates/terraform/constants/access_context_manager.go.tmpl
   pre_create: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl
   post_read: templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl
-  pre_update: templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl
+  pre_update: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl
   pre_delete: templates/terraform/pre_delete/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl
 samples:
@@ -106,6 +104,7 @@ parameters:
       The name of the Service Perimeter to add this resource to.
     url_param_only: true
     required: true
+    immutable: true
     resource: ServicePerimeter
     imports: name
 properties:
@@ -155,6 +154,17 @@ properties:
                 The resource may be in any Google Cloud organization, not just the
                 organization that the perimeter is defined in. `*` is not allowed, the
                 case of allowing all Google Cloud resources only is not supported.
+            - name: 'pscEndpoint'
+              type: NestedObject
+              description: |
+                A Private Service Connect endpoint that is allowed to access data outside the perimeter.
+                The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+              properties:
+                - name: 'forwardingRule'
+                  type: String
+                  description: |
+                    The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+                    Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
       - name: sourceRestriction
         type: Enum
         description: Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.

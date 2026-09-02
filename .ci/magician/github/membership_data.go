@@ -61,18 +61,6 @@ var (
 
 	// This is for the random-assignee rotation.
 	reviewerRotation = map[string]ReviewerConfig{
-		"BBBmau": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 7, 1),
-					endDate:   newDate(2025, 7, 17),
-				},
-				{
-					startDate: newDate(2026, 6, 11),
-					endDate:   newDate(2026, 6, 14),
-				},
-			},
-		},
 		"c2thorn": {
 			vacations: []Vacation{
 				{
@@ -83,20 +71,17 @@ var (
 					startDate: newDate(2026, 4, 19),
 					endDate:   newDate(2026, 4, 26),
 				},
+				{
+					startDate: newDate(2026, 7, 10),
+					endDate:   newDate(2026, 7, 17),
+				},
 			},
-		},
-		"malhotrasagar2212": {
-			vacations: []Vacation{},
 		},
 		"melinath": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 3, 31),
-					endDate:   newDate(2026, 4, 5),
-				},
-				{
-					startDate: newDate(2026, 4, 10),
-					endDate:   newDate(2026, 4, 12),
+					startDate: newDate(2026, 6, 26),
+					endDate:   newDate(2026, 7, 6),
 				},
 			},
 		},
@@ -122,6 +107,10 @@ var (
 					startDate: newDate(2026, 06, 01),
 					endDate:   newDate(2026, 06, 12),
 				},
+				{
+					startDate: newDate(2026, 06, 29),
+					endDate:   newDate(2026, 07, 06),
+				},
 			},
 		},
 		"roaks3": {
@@ -130,13 +119,17 @@ var (
 					startDate: newDate(2026, 5, 7),
 					endDate:   newDate(2026, 5, 11),
 				},
+				{
+					startDate: newDate(2026, 7, 5),
+					endDate:   newDate(2026, 8, 17),
+				},
 			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 4, 4),
-					endDate:   newDate(2026, 7, 13),
+					endDate:   newDate(2026, 7, 5),
 				},
 			},
 		},
@@ -164,12 +157,15 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":    {},
-		"tavasyag":   {},
-		"hao-nan-li": {},
-		"NickElliot": {},
-		"shuyama1":   {},
-		"trodge":     {},
-		"zli82016":   {},
+		"BBBmau":            {},
+		"malhotrasagar2212": {},
+		"bbasata":           {},
+		"tavasyag":          {},
+		"hao-nan-li":        {},
+		"NickElliot":        {},
+		"shuyama1":          {},
+		"trodge":            {},
+		"zli82016":          {},
+		"vr-ibm":            {},
 	}
 )

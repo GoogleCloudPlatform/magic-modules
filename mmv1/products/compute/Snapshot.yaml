@@ -63,30 +63,39 @@ custom_code:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
-examples:
+samples:
   - name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
+    steps:
+      - name: 'snapshot_basic'
+        resource_id_vars:
+          snapshot_name: 'my-snapshot'
+          disk_name: 'debian-disk'
   - name: 'snapshot_basic_2'
     primary_resource_id: 'snapshot'
     min_version: 'beta'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
+    steps:
+      - name: 'snapshot_basic_2'
+        min_version: 'beta'
+        resource_id_vars:
+          snapshot_name: 'my-snapshot'
+          disk_name: 'debian-disk'
   - name: 'snapshot_basic_source_instant_snapshot'
     primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-      instant_snapshot_name: 'my-instant-snapshot'
+    steps:
+      - name: 'snapshot_basic_source_instant_snapshot'
+        resource_id_vars:
+          snapshot_name: 'my-snapshot'
+          disk_name: 'debian-disk'
+          instant_snapshot_name: 'my-instant-snapshot'
   - name: 'snapshot_chainname'
     primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-      chain_name: 'snapshot-chain'
+    steps:
+      - name: 'snapshot_chainname'
+        resource_id_vars:
+          snapshot_name: 'my-snapshot'
+          disk_name: 'debian-disk'
+          chain_name: 'snapshot-chain'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -148,7 +157,7 @@ parameters:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
-    # ignore_read in providers - this is only used in Create
+        # ignore_read in providers - this is only used in Create
   - name: 'sourceDiskEncryptionKey'
     type: NestedObject
     description: |
@@ -309,7 +318,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

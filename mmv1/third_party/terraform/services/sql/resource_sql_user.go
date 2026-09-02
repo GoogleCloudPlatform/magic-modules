@@ -82,6 +82,30 @@ func ResourceSqlUser() *schema.Resource {
 		SchemaVersion: 1,
 		MigrateState:  resourceSqlUserMigrateState,
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"instance": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+					"host": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"host": {
 				Type:        schema.TypeString,
@@ -363,7 +387,51 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			"into %s: %s", name, instance, err)
 	}
 
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": instance,
+		"host":     user.Host,
+		"name":     name,
+	}); err != nil {
+		return err
+	}
 	return resourceSqlUserRead(d, meta)
+}
+
+func flattenSqlUser(user *sqladmin.User, d *schema.ResourceData, project string) error {
+	if err := d.Set("host", user.Host); err != nil {
+		return fmt.Errorf("Error setting host: %s", err)
+	}
+	if err := d.Set("instance", user.Instance); err != nil {
+		return fmt.Errorf("Error setting instance: %s", err)
+	}
+	if err := d.Set("name", user.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("type", user.Type); err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
+	}
+	if err := d.Set("iam_email", user.IamEmail); err != nil {
+		return fmt.Errorf("Error setting iam_email: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
+		return fmt.Errorf("Error setting sql server user details: %s", err)
+	}
+	if user.PasswordPolicy != nil {
+		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
+		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
+			if err := d.Set("password_policy", passwordPolicy); err != nil {
+				return fmt.Errorf("Error setting password_policy: %s", err)
+			}
+		}
+	}
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+
+	return nil
 }
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -385,6 +453,15 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": instance,
+		"host":     host,
+		"name":     name,
+	}); err != nil {
+		return err
+	}
+
 	if databaseInstance.Settings.ActivationPolicy != "ALWAYS" {
 		return nil
 	}
@@ -435,37 +512,18 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	if err := d.Set("host", user.Host); err != nil {
-		return fmt.Errorf("Error setting host: %s", err)
-	}
-	if err := d.Set("instance", user.Instance); err != nil {
-		return fmt.Errorf("Error setting instance: %s", err)
-	}
-	if err := d.Set("name", user.Name); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
-	}
-	if err := d.Set("type", user.Type); err != nil {
-		return fmt.Errorf("Error setting type: %s", err)
-	}
-	if err := d.Set("iam_email", user.IamEmail); err != nil {
-		return fmt.Errorf("Error setting iam_email: %s", err)
-	}
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-	if err := d.Set("sql_server_user_details", flattenSqlServerUserDetails(user.SqlserverUserDetails)); err != nil {
-		return fmt.Errorf("Error setting sql server user details: %s", err)
-	}
-	if user.PasswordPolicy != nil {
-		passwordPolicy := flattenPasswordPolicy(user.PasswordPolicy)
-		if len(passwordPolicy.([]map[string]interface{})[0]) != 0 {
-			if err := d.Set("password_policy", passwordPolicy); err != nil {
-				return fmt.Errorf("Error setting password_policy: %s", err)
-			}
-		}
+	if err := flattenSqlUser(user, d, project); err != nil {
+		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project":  project,
+		"instance": user.Instance,
+		"host":     user.Host,
+		"name":     user.Name,
+	}); err != nil {
+		return err
+	}
 
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
@@ -593,6 +651,14 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				"in %s: %s", name, instance, err)
 		}
 
+		if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+			"project":  project,
+			"instance": instance,
+			"host":     host,
+			"name":     name,
+		}); err != nil {
+			return err
+		}
 		return resourceSqlUserRead(d, meta)
 	}
 
@@ -652,8 +718,59 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	if d.Id() == "" {
+		// Import via identity block - identity attributes are already set
+		identity, err := d.Identity()
+		if err != nil {
+			return nil, fmt.Errorf("error getting identity: %s", err)
+		}
 
+		var projectStr string
+		if v, ok := identity.GetOk("project"); ok {
+			projectStr = v.(string)
+		}
+		if projectStr == "" {
+			projectStr = meta.(*transport_tpg.Config).Project
+		}
+		if err := d.Set("project", projectStr); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+
+		var instanceStr string
+		if v, ok := identity.GetOk("instance"); ok {
+			instanceStr = v.(string)
+		}
+		if err := d.Set("instance", instanceStr); err != nil {
+			return nil, fmt.Errorf("Error setting instance: %s", err)
+		}
+
+		var hostStr string
+		if v, ok := identity.GetOk("host"); ok {
+			hostStr = v.(string)
+		}
+		if hostStr != "" {
+			if err := d.Set("host", hostStr); err != nil {
+				return nil, fmt.Errorf("Error setting host: %s", err)
+			}
+		}
+
+		var nameStr string
+		if v, ok := identity.GetOk("name"); ok {
+			nameStr = v.(string)
+		}
+		if err := d.Set("name", nameStr); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
+
+		if hostStr != "" {
+			d.SetId(fmt.Sprintf("%s/%s/%s/%s", projectStr, instanceStr, hostStr, nameStr))
+		} else {
+			d.SetId(fmt.Sprintf("%s/%s/%s", projectStr, instanceStr, nameStr))
+		}
+		return []*schema.ResourceData{d}, nil
+	}
+
+	parts := strings.Split(d.Id(), "/")
 	if len(parts) == 3 {
 		if err := d.Set("project", parts[0]); err != nil {
 			return nil, fmt.Errorf("Error setting project: %s", err)
@@ -690,6 +807,7 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 		if err := d.Set("name", parts[4]); err != nil {
 			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
+
 	} else {
 		return nil, fmt.Errorf("Invalid specifier. Expecting {project}/{instance}/{name} for postgres instance and {project}/{instance}/{host}/{name} for MySQL instance")
 	}

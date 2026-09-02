@@ -1,9 +1,9 @@
-// For list responses, each item from the organizations endpoint has an
-// "organization" field. Map it to "org" so the flattener can set the
-// identity field and the id can be constructed.
-if org, ok := res["organization"]; ok && org != nil {
-	if err := d.Set("org", org); err != nil {
-		return nil, fmt.Errorf("error setting org: %w", err)
+// The list response returns organization objects where the org name is in "organization".
+// Extract the org name and set it on the resource data so the
+// identity and id can be constructed correctly.
+if orgName, ok := res["organization"].(string); ok && orgName != "" {
+	if err := d.Set("org", orgName); err != nil {
+		return nil, fmt.Errorf("error setting org from list response: %w", err)
 	}
 }
 return res, nil

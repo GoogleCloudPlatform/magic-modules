@@ -1348,88 +1348,6 @@ resource "google_compute_network" "consumer_net" {
 `, context)
 }
 
-func TestAccRedisCluster_redisClusterMaintenanceVersion(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us-central1",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccRedisCluster_redisClusterMaintenanceVersionDeploy(context),
-			},
-			{
-				ResourceName:      "google_redis_cluster.cluster-ms",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccRedisCluster_redisClusterMaintenanceVersionUpdate(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_redis_cluster.cluster-ms", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:      "google_redis_cluster.cluster-ms",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func testAccRedisCluster_redisClusterMaintenanceVersionDeploy(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster-ms" {
-  name           			 = "tf-test-ms-cluster%{random_suffix}"
-  shard_count    			 = 1
-  region 					 = "%{location}"
-  replica_count				 = 1
-  node_type 				 = "REDIS_SHARED_CORE_NANO"
-  transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
-  authorization_mode 		 = "AUTH_MODE_DISABLED"
-  redis_configs = { 
-    maxmemory-policy		 = "volatile-ttl"
-  }
-  deletion_protection_enabled = false
-
-  zone_distribution_config {
-    mode 					 = "MULTI_ZONE"
-  }
-}
-`, context)
-}
-
-func testAccRedisCluster_redisClusterMaintenanceVersionUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster-ms" {
-  name           			 = "tf-test-ms-cluster%{random_suffix}"
-  shard_count    			 = 1
-  region 					 = "%{location}"
-  replica_count				 = 1
-  node_type 				 = "REDIS_SHARED_CORE_NANO"
-  transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
-  authorization_mode 		 = "AUTH_MODE_DISABLED"
-  maintenance_version 		 = "REDISCLUSTER_20251008_00_00"
-  redis_configs = { 
-    maxmemory-policy		 = "volatile-ttl"
-  }
-  deletion_protection_enabled = false
-  zone_distribution_config {
-    mode 					 = "MULTI_ZONE"
-  }
-}
-`, context)
-}
-
 func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -1671,6 +1589,53 @@ resource "google_redis_cluster" "cluster_cas" {
     google_privateca_certificate_authority.default,
     google_privateca_ca_pool_iam_member.redis_p4sa_requester
   ]
+}
+`, context)
+}
+
+func TestAccRedisCluster_withAclPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisCluster_withAclPolicy(context),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+		},
+	})
+}
+
+func testAccRedisCluster_withAclPolicy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "test" {
+  name                        = "tf-test-redis-%{random_suffix}"
+  shard_count                 = 1
+  region                      = "europe-west4"
+  deletion_protection_enabled = false
+  
+  acl_policy                  = google_redis_cluster_acl_policy.acl_policy.id
+}
+
+resource "google_redis_cluster_acl_policy" "acl_policy" {
+  acl_policy_id               = "tf-test-policy-%{random_suffix}"
+  location                    = "europe-west4"
+  rules {
+    rule                      = "on allkeys +get"
+    username                  = "default"
+  }
 }
 `, context)
 }

@@ -1,0 +1,146 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Server'
+kind: 'storageftp#server'
+description: |
+  An SFTP Server resource supporting internal and external connectivity configurations.
+base_url: 'projects/{{project}}/locations/{{location}}/servers'
+self_link: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/servers?serverId={{server_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/servers/{{server_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['create', 'delete', 'update']
+autogen_async: true
+custom_code:
+  constants: 'templates/terraform/constants/storage_ftp_server.go.tmpl'
+samples:
+  - name: 'storage_ftp_server_internal'
+    primary_resource_id: 'internal_server'
+    steps:
+      - name: 'storage_ftp_server_internal'
+        resource_id_vars:
+          server_id: 'sftp-int'
+  - name: 'storage_ftp_server_external'
+    primary_resource_id: 'external_server'
+    steps:
+      - name: 'storage_ftp_server_external'
+        resource_id_vars:
+          server_id: 'sftp-ext'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location (region) of the Storage FTP Server.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'serverId'
+    type: String
+    description: |
+      A unique ID for the server. Must start with a lowercase letter, and end with a lowercase letter or number. Can contain lowercase letters, numbers, and hyphens. Maximum 30 characters.
+    required: true
+    immutable: true
+    max_size: 30
+    url_param_only: true
+    validation:
+      regex: '[a-z](?:[a-z0-9-]{0,28}[a-z0-9])?'
+properties:
+  - name: 'displayName'
+    type: String
+    description: |
+      A display name for the server.
+    required: false
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to the Storage FTP Server.
+  - name: 'accessType'
+    type: Enum
+    description: |
+      The access type for this SFTP server. Possible values: INTERNAL, EXTERNAL
+    required: true
+    enum_values:
+      - 'INTERNAL'
+      - 'EXTERNAL'
+  - name: 'internalConfig'
+    type: NestedObject
+    description: |
+      Configuration for internal access type SFTP servers.
+    exactly_one_of:
+      - 'internal_config'
+      - 'external_config'
+    properties:
+      - name: 'consumerAcceptList'
+        type: Array
+        is_set: true
+        set_hash_func: 'resourceStorageFtpServerConsumerAcceptListHash'
+        send_empty_value: true
+        description: |
+          A list of consumer projects that are allowed to connect to this server.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'project'
+              type: String
+              description: |
+                The project that is allowed to connect, in the format `projects/{project}`.
+              required: true
+            - name: 'connectionLimit'
+              type: Integer
+              description: |
+                The maximum number of Private Service Connect endpoints that can be created in the consumer project.
+              required: true
+      - name: 'consumerRejectList'
+        type: Array
+        is_set: true
+        set_hash_func: 'resourceStorageFtpServerConsumerRejectListHash'
+        send_empty_value: true
+        description: |
+          A list of consumer projects that are rejected from connecting to this server.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'project'
+              type: String
+              description: |
+                The project that is rejected from connecting, in the format `projects/{project}`.
+              required: true
+  - name: 'externalConfig'
+    type: NestedObject
+    description: |
+      Configuration for external access type SFTP servers.
+    exactly_one_of:
+      - 'internal_config'
+      - 'external_config'
+    properties:
+      - name: 'allowedCidrBlocks'
+        type: Array
+        is_set: true
+        min_size: 1
+        description: |
+          A list of allowed IPv4 or IPv6 CIDR block ranges that can connect to this server.
+        item_type:
+          type: String
