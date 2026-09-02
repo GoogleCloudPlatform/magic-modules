@@ -151,7 +151,7 @@ func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interf
       name   = "default"
 
       enable_rules {
-        services = []
+        services = ["services/compute.googleapis.com"]
       }
 
       # 🚀 Override strict validations to allow clean teardown
