@@ -70,8 +70,8 @@ func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobSimpleExample(t *
 func testAccDataLineageOpenLineageJob_dataLineageOpenLineageJobSimpleExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "simple" {
-  namespace   = "example_simple_namespace"
-  name        = "example_simple_name"
+  namespace   = "example_simple_namespace_%{random_suffix}"
+  name        = "example_simple_name_%{random_suffix}"
   description = "Nightly ETL from raw to curated"
 
   input {
@@ -107,8 +107,8 @@ func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample
 			{
 				Config: testAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "namespace", "testNamespace"),
-					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "name", "test_full_job"),
+					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "namespace", fmt.Sprintf("testNamespace_%s", randomSuffix)),
+					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "name", fmt.Sprintf("test_full_job_%s", randomSuffix)),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "input.#", "2"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.#", "1"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.column_lineage.0.dataset_input.#", "3"),
@@ -129,8 +129,8 @@ func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample
 func testAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "full_job" {
-  namespace   = "testNamespace"
-  name        = "test_full_job"
+  namespace   = "testNamespace_%{random_suffix}"
+  name        = "test_full_job_%{random_suffix}"
   description = "Test resource with all available facets"
 
   input {
@@ -316,8 +316,8 @@ func TestAccDataLineageOpenLineageJob_UpdateDescription(t *testing.T) {
 func testAccDataLineageOpenLineageJob_UpdateDescription_Initial(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "update_test" {
-  namespace   = "update_test_namespace"
-  name        = "update_test_name"
+  namespace   = "update_test_namespace_%{random_suffix}"
+  name        = "update_test_name_%{random_suffix}"
   description = "Initial description"
 
   input {
@@ -338,8 +338,8 @@ resource "google_data_lineage_open_lineage_job" "update_test" {
 func testAccDataLineageOpenLineageJob_UpdateDescription_Updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "update_test" {
-  namespace   = "update_test_namespace"
-  name        = "update_test_name"
+  namespace   = "update_test_namespace_%{random_suffix}"
+  name        = "update_test_name_%{random_suffix}"
   description = "Updated description after modification"
 
   input {
@@ -394,8 +394,8 @@ func TestAccDataLineageOpenLineageJob_CreateAndDelete(t *testing.T) {
 func testAccDataLineageOpenLineageJob_CreateAndDelete_Config(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "delete_test" {
-  namespace   = "delete_test_namespace"
-  name        = "delete_test_name"
+  namespace   = "delete_test_namespace_%{random_suffix}"
+  name        = "delete_test_name_%{random_suffix}"
   description = "Job to be deleted"
 
   input {
@@ -413,12 +413,8 @@ resource "google_data_lineage_open_lineage_job" "delete_test" {
 `, context)
 }
 
-// TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon validates deletion_policy="ABANDON" semantics.
-// Checks that:
-// - Resource can be created successfully
-// - deletion_policy="ABANDON" prevents remote deletion when Terraform destroys
-// - Process remains on server after terraform destroy (not checked by CheckDestroy for this policy)
-// - Demonstrates that ABANDON policy leaves remote state intact
+// TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon validates that ABANDON leaves the
+// remote process intact after Terraform removes it from state, and that the test cleanup removes it.
 func TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon(t *testing.T) {
 	t.Parallel()
 
@@ -438,6 +434,10 @@ func TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataLineageOpenLineageJob_DeletionPolicyAbandon(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.abandon_test", "knowledge_catalog.0.process"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.abandon_test", "knowledge_catalog.0.run"),
+				),
 			},
 			{
 				ResourceName: "google_data_lineage_open_lineage_job.abandon_test",
@@ -452,8 +452,8 @@ func TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon(t *testing.T) {
 func testAccDataLineageOpenLineageJob_DeletionPolicyAbandon(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "abandon_test" {
-  namespace   = "abandon_test_namespace"
-  name        = "abandon_test_name"
+  namespace   = "abandon_test_namespace_%{random_suffix}"
+  name        = "abandon_test_name_%{random_suffix}"
   description = "Job with abandon deletion policy"
 
   input {
@@ -473,9 +473,8 @@ resource "google_data_lineage_open_lineage_job" "abandon_test" {
 
 // testAccCheckDataLineageOpenLineageJobDestroyProducer validates that resources are properly destroyed.
 // Verifies that:
-// - Each resource in the destroyed state was actually removed from the server
-// - A REST GET request to the process name returns 404 (resource deleted)
-// - Handles deletion_policy=ABANDON by checking deletion_policy before making destroy assertions
+// - For DELETE resources, a GET should return 404 after Terraform destroy.
+// - For ABANDON resources, a GET should still succeed immediately after destroy, then the test cleans up the remote process.
 func testAccCheckDataLineageOpenLineageJobDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -485,11 +484,8 @@ func testAccCheckDataLineageOpenLineageJobDestroyProducer(t *testing.T) func(s *
 			if strings.HasPrefix(name, "data.") {
 				continue
 			}
-			if rs.Primary.Attributes["deletion_policy"] == "ABANDON" {
-				continue
-			}
-			conf := acctest.GoogleProviderConfig(t)
 
+			conf := acctest.GoogleProviderConfig(t)
 			n := rs.Primary.Attributes["knowledge_catalog.0.process"]
 			url := transport_tpg.BaseUrl(datalineage.Product, conf) + strings.TrimPrefix(n, "/")
 
@@ -505,6 +501,22 @@ func testAccCheckDataLineageOpenLineageJobDestroyProducer(t *testing.T) func(s *
 				RawURL:    url,
 				UserAgent: conf.UserAgent,
 			})
+			if rs.Primary.Attributes["deletion_policy"] == "ABANDON" {
+				if err != nil {
+					return fmt.Errorf("ABANDON DataLineageOpenLineageJob not found at %s: %w", url, err)
+				}
+				_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    conf,
+					Method:    "DELETE",
+					Project:   billingProject,
+					RawURL:    url,
+					UserAgent: conf.UserAgent,
+				})
+				if err != nil {
+					return fmt.Errorf("failed to clean up ABANDON DataLineageOpenLineageJob at %s: %w", url, err)
+				}
+				continue
+			}
 			if err == nil {
 				return fmt.Errorf("DataLineageOpenLineageJob still exists at %s", url)
 			}
@@ -569,8 +581,8 @@ func TestAccDataLineageOpenLineageJob_DriftDetection(t *testing.T) {
 func testAccDataLineageOpenLineageJob_DriftDetection_Config(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_lineage_open_lineage_job" "drift_test" {
-  namespace   = "drift_test_namespace"
-  name        = "drift_test_name"
+  namespace   = "drift_test_namespace_%{random_suffix}"
+  name        = "drift_test_name_%{random_suffix}"
   description = "Job for drift detection testing"
 
   input {
