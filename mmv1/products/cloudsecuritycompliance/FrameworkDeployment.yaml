@@ -344,6 +344,8 @@ properties:
     type: NestedObject
     description: FrameworkReference contains the reference of a framework.
     required: true
+    update_mask_fields:
+      - 'framework.major_revision_id'
     properties:
       - name: framework
         type: String
