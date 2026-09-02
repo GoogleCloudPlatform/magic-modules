@@ -1366,3 +1366,139 @@ resource "google_compute_region_backend_service" "home" {
 }
 `, randomSuffix, randomSuffix, randomSuffix)
 }
+
+func TestAccComputeRegionUrlMap_routeRulesRegexUrlRewrite(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionUrlMap_routeRulesRegexUrlRewrite(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionUrlMap_routeRulesRegexUrlRewrite_update(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionUrlMap_routeRulesRegexUrlRewrite(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  region                = "us-central1"
+  name                  = "regionurlmap-test-%s"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks         = [google_compute_region_health_check.zero.self_link]
+}
+
+resource "google_compute_region_health_check" "zero" {
+  region   = "us-central1"
+  name     = "regionurlmap-test-%s"
+  http_health_check {
+    port = 80
+  }
+}
+
+resource "google_compute_region_url_map" "foobar" {
+  region          = "us-central1"
+  name            = "regionurlmap-test-%s"
+  default_service = google_compute_region_backend_service.foobar.self_link
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "mysite"
+  }
+
+  path_matcher {
+    name            = "mysite"
+    default_service = google_compute_region_backend_service.foobar.self_link
+
+    route_rules {
+      priority = 1
+      match_rules {
+        prefix_match = "/api/"
+      }
+      service = google_compute_region_backend_service.foobar.self_link
+      route_action {
+        url_rewrite {
+          host_rewrite = "dev.example.com"
+          regex_rewrite {
+            path_pattern      = "/api/(.*)"
+            path_substitution = "/v2/api/\\1"
+          }
+        }
+      }
+    }
+  }
+}
+`, randomSuffix, randomSuffix, randomSuffix)
+}
+
+func testAccComputeRegionUrlMap_routeRulesRegexUrlRewrite_update(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  region                = "us-central1"
+  name                  = "regionurlmap-test-%s"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks         = [google_compute_region_health_check.zero.self_link]
+}
+
+resource "google_compute_region_health_check" "zero" {
+  region   = "us-central1"
+  name     = "regionurlmap-test-%s"
+  http_health_check {
+    port = 80
+  }
+}
+
+resource "google_compute_region_url_map" "foobar" {
+  region          = "us-central1"
+  name            = "regionurlmap-test-%s"
+  default_service = google_compute_region_backend_service.foobar.self_link
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "mysite"
+  }
+
+  path_matcher {
+    name            = "mysite"
+    default_service = google_compute_region_backend_service.foobar.self_link
+
+    route_rules {
+      priority = 1
+      match_rules {
+        prefix_match = "/api/"
+      }
+      service = google_compute_region_backend_service.foobar.self_link
+      route_action {
+        url_rewrite {
+          host_rewrite = "stage.example.com"
+          regex_rewrite {
+            path_pattern      = "/api/v2/(.*)"
+            path_substitution = "/v3/api/\\1"
+          }
+        }
+      }
+    }
+  }
+}
+`, randomSuffix, randomSuffix, randomSuffix)
+}
