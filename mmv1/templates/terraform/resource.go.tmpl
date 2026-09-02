@@ -1534,17 +1534,20 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
-    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
+    log.Printf("[DEBUG] Error before post_create_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostUpdateFailure }}
 func resource{{ $.ResourceName -}}PostUpdateFailure(d *schema.ResourceData, meta interface{}, err error) error {
-    {{- customTemplate $ $.CustomCode.PostUpdateFailure false -}}
+    log.Printf("[DEBUG] Error before post_update_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostUpdateFailure false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostDeleteFailure }}
 func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta interface{}, err error) error {
-    {{- customTemplate $ $.CustomCode.PostDeleteFailure false -}}
+    log.Printf("[DEBUG] Error before post_delete_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostDeleteFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}

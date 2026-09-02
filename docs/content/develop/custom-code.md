@@ -199,14 +199,17 @@ The failure hook code will be wrapped in functions like:
 
 ```go
 func resourceProductResourcePostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_create_failure hook: %v", err)
     // Your code will be injected here.
 }
 
 func resourceProductResourcePostUpdateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_update_failure hook: %v", err)
     // Your code will be injected here.
 }
 
 func resourceProductResourcePostDeleteFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_delete_failure hook: %v", err)
     // Your code will be injected here.
 }
 ```
