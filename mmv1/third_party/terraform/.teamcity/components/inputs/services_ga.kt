@@ -16,6 +16,11 @@
 package generated
 
 var ServicesListGa = mapOf(
+    "accessapproval" to mapOf(
+        "name" to "accessapproval",
+        "displayName" to "Accessapproval",
+        "path" to "./google/services/accessapproval"
+    ),
     "accesscontextmanager" to mapOf(
         "name" to "accesscontextmanager",
         "displayName" to "Accesscontextmanager",
