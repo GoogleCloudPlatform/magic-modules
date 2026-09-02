@@ -39,9 +39,9 @@ func dataSourceObservabilityProjectSettingsRead(d *schema.ResourceData, meta int
 
 func init() {
 	registry.Schema{
-		Name: "google_observability_project_settings",
+		Name:        "google_observability_project_settings",
 		ProductName: "observability",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceObservabilityProjectSettings(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceObservabilityProjectSettings(),
 	}.Register()
 }

@@ -5,8 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 )
 
 func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
@@ -29,7 +29,7 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityOrganizationSettings_datasource(context),
-				Check: acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_organization_settings.settings"),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_organization_settings.settings"),
 			},
 		},
 	})
