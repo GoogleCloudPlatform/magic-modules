@@ -1,5 +1,4 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -77,4 +76,3 @@ resource "google_compute_network_edge_security_service" "foobar" {
 }
 `, pName, nesName)
 }
-{{- end }}

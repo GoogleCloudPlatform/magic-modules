@@ -1,5 +1,4 @@
 package compute
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -94,4 +93,3 @@ func testSweepComputeNetworkEdgeSecurityService(region string) error {
 
 	return nil
 }
-{{- end }}
