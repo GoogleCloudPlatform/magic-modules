@@ -1195,3 +1195,63 @@ func TestSamplePrimaryResourceId(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceFirstRunnableTestConfig(t *testing.T) {
+	t.Parallel()
+	p := &api.Product{
+		Name: "test",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+	step := func(name string) *resource.Step {
+		return &resource.Step{Name: name}
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		wantName    string
+	}{
+		{
+			description: "uses first sample without skip_test",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{Name: "skipped", SkipTest: "reason", Steps: []*resource.Step{step("skipped")}},
+					{Name: "runnable", Steps: []*resource.Step{step("runnable")}},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			wantName: "runnable",
+		},
+		{
+			description: "empty when every sample has skip_test",
+			resource: api.Resource{
+				Samples: []*resource.Sample{
+					{Name: "skipped", SkipTest: "reason", Steps: []*resource.Step{step("skipped")}},
+				},
+				ProductMetadata:   p,
+				TargetVersionName: "ga",
+			},
+			wantName: "",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			got := tc.resource.FirstRunnableTestConfig()
+			if tc.wantName == "" {
+				if got.Sample != nil {
+					t.Errorf("got %q, want empty config", got.Sample.Name)
+				}
+				return
+			}
+			if got.Sample == nil || got.Sample.Name != tc.wantName {
+				t.Errorf("got %v, want %q", got.Sample, tc.wantName)
+			}
+		})
+	}
+}
