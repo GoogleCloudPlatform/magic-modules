@@ -1,0 +1,121 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RegionalTemplateVersion
+api_resource_type_kind: TemplateVersion
+description: |
+  A Regional Template Version resource stores the templated payload for a
+  Regional Template, using `{{.variableName}}` placeholders that are resolved
+  from a Regional Parameter Version's data at render time.
+references:
+  guides:
+  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates.versions
+docs:
+base_url: '{{template}}/versions'
+self_link: '{{template}}/versions/{{template_version_id}}'
+create_url: '{{template}}/versions?template_version_id={{template_version_id}}'
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{%project}}/locations/{{%location}}/templates/{{%template_id}}/versions/{{%template_version_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+# excluding resource_identity due to custom_import
+exclude_identity_generation: true
+custom_code:
+  pre_create: templates/terraform/pre_create/parameter_manager_regional_template_version.go.tmpl
+  custom_import: templates/terraform/custom_import/parameter_manager_regional_template_version.go.tmpl
+samples:
+  - name: regional_template_version_basic
+    primary_resource_id: regional-template-version-basic
+    steps:
+      - name: regional_template_version_basic
+        resource_id_vars:
+          template_id: regional_template
+          template_version_id: regional_template_version
+  - name: regional_template_version_with_json_format
+    primary_resource_id: regional-template-version-with-json-format
+    steps:
+      - name: regional_template_version_with_json_format
+        resource_id_vars:
+          template_id: regional_template
+          template_version_id: regional_template_version
+parameters:
+  - name: template
+    type: ResourceRef
+    description: |
+      Parameter Manager Regional Template resource.
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: RegionalTemplate
+    imports: name
+  - name: template_version_id
+    type: String
+    description: |
+      Version ID of the Regional Template Version resource. This must be unique within the Regional Template.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: location
+    type: String
+    description: |
+      Location of the Parameter Manager Regional Template resource.
+    url_param_only: true
+    output: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the Regional Template Version. Format:
+      `projects/{{project}}/locations/{{location}}/templates/{{template_id}}/versions/{{template_version_id}}`
+    output: true
+  - name: createTime
+    type: String
+    description: |
+      The time at which the Regional Template Version was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      The time at which the Regional Template Version was updated.
+    output: true
+  - name: disabled
+    type: Boolean
+    description: |
+      The current state of the Regional Template Version. If true, the payload
+      is never returned by read or render calls. This field is only applicable
+      for updating a Regional Template Version.
+  - name: payload
+    type: NestedObject
+    description: |
+      The payload content of a Regional Template Version resource.
+    flatten_object: true
+    required: true
+    immutable: true
+    custom_flatten: templates/terraform/custom_flatten/template_version_template_data.go.tmpl
+    properties:
+      - name: template_data
+        type: String
+        description: |
+          The template data. Use `{{.variableName}}` placeholders for values
+          that are resolved from a Regional Parameter Version's data when the
+          Regional Template Version is rendered.
+        api_name: data
+        required: true
+        immutable: true
+        sensitive: true
+        custom_expand: templates/terraform/custom_expand/base64.go.tmpl

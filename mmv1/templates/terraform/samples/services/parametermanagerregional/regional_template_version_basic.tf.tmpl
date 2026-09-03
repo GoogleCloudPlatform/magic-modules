@@ -1,0 +1,10 @@
+resource "google_parameter_manager_regional_template" "regional-template-basic" {
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  location    = "us-central1"
+}
+
+resource "google_parameter_manager_regional_template_version" "{{$.PrimaryResourceId}}" {
+  template             = google_parameter_manager_regional_template.regional-template-basic.id
+  template_version_id  = "{{index $.ResourceIdVars "template_version_id"}}"
+  template_data        = "greeting: hello {{"{{"}}.name{{"}}"}}"
+}
