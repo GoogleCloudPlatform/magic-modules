@@ -1,0 +1,9 @@
+resource "google_parameter_manager_template" "template-basic" {
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+}
+
+resource "google_parameter_manager_template_version" "{{$.PrimaryResourceId}}" {
+  template             = google_parameter_manager_template.template-basic.id
+  template_version_id  = "{{index $.ResourceIdVars "template_version_id"}}"
+  template_data        = "greeting: hello {{"{{"}}.name{{"}}"}}"
+}

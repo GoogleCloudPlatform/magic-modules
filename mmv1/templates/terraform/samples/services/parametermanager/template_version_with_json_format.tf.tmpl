@@ -1,0 +1,12 @@
+resource "google_parameter_manager_template" "template-basic" {
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  format      = "TEMPLATE_FORMAT_JSON"
+}
+
+resource "google_parameter_manager_template_version" "{{$.PrimaryResourceId}}" {
+  template             = google_parameter_manager_template.template-basic.id
+  template_version_id  = "{{index $.ResourceIdVars "template_version_id"}}"
+  template_data = jsonencode({
+    "greeting" : "hello {{"{{"}}.name{{"}}"}}"
+  })
+}
