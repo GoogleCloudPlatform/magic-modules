@@ -28,7 +28,6 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions/{{case_tag_definition_id}}
-autogen_status: Q2FzZVRhZ0RlZmluaXRpb24=
 samples:
   - name: chronicle_casetagdefinition_update
     min_version: beta
