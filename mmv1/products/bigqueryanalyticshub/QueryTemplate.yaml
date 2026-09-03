@@ -72,7 +72,7 @@ custom_code:
   post_create: "templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl"
   custom_delete: "templates/terraform/custom_delete/bigquery_analytics_hub_query_template.go.tmpl"
 custom_diff:
-  - "resourceBigqueryAnalyticsHubQueryTemplateCustomDiff"
+  - 'resourceBigqueryAnalyticsHubQueryTemplateCustomDiff'
 virtual_fields:
   - name: "submit"
     type: Boolean
