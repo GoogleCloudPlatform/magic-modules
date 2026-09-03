@@ -13,7 +13,7 @@
 
 ---
 name: 'DeploymentGroup'
-description: 'A collection of DeploymentUnits that in a DAG-like structure.'
+description: 'A collection of DeploymentUnits in a DAG-like structure.'
 references:
   api: 'https://cloud.google.com/infrastructure-manager/docs/reference/rest/v1/projects.locations.deploymentGroups'
 base_url: 'projects/{{project}}/locations/{{location}}/deploymentGroups'
@@ -22,6 +22,7 @@ delete_url: 'projects/{{project}}/locations/{{location}}/deploymentGroups/{{name
 create_url: 'projects/{{project}}/locations/{{location}}/deploymentGroups?deploymentGroupId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
+id_format: 'projects/{{project}}/locations/{{location}}/deploymentGroups/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/deploymentGroups/{{name}}'
 timeouts:
@@ -37,14 +38,17 @@ async:
   result:
     resource_inside_response: true
 
-examples:
+samples:
   - name: 'config_deployment_group_basic'
     primary_resource_id: 'default'
     exclude_test: true # Acceptance tests are handwritten due to complex prerequisites (IAM, deployments).
-    vars:
-      deployment_group_name: 'my-deployment-group'
-      deployment_name: 'my-deployment'
-      service_account_email: 'my-service-account@my-project.iam.gserviceaccount.com'
+    steps:
+      - name: 'config_deployment_group_basic'
+        resource_id_vars:
+          project: 'my-project'
+          deployment_group_name: 'my-deployment-group'
+          deployment_name: 'my-deployment'
+          service_account_email: 'my-service-account@my-project.iam.gserviceaccount.com'
 
 virtual_fields:
   - name: 'deployment_reference_policy'
@@ -91,9 +95,12 @@ properties:
     item_type:
       type: NestedObject
       properties:
+        - name: 'id'
+          type: String
+          required: true
+          description: 'The id of the deployment unit. Must be unique within the deployment group.'
         - name: 'dependencies'
           type: Array
-          required: true
           description: |-
             The IDs of the deployment units within the deployment group that this
             unit depends on.
@@ -105,9 +112,6 @@ properties:
             The name of the deployment to be provisioned.
             Format:
             'projects/{project_id}/locations/{location}/deployments/{deployment}'.
-        - name: 'id'
-          type: String
-          description: 'The id of the deployment unit. Must be unique within the deployment group.'
 
   - name: 'labels'
     type: KeyValueLabels
@@ -118,6 +122,16 @@ properties:
     description: 'Arbitrary key-value metadata storage.'
 
   # Output-only fields
+  - name: 'createTime'
+    type: Time
+    description: 'Output only. Time when the deployment group was created.'
+    output: true
+
+  - name: 'updateTime'
+    type: Time
+    description: 'Output only. Time when the deployment group was last updated.'
+    output: true
+
   - name: 'state'
     type: String
     description: 'Current state of the deployment group.'
