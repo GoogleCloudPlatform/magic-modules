@@ -16,7 +16,6 @@ name: CaseCloseDefinition
 description: >
   CaseCloseDefinition provides predefined root cause options for closing security cases in SecOps. These definitions ensure consistent documentation and reporting across case investigations upon closure.
 
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
@@ -31,7 +30,6 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseCloseDefinitions/{{case_close_definition_id}}
 samples:
   - name: chronicle_caseclosedefinition_update
-    min_version: beta
     primary_resource_id: example
     steps:
       - name: "chronicle_caseclosedefinition_basic"
