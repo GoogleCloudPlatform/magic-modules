@@ -891,6 +891,12 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 		log.Fatalf("Cannot read file %s to add Hashicorp copy right: %s", targetFile, err)
 	}
 
+	source := string(sourceByte)
+	if strings.Contains(source, "Copyright IBM Corp. 2014, 2026") &&
+		strings.Contains(source, "SPDX-License-Identifier: MPL-2.0") {
+		return
+	}
+
 	sourceByte = google.Concat([]byte(header), sourceByte)
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {

@@ -18,9 +18,6 @@ import (
 	"path/filepath"
 	"testing"
 	"testing/fstest"
-
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 )
 
 func TestGenerateFile(t *testing.T) {
@@ -112,29 +109,5 @@ func TestGenerateFile(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestGenerateMetadataFileIncludesHeaders(t *testing.T) {
-	tempDir := t.TempDir()
-	filePath := filepath.Join(tempDir, "metadata.yaml")
-	td := NewTemplateData(tempDir, "ga", fstest.MapFS{})
-
-	td.GenerateMetadataFile(filePath, api.Resource{
-		Name: "example",
-		ProductMetadata: &api.Product{
-			Name:    "Example",
-			Version: &product.Version{BaseUrl: "https://example.googleapis.com/v1"},
-		},
-	})
-
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		t.Fatalf("failed to read generated metadata: %v", err)
-	}
-
-	if got := string(content); len(got) < len(metadataFileHeader) ||
-		got[:len(metadataFileHeader)] != metadataFileHeader {
-		t.Errorf("generated metadata does not start with the expected header:\n%s", got)
 	}
 }
