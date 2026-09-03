@@ -198,6 +198,16 @@ samples:
           home_backend_service_name: 'home'
           mirror_backend_service_name: 'mirror'
           region_health_check_name: 'health-check'
+  - name: 'region_url_map_backend_bucket'
+    primary_resource_id: 'regionurlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'region_url_map_backend_bucket'
+        min_version: 'beta'
+        resource_id_vars:
+          region_url_map_name: 'regionurlmap'
+          backend_bucket_name: 'static'
+          storage_bucket_name: 'static'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -225,11 +235,12 @@ properties:
       weightedBackendServices. Conversely, if routeAction specifies any
       weightedBackendServices, service must not be specified.  Only one of defaultService,
       defaultUrlRedirect or defaultRouteAction.weightedBackendService must be set.
+      Can refer to a RegionBackendService or RegionBackendBucket.
     exactly_one_of:
       - 'default_service'
       - 'default_url_redirect'
       - 'default_route_action.0.weighted_backend_services'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
     resource: 'RegionBackendService'
     imports: 'selfLink'
   - name: 'description'
@@ -359,10 +370,10 @@ properties:
         - name: 'defaultService'
           type: ResourceRef
           description: |
-            A reference to a RegionBackendService resource. This will be used if
+            A reference to a RegionBackendService or RegionBackendBucket resource. This will be used if
             none of the pathRules defined by this PathMatcher is matched by
             the URL's path portion.
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
           # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
           # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
           # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
@@ -414,14 +425,14 @@ properties:
               - name: 'service'
                 type: ResourceRef
                 description: |
-                  The region backend service resource to which traffic is
+                  The RegionBackendService or RegionBackendBucket resource to which traffic is
                   directed if this rule is matched. If routeAction is additionally specified,
                   advanced routing actions like URL Rewrites, etc. take effect prior to sending
                   the request to the backend. However, if service is specified, routeAction cannot
                   contain any weightedBackendService s. Conversely, if routeAction specifies any
                   weightedBackendServices, service must not be specified. Only one of urlRedirect,
                   service or routeAction.weightedBackendService must be set.
-                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
                 resource: 'RegionBackendService'
                 imports: 'selfLink'
               - name: 'headerAction'
@@ -848,7 +859,7 @@ properties:
                         description: |
                           The RegionBackendService resource being mirrored to.
                         required: true
-                        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
                         resource: 'RegionBackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
@@ -1022,7 +1033,7 @@ properties:
                             forwarding the request to backendService, the loadbalancer applies any relevant
                             headerActions specified as part of this backendServiceWeight.
                           required: true
-                          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                          custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
                           resource: 'RegionBackendService'
                           imports: 'selfLink'
                         - name: 'headerAction'
@@ -1190,14 +1201,14 @@ properties:
               - name: 'service'
                 type: ResourceRef
                 description: |
-                  The region backend service resource to which traffic is
+                  The RegionBackendService or RegionBackendBucket resource to which traffic is
                   directed if this rule is matched. If routeAction is additionally specified,
                   advanced routing actions like URL Rewrites, etc. take effect prior to sending
                   the request to the backend. However, if service is specified, routeAction cannot
                   contain any weightedBackendService s. Conversely, if routeAction specifies any
                   weightedBackendServices, service must not be specified. Only one of urlRedirect,
                   service or routeAction.weightedBackendService must be set.
-                custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
                 resource: 'RegionBackendService'
                 imports: 'selfLink'
               - name: 'paths'
@@ -1351,7 +1362,7 @@ properties:
                         description: |
                           The RegionBackendService resource being mirrored to.
                         required: true
-                        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
                         resource: 'RegionBackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
@@ -1473,7 +1484,7 @@ properties:
                             forwarding the request to backendService, the loadbalancer applies any relevant
                             headerActions specified as part of this backendServiceWeight.
                           required: true
-                          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                          custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
                           resource: 'RegionBackendService'
                           imports: 'selfLink'
                         - name: 'headerAction'
@@ -1736,11 +1747,11 @@ properties:
                   - name: 'backendService'
                     type: ResourceRef
                     description: |
-                      The full or partial URL to the default BackendService resource. Before forwarding the
+                      The full or partial URL to the default RegionBackendService resource. Before forwarding the
                       request to backendService, the loadbalancer applies any relevant headerActions
                       specified as part of this backendServiceWeight.
-                    custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
-                    resource: 'BackendService'
+                    custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
+                    resource: 'RegionBackendService'
                     imports: 'selfLink'
                   - name: 'weight'
                     type: Integer
@@ -1963,10 +1974,10 @@ properties:
                 - name: 'backendService'
                   type: ResourceRef
                   description: |
-                    The full or partial URL to the BackendService resource being mirrored to.
+                    The full or partial URL to the RegionBackendService resource being mirrored to.
                   required: true
-                  custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
-                  resource: 'BackendService'
+                  custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
+                  resource: 'RegionBackendService'
                   imports: 'selfLink'
                 - name: 'mirrorPercent'
                   type: Double
@@ -2108,9 +2119,9 @@ properties:
           required: true
         - name: 'service'
           type: ResourceRef
-          description: A reference to expected RegionBackendService resource the given URL should be mapped to.
+          description: A reference to expected RegionBackendService or RegionBackendBucket resource the given URL should be mapped to.
           required: true
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
           resource: 'RegionBackendService'
           imports: 'selfLink'
   - name: 'defaultUrlRedirect'
@@ -2219,8 +2230,8 @@ properties:
             - name: 'backendService'
               type: ResourceRef
               description: |
-                The full or partial URL to the default BackendService resource. Before forwarding the request to backendService, the load balancer applies any relevant headerActions specified as part of this backendServiceWeight.
-              custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                The full or partial URL to the default RegionBackendService resource. Before forwarding the request to backendService, the load balancer applies any relevant headerActions specified as part of this backendServiceWeight.
+              custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
               resource: 'RegionBackendService'
               imports: 'selfLink'
             - name: 'weight'
@@ -2451,7 +2462,7 @@ properties:
               The full or partial URL to the RegionBackendService resource being mirrored to.
               The backend service configured for a mirroring policy must reference backends that are of the same type as the original backend service matched in the URL map.
               Serverless NEG backends are not currently supported as a mirrored backend service.
-            custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/reference_to_region_backend.tmpl'
             resource: 'RegionBackendService'
             imports: 'selfLink'
           - name: 'mirrorPercent'
