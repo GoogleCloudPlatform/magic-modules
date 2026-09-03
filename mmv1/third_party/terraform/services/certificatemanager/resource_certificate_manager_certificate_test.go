@@ -11,120 +11,31 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/certificatemanager"
 )
 
-func TestAccCertificateManagerTrustConfig_update(t *testing.T) {
+func TestAccCertificateManagerCertificate_tags(t *testing.T) {
 	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckCertificateManagerTrustConfigDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCertificateManagerTrustConfig_update0(context),
-			},
-			{
-				ResourceName:            "google_certificate_manager_trust_config.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-			{
-				Config: testAccCertificateManagerTrustConfig_update1(context),
-			},
-			{
-				ResourceName:            "google_certificate_manager_trust_config.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func testAccCertificateManagerTrustConfig_update0(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_certificate_manager_trust_config" "default" {
-  name        = "tf-test-trust-config%{random_suffix}"
-  description = "sample description for the trust config"
-  location = "global"
-
-  trust_stores {
-    trust_anchors { 
-      pem_certificate = file("test-fixtures/cert.pem")
-    }
-    intermediate_cas { 
-      pem_certificate = file("test-fixtures/cert.pem")
-    }
-  }
-
-  allowlisted_certificates  {
-    pem_certificate = file("test-fixtures/cert.pem") 
-  }
-
-  labels = {
-    "foo" = "bar"
-  }
-}
-`, context)
-}
-
-func testAccCertificateManagerTrustConfig_update1(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_certificate_manager_trust_config" "default" {
-  name        = "tf-test-trust-config%{random_suffix}"
-  description = "sample description for the trust config 2"
-  location    = "global"
-
-  trust_stores {
-    trust_anchors { 
-      pem_certificate = file("test-fixtures/cert2.pem")
-    }
-    intermediate_cas { 
-      pem_certificate = file("test-fixtures/cert2.pem")
-    }
-  }
-
-  allowlisted_certificates  {
-    pem_certificate = file("test-fixtures/cert.pem") 
-  }
-
-  labels = {
-    "bar" = "foo"
-  }
-}
-`, context)
-}
-
-func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
-	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "trust-config-tagkey", map[string]interface{}{})
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "cert-manager-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "trust-config-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "cert-manager-tagvalue", tagKey),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckCertificateManagerTrustConfigDestroyProducer(t),
+		CheckDestroy:             testAccCheckCertificateManagerCertificateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateManagerTrustConfigWithTags(context),
+				Config: testAccCertificateManagerCertificateTags(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_certificate_manager_trust_config.test", "tags.%"),
-					checkCertificateManagerTrustConfigWithTags(t),
+					resource.TestCheckResourceAttrSet("google_certificate_manager_certificate.test", "tags.%"),
+					checkCertificateManagerCertificateTags(t),
 				),
 			},
 			{
-				ResourceName:            "google_certificate_manager_trust_config.test",
+				ResourceName:            "google_certificate_manager_certificate.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"tags"},
@@ -133,10 +44,10 @@ func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 	})
 }
 
-func checkCertificateManagerTrustConfigWithTags(t *testing.T) func(s *terraform.State) error {
+func checkCertificateManagerCertificateTags(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_certificate_manager_trust_config" {
+			if rs.Type != "google_certificate_manager_certificate" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
@@ -188,16 +99,16 @@ func checkCertificateManagerTrustConfigWithTags(t *testing.T) func(s *terraform.
 				return fmt.Errorf("tag value details (name) not found in response for namespaced name: %q, response: %v", configuredTagValueNamespacedName, respDescribe)
 			}
 
-			// 3. Get the tag bindings from the Certificate Manager Trust Config.
+			// 3. Get the tag bindings from the Certificate Manager Certificates.
 			parts := strings.Split(rs.Primary.ID, "/")
 			if len(parts) != 6 {
 				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
 			}
 			project := parts[1]
 			location := parts[3]
-			trustConfigs_id := parts[5]
+			certificate_id := parts[5]
 
-			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/trustConfigs/%s", project, location, trustConfigs_id)
+			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificates/%s", project, location, certificate_id)
 			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -245,17 +156,18 @@ func checkCertificateManagerTrustConfigWithTags(t *testing.T) func(s *terraform.
 	}
 }
 
-func testAccCertificateManagerTrustConfigWithTags(context map[string]interface{}) string {
+func testAccCertificateManagerCertificateTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	resource "google_certificate_manager_trust_config" "test" {
-	  name        = "tf-test-trust-config%{random_suffix}"
-        description = "sample description for the trust config 2"
-        location    = "global"
-        allowlisted_certificates  {
-          pem_certificate = file("test-fixtures/cert.pem") 
-        }
-tags = {
-	"%{org}/%{tagKey}" = "%{tagValue}"
-  }
+	resource "google_certificate_manager_certificate" "test" {
+	  name    = "tf-test-cert-%{random_suffix}"
+	  description = "Global cert"
+	  location = "us-east1"
+	  self_managed {
+	    pem_certificate = file("test-fixtures/cert.pem")
+    	    pem_private_key = file("test-fixtures/private-key.pem")
+	  }
+	  tags = {
+	    "%{org}/%{tagKey}" = "%{tagValue}"
+	  }
 	}`, context)
 }
