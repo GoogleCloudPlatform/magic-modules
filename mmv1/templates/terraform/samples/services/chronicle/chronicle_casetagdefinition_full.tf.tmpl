@@ -1,0 +1,13 @@
+resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "tf_test_updated_tag_%{random_suffix}"
+  match_criteria = "BY_ENTITY_PROPERTY_NAME"
+  property_name = "test_property"
+  value = "updated_value"
+  comparison_type = "START_WITH"
+  priority = 200
+  can_be_case_title = true
+}
