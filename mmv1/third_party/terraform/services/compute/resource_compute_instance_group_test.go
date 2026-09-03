@@ -385,7 +385,7 @@ func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup 
 func testAccComputeInstanceGroup_basic(zone, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -440,7 +440,7 @@ resource "google_compute_instance_group" "empty" {
 func testAccComputeInstanceGroup_rename(instance, instanceGroup, backend, health string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -503,7 +503,7 @@ resource "google_compute_https_health_check" "healthcheck" {
 func testAccComputeInstanceGroup_update(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -546,7 +546,7 @@ resource "google_compute_instance_group" "update" {
 func testAccComputeInstanceGroup_update2(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -589,7 +589,7 @@ resource "google_compute_instance_group" "update" {
 func testAccComputeInstanceGroup_outOfOrderInstances(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -647,7 +647,7 @@ resource "google_compute_instance_group" "group" {
 func testAccComputeInstanceGroup_network(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
