@@ -66,13 +66,7 @@ properties:
       - 'MAINTENANCE'
       - 'INCONCLUSIVE'
     required: true
-    description: |-
-      Specify why the case was closed.
-      Possible values:
-      MALICIOUS
-      NOT_MALICIOUS
-      MAINTENANCE
-      INCONCLUSIVE
+    description: Specify why the case was closed.
   - name: name
     type: String
     description: |-

@@ -1,7 +1,6 @@
 resource "google_chronicle_case_close_definition" "{{$.PrimaryResourceId}}" {
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
-  
   close_reason = "NOT_MALICIOUS"
   root_cause = "Authorized administrative activity"
 }
