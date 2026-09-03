@@ -1,0 +1,27 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "A RAG corpus with a customer-managed encryption key"
+  region       = "us-central1"
+
+  vector_db_config {
+    rag_managed_db {
+      ann {
+        tree_depth = 2
+        leaf_count = 500
+      }
+    }
+
+    rag_embedding_model_config {
+      vertex_prediction_endpoint {
+        endpoint = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+    }
+  }
+
+  encryption_spec {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
+}
+
+data "google_project" "project" {
+}

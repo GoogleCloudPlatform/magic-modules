@@ -1,0 +1,11 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "A basic RAG corpus"
+  region       = "us-central1"
+
+  vector_db_config {
+    rag_managed_db {
+      knn {}
+    }
+  }
+}
