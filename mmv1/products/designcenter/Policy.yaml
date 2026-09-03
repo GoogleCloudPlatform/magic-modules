@@ -1,0 +1,106 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Policy
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{applicationtemplate}}/policies
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{applicationtemplate}}/policies/{{policy_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{applicationtemplate}}/policies?policyId={{policy_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{applicationtemplate}}/policies/{{policy_id}}
+autogen_status: UG9saWN5QXV0b2dlblYyQWdlbnQ=
+autogen_async: false
+examples:
+  - name: designcenter_policy_basic
+    primary_resource_id: example
+    vars:
+      resource_name: test-resource
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: space
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: applicationtemplate
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: policyId
+    type: String
+    required: true
+    description: The ID of the policy to create.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: applyConditions
+    type: Array
+    description: |-
+      Conditions for applying the policy. Condition accepts the `criticality` and
+      `environment` parameters from the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: conditionKey
+          type: String
+          required: true
+          description: The key of the parameter for the condition.
+        - name: conditionValue
+          type: String
+          required: true
+          description: The value of the parameter for the condition.
+  - name: createTime
+    type: String
+    description: The policy creation timestamp.
+    output: true
+  - name: description
+    type: String
+    description: The policy description.
+  - name: displayName
+    type: String
+    description: The policy display name.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The policy name in the following format:
+      `projects/$project/locations/$location/spaces/$space/applicationTemplates/$applicationTemplate/policies/$policy`
+    output: true
+  - name: policyRevisionUri
+    type: String
+    description: URI of the policy revision.
+  - name: policyType
+    type: String
+    required: true
+    description: |-
+      The policy type.
+      Policy type is used to determine the domain of the policy.
+      Possible values:
+      COMPLIANCE_FRAMEWORK
+  - name: policyUri
+    type: String
+    description: URI of the policy.
+  - name: updateTime
+    type: String
+    description: The policy update timestamp.
+    output: true
