@@ -1,0 +1,4 @@
+resource "google_parameter_manager_regional_template" "{{$.PrimaryResourceId}}" {
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  location    = "us-central1"
+}

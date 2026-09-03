@@ -1,0 +1,116 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RegionalTemplate
+api_resource_type_kind: Template
+description: |
+  A Regional Template resource defines the structure of regional parameter data
+  using a schema in YAML or JSON format. Regional Template versions contain the
+  templated payload, with variables as placeholders whose values are supplied by
+  a Regional Parameter Version at render time.
+references:
+  guides:
+    'Parameter Manager templates overview': 'https://cloud.google.com/secret-manager/parameter-manager/docs/parameter-templates-overview'
+  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates
+docs:
+base_url: projects/{{project}}/locations/{{location}}/templates
+self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+create_url: projects/{{project}}/locations/{{location}}/templates?template_id={{template_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+samples:
+  - name: regional_template_config_basic
+    primary_resource_id: regional-template-basic
+    steps:
+      - name: regional_template_config_basic
+        resource_id_vars:
+          template_id: regional_template
+  - name: regional_template_with_format
+    primary_resource_id: regional-template-with-format
+    steps:
+      - name: regional_template_with_format
+        resource_id_vars:
+          template_id: regional_template
+  - name: regional_template_with_labels
+    primary_resource_id: regional-template-with-labels
+    steps:
+      - name: regional_template_with_labels
+        resource_id_vars:
+          template_id: regional_template
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the regional Template. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: templateId
+    type: String
+    description: |
+      The ID to use for the Template, which will become the final component of
+      the Template's resource name. This must be unique within the project and
+      location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the regional Template. Format:
+      `projects/{{project}}/locations/{{location}}/templates/{{template_id}}`
+    output: true
+  - name: createTime
+    type: String
+    description: |
+      The time at which the regional Template was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      The time at which the regional Template was updated.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      The labels assigned to this regional Template.
+
+      Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
+      and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+
+      Label values must be between 0 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
+      and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+
+      No more than 64 labels can be assigned to a given resource.
+
+      An object containing a list of "key": value pairs. Example:
+      { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - name: format
+    type: Enum
+    description: |
+      The format type of the regional Template.
+    default_value: TEMPLATE_FORMAT_YAML
+    immutable: true
+    enum_values:
+      - TEMPLATE_FORMAT_UNSPECIFIED
+      - TEMPLATE_FORMAT_YAML
+      - TEMPLATE_FORMAT_JSON
