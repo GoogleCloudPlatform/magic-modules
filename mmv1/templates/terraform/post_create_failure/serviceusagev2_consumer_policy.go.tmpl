@@ -1,0 +1,18 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+
+// Post-create failure QoL log hints
+log.Printf("[WARN] Service Usage Policy creation failed.")
+log.Printf("[WARN] Hint 1: If due to concurrent modification (SU_CONFLICTING_CONCURRENT_MODIFICATION), re-sync and retry.")
+log.Printf("[WARN] Hint 2: If due to active service usage (COMMON_SU_SERVICES_HAVE_USAGE), set check_usage_on_remove to false.")
+return err
