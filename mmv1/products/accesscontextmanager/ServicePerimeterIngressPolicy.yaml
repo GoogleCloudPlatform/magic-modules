@@ -35,9 +35,9 @@ references:
 docs:
 base_url: ""
 self_link: '{{perimeter}}'
-create_url: '{{perimeter}}?updateMask=status.ingressPolicies'
-delete_url: '{{perimeter}}?updateMask=status.ingressPolicies'
-update_url: '{{perimeter}}?updateMask=status.ingressPolicies'
+create_url: '{{perimeter}}'
+delete_url: '{{perimeter}}'
+update_url: '{{perimeter}}'
 create_verb: PATCH
 update_verb: PATCH
 delete_verb: PATCH
@@ -76,6 +76,7 @@ custom_code:
   constants: templates/terraform/constants/access_context_manager.go.tmpl
   pre_create: templates/terraform/pre_create/access_context_manager_service_perimeter_ingress_policy.go.tmpl
   post_read: templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl
+  pre_update: templates/terraform/pre_create/access_context_manager_service_perimeter_ingress_policy.go.tmpl
   pre_delete: templates/terraform/pre_delete/access_context_manager_service_perimeter_ingress_policy.go.tmpl
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl
 samples:
