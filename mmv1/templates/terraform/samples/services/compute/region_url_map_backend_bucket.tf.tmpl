@@ -1,0 +1,42 @@
+resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.ResourceIdVars "region_url_map_name"}}"
+  region          = "us-central1"
+  description     = "a description"
+  default_service = google_compute_region_backend_bucket.static.id
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "mysite"
+  }
+
+  path_matcher {
+    name            = "mysite"
+    default_service = google_compute_region_backend_bucket.static.id
+
+    path_rule {
+      paths   = ["/static/*"]
+      service = google_compute_region_backend_bucket.static.id
+    }
+  }
+
+  test {
+    service = google_compute_region_backend_bucket.static.id
+    host    = "mysite.com"
+    path    = "/static/test"
+  }
+}
+
+resource "google_compute_region_backend_bucket" "static" {
+  name                  = "{{index $.ResourceIdVars "backend_bucket_name"}}"
+  region                = "us-central1"
+  bucket_name           = google_storage_bucket.static.name
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  description           = "Regional backend bucket for static content"
+}
+
+resource "google_storage_bucket" "static" {
+  name                        = "{{index $.ResourceIdVars "storage_bucket_name"}}"
+  location                    = "US-CENTRAL1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
