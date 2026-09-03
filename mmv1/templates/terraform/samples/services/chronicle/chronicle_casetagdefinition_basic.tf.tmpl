@@ -3,7 +3,7 @@ resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
 
-  display_name = "tf_test_tag_%{random_suffix}"
+  display_name = "tag_%{random_suffix}"
   match_criteria = "BY_VENDOR"
   value = "test_value"
   comparison_type = "EXACT"
