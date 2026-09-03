@@ -27,7 +27,6 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseStageDefinitions/{{case_stage_definition_id}}
-autogen_status: Q2FzZVN0YWdlRGVmaW5pdGlvbg==
 samples:
   - name: chronicle_casestagedefinition_basic
     primary_resource_id: example
