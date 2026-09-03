@@ -1,14 +1,13 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
@@ -26,7 +25,7 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -44,7 +43,6 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 func testAccObservabilityFolderSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "test" {
-	provider            = google-beta
 	display_name        = "%{folder_display_name}"
 	parent              = "organizations/%{org_id}"
 	deletion_protection = false
@@ -56,7 +54,6 @@ resource "time_sleep" "wait_for_folder" {
 }
 
 resource "google_observability_folder_settings" "settings" {
-	provider     = google-beta
 	folder       = google_folder.test.folder_id
 	location     = "%{location}"
 	kms_key_name = ""
@@ -64,11 +61,9 @@ resource "google_observability_folder_settings" "settings" {
 }
 
 data "google_observability_folder_settings" "settings" {
-	provider   = google-beta
 	folder     = google_folder.test.folder_id
 	location   = "%{location}"
 	depends_on = [time_sleep.wait_for_folder]
 }
 `, context)
 }
-{{- end }}

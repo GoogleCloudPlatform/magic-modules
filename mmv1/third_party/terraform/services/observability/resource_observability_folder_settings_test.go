@@ -1,6 +1,5 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 	"testing"
@@ -9,10 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccObservabilityFolderSettings_update(t *testing.T) {
@@ -26,7 +25,7 @@ func TestAccObservabilityFolderSettings_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -61,7 +60,6 @@ func TestAccObservabilityFolderSettings_update(t *testing.T) {
 func testAccObservabilityFolderSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "test_folder" {
-	provider            = google-beta
 	display_name        = "tf-test-%{random_suffix}"
 	parent              = "organizations/%{org_id}"
 	deletion_protection = false
@@ -74,7 +72,6 @@ resource "time_sleep" "wait_for_folder" {
 }
 
 data "google_observability_folder_settings" "settings_data" {
-	provider   = google-beta
 	folder     = google_folder.test_folder.folder_id
 	location   = "us"
 	depends_on = [time_sleep.wait_for_folder]
@@ -87,7 +84,6 @@ resource "time_sleep" "wait_for_sa_propagation" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-	provider      = google-beta
 	crypto_key_id = "%{kms_key_name}"
 	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 	member        = "serviceAccount:${data.google_observability_folder_settings.settings_data.service_account_id}"
@@ -95,7 +91,6 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 }
 
 resource "google_observability_folder_settings" "primary" {
-	provider = google-beta
 	location     = "us"
 	folder       = google_folder.test_folder.folder_id
 	kms_key_name = "%{kms_key_name}"
@@ -107,7 +102,6 @@ resource "google_observability_folder_settings" "primary" {
 func testAccObservabilityFolderSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "test_folder" {
-	provider            = google-beta
 	display_name        = "tf-test-%{random_suffix}"
 	parent              = "organizations/%{org_id}"
 	deletion_protection = false
@@ -120,7 +114,6 @@ resource "time_sleep" "wait_for_folder" {
 }
 
 data "google_observability_folder_settings" "settings_data" {
-	provider   = google-beta
 	folder     = google_folder.test_folder.folder_id
 	location   = "us"
 	depends_on = [time_sleep.wait_for_folder]
@@ -133,7 +126,6 @@ resource "time_sleep" "wait_for_sa_propagation" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-	provider      = google-beta
 	crypto_key_id = "%{kms_key_name}"
 	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 	member        = "serviceAccount:${data.google_observability_folder_settings.settings_data.service_account_id}"
@@ -141,7 +133,6 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 }
 
 resource "google_observability_folder_settings" "primary" {
-	provider = google-beta
 	location     = "us"
 	folder       = google_folder.test_folder.folder_id
 	kms_key_name = "" # Unset KMS key
@@ -160,7 +151,7 @@ func TestAccObservabilityFolderSettings_globalUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -195,7 +186,6 @@ func TestAccObservabilityFolderSettings_globalUpdate(t *testing.T) {
 func testAccObservabilityFolderSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_folder" "test_folder" {
-	provider            = google-beta
 	display_name        = "tf-test-%%{random_suffix}"
 	parent              = "organizations/%%{org_id}"
 	deletion_protection = false
@@ -208,14 +198,12 @@ resource "time_sleep" "wait_for_folder" {
 }
 
 data "google_observability_folder_settings" "settings_data" {
-	provider   = google-beta
 	folder   = google_folder.test_folder.folder_id
 	location = "global"
 	depends_on = [time_sleep.wait_for_folder]
 }
 
 resource "google_observability_folder_settings" "primary_global" {
-	provider                 = google-beta
 	location                 = "global"
 	folder                   = google_folder.test_folder.folder_id
 	default_storage_location = "%s"
@@ -227,7 +215,6 @@ resource "google_observability_folder_settings" "primary_global" {
 func testAccObservabilityFolderSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_folder" "test_folder" {
-	provider            = google-beta
 	display_name        = "tf-test-%%{random_suffix}"
 	parent              = "organizations/%%{org_id}"
 	deletion_protection = false
@@ -240,14 +227,12 @@ resource "time_sleep" "wait_for_folder" {
 }
 
 data "google_observability_folder_settings" "settings_data" {
-	provider   = google-beta
 	folder     = google_folder.test_folder.folder_id
 	location   = "global"
 	depends_on = [time_sleep.wait_for_folder]
 }
 
 resource "google_observability_folder_settings" "primary_global" {
-	provider                 = google-beta
 	location                 = "global"
 	folder                   = google_folder.test_folder.folder_id
 	default_storage_location = "%s"
@@ -255,4 +240,3 @@ resource "google_observability_folder_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
-{{- end }}
