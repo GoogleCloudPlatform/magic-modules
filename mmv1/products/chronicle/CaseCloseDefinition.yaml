@@ -29,7 +29,6 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseCloseDefinitions/{{case_close_definition_id}}
-autogen_status: Q2FzZUNsb3NlRGVmaW5pdGlvbg==
 samples:
   - name: chronicle_caseclosedefinition_update
     min_version: beta
