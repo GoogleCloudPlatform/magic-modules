@@ -13,7 +13,6 @@
 
 ---
 name: CaseTagDefinition
-min_version: 'beta'
 description: >
   A CaseTagDefinition is used to classify and tag cases based on criteria.
 references:
@@ -30,7 +29,6 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/caseTagDefinitions/{{case_tag_definition_id}}
 samples:
   - name: chronicle_casetagdefinition_update
-    min_version: beta
     primary_resource_id: example
     steps:
       - name: "chronicle_casetagdefinition_basic"
