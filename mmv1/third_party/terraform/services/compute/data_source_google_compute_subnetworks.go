@@ -101,9 +101,8 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 
 	pageToken := ""
 	for {
-		params := map[string]string{}
-		if filter != "" {
-			params["filter"] = filter
+		params := map[string]string{
+			"filter": filter,
 		}
 		if pageToken != "" {
 			params["pageToken"] = pageToken
