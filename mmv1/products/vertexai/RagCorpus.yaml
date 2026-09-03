@@ -46,7 +46,7 @@ samples:
   - name: 'vertex_ai_rag_corpus_full'
     primary_resource_id: 'example'
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-vertex-rag.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     steps:
       - name: 'vertex_ai_rag_corpus_full'

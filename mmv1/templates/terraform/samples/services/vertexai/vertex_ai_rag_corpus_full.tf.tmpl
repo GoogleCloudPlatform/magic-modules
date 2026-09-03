@@ -13,7 +13,7 @@ resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
 
     rag_embedding_model_config {
       vertex_prediction_endpoint {
-        endpoint = "projects/${data.google_project.project.project_id}/locations/europe-west4/publishers/google/models/text-embedding-005"
+        endpoint = "projects/${data.google_project.project.number}/locations/europe-west4/publishers/google/models/text-embedding-005"
       }
     }
   }
