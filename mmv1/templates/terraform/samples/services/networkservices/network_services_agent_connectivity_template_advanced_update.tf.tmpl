@@ -37,6 +37,7 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
   location                       = "us-central1"
   description                    = "An updated advanced configuration for Agent Connectivity Template"
 
+  access_types = ["PRIVATE"]
   access_path = "AGENT_TO_ANYWHERE"
 
   labels = {
@@ -44,6 +45,7 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
   }
 
   egress_network_config {
+    vpc_egress = "PRIVATE_RANGES_ONLY"
     network_attachment = google_compute_network_attachment.default.id
     dns_peering_config {
       domain         = google_dns_managed_zone.default.dns_name
