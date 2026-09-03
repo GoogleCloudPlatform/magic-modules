@@ -24,6 +24,14 @@ resource "google_project_iam_member" "observability_sa_bq_admin" {
   ]
 }
 
+# Buffer for the new permission to propagate
+resource "time_sleep" "wait_for_iam_propagation" {
+  create_duration = "90s"
+  depends_on      = [
+    google_project_iam_member.observability_sa_bq_admin
+  ]
+}
+
 resource "google_observability_bucket" "bucket" {
   bucket_id    = "_Trace"
   location     = "us"
@@ -40,6 +48,6 @@ resource "google_observability_link" "{{$.PrimaryResourceId}}" {
   description  = "{{index $.Vars "description"}}"
 
   depends_on = [
-    google_project_iam_member.observability_sa_bq_admin,
+    time_sleep.wait_for_iam_propagation
   ]
 }
