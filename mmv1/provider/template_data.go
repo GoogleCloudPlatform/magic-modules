@@ -130,6 +130,16 @@ func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, r
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+// GenerateIamListResourceDocumentationFile emits one docs page covering every IAM
+// list kind the resource opts into, mirroring resource_iam.hyml.markdown.tmpl.
+func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_list_resource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
 func (td *TemplateData) GenerateDataSourceDocumentationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/datasource.html.markdown.tmpl"
 	templates := []string{
@@ -235,6 +245,17 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 // GenerateQueryTestFile emits a Terraform query-mode acceptance test for list resources (generate_list_resource).
 func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/samples/base_configs/query_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+// GenerateIamQueryTestFile emits a Terraform query-mode acceptance test for every Iam
+// list kind the resource opts into (iam_policy.generate_list_resource)
+func (td *TemplateData) GenerateIamQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/iam_list_query_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
