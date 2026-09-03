@@ -7,5 +7,6 @@ resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
   match_criteria = "BY_VENDOR"
   value = "test_value"
   comparison_type = "EXACT"
-  priority = 100
+  priority = 1
+  can_be_case_title = false
 }

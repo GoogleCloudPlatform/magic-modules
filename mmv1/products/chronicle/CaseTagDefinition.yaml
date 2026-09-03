@@ -63,6 +63,7 @@ properties:
   - name: canBeCaseTitle
     type: Boolean
     send_empty_value: true
+    required: true
     description: |-
       When checked, the tag will be assigned as the title of the case if it meets the conditions.
   - name: comparisonType
