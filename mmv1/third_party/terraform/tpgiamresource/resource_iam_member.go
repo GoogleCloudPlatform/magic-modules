@@ -99,6 +99,7 @@ var IamMemberBaseIdentitySchema = map[string]*schema.Schema{
 	},
 	"condition_title": {
 		Type:              schema.TypeString,
+		Optional:          true,
 		OptionalForImport: true,
 	},
 }
