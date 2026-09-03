@@ -99,7 +99,6 @@ var IamMemberBaseIdentitySchema = map[string]*schema.Schema{
 	},
 	"condition_title": {
 		Type:              schema.TypeString,
-		Optional:          true,
 		OptionalForImport: true,
 	},
 }
@@ -248,7 +247,11 @@ func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.Resou
 	populateIamParentIdentity(identity, d, parentSpecificSchema)
 	identity.Set("role", role)
 	identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(member))
-	identity.Set("condition_title", conditionTitle)
+	if conditionTitle == "" {
+		identity.Set("condition_title", nil)
+	} else {
+		identity.Set("condition_title", conditionTitle)
+	}
 }
 
 func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
