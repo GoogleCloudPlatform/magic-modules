@@ -26,7 +26,7 @@ async:
     resource_inside_response: true
 autogen_async: true
 error_retry_predicates:
-  - transport_tpg.IsAgentConnectivityTemplateInUse
+  - transport_tpg.IsAgentGatewayInUseError
 samples:
   - name: network_services_agent_connectivity_template_basic
     primary_resource_id: default
