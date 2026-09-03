@@ -445,6 +445,7 @@ properties:
     description: Configuration specific for a Virtual Repository.
     conflicts:
       - remote_repository_config
+    send_empty_value: true
     properties:
       - name: upstreamPolicies
         type: Array
@@ -452,6 +453,7 @@ properties:
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
         diff_suppress_func: upstreamPoliciesDiffSuppress
+        send_empty_value: true
         item_type:
           type: NestedObject
           properties:
