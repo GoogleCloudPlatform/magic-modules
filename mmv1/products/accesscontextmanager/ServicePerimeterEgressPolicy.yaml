@@ -41,8 +41,6 @@ create_verb: PATCH
 update_verb: PATCH
 delete_verb: PATCH
 identity:
-  - egressFrom
-  - egressTo
   - title
 nested_query:
   keys:
