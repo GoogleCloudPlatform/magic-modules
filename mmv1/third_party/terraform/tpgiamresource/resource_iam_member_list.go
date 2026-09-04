@@ -69,6 +69,15 @@ func NewIamMemberListResource(typeName string, memberResource *schema.Resource, 
 		panic("tpgiamresource: NewIamMemberListResource requires a memberResource with identity (use IamWithResourceIdentity)")
 	}
 
+	// Strip timeouts: TfTypeResourceState() does not populate timeouts fields but
+	// ProtoSchema() includes them, causing a type mismatch when IncludeResource is true.
+	// List resources never need timeouts, so clear them on a shallow copy.
+	if memberResource.Timeouts != nil {
+		copy := *memberResource
+		copy.Timeouts = nil
+		memberResource = &copy
+	}
+
 	listConfigFields := []tpgresource.ListConfigField{
 		{
 			Name: listCallConfig.ParentResourceField,

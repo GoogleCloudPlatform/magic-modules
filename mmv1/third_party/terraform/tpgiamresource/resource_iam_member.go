@@ -247,7 +247,9 @@ func setIamMemberResourceIdentity(identity *schema.IdentityData, d *schema.Resou
 	populateIamParentIdentity(identity, d, parentSpecificSchema)
 	identity.Set("role", role)
 	identity.Set("member", tpgresource.NormalizeIamPrincipalCasing(member))
-	if conditionTitle != "" {
+	if conditionTitle == "" {
+		identity.Set("condition_title", nil)
+	} else {
 		identity.Set("condition_title", conditionTitle)
 	}
 }
