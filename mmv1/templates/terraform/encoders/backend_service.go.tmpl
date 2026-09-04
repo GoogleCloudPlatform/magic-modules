@@ -10,6 +10,17 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+
+// Pass back the generated authentication config during updates when identity is set.
+// This prevents sending an empty string which results in an API validation error.
+if tlsSettings, ok := obj["tlsSettings"].(map[string]interface{}); ok {
+    if identity, ok := tlsSettings["identity"].(string); ok && identity != "" {
+        if generatedAuth, ok := d.Get("tls_settings.0.generated_authentication_config").(string); ok && generatedAuth != "" {
+            tlsSettings["authenticationConfig"] = generatedAuth
+        }
+    }
+}
+
 backendsRaw, ok := obj["backends"]
 if !ok {
 	return obj, nil
