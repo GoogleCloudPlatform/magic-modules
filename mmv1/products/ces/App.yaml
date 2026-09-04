@@ -330,9 +330,6 @@ properties:
         type: Enum
         description: |-
           The hallucination metric behavior for golden evaluations.
-          Possible values:
-          DISABLED
-          ENABLED
         enum_values:
           - DISABLED
           - ENABLED
@@ -340,9 +337,6 @@ properties:
         type: Enum
         description: |-
           The hallucination metric behavior for scenario evaluations.
-          Possible values:
-          DISABLED
-          ENABLED
         enum_values:
           - DISABLED
           - ENABLED
