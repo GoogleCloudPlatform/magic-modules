@@ -43,6 +43,7 @@ samples:
         resource_id_vars:
           app_id: app-id
           display_name: my-app
+          secret_id: 1
   - name: ces_app_ambient_sound_gcs_uri
     primary_resource_id: ces_app_ambient_sound_gcs_uri
     steps:
@@ -250,6 +251,37 @@ properties:
           - name: webWidgetTitle
             type: String
             description: The title of the web widget.
+          - name: securitySettings
+            type: NestedObject
+            description: The security settings of the web widget.
+            properties:
+              - name: allowedOrigins
+                type: Array
+                description: |-
+                  The origins that are allowed to host the web widget. An origin is
+                  defined by RFC 6454. If empty, all origins are allowed.
+                  A maximum of 100 origins is allowed.
+                  Example: "https://example.com"
+                item_type:
+                  type: String
+              - name: enableOriginCheck
+                type: Boolean
+                description: |-
+                  Indicates whether origin check for the web widget is enabled.
+                  If `true`, the web widget will check the origin of the website that
+                  loads the web widget and only allow it to be loaded in the same origin
+                  or any of the allowed origins.
+              - name: enablePublicAccess
+                type: Boolean
+                description: |-
+                  Indicates whether public access to the web widget is enabled.
+                  If `true`, the web widget will be publicly accessible.
+                  If `false`, the web widget must be integrated with your own
+                  authentication and authorization system to return valid credentials for
+                  accessing the CES agent.
+              - name: enableRecaptcha
+                type: Boolean
+                description: Indicates whether reCAPTCHA verification for the web widget is enabled.
       - name: whatsappConfig
         type: NestedObject
         description: Configuration specific to WhatsApp deployments.
@@ -488,6 +520,11 @@ properties:
               detection of sensitive data types.
               Format:
               `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
+  - name: locked
+    type: Boolean
+    description: |-
+      Indicates whether the app is locked for changes. If the app is locked,
+      modifications to the app resources will be rejected.
   - name: metadata
     type: KeyValuePairs
     description: |-
