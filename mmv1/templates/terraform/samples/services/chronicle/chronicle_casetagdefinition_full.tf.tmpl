@@ -1,0 +1,12 @@
+resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "updated_tag_%{random_suffix}"
+  match_criteria = "BY_ENTITY_PROPERTY_NAME"
+  property_name = "test_property"
+  value = "updated_value"
+  comparison_type = "START_WITH"
+  priority = 1
+  can_be_case_title = true
+}
