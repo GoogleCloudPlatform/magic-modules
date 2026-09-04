@@ -326,6 +326,14 @@ properties:
                 description: |-
                   The success threshold for semantic similarity. Must be an integer
                   between 0 and 4. Default is >= 3.
+              - name: semanticSimilarityChannel
+                type: String
+                description: |-
+                  The semantic similarity channel to use for evaluation.
+                  Possible values:
+                  SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED
+                  TEXT
+                  AUDIO
   - name: globalInstruction
     type: String
     description: |-
