@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -19,70 +21,134 @@ import (
 {{- end }}
 )
 
-func TestComputeInstance_flattenBootDiskResourcePoliciesGuard(t *testing.T) {
+const (
+	testFlattenBootDiskInstanceID = "projects/test-project/zones/us-central1-a/instances/test-instance"
+	testFlattenBootDiskSource     = "projects/test-project/zones/us-central1-a/disks/test-disk"
+	testFlattenBootDiskImage      = "projects/debian-cloud/global/images/family/debian-11"
+	testFlattenBootDiskPolicy     = "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/resourcePolicies/policy-a"
+)
+
+// The disk can carry resource policies that were never set through
+// boot_disk.initialize_params, either because the API autofilled them or
+// because they were attached out of band with
+// google_compute_disk_resource_policy_attachment. There can be more of them
+// than the field's MaxItems allows.
+var testFlattenBootDiskAPIPolicies = []string{
+	testFlattenBootDiskPolicy,
+	"https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/resourcePolicies/policy-b",
+}
+
+// A freshly planned resource, as flattenBootDisk sees it while reading back a
+// create.
+func testFlattenBootDiskConfigData(t *testing.T, resourcePolicies []interface{}) *schema.ResourceData {
+	t.Helper()
+
+	initializeParams := map[string]interface{}{
+		"image": testFlattenBootDiskImage,
+	}
+	if resourcePolicies != nil {
+		initializeParams["resource_policies"] = resourcePolicies
+	}
+
+	return schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{
+		"name":         "test-instance",
+		"machine_type": "e2-medium",
+		"project":      "test-project",
+		"zone":         "us-central1-a",
+		"boot_disk": []interface{}{
+			map[string]interface{}{
+				"initialize_params": []interface{}{initializeParams},
+			},
+		},
+		"network_interface": []interface{}{
+			map[string]interface{}{
+				"network": "default",
+			},
+		},
+	})
+}
+
+// A resource being refreshed, where the prior state carries whatever the
+// previous read wrote. Passing nil models an import, which starts from an
+// empty state.
+func testFlattenBootDiskStateData(t *testing.T, resourcePolicies []string) *schema.ResourceData {
+	t.Helper()
+
+	attributes := map[string]string{}
+	if resourcePolicies != nil {
+		attributes = map[string]string{
+			"name":                                  "test-instance",
+			"machine_type":                          "e2-medium",
+			"project":                               "test-project",
+			"zone":                                  "us-central1-a",
+			"boot_disk.#":                           "1",
+			"boot_disk.0.initialize_params.#":       "1",
+			"boot_disk.0.initialize_params.0.image": testFlattenBootDiskImage,
+			"boot_disk.0.initialize_params.0.resource_policies.#": strconv.Itoa(len(resourcePolicies)),
+		}
+		for i, policy := range resourcePolicies {
+			attributes["boot_disk.0.initialize_params.0.resource_policies."+strconv.Itoa(i)] = policy
+		}
+	}
+
+	return ResourceComputeInstance().Data(&terraform.InstanceState{
+		ID:         testFlattenBootDiskInstanceID,
+		Attributes: attributes,
+	})
+}
+
+func TestComputeInstance_flattenBootDiskResourcePolicies(t *testing.T) {
 	t.Parallel()
 
-	apiResourcePolicies := []string{"policy-a", "policy-b"}
-	diskSource := "projects/test-project/zones/us-central1-a/disks/test-disk"
-
 	cases := map[string]struct {
-		resourcePolicies []interface{}
-		wantPolicies     []string
+		data         func(t *testing.T) *schema.ResourceData
+		wantPolicies []string
 	}{
-		"empty list stays unset": {
-			resourcePolicies: []interface{}{},
-			wantPolicies:     nil,
+		"unset in config": {
+			data:         func(t *testing.T) *schema.ResourceData { return testFlattenBootDiskConfigData(t, nil) },
+			wantPolicies: nil,
 		},
-		"configured value is preserved": {
-			resourcePolicies: []interface{}{"policy-a"},
-			wantPolicies:     apiResourcePolicies,
+		"empty list in config": {
+			data:         func(t *testing.T) *schema.ResourceData { return testFlattenBootDiskConfigData(t, []interface{}{}) },
+			wantPolicies: nil,
+		},
+		"set in config": {
+			data: func(t *testing.T) *schema.ResourceData {
+				return testFlattenBootDiskConfigData(t, []interface{}{testFlattenBootDiskPolicy})
+			},
+			wantPolicies: testFlattenBootDiskAPIPolicies,
+		},
+		"unset in state": {
+			data:         func(t *testing.T) *schema.ResourceData { return testFlattenBootDiskStateData(t, []string{}) },
+			wantPolicies: nil,
+		},
+		"set in state": {
+			data: func(t *testing.T) *schema.ResourceData {
+				return testFlattenBootDiskStateData(t, []string{testFlattenBootDiskPolicy})
+			},
+			wantPolicies: testFlattenBootDiskAPIPolicies,
+		},
+		// On import there is no config and no prior state to tell whether the
+		// policies on the disk belong to initialize_params, so they are left out
+		// rather than imported into a field the config may not own.
+		"import": {
+			data:         func(t *testing.T) *schema.ResourceData { return testFlattenBootDiskStateData(t, nil) },
+			wantPolicies: nil,
 		},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			d := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{
-				"name":         "test-instance",
-				"machine_type": "e2-medium",
-				"project":      "test-project",
-				"zone":         "us-central1-a",
-				"boot_disk": []interface{}{
-					map[string]interface{}{
-						"initialize_params": []interface{}{
-							map[string]interface{}{
-								"image":             "projects/debian-cloud/global/images/family/debian-11",
-								"resource_policies": tc.resourcePolicies,
-							},
-						},
-					},
-				},
-				"network_interface": []interface{}{
-					map[string]interface{}{
-						"network": "default",
-					},
-				},
-			})
-
-			if len(tc.resourcePolicies) == 0 {
-				if got := d.Get("boot_disk.0.initialize_params.0.resource_policies.0"); got != "" {
-					t.Fatalf("expected empty string for resource_policies.0, got %#v", got)
-				}
-
-				if got := d.Get("boot_disk.0.initialize_params.0.resource_policies"); !reflect.DeepEqual(got, []interface{}{}) {
-					t.Fatalf("expected empty list for resource_policies, got %#v", got)
-				}
-			}
-
 			config := testComputeInstanceFlattenBootDiskConfig(t, &compute.Disk{
-				ResourcePolicies: apiResourcePolicies,
+				ResourcePolicies: testFlattenBootDiskAPIPolicies,
 				Type:             "projects/test-project/zones/us-central1-a/diskTypes/pd-balanced",
 			})
 
-			flattened := flattenBootDisk(d, &compute.AttachedDisk{
+			flattened := flattenBootDisk(tc.data(t), &compute.AttachedDisk{
 				AutoDelete: true,
 				DeviceName: "test-disk",
 				Mode:       "READ_WRITE",
-				Source:     diskSource,
+				Source:     testFlattenBootDiskSource,
 			}, config)
 
 			initializeParams, ok := flattened[0]["initialize_params"].([]map[string]interface{})
@@ -98,31 +164,10 @@ func TestComputeInstance_flattenBootDiskResourcePoliciesGuard(t *testing.T) {
 	}
 }
 
-func TestComputeInstance_flattenBootDiskResourcePoliciesGuard_handlesGetDiskError(t *testing.T) {
+func TestComputeInstance_flattenBootDiskResourcePolicies_handlesGetDiskError(t *testing.T) {
 	t.Parallel()
 
-	d := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{
-		"name":         "test-instance",
-		"machine_type": "e2-medium",
-		"project":      "test-project",
-		"zone":         "us-central1-a",
-		"boot_disk": []interface{}{
-			map[string]interface{}{
-				"initialize_params": []interface{}{
-					map[string]interface{}{
-						"image":             "projects/debian-cloud/global/images/family/debian-11",
-						"resource_policies": []interface{}{},
-					},
-				},
-			},
-		},
-		"network_interface": []interface{}{
-			map[string]interface{}{
-				"network": "default",
-			},
-		},
-	})
-
+	d := testFlattenBootDiskConfigData(t, []interface{}{})
 	config := testComputeInstanceFlattenBootDiskErrorConfig(t)
 
 	defer func() {
@@ -135,7 +180,7 @@ func TestComputeInstance_flattenBootDiskResourcePoliciesGuard_handlesGetDiskErro
 		AutoDelete: true,
 		DeviceName: "test-disk",
 		Mode:       "READ_WRITE",
-		Source:     "projects/test-project/zones/us-central1-a/disks/test-disk",
+		Source:     testFlattenBootDiskSource,
 	}, config)
 
 	if got, want := flattened[0]["initialize_params"], d.Get("boot_disk.0.initialize_params"); !reflect.DeepEqual(got, want) {
@@ -163,29 +208,22 @@ func testComputeInstanceFlattenBootDiskConfig(t *testing.T, disk *compute.Disk) 
 
 	t.Cleanup(server.Close)
 
-	return &transport_tpg.Config{
-		Client:          server.Client(),
-		ComputeBasePath: server.URL + "/",
-		Context:         context.Background(),
-		Project:         "test-project",
-		UserAgent:       "test-agent",
-		Zone:            "us-central1-a",
-	}
+	return testComputeInstanceFlattenBootDiskServerConfig(server)
 }
 
 func testComputeInstanceFlattenBootDiskErrorConfig(t *testing.T) *transport_tpg.Config {
 	t.Helper()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			t.Fatalf("unexpected method %q", r.Method)
-		}
-
 		http.Error(w, "boom", http.StatusInternalServerError)
 	}))
 
 	t.Cleanup(server.Close)
 
+	return testComputeInstanceFlattenBootDiskServerConfig(server)
+}
+
+func testComputeInstanceFlattenBootDiskServerConfig(server *httptest.Server) *transport_tpg.Config {
 	return &transport_tpg.Config{
 		Client:          server.Client(),
 		ComputeBasePath: server.URL + "/",

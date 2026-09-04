@@ -538,6 +538,11 @@ func TestAccComputeInstance_diskResourcePolicies_attachmentDiff(t *testing.T) {
 				ResourceName:      "google_compute_instance.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				// The API reports the policies attached to the boot disk without saying
+				// whether they came from initialize_params or from a separate
+				// google_compute_disk_resource_policy_attachment, so an import leaves the
+				// field unset rather than claiming policies the config may not own.
+				ImportStateVerifyIgnore: []string{"boot_disk.0.initialize_params.0.resource_policies"},
 			},
 		},
 	})

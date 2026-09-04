@@ -3783,9 +3783,13 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			result["initialize_params"] = m
 		}
 	} else {
-		// Resource policies can get autofilled from the API on this field and cause the
-		// instance to recreate. Ignore those API-provided values when the user left the
-		// field unset or explicitly configured an empty list.
+		// The policies attached to the disk are not necessarily the ones set through
+		// initialize_params: the API can autofill them, and they can also be attached
+		// out of band with google_compute_disk_resource_policy_attachment, which can
+		// leave more of them on the disk than this field's MaxItems allows. Only mirror
+		// them back when the field is actually set, so that an unset field does not gain
+		// a value that would force the instance to recreate. This also means an import
+		// leaves the field unset.
 		if v, ok := d.GetOkExists("boot_disk.0.initialize_params.0.resource_policies"); !ok || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
 			diskDetails.ResourcePolicies = nil
 		}
