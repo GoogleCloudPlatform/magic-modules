@@ -262,3 +262,19 @@ properties:
             type: Boolean
             description: |
               Whether to disable the private KG for query UI chips.
+  - name: 'observabilityConfig'
+    type: NestedObject
+    default_from_api: true
+    description: |
+      Observability config for the engine.
+    properties:
+      - name: 'observabilityEnabled'
+        type: Boolean
+        default_from_api: true
+        description: |
+          Enables observability. If `false`, all other flags are ignored.
+      - name: 'sensitiveLoggingEnabled'
+        type: Boolean
+        default_from_api: true
+        description: |
+          Enables sensitive logging. Sensitive logging includes customer core content (e.g. prompts, responses). If `false`, will sanitize all sensitive fields.
