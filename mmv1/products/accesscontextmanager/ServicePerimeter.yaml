@@ -138,6 +138,11 @@ properties:
     description: |
       Time the AccessPolicy was updated in UTC.
     output: true
+  - name: etag
+    type: Fingerprint
+    description: |
+      The etag for the version of the ServicePerimeter that this request is based on.
+    output: true
   - name: perimeterType
     type: Enum
     description: |
