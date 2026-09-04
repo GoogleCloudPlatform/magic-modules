@@ -159,6 +159,8 @@ resource "google_ces_app" "ces_app_basic" {
         tool_invocation_parameter_correctness_threshold = 1.0
       }
     }
+    golden_hallucination_metric_behavior   = "ENABLED"
+    scenario_hallucination_metric_behavior = "ENABLED"
   }
 
   variable_declarations {
@@ -372,6 +374,8 @@ resource "google_ces_app" "ces_app_basic" {
         tool_invocation_parameter_correctness_threshold = 0.1
       }
     }
+    golden_hallucination_metric_behavior   = "DISABLED"
+    scenario_hallucination_metric_behavior = "DISABLED"
   }
 
   variable_declarations {

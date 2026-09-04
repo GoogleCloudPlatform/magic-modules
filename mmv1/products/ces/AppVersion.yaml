@@ -706,6 +706,22 @@ properties:
                           The success threshold for semantic similarity. Must be an integer
                           between 0 and 4. Default is >= 3.
                         output: true
+              - name: goldenHallucinationMetricBehavior
+                type: String
+                description: |-
+                  The hallucination metric behavior for golden evaluations.
+                  Possible values:
+                  DISABLED
+                  ENABLED
+                output: true
+              - name: scenarioHallucinationMetricBehavior
+                type: String
+                description: |-
+                  The hallucination metric behavior for scenario evaluations.
+                  Possible values:
+                  DISABLED
+                  ENABLED
+                output: true
           - name: globalInstruction
             type: String
             description: |-
