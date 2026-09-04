@@ -241,7 +241,7 @@ func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, 
 				}
 				continue
 			}
-			p, err := iamPolicyReadWithRetry(updater)
+			p, err := iamPolicyReadWithRetry(updater, r.Client)
 			if err != nil {
 				res := req.NewListResult(ctx)
 				res.Diagnostics.AddError("API Error", err.Error())
