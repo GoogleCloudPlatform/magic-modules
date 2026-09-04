@@ -706,6 +706,24 @@ properties:
                           The success threshold for semantic similarity. Must be an integer
                           between 0 and 4. Default is >= 3.
                         output: true
+                  - name: toolMatchingSettings
+                    type: NestedObject
+                    description: |-
+                      The tool matching settings. An extra tool call is a tool call that is
+                      present in the execution but does not match any tool call in the golden
+                      expectation.
+                    output: true
+                    properties:
+                      - name: extraToolCallBehavior
+                        type: String
+                        description: |-
+                          Defines the behavior when an extra tool call is encountered. An extra
+                          tool call is a tool call that is present in the execution but does
+                          not match any tool call in the golden expectation.
+                          Possible values:
+                          FAIL
+                          ALLOW
+                        output: true
           - name: globalInstruction
             type: String
             description: |-
