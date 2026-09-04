@@ -3,4 +3,5 @@ resource "google_network_services_gateway" "{{$.PrimaryResourceId}}" {
   scope    = "default-scope-basic"
   type     = "OPEN_MESH"
   ports    = [443]
+  location = "{{index $.Vars "location"}}"
 }
