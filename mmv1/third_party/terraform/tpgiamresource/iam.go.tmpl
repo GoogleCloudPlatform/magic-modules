@@ -61,8 +61,12 @@ type (
 	ParentResourceIdFromIdentityParserFunc func(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
 )
 
-// Locking wrapper around read-only operation with retries.
-func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
+// Locking wrapper around a single, unbatched read-only operation with retries.
+// This performs exactly one GetResourceIamPolicy call (with retries) and takes
+// the per-resource mutex for its duration. Most callers should use
+// iamPolicyReadWithRetry instead, which deduplicates this call across
+// concurrent callers for the same resource.
+func readIamPolicyWithRetryOnce(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
 	mutexKey := updater.GetMutexKey()
 	transport_tpg.MutexStore.Lock(mutexKey)
 	defer transport_tpg.MutexStore.Unlock(mutexKey)
@@ -81,6 +85,31 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 	}
 	log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v\n", updater.DescribeResource(), policy))
 	return policy, nil
+}
+
+const batchKeyTmplIamPolicyRead = "%s getIamPolicy"
+
+// iamPolicyReadWithRetry reads a resource's IAM policy, with retries. Concurrent
+// calls for the same resource are batched into a single API call.
+func iamPolicyReadWithRetry(updater ResourceIamUpdater, config *transport_tpg.Config) (*cloudresourcemanager.Policy, error) {
+	batchKey := fmt.Sprintf(batchKeyTmplIamPolicyRead, updater.GetMutexKey())
+
+	req := &transport_tpg.BatchRequest{
+		ResourceName: updater.GetMutexKey(),
+		Body:         nil,
+		// Use empty CombineF since the request is exactly the same no matter how many callers ask for it.
+		CombineF: func(body interface{}, toAdd interface{}) (interface{}, error) { return nil, nil },
+		SendF: func(_ string, _ interface{}) (interface{}, error) {
+			return readIamPolicyWithRetryOnce(updater)
+		},
+		DebugId: fmt.Sprintf("Read IAM policy for %s", updater.DescribeResource()),
+	}
+
+	result, err := config.RequestBatcherIam.SendRequestWithTimeout(batchKey, req, 10*time.Minute)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*cloudresourcemanager.Policy), nil
 }
 
 // Locking wrapper around read-modify-write cycle for IAM policy.
@@ -165,7 +194,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			// calling a retryable function within a retry loop is not
 			// strictly the _best_ idea, but this error only happens in
 			// high-traffic projects anyways
-			currentPolicy, rerr := iamPolicyReadWithRetry(updater)
+			currentPolicy, rerr := readIamPolicyWithRetryOnce(updater)
 			if rerr != nil {
 				if p.Etag != currentPolicy.Etag {
 					// not matching indicates that there is a new state to attempt to apply

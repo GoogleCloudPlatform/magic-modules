@@ -152,7 +152,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 		if err != nil {
 			return nil, err
 		}
-		p, err := iamPolicyReadWithRetry(updater)
+		p, err := iamPolicyReadWithRetry(updater, config)
 		if err != nil {
 			return nil, err
 		}
@@ -360,7 +360,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 
 		eMember := getResourceIamMember(d)
 		eCondition := conditionKeyFromCondition(eMember.Condition)
-		p, err := iamPolicyReadWithRetry(updater)
+		p, err := iamPolicyReadWithRetry(updater, config)
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
 		}
