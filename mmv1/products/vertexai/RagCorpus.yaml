@@ -22,6 +22,7 @@ references:
 base_url: 'projects/{{project}}/locations/{{region}}/ragCorpora'
 self_link: 'projects/{{project}}/locations/{{region}}/ragCorpora/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/ragCorpora'
+collection_url_key: 'ragCorpora'
 update_verb: 'PATCH'
 update_mask: false
 generate_list_resource: true
