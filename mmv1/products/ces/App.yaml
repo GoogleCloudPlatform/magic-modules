@@ -460,6 +460,25 @@ properties:
               detection of sensitive data types.
               Format:
               `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
+      - name: unredactedBigqueryExportSettings
+        type: NestedObject
+        description: |-
+          Settings to describe the BigQuery export behaviors for the app for
+          unredacted conversation data.
+        properties:
+          - name: dataset
+            type: String
+            description: The BigQuery dataset to export the data to.
+          - name: enabled
+            type: Boolean
+            description: Indicates whether the BigQuery export is enabled.
+          - name: project
+            type: String
+            description: |-
+              The project ID of the BigQuery dataset to export the data to.
+              Note: If the BigQuery dataset is in a different project from the app, you should grant
+              roles/bigquery.admin role to the CES service agent service-<PROJECT-
+              NUMBER>@gcp-sa-ces.iam.gserviceaccount.com.
   - name: metadata
     type: KeyValuePairs
     description: |-

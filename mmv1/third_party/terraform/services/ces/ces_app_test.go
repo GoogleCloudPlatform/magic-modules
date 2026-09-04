@@ -130,6 +130,12 @@ resource "google_ces_app" "ces_app_basic" {
       project = "projects/fake-project"
     }
 
+    unredacted_bigquery_export_settings {
+      dataset = "projects/fake-project/datasets/fake-dataset/tables/fake-table"
+      enabled = false
+      project = "projects/fake-project"
+    }
+
     cloud_logging_settings {
       enable_cloud_logging = true
     }
@@ -337,6 +343,12 @@ resource "google_ces_app" "ces_app_basic" {
       dataset = "projects/fake-project/datasets/fake-dataset/tables/fake-table"
       enabled = true
       project = "projects/fake-project"
+    }
+
+    unredacted_bigquery_export_settings {
+      dataset = "projects/fake-project/datasets/fake-dataset/tables/fake-table-updated"
+      enabled = true
+      project = "projects/fake-project-updated"
     }
 
     cloud_logging_settings {
