@@ -1,0 +1,250 @@
+package chronicle
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"reflect"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+// Custom create logic for Chronicle RuleDeployment.
+//
+// RuleDeployment instances are auto-created when a Rule is created. Therefore, creation in Terraform
+// performs a GET to retrieve the existing deployment, expands the desired deployment configuration
+// (enabled, alerting, archived, runFrequency, scheduleCustomizations), and sends a PATCH request to initialize settings.
+func resourceChronicleRuleDeploymentCustomCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment")
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for RuleDeployment: %s", err)
+	}
+	billingProject = project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	headers := make(http.Header)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Headers:   headers,
+	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ChronicleRuleDeployment %q", d.Id()))
+	}
+
+	obj := make(map[string]interface{})
+	updateMask := []string{}
+
+	enabledProp, err := expandChronicleRuleDeploymentEnabled(d.Get("enabled"), d, config)
+	if err != nil {
+		return err
+	}
+	alertingProp, err := expandChronicleRuleDeploymentAlerting(d.Get("alerting"), d, config)
+	if err != nil {
+		return err
+	}
+	archivedProp, err := expandChronicleRuleDeploymentArchived(d.Get("archived"), d, config)
+	if err != nil {
+		return err
+	}
+	runFrequencyProp, err := expandChronicleRuleDeploymentRunFrequency(d.Get("run_frequency"), d, config)
+	if err != nil {
+		return err
+	}
+	scheduleCustomizationsProp, err := expandChronicleRuleDeploymentScheduleCustomizations(d.Get("schedule_customizations"), d, config)
+	if err != nil {
+		return err
+	}
+
+	if res != nil {
+		enabledValue, enabledExists := res["enabled"]
+		if enabledExists {
+			enabled := flattenChronicleRuleDeploymentEnabled(enabledValue, d, config)
+			if !reflect.DeepEqual(enabledProp, enabled) {
+				obj["enabled"] = enabledProp
+				updateMask = append(updateMask, "enabled")
+			}
+		} else {
+			// Handle the case where "enabled" is missing from the API response
+			if v, ok := d.GetOkExists("enabled"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+				obj["enabled"] = enabledProp
+				updateMask = append(updateMask, "enabled")
+			}
+		}
+
+		alertingValue, alertingExists := res["alerting"]
+		if alertingExists {
+			alerting := flattenChronicleRuleDeploymentAlerting(alertingValue, d, config)
+			if !reflect.DeepEqual(alertingProp, alerting) {
+				obj["alerting"] = alertingProp
+				updateMask = append(updateMask, "alerting")
+			}
+		} else {
+			// Handle the case where "alerting" is missing from the API response
+			if v, ok := d.GetOkExists("alerting"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+				obj["alerting"] = alertingProp
+				updateMask = append(updateMask, "alerting")
+			}
+		}
+
+		archivedValue, archivedExists := res["archived"]
+		if archivedExists {
+			archived := flattenChronicleRuleDeploymentArchived(archivedValue, d, config)
+			if !reflect.DeepEqual(archivedProp, archived) {
+				obj["archived"] = archivedProp
+				updateMask = append(updateMask, "archived")
+			}
+		} else {
+			// Handle the case where "archived" is missing from the API response
+			if v, ok := d.GetOkExists("archived"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+				obj["archived"] = archivedProp
+				updateMask = append(updateMask, "archived")
+			}
+		}
+
+		runFrequencyValue, runFrequencyExists := res["runFrequency"]
+		if runFrequencyExists {
+			runFrequency := flattenChronicleRuleDeploymentRunFrequency(runFrequencyValue, d, config)
+			_, ok := d.GetOkExists("run_frequency")
+			if !reflect.DeepEqual(runFrequencyProp, runFrequency) && ok {
+				obj["runFrequency"] = runFrequencyProp
+				updateMask = append(updateMask, "runFrequency")
+			}
+		} else {
+			// Handle the case where "run_frequency" is missing from the API response
+			if v, ok := d.GetOkExists("run_frequency"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+				obj["runFrequency"] = runFrequencyProp
+				updateMask = append(updateMask, "runFrequency")
+			}
+		}
+
+		scheduleCustomizationsValue, scheduleCustomizationsExists := res["scheduleCustomizations"]
+		if scheduleCustomizationsExists {
+			// Flatten existing scheduleCustomizations from GET response to compare against expanded config
+			scheduleCustomizations := flattenChronicleRuleDeploymentScheduleCustomizations(scheduleCustomizationsValue, d, config)
+			_, ok := d.GetOkExists("schedule_customizations")
+			if !reflect.DeepEqual(scheduleCustomizationsProp, scheduleCustomizations) && ok {
+				obj["scheduleCustomizations"] = scheduleCustomizationsProp
+			}
+		} else {
+			// Handle the case where "schedule_customizations" is missing from the API response
+			if v, ok := d.GetOkExists("schedule_customizations"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+				obj["scheduleCustomizations"] = scheduleCustomizationsProp
+			}
+		}
+	} else {
+		if v, ok := d.GetOkExists("enabled"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			obj["enabled"] = enabledProp
+			updateMask = append(updateMask, "enabled")
+		}
+		if v, ok := d.GetOkExists("alerting"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			obj["alerting"] = alertingProp
+			updateMask = append(updateMask, "alerting")
+		}
+		if v, ok := d.GetOkExists("archived"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			obj["archived"] = archivedProp
+			updateMask = append(updateMask, "archived")
+		}
+		if v, ok := d.GetOkExists("run_frequency"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			obj["runFrequency"] = runFrequencyProp
+			updateMask = append(updateMask, "runFrequency")
+		}
+		if v, ok := d.GetOkExists("schedule_customizations"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			obj["scheduleCustomizations"] = scheduleCustomizationsProp
+		}
+	}
+
+	// We solve two problems here:
+	//  1. The scheduleCustomizations field does not have its own update mask field. Instead, it uses
+	//     the runFrequency update mask field. So, if we want to update scheduleCustomizations, we
+	//     have to add the runFrequency update mask if it's not already there.
+	//  2. Because scheduleCustomizations and runFrequency share the same update mask field, they are
+	//     always updated together. By default terraform won't add runFrequency or scheduleCustomizations
+	//     if either did not change. But because they will be updated together, we still need to include
+	//     the field that did not change into the request, or it will revert back to the default,
+	//     unspecified value.
+	hasScheduleCustomizationsUpdate := obj["scheduleCustomizations"] != nil
+	hasRunFrequencyUpdate := obj["runFrequency"] != nil
+	if hasScheduleCustomizationsUpdate || hasRunFrequencyUpdate {
+		if hasScheduleCustomizationsUpdate && !hasRunFrequencyUpdate {
+			obj["runFrequency"] = runFrequencyProp
+		}
+		if hasRunFrequencyUpdate && !hasScheduleCustomizationsUpdate {
+			if scheduleCustomizationsProp != nil {
+				obj["scheduleCustomizations"] = scheduleCustomizationsProp
+			}
+		}
+		hasRunFreqMask := false
+		for _, m := range updateMask {
+			if m == "runFrequency" {
+				hasRunFreqMask = true
+				break
+			}
+		}
+		if !hasRunFreqMask {
+			updateMask = append(updateMask, "runFrequency")
+		}
+	}
+
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Updating RuleDeployment %q: %#v", d.Id(), obj)
+
+	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error updating RuleDeployment %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished updating RuleDeployment %q: %#v", d.Id(), res)
+	}
+
+	if err := d.Set("name", flattenChronicleRuleDeploymentName(res["name"], d, config)); err != nil {
+		return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
+	}
+
+	// Store the ID now
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	log.Printf("[DEBUG] Finished creating RuleDeployment %q: %#v", d.Id(), res)
+
+	return resourceChronicleRuleDeploymentRead(d, meta)
+}
