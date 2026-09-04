@@ -68,11 +68,6 @@ properties:
     required: true
     description: |-
       The type of comparison to be used when comparing the value to the case.
-      Possible values:
-      EXACT
-      START_WITH
-      CONTAIN
-      ENDS_WITH
     enum_values:
       - EXACT
       - START_WITH
@@ -87,13 +82,6 @@ properties:
     required: true
     description: |-
       The criteria to match the case against.
-      Possible values:
-      BY_VENDOR
-      BY_PRODUCT
-      BY_RULE_GENERATOR
-      BY_ENTITY_PROPERTY_NAME
-      DATA_DRIVEN
-      SYSTEM
     enum_values:
       - BY_VENDOR
       - BY_PRODUCT
