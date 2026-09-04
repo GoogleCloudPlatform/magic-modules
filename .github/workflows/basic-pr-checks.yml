@@ -1,6 +1,7 @@
 name: "pull-request"
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   pull_request
@@ -23,3 +24,5 @@ jobs:
         else
           echo "No submodules found"
         fi
+
+
