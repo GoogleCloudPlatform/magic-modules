@@ -1,0 +1,37 @@
+resource "google_project_service" "geminidataanalytics" {
+  provider = google-beta
+
+  service            = "geminidataanalytics.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_gemini_data_analytics_data_agent" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  location      = "global"
+  data_agent_id = "{{index $.Vars "data_agent_id"}}"
+  display_name  = "Example data agent"
+  description   = "Example Gemini Data Analytics data agent."
+
+  labels = {
+    env = "test"
+  }
+
+  data_analytics_agent {
+    staging_context {
+      system_instruction = "Answer questions about the sample Shakespeare corpus."
+
+      datasource_references {
+        bq {
+          table_references {
+            project_id = "bigquery-public-data"
+            dataset_id = "samples"
+            table_id   = "shakespeare"
+          }
+        }
+      }
+    }
+  }
+
+  depends_on = [google_project_service.geminidataanalytics]
+}
