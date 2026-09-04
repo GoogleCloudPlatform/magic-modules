@@ -56,6 +56,10 @@ samples:
           resource_name: my-tls-route
           backend_service_name: my-backend-service
           health_check_name: backend-service-health-check
+        vars:
+          location: 'global'
+        test_vars_overrides:
+          location: envvar.GetTestRegionFromEnv()
   - name: network_services_tls_route_regional_basic
     primary_resource_id: default
     steps:

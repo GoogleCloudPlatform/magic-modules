@@ -376,11 +376,14 @@ func ListPages(opt ListPagesOptions) error {
 				}
 			}
 		}
-		token, more := nextListPageToken(res)
-		if !more {
+		// Handle pagination for next loop, or break loop
+		v, ok := res["nextPageToken"]
+		if ok {
+			params["pageToken"] = v.(string)
+		}
+		if !ok {
 			break
 		}
-		params["pageToken"] = token
 	}
 	return nil
 }

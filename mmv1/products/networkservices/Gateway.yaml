@@ -65,6 +65,10 @@ samples:
       - name: network_services_gateway_basic
         resource_id_vars:
           resource_name: my-gateway
+        vars:
+          location: 'global'
+        test_vars_overrides:
+          location: envvar.GetTestRegionFromEnv()
   - name: network_services_gateway_advanced
     primary_resource_id: default
     steps:

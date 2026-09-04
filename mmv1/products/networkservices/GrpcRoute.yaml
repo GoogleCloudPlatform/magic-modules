@@ -20,7 +20,7 @@ references:
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.grpcRoutes
 docs:
 generate_list_resource: true
-base_url: projects/{{project}}/locations/{{location}}/grpcRoutes
+base_url: projects/{{project}}/locations/global/grpcRoutes
 self_link: projects/{{project}}/locations/{{location}}/grpcRoutes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/grpcRoutes?grpcRouteId={{name}}
 update_mask: true
@@ -56,6 +56,8 @@ samples:
       - name: network_services_grpc_route_basic
         resource_id_vars:
           resource_name: my-grpc-route
+        vars:
+          location: 'global'
   - name: network_services_grpc_route_matches_and_actions
     primary_resource_id: default
     steps:

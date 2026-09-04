@@ -41,7 +41,17 @@ async:
 autogen_async: true
 error_retry_predicates: ['transport_tpg.IsAgentGatewayInUseError']
 generate_list_resource: true
+custom_code:
+  decoder: templates/terraform/decoders/networkservices_agent_gateway.go.tmpl
 samples:
+  - name: network_services_agent_gateway_client_to_agent
+    primary_resource_id: default
+    steps:
+      - name: network_services_agent_gateway_client_to_agent
+        resource_id_vars:
+          name: my-client-to-agent-gateway
+        test_env_vars:
+          project: PROJECT_NAME
   - name: network_services_agent_gateway_full
     primary_resource_id: default
     steps:
@@ -54,14 +64,8 @@ samples:
           dns_zone_name: my-gateway-zone
         test_env_vars:
           project: PROJECT_NAME
-  - name: network_services_agent_gateway_client_to_agent
-    primary_resource_id: default
-    steps:
-      - name: network_services_agent_gateway_client_to_agent
-        resource_id_vars:
-          name: my-client-to-agent-gateway
-        test_env_vars:
-          project: PROJECT_NAME
+        vars:
+          location: 'us-central1'
   - name: network_services_agent_gateway_self_managed
     skip_test: true # temporary b/484137930
     primary_resource_id: default

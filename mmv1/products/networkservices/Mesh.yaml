@@ -21,7 +21,7 @@ references:
   guides: {}
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes
 generate_list_resource: true
-base_url: projects/{{project}}/locations/{{location}}/meshes
+base_url: projects/{{project}}/locations/global/meshes
 self_link: projects/{{project}}/locations/{{location}}/meshes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}
 update_mask: true
@@ -52,6 +52,8 @@ samples:
       - name: network_services_mesh_basic
         resource_id_vars:
           resource_name: my-mesh
+        vars:
+          location: 'global'
   - name: network_services_mesh_no_port
     primary_resource_id: default
     steps:
