@@ -180,7 +180,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
-	projectNumber := envvar.GetTestProjectNumberFromEnv()
+	projects := BootstrapServicePerimeterProjects(t, 2)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -190,7 +190,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step1(org, policyTitle, perimeterTitle),
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitle, projectNumber),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -201,7 +201,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 				},
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitle, projectNumber),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitle, projects[0].ProjectNumber),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -212,7 +212,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest(t *test
 				},
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step4(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step4(org, policyTitle, perimeterTitle, projects[1].ProjectNumber),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -248,9 +248,6 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
       method_selectors {
         method = "*"
       }
-      method_selectors {
-        permission = "storage.objects.get"
-      }
     }
   }
 }
@@ -258,7 +255,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 }
 
 // step 2: change identity_type, add access_level source, update resources, add roles, omit operations
-func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, projectNumber string) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step2(org, policyTitle, perimeterTitleName string, projectNumber int64) string {
 	return fmt.Sprintf(`
 %s
 
@@ -284,7 +281,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
     }
   }
   ingress_to {
-    resources = ["projects/%s"]
+    resources = ["projects/%d"]
     roles     = ["roles/bigquery.admin"]
   }
 }
@@ -292,7 +289,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 }
 
 // step 3: omit identity_type, add identities, update access_level source and add resource source, update resources and roles
-func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitleName, projectNumber string) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitleName string, projectNumber int64) string {
 	return fmt.Sprintf(`
 %s
 
@@ -324,24 +321,24 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   title     = "ingress policy update test"
   ingress_from {
-    identities = ["user:test@google.com"]
+    identities = ["group:test@google.com"]
     sources {
       access_level = google_access_context_manager_access_level.update-test2.name
     }
     sources {
-      resource = "projects/%s"
+      resource = "projects/%d"
     }
   }
   ingress_to {
     resources = ["*"]
-    roles     = ["roles/storage.admin"]
+    roles     = ["roles/bigquery.dataViewer"]
   }
 }
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
 }
 
 // step 4: update identities, update resource source and omit access_level source, update resources, omit roles and add updated operations
-func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step4(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_ingressPolicyUpdate_step4(org, policyTitle, perimeterTitleName string, projectNumber int64) string {
 	return fmt.Sprintf(`
 %s
 
@@ -373,13 +370,13 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   title     = "ingress policy update test"
   ingress_from {
-    identities = ["user:test2@google.com"]
+    identities = ["group:test2@google.com"]
     sources {
-      resource = "projects/123456789"
+      resource = "projects/%d"
     }
   }
   ingress_to {
-    resources = ["projects/123456789"]
+    resources = ["projects/%d"]
     operations {
       service_name = "bigquery.googleapis.com"
       method_selectors {
@@ -391,7 +388,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber, projectNumber)
 }
 
 func testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
