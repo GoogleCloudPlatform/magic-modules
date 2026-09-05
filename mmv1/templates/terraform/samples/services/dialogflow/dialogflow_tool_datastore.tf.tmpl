@@ -1,0 +1,14 @@
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.ResourceIdVars "location"}}"
+  tool_key = "{{index $.ResourceIdVars "tool_key"}}"
+  display_name = "datastore-tool"
+  description = "A tool with Data Store spec"
+  data_store_spec {
+    data_store_connections {
+      data_store = "projects/test-project/locations/{{index $.ResourceIdVars "location"}}/dataStores/test-datastore"
+      data_store_type          = "PUBLIC_WEB"
+      document_processing_mode = "DOCUMENTS"
+    }
+    fallback_prompt {}
+  }
+}

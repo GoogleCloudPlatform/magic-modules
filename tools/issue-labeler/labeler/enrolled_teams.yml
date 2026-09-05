@@ -414,6 +414,7 @@ service/dialogflow-cx:
   - google_dialogflow_fulfillment
   - google_dialogflow_generator
   - google_dialogflow_intent
+  - google_dialogflow_tool
   - google_dialogflow_version
 service/discoveryengine:
   resources:
