@@ -65,9 +65,11 @@ samples:
       - name: 'discoveryengine_datastore_kms_key_name'
         resource_id_vars:
           data_store_id: 'data-store-id'
+          cmek_config_id: 'cmek-config-id'
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+          cmek_config_id: '"tf-bootstrap-datastore-cmekconfig"'
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-discoveryengine-datastore-key").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     steps:
