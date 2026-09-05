@@ -216,6 +216,10 @@ The `android_settings` block supports:
 * `allowed_package_names` -
   (Optional)
   Android package names of apps allowed to use the key. Example: 'com.companyname.appname'
+
+* `support_non_google_app_store_distribution` -
+  (Optional)
+  Set to true for keys that are used in an Android application that is available for download in app stores in addition to the Google Play Store. Defaults to false.
     
 The `ios_settings` block supports:
     
@@ -226,6 +230,29 @@ The `ios_settings` block supports:
 * `allowed_bundle_ids` -
   (Optional)
   iOS bundle ids of apps allowed to use the key. Example: 'com.companyname.productname.appname'
+
+* `apple_developer_id` -
+  (Optional)
+  Apple Developer account details for the app that is protected by the reCAPTCHA Key.
+  Structure is documented below.
+
+The `apple_developer_id` block supports:
+
+* `key_id` -
+  (Required)
+  The Apple Developer Key ID (10-character string).
+
+* `private_key_wo` -
+  (Required)
+  The Apple Developer Private Key (.p8 file contents). Note: This property is write-only and will not be read from the API. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments).
+
+* `private_key_wo_version` -
+  (Required)
+  Triggers update of `private_key_wo` write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments).
+
+* `team_id` -
+  (Required)
+  The Apple Developer Team ID (10-character string).
     
 The `testing_options` block supports:
     
