@@ -1,0 +1,232 @@
+package compute
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleComputeServiceAttachments() *schema.Resource {
+	return &schema.Resource{
+		Read: datasourceGoogleComputeServiceAttachmentsRead,
+		Schema: map[string]*schema.Schema{
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"filter": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"service_attachments": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeServiceAttachment().Schema),
+				},
+			},
+		},
+	}
+}
+
+func datasourceGoogleComputeServiceAttachmentsRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := tpgresource.GetRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	billingProject := project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	id := fmt.Sprintf("projects/%s/regions/%s/serviceAttachments", project, region)
+	d.SetId(id)
+
+	baseURL, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/serviceAttachments")
+	if err != nil {
+		return err
+	}
+
+	serviceAttachments := make([]map[string]interface{}, 0)
+	pageToken := ""
+
+	for {
+		params := map[string]string{}
+		if filter, ok := d.GetOk("filter"); ok {
+			params["filter"] = filter.(string)
+		}
+		if pageToken != "" {
+			params["pageToken"] = pageToken
+		}
+
+		url, err := transport_tpg.AddQueryParams(baseURL, params)
+		if err != nil {
+			return err
+		}
+
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Attachments Not Found in project %s, region %s", project, region))
+		}
+
+		if items, ok := resp["items"].([]interface{}); ok {
+			for _, raw := range items {
+				sa, ok := raw.(map[string]interface{})
+				if !ok {
+					continue
+				}
+
+				consumerAcceptLists := flattenServiceAttachmentConsumerAcceptLists(sa["consumerAcceptLists"])
+				connectedEndpoints := flattenServiceAttachmentConnectedEndpoints(sa["connectedEndpoints"])
+				pscId := flattenServiceAttachmentPscServiceAttachmentId(sa["pscServiceAttachmentId"])
+
+				mapped := map[string]interface{}{
+					"name":                        sa["name"],
+					"description":                 sa["description"],
+					"self_link":                   sa["selfLink"],
+					"target_service":              sa["targetService"],
+					"connection_preference":       sa["connectionPreference"],
+					"nat_subnets":                 sa["natSubnets"],
+					"enable_proxy_protocol":       sa["enableProxyProtocol"],
+					"domain_names":                sa["domainNames"],
+					"fingerprint":                 sa["fingerprint"],
+					"region":                      sa["region"],
+					"reconcile_connections":       sa["reconcileConnections"],
+					"propagated_connection_limit": flattenInt64FromFloat(sa["propagatedConnectionLimit"]),
+					"consumer_reject_lists":       sa["consumerRejectLists"],
+					"consumer_accept_lists":       consumerAcceptLists,
+					"connected_endpoints":         connectedEndpoints,
+					"psc_service_attachment_id":   pscId,
+				}
+				serviceAttachments = append(serviceAttachments, mapped)
+			}
+		}
+
+		pageToken, _ = resp["nextPageToken"].(string)
+		if pageToken == "" {
+			break
+		}
+	}
+
+	if err := d.Set("service_attachments", serviceAttachments); err != nil {
+		return fmt.Errorf("error setting service_attachments: %s", err)
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("error setting project: %s", err)
+	}
+
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("error setting region: %s", err)
+	}
+
+	return nil
+}
+
+func flattenServiceAttachmentConsumerAcceptLists(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	items, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(items))
+	for _, raw := range items {
+		cal, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"project_id_or_num": cal["projectIdOrNum"],
+			"connection_limit":  flattenInt64FromFloat(cal["connectionLimit"]),
+			"network_url":       cal["networkUrl"],
+		})
+	}
+	return result
+}
+
+func flattenServiceAttachmentConnectedEndpoints(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	items, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(items))
+	for _, raw := range items {
+		ce, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		result = append(result, map[string]interface{}{
+			"endpoint":          ce["endpoint"],
+			"status":            ce["status"],
+			"psc_connection_id": ce["pscConnectionId"],
+			"consumer_network":  ce["consumerNetwork"],
+		})
+	}
+	return result
+}
+
+func flattenServiceAttachmentPscServiceAttachmentId(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	psc, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"high": psc["high"],
+			"low":  psc["low"],
+		},
+	}
+}
+
+func flattenInt64FromFloat(v interface{}) interface{} {
+	if v == nil {
+		return nil
+	}
+	if f, ok := v.(float64); ok {
+		return int(f)
+	}
+	return v
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_service_attachments",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeServiceAttachments(),
+	}.Register()
+}
