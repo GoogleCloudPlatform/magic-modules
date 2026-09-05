@@ -117,6 +117,7 @@ properties:
     description: |
       The data stores associated with this engine. Multiple DataStores in the same Collection can be associated here. All listed DataStores must be `SOLUTION_TYPE_CHAT`.
     required: true
+    is_set: true
     item_type:
       type: String
     min_size: 1
