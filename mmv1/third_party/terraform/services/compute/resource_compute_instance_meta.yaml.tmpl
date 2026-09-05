@@ -232,6 +232,7 @@ fields:
   - api_field: 'resourcePolicies'
   - api_field: 'scheduling.automaticRestart'
   - api_field: 'scheduling.availabilityDomain'
+  - api_field: 'scheduling.exposeHostTopology'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'scheduling.gracefulShutdown.enabled'
   - api_field: 'scheduling.gracefulShutdown.maxDuration.nanos'
