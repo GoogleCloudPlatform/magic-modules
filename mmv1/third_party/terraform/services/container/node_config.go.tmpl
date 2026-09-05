@@ -1323,7 +1323,6 @@ func schemaNodeConfig() *schema.Schema {
 							"performance_monitoring_unit": {
 								Type: schema.TypeString,
 								Optional: true,
-								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
 								ValidateFunc: verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
 								Description: `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
 							},
