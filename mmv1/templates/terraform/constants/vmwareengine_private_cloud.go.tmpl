@@ -77,3 +77,31 @@ func pollCheckForPrivateCloudAbsence(resp map[string]interface{}, respErr error)
     }
     return transport_tpg.PendingStatusPollResult("found")
 }
+
+func vmwareenginePrivateCloudEncryptionConfigCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	v, ok := diff.GetOk("encryption_config")
+	if !ok || v == nil {
+		return nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	original := l[0].(map[string]interface{})
+
+	// Validate kms_key_name based on type
+	if original["type"] == "GMEK" {
+		if vKey, ok := original["kms_key_name"]; ok && vKey != nil && vKey.(string) != "" {
+			return fmt.Errorf("encryption_config.kms_key_name cannot be set when encryption_config.type is GMEK")
+		}
+	}
+
+	if original["type"] == "CMEK" {
+		vKey, ok := original["kms_key_name"]
+		if !ok || vKey == nil || vKey.(string) == "" {
+			return fmt.Errorf("encryption_config.kms_key_name must be set when encryption_config.type is CMEK")
+		}
+	}
+
+	return nil
+}
