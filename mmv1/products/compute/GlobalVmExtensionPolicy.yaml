@@ -15,6 +15,7 @@
 name: 'GlobalVmExtensionPolicy'
 description: 'A Global VM Extension Policy.'
 base_url: 'projects/{{project}}/global/vmExtensionPolicies'
+generate_list_resource: true
 self_link: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
 delete_url: 'projects/{{project}}/global/vmExtensionPolicies/{{name}}/delete'
