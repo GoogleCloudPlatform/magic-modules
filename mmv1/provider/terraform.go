@@ -839,7 +839,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 			"Watch out for unexpected changes to copied files", outputFolder)
 	}
 	// only add copyright headers when generating TPG, TPGB, and TPGN
-	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta") || strings.HasSuffix(outputFolder, "terraform-provider-google-nightly")) {
+	if !isHashicorpTarget(outputFolder) {
 		return
 	}
 
@@ -900,16 +900,32 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 
 func expectedOutputFolder(outputFolder string) bool {
 	expectedFolders := []string{"terraform-provider-google", "terraform-provider-google-beta", "terraform-provider-google-nightly", "terraform-next", "terraform-provider-google-internal", "terraform-google-conversion", "tfplan2cai"}
-	folderName := filepath.Base(outputFolder) // Possible issue with Windows OS
-	isExpected := false
-	for _, folder := range expectedFolders {
-		if folderName == folder {
-			isExpected = true
-			break
+	cleanPath := filepath.Clean(outputFolder)
+	parts := strings.Split(cleanPath, string(filepath.Separator))
+	for _, part := range parts {
+		for _, folder := range expectedFolders {
+			if part == folder {
+				return true
+			}
 		}
 	}
 
-	return isExpected
+	return false
+}
+
+func isHashicorpTarget(outputFolder string) bool {
+	targets := []string{"terraform-provider-google", "terraform-provider-google-beta", "terraform-provider-google-nightly"}
+	cleanPath := filepath.Clean(outputFolder)
+	parts := strings.Split(cleanPath, string(filepath.Separator))
+	for _, part := range parts {
+		for _, target := range targets {
+			if part == target {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (t Terraform) replaceImportPath(outputFolder, target string) {
