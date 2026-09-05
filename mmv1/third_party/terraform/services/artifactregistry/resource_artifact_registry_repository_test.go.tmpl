@@ -502,6 +502,50 @@ func TestAccArtifactRegistryRepository_virtual(t *testing.T) {
 	})
 }
 
+func TestAccArtifactRegistryRepository_virtualEmpty(t *testing.T) {
+	t.Parallel()
+
+	repositoryID := fmt.Sprintf("tf-test-%d-virtual-empty", acctest.RandInt(t))
+	upstreamRepositoryID := fmt.Sprintf("tf-test-%d-upstream", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckArtifactRegistryRepositoryDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Regression test: creating a VIRTUAL_REPOSITORY with an
+				// empty upstream_policies list used to fail with
+				// "Error 400: Virtual repository config is not specified",
+				// because the generated expand dropped the whole
+				// virtual_repository_config object whenever
+				// upstream_policies was empty - even though the Artifact
+				// Registry API itself accepts an explicit empty list fine.
+				Config: testAccArtifactRegistryRepository_virtualEmpty(repositoryID, upstreamRepositoryID, false),
+			},
+			{
+				ResourceName:      "google_artifact_registry_repository.vr-empty-test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Zero -> one upstream policy must also work (same expand
+				// function is used on the update path).
+				Config: testAccArtifactRegistryRepository_virtualEmpty(repositoryID, upstreamRepositoryID, true),
+			},
+			{
+				ResourceName:      "google_artifact_registry_repository.vr-empty-test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// And back down to zero again.
+				Config: testAccArtifactRegistryRepository_virtualEmpty(repositoryID, upstreamRepositoryID, false),
+			},
+		},
+	})
+}
+
 func TestAccArtifactRegistryRepository_remote(t *testing.T) {
 	t.Parallel()
 
@@ -613,6 +657,39 @@ resource "google_artifact_registry_repository" "vr-test" {
   }
 }
 `,upstreamRepositoryID, upstreamRepositoryID, repositoryID, policy_a, policy_b)
+}
+
+func testAccArtifactRegistryRepository_virtualEmpty(repositoryID string, upstreamRepositoryID string, withPolicy bool) string {
+	policy := ""
+	if withPolicy {
+		policy = `
+    upstream_policies {
+      id = "upstream-a"
+      repository = google_artifact_registry_repository.upstream-empty-test.id
+      priority = 1
+    }
+`
+	}
+	return fmt.Sprintf(`
+resource "google_artifact_registry_repository" "upstream-empty-test" {
+  repository_id = "%s"
+  location = "us-central1"
+  description = "upstream repo"
+  format = "DOCKER"
+}
+
+resource "google_artifact_registry_repository" "vr-empty-test" {
+  repository_id = "%s"
+  location = "us-central1"
+  description = "virtual repo with no upstream policies at creation"
+  format = "DOCKER"
+  mode = "VIRTUAL_REPOSITORY"
+
+  virtual_repository_config {
+%s
+  }
+}
+`, upstreamRepositoryID, repositoryID, policy)
 }
 
 func testAccArtifactRegistryRepository_remote(repositoryID string, remoteDescription string) string {
