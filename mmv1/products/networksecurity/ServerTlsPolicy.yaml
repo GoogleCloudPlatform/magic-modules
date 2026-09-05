@@ -20,12 +20,13 @@ references:
     Use ServerTlsPolicy: https://cloud.google.com/load-balancing/docs/mtls
   api: https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.serverTlsPolicies
 docs:
-base_url: projects/{{project}}/locations/{{location}}/serverTlsPolicies
+base_url: projects/{{project}}/locations/global/serverTlsPolicies
 create_url: projects/{{project}}/locations/{{location}}/serverTlsPolicies?serverTlsPolicyId={{name}}
 update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/serverTlsPolicies/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
