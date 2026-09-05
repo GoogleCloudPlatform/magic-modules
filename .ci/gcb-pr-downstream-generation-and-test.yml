@@ -43,8 +43,8 @@ steps:
           - origin/$_BASE_BRANCH
 
     # Build the CI orchestration binary before merging the proposed changes. Keep
-    # both the binary and its launcher outside the checkout so later steps cannot
-    # replace them through files from the head branch.
+    # the resulting binary and launcher in a separate pre-merge path so files from
+    # the head branch cannot replace the orchestration used by later steps.
     - name: 'gcr.io/graphite-docker-images/build-environment'
       id: build-magician-binary
       entrypoint: bash
