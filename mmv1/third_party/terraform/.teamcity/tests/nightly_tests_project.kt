@@ -7,7 +7,11 @@
 
 package tests
 
+import AllNightlyTestsName
+import ServiceSweeperName
+import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
 import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import projects.googleCloudRootProject
@@ -23,8 +27,14 @@ class NightlyTestProjectsTests {
         // Find Beta nightly test project
         var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
-        // Make assertions about builds in both nightly test projects
+        // Package tests and the Service Sweeper keep their upstream CRON triggers.
+        // The composite All Nightly Tests build is started via snapshot dependency only.
         (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->
+            if (bt.name == AllNightlyTestsName) {
+                assertTrue("Build configuration `${bt.name}` should not have a trigger; it is started via snapshot dependency", bt.triggers.items.isEmpty())
+                return@forEach
+            }
+
             assertTrue("Build configuration `${bt.name}` should contain at least one trigger", bt.triggers.items.isNotEmpty())
              // Look for at least one CRON trigger
             var found: Boolean = false
@@ -45,6 +55,32 @@ class NightlyTestProjectsTests {
                 isNightlyTestBranch = true
             }
             assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
+        }
+    }
+
+    @Test
+    fun nightlyTestsShouldHaveCompositeAllTestsBuild() {
+        val root = googleCloudRootProject(testContextParameters())
+
+        var gaNightlyTestProject = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
+        var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
+
+        listOf(gaNightlyTestProject, betaNightlyTestProject).forEach { project ->
+            val composite = getBuildFromProject(project, AllNightlyTestsName)
+            assertEquals("Build configuration `${composite.name}` should be a COMPOSITE build", BuildTypeSettings.Type.COMPOSITE, composite.type)
+
+            val packageBuilds = project.buildTypes.filter { bt ->
+                bt.name != ServiceSweeperName && bt.name != AllNightlyTestsName
+            }
+            assertTrue("Nightly test project `${project.name}` should have package test builds", packageBuilds.isNotEmpty())
+            assertEquals(
+                "Composite `${composite.name}` should snapshot-depend on every package test build",
+                packageBuilds.size,
+                composite.dependencies.items.size
+            )
+
+            val sweeper = getBuildFromProject(project, ServiceSweeperName)
+            assertEquals("Service sweeper should snapshot-depend on the composite All Nightly Tests build", 1, sweeper.dependencies.items.size)
         }
     }
 }
