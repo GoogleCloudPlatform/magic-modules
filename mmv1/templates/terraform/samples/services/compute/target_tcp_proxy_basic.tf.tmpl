@@ -1,12 +1,14 @@
 resource "google_compute_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
-  name            = "{{index $.ResourceIdVars "target_tcp_proxy_name"}}"
-  backend_service = google_compute_backend_service.default.id
+  name                  = "{{index $.ResourceIdVars "target_tcp_proxy_name"}}"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  backend_service       = google_compute_backend_service.default.id
 }
 
 resource "google_compute_backend_service" "default" {
-  name        = "{{index $.ResourceIdVars "backend_service_name"}}"
-  protocol    = "TCP"
-  timeout_sec = 10
+  name                  = "{{index $.ResourceIdVars "backend_service_name"}}"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  protocol              = "TCP"
+  timeout_sec           = 10
 
   health_checks = [google_compute_health_check.default.id]
 }
