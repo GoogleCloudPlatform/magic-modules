@@ -124,8 +124,10 @@ parameters:
   - name: 'userType'
     type: Enum
     description: |
-      The type of this user. Note that 'ALLOYDB_IAM_GROUP' is only supported by
-      the beta API and will be rejected by the GA API.
+      The type of this user. Note that 'ALLOYDB_IAM_GROUP' is currently only supported by
+      the google-beta provider (which uses the v1beta alloydb API). Only new or Google-whitelisted
+      AlloyDB clusters support IAM group authentication. See
+      https://docs.cloud.google.com/alloydb/docs/database-users/manage-iam-auth for details.
     required: true
     immutable: true
     enum_values:
