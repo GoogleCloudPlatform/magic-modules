@@ -91,11 +91,11 @@ samples:
           backend_service_name: my-backend-service
           health_check_name: my-health-check
   - name: network_services_tls_route_region_target_tcp_proxy_basic
-    min_version: beta
     primary_resource_id: default
     steps:
       - name: network_services_tls_route_region_target_tcp_proxy_basic
-        min_version: beta
+        vars:
+          region: europe-west4
         resource_id_vars:
           resource_name: my-tls-route
           target_tcp_proxy_name: my-target-tcp-proxy
