@@ -1076,15 +1076,20 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_disableAutoScheduling(t *t
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				// With an all-default block the API omits scheduleOptions, so an
-				// imported state cannot recover the block (there is no prior state
-				// to preserve). The first plan after import shows a one-time diff
-				// that converges on apply; schedule_options is therefore excluded
-				// from import verification.
+				// With an all-default block the API omits scheduleOptions, so it is
+				// absent from state both after apply and after import. The diff
+				// suppress keeps the config block from producing a plan, so import
+				// verification needs no exclusion for schedule_options.
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "schedule_options"},
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				// The plan after import stays empty.
+				Config:             testAccBigqueryDataTransferConfig_scheduledQueryDisableAutoScheduling(random_suffix, "false"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 		},
 	})

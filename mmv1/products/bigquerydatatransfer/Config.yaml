@@ -131,7 +131,7 @@ properties:
     type: NestedObject
     description: |
       Options customizing the data transfer schedule.
-    custom_flatten: 'templates/terraform/custom_flatten/bigquery_data_transfer_schedule_options.go.tmpl'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'disableAutoScheduling'
         type: Boolean
