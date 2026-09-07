@@ -32,6 +32,20 @@ if err != nil {
   obj["restricted-locations-config"] = restrictedLocationsConfigProp
 }
 
+descriptionProp, err := expandBiglakeIcebergIcebergCatalogDescription(d.Get("description"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+  obj["description"] = descriptionProp
+}
+
+federatedCatalogOptionsProp, err := expandBiglakeIcebergIcebergCatalogFederatedCatalogOptions(d.Get("federated_catalog_options"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("federated_catalog_options"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, federatedCatalogOptionsProp)) {
+  obj["federated-catalog-options"] = federatedCatalogOptionsProp
+}
+
 url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BiglakeIcebergBasePath{{"}}"}}iceberg/v1/restcatalog/extensions/projects/{{"{{"}}project{{"}}"}}/catalogs/{{"{{"}}name{{"}}"}}")
 if err != nil {
   return err
@@ -54,6 +68,28 @@ if d.HasChange("default_location") {
 
 if d.HasChange("restricted_locations_config") {
   updateMask = append(updateMask, "restricted_locations_config")
+}
+
+if d.HasChange("description") {
+  updateMask = append(updateMask, "description")
+}
+
+if d.HasChange("federated_catalog_options") {
+  if d.HasChange("federated_catalog_options.0.secret_name") {
+    updateMask = append(updateMask, "federated_catalog_options.secret_name")
+  }
+  if d.HasChange("federated_catalog_options.0.service_directory_name") {
+    updateMask = append(updateMask, "federated_catalog_options.service_directory_name")
+  }
+  if d.HasChange("federated_catalog_options.0.refresh_options") {
+    updateMask = append(updateMask, "federated_catalog_options.refresh_options")
+  }
+  if d.HasChange("federated_catalog_options.0.glue_catalog_info.0.aws_role_arn") {
+    updateMask = append(updateMask, "federated_catalog_options.glue_catalog_info.aws_role_arn")
+  }
+  if d.HasChange("federated_catalog_options.0.unity_catalog_info.0.service_principal_application_id") {
+    updateMask = append(updateMask, "federated_catalog_options.unity_catalog_info.service_principal_application_id")
+  }
 }
 
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars

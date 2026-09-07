@@ -1,3 +1,8 @@
+// Custom create logic for Chronicle RuleDeployment.
+//
+// RuleDeployment instances are auto-created when a Rule is created. Therefore, creation in Terraform
+// performs a GET to retrieve the existing deployment, expands the desired deployment configuration
+// (enabled, alerting, archived, runFrequency, scheduleCustomizations), and sends a PATCH request to initialize settings.
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
     return err
@@ -50,6 +55,10 @@ if err != nil {
     return err
 }
 runFrequencyProp, err := expandChronicleRuleDeploymentRunFrequency(d.Get("run_frequency"), d, config)
+if err != nil {
+    return err
+}
+scheduleCustomizationsProp, err := expandChronicleRuleDeploymentScheduleCustomizations(d.Get("schedule_customizations"), d, config)
 if err != nil {
     return err
 }
@@ -115,6 +124,21 @@ if res != nil {
             updateMask = append(updateMask, "runFrequency")
         }
     }
+
+    scheduleCustomizationsValue, scheduleCustomizationsExists := res["scheduleCustomizations"]
+    if scheduleCustomizationsExists {
+        // Flatten existing scheduleCustomizations from GET response to compare against expanded config
+        scheduleCustomizations := flattenChronicleRuleDeploymentScheduleCustomizations(scheduleCustomizationsValue, d, config)
+        _, ok := d.GetOkExists("schedule_customizations")
+        if !reflect.DeepEqual(scheduleCustomizationsProp, scheduleCustomizations) && ok {
+            obj["scheduleCustomizations"] = scheduleCustomizationsProp
+        }
+    } else {
+        // Handle the case where "schedule_customizations" is missing from the API response
+        if v, ok := d.GetOkExists("schedule_customizations"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+            obj["scheduleCustomizations"] = scheduleCustomizationsProp
+        }
+    }
 } else {
     if v, ok:= d.GetOkExists("enabled"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
         obj["enabled"] = enabledProp
@@ -130,6 +154,41 @@ if res != nil {
     }
     if v, ok:= d.GetOkExists("run_frequency"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
         obj["runFrequency"] = runFrequencyProp
+        updateMask = append(updateMask, "runFrequency")
+    }
+    if v, ok:= d.GetOkExists("schedule_customizations"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+        obj["scheduleCustomizations"] = scheduleCustomizationsProp
+    }
+}
+
+// We solve two problems here:
+//  1. The scheduleCustomizations field does not have its own update mask field. Instead, it uses
+//     the runFrequency update mask field. So, if we want to update scheduleCustomizations, we
+//     have to add the runFrequency update mask if it's not already there.
+//  2. Because scheduleCustomizations and runFrequency share the same update mask field, they are
+//     always updated together. By default terraform won't add runFrequency or scheduleCustomizations
+//     if either did not change. But because they will be updated together, we still need to include
+//     the field that did not change into the request, or it will revert back to the default,
+//     unspecified value.
+hasScheduleCustomizationsUpdate := obj["scheduleCustomizations"] != nil
+hasRunFrequencyUpdate := obj["runFrequency"] != nil
+if hasScheduleCustomizationsUpdate || hasRunFrequencyUpdate {
+    if hasScheduleCustomizationsUpdate && !hasRunFrequencyUpdate {
+        obj["runFrequency"] = runFrequencyProp
+    }
+    if hasRunFrequencyUpdate && !hasScheduleCustomizationsUpdate {
+        if scheduleCustomizationsProp != nil {
+            obj["scheduleCustomizations"] = scheduleCustomizationsProp
+        }
+    }
+    hasRunFreqMask := false
+    for _, m := range updateMask {
+        if m == "runFrequency" {
+            hasRunFreqMask = true
+            break
+        }
+    }
+    if !hasRunFreqMask {
         updateMask = append(updateMask, "runFrequency")
     }
 }

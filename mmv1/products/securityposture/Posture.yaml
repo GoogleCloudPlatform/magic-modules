@@ -47,6 +47,7 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/posture.go.tmpl'
+  encoder: 'templates/terraform/encoders/securityposture_posture.go.tmpl'
 custom_diff:
   - 'revisionIdCustomizeDiff'
 samples:

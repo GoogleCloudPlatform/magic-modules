@@ -15,7 +15,6 @@
 name: FolderSettings
 description: Manages Cloud Observability settings for a folder.
 base_url: folders/{{folder}}/locations/{{location}}/settings
-min_version: beta
 self_link: folders/{{folder}}/locations/{{location}}/settings
 create_url: folders/{{folder}}/locations/{{location}}/settings
 update_url: folders/{{folder}}/locations/{{location}}/settings
@@ -29,6 +28,7 @@ async:
     timeouts:
       insert_minutes: 10
       update_minutes: 10
+      delete_minutes: 20
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true

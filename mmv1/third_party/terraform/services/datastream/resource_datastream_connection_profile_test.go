@@ -418,7 +418,7 @@ resource "google_compute_instance" "default" {
 	zone         = "us-central1-a"
 	boot_disk {
 		initialize_params {
-			image = "debian-11-bullseye-v20241009"
+			image = "debian-13-trixie-v20260827"
 		}
 	}
 
@@ -730,7 +730,8 @@ resource "google_datastream_connection_profile" "default" {
       secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
     }
 	additional_options = {
-		readPreference = "secondary"
+		readPreference   = "primary"  // <-- Changed
+		connectTimeoutMS = "5000"     // <-- Added
 	}
     standard_connection_format {
       direct_connection = true

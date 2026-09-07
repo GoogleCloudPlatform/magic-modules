@@ -14,6 +14,7 @@
 ---
 # API resource name
 name: 'RegionHealthSource'
+api_resource_type_kind: 'HealthSource'
 # Resource description for the provider documentation.
 description: |
   A health source resource specifies the source resources and the health

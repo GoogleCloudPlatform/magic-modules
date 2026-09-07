@@ -1,5 +1,7 @@
 name: downstreams
-permissions: read-all
+permissions:
+  contents: read
+
 
 on:
   push:

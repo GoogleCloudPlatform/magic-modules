@@ -55,7 +55,7 @@ samples:
           example_zone_googlecloudexample: example-zone-googlecloudexample
           dns_name: googlecloudexample.net.
         test_vars_overrides:
-          dns_name: '"m-z.gcp.tfacc.hashicorptest.com."'
+          dns_name: '"m-z-" + randomSuffix + ".gcp.tfacc.hashicorptest.com."'
         ignore_read_extra:
           - force_destroy
   - name: dns_record_set_basic

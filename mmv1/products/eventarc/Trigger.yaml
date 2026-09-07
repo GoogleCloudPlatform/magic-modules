@@ -275,6 +275,7 @@ properties:
     type: KeyValuePairs
     description: Output only. The reason(s) why a trigger is in FAILED state.
     output: true
+    custom_flatten: templates/terraform/custom_flatten/eventarc_trigger_conditions_flatten.go.tmpl
   - name: eventDataContentType
     type: String
     description: Optional. EventDataContentType specifies the type of payload in MIME format that is expected from the CloudEvent data field. This is set to `application/json` if the value is not defined.

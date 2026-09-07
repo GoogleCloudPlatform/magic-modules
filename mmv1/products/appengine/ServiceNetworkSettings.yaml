@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 mutex: apps/{{project}}
+generate_list_resource: true
 async:
   type: OpAsync
   operation:

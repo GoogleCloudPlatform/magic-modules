@@ -1,0 +1,72 @@
+# NOTE: This resource issues one CreateDataObject request per block.
+# It does NOT batch across resources. Terraform will parallelize a
+# 'for_each' up to '-parallelism', but each item is still a separate
+# HTTP call.
+#
+# For bulk ingestion of many items, prefer one of these out-of-band
+# paths instead of Terraform:
+#   * 'importDataObjects' (from Cloud Storage) -- highest throughput,
+#     but only available *before* any Index is created on the Collection.
+#   * 'batchCreate' (up to ~1000 items per call) -- available at any
+#     time, but must be driven from client code, not Terraform.
+resource "google_vector_search_collection" "parent" {
+  location      = "us-central1"
+  collection_id = "{{index $.ResourceIdVars "collection_id"}}"
+
+  display_name = "My BYO-Embedding Collection"
+  description  = "Collection whose vectors are supplied by the client."
+
+  data_schema = <<EOF
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    }
+  }
+}
+EOF
+
+  # Two vector fields, both without vertex_embedding_config -- the client
+  # (this Terraform config) is responsible for supplying vector values on
+  # each DataObject.
+  vector_schema {
+    field_name = "dense_embedding"
+    dense_vector {
+      dimensions = 4
+    }
+  }
+  vector_schema {
+    field_name = "sparse_embedding"
+    sparse_vector {}
+  }
+}
+
+resource "google_vector_search_data_object" "{{$.PrimaryResourceId}}" {
+  location       = "us-central1"
+  collection_id  = google_vector_search_collection.parent.collection_id
+  data_object_id = "{{index $.ResourceIdVars "data_object_id"}}"
+
+  data = jsonencode({
+    title    = "The Matrix"
+    category = "movie"
+  })
+
+  vectors {
+    field_name = "dense_embedding"
+    dense {
+      values = [0.11, 0.22, 0.33, 0.44]
+    }
+  }
+
+  vectors {
+    field_name = "sparse_embedding"
+    sparse {
+      values  = [0.9, 0.5, 0.1]
+      indices = [3, 17, 42]
+    }
+  }
+}

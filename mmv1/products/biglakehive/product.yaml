@@ -21,5 +21,3 @@ scopes:
 versions:
   - name: ga
     base_url: https://biglake.googleapis.com/
-  - name: beta
-    base_url: https://biglake.googleapis.com/

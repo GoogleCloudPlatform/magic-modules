@@ -181,26 +181,10 @@ In the flattener for the field, return the value of the field in the user's conf
 
 {{% tabs "ignore_read" %}}
 {{< tab "MMv1" >}}
-On top-level fields, this can be done with:
+Set:
 
 ```yaml
 ignore_read: true
-```
-
-For nested fields, `ignore_read` is [not currently supported](https://github.com/hashicorp/terraform-provider-google/issues/12410), so this must be implemented with a [custom flattener]({{< ref "/develop/custom-code#custom_flatten" >}}). You will also need to add the field to `ignore_read_extra` on any examples that are used to generate tests; this will cause tests to ignore the field when checking that the values in the API match the user's configuration.
-
-```go
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-    // We want to ignore read on this field, but cannot because it is nested
-    return d.Get("path.0.to.0.nested.0.field")
-}
-```
-
-```yaml
-examples:
-   # example configuration
-   ignore_read_extra:
-     - "path.0.to.0.nested.0.field"
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}

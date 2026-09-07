@@ -1564,6 +1564,32 @@ properties:
         item_type:
           type: String
         default_from_api: true
+      - name: 'requestHeaders'
+        api_name: 'loggingHttpRequestHeaders'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and if the BackendService protocol is one of HTTP, HTTPS, HTTP2 and GRPC. Contains a list of request headers to be logged.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: |
+                The header name to match on for logging.
+              required: true
+      - name: 'responseHeaders'
+        api_name: 'loggingHttpResponseHeaders'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and if the BackendService protocol is one of HTTP, HTTPS, HTTP2 and GRPC. Contains a list of response headers to be logged.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: |
+                The header name to match on for logging.
+              required: true
   - name: 'network'
     type: ResourceRef
     description: |

@@ -1,0 +1,37 @@
+deletionPolicy := d.Get("deletion_policy").(string)
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/dataExchanges/{{"{{"}}data_exchange_id{{"}}"}}/queryTemplates/{{"{{"}}query_template_id{{"}}"}}")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+var obj map[string]interface{}
+log.Printf("[DEBUG] Deleting QueryTemplate %q", d.Id())
+
+// Send the Delete Request
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "DELETE",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent,
+	Body:      obj,
+	Timeout:   d.Timeout(schema.TimeoutDelete),
+})
+
+if err != nil {
+	if deletionPolicy == "DELETE_IF_DRAFTED" && transport_tpg.IsGoogleApiErrorWithCode(err, 400) && strings.Contains(err.Error(), "must be in DRAFTED state") {
+		log.Printf("[WARN] QueryTemplate %q is not in DRAFTED state. Abandoning resource due to deletion_policy 'DELETE_IF_DRAFTED'.", d.Id())
+		d.SetId("")
+		return nil
+	}
+	return transport_tpg.HandleNotFoundError(err, d, "QueryTemplate")
+}
+
+log.Printf("[DEBUG] Finished deleting QueryTemplate %q: %#v", d.Id(), res)
+return nil

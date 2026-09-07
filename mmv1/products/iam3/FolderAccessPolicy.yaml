@@ -18,9 +18,8 @@ description: |
   that allow or deny access to resources within the specified folder based on principals and conditions.
   See the Cloud IAM documentation for more details on Access Policies.
 references:
-  api: https://cloud.google.com/iam/docs/reference/rest/v3beta/folders.locations.accessPolicies
+  api: https://cloud.google.com/iam/docs/reference/rest/v3/folders.locations.accessPolicies
 base_url: folders/{{folder}}/locations/{{location}}/accessPolicies
-min_version: beta
 self_link: folders/{{folder}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 create_url: folders/{{folder}}/locations/{{location}}/accessPolicies?accessPolicyId={{access_policy_id}}
 update_verb: PATCH

@@ -1,0 +1,78 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SoarDomain
+description: >
+  A SOAR domain designate a domain as internal, ensuring that entities associated with it are treated as organizational assets rather than external threats during ingestion.
+
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.soarDomains'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarDomains
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarDomains/{{soar_domain_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarDomains
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarDomains/{{soar_domain_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/soarDomains/{{soar_domain_id}}
+autogen_status: U29hckRvbWFpbg==
+samples:
+  - name: chronicle_soardomain_update
+    primary_resource_id: example
+    min_version: beta
+    steps:
+      - name: "chronicle_soardomain_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_soardomain_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: soarDomainId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the domain record.
+properties:
+  - name: displayName
+    type: String
+    required: true
+    description: SoarDomain display name, limited to 4096 characters.
+  - name: environmentsJson
+    type: String
+    required: true
+    description: SoarDomain associated logical environments (json).
+  - name: name
+    type: String
+    description: |-
+      Identifier. The unique name(ID) of the SoarDomain.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/soarDomains/{soar_domain_id}
+    output: true

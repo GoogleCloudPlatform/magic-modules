@@ -1,8 +1,9 @@
 name: request-reviewer
 
-permissions: read-all
+permissions: {}
 
 on:
+  # zizmor: ignore[dangerous-triggers] - pull_request_target needed to assign reviewers on fork PRs, checks out trusted ref: main
   pull_request_target:
     types:
       - opened
@@ -13,6 +14,7 @@ on:
     types:
       - created
 
+
 jobs:
   request-review:
     if: (github.event.action == 'created' && github.event.issue.state == 'open' && github.event.issue.draft == false && github.event.comment.user.login == github.event.issue.user.login) || (github.event.action != 'created' && github.event.pull_request.state == 'open' && github.event.pull_request.draft == false )
@@ -21,11 +23,13 @@ jobs:
       pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: main
+          persist-credentials: false
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
@@ -39,16 +43,17 @@ jobs:
       
       - name: Request reviewer
         if: ${{ (github.event.action == 'created' && github.event.issue.user.login != 'copybara-service' && github.event.issue.user.login != 'modular-apprentice') || (github.event.action != 'created' && github.event.pull_request.user.login != 'copybara-service' && github.event.pull_request.user.login != 'modular-apprentice') }}
-        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: .ci/magician/magician request-reviewer "${PR_NUMBER}"
       
       - name: Request reviewer (copybara)
         if: ${{ github.event.issue.user.login == 'copybara-service' || github.event.pull_request.user.login == 'copybara-service' }}
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "@melinath"
+        run: gh pr edit "${PR_NUMBER}" --add-reviewer "@melinath"
 
       - name: Request reviewer (modular-apprentice)
         if: ${{ github.event.issue.user.login == 'modular-apprentice' || github.event.pull_request.user.login == 'modular-apprentice' }}
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "ScottSuarez,slevenick"
+        run: gh pr edit "${PR_NUMBER}" --add-reviewer "ScottSuarez,slevenick"
+

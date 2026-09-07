@@ -1,0 +1,14 @@
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "name"}}"
+  description  = "Reasoning engine with traffic config"
+  region       = "us-central1"
+  provider     = google-beta
+
+  spec {
+    agent_framework = "langchain"
+  }
+
+  traffic_config {
+    traffic_split_always_latest {}
+  }
+}

@@ -1,0 +1,67 @@
+# NOTE: For most workloads we recommend creating the Collection and the Index
+# in *separate* Terraform configurations (i.e. create and apply the Collection
+# first, ingest data via importDataObjects, and only then create the Index in a
+# second configuration). Once an Index exists on a Collection you can no longer
+# run importDataObjects for bulk ingestion of data objects on that Collection --
+# you are limited to creating data objects one at a time or in small online
+# batches. Defining both resources in the same Terraform file (as shown below)
+# is convenient for a quick start, but locks you into the online / batched
+# create path for any subsequent data ingestion.
+resource "google_vector_search_collection" "parent" {
+  location      = "us-central1"
+  collection_id = "{{index $.ResourceIdVars "collection_id"}}"
+
+  display_name = "My Awesome Collection"
+  description  = "Parent collection for a dedicated-infrastructure index."
+
+  data_schema = <<EOF
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    }
+  }
+}
+EOF
+
+  vector_schema {
+    field_name = "text_embedding"
+    dense_vector {
+      dimensions = 768
+      vertex_embedding_config {
+        model_id      = "textembedding-gecko@003"
+        task_type     = "RETRIEVAL_DOCUMENT"
+        text_template = "Title: {title}"
+      }
+    }
+  }
+}
+
+resource "google_vector_search_index" "{{$.PrimaryResourceId}}" {
+  location      = "us-central1"
+  collection_id = google_vector_search_collection.parent.collection_id
+  index_id      = "{{index $.ResourceIdVars "index_id"}}"
+
+  display_name    = "My Dedicated Index"
+  description     = "Index served on dedicated infrastructure with autoscaling."
+  index_field     = "text_embedding"
+  distance_metric = "COSINE_DISTANCE"
+  filter_fields   = ["category"]
+  store_fields    = ["title"]
+
+  dense_scann {
+    feature_norm_type = "UNIT_L2_NORM"
+  }
+
+  dedicated_infrastructure {
+    mode = "PERFORMANCE_OPTIMIZED"
+    autoscaling_spec {
+      min_replica_count = 2
+      max_replica_count = 5
+    }
+  }
+}

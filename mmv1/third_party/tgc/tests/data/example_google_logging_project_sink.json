@@ -33,6 +33,7 @@
     "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
     "data": {
       "friendlyName": "",
+      "defaultCollation": "",
       "datasetReference": {
         "datasetId": "basic_logsink_dataset"
       },

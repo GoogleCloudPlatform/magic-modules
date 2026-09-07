@@ -698,13 +698,12 @@ func init() {
 var (
 	// TODO: add all mismatch resource names
 	resourceNameConverter = map[string]string{
-		"google_iam3_projects_policy_binding":             "google_iam_projects_policy_binding",
-		"google_iam3_organizations_policy_binding":        "google_iam_organizations_policy_binding",
-		"google_cloud_backup_dr_data_source":              "google_backup_dr_data_source",
-		"google_cloud_backup_dr_backup":                   "google_backup_dr_backup",
-		"google_security_posture_posture_deployment":      "google_securityposture_posture_deployment",
-		"google_container_cluster_custom_service_account": "google_container_cluster",
-		"iap_client":                                                      "google_iap_client",
+		"google_iam3_projects_policy_binding":                             "google_iam_projects_policy_binding",
+		"google_iam3_organizations_policy_binding":                        "google_iam_organizations_policy_binding",
+		"google_cloud_backup_dr_data_source":                              "google_backup_dr_data_source",
+		"google_cloud_backup_dr_backup":                                   "google_backup_dr_backup",
+		"google_security_posture_posture_deployment":                      "google_securityposture_posture_deployment",
+		"google_container_cluster_custom_service_account":                 "google_container_cluster",
 		"compute_node_types":                                              "google_compute_node_types",
 		"google_big_query_table":                                          "google_bigquery_table",
 		"google_sql_user_fw":                                              "google_fw_sql_user",

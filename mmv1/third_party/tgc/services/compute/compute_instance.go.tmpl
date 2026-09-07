@@ -9,6 +9,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -129,14 +130,18 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
-	metadata, err := resourceInstanceMetadataTyped(d)
+	metadataMap, err := resourceInstanceMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfacesTyped(d, config)
+	networkInterfacesRaw, err := expandNetworkInterfaces(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
+	}
+	networkInterfaces, err := expandNetworkInterfacesTyped(networkInterfacesRaw)
+	if err != nil {
+		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
 	}
 
 	accels, err := expandInstanceGuestAccelerators(d, config)
@@ -147,8 +152,12 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	tagsMap := resourceInstanceTags(d)
 	var tags *compute.Tags
 	if tagsMap != nil {
+		b, err := json.Marshal(tagsMap)
+		if err != nil {
+			return nil, fmt.Errorf("Error converting tags: %s", err)
+		}
 		tags = &compute.Tags{}
-		if err := tpgresource.Convert(tagsMap, tags); err != nil {
+		if err := json.Unmarshal(b, tags); err != nil {
 			return nil, fmt.Errorf("Error converting tags: %s", err)
 		}
 	}
@@ -159,20 +168,29 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Description:             d.Get("description").(string),
 		Disks:                   disks,
 		MachineType:             machineTypeUrl,
-		Metadata:                metadata,
 		Name:                    d.Get("name").(string),
 		Zone:                    d.Get("zone").(string),
 		NetworkInterfaces:       networkInterfaces,
 		Tags:                    tags,
 		Labels:                  tpgresource.ExpandLabels(d),
-		ServiceAccounts:         expandServiceAccountsTyped(d.Get("service_account").([]interface{})),
+		ServiceAccounts:         expandServiceAccountsForTGC(d.Get("service_account").([]interface{})),
 		GuestAccelerators:       accels,
 		MinCpuPlatform:          d.Get("min_cpu_platform").(string),
 		Scheduling:              scheduling,
 		DeletionProtection:      d.Get("deletion_protection").(bool),
 		Hostname:                d.Get("hostname").(string),
 		ForceSendFields:         []string{"CanIpForward", "DeletionProtection"},
-		AdvancedMachineFeatures: expandAdvancedMachineFeaturesTyped(d),
+		AdvancedMachineFeatures: expandAdvancedMachineFeaturesForTGC(d),
+	}
+	if metadataMap != nil {
+		if err := tpgresource.Convert(metadataMap, &instance.Metadata); err != nil {
+			return nil, fmt.Errorf("Error converting metadata: %s", err)
+		}
+	}
+	if metadataMap != nil {
+		if err := tpgresource.Convert(metadataMap, &instance.Metadata); err != nil {
+			return nil, fmt.Errorf("Error converting metadata: %s", err)
+		}
 	}
 	if sicMap := expandShieldedVmConfigs(d); sicMap != nil {
 		instance.ShieldedInstanceConfig = &compute.ShieldedInstanceConfig{
@@ -190,6 +208,47 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 	return instance, nil
+}
+
+func expandNetworkInterfacesTyped(expanded []interface{}) ([]*compute.NetworkInterface, error) {
+	b, err := json.Marshal(expanded)
+	if err != nil {
+		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
+	}
+	var ifaces []*compute.NetworkInterface
+	if err := json.Unmarshal(b, &ifaces); err != nil {
+		return nil, fmt.Errorf("Error converting network interfaces: %s", err)
+	}
+	return ifaces, nil
+}
+
+func expandServiceAccountsForTGC(configs []interface{}) []*compute.ServiceAccount {
+	expanded := expandServiceAccounts(configs)
+	accounts := make([]*compute.ServiceAccount, len(expanded))
+	for i, raw := range expanded {
+		data := raw.(map[string]interface{})
+		accounts[i] = &compute.ServiceAccount{
+			Email:  data["email"].(string),
+			Scopes: data["scopes"].([]string),
+		}
+	}
+	return accounts
+}
+
+func expandAdvancedMachineFeaturesForTGC(d tpgresource.TerraformResourceData) *compute.AdvancedMachineFeatures {
+	amfMap := expandAdvancedMachineFeatures(d)
+	if amfMap == nil {
+		return nil
+	}
+	b, err := json.Marshal(amfMap)
+	if err != nil {
+		return nil
+	}
+	typed := &compute.AdvancedMachineFeatures{}
+	if err := json.Unmarshal(b, typed); err != nil {
+		return nil
+	}
+	return typed
 }
 
 func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
@@ -370,4 +429,12 @@ func expandScratchDisks(d tpgresource.TerraformResourceData, config *transport_t
 	}
 
 	return scratchDisks, nil
+}
+
+func convertViaJSON(in, out interface{}) error {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, out)
 }

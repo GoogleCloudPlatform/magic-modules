@@ -231,6 +231,8 @@ properties:
           description: |
             A list of messages that carry the error details.
           output: true
+          deprecation_message: '`details` is deprecated and will be removed in a future major release. This field is no longer populated from the API.'
+          ignore_read: true
           item_type:
             type: KeyValuePairs
   - name: tags

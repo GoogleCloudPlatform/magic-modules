@@ -22,5 +22,8 @@ resource "google_model_armor_template" "template-template-metadata" {
     custom_prompt_safety_error_message       = "{{index $.ResourceIdVars "template_metadata_custom_prompt_safety_error_message"}}"
     custom_llm_response_safety_error_code    = {{index $.ResourceIdVars "template_metadata_custom_llm_response_safety_error_code"}}
     enforcement_type                         = "{{index $.ResourceIdVars "template_metadata_enforcement_type"}}"
+    filter_version_selector {
+      alias = "{{index $.ResourceIdVars "template_metadata_filter_version_selector_alias"}}"
+    }
   }
 }

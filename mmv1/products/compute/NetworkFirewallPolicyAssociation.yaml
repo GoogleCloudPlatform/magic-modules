@@ -33,6 +33,8 @@ legacy_long_form_project: true
 import_format:
   - 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
   - '{{project}}/{{firewall_policy}}/{{name}}'
+generate_list_resource: true
+collection_url_key: 'associations'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

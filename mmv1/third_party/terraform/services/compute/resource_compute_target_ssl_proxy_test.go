@@ -179,9 +179,10 @@ resource "google_compute_ssl_certificate" "foo" {
 }
 
 resource "google_compute_backend_service" "foo" {
-  name          = "%s"
-  protocol      = "SSL"
-  health_checks = [google_compute_health_check.zero.self_link]
+  name                  = "%s"
+  protocol              = "SSL"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_health_check.zero.self_link]
 }
 
 resource "google_compute_health_check" "zero" {
@@ -225,15 +226,17 @@ resource "google_compute_ssl_certificate" "bar" {
 }
 
 resource "google_compute_backend_service" "foo" {
-  name          = "%s"
-  protocol      = "SSL"
-  health_checks = [google_compute_health_check.zero.self_link]
+  name                  = "%s"
+  protocol              = "SSL"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_health_check.zero.self_link]
 }
 
 resource "google_compute_backend_service" "bar" {
-  name          = "%s"
-  protocol      = "SSL"
-  health_checks = [google_compute_health_check.zero.self_link]
+  name                  = "%s"
+  protocol              = "SSL"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_health_check.zero.self_link]
 }
 
 resource "google_compute_health_check" "zero" {
@@ -257,9 +260,10 @@ resource "google_compute_target_ssl_proxy" "with_certificate_map" {
 }
 
 resource "google_compute_backend_service" "foo" {
-  name          = "tf-test-backend-%s"
-  protocol      = "SSL"
-  health_checks = [google_compute_health_check.zero.self_link]
+  name                  = "tf-test-backend-%s"
+  protocol              = "SSL"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_health_check.zero.self_link]
 }
 
 resource "google_compute_health_check" "zero" {
@@ -311,9 +315,10 @@ resource "google_compute_target_ssl_proxy" "with_certificate_map" {
 }
 
 resource "google_compute_backend_service" "foo" {
-  name          = "tf-test-backend-%s"
-  protocol      = "SSL"
-  health_checks = [google_compute_health_check.zero.self_link]
+  name                  = "tf-test-backend-%s"
+  protocol              = "SSL"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_health_check.zero.self_link]
 }
 
 resource "google_compute_health_check" "zero" {

@@ -20,6 +20,7 @@ base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
 self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'
 create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
 update_verb: 'PATCH'
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

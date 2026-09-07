@@ -131,6 +131,14 @@ var (
 		"settings.0.performance_capture_config.0.running_threads_threshold",
 		"settings.0.performance_capture_config.0.seconds_behind_source_threshold",
 		"settings.0.performance_capture_config.0.transaction_duration_threshold",
+		"settings.0.performance_capture_config.0.cpu_utilization_threshold_percent",
+		"settings.0.performance_capture_config.0.memory_usage_threshold_percent",
+		"settings.0.performance_capture_config.0.history_list_length_threshold_count",
+		"settings.0.performance_capture_config.0.semaphore_wait_threshold_count",
+		"settings.0.performance_capture_config.0.transaction_lock_wait_threshold_count",
+		"settings.0.performance_capture_config.0.transaction_kill_threshold_seconds",
+		"settings.0.performance_capture_config.0.transaction_kill_type",
+		"settings.0.performance_capture_config.0.transaction_kill_excluded_user_hosts",
 	}
 {{- end }}
 
@@ -262,6 +270,13 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Default:     true,
 				Optional:    true,
 				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
+			},
+			"enforce_new_sql_network_architecture": {
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: sqlNetworkArchitectureDiffSuppress,
+				Description:      `Whether to enforce the new SQL network architecture.`,
 			},
 			"final_backup_description": {
 				Type:        schema.TypeString,
@@ -575,7 +590,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
@@ -590,6 +604,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Computed:    true,
 							Description: `Provisioned throughput measured in MiB per second for the data disk. This field is only used for HYPERDISK_BALANCED disk types.`,
+						},
+						"replication_lag_max_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: `The acceptable replication lag, in seconds, after which a read replica recreates itself. The lag must persist for at least five minutes before recreation is triggered. This is a replica level field, and must be between 300 seconds (five minutes) and 31536000 seconds (one year).`,
 						},
 						"connection_pool_config": {
 							Type:     schema.TypeSet,
@@ -677,6 +697,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 												        Computed:    true,
 												        Description: `Whether PSC write endpoint DNS is enabled for this instance.`,
 												},
+												"psc_auto_connection_policy_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether a service connection policy is created for the auto connections configured for the instance.`,
+												},
 												"allowed_consumer_projects": {
 													Type:     schema.TypeSet,
 													Optional: true,
@@ -699,6 +725,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
                                                                                                                         "consumer_service_project_id": {
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Optional:     true,
+                                                                                                                                Computed:     true,
                                                                                                                                 Description:  `The project ID of consumer service project of this consumer endpoint.`,
                                                                                                                         },
                                                                                                                         "consumer_network": {
@@ -711,6 +738,16 @@ API (for read pools, effective_availability_type may differ from availability_ty
                                                                                                                                 Computed:     true,
                                                                                                                                 Description:  `The connection policy status of the consumer network.`,
                                                                                                                         },
+                                                                                                                        "instance_auto_dns_status": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The status of the automated DNS provisioning for the instance.`,
+                                                                                                                        },
+                                                                                                                        "write_endpoint_auto_dns_status": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The status of the automated DNS provisioning for the write endpoint.`,
+                                                                                                                        },
                                                                                                                         "ip_address": {
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Computed:     true,
@@ -720,6 +757,16 @@ API (for read pools, effective_availability_type may differ from availability_ty
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Computed:     true,
                                                                                                                                 Description:  `The connection status of the consumer endpoint.`,
+                                                                                                                        },
+                                                                                                                        "service_connection_policy": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The service connection policy created for the auto connection.`,
+                                                                                                                        },
+                                                                                                                        "service_connection_policy_creation_result": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The result of the service connection policy creation.`,
                                                                                                                         },
                                                                                                                 },
 													},
@@ -942,6 +989,63 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										AtLeastOneOf: performanceCaptureConfigKeys,
 										Description:  `The amount of time in seconds that a transaction needs to have been open before getting recorded.`,
 									},
+									"cpu_utilization_threshold_percent": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum percentage of CPU utilization that triggers the performance capture. Valid range is 10 to 99. 0 disables the check.`,
+									},
+									"memory_usage_threshold_percent": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum percentage of memory usage that triggers the performance capture. Valid range is 10 to 99. 0 disables the check.`,
+									},
+									"history_list_length_threshold_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of undo log entries in the history list length that triggers the performance capture. Valid range is 10000 to 10000000. 0 disables the check.`,
+									},
+									"semaphore_wait_threshold_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of semaphore waits that triggers the performance capture. Valid range is 10 to 10000. 0 disables the check.`,
+									},
+									"transaction_lock_wait_threshold_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of transactions in lock wait state that triggers the performance capture. Valid range is 10 to 10000. 0 disables the check.`,
+									},
+									"transaction_kill_threshold_seconds": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it. Valid range is 60 to 604800. 0 disables termination.`,
+									},
+									"transaction_kill_type": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										ValidateFunc: validation.StringInSlice([]string{"TRANSACTION_KILL_TYPE_UNSPECIFIED", "READ_ONLY_TRANSACTIONS", "ALL_TRANSACTIONS"}, false),
+										Description:  `Determines which transactions are allowed to be terminated when they exceed transaction_kill_threshold_seconds. Possible values are: "TRANSACTION_KILL_TYPE_UNSPECIFIED", "READ_ONLY_TRANSACTIONS", "ALL_TRANSACTIONS".`,
+									},
+									"transaction_kill_excluded_user_hosts": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Elem:         &schema.Schema{Type: schema.TypeString},
+										Description:  `A list of users to exclude from transaction termination. Entries can be in the format 'user@host' or just 'user'.`,
+									},
 								},
 							},
 							Description: `Configuration of Performance Capture.`,
@@ -1155,6 +1259,16 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Required:         true,
 				Description:      `The MySQL, PostgreSQL or SQL Server version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, MYSQL_8_4, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, POSTGRES_16, POSTGRES_17, POSTGRES_18, SQLSERVER_2022_STANDARD, SQLSERVER_2022_ENTERPRISE, SQLSERVER_2022_EXPRESS, SQLSERVER_2022_WEB, SQLSERVER_2025_STANDARD, SQLSERVER_2025_ENTERPRISE, SQLSERVER_2025_EXPRESS, SQLSERVER_2025_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 				DiffSuppressFunc: databaseVersionDiffSuppress,
+			},
+			"switch_transaction_logs_to_cloud_storage_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When set to true, Cloud SQL instances can switch storing point-in-time recovery transaction logs from a data disk to Cloud Storage, freeing up data disk space and enabling longer retention windows. This is an input-only field that is not persisted in the API.`,
+			},
+			"include_replicas_for_major_version_upgrade": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When this parameter is set to true, Cloud SQL instances can perform in-place major version upgrades of read replicas along with the primary instance when 'database_version' is updated. This is an input-only field that is not persisted in the API and only takes effect during a major version upgrade.`,
 			},
 			"encryption_key_name": {
 				Type:     schema.TypeString,
@@ -1676,6 +1790,14 @@ func pitrSupportDbCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v 
 	return nil
 }
 
+func sqlNetworkArchitectureDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// By default, new Cloud SQL instances created in projects created after August 2021 use the new network architecture.
+	// If the state is true and the config is false, suppress the diff.
+	// This follows the gcloud pattern where the flag is an irreversible opt-in.
+	// See https://docs.cloud.google.com/sql/docs/mysql/upgrade-cloud-sql-instance-new-network-architecture#new-arch
+	return old == "true" && new == "false"
+}
+
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -1724,6 +1846,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
+	if d.Get("enforce_new_sql_network_architecture").(bool) {
+		instance.SqlNetworkArchitecture = "NEW_NETWORK_ARCHITECTURE"
+	}
+
 	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
 	
 	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
@@ -1754,6 +1880,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	if _, ok := d.GetOk("node_count"); ok {
 		instance.NodeCount = int64(d.Get("node_count").(int))
+	}
+	if v, ok := d.GetOk("switch_transaction_logs_to_cloud_storage_enabled"); ok {
+		instance.SwitchTransactionLogsToCloudStorageEnabled = v.(bool)
 	}
 	if _, ok := d.GetOk("root_password_wo_version"); ok {
 		instance.RootPassword = tpgresource.GetRawConfigAttributeAsString(d, "root_password_wo")
@@ -1966,6 +2095,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DataDiskType:                  _settings["disk_type"].(string),
 		DataDiskProvisionedIops:       int64(_settings["data_disk_provisioned_iops"].(int)),
 		DataDiskProvisionedThroughput: int64(_settings["data_disk_provisioned_throughput"].(int)),
+		ReplicationLagMaxSeconds:      int64(_settings["replication_lag_max_seconds"].(int)),
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
@@ -2137,9 +2267,11 @@ func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 			PscEnabled:                 _entry["psc_enabled"].(bool),
 			PscAutoDnsEnabled:          _entry["psc_auto_dns_enabled"].(bool),
 			PscWriteEndpointDnsEnabled: _entry["psc_write_endpoint_dns_enabled"].(bool),
+			PscAutoConnectionPolicyEnabled: _entry["psc_auto_connection_policy_enabled"].(bool),
 			AllowedConsumerProjects:    tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
 			NetworkAttachmentUri:    _entry["network_attachment_uri"].(string),
 			PscAutoConnections:      expandPscAutoConnectionConfig(_entry["psc_auto_connections"].([]interface{})),
+			ForceSendFields:         []string{"AllowedConsumerProjects"},
 		}
 	}
 
@@ -2382,6 +2514,14 @@ func expandPerformanceCaptureConfig(configured []interface{}) *sqladmin.Performa
 		RunningThreadsThreshold:      int64(_performanceCaptureConfig["running_threads_threshold"].(int)),
 		SecondsBehindSourceThreshold: int64(_performanceCaptureConfig["seconds_behind_source_threshold"].(int)),
 		TransactionDurationThreshold: int64(_performanceCaptureConfig["transaction_duration_threshold"].(int)),
+		CpuUtilizationThresholdPercent:    int64(_performanceCaptureConfig["cpu_utilization_threshold_percent"].(int)),
+		MemoryUsageThresholdPercent:       int64(_performanceCaptureConfig["memory_usage_threshold_percent"].(int)),
+		HistoryListLengthThresholdCount:   int64(_performanceCaptureConfig["history_list_length_threshold_count"].(int)),
+		SemaphoreWaitThresholdCount:       int64(_performanceCaptureConfig["semaphore_wait_threshold_count"].(int)),
+		TransactionLockWaitThresholdCount: int64(_performanceCaptureConfig["transaction_lock_wait_threshold_count"].(int)),
+		TransactionKillThresholdSeconds:   int64(_performanceCaptureConfig["transaction_kill_threshold_seconds"].(int)),
+		TransactionKillType:               _performanceCaptureConfig["transaction_kill_type"].(string),
+		TransactionKillExcludedUserHosts:  tpgresource.ConvertStringArr(_performanceCaptureConfig["transaction_kill_excluded_user_hosts"].([]interface{})),
 		ForceSendFields:              []string{"Enabled"},
 	}
 }
@@ -2498,6 +2638,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 	if err := d.Set("instance_type", instance.InstanceType); err != nil {
 		return fmt.Errorf("Error setting instance_type: %s", err)
+	}
+	if err := d.Set("enforce_new_sql_network_architecture", instance.SqlNetworkArchitecture == "NEW_NETWORK_ARCHITECTURE"); err != nil {
+		return fmt.Errorf("Error setting enforce_new_sql_network_architecture: %s", err)
 	}
 	if err := d.Set("node_count", instance.NodeCount); err != nil {
 		return fmt.Errorf("Error setting node_count: %s", err)
@@ -2631,7 +2774,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	desiredSetting := d.Get("settings")
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 
@@ -2661,10 +2803,39 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// We check for HasChange because we only want to trigger the network architecture upgrade
+	// if the configuration has explicitly changed. We also check the current value to ensure
+	// it's true, as this is an irreversible opt-in.
+	if d.HasChange("enforce_new_sql_network_architecture") && d.Get("enforce_new_sql_network_architecture").(bool) {
+		instance = &sqladmin.DatabaseInstance{SqlNetworkArchitecture: "NEW_NETWORK_ARCHITECTURE"}
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (rerr error) {
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				return rerr
+			},
+			Timeout:              d.Timeout(schema.TimeoutUpdate),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", d.Get("name").(string), err)
+		}
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
 	// performed with other fields, we first patch database version before updating the rest of the fields.
 	if d.HasChange("database_version") {
-		instance = &sqladmin.DatabaseInstance{DatabaseVersion: databaseVersion}
+		instance = &sqladmin.DatabaseInstance{
+			DatabaseVersion:                       databaseVersion,
+			IncludeReplicasForMajorVersionUpgrade: d.Get("include_replicas_for_major_version_upgrade").(bool),
+		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
 				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
@@ -2877,6 +3048,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
     	}
 	}
 
+	desiredSetting := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
@@ -2949,6 +3121,11 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 				PsaWriteEndpoint: psaWriteEndpoint,
 			}
 		}
+	}
+
+	// switch_transaction_logs_to_cloud_storage_enabled is input-only; send it only when toggled.
+	if d.HasChange("switch_transaction_logs_to_cloud_storage_enabled") {
+		instance.SwitchTransactionLogsToCloudStorageEnabled = d.Get("switch_transaction_logs_to_cloud_storage_enabled").(bool)
 	}
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -3191,6 +3368,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"disk_size":                        settings.DataDiskSizeGb,
 		"data_disk_provisioned_iops":       settings.DataDiskProvisionedIops,
 		"data_disk_provisioned_throughput": settings.DataDiskProvisionedThroughput,
+		"replication_lag_max_seconds":      settings.ReplicationLagMaxSeconds,
 		"pricing_plan":                     settings.PricingPlan,
 		"user_labels":                      settings.UserLabels,
 		"password_validation_policy":       settings.PasswordValidationPolicy,
@@ -3530,9 +3708,13 @@ func flattenPscAutoConnections(pscAutoConnections []*sqladmin.PscAutoConnectionC
                 data := map[string]interface{}{
                         "consumer_network":   flag.ConsumerNetwork,
                         "consumer_network_status":   flag.ConsumerNetworkStatus,
+                        "instance_auto_dns_status":   flag.InstanceAutoDnsStatus,
+                        "write_endpoint_auto_dns_status":   flag.WriteEndpointAutoDnsStatus,
                         "consumer_service_project_id":   flag.ConsumerProject,
                         "ip_address":   flag.IpAddress,
                         "status":   flag.Status,
+                        "service_connection_policy":   flag.ServiceConnectionPolicy,
+                        "service_connection_policy_creation_result":   flag.ServiceConnectionPolicyCreationResult,
                 }
 
                 flags = append(flags, data)
@@ -3546,6 +3728,7 @@ func flattenPscConfigs(pscConfig *sqladmin.PscConfig) interface{} {
 		"psc_enabled":                    pscConfig.PscEnabled,
 		"psc_auto_dns_enabled":           pscConfig.PscAutoDnsEnabled,
 		"psc_write_endpoint_dns_enabled": pscConfig.PscWriteEndpointDnsEnabled,
+		"psc_auto_connection_policy_enabled": pscConfig.PscAutoConnectionPolicyEnabled,
 		"allowed_consumer_projects":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
 		"network_attachment_uri":    pscConfig.NetworkAttachmentUri,
 		"psc_auto_connections":      flattenPscAutoConnections(pscConfig.PscAutoConnections),
@@ -3694,6 +3877,14 @@ func flattenPerformanceCaptureConfig(performanceCaptureConfig *sqladmin.Performa
 		"running_threads_threshold":       performanceCaptureConfig.RunningThreadsThreshold,
 		"seconds_behind_source_threshold": performanceCaptureConfig.SecondsBehindSourceThreshold,
 		"transaction_duration_threshold":  performanceCaptureConfig.TransactionDurationThreshold,
+		"cpu_utilization_threshold_percent":     performanceCaptureConfig.CpuUtilizationThresholdPercent,
+		"memory_usage_threshold_percent":        performanceCaptureConfig.MemoryUsageThresholdPercent,
+		"history_list_length_threshold_count":   performanceCaptureConfig.HistoryListLengthThresholdCount,
+		"semaphore_wait_threshold_count":        performanceCaptureConfig.SemaphoreWaitThresholdCount,
+		"transaction_lock_wait_threshold_count": performanceCaptureConfig.TransactionLockWaitThresholdCount,
+		"transaction_kill_threshold_seconds":    performanceCaptureConfig.TransactionKillThresholdSeconds,
+		"transaction_kill_type":                 performanceCaptureConfig.TransactionKillType,
+		"transaction_kill_excluded_user_hosts":  performanceCaptureConfig.TransactionKillExcludedUserHosts,
 	}
 
 	return []map[string]interface{}{data}

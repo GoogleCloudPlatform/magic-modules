@@ -1,6 +1,8 @@
 name: mmv1
 
-permissions: read-all
+permissions:
+  contents: read
+
 
 on:
   push:
@@ -24,6 +26,7 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+          persist-credentials: false
       - name: Merge base branch
         if: github.event_name == 'pull_request'
         run: |
@@ -49,6 +52,7 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+          persist-credentials: false
       - name: Merge base branch
         if: github.event_name == 'pull_request'
         id: pull_request
@@ -76,6 +80,7 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+          persist-credentials: false
       - name: Merge base branch
         if: github.event_name == 'pull_request'
         run: |
@@ -119,6 +124,7 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Merge base branch
         if: github.event_name == 'pull_request'

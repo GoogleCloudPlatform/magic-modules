@@ -1,5 +1,4 @@
 resource "google_chronicle_findings_refinement" "my-findings-refinement" {
-  provider = google-beta
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
   display_name = "{{index $.ResourceIdVars "display_name"}}" 
@@ -13,7 +12,6 @@ resource "google_chronicle_findings_refinement" "my-findings-refinement" {
 }
 
 resource "google_chronicle_findings_refinement_deployment" "{{$.PrimaryResourceId}}" {
- provider = google-beta
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  findings_refinement = element(split("/", resource.google_chronicle_findings_refinement.my-findings-refinement.name), length(split("/", resource.google_chronicle_findings_refinement.my-findings-refinement.name)) - 1)

@@ -115,7 +115,7 @@ func (s *sandbox) AllowPassthrough(commands ...string) {
 	}
 }
 
-func (s *sandbox) RequireWhitelist() {
+func (s *sandbox) RequireAllowlist() {
 	if runner, ok := s.Runner.(*interceptingRunner); ok {
 		runner.strictMode = true
 	}
