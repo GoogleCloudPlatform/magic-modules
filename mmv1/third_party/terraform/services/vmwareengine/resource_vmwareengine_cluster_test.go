@@ -573,3 +573,96 @@ func TestRemoveDatastoreMountConfigFieldFromUpdateMask(t *testing.T) {
 		})
 	}
 }
+
+
+func TestAccVmwareengineCluster_vmwareEngineClusterVsanType(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	random_suffix := acctest.RandString(t, 10)
+	region_id := "me-west1"
+	context := map[string]interface{}{
+		"region":               region_id,
+		"random_suffix":        random_suffix,
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
+		"zone":                 region_id + "-b",
+		"pc_name":              "tf-test-cluster-pc" + random_suffix,
+		"mgmt_cluster_node":    3,
+		"node_type":            "standard-72",
+		"vsan_type":            "VSAN_TYPE_ESA",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckVmwareengineClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testVmwareEngineClusterConfig_VsanType(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vmwareengine_cluster.vmw-engine-ext-cluster", "vsan_type", "VSAN_TYPE_ESA"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_vmwareengine_cluster.ds_vmw_engine_ext_cluster", "google_vmwareengine_cluster.vmw-engine-ext-cluster"),
+				),
+			},
+			{
+				ResourceName:            "google_vmwareengine_cluster.vmw-engine-ext-cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "name"},
+			},
+		},
+	})
+}
+
+func testVmwareEngineClusterConfig_VsanType(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
+  name              = "tf-test-pc-nw-%{random_suffix}"
+  location          = "global"
+  type              = "STANDARD"
+  description       = "PC network description."
+}
+
+resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project = "%{vmwareengine_project}"
+  location = "%{zone}"
+  name = "%{pc_name}"
+  type = "STANDARD"
+  network_config {
+    management_cidr = "192.168.0.0/24"
+    vmware_engine_network = google_vmwareengine_network.vmw-engine-nw.id
+  }
+  management_cluster {
+    cluster_id = "sample-mgmt-cluster%{random_suffix}"
+    node_type_configs {
+      node_type_id = "%{node_type}"
+      node_count = "%{mgmt_cluster_node}"
+    }
+  }
+}
+
+resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
+  name = "ext-cluster%{random_suffix}"
+  parent = google_vmwareengine_private_cloud.vmw-engine-pc.id
+  node_type_configs {
+    node_type_id = "%{node_type}"
+    node_count = 3
+  }
+  vsan_type = "%{vsan_type}"
+}
+
+data "google_vmwareengine_cluster" "ds_vmw_engine_ext_cluster" {
+  name = "ext-cluster%{random_suffix}"
+  parent = google_vmwareengine_private_cloud.vmw-engine-pc.id
+  depends_on = [
+    google_vmwareengine_cluster.vmw-engine-ext-cluster,
+  ]
+}
+`, context)
+}

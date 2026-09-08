@@ -463,3 +463,89 @@ func testAccCheckVmwareenginePrivateCloudDestroyProducer(t *testing.T) func(s *t
 		return nil
 	}
 }
+
+
+func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudVsanType(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"region":               "me-west1",
+		"random_suffix":        acctest.RandString(t, 10),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
+		"vsan_type":            "VSAN_TYPE_ESA",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckVmwareenginePrivateCloudDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testVmwareenginePrivateCloudVsanTypeConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vmwareengine_private_cloud.vmw-engine-pc", "management_cluster.0.vsan_type", "VSAN_TYPE_ESA"),
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_vmwareengine_private_cloud.ds",
+						"google_vmwareengine_private_cloud.vmw-engine-pc",
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
+						}),
+				),
+			},
+			{
+				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+			},
+		},
+	})
+}
+
+func testVmwareenginePrivateCloudVsanTypeConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
+  name              = "tf-test-pc-nw-%{random_suffix}"
+  location          = "global"
+  type              = "STANDARD"
+  description       = "PC network description."
+}
+
+resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project = "%{vmwareengine_project}"
+  location = "%{region}-b"
+  name = "tf-test-sample-pc%{random_suffix}"
+  description = "Sample PC description."
+  type = "STANDARD"
+  network_config {
+    management_cidr = "192.168.0.0/24"
+    vmware_engine_network = google_vmwareengine_network.vmw-engine-nw.id
+  }
+  management_cluster {
+    cluster_id = "tf-test-mgmt-cluster-%{random_suffix}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count = 3
+    }
+    vsan_type = "%{vsan_type}"
+  }
+}
+
+data "google_vmwareengine_private_cloud" "ds" {
+  project = "%{vmwareengine_project}"
+  location = "%{region}-b"
+  name = "tf-test-sample-pc%{random_suffix}"
+  depends_on = [
+    google_vmwareengine_private_cloud.vmw-engine-pc,
+  ]
+}
+`, context)
+}
