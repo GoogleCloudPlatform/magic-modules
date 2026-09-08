@@ -31,6 +31,9 @@ update_verb: PATCH
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: topic
+  list_resource:
+    member_iam_resource:
+      generate: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
