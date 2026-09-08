@@ -98,6 +98,37 @@ func TestAccAssuredWorkloadsV2Workload_existingFolder(t *testing.T) {
 	})
 }
 
+func TestAccAssuredWorkloadsV2Workload_updateControls(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Workload_controlsStep1(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "cloud_control_configs.#", "1"),
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "cloud_control_configs.0.enforcement_mode", "PREVENTIVE"),
+				),
+			},
+			{
+				Config: testAccAssuredWorkloadsV2Workload_controlsStep2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "cloud_control_configs.#", "1"),
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "cloud_control_configs.0.enforcement_mode", "DETECTIVE"),
+				),
+			},
+		},
+	})
+}
+
 func testAccAssuredWorkloadsV2Workload_existingProject(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_assured_workloads_v2_workload" "workload" {
@@ -152,5 +183,67 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 }
 `, context["org_id"], context["random_suffix"], context["folder_id"])
+}
+
+func testAccAssuredWorkloadsV2Workload_controlsStep1(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-ctrl-%s"
+  description  = "Test Workload with Controls Step 1"
+
+  resource_config {
+    existing_project = "projects/%s"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+
+  cloud_control_configs {
+    cloud_control          = "builtin-require-cmek"
+    cloud_control_revision = 1
+    enforcement_mode       = "PREVENTIVE"
+    parameters {
+      name = "key_rings"
+      parameter_value {
+        string_value = "projects/my-p/locations/us/keyRings/my-kr"
+      }
+    }
+  }
+}
+`, context["org_id"], context["random_suffix"], context["project_id"])
+}
+
+func testAccAssuredWorkloadsV2Workload_controlsStep2(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-ctrl-%s"
+  description  = "Test Workload with Controls Step 2"
+
+  resource_config {
+    existing_project = "projects/%s"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+
+  cloud_control_configs {
+    cloud_control          = "builtin-require-cmek"
+    cloud_control_revision = 1
+    enforcement_mode       = "DETECTIVE"
+    parameters {
+      name = "key_rings"
+      parameter_value {
+        string_value = "projects/my-p/locations/us/keyRings/my-kr"
+      }
+    }
+  }
+}
+`, context["org_id"], context["random_suffix"], context["project_id"])
 }
 {{- end }}

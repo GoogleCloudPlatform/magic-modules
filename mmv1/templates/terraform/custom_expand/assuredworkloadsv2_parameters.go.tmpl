@@ -1,0 +1,70 @@
+func expandAssuredWorkloadsV2SingleParamValue(raw map[string]interface{}) (map[string]interface{}, error) {
+	paramVal := make(map[string]interface{})
+	populatedCount := 0
+
+	if strVal, ok := raw["string_value"].(string); ok && strVal != "" {
+		paramVal["stringValue"] = strVal
+		populatedCount++
+	}
+	if bVal, ok := raw["bool_value"].(bool); ok && raw["bool_value"] != nil {
+		paramVal["boolValue"] = bVal
+		populatedCount++
+	}
+	if numVal, ok := raw["number_value"].(float64); ok && numVal != 0 {
+		paramVal["numberValue"] = numVal
+		populatedCount++
+	}
+	if listRaw, ok := raw["string_list_value"].([]interface{}); ok && len(listRaw) > 0 && listRaw[0] != nil {
+		listMap := listRaw[0].(map[string]interface{})
+		if vals, ok := listMap["values"].([]interface{}); ok {
+			paramVal["stringListValue"] = map[string]interface{}{"values": vals}
+			populatedCount++
+		}
+	}
+	if oneofRaw, ok := raw["oneof_value"].([]interface{}); ok && len(oneofRaw) > 0 && oneofRaw[0] != nil {
+		subMap := oneofRaw[0].(map[string]interface{})
+		expandedSub, err := expandAssuredWorkloadsV2SingleParameter(subMap)
+		if err != nil {
+			return nil, err
+		}
+		paramVal["oneofValue"] = expandedSub
+		populatedCount++
+	}
+
+	if populatedCount > 1 {
+		return nil, fmt.Errorf("parameter cannot have multiple values populated; specify exactly one of string_value, bool_value, number_value, string_list_value, or oneof_value")
+	}
+	return paramVal, nil
+}
+
+func expandAssuredWorkloadsV2SingleParameter(raw map[string]interface{}) (map[string]interface{}, error) {
+	transformed := make(map[string]interface{})
+	transformed["name"] = raw["name"]
+	if pvRaw, ok := raw["parameter_value"].([]interface{}); ok && len(pvRaw) > 0 && pvRaw[0] != nil {
+		expandedVal, err := expandAssuredWorkloadsV2SingleParamValue(pvRaw[0].(map[string]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		transformed["parameterValue"] = expandedVal
+	}
+	return transformed, nil
+}
+
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	l := v.([]interface{})
+	req := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		expandedParam, err := expandAssuredWorkloadsV2SingleParameter(raw.(map[string]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		req = append(req, expandedParam)
+	}
+	return req, nil
+}

@@ -181,6 +181,84 @@ properties:
         type: Integer
         description: Major revision ID of the framework.
         immutable: true
+  - name: cloudControlConfigs
+    type: Array
+    description: Control configurations enforced on this workload. Updatable in place.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: cloudControl
+          type: String
+          description: Resource name of the cloud control.
+          required: true
+        - name: cloudControlRevision
+          type: Integer
+          description: Revision number of the cloud control.
+          required: true
+        - name: enforcementMode
+          type: String
+          description: 'Enforcement mode. Possible values: `PREVENTIVE`, `DETECTIVE`, `AUDIT`.'
+          required: true
+        - name: parameters
+          type: Array
+          description: Parameters for the cloud control configuration.
+          custom_expand: templates/terraform/custom_expand/assuredworkloadsv2_parameters.go.tmpl
+          item_type:
+            type: NestedObject
+            properties:
+              - name: name
+                type: String
+                description: The name or key of the parameter.
+                required: true
+              - name: parameterValue
+                type: NestedObject
+                description: Parameter value container. Exactly one value must be specified.
+                required: true
+                properties:
+                  - name: stringValue
+                    type: String
+                    description: String parameter value.
+                  - name: boolValue
+                    type: Boolean
+                    description: Boolean parameter value.
+                  - name: numberValue
+                    type: Double
+                    description: Number parameter value.
+                  - name: stringListValue
+                    type: NestedObject
+                    description: List of strings.
+                    properties:
+                      - name: values
+                        type: Array
+                        required: true
+                        item_type:
+                          type: String
+                  - name: oneofValue
+                    type: NestedObject
+                    description: Nested parameter for complex control configurations.
+                    properties:
+                      - name: name
+                        type: String
+                        required: true
+                      - name: parameterValue
+                        type: NestedObject
+                        description: Bounded sub-parameter value container.
+                        required: true
+                        properties:
+                          - name: stringValue
+                            type: String
+                          - name: boolValue
+                            type: Boolean
+                          - name: numberValue
+                            type: Double
+                          - name: stringListValue
+                            type: NestedObject
+                            properties:
+                              - name: values
+                                type: Array
+                                required: true
+                                item_type:
+                                  type: String
   - name: state
     type: String
     description: Output only. Status of the workload (e.g. `ACTIVE`, `CREATING`, `FAILED`).
