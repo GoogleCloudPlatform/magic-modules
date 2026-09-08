@@ -450,6 +450,7 @@ properties:
         type: String
         description: |
           The client secret for the Oauth config.
+        sensitive: true
         required: true
   # Oauth Object - End
   # Periodic Export Config Object

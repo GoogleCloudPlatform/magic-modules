@@ -89,6 +89,7 @@ properties:
     type: String
     description: |
       OAuth client secret
+    sensitive: true
     required: true
   - name: enabled
     type: Boolean
