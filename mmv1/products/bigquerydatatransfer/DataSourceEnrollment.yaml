@@ -164,11 +164,6 @@ properties:
           output: true
           description: |
             Is parameter required.
-        - name: 'repeated'
-          type: Boolean
-          output: true
-          description: |
-            Is parameter repeated.
         - name: 'validationRegex'
           type: String
           output: true
@@ -191,34 +186,6 @@ properties:
           output: true
           description: |
             For integer and double values specifies maximum allowed value.
-        - name: 'fields'
-          type: Array
-          output: true
-          item_type:
-            type: NestedObject
-            properties:
-              - name: 'paramId'
-                type: String
-                output: true
-                description: |
-                  Parameter identifier.
-              - name: 'displayName'
-                type: String
-                output: true
-                description: |
-                  User friendly parameter name.
-              - name: 'description'
-                type: String
-                output: true
-                description: |
-                  Parameter description.
-              - name: 'type'
-                type: String
-                output: true
-                description: |
-                  Parameter type.
-          description: |
-            Deprecated. This field has no effect.
         - name: 'validationDescription'
           type: String
           output: true
@@ -234,21 +201,11 @@ properties:
           output: true
           description: |
             Cannot be changed after initial transfer config creation. Applies only to custom data sources.
-        - name: 'recurse'
-          type: Boolean
-          output: true
-          description: |
-            Deprecated. This field has no effect.
         - name: 'deprecated'
           type: Boolean
           output: true
           description: |
             If true, it should not be used in new transfers, and it should not be visible to users.
-        - name: 'maxListSize'
-          type: Integer
-          output: true
-          description: |
-            Deprecated. This field has no effect.
     description: |
       Data source parameters.
   - name: 'helpUrl'
