@@ -78,11 +78,11 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
 	metadata := metadata.FromResource(resource)
-	bytes, err := yaml.Marshal(metadata)
+	metadataBytes, err := yaml.Marshal(metadata)
 	if err != nil {
 		glog.Exit("error marshalling yaml %v: %v", filePath)
 	}
-	err = os.WriteFile(filePath, bytes, 0644)
+	err = os.WriteFile(filePath, metadataBytes, 0644)
 	if err != nil {
 		glog.Exit(err)
 	}
