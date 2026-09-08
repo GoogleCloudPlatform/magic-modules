@@ -1,0 +1,4 @@
+resource "google_assured_workloads_v2_settings" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  olpc_mode    = "OLPC_MODE_OPT_OUT"
+}

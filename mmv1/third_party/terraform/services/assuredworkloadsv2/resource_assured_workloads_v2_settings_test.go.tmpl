@@ -1,0 +1,70 @@
+package assuredworkloadsv2_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/assuredworkloadsv2"
+)
+
+func TestAccAssuredWorkloadsV2Settings_lifecycle(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id": envvar.GetTestOrgFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Settings_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_settings.settings", "olpc_mode", "OLPC_MODE_OPT_OUT"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_settings.settings", "etag"),
+				),
+			},
+			{
+				ResourceName:      "google_assured_workloads_v2_settings.settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccAssuredWorkloadsV2Settings_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_settings.settings", "olpc_mode", "OLPC_MODE_STRICT_IL5_FORWARD"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_settings.settings", "etag"),
+				),
+			},
+			{
+				ResourceName:      "google_assured_workloads_v2_settings.settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccAssuredWorkloadsV2Settings_basic(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_settings" "settings" {
+  organization = "%s"
+  olpc_mode    = "OLPC_MODE_OPT_OUT"
+}
+`, context["org_id"])
+}
+
+func testAccAssuredWorkloadsV2Settings_update(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_settings" "settings" {
+  organization = "%s"
+  olpc_mode    = "OLPC_MODE_STRICT_IL5_FORWARD"
+}
+`, context["org_id"])
+}
+{{- end }}

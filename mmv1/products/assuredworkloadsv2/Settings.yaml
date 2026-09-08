@@ -1,0 +1,70 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Settings
+description: |
+  Manages organization-wide settings for Assured Workloads, such as Organization-Level
+  Personnel Controls (OLPC). This is a singleton resource.
+references:
+  guides:
+    Assured Workloads Settings: https://cloud.google.com/assured-workloads/docs/settings
+  api: https://cloud.google.com/assured-workloads/docs/reference/rest/v2/organizations/assuredWorkloadsSettings
+min_version: beta
+base_url: 'organizations/{{organization}}/assuredWorkloadsSettings'
+self_link: 'organizations/{{organization}}/assuredWorkloadsSettings'
+create_url: 'organizations/{{organization}}/assuredWorkloadsSettings?updateMask=olpc_mode'
+update_url: 'organizations/{{organization}}/assuredWorkloadsSettings?updateMask=olpc_mode'
+create_verb: PATCH
+update_verb: PATCH
+exclude_delete: true
+id_format: 'organizations/{{organization}}/assuredWorkloadsSettings'
+import_format:
+  - 'organizations/{{organization}}/assuredWorkloadsSettings'
+  - '{{organization}}'
+timeouts:
+  insert_minutes: 15
+  update_minutes: 15
+examples:
+  - name: assured_workloads_v2_settings_basic
+    primary_resource_id: settings
+    test_env_vars:
+      org_id: ORG_ID
+    exclude_test: true
+
+parameters:
+  - name: organization
+    type: String
+    description: The parent organization ID.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: Identifier. The resource name of the settings singleton.
+    output: true
+  - name: olpcMode
+    type: String
+    description: |
+      Organization-Level Personnel Control (OLPC) mode.
+      Possible values:
+      `OLPC_MODE_UNSPECIFIED`, `OLPC_MODE_OPT_OUT`, `OLPC_MODE_STRICT_IL5`,
+      `OLPC_MODE_ALLOW_MIXED_IL5`, `OLPC_MODE_STRICT_IL5_FORWARD`.
+    required: true
+    validation:
+      function: 'validation.StringInSlice([]string{"OLPC_MODE_UNSPECIFIED", "OLPC_MODE_OPT_OUT", "OLPC_MODE_STRICT_IL5", "OLPC_MODE_ALLOW_MIXED_IL5", "OLPC_MODE_STRICT_IL5_FORWARD"}, false)'
+  - name: etag
+    type: String
+    description: Concurrency token for optimistic locking.
+    output: true
