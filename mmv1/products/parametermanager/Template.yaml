@@ -62,6 +62,7 @@ samples:
           template_id: template
         test_vars_overrides:
           template_id: '"template" + randomSuffix'
+autogen_status: VGVtcGxhdGU=
 parameters:
   - name: templateId
     type: String
