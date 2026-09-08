@@ -1,0 +1,199 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Workload
+description: |
+  A Workload object for managing Assured Workloads V2 environments, providing
+  orchestrated regulatory compliance on GCP Projects and Folders.
+references:
+  guides:
+    Assured Workloads Overview: https://cloud.google.com/assured-workloads/docs/overview
+  api: https://cloud.google.com/assured-workloads/docs/reference/rest/v2/organizations.locations.workloads
+min_version: beta
+base_url: 'organizations/{{organization}}/locations/{{location}}/workloads'
+self_link: '{{name}}'
+create_url: 'organizations/{{organization}}/locations/{{location}}/workloads'
+update_url: '{{name}}'
+update_verb: PATCH
+update_mask: true
+id_format: '{{name}}'
+import_format:
+  - 'organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}'
+  - '{{organization}}/{{location}}/{{workload_id}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+custom_code:
+  pre_create: templates/terraform/pre_create/assuredworkloadsv2_workload.go.tmpl
+  post_create: templates/terraform/post_create/set_computed_name.tmpl
+  custom_import: templates/terraform/custom_import/assuredworkloadsv2_workload.go.tmpl
+examples:
+  - name: 'assured_workloads_v2_workload_basic'
+    primary_resource_id: 'workload'
+    vars:
+      org_id: '123456789'
+      location: 'us-central1'
+      project_id: 'example-project'
+    exclude_test: true
+parameters:
+  - name: organization
+    type: String
+    description: The parent organization ID of the Assured Workloads environment.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: location
+    type: String
+    description: The location of the Assured Workloads environment.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: workloadId
+    type: String
+    description: |
+      User-assigned unique identifier for the workload. If omitted, the server generates an ID.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: Identifier. The resource name of the workload.
+    output: true
+  - name: description
+    type: String
+    description: User-friendly description for the workload.
+  - name: resourceConfig
+    type: NestedObject
+    description: Target GCP Folder or Project where controls are deployed. Exactly one target must be specified.
+    required: true
+    immutable: true
+    properties:
+      - name: existingProject
+        type: String
+        description: Reference to an existing GCP Project ID or number.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+      - name: existingFolder
+        type: String
+        description: Reference to an existing GCP Folder (e.g. `folders/123`).
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+      - name: newProjectConfig
+        type: NestedObject
+        description: Configuration to provision a new GCP Project on the fly.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+        properties:
+          - name: parent
+            type: String
+            description: Parent resource where the project will be created (e.g. `organizations/123` or `folders/456`).
+            required: true
+            immutable: true
+          - name: displayName
+            type: String
+            description: Display name for the new project.
+            required: true
+            immutable: true
+          - name: billingAccount
+            type: String
+            description: Billing account to link to the new project.
+            required: true
+            immutable: true
+      - name: newFolderConfig
+        type: NestedObject
+        description: Configuration to provision a new GCP Folder on the fly.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+        properties:
+          - name: parent
+            type: String
+            description: Parent resource where the folder will be created (e.g. `organizations/123` or `folders/456`).
+            required: true
+            immutable: true
+          - name: displayName
+            type: String
+            description: Display name for the new folder.
+            required: true
+            immutable: true
+  - name: computedTargetResource
+    type: String
+    description: Output only. The resolved target resource (e.g. `projects/123` or `folders/456`).
+    output: true
+  - name: targetResourceDisplayName
+    type: String
+    description: Output only. User-facing display name of the target resource.
+    output: true
+  - name: framework
+    type: NestedObject
+    description: The compliance framework active on this workload.
+    required: true
+    immutable: true
+    properties:
+      - name: framework
+        type: String
+        description: The compliance framework resource name or ID (e.g. `organizations/123/locations/us/frameworks/fedramp-moderate` or `fedramp-moderate`).
+        required: true
+        immutable: true
+      - name: majorRevisionId
+        type: Integer
+        description: Major revision ID of the framework.
+        immutable: true
+  - name: state
+    type: String
+    description: Output only. Status of the workload (e.g. `ACTIVE`, `CREATING`, `FAILED`).
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. Creation timestamp in RFC3339 format.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Last update timestamp in RFC3339 format.
+    output: true
+  - name: etag
+    type: String
+    description: Concurrency control token for optimistic locking.
+    output: true

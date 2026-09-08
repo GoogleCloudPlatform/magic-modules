@@ -1,0 +1,8 @@
+// Injects ?workloadId query parameter only if explicitly set by the user.
+// Avoids sending ?workloadId= on server-generated ID lifecycles.
+if v, ok := d.GetOk("workload_id"); ok && v.(string) != "" {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"workloadId": v.(string)})
+	if err != nil {
+		return err
+	}
+}

@@ -1,0 +1,14 @@
+resource "google_assured_workloads_v2_workload" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.Vars "org_id"}}"
+  location     = "{{index $.Vars "location"}}"
+  workload_id  = "basic-workload"
+  description  = "Basic Assured Workloads V2 environment"
+
+  resource_config {
+    existing_project = "projects/{{index $.Vars "project_id"}}"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+}

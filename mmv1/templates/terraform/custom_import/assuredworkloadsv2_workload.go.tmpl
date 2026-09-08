@@ -1,0 +1,19 @@
+config := meta.(*transport_tpg.Config)
+
+// Support full URI: organizations/{org}/locations/{loc}/workloads/{workload_id}
+// Support shorthand: {org}/{loc}/{workload_id}
+if err := tpgresource.ParseImportId([]string{
+	"^organizations/(?P<organization>[^/]+)/locations/(?P<location>[^/]+)/workloads/(?P<workload_id>[^/]+)$",
+	"^(?P<organization>[^/]+)/(?P<location>[^/]+)/(?P<workload_id>[^/]+)$",
+}, d, config); err != nil {
+	return nil, err
+}
+
+id := fmt.Sprintf("organizations/%s/locations/%s/workloads/%s",
+	d.Get("organization").(string),
+	d.Get("location").(string),
+	d.Get("workload_id").(string))
+d.SetId(id)
+_ = d.Set("name", id)
+
+return []*schema.ResourceData{d}, nil

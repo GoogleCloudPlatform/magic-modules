@@ -1,0 +1,156 @@
+package assuredworkloadsv2_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/assuredworkloadsv2"
+)
+
+func TestAccAssuredWorkloadsV2Workload_existingProject(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Workload_existingProject(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "location", "us-central1"),
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "workload_id", fmt.Sprintf("tf-test-%s", context["random_suffix"])),
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "framework.0.framework", "fedramp-moderate"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_workload.workload", "name"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_workload.workload", "computed_target_resource"),
+				),
+			},
+			{
+				ResourceName:      "google_assured_workloads_v2_workload.workload",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAssuredWorkloadsV2Workload_serverAssignedId(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Workload_serverAssignedId(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "location", "us-central1"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_workload.workload", "name"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_workload.workload", "computed_target_resource"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAssuredWorkloadsV2Workload_existingFolder(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"folder_id":     envvar.GetTestFolderFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Workload_existingFolder(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "location", "us-central1"),
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "framework.0.framework", "il4"),
+					resource.TestCheckResourceAttrSet("google_assured_workloads_v2_workload.workload", "name"),
+				),
+			},
+			{
+				ResourceName:      "google_assured_workloads_v2_workload.workload",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccAssuredWorkloadsV2Workload_existingProject(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-%s"
+  description  = "Test Workload on Existing Project"
+
+  resource_config {
+    existing_project = "projects/%s"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+}
+`, context["org_id"], context["random_suffix"], context["project_id"])
+}
+
+func testAccAssuredWorkloadsV2Workload_serverAssignedId(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  description  = "Test Workload with Server Assigned ID"
+
+  resource_config {
+    existing_project = "projects/%s"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+}
+`, context["org_id"], context["project_id"])
+}
+
+func testAccAssuredWorkloadsV2Workload_existingFolder(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-folder-%s"
+  description  = "Test Workload on Existing Folder"
+
+  resource_config {
+    existing_folder = "folders/%s"
+  }
+
+  framework {
+    framework = "il4"
+  }
+}
+`, context["org_id"], context["random_suffix"], context["folder_id"])
+}
+{{- end }}
