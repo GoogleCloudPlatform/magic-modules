@@ -3787,7 +3787,7 @@ resource "google_container_node_pool" "np_with_management" {
   %s
 
   node_config {
-    machine_type = "g1-small"
+    machine_type = "e2-micro"
     disk_size_gb = 15
     oauth_scopes = ["compute-rw", "storage-ro", "logging-write", "monitoring"]
   }
@@ -5020,6 +5020,9 @@ resource "google_container_cluster" "cluster" {
 
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
 }
 
 resource "google_container_node_pool" "np_with_gpudirect" {
@@ -5439,6 +5442,9 @@ resource "google_container_cluster" "cluster" {
   initial_node_count       = 1
   # Testing the node pool update, so don't need default-pool also.
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
   min_master_version       = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
   network                  = "%s"
   subnetwork               = "%s"
@@ -5478,6 +5484,9 @@ resource "google_container_cluster" "cluster" {
   initial_node_count       = 1
   # Testing the node pool update, so don't need default-pool also.
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
   min_master_version       = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
   network                  = "%s"
   subnetwork               = "%s"
@@ -6289,6 +6298,9 @@ resource "google_container_cluster" "primary" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
+  node_config {
+    machine_type = "e2-micro"
+  }
 
   deletion_protection = false
   network             = "%{network}"
@@ -6305,6 +6317,7 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
+    machine_type = "e2-micro"
     disk_size_gb = 15
 
     resource_manager_tags = {
@@ -6335,6 +6348,9 @@ resource "google_container_cluster" "primary" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
+  node_config {
+    machine_type = "e2-micro"
+  }
 
   deletion_protection = false
   network             = "%{network}"
@@ -6351,6 +6367,7 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
+    machine_type = "e2-micro"
     disk_size_gb = 15
 
     resource_manager_tags = {
@@ -6382,6 +6399,9 @@ resource "google_container_cluster" "primary" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
+  node_config {
+    machine_type = "e2-micro"
+  }
 
   deletion_protection = false
   network             = "%{network}"
@@ -6398,6 +6418,7 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
+    machine_type = "e2-micro"
     disk_size_gb = 15
   }
 }
@@ -7013,6 +7034,9 @@ resource "google_container_cluster" "primary" {
 
   remove_default_node_pool = true
   initial_node_count       = 1
+  node_config {
+    machine_type = "e2-micro"
+  }
 
   datapath_provider       = "ADVANCED_DATAPATH"
   ip_allocation_policy    {} 
@@ -7485,6 +7509,9 @@ resource "google_container_cluster" "cluster" {
   }
 
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
 }
 
 resource "google_container_node_pool" "np" {
@@ -7496,7 +7523,7 @@ resource "google_container_node_pool" "np" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-medium"
+    machine_type = "e2-micro"
   }
 }
 `, suffix, suffix, clusterName, poolName, count, ignoreChanges)
