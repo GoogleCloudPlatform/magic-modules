@@ -8237,7 +8237,7 @@ func testAccContainerCluster_network_tier_config(clusterName, networkName, subne
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 2
+  initial_node_count = 1
   dns_config {
     cluster_dns      = "CLOUD_DNS"
   }
@@ -8260,7 +8260,7 @@ func testAccContainerCluster_network_tier_config_none(clusterName, networkName, 
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 2
+  initial_node_count = 1
   dns_config {
     cluster_dns      = "CLOUD_DNS"
   }
@@ -8663,7 +8663,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = true
@@ -8683,7 +8683,7 @@ func testAccContainerCluster_disableNotificationConfig(clusterName, networkName,
 resource "google_container_cluster" "notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = false
@@ -8708,7 +8708,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "filtered_notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = true
@@ -8737,7 +8737,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "filtered_notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
 	pubsub {
 	  enabled = true
@@ -8765,7 +8765,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "filtered_notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = true
@@ -9832,7 +9832,7 @@ func testAccContainerCluster_withMasterAuthNoCert(clusterName, networkName, subn
 resource "google_container_cluster" "with_master_auth_no_cert" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   master_auth {
     client_certificate_config {
       issue_client_certificate = false
@@ -11076,7 +11076,7 @@ resource "google_compute_http_health_check" "default" {
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
 
   node_locations = [
     "us-central1-b",
@@ -11107,7 +11107,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
   }
 
   network    = "%s"
@@ -11132,7 +11132,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     version            = data.google_container_engine_versions.central1a.valid_node_versions[2]
   }
   network    = "%s"
@@ -11157,7 +11157,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     version            = data.google_container_engine_versions.central1a.valid_node_versions[1]
   }
   network    = "%s"
@@ -11761,7 +11761,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
   }
   network    = "%s"
   subnetwork = "%s"
@@ -13027,7 +13027,7 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 resource "google_container_cluster" "with_flexible_cidr" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
 
   networking_mode = "VPC_NATIVE"
   network         = google_compute_network.container_network.name
@@ -18350,7 +18350,7 @@ resource "google_container_cluster" "cluster" {
   provider            = google.user-project-override
   name                = "%s"
   location            = "us-central1-a"
-  initial_node_count  = 3
+  initial_node_count  = 1
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
@@ -18378,7 +18378,7 @@ resource "google_container_cluster" "cluster" {
   provider            = google.user-project-override
   name                = "%s"
   location            = "us-central1-a"
-  initial_node_count  = 3
+  initial_node_count  = 1
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
