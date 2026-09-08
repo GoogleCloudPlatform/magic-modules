@@ -12,8 +12,11 @@ import (
 )
 
 func TestAccBigqueryDataTransferDataSourceEnrollment_attributes(t *testing.T) {
+	t.Parallel()
+
 	context := map[string]interface{}{
-		"project": envvar.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
