@@ -1,11 +1,16 @@
 ---
 subcategory: "Cloud Platform"
 description: |-
-  List IAM member bindings for a Google Cloud project for use with terraform query
+  List IAM resources for a Google Cloud project for use with terraform query
   and .tfquery.hcl files.
 ---
+# IAM List Resource for Project
 
-# google_project_iam_member (list)
+For how list resources work in this provider, file layout, Terraform version requirements, and
+shared `list` block arguments, refer to the guide
+[Use list resources with terraform query (Google Cloud provider)](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_list_resources_with_terraform_query).
+
+## google_project_iam_member (list)
 
 Lists IAM **member bindings** for a Google Cloud project for use with
 [`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) and
@@ -13,11 +18,7 @@ Lists IAM **member bindings** for a Google Cloud project for use with
 [`google_project_iam_member`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_project_iam)
 managed resources.
 
-For how list resources work in this provider, file layout, Terraform version requirements, and
-shared `list` block arguments, refer to the guide
-[Use list resources with terraform query (Google Cloud provider)](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_list_resources_with_terraform_query).
-
-## Example
+### Example
 
 ```hcl
 list "google_project_iam_member" "all" {
@@ -32,7 +33,7 @@ list "google_project_iam_member" "all" {
 
 Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
 
-## Configuration (`config` block)
+### Configuration (`config` block)
 
 * `project` - (Optional) Project ID to list IAM member from. If unset, the provider's
   configured default project is used (same idea as the managed resource).
@@ -45,7 +46,7 @@ Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
   all roles are returned.
 
 
-## Results
+### Results
 
 By default each result includes **resource identity** for `google_project_iam_member` (see
 [Resource identity](https://developer.hashicorp.com/terraform/language/resources/identities)):
@@ -58,3 +59,46 @@ With `include_resource = true` on the `list` block, results also include the ful
 attributes documented for the managed
 [`google_project_iam_member` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_project_iam#attributes-reference)
 (for example `etag`and `condition` where present in state).
+
+## google_project_iam_binding (list)
+
+List IAM **role bindings** for a Google Cloud Project for use with 
+[`terraform query`](https://developer.hashicorp.com/terraform/cli/commands/query) and
+**`.tfquery.hcl`** files. Results correspond to existing
+[`google_project_iam_binding`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_project_iam)
+managed resources.
+
+### Example
+
+```hcl
+list "google_project_iam_binding" "all" {
+  provider = google
+
+  config {
+    # Optional. Defaults to the provider project when omitted.
+    # project = "other-project"
+  }
+}
+```
+
+Run `terraform query` from the directory that contains the `.tfquery.hcl` file.
+
+### Configuration (`config` block)
+
+* `project` - (Optional) Project ID to list IAM role bindings from. If unset, the provider's
+  configured default project is used (same idea as the managed resource).
+
+* `role` - (Optional) IAM role filter.
+
+* `member` - (Optional) IAM member filter. Selects binding that contain the given principal;
+   each matching binding still reports all of its member.
+
+
+### Results
+
+By default each result includes **resource identity** for `google_project_iam_binding` (see
+[Resource identity](https://developer.hashicorp.com/terraform/language/resources/identities)):
+
+With `include_resource = true` on the `list` block, results also include the full resource-style
+attributes documented for the managed
+[`google_project_iam_binding` resource](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_project_iam#attributes-reference).
