@@ -94,8 +94,9 @@ properties:
     type: Boolean
     description: |
       The current state of the TemplateVersion. If true, the payload is
-      never returned by read or render calls. This field is only applicable
-      for updating a TemplateVersion.
+      never returned by read or render calls. Set to true to temporarily
+      deactivate a TemplateVersion without deleting it. This field is only
+      applicable for updating a TemplateVersion. Default value is false.
   - name: payload
     type: NestedObject
     description: |
@@ -108,9 +109,19 @@ properties:
       - name: template_data
         type: String
         description: |
-          The template data. Use `{{.variableName}}` placeholders for values
-          that are resolved from a ParameterVersion's data when the
-          TemplateVersion is rendered.
+          The template data. A structural blueprint in YAML or JSON format
+          containing `{{.variableName}}` placeholders. When rendering a TemplateVersion,
+          Parameter Manager replaces these placeholders with corresponding values
+          from a ParameterVersion to generate the final configuration.
+
+          Constraints:
+          - Format must be valid YAML or JSON
+          - Maximum 64 variables per TemplateVersion
+          - Variables must be simple key-value pairs without arrays or nested structures
+          - Rendered output cannot exceed 1 MB
+          - Variable names must follow format `{{.variableName}}`
+
+          Example: `{"database": "{{.dbName}}", "user": "{{.dbUser}}"}`
         api_name: data
         required: true
         immutable: true
