@@ -574,7 +574,6 @@ func TestRemoveDatastoreMountConfigFieldFromUpdateMask(t *testing.T) {
 	}
 }
 
-
 func TestAccVmwareengineCluster_vmwareEngineClusterVsanType(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()

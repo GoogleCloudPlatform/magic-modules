@@ -464,7 +464,6 @@ func testAccCheckVmwareenginePrivateCloudDestroyProducer(t *testing.T) func(s *t
 	}
 }
 
-
 func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudVsanType(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
