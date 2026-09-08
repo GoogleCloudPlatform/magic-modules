@@ -171,6 +171,9 @@ resource "google_ces_app" "ces_app_basic" {
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 1.0
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "ALLOW"
+      }
     }
     golden_hallucination_metric_behavior   = "ENABLED"
     scenario_hallucination_metric_behavior = "ENABLED"
@@ -393,6 +396,9 @@ resource "google_ces_app" "ces_app_basic" {
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 0.1
+      }
+      tool_matching_settings {
+        extra_tool_call_behavior = "FAIL"
       }
     }
     golden_hallucination_metric_behavior   = "DISABLED"
