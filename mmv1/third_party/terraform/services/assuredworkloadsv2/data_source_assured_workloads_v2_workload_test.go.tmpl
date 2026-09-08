@@ -1,0 +1,67 @@
+package assuredworkloadsv2_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/assuredworkloadsv2"
+)
+
+func TestAccAssuredWorkloadsV2Workload_datasource(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	dataResourceName := "data.google_assured_workloads_v2_workload.workload"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Workload_datasource(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(dataResourceName, "location", "us-central1"),
+					resource.TestCheckResourceAttr(dataResourceName, "workload_id", fmt.Sprintf("tf-test-ds-%s", context["random_suffix"])),
+					resource.TestCheckResourceAttr(dataResourceName, "framework.0.framework", "fedramp-moderate"),
+					resource.TestCheckResourceAttrSet(dataResourceName, "name"),
+					resource.TestCheckResourceAttrSet(dataResourceName, "computed_target_resource"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAssuredWorkloadsV2Workload_datasource(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-ds-%s"
+  description  = "Test Workload for Data Source"
+
+  resource_config {
+    existing_project = "projects/%s"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+}
+
+data "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-ds-%s"
+  depends_on   = [google_assured_workloads_v2_workload.workload]
+}
+`, context["org_id"], context["random_suffix"], context["project_id"], context["org_id"], context["random_suffix"])
+}
+{{- end }}

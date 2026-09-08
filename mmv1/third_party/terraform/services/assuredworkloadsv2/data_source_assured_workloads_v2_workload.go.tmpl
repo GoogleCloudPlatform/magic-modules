@@ -1,0 +1,78 @@
+package assuredworkloadsv2
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+func DataSourceAssuredWorkloadsV2Workload() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceAssuredWorkloadsV2Workload().Schema)
+
+	dsSchema["name"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Computed:    true,
+		Description: "The resource name of the workload.",
+	}
+	dsSchema["organization"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The parent organization ID.",
+	}
+	dsSchema["location"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The location of the workload.",
+	}
+	dsSchema["workload_id"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The workload ID.",
+	}
+
+	return &schema.Resource{
+		Read:   dataSourceAssuredWorkloadsV2WorkloadRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceAssuredWorkloadsV2WorkloadRead(d *schema.ResourceData, meta interface{}) error {
+	var id string
+	if v, ok := d.GetOk("name"); ok && v.(string) != "" {
+		id = v.(string)
+	} else {
+		org, okOrg := d.GetOk("organization")
+		loc, okLoc := d.GetOk("location")
+		wId, okWid := d.GetOk("workload_id")
+		if !okOrg || !okLoc || !okWid {
+			return fmt.Errorf("either 'name' or all of ('organization', 'location', 'workload_id') must be specified")
+		}
+		id = fmt.Sprintf("organizations/%s/locations/%s/workloads/%s", org.(string), loc.(string), wId.(string))
+	}
+
+	d.SetId(id)
+	_ = d.Set("name", id)
+
+	err := resourceAssuredWorkloadsV2WorkloadRead(d, meta)
+	if err != nil {
+		return err
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_assured_workloads_v2_workload",
+		ProductName: "assuredworkloadsv2",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAssuredWorkloadsV2Workload(),
+	}.Register()
+}
+{{- end }}

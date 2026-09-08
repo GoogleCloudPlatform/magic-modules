@@ -1,0 +1,52 @@
+package assuredworkloadsv2
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+func DataSourceAssuredWorkloadsV2Settings() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceAssuredWorkloadsV2Settings().Schema)
+
+	dsSchema["organization"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "The parent organization ID.",
+	}
+
+	return &schema.Resource{
+		Read:   dataSourceAssuredWorkloadsV2SettingsRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceAssuredWorkloadsV2SettingsRead(d *schema.ResourceData, meta interface{}) error {
+	organization := d.Get("organization").(string)
+
+	id := fmt.Sprintf("organizations/%s/assuredWorkloadsSettings", organization)
+	d.SetId(id)
+	_ = d.Set("name", id)
+
+	err := resourceAssuredWorkloadsV2SettingsRead(d, meta)
+	if err != nil {
+		return err
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_assured_workloads_v2_settings",
+		ProductName: "assuredworkloadsv2",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceAssuredWorkloadsV2Settings(),
+	}.Register()
+}
+{{- end }}

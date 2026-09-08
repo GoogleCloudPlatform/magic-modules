@@ -1,0 +1,50 @@
+package assuredworkloadsv2_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/assuredworkloadsv2"
+)
+
+func TestAccAssuredWorkloadsV2Settings_datasource(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id": envvar.GetTestOrgFromEnv(t),
+	}
+	dataResourceName := "data.google_assured_workloads_v2_settings.settings"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Settings_datasource(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(dataResourceName, "olpc_mode"),
+					resource.TestCheckResourceAttrSet(dataResourceName, "etag"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAssuredWorkloadsV2Settings_datasource(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_settings" "settings" {
+  organization = "%s"
+  olpc_mode    = "OLPC_MODE_OPT_OUT"
+}
+
+data "google_assured_workloads_v2_settings" "settings" {
+  organization = "%s"
+  depends_on   = [google_assured_workloads_v2_settings.settings]
+}
+`, context["org_id"], context["org_id"])
+}
+{{- end }}
