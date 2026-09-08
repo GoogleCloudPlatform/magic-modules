@@ -163,6 +163,13 @@ func ListSecretManagerSecretVersions(config *transport_tpg.Config, project, secr
 			if err := d.Set("name", name); err != nil {
 				return err
 			}
+			if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+				"project": versionProject,
+				"secret":  fmt.Sprintf("projects/%s/secrets/%s", versionProject, versionSecret),
+				"version": versionNum,
+			}); err != nil {
+				return err
+			}
 			if state, ok := res["state"].(string); ok {
 				if err := d.Set("enabled", state == "ENABLED"); err != nil {
 					return err
