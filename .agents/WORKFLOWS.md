@@ -43,6 +43,7 @@ specific one.
 ## Subagents:
 
 *   **`autogen`** (`.agents/agents/autogen/`): Generates new Terraform resources and acceptance tests from OpenAPI specifications using the autogen tool.
+*   **`bug-triager`** (`.agents/agents/bug-triager/`): Investigates reported provider bugs, inspecting issue comments and linked Buganizer tickets (`b/XXXX`), gathering external API documentation, internal MMv1 context, and historical Git changes to produce structured triage and context reports.
 *   **`qa-test-runner`** (`.agents/agents/qa-test-runner/`): Reproduces acceptance test failures and parses debug logs into structured API traces without modifying code.
 *   **`removal-auditor`** (`.agents/agents/removal-auditor/`): Audits deprecation status on `main`, sync status on the major release branch, and scans repository dependencies for resource and field removals.
 *   **`repo-sync`** (`.agents/agents/repo-sync/`): Initializes and synchronizes downstream provider repositories with Magic Modules to establish a clean verification baseline.
