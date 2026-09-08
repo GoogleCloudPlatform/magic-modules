@@ -62,7 +62,7 @@ type AnalysisResponse struct {
 	Analysis []AnalysisReportDetails
 }
 
-var servicesRegexp = regexp.MustCompile(`([^(\s|,)]+\.googleapis.com)`)
+var servicesRegexp = regexp.MustCompile(`([^(\s|,)]+\.googleapis\.com)`)
 
 func parseObject(obj any, resp interface{}) error {
 	b, err := json.Marshal(obj)
