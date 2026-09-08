@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -67,15 +68,6 @@ type IamMemberListResource struct {
 func NewIamMemberListResource(typeName string, memberResource *schema.Resource, newUpdater NewResourceIamUpdaterFunc, listCallConfig IamMemberListCallConfig) list.ListResource {
 	if memberResource.Identity == nil {
 		panic("tpgiamresource: NewIamMemberListResource requires a memberResource with identity (use IamWithResourceIdentity)")
-	}
-
-	// Strip timeouts: TfTypeResourceState() does not populate timeouts fields but
-	// ProtoSchema() includes them, causing a type mismatch when IncludeResource is true.
-	// List resources never need timeouts, so clear them on a shallow copy.
-	if memberResource.Timeouts != nil {
-		copy := *memberResource
-		copy.Timeouts = nil
-		memberResource = &copy
 	}
 
 	listConfigFields := []tpgresource.ListConfigField{
@@ -166,9 +158,14 @@ func (r *IamMemberListResource) RawV5Schemas(ctx context.Context, _ list.RawV5Sc
 	}
 }
 
+func iamMemberListResourceData(r *schema.Resource) *schema.ResourceData {
+	// Resource.Data retains timeout fields so the SDK state matches the list schema.
+	return r.Data(&terraform.InstanceState{})
+}
+
 // discoverPolicyTargets returns one ResourceData per GCP resource whose IAM policy should be read.
 func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req list.ListRequest) ([]*schema.ResourceData, error) {
-	baseRd := r.memberResource.TestResourceData()
+	baseRd := iamMemberListResourceData(r.memberResource)
 
 	// Set every target-identifying field (parent + scope dimensions like project/region/
 	// zone/location) from the list config onto the ResourceData the updater reads.
@@ -209,7 +206,7 @@ func (r *IamMemberListResource) discoverPolicyTargets(ctx context.Context, req l
 	}
 
 	listOpts.Callback = func(rd *schema.ResourceData) error {
-		targetRd := r.memberResource.TestResourceData()
+		targetRd := iamMemberListResourceData(r.memberResource)
 		targets = append(targets, targetRd)
 		return nil
 	}
@@ -301,7 +298,7 @@ func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list
 
 // buildMemberResult populates a ResourceData for one binding member and converts it to a ListResult.
 func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, binding *cloudresourcemanager.Binding, member, etag string) (list.ListResult, error) {
-	rd := r.memberResource.TestResourceData()
+	rd := iamMemberListResourceData(r.memberResource)
 	for k := range r.iamResourceSchema {
 		if v, ok := targetRd.GetOk(k); ok {
 			if err := rd.Set(k, v); err != nil {
