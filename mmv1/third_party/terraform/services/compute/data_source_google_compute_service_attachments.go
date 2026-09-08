@@ -118,7 +118,7 @@ func datasourceGoogleComputeServiceAttachmentsRead(d *schema.ResourceData, meta 
 					"fingerprint":                 sa["fingerprint"],
 					"region":                      sa["region"],
 					"reconcile_connections":       sa["reconcileConnections"],
-					"propagated_connection_limit": flattenInt64FromFloat(sa["propagatedConnectionLimit"]),
+					"propagated_connection_limit": flattenInt64(sa["propagatedConnectionLimit"]),
 					"consumer_reject_lists":       sa["consumerRejectLists"],
 					"consumer_accept_lists":       consumerAcceptLists,
 					"connected_endpoints":         connectedEndpoints,
@@ -165,7 +165,7 @@ func flattenServiceAttachmentConsumerAcceptLists(v interface{}) []map[string]int
 		}
 		result = append(result, map[string]interface{}{
 			"project_id_or_num": cal["projectIdOrNum"],
-			"connection_limit":  flattenInt64FromFloat(cal["connectionLimit"]),
+			"connection_limit":  flattenInt64(cal["connectionLimit"]),
 			"network_url":       cal["networkUrl"],
 		})
 	}
@@ -212,14 +212,20 @@ func flattenServiceAttachmentPscServiceAttachmentId(v interface{}) []map[string]
 	}
 }
 
-func flattenInt64FromFloat(v interface{}) interface{} {
-	if v == nil {
-		return nil
+func flattenInt64(v interface{}) interface{} {
+	// Handles the string fixed64 format.
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			return intVal
+		}
 	}
-	if f, ok := v.(float64); ok {
-		return int(f)
+
+	// Number values are represented as float64.
+	if floatVal, ok := v.(float64); ok {
+		return int(floatVal)
 	}
-	return v
+
+	return v // let Terraform Core handle it otherwise
 }
 
 func init() {
