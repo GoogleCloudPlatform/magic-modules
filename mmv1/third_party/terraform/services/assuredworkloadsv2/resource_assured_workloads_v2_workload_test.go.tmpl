@@ -3,6 +3,7 @@ package assuredworkloadsv2_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -73,7 +74,6 @@ func TestAccAssuredWorkloadsV2Workload_existingFolder(t *testing.T) {
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"folder_id":     envvar.GetTestFolderFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -129,6 +129,52 @@ func TestAccAssuredWorkloadsV2Workload_updateControls(t *testing.T) {
 	})
 }
 
+func TestAccAssuredWorkloadsV2Workload_cmekOnFolder(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAssuredWorkloadsV2Workload_cmekFolder(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "cmek_config.0.key_ring_id", fmt.Sprintf("cmek-ring-%s", context["random_suffix"])),
+					resource.TestCheckResourceAttr("google_assured_workloads_v2_workload.workload", "cmek_config.0.dedicated_project_config.0.billing_account", fmt.Sprintf("billingAccounts/%s", context["billing_account"])),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAssuredWorkloadsV2Workload_cmekOnProject_invalid(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"project_id":      envvar.GetTestProjectFromEnv(),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccAssuredWorkloadsV2Workload_cmekOnProject(context),
+				ExpectError: regexp.MustCompile("cmek_config.dedicated_project_config is invalid when resource_config targets a project; dedicated KMS projects can only be created when targeting a folder"),
+			},
+		},
+	})
+}
+
 func testAccAssuredWorkloadsV2Workload_existingProject(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_assured_workloads_v2_workload" "workload" {
@@ -168,6 +214,12 @@ resource "google_assured_workloads_v2_workload" "workload" {
 
 func testAccAssuredWorkloadsV2Workload_existingFolder(context map[string]interface{}) string {
 	return fmt.Sprintf(`
+resource "google_folder" "test_folder" {
+  display_name        = "tf-test-folder-%s"
+  parent              = "organizations/%s"
+  deletion_protection = false
+}
+
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%s"
   location     = "us-central1"
@@ -175,14 +227,14 @@ resource "google_assured_workloads_v2_workload" "workload" {
   description  = "Test Workload on Existing Folder"
 
   resource_config {
-    existing_folder = "folders/%s"
+    existing_folder = google_folder.test_folder.name
   }
 
   framework {
     framework = "il4"
   }
 }
-`, context["org_id"], context["random_suffix"], context["folder_id"])
+`, context["random_suffix"], context["org_id"], context["org_id"], context["random_suffix"])
 }
 
 func testAccAssuredWorkloadsV2Workload_controlsStep1(context map[string]interface{}) string {
@@ -245,5 +297,64 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 }
 `, context["org_id"], context["random_suffix"], context["project_id"])
+}
+
+func testAccAssuredWorkloadsV2Workload_cmekFolder(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_folder" "test_folder" {
+  display_name        = "tf-test-cmek-fldr-%s"
+  parent              = "organizations/%s"
+  deletion_protection = false
+}
+
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-cmek-%s"
+  description  = "Test Workload with CMEK on Folder"
+
+  resource_config {
+    existing_folder = google_folder.test_folder.name
+  }
+
+  framework {
+    framework = "il4"
+  }
+
+  cmek_config {
+    key_ring_id = "cmek-ring-%s"
+    dedicated_project_config {
+      billing_account = "billingAccounts/%s"
+      display_name    = "tf-test-cmek-proj-%s"
+    }
+  }
+}
+`, context["random_suffix"], context["org_id"], context["org_id"], context["random_suffix"], context["random_suffix"], context["billing_account"], context["random_suffix"])
+}
+
+func testAccAssuredWorkloadsV2Workload_cmekOnProject(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_assured_workloads_v2_workload" "workload" {
+  organization = "%s"
+  location     = "us-central1"
+  workload_id  = "tf-test-cmek-inv-%s"
+  description  = "Test Workload Invalid CMEK on Project"
+
+  resource_config {
+    existing_project = "projects/%s"
+  }
+
+  framework {
+    framework = "fedramp-moderate"
+  }
+
+  cmek_config {
+    key_ring_id = "cmek-ring-%s"
+    dedicated_project_config {
+      billing_account = "billingAccounts/%s"
+    }
+  }
+}
+`, context["org_id"], context["random_suffix"], context["project_id"], context["random_suffix"], context["billing_account"])
 }
 {{- end }}

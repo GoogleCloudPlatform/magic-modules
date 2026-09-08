@@ -259,6 +259,34 @@ properties:
                                 required: true
                                 item_type:
                                   type: String
+  - name: cmekConfig
+    type: NestedObject
+    description: Customer Managed Encryption Keys (CMEK) configuration. Immutable.
+    immutable: true
+    properties:
+      - name: keyRingId
+        type: String
+        description: The ID of the KMS key ring to be created.
+        required: true
+        immutable: true
+      - name: dedicatedProjectConfig
+        type: NestedObject
+        description: Configuration for dedicated CMEK project (valid only when target is a folder).
+        immutable: true
+        properties:
+          - name: billingAccount
+            type: String
+            description: Billing account to link to this dedicated KMS project.
+            required: true
+            immutable: true
+          - name: projectId
+            type: String
+            description: Desired Project ID for the dedicated CMEK project.
+            immutable: true
+          - name: displayName
+            type: String
+            description: Display name for the CMEK project.
+            immutable: true
   - name: state
     type: String
     description: Output only. Status of the workload (e.g. `ACTIVE`, `CREATING`, `FAILED`).

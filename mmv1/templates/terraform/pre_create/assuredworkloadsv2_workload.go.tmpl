@@ -6,3 +6,12 @@ if v, ok := d.GetOk("workload_id"); ok && v.(string) != "" {
 		return err
 	}
 }
+
+// Enforce API invariant: CMEK dedicated project is strictly prohibited on project targets
+if _, hasCmek := d.GetOk("cmek_config.0.dedicated_project_config"); hasCmek {
+	_, hasProj := d.GetOk("resource_config.0.existing_project")
+	_, hasNewProj := d.GetOk("resource_config.0.new_project_config")
+	if hasProj || hasNewProj {
+		return fmt.Errorf("cmek_config.dedicated_project_config is invalid when resource_config targets a project; dedicated KMS projects can only be created when targeting a folder")
+	}
+}
