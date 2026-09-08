@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -4750,14 +4751,6 @@ func flattenBootDisk(d *schema.ResourceData, disk map[string]interface{}, config
 
 	diskDetails, err := getDisk(diskSource, d, config)
 
-	// Resource policies can get autofilled from the API and on this field and this will cause the instance to recreate
-	// This overrides any value set by the API not to cause a diff when the user didn't set this in their config.
-	if diskDetails != nil {
-		if d.Get("boot_disk.0.initialize_params.0.resource_policies.0") == nil || d.Get("boot_disk.0.initialize_params.0.resource_policies") == nil {
-			delete(diskDetails, "resourcePolicies")
-		}
-	}
-
 	if err != nil {
 		log.Printf("[WARN] Cannot retrieve boot disk details: %s", err)
 
@@ -4768,6 +4761,17 @@ func flattenBootDisk(d *schema.ResourceData, disk map[string]interface{}, config
 			result["initialize_params"] = m
 		}
 	} else {
+		// The policies attached to the disk are not necessarily the ones set through
+		// initialize_params: the API can autofill them, and they can also be attached
+		// out of band with google_compute_disk_resource_policy_attachment, which can
+		// leave more of them on the disk than this field's MaxItems allows. Only mirror
+		// them back when the field is actually set, so that an unset field does not gain
+		// a value that would force the instance to recreate. This also means an import
+		// leaves the field unset.
+		if v, ok := d.GetOkExists("boot_disk.0.initialize_params.0.resource_policies"); !ok || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+			delete(diskDetails, "resourcePolicies")
+		}
+
 		diskType, _ := diskDetails["type"].(string)
 		storagePool, _ := diskDetails["storagePool"].(string)
 		var replicaZones []string
