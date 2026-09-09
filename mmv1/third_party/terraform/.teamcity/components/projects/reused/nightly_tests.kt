@@ -22,6 +22,7 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 import replaceCharsId
 
@@ -47,8 +48,9 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, listOf(), config)
 
     // Create a composite build that runs all package tests
+    val compositeId = replaceCharsId("${projectId}_all_tests")
     val compositeConfig = BuildType {
-        id(replaceCharsId("${projectId}_all_tests"))
+        id(compositeId)
         name = AllNightlyTestsName
         type = BuildTypeSettings.Type.COMPOSITE
 
@@ -78,6 +80,11 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     }
     // We still allow locks in the service sweeper build configuration for adhoc triggers of services
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
+    serviceSweeperConfig.triggers {
+        finishBuildTrigger {
+            buildType = compositeId
+        }
+    }
 
     // Add snapshot dependency on the composite config to run after tests finish
     serviceSweeperConfig.dependencies {

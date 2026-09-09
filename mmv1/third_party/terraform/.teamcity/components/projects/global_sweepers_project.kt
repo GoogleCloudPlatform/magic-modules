@@ -46,6 +46,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = gaAllTestsId.value // Trigger project sweeper after GA Composite build (GA Service Tests + GA Sweeper)
+            successfulOnly = false
         }
     }
     serviceSweeperConfig.dependencies {
@@ -64,6 +65,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     folderSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = gaAllTestsId.value // Trigger folder sweeper after GA Composite build (GA Service Tests + GA Sweeper)
+            successfulOnly = false
         }
     }
     folderSweeperConfig.dependencies {
