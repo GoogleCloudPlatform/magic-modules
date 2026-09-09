@@ -182,11 +182,23 @@ func SetResourceIdentityAttributes(d *schema.ResourceData, attrs map[string]inte
 // It panics if SDKv2Resource, Identity, or the identity schema is empty (wiring error).
 func (listR *ListResourceMetadata) setResourceIdentity(rd *schema.ResourceData) error {
 	idSchema := listR.SDKv2Resource.Identity.SchemaMap()
-	attrs := make(map[string]interface{}, len(idSchema))
-	for attr := range idSchema {
-		attrs[attr] = rd.Get(attr)
+	identity, err := rd.Identity()
+	if err != nil {
+		return fmt.Errorf("error getting resource identity: %w", err)
 	}
-	return SetResourceIdentityAttributes(rd, attrs)
+	if identity == nil {
+		return fmt.Errorf("resource identity is unavailable")
+	}
+
+	for attr := range idSchema {
+		if value, ok := identity.GetOk(attr); ok && value != "" {
+			continue
+		}
+		if err := identity.Set(attr, rd.Get(attr)); err != nil {
+			return fmt.Errorf("error setting resource identity field %q: %w", attr, err)
+		}
+	}
+	return nil
 }
 
 // ListResultDisplayName returns the first non-empty label from rd for keys in order. Use a
