@@ -45,7 +45,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     val serviceSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
-            buildType = gaAllTestsId // Trigger project sweeper after GA Composite build (GA Service Tests + GA Sweeper)
+            buildType = gaAllTestsId.value // Trigger project sweeper after GA Composite build (GA Service Tests + GA Sweeper)
         }
     }
     serviceSweeperConfig.dependencies {
@@ -63,7 +63,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
     folderSweeperConfig.triggers {
         finishBuildTrigger {
-            buildType = gaAllTestsId // Trigger folder sweeper after GA Composite build (GA Service Tests + GA Sweeper)
+            buildType = gaAllTestsId.value // Trigger folder sweeper after GA Composite build (GA Service Tests + GA Sweeper)
         }
     }
     folderSweeperConfig.dependencies {
