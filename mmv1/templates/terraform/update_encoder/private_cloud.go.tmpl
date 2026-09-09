@@ -1,2 +1,17 @@
 delete(obj, "managementCluster")
+
+// Force encryptionConfig to nil if it was set to GMEK
+if d.HasChange("encryption_config") {
+	_, new := d.GetChange("encryption_config")
+	if new != nil {
+		l := new.([]interface{})
+		if len(l) > 0 && l[0] != nil {
+			original := l[0].(map[string]interface{})
+			if original["type"] == "GMEK" {
+				obj["encryptionConfig"] = nil
+			}
+		}
+	}
+}
+
 return obj, nil
