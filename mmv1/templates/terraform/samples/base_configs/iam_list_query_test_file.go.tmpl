@@ -85,8 +85,11 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 			{
 				Config: testAcc{{ $.ResourceName }}IamMemberListQuery_create(context),
 				Check: resource.ComposeTestCheckFunc(
-					listScope.Capture(map[string]string{
-                        "{{ underscore $.IamParentResourceName}}": "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}",
+				{{- $ids := $.IamSelfLinkIdentifiers }}
+					listScope.CaptureFrom(map[string]acctest.ListScopeSource{
+					{{- range $i, $attribute := $.IamAttributes }}
+						"{{ $attribute}}": {Addr: "{{ $.TerraformName }}.{{$sample.PrimaryResourceId }}", Attr: "{{ underscore (index $ids $i) }}"},
+					{{- end }}
 					}),
 				),
 			},
@@ -102,9 +105,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 				{{- end}}
 						"role": knownvalue.StringExact("{{ $.IamPolicy.AllowedIamRole }}"),
 						"member": knownvalue.StringExact("user:admin@hashicorptest.com"),
-				{{- if $.IamPolicy.IamConditionsRequestType }}
 						"condition_title": knownvalue.Null(),
-				{{- end}}
 					}),
 				},
 			},
