@@ -83,6 +83,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = compositeId
+            successfulOnly = false
         }
     }
 

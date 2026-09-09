@@ -10,7 +10,6 @@ package tests
 import AllNightlyTestsName
 import ServiceSweeperName
 import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
-import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,34 +26,23 @@ class NightlyTestProjectsTests {
         // Find Beta nightly test project
         var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
-        // Package tests and the Service Sweeper keep their upstream CRON triggers.
-        // The composite All Nightly Tests build is started via snapshot dependency only.
+        // The composite starts on its nightly CRON trigger. Package builds have no
+        // individual nightly triggers, and the Service Sweeper follows the composite.
         (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->
             if (bt.name == AllNightlyTestsName) {
-                assertTrue("Build configuration `${bt.name}` should not have a trigger; it is started via snapshot dependency", bt.triggers.items.isEmpty())
+                assertTrue("Build configuration `${bt.name}` should have a trigger", bt.triggers.items.isNotEmpty())
                 return@forEach
             }
 
-            assertTrue("Build configuration `${bt.name}` should contain at least one trigger", bt.triggers.items.isNotEmpty())
-             // Look for at least one CRON trigger
-            var found: Boolean = false
-            lateinit var schedulingTrigger: ScheduleTrigger
-            for (item in bt.triggers.items){
-                if (item.type == "schedulingTrigger") {
-                    schedulingTrigger = item as ScheduleTrigger
-                    found = true
-                    break
-                }
+            if (bt.name == ServiceSweeperName) {
+                assertEquals("Build configuration `${bt.name}` should have one finish trigger", 1, bt.triggers.items.size)
+                return@forEach
             }
 
-            assertTrue("Build configuration `${bt.name}` should contain a CRON/'schedulingTrigger' trigger", found)
-
-            // Check that nightly test is being ran on the nightly-test branch
-            var isNightlyTestBranch: Boolean = false
-            if (schedulingTrigger.branchFilter == "+:refs/heads/nightly-test"){
-                isNightlyTestBranch = true
+            if (bt.name != AllNightlyTestsName) {
+                assertTrue("Package build configuration `${bt.name}` should not contain an individual nightly trigger", bt.triggers.items.isEmpty())
+                return@forEach
             }
-            assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
         }
     }
 
@@ -81,6 +69,7 @@ class NightlyTestProjectsTests {
 
             val sweeper = getBuildFromProject(project, ServiceSweeperName)
             assertEquals("Service sweeper should snapshot-depend on the composite All Nightly Tests build", 1, sweeper.dependencies.items.size)
+            assertEquals("Service sweeper should have one finish trigger from the composite", 1, sweeper.triggers.items.size)
         }
     }
 }
