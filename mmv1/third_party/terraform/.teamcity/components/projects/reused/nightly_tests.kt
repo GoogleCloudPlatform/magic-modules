@@ -44,7 +44,8 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     // Create build configs to run acceptance tests for each package defined in packages.kt and services.kt files
     // and add cron trigger to them all
     val allPackages = getAllPackageInProviderVersion(providerName)
-    val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, sharedResources, config)
+    // Package builds are dependencies of the composite build and must not acquire shared-resource locks.
+    val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, listOf(), config)
 
     // Create a composite build that runs all package tests
     val compositeConfig = BuildType {
