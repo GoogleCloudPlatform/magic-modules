@@ -100,6 +100,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
         description = "A project connected to the hashicorp/terraform-provider-${providerName} repository, where scheduled nightly tests run and users can trigger ad-hoc builds"
 
         buildType(compositeConfig)
+        packageBuildConfigs.forEach { buildType(it) }
         buildType(serviceSweeperConfig)
 
         params{
