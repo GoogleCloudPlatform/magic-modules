@@ -8,6 +8,7 @@
 package projects
 
 import GlobalSweepersProjectName
+import DefaultBranchName
 import NightlyTestsProjectId
 import SharedResourceNameBeta
 import SharedResourceNameGa
@@ -49,6 +50,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = gaServiceSweeperId.value // Trigger project sweeper after the GA service sweeper
+            branchFilter = "+:$DefaultBranchName"
             successfulOnly = false
         }
     }
@@ -76,6 +78,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     folderSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = gaServiceSweeperId.value // Trigger folder sweeper after the GA service sweeper
+            branchFilter = "+:$DefaultBranchName"
             successfulOnly = false
         }
     }

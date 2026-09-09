@@ -84,6 +84,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = "${DslContext.projectId}_${compositeId}"
+            branchFilter = "+:${cron.branch}"
             successfulOnly = false
         }
     }
