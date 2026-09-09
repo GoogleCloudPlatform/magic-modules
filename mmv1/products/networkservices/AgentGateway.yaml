@@ -163,6 +163,13 @@ properties:
       `//agentregistry.googleapis.com/{version}/projects/{{project}}/locations/{{location}}`
     item_type:
       type: String
+  - name: agentConnectivityTemplate
+    type: String
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    description: |
+      The resource name of the AgentConnectivityTemplate.
+      Must be of format
+      `projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{agent_connectivity_template}}`
   - name: networkConfig
     type: NestedObject
     description: |
