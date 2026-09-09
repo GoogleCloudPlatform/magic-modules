@@ -1,0 +1,167 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'PublisherModelConfig'
+description: |
+  Configs of a publisher model.
+references:
+  guides:
+    'Log and share requests and responses': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/request-response-logging'
+  api: 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1beta1/projects.locations.endpoints#PublisherModelConfig'
+min_version: beta
+
+base_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+self_link: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+
+immutable: false
+
+create_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
+update_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
+update_verb: 'POST'
+read_query_params: ':fetchPublisherModelConfig'
+id_format: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}/publisherModelConfig'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}/publisherModelConfig'
+
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The model's location.
+  - name: 'publisher'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The model provider's name.
+  - name: 'model'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The model's name.
+
+properties:
+  - name: 'loggingConfig'
+    type: NestedObject
+    description: |
+      The prediction request/response logging config.
+    properties:
+    - name: 'enabled'
+      type: Boolean
+      description: |
+        If logging is enabled or not.
+    - name: 'samplingRate'
+      type: Double
+      description: |
+        Percentage of requests to be logged, expressed as a fraction in range(0,1].
+    - name: 'errorSamplingRate'
+      type: Double
+      description: |
+        Percentage of failed requests to be logged, expressed as a fraction in range [0,1].
+        Only non-transient errors will be logged (currently `500/Internal errors`).
+    - name: 'bigqueryDestination'
+      type: NestedObject
+      description: |
+        BigQuery table for logging.
+      properties:
+        - name: 'outputUri'
+          type: String
+          required: true
+          description: |
+            BigQuery URI to a project or table, up to 2000 characters long.
+            If only given a project, a new dataset will be created with name `publishers_<publisher>_models_<model>`
+            where will be made BigQuery-dataset-name compatible (e.g. most special characters will become underscores).
+            If no table name is given, a new table will be created with name `request_response_logging`.
+            When the full table reference is specified, the dataset must exist and table must not exist.
+            If the endpoint is global, the dataset have to be specified.
+            Accepted forms: BigQuery path. For example: `bq://projectId`, `bq://projectId.bqDatasetId` or `bq://projectId.bqDatasetId.bqTableId`.
+          diff_suppress_func: vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppress
+    - name: 'requestResponseLoggingSchemaVersion'
+      type: String
+      output: true
+      description: |
+        The schema version used in creating the BigQuery table for the request response logging.
+        The versions are "v1" and "v2". The current default version is "v1".
+    - name: 'enableOtelLogging'
+      type: Boolean
+      description: |
+        This field is used for large models. If true, in addition to the original large model logs,
+        logs will be converted in OTel schema format, and saved in otel_log column. Default value is false.
+  - name: 'dataSharingEnabledProvider'
+    type: Enum
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+    default_value: MODEL_PROVIDER_UNSPECIFIED
+    enum_values:
+      - MODEL_PROVIDER_UNSPECIFIED
+      - ANTHROPIC
+    description: |
+      The model provider (publisher) for which the customer has enabled data sharing.
+      For publisher models that are configured to require data sharing, a prediction request is only allowed when the model's publisher matches this provider.
+      Otherwise, the request is rejected.
+custom_code:
+  pre_create: templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
+  pre_read:   templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
+  pre_update: templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
+  encoder:    templates/terraform/encoders/vertex_ai_publisher_model_config.go.tmpl
+  constants:  templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl
+
+exclude_delete: true
+deletion_policy_exclude: true
+
+samples:
+  - name: publisher_model_config_regional_endpoint
+    primary_resource_id: claude_us
+    min_version: beta
+    steps:
+      - name: vertex_ai_publisher_model_config_rep
+        vars:
+          dataSharingProvider: ANTHROPIC
+      - name: vertex_ai_publisher_model_config_rep
+        vars:
+          dataSharingProvider: MODEL_PROVIDER_UNSPECIFIED
+        include_step_doc: false
+  - name: publisher_model_config_update
+    primary_resource_id: claude_global
+    min_version: beta
+    steps:
+      - name: vertex_ai_publisher_model_config_global_full
+        resource_id_vars:
+          dataset_name: example_dataset
+          table_name: example_table
+        vars:
+          samplingRate: 0.1
+          errorSamplingRate: 1
+          otelLog: true
+      - name: vertex_ai_publisher_model_config_global_full
+        resource_id_vars:
+          dataset_name: example_dataset
+          table_name: example_table
+        vars:
+          samplingRate: 0.2
+          errorSamplingRate: 0.9
+          otelLog: false
+      - name: vertex_ai_publisher_model_config_global_clear
+        include_step_doc: false

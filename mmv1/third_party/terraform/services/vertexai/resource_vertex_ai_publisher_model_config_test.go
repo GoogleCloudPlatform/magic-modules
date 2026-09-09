@@ -1,0 +1,49 @@
+package vertexai
+
+import (
+	"testing"
+)
+
+func TestVertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppressLogic(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"same full path": {
+			Old:                "bq://project_id.dataset_id.table_id",
+			New:                "bq://project_id.dataset_id.table_id",
+			ExpectDiffSuppress: true,
+		},
+		"different full path": {
+			Old:                "bq://project_id.dataset_id.table_id",
+			New:                "bq://project_id.dataset_id.table_id2",
+			ExpectDiffSuppress: false,
+		},
+		"auto table created": {
+			Old:                "bq://project_id.dataset_id.request_response_logging",
+			New:                "bq://project_id.dataset_id",
+			ExpectDiffSuppress: true,
+		},
+		"manual table id unmatch": {
+			Old:                "bq://project_id.dataset_id.table_id",
+			New:                "bq://project_id.dataset_id",
+			ExpectDiffSuppress: false,
+		},
+		"auto dataset and table created": {
+			Old:                "bq://project_id.publishers_google_models_gemini_3_5_flash_1234567890123456789.request_response_logging",
+			New:                "bq://project_id",
+			ExpectDiffSuppress: true,
+		},
+		"dataset unmatch": {
+			Old:                "bq://project_id.dataset_id.request_response_logging",
+			New:                "bq://project_id",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppressLogic(tc.Old, tc.New) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}

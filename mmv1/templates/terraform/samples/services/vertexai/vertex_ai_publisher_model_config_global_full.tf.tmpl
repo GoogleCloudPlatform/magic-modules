@@ -1,0 +1,34 @@
+resource "google_vertex_ai_publisher_model_config" "{{.PrimaryResourceId}}" {
+  provider = google-beta
+
+  location  = "global"
+  publisher = "anthropic"
+  model     = "claude-fable-5-1"
+
+  logging_config {
+    enabled             = true
+    sampling_rate.      = {{index $.Vars "samplingRate"}}
+    error_sampling_rate = {{index $.Vars "errorSamplingRate"}}
+
+    bigquery_destination {
+      output_uri = "bq://${data.google_project.project.project_id}.${google_bigquery_dataset.{{.PrimaryResourceId}}.dataset_id}"
+    }
+
+    enable_otel_logging = {{index $.Vars "otelLog"}}
+  }
+
+  data_sharing_enabled_provider = "ANTHROPIC"
+}
+
+resource "google_bigquery_dataset" "{{.PrimaryResourceId}}" {
+  provider = google-beta
+
+  dataset_id                 = "{{index $.ResourceIdVars "dataset_name"}}"
+  friendly_name              = "genai_log"
+  location                   = "US"
+  delete_contents_on_destroy = true
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}

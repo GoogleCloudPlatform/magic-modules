@@ -1,0 +1,31 @@
+if location, ok := d.GetOk("location"); ok {
+	configCopy := *config
+	configCopy.CustomEndpoints = make(map[string]string, len(config.CustomEndpoints)+1)
+	for k, v := range config.CustomEndpoints {
+		configCopy.CustomEndpoints[k] = v
+	}
+
+	re := regexp.MustCompile(`^https://[a-z0-9-]+\-aiplatform\.googleapis\.com`)
+
+	locStr := location.(string)
+	tempUrl := "https://{{`{{region}}`}}-aiplatform.googleapis.com"
+	switch locStr {
+		case "us", "eu":
+			repBaseURL := "https://aiplatform."+locStr+".rep.googleapis.com"
+			url = re.ReplaceAllLiteralString(url, repBaseURL)
+			configCopy.CustomEndpoints[Product.CustomEndpointField] = strings.ReplaceAll(transport_tpg.BaseUrl(Product, config), tempUrl, repBaseURL)
+			log.Printf("[DEBUG] Overriding URL with REP URL: %s", url)
+		case "global":
+			globalBaseURL := "https://aiplatform.googleapis.com"
+			url = re.ReplaceAllLiteralString(url, globalBaseURL)
+			configCopy.CustomEndpoints[Product.CustomEndpointField] = strings.ReplaceAll(transport_tpg.BaseUrl(Product, config), tempUrl, globalBaseURL)
+			log.Printf("[DEBUG] Overriding URL with global URL: %s", url)
+		default:
+			regionalBaseURL := "https://"+locStr+"-aiplatform.googleapis.com"
+			url = re.ReplaceAllLiteralString(url, regionalBaseURL)
+			configCopy.CustomEndpoints[Product.CustomEndpointField] = strings.ReplaceAll(transport_tpg.BaseUrl(Product, config), tempUrl, regionalBaseURL)
+			log.Printf("[DEBUG] Overriding URL with regional URL: %s", url)
+	}
+
+	config = &configCopy
+}

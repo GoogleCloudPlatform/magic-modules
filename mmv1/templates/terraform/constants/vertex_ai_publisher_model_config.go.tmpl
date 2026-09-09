@@ -1,0 +1,30 @@
+func vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppressLogic(old, new)
+}
+
+var autoDatasetRe = regexp.MustCompile(`^publishers_[a-z0-9_]+_models_[a-z0-9_]+$`)
+
+const defaultTableId = "request_response_logging"
+
+func vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppressLogic(old, new string) bool {
+	if old == new {
+		return true
+	}
+
+	o := strings.Split(old, ".")
+	n := strings.Split(new, ".")
+
+	// API always returns bq://project.dataset.table format path
+	if len(o) != 3 || o[2] != defaultTableId || o[0] != n[0] {
+		return false
+	}
+
+	switch len(n) {
+	case 1: // config has bq://project format path: dataset ID matches auto-generated format.
+		return autoDatasetRe.MatchString(o[1])
+	case 2: // config has bq://project.dataset format path: compare dataset ID.
+		return o[1] == n[1]
+	default:
+		return false
+	}
+}

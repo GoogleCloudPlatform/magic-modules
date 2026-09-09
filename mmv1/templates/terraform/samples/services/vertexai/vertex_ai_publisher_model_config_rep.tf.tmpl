@@ -1,0 +1,9 @@
+resource "google_vertex_ai_publisher_model_config" "{{.PrimaryResourceId}}" {
+  provider = google-beta
+
+  location  = "us"
+  publisher = "anthropic"
+  model     = "claude-fable-5-1"
+
+  data_sharing_enabled_provider = "{{index $.Vars "dataSharingProvider"}}"
+}
