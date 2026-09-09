@@ -20,7 +20,6 @@ description: |
   and organization.
 references:
   guides:
-    Create and manage parameters: https://docs.cloud.google.com/secret-manager/parameter-manager/docs/create-and-manage-parameters
     Work with parameter tags: https://docs.cloud.google.com/secret-manager/parameter-manager/docs/create-and-manage-tags
   api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters
 docs:
@@ -80,13 +79,17 @@ samples:
           parameter_id: '"parameter" + randomSuffix'
   - name: parameter_with_tags
     primary_resource_id: parameter-with-tags
+    # Docs example only. The tag key/value IDs here are illustrative
+    # placeholders, not real resources, so this sample is excluded from
+    # generating a live acceptance test (which would fail against real GCP).
+    # Real coverage lives in TestAccParameterManagerParameter_tags in
+    # resource_parameter_manager_parameter_test.go, which bootstraps an
+    # actual org tag key/value.
+    exclude_test: true
     steps:
       - name: parameter_with_tags
         resource_id_vars:
           parameter_id: parameter
-        test_vars_overrides:
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
 parameters:
   - name: parameterId
     type: String
