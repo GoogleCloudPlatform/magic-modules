@@ -1,5 +1,7 @@
 package vertexai
 
+{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"testing"
 )
@@ -47,3 +49,5 @@ func TestVertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppressLog
 		}
 	}
 }
+
+{{ end }}
