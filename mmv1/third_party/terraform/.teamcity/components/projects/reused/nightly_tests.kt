@@ -76,6 +76,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
         ProviderNameBetaDiffTest -> sweepersList = SweepersListBeta
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
+    // We still allow locks in the service sweeper build configuration for adhoc triggers of services
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
 
     // Add snapshot dependency on the composite config to run after tests finish
