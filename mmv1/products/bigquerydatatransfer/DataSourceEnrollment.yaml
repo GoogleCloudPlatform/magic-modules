@@ -206,6 +206,11 @@ properties:
           output: true
           description: |
             If true, it should not be used in new transfers, and it should not be visible to users.
+        - name: 'maxListSize'
+          type: Integer
+          output: true
+          description: |
+            For list parameters, the max size of the list.
     description: |
       Data source parameters.
   - name: 'helpUrl'
