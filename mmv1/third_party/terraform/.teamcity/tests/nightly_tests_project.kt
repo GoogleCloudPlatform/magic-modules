@@ -8,16 +8,29 @@
 package tests
 
 import AllNightlyTestsName
+import DefaultBranchName
+import ProviderNameBeta
+import ProviderNameGa
 import ServiceSweeperName
+import SharedResourceNameBeta
+import SharedResourceNameGa
+import builds.NightlyTriggerConfiguration
+import builds.getGaAcceptanceTestConfig
 import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
+import jetbrains.buildServer.configs.kotlin.FailureAction
+import jetbrains.buildServer.configs.kotlin.SharedResources
+import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import projects.googleCloudRootProject
+import projects.reused.getAllPackageInProviderVersion
+import projects.reused.nightlyTests
+import vcs_roots.HashiCorpVCSRootGa
 
 class NightlyTestProjectsTests {
     @Test
-    fun allBuildsShouldHaveTrigger() {
+    fun onlyCompositeShouldHaveNightlySchedule() {
         val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
@@ -26,22 +39,20 @@ class NightlyTestProjectsTests {
         // Find Beta nightly test project
         var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
-        // The composite starts on its nightly CRON trigger. Package builds have no
-        // individual nightly triggers, and the Service Sweeper follows the composite.
-        (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->
-            if (bt.name == AllNightlyTestsName) {
-                assertTrue("Build configuration `${bt.name}` should have a trigger", bt.triggers.items.isNotEmpty())
-                return@forEach
-            }
+        listOf(gaNightlyTestProject, betaNightlyTestProject).forEach { project ->
+            val composite = getBuildFromProject(project, AllNightlyTestsName)
+            assertEquals("Composite should have one schedule trigger", 1, composite.triggers.items.size)
+            val trigger = composite.triggers.items.single()
+            assertTrue("Composite should use a schedule trigger", trigger is ScheduleTrigger)
+            trigger as ScheduleTrigger
+            assertTrue("Composite should use CRON scheduling", trigger.schedulingPolicy is ScheduleTrigger.SchedulingPolicy.Cron)
+            assertEquals("Composite should select the nightly branch", "+:$DefaultBranchName", trigger.branchFilter)
+            assertEquals("Nightly runs should not require pending changes", false, trigger.withPendingChangesOnly)
 
-            if (bt.name == ServiceSweeperName) {
-                assertEquals("Build configuration `${bt.name}` should have one finish trigger", 1, bt.triggers.items.size)
-                return@forEach
-            }
-
-            if (bt.name != AllNightlyTestsName) {
-                assertTrue("Package build configuration `${bt.name}` should not contain an individual nightly trigger", bt.triggers.items.isEmpty())
-                return@forEach
+            val sweeper = getBuildFromProject(project, ServiceSweeperName)
+            assertFinishTrigger(sweeper, composite, DefaultBranchName)
+            project.buildTypes.filter { it != composite && it != sweeper }.forEach { build ->
+                assertTrue("Package build `${build.name}` should have no independent trigger", build.triggers.items.isEmpty())
             }
         }
     }
@@ -61,15 +72,47 @@ class NightlyTestProjectsTests {
                 bt.name != ServiceSweeperName && bt.name != AllNightlyTestsName
             }
             assertTrue("Nightly test project `${project.name}` should have package test builds", packageBuilds.isNotEmpty())
-            assertEquals(
-                "Composite `${composite.name}` should snapshot-depend on every package test build",
-                packageBuilds.size,
-                composite.dependencies.items.size
-            )
+            assertSnapshotDependencies(composite, packageBuilds, FailureAction.ADD_PROBLEM)
 
             val sweeper = getBuildFromProject(project, ServiceSweeperName)
-            assertEquals("Service sweeper should snapshot-depend on the composite All Nightly Tests build", 1, sweeper.dependencies.items.size)
-            assertEquals("Service sweeper should have one finish trigger from the composite", 1, sweeper.triggers.items.size)
+            assertSnapshotDependencies(sweeper, listOf(composite), FailureAction.IGNORE)
+        }
+    }
+
+    @Test
+    fun serviceSweeperShouldFollowCustomNightlyBranch() {
+        val config = getGaAcceptanceTestConfig(testContextParameters())
+        val cron = NightlyTriggerConfiguration(
+            branch = "refs/heads/experimental-nightly",
+            nightlyTestsEnabled = false,
+            startHour = 7
+        )
+        val project = nightlyTests("EXPERIMENTAL", ProviderNameGa, HashiCorpVCSRootGa, config, cron)
+        val composite = getBuildFromProject(project, AllNightlyTestsName)
+        val schedule = composite.triggers.items.single() as ScheduleTrigger
+        assertEquals(false, schedule.enabled)
+        assertEquals("+:${cron.branch}", schedule.branchFilter)
+        assertEquals("7", (schedule.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron).hours)
+        assertFinishTrigger(getBuildFromProject(project, ServiceSweeperName), composite, cron.branch)
+    }
+
+    @Test
+    fun nightlyPackagesAndSweepersShouldRetainProviderLocks() {
+        val root = googleCloudRootProject(testContextParameters())
+        listOf(
+            Triple(gaProjectName, ProviderNameGa, SharedResourceNameGa),
+            Triple(betaProjectName, ProviderNameBeta, SharedResourceNameBeta)
+        ).forEach { (name, provider, resource) ->
+            val project = getNestedProjectFromRoot(root, name, nightlyTestsProjectName)
+            val composite = getBuildFromProject(project, AllNightlyTestsName)
+            val sweeper = getBuildFromProject(project, ServiceSweeperName)
+            assertTrue("Composite should not hold locks needed by package builds", composite.features.items.filterIsInstance<SharedResources>().isEmpty())
+            assertSharedResourceLocks(sweeper, SharedResources { lockAllValues(resource) })
+            project.buildTypes.filter { it != composite && it != sweeper }.forEach { build ->
+                val path = build.params.findRawParam("PACKAGE_PATH")!!.value
+                val packageName = getAllPackageInProviderVersion(provider).entries.single { it.value.getValue("path") == path }.key
+                assertSharedResourceLocks(build, SharedResources { lockSpecificValue(resource, packageName) })
+            }
         }
     }
 }

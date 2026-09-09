@@ -7,11 +7,17 @@
 
 package tests
 
+import AllNightlyTestsName
+import DefaultBranchName
 import ServiceSweeperCronName
 import ServiceSweeperManualName
 import ServiceSweeperName
+import SharedResourceNameBeta
+import SharedResourceNameGa
+import SharedResourceNameVcr
 import jetbrains.buildServer.configs.kotlin.BuildType
-import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.FailureAction
+import jetbrains.buildServer.configs.kotlin.SharedResources
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -130,29 +136,28 @@ class SweeperTests {
 
     @Test
     fun globalSweepersDependOnAllNightlyTests() {
-        val root = googleCloudRootProject(testContextParameters())
+        listOf("TeamCityTests", "Experimental_NightlyTests").forEach { projectId ->
+            val root = googleCloudRootProject(testContextParameters(projectId))
+            val gaNightly = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
+            val betaNightly = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
+            val gaComposite = getBuildFromProject(gaNightly, AllNightlyTestsName)
+            val betaComposite = getBuildFromProject(betaNightly, AllNightlyTestsName)
+            val sweeperGa = getBuildFromProject(gaNightly, ServiceSweeperName)
+            val sweeperBeta = getBuildFromProject(betaNightly, ServiceSweeperName)
+            assertFinishTrigger(sweeperGa, gaComposite, DefaultBranchName)
+            assertFinishTrigger(sweeperBeta, betaComposite, DefaultBranchName)
 
-        // Find GA nightly test project's service sweeper
-        val gaNightlyTests: Project = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
-        val sweeperGa: BuildType = getBuildFromProject(gaNightlyTests, ServiceSweeperName)
-
-        // Find Beta nightly test project's service sweeper
-        val betaNightlyTests : Project = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
-        val sweeperBeta: BuildType = getBuildFromProject(betaNightlyTests, ServiceSweeperName)
-
-        // Find Global sweepers project's builds
-        val globalSweepersProject = getSubProject(root, globalSweepersProjectName)
-        val projectSweeper: BuildType = getBuildFromProject(globalSweepersProject, "Project Sweeper")
-        val folderSweeper: BuildType = getBuildFromProject(globalSweepersProject, "Folder Sweeper")
-
-        // Each nightly service sweeper follows its composite, while global sweepers
-        // follow the GA service sweeper after both GA and Beta sweepers complete.
-        assertTrue(sweeperGa.triggers.items.size == 1)
-        assertTrue(sweeperBeta.triggers.items.size == 1)
-        assertTrue(projectSweeper.triggers.items.size == 1)
-        assertTrue(folderSweeper.triggers.items.size == 1)
-
-        assertEquals("Project sweeper should snapshot-depend on GA and Beta composites and service sweepers", 4, projectSweeper.dependencies.items.size)
-        assertEquals("Folder sweeper should snapshot-depend on GA and Beta composites and service sweepers", 4, folderSweeper.dependencies.items.size)
+            val globalSweepers = getSubProject(root, globalSweepersProjectName)
+            listOf("Project Sweeper", "Folder Sweeper").forEach { name ->
+                val sweeper = getBuildFromProject(globalSweepers, name)
+                assertFinishTrigger(sweeper, sweeperGa, DefaultBranchName)
+                assertSnapshotDependencies(sweeper, listOf(gaComposite, betaComposite, sweeperGa, sweeperBeta), FailureAction.IGNORE)
+                assertSharedResourceLocks(sweeper, SharedResources {
+                    lockAllValues(SharedResourceNameGa)
+                    lockAllValues(SharedResourceNameBeta)
+                    lockAllValues(SharedResourceNameVcr)
+                })
+            }
+        }
     }
 }

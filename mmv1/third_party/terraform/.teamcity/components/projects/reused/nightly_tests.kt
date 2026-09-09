@@ -25,11 +25,9 @@ import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
-import generated.ServicesListBeta
-import generated.ServicesListGa
 import replaceCharsId
 
-fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot, config: AccTestConfiguration, cron: NightlyTriggerConfiguration, servicesToTest: Array<String>? = null): Project {
+fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot, config: AccTestConfiguration, cron: NightlyTriggerConfiguration): Project {
 
     // Create unique ID for the dynamically-created project
     var projectId = "${parentProject}_${NightlyTestsProjectId}"
