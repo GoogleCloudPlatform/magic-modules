@@ -69,47 +69,47 @@ properties:
     description: |
       The prediction request/response logging config.
     properties:
-    - name: 'enabled'
-      type: Boolean
-      description: |
-        If logging is enabled or not.
-    - name: 'samplingRate'
-      type: Double
-      description: |
-        Percentage of requests to be logged, expressed as a fraction in range(0,1].
-    - name: 'errorSamplingRate'
-      type: Double
-      description: |
-        Percentage of failed requests to be logged, expressed as a fraction in range [0,1].
-        Only non-transient errors will be logged (currently `500/Internal errors`).
-    - name: 'bigqueryDestination'
-      type: NestedObject
-      description: |
-        BigQuery table for logging.
-      properties:
-        - name: 'outputUri'
-          type: String
-          required: true
-          description: |
-            BigQuery URI to a project or table, up to 2000 characters long.
-            If only given a project, a new dataset will be created with name `publishers_<publisher>_models_<model>`
-            where will be made BigQuery-dataset-name compatible (e.g. most special characters will become underscores).
-            If no table name is given, a new table will be created with name `request_response_logging`.
-            When the full table reference is specified, the dataset must exist and table must not exist.
-            If the endpoint is global, the dataset have to be specified.
-            Accepted forms: BigQuery path. For example: `bq://projectId`, `bq://projectId.bqDatasetId` or `bq://projectId.bqDatasetId.bqTableId`.
-          diff_suppress_func: vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppress
-    - name: 'requestResponseLoggingSchemaVersion'
-      type: String
-      output: true
-      description: |
-        The schema version used in creating the BigQuery table for the request response logging.
-        The versions are "v1" and "v2". The current default version is "v1".
-    - name: 'enableOtelLogging'
-      type: Boolean
-      description: |
-        This field is used for large models. If true, in addition to the original large model logs,
-        logs will be converted in OTel schema format, and saved in otel_log column. Default value is false.
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          If logging is enabled or not.
+      - name: 'samplingRate'
+        type: Double
+        description: |
+          Percentage of requests to be logged, expressed as a fraction in range(0,1].
+      - name: 'errorSamplingRate'
+        type: Double
+        description: |
+          Percentage of failed requests to be logged, expressed as a fraction in range [0,1].
+          Only non-transient errors will be logged (currently `500/Internal errors`).
+      - name: 'bigqueryDestination'
+        type: NestedObject
+        description: |
+          BigQuery table for logging.
+        properties:
+          - name: 'outputUri'
+            type: String
+            required: true
+            description: |
+              BigQuery URI to a project or table, up to 2000 characters long.
+              If only given a project, a new dataset will be created with name `publishers_<publisher>_models_<model>`
+              where will be made BigQuery-dataset-name compatible (e.g. most special characters will become underscores).
+              If no table name is given, a new table will be created with name `request_response_logging`.
+              When the full table reference is specified, the dataset must exist and table must not exist.
+              If the endpoint is global, the dataset have to be specified.
+              Accepted forms: BigQuery path. For example: `bq://projectId`, `bq://projectId.bqDatasetId` or `bq://projectId.bqDatasetId.bqTableId`.
+            diff_suppress_func: vertexAIPublisherModelConfigBigqueryDestinationoutputUriDiffSuppress
+      - name: 'requestResponseLoggingSchemaVersion'
+        type: String
+        output: true
+        description: |
+          The schema version used in creating the BigQuery table for the request response logging.
+          The versions are "v1" and "v2". The current default version is "v1".
+      - name: 'enableOtelLogging'
+        type: Boolean
+        description: |
+          This field is used for large models. If true, in addition to the original large model logs,
+          logs will be converted in OTel schema format, and saved in otel_log column. Default value is false.
   - name: 'dataSharingEnabledProvider'
     type: Enum
     custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
@@ -123,10 +123,10 @@ properties:
       Otherwise, the request is rejected.
 custom_code:
   pre_create: templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
-  pre_read:   templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
+  pre_read: templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
   pre_update: templates/terraform/custom_code/vertex_ai_modify_rep_url.go.tmpl
-  encoder:    templates/terraform/encoders/vertex_ai_publisher_model_config.go.tmpl
-  constants:  templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl
+  encoder: templates/terraform/encoders/vertex_ai_publisher_model_config.go.tmpl
+  constants: templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl
 
 exclude_delete: true
 deletion_policy_exclude: true

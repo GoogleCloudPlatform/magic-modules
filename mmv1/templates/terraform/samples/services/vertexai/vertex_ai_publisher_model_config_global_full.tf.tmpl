@@ -7,7 +7,7 @@ resource "google_vertex_ai_publisher_model_config" "{{.PrimaryResourceId}}" {
 
   logging_config {
     enabled             = true
-    sampling_rate.      = {{index $.Vars "samplingRate"}}
+    sampling_rate       = {{index $.Vars "samplingRate"}}
     error_sampling_rate = {{index $.Vars "errorSamplingRate"}}
 
     bigquery_destination {
