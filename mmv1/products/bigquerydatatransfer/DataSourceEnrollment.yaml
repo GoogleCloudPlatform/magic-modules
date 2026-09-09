@@ -90,9 +90,179 @@ parameters:
       this only exists because the API offers no project-level unenroll method. Override it only if
       `us` is not routable for the project, for example under a data-residency organization policy.
 properties:
+  - name: 'authorizationType'
+    type: String
+    output: true
+    description: |
+      Indicates the type of authorization.
+  - name: 'clientId'
+    type: String
+    output: true
+    description: |
+      Data source client id which should be used to receive refresh token.
+  - name: 'dataRefreshType'
+    type: String
+    output: true
+    description: |
+      Specifies whether the data source supports automatic data refresh for the
+      past few days, and how it's supported. For some data sources, data might
+      not be complete until a few days later, so it's useful to refresh data
+      automatically.
+  - name: 'defaultDataRefreshWindowDays'
+    type: Integer
+    output: true
+    description: |
+      Default data refresh window on days.
+      Only meaningful when `data_refresh_type` = `SLIDING_WINDOW`.
+  - name: 'defaultSchedule'
+    type: String
+    output: true
+    description: |
+      Default data transfer schedule.
+  - name: 'description'
+    type: String
+    output: true
+    description: |
+      User friendly data source description string.
   - name: 'displayName'
     type: String
     output: true
     description: |
       User friendly name of the enrolled data source, for example
       `Google Cloud Carbon Footprint Exports`.
+  - name: 'helpUrl'
+    type: String
+    output: true
+    description: |
+      Url for the help document for this data source.
+  - name: 'manualRunsDisabled'
+    type: Boolean
+    output: true
+    description: |
+      Disables backfilling and manual run scheduling for the data source.
+  - name: 'minimumScheduleInterval'
+    type: String
+    output: true
+    description: |
+      The minimum interval for scheduler to schedule runs.
+  - name: 'parameters'
+    type: Array
+    output: true
+    description: |
+      Data source parameters.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'allowedValues'
+          type: Array
+          output: true
+          description: |
+            All possible values for the parameter.
+          item_type:
+            type: String
+        - name: 'deprecated'
+          type: Boolean
+          output: true
+          description: |
+            If true, it should not be used in new transfers, and it should not be
+            visible to users.
+        - name: 'description'
+          type: String
+          output: true
+          description: |
+            Parameter description.
+        - name: 'displayName'
+          type: String
+          output: true
+          description: |
+            Parameter display name in the user interface.
+        - name: 'fields'
+          type: Array
+          output: true
+          description: |
+            Deprecated. This field has no effect.
+          item_type:
+            type: String
+        - name: 'immutable'
+          type: Boolean
+          output: true
+          description: |
+            Cannot be changed after initial creation.
+        - name: 'maxListSize'
+          type: Integer
+          output: true
+          description: |
+            For list parameters, the max size of the list.
+        - name: 'maxValue'
+          type: Double
+          output: true
+          description: |
+            For integer and double values specifies maximum allowed value.
+        - name: 'minValue'
+          type: Double
+          output: true
+          description: |
+            For integer and double values specifies minimum allowed value.
+        - name: 'paramId'
+          type: String
+          output: true
+          description: |
+            Parameter identifier.
+        - name: 'recurse'
+          type: Boolean
+          output: true
+          description: |
+            Deprecated. This field has no effect.
+        - name: 'repeated'
+          type: Boolean
+          output: true
+          description: |
+            Deprecated. This field has no effect.
+        - name: 'required'
+          type: Boolean
+          output: true
+          description: |
+            Is parameter required.
+        - name: 'type'
+          type: String
+          output: true
+          description: |
+            Parameter type.
+        - name: 'validationDescription'
+          type: String
+          output: true
+          description: |
+            Description of the requirements for this field, in case the user input does
+            not fulfill the regex pattern or min/max values.
+        - name: 'validationHelpUrl'
+          type: String
+          output: true
+          description: |
+            URL to a help document to further explain the naming requirements.
+        - name: 'validationRegex'
+          type: String
+          output: true
+          description: |
+            Regular expression which can be used for parameter validation.
+  - name: 'scopes'
+    type: Array
+    output: true
+    description: |
+      Api auth scopes for which refresh token needs to be obtained. These are
+      scopes needed by a data source to prepare data and ingest them into
+      BigQuery, e.g., https://www.googleapis.com/auth/bigquery
+    item_type:
+      type: String
+  - name: 'supportsCustomSchedule'
+    type: Boolean
+    output: true
+    description: |
+      Specifies whether the data source supports a user defined schedule, or
+      operates on the default schedule. When set to `true`, user can override
+      default schedule.
+  - name: 'updateDeadlineSeconds'
+    type: Integer
+    output: true
+    description: |
+      The number of seconds to wait for an update from the data source
+      before the Data Transfer Service marks the transfer as FAILED.
