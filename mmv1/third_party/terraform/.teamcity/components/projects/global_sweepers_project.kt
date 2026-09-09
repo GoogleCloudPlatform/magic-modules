@@ -15,6 +15,7 @@ import SharedResourceNameVcr
 import builds.*
 import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
+import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
@@ -37,10 +38,10 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     // These IDs must mirror how googleSubProjectGa/Beta and nightlyTests() compute their project IDs.
     val gaProjectId = replaceCharsId("GOOGLE")
     val betaProjectId = replaceCharsId("GOOGLE_BETA")
-    val gaAllTestsId = AbsoluteId(replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_ALL_TESTS"))
-    val betaAllTestsId = AbsoluteId(replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_ALL_TESTS"))
-    val gaServiceSweeperId = AbsoluteId(replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_Service_Sweeper"))
-    val betaServiceSweeperId = AbsoluteId(replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_Service_Sweeper"))
+    val gaAllTestsId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_ALL_TESTS")}")
+    val betaAllTestsId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_ALL_TESTS")}")
+    val gaServiceSweeperId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_Service_Sweeper")}")
+    val betaServiceSweeperId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_Service_Sweeper")}")
 
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used

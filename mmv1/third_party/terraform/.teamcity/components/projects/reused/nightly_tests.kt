@@ -20,6 +20,7 @@ import generated.SweepersListBeta
 import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
+import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
@@ -82,7 +83,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
-            buildType = compositeId
+            buildType = "${DslContext.projectId}_${compositeId}"
             successfulOnly = false
         }
     }
