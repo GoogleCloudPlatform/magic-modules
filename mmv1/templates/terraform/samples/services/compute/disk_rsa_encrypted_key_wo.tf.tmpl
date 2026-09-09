@@ -1,0 +1,10 @@
+resource "google_compute_disk" "default" {
+  name  = "{{index $.ResourceIdVars "disk_name"}}"
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+  image = "debian-11-bullseye-v20220719"
+  disk_encryption_key {
+    rsa_encrypted_key_wo         = "fB6BS8tJGhGVDZDjGt1pwUo2wyNbkzNxgH1avfOtiwB9X6oPG94gWgenygitnsYJyKjdOJ7DyXLmxwQOSmnCYCUBWdKCSssyLV5907HL2mb5TfqmgHk5JcArI/t6QADZWiuGtR+XVXqiLa5B9usxFT2BTmbHvSKfkpJ7McCNc/3U0PQR8euFRZ9i75o/w+pLHFMJ05IX3JB0zHbXMV173PjObiV3ItSJm2j3mp5XKabRGSA5rmfMnHIAMz6stGhcuom6+bMri2u/axmPsdxmC6MeWkCkCmPjaKsVz1+uQUNCJkAnzesluhoD+R6VjFDm4WI7yYabu4MOOAOTaQXdEg=="
+    rsa_encrypted_key_wo_version = 1
+  }
+}

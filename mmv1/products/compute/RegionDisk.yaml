@@ -79,6 +79,24 @@ samples:
           region_disk_name: 'my-region-disk'
           disk_name: 'my-disk'
           snapshot_name: 'my-snapshot'
+  - name: 'region_disk_disk_encryption_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_disk_encryption_key_wo'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_rsa_encrypted_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_rsa_encrypted_key_wo'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
   - name: 'region_disk_async'
     primary_resource_id: 'primary'
     steps:
@@ -162,6 +180,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
@@ -170,6 +189,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'sha256'
         type: String
