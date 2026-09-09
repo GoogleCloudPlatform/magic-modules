@@ -1,0 +1,9 @@
+resource "google_parameter_manager_regional_parameter" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  parameter_id = "{{index $.ResourceIdVars "parameter_id"}}"
+
+  tags = {
+    "tagKeys/123456" = "tagValues/789012"
+    "tagKeys/345678" = "tagValues/901234"
+  }
+}
