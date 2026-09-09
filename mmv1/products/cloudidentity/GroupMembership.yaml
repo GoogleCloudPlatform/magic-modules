@@ -43,6 +43,7 @@ custom_code:
   post_create: templates/terraform/post_create/set_computed_name.tmpl
   custom_update: templates/terraform/custom_update/cloud_identity_group_membership.go.tmpl
   post_import: templates/terraform/post_import/cloud_identity_group_membership.go.tmpl
+  custom_delete: templates/terraform/custom_delete/cloud_identity_group_membership.go.tmpl
 samples:
   - name: cloud_identity_group_membership
     primary_resource_id: cloud_identity_group_membership_basic
