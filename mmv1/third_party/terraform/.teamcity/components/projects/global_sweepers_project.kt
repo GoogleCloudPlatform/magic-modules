@@ -17,6 +17,7 @@ import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootGa
 
@@ -42,7 +43,11 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
     val serviceSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    serviceSweeperConfig.addTrigger(NightlyTriggerConfiguration(startHour=12))
+    serviceSweeperConfig.triggers {
+        finishBuildTrigger {
+            buildType = gaAllTestsId // Trigger project sweeper after GA Composite build (GA Service Tests + GA Sweeper)
+        }
+    }
     serviceSweeperConfig.dependencies {
         snapshot(gaAllTestsId) {
             onDependencyFailure = FailureAction.IGNORE
@@ -56,7 +61,11 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
 
     // Create build config for sweeping folder resources
     val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    folderSweeperConfig.addTrigger(NightlyTriggerConfiguration(startHour=12))
+    folderSweeperConfig.triggers {
+        finishBuildTrigger {
+            buildType = gaAllTestsId // Trigger folder sweeper after GA Composite build (GA Service Tests + GA Sweeper)
+        }
+    }
     folderSweeperConfig.dependencies {
         snapshot(gaAllTestsId) {
             onDependencyFailure = FailureAction.IGNORE
