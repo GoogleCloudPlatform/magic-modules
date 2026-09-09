@@ -45,9 +45,6 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     // and add cron trigger to them all
     val allPackages = getAllPackageInProviderVersion(providerName)
     val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, sharedResources, config)
-    packageBuildConfigs.forEach { buildConfiguration ->
-        buildConfiguration.addTrigger(cron)
-    }
 
     // Create a composite build that runs all package tests
     val compositeConfig = BuildType {
