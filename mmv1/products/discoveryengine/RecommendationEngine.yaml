@@ -104,6 +104,7 @@ properties:
     description: |
       The data stores associated with this engine. For SOLUTION_TYPE_RECOMMENDATION type of engines, they can only associate with at most one data store.
     required: true
+    is_set: true
     item_type:
       type: String
   - name: industryVertical
