@@ -401,6 +401,7 @@ properties:
           - name: 'workbenchRuntime'
             type: NestedObject
             description: 'Configuration for a Workbench Instances-based environment.'
+            allow_empty_object: true
             properties: []
       - name: 'notebookExecutionJobId'
         type: String

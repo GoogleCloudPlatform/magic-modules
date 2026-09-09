@@ -706,6 +706,49 @@ properties:
                           The success threshold for semantic similarity. Must be an integer
                           between 0 and 4. Default is >= 3.
                         output: true
+                      - name: semanticSimilarityChannel
+                        type: String
+                        description: |-
+                          The semantic similarity channel to use for evaluation.
+                          Possible values:
+                          SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED
+                          TEXT
+                          AUDIO
+                        output: true
+                  - name: toolMatchingSettings
+                    type: NestedObject
+                    description: |-
+                      The tool matching settings. An extra tool call is a tool call that is
+                      present in the execution but does not match any tool call in the golden
+                      expectation.
+                    output: true
+                    properties:
+                      - name: extraToolCallBehavior
+                        type: String
+                        description: |-
+                          Defines the behavior when an extra tool call is encountered. An extra
+                          tool call is a tool call that is present in the execution but does
+                          not match any tool call in the golden expectation.
+                          Possible values:
+                          FAIL
+                          ALLOW
+                        output: true
+              - name: goldenHallucinationMetricBehavior
+                type: String
+                description: |-
+                  The hallucination metric behavior for golden evaluations.
+                  Possible values:
+                  DISABLED
+                  ENABLED
+                output: true
+              - name: scenarioHallucinationMetricBehavior
+                type: String
+                description: |-
+                  The hallucination metric behavior for scenario evaluations.
+                  Possible values:
+                  DISABLED
+                  ENABLED
+                output: true
           - name: globalInstruction
             type: String
             description: |-
@@ -834,6 +877,21 @@ properties:
                     description: |-
                       Controls the retention window for the conversation.
                       If not set, the conversation will be retained for 365 days.
+                    output: true
+              - name: metricAnalysisSettings
+                type: NestedObject
+                allow_empty_object: true
+                description: |-
+                  Settings to describe the conversation data collection behaviors for the LLM
+                  analysis pipeline for the app.
+                output: true
+                properties:
+                  - name: llmMetricsOptedOut
+                    type: Boolean
+                    description: |-
+                      Whether to collect conversation data for llm analysis metrics. If true,
+                      conversation data will not be collected for llm analysis metrics;
+                      otherwise, conversation data will be collected.
                     output: true
               - name: redactionConfig
                 type: NestedObject

@@ -49,12 +49,18 @@ samples:
     external_providers: [time]
     steps:
       - name: "observability_link_basic"
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         resource_id_vars:
           link_id: "link_test"
         vars:
           display_name: "Initial Display Name"
           description: "Initial description"
       - name: "observability_link_basic"
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         resource_id_vars:
           link_id: "link_test"
         vars:

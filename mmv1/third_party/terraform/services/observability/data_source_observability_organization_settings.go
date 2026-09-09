@@ -1,6 +1,5 @@
 package observability
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 
@@ -40,10 +39,9 @@ func dataSourceObservabilityOrganizationSettingsRead(d *schema.ResourceData, met
 
 func init() {
 	registry.Schema{
-		Name: "google_observability_organization_settings",
+		Name:        "google_observability_organization_settings",
 		ProductName: "observability",
-		Type: registry.SchemaTypeDataSource,
-		Schema: DataSourceObservabilityOrganizationSettings(),
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceObservabilityOrganizationSettings(),
 	}.Register()
 }
-{{- end }}

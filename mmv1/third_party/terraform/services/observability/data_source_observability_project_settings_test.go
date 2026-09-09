@@ -1,14 +1,13 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
@@ -22,14 +21,14 @@ func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
 	dataResourceName := "data.google_observability_project_settings.settings"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityProjectSettings_datasource(context),
-				Check: acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_project_settings.settings"),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_project_settings.settings"),
 			},
 		},
 	})
@@ -37,7 +36,6 @@ func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
 func testAccObservabilityProjectSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "default" {
-		provider        = "google-beta"
 		project_id      = "%{project_name}"
 		name            = "%{project_name}"
 		org_id          = "%{org_id}"
@@ -45,7 +43,6 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 		deletion_policy = "DELETE"
 	}
 	resource "google_project_service" "observability_service" {
-		provider           = "google-beta"
 		project            = google_project.default.project_id
 		service            = "observability.googleapis.com"
 		disable_on_destroy = false
@@ -56,7 +53,6 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 	}
 
 	resource "google_observability_project_settings" "settings" {
-		provider     = "google-beta"
 		project      = google_project.default.project_id
 		location     = "%{location}"
 		kms_key_name = ""
@@ -64,12 +60,9 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 	}
 
 	data "google_observability_project_settings" "settings" {
-		provider   = "google-beta"
 		project    = google_project.default.project_id
 		location   = "%{location}"
 		depends_on = [google_observability_project_settings.settings]
 	}
 `, context)
 }
-{{- else }}
-{{- end }}

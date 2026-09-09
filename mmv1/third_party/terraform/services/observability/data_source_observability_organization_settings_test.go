@@ -1,13 +1,12 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 )
 
 func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
@@ -23,22 +22,19 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityOrganizationSettings_datasource(context),
-				Check: acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_organization_settings.settings"),
+				Check:  acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_organization_settings.settings"),
 			},
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "time_sleep" "wait_for_org" {
@@ -46,7 +42,6 @@ func testAccObservabilityOrganizationSettings_datasource(context map[string]inte
 	}
 
 	resource "google_observability_organization_settings" "settings" {
-		provider 	      						= "google-beta"
 		organization 	  						= "%{org_id}"
 		location 	           				= "global"
 		default_storage_location    = "%{location}"
@@ -54,12 +49,9 @@ func testAccObservabilityOrganizationSettings_datasource(context map[string]inte
 	}
 
 	data "google_observability_organization_settings" "settings" {
-		provider 	      = "google-beta"
 		organization 	  = "%{org_id}"
 		location 	      = "global"
 		depends_on 	    = [google_observability_organization_settings.settings]
 	}
 `, context)
 }
-{{- else }}
-{{- end }}

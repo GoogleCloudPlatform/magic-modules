@@ -1,6 +1,5 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 	"testing"
@@ -9,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 )
 
 func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
@@ -23,7 +22,7 @@ func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -54,14 +53,10 @@ func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_observability_organization_settings" "settings_data" {
-  provider      = "google-beta"
   organization  = "%{org_id}"
   location      = "us"
 }
@@ -73,7 +68,6 @@ resource "time_sleep" "wait_for_sa_propagation" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_observability_organization_settings.settings_data.service_account_id}"
@@ -81,7 +75,6 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 }
 
 resource "google_observability_organization_settings" "primary" {
-  provider      = "google-beta"
   location      = "us"
   organization  = "%{org_id}"
   kms_key_name  = "%{kms_key_name}"
@@ -89,24 +82,17 @@ resource "google_observability_organization_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_observability_organization_settings" "primary" {
-  provider                 = "google-beta"
   location                 = "us"
   organization             = "%{org_id}"
   kms_key_name             = "" # Unset KMS key
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
@@ -115,7 +101,7 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityOrganizationSettings_global(context, "us"),
@@ -143,20 +129,15 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 data "google_observability_organization_settings" "settings_data" {
-  provider     = "google-beta"
   organization = "%%{org_id}"
   location     = "global"
 }
 
 resource "google_observability_organization_settings" "primary_global" {
-  provider                 = "google-beta"
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
@@ -164,20 +145,15 @@ resource "google_observability_organization_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 data "google_observability_organization_settings" "settings_data" {
-  provider     = "google-beta"
   organization = "%%{org_id}"
   location     = "global"
 }
 
 resource "google_observability_organization_settings" "primary_global" {
-	provider                 = "google-beta"
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
@@ -185,5 +161,3 @@ resource "google_observability_organization_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}

@@ -181,10 +181,6 @@ type Type struct {
 	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
 	WriteOnly bool `yaml:"write_only,omitempty"`
 
-	// TODO: remove this field after all references are migrated
-	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
-	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
-
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
 	IgnoreRead bool `yaml:"ignore_read,omitempty"`
@@ -516,11 +512,11 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}
 
-	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
+	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and default_from_api or output at the same time in resource %s", fullFieldPath, rName))
 	}
 
-	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
+	if t.WriteOnly && t.Sensitive {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
@@ -838,7 +834,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		}
 	case t.IsA("NestedObject"):
 		props = google.Select(t.UserProperties(), func(p *Type) bool {
-			return p.WriteOnlyLegacy || p.WriteOnly
+			return p.WriteOnly
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
@@ -894,7 +890,7 @@ func (t *Type) FieldType() []string {
 		ret = append(ret, "Output")
 	}
 
-	if t.WriteOnlyLegacy || t.WriteOnly {
+	if t.WriteOnly {
 		ret = append(ret, "Write-Only")
 	}
 
@@ -1409,8 +1405,8 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
-	// WriteOnlyLegacy fields are never immutable
-	if t.WriteOnlyLegacy || t.WriteOnly {
+	// WriteOnly fields are never immutable
+	if t.WriteOnly {
 		return false
 	}
 

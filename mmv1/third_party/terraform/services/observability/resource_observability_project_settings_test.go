@@ -1,6 +1,5 @@
 package observability_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 	"testing"
@@ -9,10 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/observability"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccObservabilityProjectSettings_update(t *testing.T) {
@@ -26,7 +25,7 @@ func TestAccObservabilityProjectSettings_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -57,14 +56,10 @@ func TestAccObservabilityProjectSettings_update(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-	provider        = "google-beta"
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
@@ -72,38 +67,46 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "observability_api" {
-	provider           = "google-beta"
   project            = google_project.project.project_id
   service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
-# Actively force the creation of the Service Agent identity
-resource "google_project_service_identity" "observability_sa" {
-	provider = "google-beta"
-  project  = google_project.project.project_id
-  service  = "observability.googleapis.com"
-
-  depends_on = [google_project_service.observability_api]
+# Allow the newly created project to be recognized by the Observability backend
+resource "time_sleep" "wait_for_project_propagation" {
+  create_duration = "90s"
+  depends_on      = [google_project_service.observability_api]
 }
 
-# Short buffer for the new identity to propagate to global IAM indexes
+resource "google_observability_project_settings" "primary_global" {
+  location                 = "global"
+  project                  = google_project.project.project_id
+  default_storage_location = "us"
+
+  depends_on = [
+    time_sleep.wait_for_project_propagation
+  ]
+}
+
+# Buffer for the new identity to propagate to global IAM indexes
 resource "time_sleep" "wait_for_sa_propagation" {
   create_duration = "30s"
-  depends_on      = [google_project_service_identity.observability_sa]
+  depends_on      = [
+    google_observability_project_settings.primary_global
+  ]
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-	provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+  member        = "serviceAccount:service-${google_project.project.number}@gcp-sa-observability.iam.gserviceaccount.com"
 
-  depends_on = [time_sleep.wait_for_sa_propagation]
+  depends_on = [
+    time_sleep.wait_for_sa_propagation
+  ]
 }
 
 resource "google_observability_project_settings" "primary" {
-	provider     = "google-beta"
   location     = "us"
   project      = google_project.project.project_id
   kms_key_name = "%{kms_key_name}"
@@ -114,14 +117,10 @@ resource "google_observability_project_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-	provider        = "google-beta"
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
@@ -129,38 +128,46 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "observability_api" {
-	provider           = "google-beta"
   project            = google_project.project.project_id
   service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
-# This resource actively forces the Service Agent to be created in IAM
-resource "google_project_service_identity" "observability_sa" {
-	provider = "google-beta"
-  project  = google_project.project.project_id
-  service  = "observability.googleapis.com"
-
-  depends_on = [google_project_service.observability_api]
+# Allow the newly created project to be recognized by the Observability backend
+resource "time_sleep" "wait_for_project_propagation" {
+  create_duration = "90s"
+  depends_on      = [google_project_service.observability_api]
 }
 
-# A shorter delay is still needed for global IAM propagation (news to travel to KMS)
+resource "google_observability_project_settings" "primary_global" {
+  location                 = "global"
+  project                  = google_project.project.project_id
+  default_storage_location = "us"
+
+  depends_on = [
+    time_sleep.wait_for_project_propagation
+  ]
+}
+
+# Buffer for the new identity to propagate to global IAM indexes
 resource "time_sleep" "wait_for_sa_propagation" {
   create_duration = "30s"
-  depends_on      = [google_project_service_identity.observability_sa]
+  depends_on      = [
+    google_observability_project_settings.primary_global
+  ]
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-	provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${google_project_service_identity.observability_sa.email}"
+  member        = "serviceAccount:service-${google_project.project.number}@gcp-sa-observability.iam.gserviceaccount.com"
 
-  depends_on = [time_sleep.wait_for_sa_propagation]
+  depends_on = [
+    time_sleep.wait_for_sa_propagation
+  ]
 }
 
 resource "google_observability_project_settings" "primary" {
-	provider     = "google-beta"
   location     = "us"
   project      = google_project.project.project_id
   kms_key_name = "" # Unset KMS key
@@ -171,10 +178,7 @@ resource "google_observability_project_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -185,7 +189,7 @@ func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -216,14 +220,10 @@ func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 		},
 	})
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_project" "project" {
-	provider        = "google-beta"
 	project_id      = "tf-test%%{random_suffix}"
 	name            = "tf-test%%{random_suffix}"
 	org_id          = "%%{org_id}"
@@ -231,7 +231,6 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "observability_api" {
-	provider           = "google-beta"
 	project            = google_project.project.project_id
 	service            = "observability.googleapis.com"
 	disable_on_destroy = false
@@ -244,14 +243,12 @@ resource "time_sleep" "wait_for_propagation" {
 }
 
 data "google_observability_project_settings" "wait_for_propagation" {
-	provider   = "google-beta"
 	location   = "global"
 	project    = google_project.project.project_id
 	depends_on = [time_sleep.wait_for_propagation]
 }
 
 resource "google_observability_project_settings" "primary_global" {
-	provider                 = "google-beta"
 	location                 = "global"
 	project                  = google_project.project.project_id
 	default_storage_location = "%s"
@@ -259,14 +256,10 @@ resource "google_observability_project_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityProjectSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_project" "project" {
-	provider        = "google-beta"
 	project_id      = "tf-test%%{random_suffix}"
 	name            = "tf-test%%{random_suffix}"
 	org_id          = "%%{org_id}"
@@ -274,7 +267,6 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "observability_api" {
-	provider           = "google-beta"
 	project            = google_project.project.project_id
 	service            = "observability.googleapis.com"
 	disable_on_destroy = false
@@ -287,14 +279,12 @@ resource "time_sleep" "wait_for_propagation" {
 }
 
 data "google_observability_project_settings" "wait_for_propagation" {
-	provider   = "google-beta"
 	location   = "global"
 	project    = google_project.project.project_id
 	depends_on = [time_sleep.wait_for_propagation]
 }
 
 resource "google_observability_project_settings" "primary_global" {
-	provider                 = "google-beta"
 	location                 = "global"
 	project                  = google_project.project.project_id
 	default_storage_location = "%s"
@@ -302,5 +292,3 @@ resource "google_observability_project_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
-{{- else }}
-{{- end }}
