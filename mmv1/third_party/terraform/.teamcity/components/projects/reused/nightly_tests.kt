@@ -85,10 +85,6 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
         }
     }
 
-    val sweeperCron = cron.clone()
-    sweeperCron.startHour += 5  // Ensure triggered after the package test builds are triggered
-    serviceSweeperConfig.addTrigger(sweeperCron)
-
     return Project {
         id(projectId)
         name = "Nightly Tests"
