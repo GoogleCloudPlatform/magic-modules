@@ -19,13 +19,14 @@ references:
   guides:
   api: https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.gatewaySecurityPolicies
 docs:
-base_url: projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies
+base_url: projects/{{project}}/locations/us-central1/gatewaySecurityPolicies
 self_link: projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies?gatewaySecurityPolicyId={{name}}
 update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
