@@ -99,6 +99,13 @@ samples:
           # for backward compatible
           sec_policy_name: '"policyruletest" + randomSuffix'
           backend_name: '"backendpolicy" + randomSuffix'
+  - name: "security_policy_rule_request_body_expression"
+    primary_resource_id: "policy_rule"
+    min_version: beta
+    steps:
+      - name: "security_policy_rule_request_body_expression"
+        resource_id_vars:
+          sec_policy_name: "policyruletest"
 parameters:
   - name: 'security_policy'
     type: String
@@ -294,7 +301,7 @@ properties:
               min_version: 'beta'
               type: Array
               description: |
-                A list of request body fields to be excluded from inspection during\npreconfigured WAF evaluation.
+                A list of request body fields to be excluded from inspection during preconfigured WAF evaluation.
               api_name: requestBodiesToExclude
               item_type:
                 type: NestedObject
