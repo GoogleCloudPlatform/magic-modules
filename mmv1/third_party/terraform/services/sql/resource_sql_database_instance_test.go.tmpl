@@ -610,6 +610,39 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_replicationLagMaxSeconds(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	replicaName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_replicationLagMaxSeconds(instanceName, replicaName, 600),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.replica", "settings.0.replication_lag_max_seconds", "600"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.replica",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_replicationLagMaxSeconds(instanceName, replicaName, 1200),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.replica", "settings.0.replication_lag_max_seconds", "1200"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_settings_secondary(t *testing.T) {
 	t.Parallel()
 
@@ -1272,6 +1305,7 @@ func TestAccSqlDatabaseInstance_updateMCPEnabled(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1302,6 +1336,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 		},
 	})
 }
+{{- end }}
 
 func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t *testing.T) {
 	t.Parallel()
@@ -1476,6 +1511,56 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
 				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{}, false, false, false, "", "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_updateAllowedConsumerProjects(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := "psctestproject" + acctest.RandString(t, 10)
+	orgId := envvar.GetTestOrgFromEnv(t)
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()}, false, false, false, "", "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withEmptyAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{}, false, false, false, "", "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
+				Check:  resource.ComposeTestCheckFunc(verifyPscOperation("google_sql_database_instance.instance", true, true, []string{envvar.GetTestProjectFromEnv()}, false, false, false, "", "")),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2621,6 +2706,43 @@ func TestAccSqlDatabaseInstance_switchTransactionLogsToCloudStorage(t *testing.T
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password", "switch_transaction_logs_to_cloud_storage_enabled", "settings.0.version"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_includeReplicasForMajorVersionUpgrade(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	testId := "sql-instance-major-upgrade-1"
+	addressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, testId)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_includeReplicasForMajorVersionUpgrade(databaseName, networkName, addressName, "MYSQL_8_0"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password", "include_replicas_for_major_version_upgrade", "replica_names", "settings.0.version"},
+			},
+			{
+				// Upgrade the primary's major version; with the flag set, the in-place upgrade
+				// propagates to the read replica automatically (the replica ignores database_version changes).
+				Config: testGoogleSqlDatabaseInstance_includeReplicasForMajorVersionUpgrade(databaseName, networkName, addressName, "MYSQL_8_4"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password", "include_replicas_for_major_version_upgrade", "replica_names", "settings.0.version"},
 			},
 		},
 	})
@@ -5805,9 +5927,6 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "%s"
     edition = "%s"
-	backup_configuration {
-	  transaction_log_retention_days = 7
-    }
   }
 }`, databaseName, tier, edition)
 }
@@ -6008,6 +6127,40 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, instanceName)
+}
+
+func testGoogleSqlDatabaseInstanceConfig_replicationLagMaxSeconds(instanceName, replicaName string, lagMaxSeconds int) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+
+  settings {
+    tier = "db-n1-standard-1"
+
+    backup_configuration {
+      binary_log_enabled = "true"
+      enabled            = "true"
+      start_time         = "18:00"
+    }
+  }
+}
+
+resource "google_sql_database_instance" "replica" {
+  name                 = "%s"
+  region               = "us-central1"
+  database_version     = "MYSQL_5_7"
+  master_instance_name = google_sql_database_instance.instance.name
+  deletion_protection  = false
+
+  settings {
+    tier                        = "db-n1-standard-1"
+    replication_lag_max_seconds = %d
+  }
+}
+`, instanceName, replicaName, lagMaxSeconds)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withReplica(instanceName, failoverName string) string {
@@ -7347,6 +7500,7 @@ resource "google_sql_database_instance" "instance" {
 `, projectId, projectId, orgId, billingAccount, instanceName)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, networkName string, projectId string) string {
 	return fmt.Sprintf(`
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
@@ -7435,6 +7589,7 @@ resource "google_compute_network" "default" {
 }
 `, projectId, projectId, projectId, projectId, networkName)
 }
+{{- end }}
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
 	return fmt.Sprintf(`
@@ -7764,6 +7919,14 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 				consumerProject, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id"]
 				if !ok || consumerProject != expectedConsumerProject {
 					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id property is not present or set as expected in state of %s", resourceName)
+				}
+
+				if _, ok = resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.instance_auto_dns_status"]; !ok {
+					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.instance_auto_dns_status property is not present in state of %s", resourceName)
+				}
+
+				if _, ok = resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.write_endpoint_auto_dns_status"]; !ok {
+					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.write_endpoint_auto_dns_status property is not present in state of %s", resourceName)
 				}
 			}
 		}
@@ -8713,6 +8876,14 @@ resource "google_sql_database_instance" "instance" {
       running_threads_threshold         = 100
       seconds_behind_source_threshold   = 3600
       transaction_duration_threshold    = 300
+      cpu_utilization_threshold_percent     = 80
+      memory_usage_threshold_percent        = 80
+      history_list_length_threshold_count   = 100000
+      semaphore_wait_threshold_count        = 100
+      transaction_lock_wait_threshold_count = 100
+      transaction_kill_threshold_seconds    = 600
+      transaction_kill_type                 = "READ_ONLY_TRANSACTIONS"
+      transaction_kill_excluded_user_hosts  = ["app_user", "admin@10.1.2.3"]
     }
   }
 }
@@ -8740,6 +8911,14 @@ resource "google_sql_database_instance" "instance" {
       running_threads_threshold         = 200
       seconds_behind_source_threshold   = 3700
       transaction_duration_threshold    = 300
+      cpu_utilization_threshold_percent     = 90
+      memory_usage_threshold_percent        = 90
+      history_list_length_threshold_count   = 200000
+      semaphore_wait_threshold_count        = 200
+      transaction_lock_wait_threshold_count = 200
+      transaction_kill_threshold_seconds    = 700
+      transaction_kill_type                 = "ALL_TRANSACTIONS"
+      transaction_kill_excluded_user_hosts  = ["app_user"]
     }
   }
 }
@@ -8933,6 +9112,62 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, masterID, dbVersion, masterID, tier, autoUpgradeEnabled)
+}
+
+func testGoogleSqlDatabaseInstance_includeReplicasForMajorVersionUpgrade(databaseName, networkName, addressRangeName, dbVersion string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "servicenet" {
+  name = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "%s"
+  deletion_protection = false
+  root_password       = "rand-pwd-%s"
+
+  include_replicas_for_major_version_upgrade = true
+
+  settings {
+    tier              = "db-g1-small"
+    availability_type = "ZONAL"
+    ip_configuration {
+      ipv4_enabled    = "false"
+      private_network = data.google_compute_network.servicenet.self_link
+    }
+    backup_configuration {
+      enabled            = true
+      start_time         = "00:00"
+      binary_log_enabled = true
+    }
+  }
+}
+
+resource "google_sql_database_instance" "replica" {
+  name                 = "%s-replica"
+  region               = "us-central1"
+  database_version     = "MYSQL_8_0"
+  master_instance_name = google_sql_database_instance.instance.name
+  deletion_protection  = false
+
+  settings {
+    tier              = "db-g1-small"
+    availability_type = "ZONAL"
+    ip_configuration {
+      ipv4_enabled       = "false"
+      private_network    = data.google_compute_network.servicenet.self_link
+      allocated_ip_range = "%s"
+    }
+  }
+
+  # When the primary is upgraded with include_replicas_for_major_version_upgrade,
+  # the replica is upgraded in place by the API; ignore the resulting version drift.
+  lifecycle {
+    ignore_changes = [database_version]
+  }
+}
+`, networkName, databaseName, dbVersion, databaseName, databaseName, addressRangeName)
 }
 
 func testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID int, enableDataplexIntegration bool) string {

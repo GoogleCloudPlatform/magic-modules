@@ -12,19 +12,6 @@
         "name": "my-policy",
         "rule": [
           {
-            "action": "deny(403)",
-            "description": "Deny access to IPs in 9.9.9.0/24",
-            "match": {
-              "config": {
-                "srcIpRanges": [
-                  "9.9.9.0/24"
-                ]
-              },
-              "versionedExpr": "SRC_IPS_V1"
-            },
-            "priority": 1000
-          },
-          {
             "action": "allow",
             "description": "default rule",
             "match": {
@@ -36,6 +23,19 @@
               "versionedExpr": "SRC_IPS_V1"
             },
             "priority": 2147483647
+          },
+          {
+            "action": "deny(403)",
+            "description": "Deny access to IPs in 9.9.9.0/24",
+            "match": {
+              "config": {
+                "srcIpRanges": [
+                  "9.9.9.0/24"
+                ]
+              },
+              "versionedExpr": "SRC_IPS_V1"
+            },
+            "priority": 1000
           }
         ]
       }

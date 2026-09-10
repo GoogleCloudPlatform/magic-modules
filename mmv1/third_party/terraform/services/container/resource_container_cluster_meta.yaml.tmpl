@@ -24,6 +24,7 @@ fields:
   - api_field: 'addonsConfig.gcpFilestoreCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.gcsFuseCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.gkeBackupAgentConfig.enabled'
+  - api_field: 'addonsConfig.highScaleCheckpointingConfig.enabled'
   - api_field: 'addonsConfig.horizontalPodAutoscaling.disabled'
   - api_field: 'addonsConfig.httpLoadBalancing.disabled'
   - api_field: 'addonsConfig.podSnapshotConfig.enabled'
@@ -45,6 +46,7 @@ fields:
   - api_field: 'addonsConfig.rayOperatorConfig.rayClusterLoggingConfig.enabled'
   - api_field: 'addonsConfig.rayOperatorConfig.rayClusterMonitoringConfig.enabled'
   - api_field: 'addonsConfig.slurmOperatorConfig.enabled'
+  - api_field: 'addonsConfig.nodeReadinessConfig.enabled'
   - api_field: 'addonsConfig.statefulHaConfig.enabled'
   - api_field: 'addonsConfig.sliceControllerConfig.enabled'
   - api_field: 'anonymousAuthenticationConfig.mode'
@@ -143,6 +145,8 @@ fields:
   - field: 'deletion_protection'
     provider_only: true
   - api_field: 'description'
+  - field: 'desired_emulated_version'
+    provider_only: true
   - field: 'dns_config.additive_vpc_scope_dns_domain'
     api_field: 'networkConfig.dnsConfig.additiveVpcScopeDnsDomain'
   - field: 'dns_config.cluster_dns'
@@ -153,6 +157,8 @@ fields:
     api_field: 'networkConfig.dnsConfig.clusterDnsScope'
   - field: 'effective_labels'
     provider_only: true
+  - field: 'emulated_version'
+    api_field: 'currentEmulatedVersion'
   - field: 'enable_autopilot'
     api_field: 'autopilot.enabled'
   - field: 'enable_cilium_clusterwide_network_policy'
@@ -341,6 +347,11 @@ fields:
     api_field: 'nodeConfig.accelerators.acceleratorType'
   - api_field: 'nodeConfig.gvnic.enabled'
   - api_field: 'nodeConfig.hostMaintenancePolicy.maintenanceInterval'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'nodeConfig.hostMaintenancePolicy.opportunisticMaintenanceStrategy.maintenanceAvailabilityWindow'
+  - api_field: 'nodeConfig.hostMaintenancePolicy.opportunisticMaintenanceStrategy.minNodesPerPool'
+  - api_field: 'nodeConfig.hostMaintenancePolicy.opportunisticMaintenanceStrategy.nodeIdleTimeWindow'
+{{- end }}
   - api_field: 'nodeConfig.imageType'
   - api_field: 'nodeConfig.kubeletConfig.allowedUnsafeSysctls'
   - api_field: 'nodeConfig.kubeletConfig.containerLogMaxFiles'
@@ -597,6 +608,14 @@ fields:
     api_field: 'nodePools.config.gvnic.enabled'
   - field: 'node_pool.node_config.host_maintenance_policy.maintenance_interval'
     api_field: 'nodePools.config.hostMaintenancePolicy.maintenanceInterval'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.maintenance_availability_window'
+    api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.maintenanceAvailabilityWindow'
+  - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.min_nodes_per_pool'
+    api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.minNodesPerPool'
+  - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.node_idle_time_window'
+    api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.nodeIdleTimeWindow'
+{{- end }}
   - field: 'node_pool.node_config.image_type'
     api_field: 'nodePools.config.imageType'
   - field: 'node_pool.node_config.kubelet_config.allowed_unsafe_sysctls'
@@ -904,6 +923,7 @@ fields:
   - api_field: 'resourceUsageExportConfig.enableNetworkEgressMetering'
   - field: 'resource_usage_export_config.enable_resource_consumption_metering'
     api_field: 'resourceUsageExportConfig.consumptionMeteringConfig.enabled'
+  - api_field: 'rollbackSafeUpgrade.controlPlaneSoakDuration'
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'

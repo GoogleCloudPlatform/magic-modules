@@ -227,9 +227,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["placementPolicy"].(map[string]interface{}); ok {
+		policyType := v["type"]
+		if policyType == nil {
+			policyType = ""
+		}
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
-				"type":         v["type"],
+				"type":         policyType,
 				"policy_name":  v["policyName"],
 				"tpu_topology": v["tpuTopology"],
 			},
@@ -237,9 +241,13 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["queuedProvisioning"].(map[string]interface{}); ok {
+		enabled := v["enabled"]
+		if enabled == nil {
+			enabled = false
+		}
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
-				"enabled": v["enabled"],
+				"enabled": enabled,
 			},
 		}
 	}

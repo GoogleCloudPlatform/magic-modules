@@ -1,0 +1,14 @@
+// managementCluster is updated via its own separate endpoint.
+// We remove it from the update mask of the PrivateCloud resource update.
+var filteredUpdateMask []string
+for _, mask := range updateMask {
+	if mask != "managementCluster" {
+		filteredUpdateMask = append(filteredUpdateMask, mask)
+	}
+}
+updateMask = filteredUpdateMask
+
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}

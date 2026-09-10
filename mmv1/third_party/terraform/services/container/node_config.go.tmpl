@@ -1391,6 +1391,37 @@ func schemaNodeConfig() *schema.Schema {
 								Description:  `.`,
 								ValidateFunc: validation.StringInSlice([]string{"MAINTENANCE_INTERVAL_UNSPECIFIED", "AS_NEEDED", "PERIODIC"}, false),
 							},
+	{{ if ne $.TargetVersionName `ga` -}}
+							"opportunistic_maintenance_strategy": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								ForceNew:    true,
+								MaxItems:    1,
+								Description: `Strategy that will trigger maintenance on behalf of the customer.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"node_idle_time_window": {
+											Type:        schema.TypeString,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The amount of time that a node can remain idle (no customer owned workloads running), before triggering maintenance.`,
+										},
+										"maintenance_availability_window": {
+											Type:        schema.TypeString,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The window of time that opportunistic maintenance can run. Example: A setting of 14 days implies that opportunistic maintenance can only be ran in the 2 weeks leading up to the scheduled maintenance date. Setting 28 days allows opportunistic maintenance to run at any time in the scheduled maintenance window (all PERIODIC maintenance is set 28 days in advance).`,
+										},
+										"min_nodes_per_pool": {
+											Type:        schema.TypeInt,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The minimum nodes required to be available in a pool. Blocks maintenance if it would cause the number of running nodes to dip below this value.`,
+										},
+									},
+								},
+							},
+	{{- end }}
 						},
 					},
 				},
@@ -2943,8 +2974,36 @@ func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy
 	if maintenanceInterval, ok := cfg["maintenance_interval"]; ok {
 		mPolicy.MaintenanceInterval = maintenanceInterval.(string)
 	}
+	if v, ok := cfg["opportunistic_maintenance_strategy"]; ok {
+		mPolicy.OpportunisticMaintenanceStrategy = expandOpportunisticMaintenanceStrategy(v)
+	}
 
 	return mPolicy
+}
+
+func expandOpportunisticMaintenanceStrategy(v interface{}) *container.OpportunisticMaintenanceStrategy {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	strategy := &container.OpportunisticMaintenanceStrategy{
+		ForceSendFields: []string{"MinNodesPerPool"},
+	}
+	if nodeIdleTimeWindow, ok := cfg["node_idle_time_window"]; ok {
+		strategy.NodeIdleTimeWindow = nodeIdleTimeWindow.(string)
+	}
+	if maintenanceAvailabilityWindow, ok := cfg["maintenance_availability_window"]; ok {
+		strategy.MaintenanceAvailabilityWindow = maintenanceAvailabilityWindow.(string)
+	}
+	if minNodesPerPool, ok := cfg["min_nodes_per_pool"]; ok {
+		strategy.MinNodesPerPool = int64(minNodesPerPool.(int))
+	}
+
+	return strategy
 }
 {{- end }}
 
@@ -3906,7 +3965,21 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"maintenance_interval": c.MaintenanceInterval,
+			"maintenance_interval":               c.MaintenanceInterval,
+			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(c.OpportunisticMaintenanceStrategy),
+		})
+	}
+
+	return result
+}
+
+func flattenOpportunisticMaintenanceStrategy(c *container.OpportunisticMaintenanceStrategy) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"node_idle_time_window":           c.NodeIdleTimeWindow,
+			"maintenance_availability_window": c.MaintenanceAvailabilityWindow,
+			"min_nodes_per_pool":              c.MinNodesPerPool,
 		})
 	}
 

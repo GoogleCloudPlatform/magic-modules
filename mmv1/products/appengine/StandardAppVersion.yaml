@@ -85,6 +85,17 @@ samples:
           sa_email: gae-sa
         ignore_read_extra:
           - delete_service_on_destroy
+  - name: app_engine_standard_app_version_vpc_access
+    min_version: beta
+    primary_resource_id: gae-std-app-ver-vpc-access
+    steps:
+      - name: app_engine_standard_app_version_vpc_access
+        resource_id_vars:
+          service_id: vpc-service
+          bucket_name: tf-test-gae-bkt-vpc-access
+          sa_email: gae-sa
+        ignore_read_extra:
+          - delete_service_on_destroy
 virtual_fields:
   - name: noop_on_destroy
     description: |
@@ -136,7 +147,7 @@ properties:
     type: Boolean
     description: |
       Allows App Engine second generation runtimes to access the legacy bundled services.
-      Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
+      Cannot specify both `app_engine_apis` and `app_engine_bundled_services` together.
     immutable: true
     conflicts:
       - app_engine_bundled_services
@@ -329,6 +340,8 @@ properties:
     type: NestedObject
     description: |
       Enables VPC connectivity for standard apps.
+    conflicts:
+      - vpc_access
     properties:
       - name: name
         type: String
@@ -339,6 +352,43 @@ properties:
         type: String
         description: |
           The egress setting for the connector, controlling what traffic is diverted through it.
+  - name: vpcAccess
+    type: NestedObject
+    min_version: beta
+    description: |
+      Direct VPC Access settings for standard apps.
+    conflicts:
+      - vpc_access_connector
+    properties:
+      - name: egressSetting
+        api_name: vpcEgress
+        type: String
+        description: |
+          The egress setting for the VPC Access, controlling what traffic is diverted through it.
+      - name: networkInterfaces
+        type: Array
+        description: |
+          List of network interfaces for the VPC Access. Currently only a single network interface is supported.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: network
+              type: String
+              diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+              description: |
+                The name of the VPC network to which the version connects (e.g. `projects/my-project/global/networks/default`).
+            - name: subnetwork
+              api_name: subnet
+              type: String
+              diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+              description: |
+                The name of the subnetwork to which the version connects (e.g. `projects/my-project/regions/us-central1/subnetworks/default`).
+            - name: tags
+              type: Array
+              item_type:
+                type: String
+              description: |
+                Network tags applied to this App Engine version.
   - name: inboundServices
     type: Array
     description: |
@@ -374,6 +424,7 @@ properties:
       - manual_scaling
     # This flattener is entirely handwritten and must be updated with **any** new field or subfield
     custom_flatten: templates/terraform/custom_flatten/appengine_standardappversion_automatic_scaling_handlenil.go.tmpl
+    default_from_api: true
     properties:
       - name: maxConcurrentRequests
         type: Integer
@@ -460,8 +511,6 @@ properties:
         required: true
   - name: 'appEngineBundledServices'
     type: Array
-    # Developer Note: This field is write-only because the App Engine GET Admin API
-    # does not return it in the response (we use ignore_read: true to prevent state drift to null).
     # It is marked is_set: true to represent the list as a set in Terraform so configuration
     # ordering differences do not trigger spurious plans.
     description: |

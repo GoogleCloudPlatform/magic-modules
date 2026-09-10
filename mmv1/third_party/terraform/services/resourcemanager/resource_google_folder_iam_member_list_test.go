@@ -106,6 +106,7 @@ func testAccFolderIamMemberListQuery(folderName string) string {
 list "google_folder_iam_member" "test" {
 	provider = google
 	include_resource = true
+	limit = 1000
 	config {
 		folder = "%s"
 	}
@@ -119,6 +120,7 @@ func testAccFolderIamMemberListQueryWithFilters(folderName, role, member string)
 list "google_folder_iam_member" "test" {
 	provider = google
 	include_resource = true
+	limit = 1000
 	config {
 		folder = "%s"
 		role = "%s"

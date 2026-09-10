@@ -144,7 +144,14 @@ cluster.
     auto-generate a unique name.
 
 * `name_prefix` - (Optional) Creates a unique name for the node pool beginning
-    with the specified prefix. Conflicts with `name`.
+    with the specified prefix. Conflicts with `name`. Max length is 31 characters.
+    Prefixes with lengths longer than 14 characters will use a shortened
+    UUID that will be more prone to collisions.
+
+    Resulting name for a `name_prefix` <= 14 characters:
+    `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+    Resulting name for a `name_prefix` 15 - 31 characters:
+    `name_prefix` + YYmmdd + 3 digit incremental counter
 
 * `node_config` - (Optional) Parameters used in creating the node pool. Structure is [documented below](#nested_node_config). See [google_container_cluster](container_cluster.html#nested_node_config) for exact schema.
 
@@ -374,9 +381,9 @@ In addition to the arguments listed above, the following computed attributes are
 `google_container_node_pool` provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
-- `create` - (Default `60 minutes`) Used for adding node pools
-- `update` - (Default `60 minutes`) Used for updates to node pools
-- `delete` - (Default `60 minutes`) Used for removing node pools.
+- `create` - (Default `2 hours`) Used for adding node pools
+- `update` - (Default `2 hours`) Used for updates to node pools
+- `delete` - (Default `2 hours`) Used for removing node pools.
 
 <a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
 

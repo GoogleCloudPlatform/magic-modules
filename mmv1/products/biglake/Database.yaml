@@ -13,6 +13,8 @@
 
 ---
 name: Database
+api_variant_patterns:
+  - projects/{project}/locations/{location}/catalogs/{catalog}/databases/{database}
 description: |
   Databases are containers of tables.
 references:

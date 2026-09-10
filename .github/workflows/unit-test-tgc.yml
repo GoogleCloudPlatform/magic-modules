@@ -1,6 +1,8 @@
 name: unit-test-tgc
 
-permissions: read-all
+permissions:
+  contents: read
+
 
 on:
   workflow_call:

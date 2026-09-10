@@ -9,10 +9,11 @@ resource "google_compute_health_check" "{{$.ResourceIdVars.health_check_name}}" 
 }
 
 resource "google_compute_backend_service" "{{$.ResourceIdVars.backend_service_name}}" {
-  name        = "{{index $.ResourceIdVars "backend_service_name"}}"
-  port_name   = "http"
-  protocol    = "HTTP"
-  timeout_sec = 10
+  name                  = "{{index $.ResourceIdVars "backend_service_name"}}"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "EXTERNAL"
 
   health_checks = [google_compute_health_check.{{$.ResourceIdVars.health_check_name}}.id]
 }

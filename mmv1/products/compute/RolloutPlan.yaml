@@ -19,9 +19,8 @@ description: |
   into smaller increments, referred to as "waves". Each wave targets a specific
   portion of the overall affected area and defines criteria that must be met
   before progressing to the subsequent wave.
-min_version: 'beta'
 references:
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/rolloutPlans'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/rolloutPlans'
 base_url: 'projects/{{project}}/global/rolloutPlans'
 has_self_link: true
 generate_list_resource: true

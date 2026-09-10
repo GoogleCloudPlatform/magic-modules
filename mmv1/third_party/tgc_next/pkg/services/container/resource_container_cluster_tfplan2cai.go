@@ -506,6 +506,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["node_readiness_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.NodeReadinessConfig = &container.NodeReadinessConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 	return ac
 }
 

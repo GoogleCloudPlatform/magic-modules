@@ -353,7 +353,7 @@ properties:
 
       For more information about forwarding rules, refer to
       [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).
-    default_value: "EXTERNAL"
+    default_value: "EXTERNAL_MANAGED"
     enum_values:
       - 'EXTERNAL'
       - 'EXTERNAL_MANAGED'

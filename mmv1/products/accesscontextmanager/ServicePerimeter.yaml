@@ -68,6 +68,7 @@ custom_code:
   encoder: templates/terraform/encoders/access_level_never_send_parent.go.tmpl
   constants: templates/terraform/constants/access_context_manager.go.tmpl
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl
+  pre_update: templates/terraform/pre_update/access_context_manager_service_perimeter.go.tmpl
 samples:
   - name: access_context_manager_service_perimeter_basic
     primary_resource_id: service-perimeter
@@ -137,6 +138,11 @@ properties:
     type: Time
     description: |
       Time the AccessPolicy was updated in UTC.
+    output: true
+  - name: etag
+    type: Fingerprint
+    description: |
+      The etag for the version of the ServicePerimeter that this request is based on.
     output: true
   - name: perimeterType
     type: Enum
@@ -237,6 +243,46 @@ properties:
             is_set: true
             item_type:
               type: String
+          - name: allowedServicePatterns
+            type: Array
+            description: |
+              Specifies which Google services are allowed to be accessed from
+              VPC networks in the service perimeter.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: service
+                  type: String
+                  description: 'Supported service to allow.'
+                - name: pattern
+                  type: String
+                  description: 'URL pattern to allow.'
+                - name: modifiers
+                  type: Array
+                  description: 'Modifiers to apply to the requests that match the URL pattern.'
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: addRequestHeader
+                        type: NestedObject
+                        description: 'Adds additional HTTP request headers.'
+                        properties:
+                          - name: key
+                            type: String
+                            required: true
+                            description: 'HTTP header key.'
+                          - name: value
+                            type: String
+                            required: true
+                            description: 'HTTP header value.'
+          - name: servicePatternsEnforcementScopes
+            type: Array
+            description: |
+              Defines the enforcement scopes of service patterns.
+            item_type:
+              type: Enum
+              enum_values:
+                - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
       - name: ingressPolicies
         type: Array
         description: |
@@ -606,6 +652,46 @@ properties:
             is_set: true
             item_type:
               type: String
+          - name: allowedServicePatterns
+            type: Array
+            description: |
+              Specifies which Google services are allowed to be accessed from
+              VPC networks in the service perimeter.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: service
+                  type: String
+                  description: 'Supported service to allow.'
+                - name: pattern
+                  type: String
+                  description: 'URL pattern to allow.'
+                - name: modifiers
+                  type: Array
+                  description: 'Modifiers to apply to the requests that match the URL pattern.'
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: addRequestHeader
+                        type: NestedObject
+                        description: 'Adds additional HTTP request headers.'
+                        properties:
+                          - name: key
+                            type: String
+                            required: true
+                            description: 'HTTP header key.'
+                          - name: value
+                            type: String
+                            required: true
+                            description: 'HTTP header value.'
+          - name: servicePatternsEnforcementScopes
+            type: Array
+            description: |
+              Defines the enforcement scopes of service patterns.
+            item_type:
+              type: Enum
+              enum_values:
+                - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
       - name: ingressPolicies
         type: Array
         description: |

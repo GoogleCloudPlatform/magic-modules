@@ -131,6 +131,7 @@ steps:
       waitFor: ["tpgb-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
+        - GOPRIVATE=github.com/hashicorp/terraform-provider-google-beta
       args:
           - 'generate-downstream'
           - 'downstream'

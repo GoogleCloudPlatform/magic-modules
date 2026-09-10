@@ -188,6 +188,7 @@ properties:
         type: Array
         description: Output only. Additional metadata specific to the resource type.
         output: true
+        custom_flatten: 'templates/terraform/custom_flatten/apphub_extended_metadata.go.tmpl'
         item_type:
           type: NestedObject
           properties:
