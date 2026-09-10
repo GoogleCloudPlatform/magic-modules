@@ -1,5 +1,5 @@
 resource "google_compute_network" "network" {
-  name                    = "tf-net"
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
   auto_create_subnetworks = false
 }
 
@@ -13,8 +13,8 @@ resource "google_network_connectivity_group" "center_group" {
   hub  = google_network_connectivity_hub.star_hub.id
   auto_accept {
     auto_accept_projects = [
-      "foo%{random_suffix}", 
-      "bar%{random_suffix}", 
+      "{{index $.ResourceIdVars "auto_accept_project_1_name"}}", 
+      "{{index $.ResourceIdVars "auto_accept_project_2_name"}}", 
     ]
   }
 }
