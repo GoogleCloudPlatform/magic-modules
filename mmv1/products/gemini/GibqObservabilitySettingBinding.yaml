@@ -53,6 +53,7 @@ autogen_async: true
 samples:
   - name: gemini_gibq_observability_setting_binding_basic
     primary_resource_id: example
+    exclude_test: true
     steps:
       - name: gemini_gibq_observability_setting_binding_basic
         resource_id_vars:

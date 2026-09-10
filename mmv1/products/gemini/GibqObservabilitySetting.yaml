@@ -53,6 +53,7 @@ properties:
   - name: conversationalAnalyticsSetting
     type: NestedObject
     allow_empty_object: true
+    send_empty_value: true
     description: Settings for Conversational Analytics, which can be used to enable observability features.
     properties:
       - name: metricsEnabled
