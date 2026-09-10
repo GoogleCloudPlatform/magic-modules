@@ -22,6 +22,11 @@ func TestAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_discovery_engine_widget_config.basic", "ui_settings.0.search_addon_spec.0.semantic_add_on_disabled", "true"),
+					resource.TestCheckResourceAttr("google_discovery_engine_widget_config.basic", "ui_settings.0.search_addon_spec.0.kpi_personalization_add_on_disabled", "false"),
+					resource.TestCheckResourceAttr("google_discovery_engine_widget_config.basic", "ui_settings.0.search_addon_spec.0.generative_answer_add_on_disabled", "true"),
+				),
 			},
 			{
 				ResourceName:      "google_discovery_engine_widget_config.basic",
@@ -30,6 +35,11 @@ func TestAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_
 			},
 			{
 				Config: testAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_discovery_engine_widget_config.basic", "ui_settings.0.search_addon_spec.0.semantic_add_on_disabled", "false"),
+					resource.TestCheckResourceAttr("google_discovery_engine_widget_config.basic", "ui_settings.0.search_addon_spec.0.kpi_personalization_add_on_disabled", "true"),
+					resource.TestCheckResourceAttr("google_discovery_engine_widget_config.basic", "ui_settings.0.search_addon_spec.0.generative_answer_add_on_disabled", "false"),
+				),
 			},
 			{
 				ResourceName:      "google_discovery_engine_widget_config.basic",
@@ -113,6 +123,11 @@ resource "google_discovery_engine_widget_config" "basic" {
         field                 = "name"
         display_template      = "Name: {name}"
       }
+    }
+    search_addon_spec {
+      semantic_add_on_disabled            = true
+      kpi_personalization_add_on_disabled = false
+      generative_answer_add_on_disabled   = true
     }
   }
   ui_branding {
@@ -207,6 +222,11 @@ resource "google_discovery_engine_widget_config" "basic" {
         field                 = "name"
         display_template      = "Name: {name}"
       }
+    }
+    search_addon_spec {
+      semantic_add_on_disabled            = false
+      kpi_personalization_add_on_disabled = true
+      generative_answer_add_on_disabled   = false
     }
   }
   ui_branding {
