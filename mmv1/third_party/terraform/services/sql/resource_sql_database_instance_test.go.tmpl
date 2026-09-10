@@ -606,6 +606,16 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_settings_nullAttributes, databaseName),
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_settings_nullAttributes, databaseName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
 		},
 	})
 }
@@ -8418,6 +8428,45 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
+var testGoogleSqlDatabaseInstance_settings_nullAttributes = `
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier      = "db-g1-small"
+    collation = null
+    time_zone = null
+
+    location_preference {
+      zone                   = "us-central1-f"
+      secondary_zone         = null
+      follow_gae_application = null
+    }
+
+    ip_configuration {
+      ipv4_enabled       = "true"
+      allocated_ip_range = null
+      server_ca_pool     = null
+      authorized_networks {
+        value           = "108.12.12.12"
+        name            = "misc"
+        expiration_time = "2037-11-15T16:19:00.094Z"
+      }
+    }
+
+    backup_configuration {
+      enabled    = "true"
+      start_time = "19:19"
+      location   = null
+    }
+
+    activation_policy = "ALWAYS"
+  }
+}
+`
+
 var testGoogleSqlDatabaseInstance_settings_secondary = `
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -10557,4 +10606,5 @@ resource "google_sql_database_instance" "instance" {
 }
 `, instanceName, enforce)
 }
+
 

@@ -413,22 +413,25 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"bucket": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: sqlServerAuditConfigurationKeys,
-										Description:  `The name of the destination bucket (e.g., gs://mybucket).`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     sqlServerAuditConfigurationKeys,
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `The name of the destination bucket (e.g., gs://mybucket).`,
 									},
 									"retention_interval": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: sqlServerAuditConfigurationKeys,
-										Description:  `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     sqlServerAuditConfigurationKeys,
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `How long to keep generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"..`,
 									},
 									"upload_interval": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: sqlServerAuditConfigurationKeys,
-										Description:  `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     sqlServerAuditConfigurationKeys,
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `How often to upload generated audit files. A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".`,
 									},
 								},
 							},
@@ -436,6 +439,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 						"time_zone": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
 							Description:      `The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.`,
 						},
 						"availability_type": {
@@ -490,10 +494,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Description:  `HH:MM format time indicating when backup configuration starts.`,
 									},
 									"location": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: backupConfigurationKeys,
-										Description:  `Location of the backup configuration.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     backupConfigurationKeys,
+										DiffSuppressFunc: backupConfigurationLocationDiffSuppress,
+										Description:      `Location of the backup configuration.`,
 									},
 									"point_in_time_recovery_enabled": {
 										Type:         schema.TypeBool,
@@ -542,10 +547,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 						},
 						"collation": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							ForceNew:    true,
-							Description: `The name of server instance collation.`,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+							Description:      `The name of server instance collation.`,
 						},
 						"database_flags": {
 							Type:     schema.TypeSet,
@@ -663,10 +669,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Description:      `The VPC network from which the Cloud SQL instance is accessible for private IP. For example, projects/myProject/global/networks/default. Specifying a network enables private IP. At least ipv4_enabled must be enabled or a private_network must be configured. This setting can be updated, but it cannot be removed after it is set.`,
 									},
 									"allocated_ip_range": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: ipConfigurationKeys,
-										Description:  `The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     ipConfigurationKeys,
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
 									},
 									"enable_private_path_for_google_cloud_services": {
 										Type:         schema.TypeBool,
@@ -792,10 +799,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										AtLeastOneOf: ipConfigurationKeys,
 									},
 									"server_ca_pool": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Description:  `The resource name of the server CA pool for an instance with "CUSTOMER_MANAGED_CAS_CA" as the "server_ca_mode".`,
-										AtLeastOneOf: ipConfigurationKeys,
+										Type:             schema.TypeString,
+										Optional:         true,
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `The resource name of the server CA pool for an instance with "CUSTOMER_MANAGED_CAS_CA" as the "server_ca_mode".`,
+										AtLeastOneOf:     ipConfigurationKeys,
 									},
 									"server_certificate_rotation_mode": {
 										Type:            schema.TypeString,
@@ -826,10 +834,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"follow_gae_application": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: []string{"settings.0.location_preference.0.follow_gae_application", "settings.0.location_preference.0.zone"},
-										Description:  `A Google App Engine application whose zone to remain in. Must be in the same region as this instance.`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     []string{"settings.0.location_preference.0.follow_gae_application", "settings.0.location_preference.0.zone"},
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `A Google App Engine application whose zone to remain in. Must be in the same region as this instance.`,
 									},
 									"zone": {
 										Type:         schema.TypeString,
@@ -838,9 +847,10 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Description:  `The preferred compute engine zone.`,
 									},
 									"secondary_zone": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: `The preferred Compute Engine zone for the secondary/failover`,
+										Type:             schema.TypeString,
+										Optional:         true,
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress(""),
+										Description:      `The preferred Compute Engine zone for the secondary/failover`,
 									},
 								},
 							},
@@ -3245,6 +3255,16 @@ func EnhancedBackupManagerDiffSuppressFunc(k, old, new string, d *schema.Resourc
         return true
     }
     return false
+}
+
+func backupConfigurationLocationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if tpgresource.EmptyOrDefaultStringSuppress("")(k, old, new, d) {
+		return true
+	}
+	if d == nil {
+		return false
+	}
+	return EnhancedBackupManagerDiffSuppressFunc(k, old, new, d)
 }
 
 func databaseVersionDiffSuppress(_, oldVersion, newVersion string, _ *schema.ResourceData) bool {
