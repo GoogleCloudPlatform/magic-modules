@@ -33,11 +33,15 @@ timeouts:
   delete_minutes: 120
 sweeper:
   url_substitutions:
-    - region: us-central1-b
+    - location: us-central1-b
     - zone: us-central1-b
-    - region: us-central1
-    - region: us-east1
-    - region: us-west1
+    - location: us-central1
+    - location: us-east1
+    - location: us-west1
+    - location: me-west1-b
+  ensure_value:
+    field: deletionProtectionEnabled
+    value: false
 async:
   type: OpAsync
   operation:
