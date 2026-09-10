@@ -119,7 +119,7 @@ properties:
             properties:
               - name: 'allowedSourceIpRanges'
                 type: Array
-                description: "A list of IPv4 addresses or CIDR ranges that are allowed to connect to the cluster."
+                description: "A list of IPv4 addresses or CIDR ranges that are allowed to connect to the cluster. To protect your cluster, allow access from only trusted external IP ranges. Don't expose your cluster to untrusted ranges."
                 required: true
                 item_type:
                   type: String
