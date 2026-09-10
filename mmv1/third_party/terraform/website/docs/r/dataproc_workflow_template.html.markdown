@@ -193,7 +193,8 @@ The following arguments are supported:
   (Required) The resource name of the workflow template, as described in https://docs.cloud.google.com/apis/design/resource_names. * For `projects.regions.workflowTemplates`, the resource name of the template has the following format: `projects/{project_id}/regions/{region}/workflowTemplates/{template_id}` * For `projects.locations.workflowTemplates`, the resource name of the template has the following format: `projects/{project_id}/locations/{location}/workflowTemplates/{template_id}`
 
 * `placement` -
-  (Required) WorkflowTemplate scheduling information. Structure is [documented below](#nested_placement).
+  (Required)
+  WorkflowTemplate scheduling information. Structure is [documented below](#nested_placement).
 
 * `jobs` -
   (Required) The Directed Acyclic Graph of Jobs to submit. Structure is [documented below](#nested_jobs)
@@ -755,11 +756,11 @@ The `values` block supports:
 
 * `accelerators` -
   (Optional)
-  The Compute Engine accelerator configuration for these instances.
+  The Compute Engine accelerator configuration for these instances. Structure is [documented below](#nested_accelerators).
 
 * `disk_config` -
   (Optional)
-  Disk option config settings.
+  Disk option config settings. Structure is [documented below](#nested_disk_config).
 
 * `image` -
   (Optional)
