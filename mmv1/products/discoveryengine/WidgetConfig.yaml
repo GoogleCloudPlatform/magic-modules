@@ -265,6 +265,31 @@ properties:
       - name: enableCreateAgentButton
         type: Boolean
         description: If set to true, the widget will enable the create agent button.
+      - name: searchAddonSpec
+        type: NestedObject
+        description: |
+          SearchAddonSpec is used to disable add-ons for search. By default, if this
+          field is not specified, add-ons are enabled wherever applicable.
+          This field is only supported for search requests.
+        properties:
+          - name: semanticAddOnDisabled
+            type: Boolean
+            description: |
+              If true, semantic add-on is disabled. Semantic add-on includes
+              embeddings and jetstream.
+            send_empty_value: true
+          - name: kpiPersonalizationAddOnDisabled
+            type: Boolean
+            description: |
+              If true, disables event re-ranking and personalization to optimize KPIs
+              & personalize results.
+            send_empty_value: true
+          - name: generativeAnswerAddOnDisabled
+            type: Boolean
+            description: |
+              If true, generative answer add-on is disabled. Generative answer
+              add-on includes natural language to filters and simple answers.
+            send_empty_value: true
   - name: uiBranding
     type: NestedObject
     description: |
