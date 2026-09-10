@@ -1,0 +1,84 @@
+{{/*
+    The license inside this block applies to this file
+    Copyright 2024 Google Inc.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/ -}}
+if d.HasChange("desired_state") {
+    newState := d.Get("desired_state").(string)
+    if newState == "STATE_ARCHIVED" {
+        stopUrl := strings.Split(url, "?updateMask=")[0] + ":stop"
+        _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config:    config,
+            Method:    "POST",
+            Project:   billingProject,
+            RawURL:    stopUrl,
+            UserAgent: userAgent,
+            Body:      map[string]interface{}{},
+            Timeout:   d.Timeout(schema.TimeoutUpdate),
+        })
+        if err != nil {
+            return fmt.Errorf("Error archiving Pipeline %q: %s", d.Id(), err)
+        }
+
+        // Poll until the pipeline reaches STATE_ARCHIVED (the :stop endpoint is async).
+        getUrl := strings.Split(url, "?updateMask=")[0]
+        timeout := d.Timeout(schema.TimeoutUpdate)
+        start := time.Now()
+        for time.Since(start) < timeout {
+            res, pollErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                Config:    config,
+                Method:    "GET",
+                Project:   billingProject,
+                RawURL:    getUrl,
+                UserAgent: userAgent,
+                Timeout:   d.Timeout(schema.TimeoutUpdate),
+            })
+            if pollErr != nil {
+                return fmt.Errorf("Error polling Pipeline %q state: %s", d.Id(), pollErr)
+            }
+            state, _ := res["state"].(string)
+            if state == "STATE_ARCHIVED" {
+                break
+            }
+            if state != "STATE_STOPPING" {
+                return fmt.Errorf("Pipeline %q in unexpected state %q after :stop", d.Id(), state)
+            }
+            time.Sleep(5 * time.Second)
+        }
+
+        // Skip the PATCH and refresh state from API.
+        return resourceDataPipelinePipelineRead(d, meta)
+
+    } else if newState == "STATE_ACTIVE" {
+        runUrl := strings.Split(url, "?updateMask=")[0] + ":run"
+        _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config:    config,
+            Method:    "POST",
+            Project:   billingProject,
+            RawURL:    runUrl,
+            UserAgent: userAgent,
+            Body:      map[string]interface{}{},
+            Timeout:   d.Timeout(schema.TimeoutUpdate),
+        })
+        if err != nil {
+            return fmt.Errorf("Error starting Pipeline %q: %s", d.Id(), err)
+        }
+        // Skip the PATCH and refresh state from API.
+        return resourceDataPipelinePipelineRead(d, meta)
+
+    } else {
+        return fmt.Errorf(
+            "Cannot change `desired_state` to %q after creation: the Data Pipelines API does not support "+
+                "state transitions via the PATCH endpoint. Supported transitions are handled via the "+
+                ":run and :stop endpoints for `STATE_ACTIVE` and `STATE_ARCHIVED`.",
+            newState,
+        )
+    }
+}
