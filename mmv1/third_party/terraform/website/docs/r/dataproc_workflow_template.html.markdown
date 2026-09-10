@@ -136,6 +136,38 @@ resource "google_dataproc_workflow_template" "example" {
 }
 ```
 
+## Example Usage - Dataproc Workflow Template Instance Flexibility Policy
+
+```hcl
+resource "google_dataproc_workflow_template" "template" {
+  name     = "template-flexible-vms"
+  location = "us-central1"
+  placement {
+    managed_cluster {
+      cluster_name = "my-flexible-cluster"
+      config {
+        software_config {
+          image_version = "2.0.35-debian10"
+        }
+        master_config {
+          num_instances = 1
+          machine_type  = "e2-standard-2"
+        }
+        worker_config {
+          num_instances = 2
+          instance_flexibility_policy {
+            instance_selection_list {
+              machine_types = ["e2-standard-2"]
+              rank          = 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -300,7 +332,7 @@ The `config` block supports:
 
 * `worker_config` -
   (Optional)
-  The Compute Engine config settings for additional worker instances in a cluster.
+  The Compute Engine config settings for additional worker instances in a cluster. Structure is [documented below](#nested_worker_config).
 
 - - -
 
@@ -745,7 +777,50 @@ The `master_config` block supports:
 * `managed_group_config` -
   Output only. The config for Compute Engine Instance Group Manager that manages this group. This is only used for preemptible instance groups.
 
-The `accelerators` block supports:
+* `instance_flexibility_policy` -
+  (Optional)
+  Instance flexibility Policy allowing a mixture of VM shapes and provisioning models. Supported on `master_config`, `worker_config`, and `secondary_worker_config` (provisioning models are supported exclusively on `secondary_worker_config`). Structure is [documented below](#nested_instance_flexibility_policy).
+
+<a name="nested_worker_config"></a>The `worker_config` block supports:
+
+* `accelerators` -
+  (Optional)
+  The Compute Engine accelerator configuration for these instances. Structure is [documented below](#nested_accelerators).
+
+* `disk_config` -
+  (Optional)
+  Disk option config settings. Structure is [documented below](#nested_disk_config).
+
+* `image` -
+  (Optional)
+  The Compute Engine image resource used for cluster instances.
+
+* `machine_type` -
+  (Optional)
+  The Compute Engine machine type used for cluster instances.
+
+* `min_cpu_platform` -
+  (Optional)
+  The minimum CPU platform and architecture for the cluster.
+
+* `num_instances` -
+  (Optional)
+  The number of worker instances in the cluster.
+
+* `instance_names` -
+  Output only. The list of instance names.
+
+* `is_preemptible` -
+  Output only. Specifies that this instance group contains preemptible instances.
+
+* `managed_group_config` -
+  Output only. The config for Compute Engine Instance Group Manager that manages this group.
+
+* `instance_flexibility_policy` -
+  (Optional)
+  Instance flexibility Policy allowing a mixture of VM shapes. Structure is [documented below](#nested_instance_flexibility_policy).
+
+<a name="nested_accelerators"></a>The `accelerators` block supports:
 
 * `accelerator_count` -
   (Optional)
@@ -755,7 +830,7 @@ The `accelerators` block supports:
   (Optional)
   Full URL, partial URI, or short name of the accelerator type resource to expose to this instance. See (https://docs.cloud.google.com/dataproc/docs/concepts/configuring-clusters/auto-zone#using_auto_zone_placement) feature, you must use the short name of the accelerator type resource, for example, `nvidia-tesla-k80`.
 
-The `disk_config` block supports:
+<a name="nested_disk_config"></a>The `disk_config` block supports:
 
 * `boot_disk_size_gb` -
   (Optional)
@@ -768,6 +843,40 @@ The `disk_config` block supports:
 * `num_local_ssds` -
   (Optional)
   Number of attached SSDs, from 0 to 4 (default is 0). If SSDs are not attached, the boot disk is used to store runtime logs and (https://hadoop.apache.org/docs/r1.2.1/hdfs_user_guide.html) data. If one or more SSDs are attached, this runtime bulk data is spread across them, and the boot disk contains only basic config and installed binaries.
+
+<a name="nested_instance_flexibility_policy"></a>The `instance_flexibility_policy` block supports:
+
+* `instance_selection_list` -
+  (Optional)
+  List of instance selection options that the group will use when creating new VMs. Structure is [documented below](#nested_instance_selection_list).
+
+* `instance_selection_results` -
+  Output only. A list of instance selection results that were successfully allocated. Structure is [documented below](#nested_instance_selection_results).
+
+* `instance_machine_types` -
+  Output only. A map of instance names to their machine types.
+
+<a name="nested_instance_selection_list"></a>The `instance_selection_list` block supports:
+
+* `machine_types` -
+  (Optional)
+  Full machine-type names, e.g. `n1-standard-16`.
+
+* `rank` -
+  (Optional)
+  Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
+
+* `disk_config` -
+  (Optional)
+  Disk option for the instance group. Structure is [documented above](#nested_disk_config).
+
+<a name="nested_instance_selection_results"></a>The `instance_selection_results` block supports:
+
+* `machine_type` -
+  Output only. Full machine-type names, e.g. `n1-standard-16`.
+
+* `vm_count` -
+  Output only. Number of VM provisioned with the corresponding machine_type.
 
 The `autoscaling_config` block supports:
 
