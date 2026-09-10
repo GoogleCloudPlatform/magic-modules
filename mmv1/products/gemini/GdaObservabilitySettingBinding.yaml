@@ -60,9 +60,7 @@ samples:
         resource_id_vars:
           gda_observability_setting_id: ls-tf1
           setting_binding_id: ls-tf1b1
-          target: projects/980109375338
-        test_vars_overrides:
-          target: '"projects/980109375338" + randomSuffix'
+          target: projects/1234567890
 parameters:
   - name: location
     type: String

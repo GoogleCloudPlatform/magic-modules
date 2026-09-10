@@ -82,7 +82,7 @@ properties:
   - name: conversationalAnalyticsSetting
     type: NestedObject
     description: Message describing Setting for Conversational Analytics.
-    send_empty_value: true
+    allow_empty_object: true
     properties:
       - name: feedbackEnabled
         type: Boolean
