@@ -4928,6 +4928,64 @@ resource "google_container_cluster" "primary" {
 	return res
 }
 
+func TestAccContainerCluster_withAutopilotGeneralProfile(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withAutopilotGeneralProfile(clusterName, networkName, subnetworkName, "NO_PERFORMANCE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "cluster_autoscaling.0.autopilot_general_profile", "NO_PERFORMANCE"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
+			},
+			{
+				Config: testAccContainerCluster_withAutopilotGeneralProfile(clusterName, networkName, subnetworkName, "NONE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "cluster_autoscaling.0.autopilot_general_profile", "NONE"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withAutopilotGeneralProfile(clusterName, networkName, subnetworkName, profile string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  enable_autopilot    = true
+  deletion_protection = false
+
+  cluster_autoscaling {
+    autopilot_general_profile = "%s"
+  }
+}
+`, clusterName, networkName, subnetworkName, profile)
+}
+
 func TestAccContainerCluster_withAutopilotClusterPolicy(t *testing.T) {
 	t.Parallel()
 
