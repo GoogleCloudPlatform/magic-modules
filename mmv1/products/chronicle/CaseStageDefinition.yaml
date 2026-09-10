@@ -32,6 +32,8 @@ samples:
     primary_resource_id: example
     steps:
       - name: "chronicle_casestagedefinition_basic"
+        resource_id_vars:
+          display_name: my_stage
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
 parameters:

@@ -2,6 +2,6 @@ resource "google_chronicle_case_stage_definition" "{{$.PrimaryResourceId}}" {
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
 
-  display_name = "tf_stage_%{random_suffix}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
   order = 100
 }
