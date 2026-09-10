@@ -18,7 +18,7 @@ description: >
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.customLists'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.customLists'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists
@@ -27,13 +27,10 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/customLists/{{custom_list_id}}
-
 autogen_status: Q3VzdG9tTGlzdA==
-
 samples:
   - name: chronicle_customlist_update
     primary_resource_id: sample
-    min_version: beta
     steps:
       - name: "chronicle_customlist_basic"
         test_env_vars:
@@ -41,7 +38,6 @@ samples:
       - name: "chronicle_customlist_full"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-
 parameters:
   - name: location
     type: String

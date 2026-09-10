@@ -1,0 +1,236 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: BigQueryExport
+description: |
+  BigQueryExport resource represents the BigQuery export configuration for a Chronicle instance.
+references:
+  guides:
+    'BigQuery Export Overview': 'https://cloud.google.com/chronicle/docs/secops/bigquery-export-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.bigQueryExport'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
+update_mask: true
+create_verb: PATCH
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/bigQueryExport
+exclude_delete: true
+samples:
+  - name: chronicle_bigquery_export_basic
+    primary_resource_id: example
+    steps:
+      - name: chronicle_bigquery_export_basic
+        vars:
+          location: 'us'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          project_name: 'PROJECT_NAME'
+  - name: chronicle_bigquery_export_full
+    primary_resource_id: example
+    steps:
+      - name: chronicle_bigquery_export_full
+        vars:
+          location: 'us'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          project_name: 'PROJECT_NAME'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: bigQueryExportPackage
+    type: Enum
+    default_from_api: true
+    enum_values:
+      - 'BIG_QUERY_EXPORT_PACKAGE_BYOBQ'
+      - 'BIG_QUERY_EXPORT_PACKAGE_ADVANCED'
+    description: The BigQueryExportPackage entitled for the Chronicle instance.
+  - name: entityGraphSettings
+    type: NestedObject
+    default_from_api: true
+    description: The export settings for a data source.
+    properties:
+      - name: dataFreshnessTime
+        type: String
+        description: |-
+          The data freshness of the given export which represents the time bucket at
+          which the latest event was exported.
+        output: true
+      - name: dataVolume
+        type: String
+        description: The stored data volume of all the exports.
+        output: true
+      - name: enabled
+        type: Boolean
+        required: true
+        description: Whether the data source is enabled for export.
+      - name: latestExportJobState
+        type: Enum
+        output: true
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
+      - name: retentionDays
+        type: Integer
+        required: true
+        description: The retention period for the data source in days.
+  - name: iocMatchesSettings
+    type: NestedObject
+    default_from_api: true
+    description: The export settings for a data source.
+    properties:
+      - name: dataFreshnessTime
+        type: String
+        description: |-
+          The data freshness of the given export which represents the time bucket at
+          which the latest event was exported.
+        output: true
+      - name: dataVolume
+        type: String
+        description: The stored data volume of all the exports.
+        output: true
+      - name: enabled
+        type: Boolean
+        required: true
+        description: Whether the data source is enabled for export.
+      - name: latestExportJobState
+        type: Enum
+        output: true
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
+      - name: retentionDays
+        type: Integer
+        required: true
+        description: The retention period for the data source in days.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the BigQueryExport.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/bigQueryExport
+    output: true
+  - name: provisioned
+    type: Boolean
+    description: Whether the BigQueryExport has been provisioned for the Chronicle instance.
+    output: true
+  - name: ruleDetectionsSettings
+    type: NestedObject
+    default_from_api: true
+    description: The export settings for a data source.
+    properties:
+      - name: dataFreshnessTime
+        type: String
+        description: |-
+          The data freshness of the given export which represents the time bucket at
+          which the latest event was exported.
+        output: true
+      - name: dataVolume
+        type: String
+        description: The stored data volume of all the exports.
+        output: true
+      - name: enabled
+        type: Boolean
+        required: true
+        description: Whether the data source is enabled for export.
+      - name: latestExportJobState
+        type: Enum
+        output: true
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
+      - name: retentionDays
+        type: Integer
+        required: true
+        description: The retention period for the data source in days.
+  - name: udmEventsAggregatesSettings
+    type: NestedObject
+    default_from_api: true
+    description: The export settings for a data source.
+    properties:
+      - name: dataFreshnessTime
+        type: String
+        description: |-
+          The data freshness of the given export which represents the time bucket at
+          which the latest event was exported.
+        output: true
+      - name: dataVolume
+        type: String
+        description: The stored data volume of all the exports.
+        output: true
+      - name: enabled
+        type: Boolean
+        required: true
+        description: Whether the data source is enabled for export.
+      - name: latestExportJobState
+        type: Enum
+        output: true
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
+      - name: retentionDays
+        type: Integer
+        required: true
+        description: The retention period for the data source in days.
+  - name: udmEventsSettings
+    type: NestedObject
+    default_from_api: true
+    description: The export settings for a data source.
+    properties:
+      - name: dataFreshnessTime
+        type: String
+        description: |-
+          The data freshness of the given export which represents the time bucket at
+          which the latest event was exported.
+        output: true
+      - name: dataVolume
+        type: String
+        description: The stored data volume of all the exports.
+        output: true
+      - name: enabled
+        type: Boolean
+        required: true
+        description: Whether the data source is enabled for export.
+      - name: latestExportJobState
+        type: Enum
+        output: true
+        enum_values:
+          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
+          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
+          - 'LATEST_EXPORT_JOB_STATE_FAILED'
+        description: The latest export job state.
+      - name: retentionDays
+        type: Integer
+        required: true
+        description: The retention period for the data source in days.

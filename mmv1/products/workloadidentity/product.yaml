@@ -13,8 +13,8 @@
 
 ---
 name: WorkloadIdentity
-packagepath: ""
 display_name: Workload Identity API
+packagepath: ""
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:

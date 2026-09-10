@@ -1,6 +1,6 @@
 ---
-majorVersion: "7.0.0"
-upgradeGuide: "version_7_upgrade.html.markdown"
+majorVersion: "8.0.0"
+upgradeGuide: "version_8_upgrade.html.markdown"
 title: "Make a breaking change"
 summary: "Guidance on making a breaking changes"
 weight: 20
@@ -65,7 +65,7 @@ The general process for contributing a breaking change to the
 
 1. Make the `main` branch forwards-compatible with the major release
 2. Add deprecations and warnings to the `main` branch of `magic-modules`
-3. Add upgrade guide entries to the `FEATURE-BRANCH-major-release-7.0.0` branch of `magic-modules`
+3. Add upgrade guide entries to the `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}` branch of `magic-modules`
 4. Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 
 These are covered in more detail in the following sections. The upgrade guide

@@ -15,6 +15,7 @@
 name: Source
 description: Source represents a data source from which asset discovery data is ingested into Migration Center.
 base_url: projects/{{project}}/locations/{{location}}/sources
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/sources/{{source_id}}
 create_url: projects/{{project}}/locations/{{location}}/sources?sourceId={{source_id}}
 update_mask: true
@@ -32,11 +33,13 @@ async:
     resource_inside_response: true
 autogen_status: U291cmNlQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
-examples:
-  - name: 'migration_center_source_basic'
-    primary_resource_id: 'default'
-    vars:
-      source_id: 'source-test'
+samples:
+  - name: migration_center_source_basic
+    primary_resource_id: default
+    steps:
+      - name: migration_center_source_basic
+        resource_id_vars:
+          source_id: source-test
 parameters:
   - name: location
     type: String

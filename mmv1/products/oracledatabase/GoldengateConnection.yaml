@@ -21,6 +21,10 @@ create_url: projects/{{project}}/locations/{{location}}/goldengateConnections?go
 id_format: projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/goldengateConnections/{{goldengate_connection_id}}
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
 async:
   type: OpAsync
   operation:
@@ -51,7 +55,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-basic-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_full
@@ -69,10 +73,10 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: false
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           goldengate_connection_id: fmt.Sprintf("tf-conn-full-%s", acctest.RandString(t, 10))
-          odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
-          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
           autonomous_database_id: '"do-not-delete-tf-adb"'
   - name: oracledatabase_goldengate_connection_mysql
     primary_resource_id: connection
@@ -85,7 +89,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-mysql-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_postgresql
@@ -99,7 +103,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-pg-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_redis
@@ -113,7 +117,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-redis-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_kafka
@@ -127,7 +131,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-kafka-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_iceberg
@@ -141,7 +145,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-iceberg-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_snowflake
@@ -155,7 +159,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-snowflake-%s", acctest.RandString(t, 10))
   - name: oracledatabase_goldengate_connection_jms
@@ -169,7 +173,7 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
           goldengate_connection_id: fmt.Sprintf("tf-conn-jms-%s", acctest.RandString(t, 10))
 virtual_fields:

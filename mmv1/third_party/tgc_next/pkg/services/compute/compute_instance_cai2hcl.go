@@ -720,7 +720,7 @@ func flattenAdvancedMachineFeaturesTgcNext(v interface{}) []map[string]interface
 		return nil
 	}
 	resp, ok := v.(map[string]interface{})
-	if !ok {
+	if !ok || len(resp) == 0 {
 		return nil
 	}
 	return []map[string]interface{}{{

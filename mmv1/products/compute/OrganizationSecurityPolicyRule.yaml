@@ -44,32 +44,45 @@ custom_code:
   decoder: 'templates/terraform/decoders/compute_organization_security_policy_rule.go.tmpl'
   # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
+samples:
   - name: 'organization_security_policy_rule_basic'
     primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_rule_basic'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_expression'
     primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_rule_expression'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_with_preconfigured_waf_config'
     primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_rule_with_preconfigured_waf_config'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_with_header_action'
     primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_rule_with_header_action'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_with_redirect'
     primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_rule_with_redirect'
+        test_env_vars:
+          org_id: 'ORG_ID'
   - name: 'organization_security_policy_rule_firewall'
     min_version: 'beta'
     primary_resource_id: 'policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'organization_security_policy_rule_firewall'
+        min_version: 'beta'
+        test_env_vars:
+          org_id: 'ORG_ID'
 parameters:
   - name: 'policyId'
     type: String
@@ -93,9 +106,7 @@ properties:
     immutable: true
   - name: 'match'
     type: NestedObject
-    description:
-      A match condition that incoming traffic is evaluated against. If it
-      evaluates to true, the corresponding 'action' is enforced.
+    description: A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
       - name: 'description'
@@ -327,6 +338,7 @@ properties:
                 type: String
   - name: 'preview'
     type: Boolean
+    send_empty_value: true
     description: |
       If set to true, the specified action is not enforced.
   - name: 'redirectOptions'

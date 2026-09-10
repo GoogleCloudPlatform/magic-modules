@@ -40,22 +40,29 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
   test_check_destroy: 'templates/terraform/test_check_destroy/dialogflow_conversation_profile.go.tmpl'
 exclude_sweeper: true
-examples:
+samples:
   - name: 'dialogflow_conversation_profile_basic'
     primary_resource_id: 'basic_profile'
-    vars:
-      profile_name: 'dialogflow-profile'
+    steps:
+      - name: 'dialogflow_conversation_profile_basic'
+        resource_id_vars:
+          profile_name: 'dialogflow-profile'
   - name: 'dialogflow_conversation_profile_recognition_result_notification'
     primary_resource_id: 'recognition_result_notification_profile'
-    vars:
-      profile_name: 'dialogflow-profile'
-      topic_name: 'recognition-result-notification'
+    steps:
+      - name: 'dialogflow_conversation_profile_recognition_result_notification'
+        resource_id_vars:
+          profile_name: 'dialogflow-profile'
+          topic_name: 'recognition-result-notification'
   - name: 'dialogflow_conversation_profile_beta_bidi'
     primary_resource_id: 'bidi_profile'
     min_version: beta
-    vars:
-      profile_name: 'dialogflow-profile-bidi'
-      app_id: 'app-id'
+    steps:
+      - name: 'dialogflow_conversation_profile_beta_bidi'
+        min_version: beta
+        resource_id_vars:
+          profile_name: 'dialogflow-profile-bidi'
+          app_id: 'app-id'
 parameters:
   - name: 'location'
     type: String
@@ -225,7 +232,7 @@ properties:
                             type: Enum
                             name: 'sectionType'
                             description: |
-                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
+                              The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
@@ -400,7 +407,7 @@ properties:
                             type: Enum
                             name: 'sectionType'
                             description: |
-                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
+                              The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION

@@ -40,123 +40,147 @@ custom_code:
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl
   post_create: templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl
   post_update: templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl
-examples:
+samples:
   - name: iam_workforce_pool_provider_saml_basic
     primary_resource_id: example
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_saml_basic
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_saml_full
     primary_resource_id: example
-    ignore_read_extra:
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_saml_full
+        ignore_read_extra:
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_oidc_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_oidc_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_upload_key
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-    exclude_docs: true
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    exclude_basic_doc: true
+    steps:
+      - name: iam_workforce_pool_provider_oidc_upload_key
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
-    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05") # waiting for rollout
+    steps:
+      - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+          - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
   - name: iam_workforce_pool_provider_oidc_detailed_audit_logging
     primary_resource_id: example
-    ignore_read_extra:
-      - oidc.0.client_secret.0.value.0.plain_text
-    vars:
-      provider_id: example-prvdr
-      workforce_pool_id: example-pool
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: iam_workforce_pool_provider_oidc_detailed_audit_logging
+        ignore_read_extra:
+          - oidc.0.client_secret.0.value.0.plain_text
+        resource_id_vars:
+          provider_id: example-prvdr
+          workforce_pool_id: example-pool
+        test_env_vars:
+          org_id: ORG_ID
 properties:
   - name: location
     type: String

@@ -25,6 +25,7 @@ references:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
+generate_list_resource: true
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}&skipDefaultSchemaCreation={{skip_default_schema_creation}}'
 update_verb: 'PATCH'
@@ -51,41 +52,62 @@ sweeper:
   url_substitutions:
     - region: "eu"
     - region: "global"
-examples:
+samples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
+    steps:
+      - name: 'discoveryengine_datastore_basic'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_kms_key_name'
     primary_resource_id: 'kms_key_name'
-    vars:
-      data_store_id: 'data-store-id'
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+    steps:
+      - name: 'discoveryengine_datastore_kms_key_name'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+          kms_key_name: 'kms-key'
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
-    vars:
-      data_store_id: 'data-store-id'
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_ocr'
     primary_resource_id: 'document_processing_config_ocr'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config_ocr'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_layout'
     primary_resource_id: 'document_processing_config_layout'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config_layout'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_layout_full'
     primary_resource_id: 'document_processing_config_layout_full'
-    vars:
-      data_store_id: 'data-store-id'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_document_processing_config_layout_full'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_advanced_site_search_config'
     primary_resource_id: 'advanced_site_search_config'
-    vars:
-      data_store_id: 'data-store-id'
+    steps:
+      - name: 'discoveryengine_datastore_advanced_site_search_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_acl_config'
+    primary_resource_id: 'acl_config'
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_acl_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
 parameters:
   - name: 'location'
     type: String
@@ -120,7 +142,6 @@ parameters:
       before any documents can be ingested.
       This flag cannot be specified if `data_store.starting_schema` is
       specified.
-
     url_param_only: true
     default_value: false
 properties:
@@ -177,6 +198,16 @@ properties:
       - 'NO_CONTENT'
       - 'CONTENT_REQUIRED'
       - 'PUBLIC_WEBSITE'
+  - name: 'aclEnabled'
+    type: Boolean
+    description: |
+      Immutable. Whether data in the DataStore has ACL information. If set to `true`,
+      the source data must have ACL. ACL will be ingested when data is ingested by
+      DocumentService.ImportDocuments methods. When ACL is enabled for the DataStore,
+      Document can't be accessed by calling DocumentService.GetDocument or
+      DocumentService.ListDocuments. Currently ACL is only supported in the `GENERIC`
+      industry vertical with non-`PUBLIC_WEBSITE` content config.
+    immutable: true
   - name: 'advancedSiteSearchConfig'
     type: NestedObject
     description: |
@@ -242,7 +273,6 @@ properties:
                 description: |
                   Whether to include appending different levels of headings to chunks from the middle of the document to prevent context loss.
                   Default value: False.
-
                 required: false
       - name: 'defaultParsingConfig'
         type: NestedObject
@@ -263,8 +293,7 @@ properties:
               - 'default_parsing_config.0.digital_parsing_config'
               - 'default_parsing_config.0.ocr_parsing_config'
               - 'default_parsing_config.0.layout_parsing_config'
-            properties:
-              []
+            properties: []
           - name: 'ocrParsingConfig'
             type: NestedObject
             description: |
@@ -302,6 +331,14 @@ properties:
                 description: |
                   If true, the LLM based annotation is added to the image during parsing.
                 required: false
+              - name: 'enableLlmLayoutParsing'
+                type: Boolean
+                description: |
+                  If true, the pdf layout will be refined using an LLM.
+              - name: 'enableGetProcessedDocument'
+                type: Boolean
+                description: |
+                  If true, the processed document will be made available for the GetProcessedDocument API.
               - name: 'structuredContentTypes'
                 type: Array
                 description: |
@@ -352,8 +389,7 @@ properties:
                 - 'default_parsing_config.0.digital_parsing_config'
                 - 'default_parsing_config.0.ocr_parsing_config'
                 - 'default_parsing_config.0.layout_parsing_config'
-              properties:
-                []
+              properties: []
             - name: 'ocrParsingConfig'
               type: NestedObject
               description: |
@@ -391,6 +427,14 @@ properties:
                   description: |
                     If true, the LLM based annotation is added to the image during parsing.
                   required: false
+                - name: 'enableLlmLayoutParsing'
+                  type: Boolean
+                  description: |
+                    If true, the pdf layout will be refined using an LLM.
+                - name: 'enableGetProcessedDocument'
+                  type: Boolean
+                  description: |
+                    If true, the processed document will be made available for the GetProcessedDocument API.
                 - name: 'structuredContentTypes'
                   type: Array
                   description: |

@@ -1,0 +1,10 @@
+resource "google_agent_identity_auth_provider" "{{.PrimaryResourceId}}" {
+    location         = "us-central1"
+    auth_provider_id = "{{index $.ResourceIdVars "auth_provider_id"}}"
+  
+    auth_provider_type_params {
+      api_key {
+        api_key = "test-api-key-value"
+      }
+    }
+  }

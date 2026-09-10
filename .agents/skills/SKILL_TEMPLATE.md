@@ -18,7 +18,7 @@ Provide the exact bash commands the agent should run to verify the prerequisites
 
 #### Example: Verify Directory
 ```bash
-pwd # Verify we are in /Users/camthornton/magic-modules
+pwd # Verify we are in the magic-modules root directory
 ```
 
 ### 2. The Core Commands
@@ -27,7 +27,7 @@ Provide the precise, bulletproof bash commands, python script, or instruction se
 #### Example: Compile Downstream Provider
 ```bash
 # Make terraform provider for Beta
-make terraform VERSION=beta OUTPUT_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta PRODUCT=compute
+make terraform VERSION=beta OUTPUT_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 ```
 
 ### 3. Verification & Handoff

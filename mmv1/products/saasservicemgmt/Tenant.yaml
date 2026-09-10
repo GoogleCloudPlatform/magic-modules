@@ -15,28 +15,31 @@
 name: Tenant
 description: The Tenant resource represents the service producer's view of a service instance created for a consumer. It enables the association between the service producer's managed resources and the end consumer.
 base_url: projects/{{project}}/locations/{{location}}/tenants
-update_mask: true
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/tenants/{{tenant_id}}
 create_url: projects/{{project}}/locations/{{location}}/tenants?tenantId={{tenant_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/tenants/{{tenant_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/tenants/{{tenant_id}}
-min_version: beta
-examples:
-  - name: saas_runtime_tenant_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      tenant_name: example-tenant
-    test_env_vars:
-      project: "PROJECT_NAME"
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
 autogen_status: VGVuYW50
+autogen_async: false
+samples:
+  - name: saas_runtime_tenant_basic
+    primary_resource_id: example
+    min_version: beta
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    steps:
+      - name: saas_runtime_tenant_basic
+        min_version: beta
+        resource_id_vars:
+          saas_name: example-saas
+          tenant_name: example-tenant
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

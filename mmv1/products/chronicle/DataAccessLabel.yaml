@@ -27,16 +27,16 @@ import_format:
 update_verb: PATCH
 update_mask: true
 autogen_status: RGF0YUFjY2Vzc0xhYmVs
-
-examples:
+samples:
   - name: 'chronicle_dataaccesslabel_basic'
     primary_resource_id: 'example'
-    vars:
-      data_access_label_id: label-id
-      description: label-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+    steps:
+      - name: 'chronicle_dataaccesslabel_basic'
+        resource_id_vars:
+          data_access_label_id: label-id
+          description: label-description
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
 parameters:
   - name: location
     type: String

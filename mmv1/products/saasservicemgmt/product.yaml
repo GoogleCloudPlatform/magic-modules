@@ -17,5 +17,5 @@ display_name: App Lifecycle Manager (SaaS Runtime)
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
-  - name: "beta"
+  - name: beta
     base_url: https://saasservicemgmt.googleapis.com/v1beta1/

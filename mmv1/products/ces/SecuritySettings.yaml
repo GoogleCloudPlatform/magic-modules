@@ -33,10 +33,12 @@ timeouts:
 exclude_delete: true
 exclude_sweeper: true
 min_version: beta
-examples:
+samples:
   - name: 'ces_security_settings_basic'
     primary_resource_id: 'security_settings'
     exclude_test: true
+    steps:
+      - name: 'ces_security_settings_basic'
 parameters:
   - name: 'location'
     type: String

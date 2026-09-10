@@ -26,6 +26,8 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}
+generate_list_resource: true
+
 async:
   type: OpAsync
   operation:

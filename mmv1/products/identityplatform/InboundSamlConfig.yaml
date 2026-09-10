@@ -30,6 +30,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: identity_platform_inbound_saml_config_basic

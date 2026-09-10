@@ -12,49 +12,53 @@
 # limitations under the License.
 
 ---
-name: 'Space'
+name: Space
 description: |
   A Space in Apigee
-exclude_identity_generation: true
 references:
   guides:
-    "Managing Spaces": "https://cloud.google.com/apigee/docs/api-platform/system-administration/spaces/manage-spaces"
-  api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.spaces"
-base_url: "{{org_id}}/spaces"
-create_url: "{{org_id}}/spaces?spaceId={{space_id}}"
-self_link: "{{org_id}}/spaces/{{space_id}}"
-update_verb: 'PATCH'
+    Managing Spaces: https://cloud.google.com/apigee/docs/api-platform/system-administration/spaces/manage-spaces
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.spaces
+base_url: '{{org_id}}/spaces'
+self_link: '{{org_id}}/spaces/{{space_id}}'
+create_url: '{{org_id}}/spaces?spaceId={{space_id}}'
 update_mask: true
+update_verb: PATCH
 import_format:
-  - "{{org_id}}/spaces/{{space_id}}"
-  - "{{org_id}}/{{space_id}}"
-custom_code:
-  custom_import: "templates/terraform/custom_import/apigee_space.go.tmpl"
+  - '{{org_id}}/spaces/{{space_id}}'
+  - '{{org_id}}/{{space_id}}'
+exclude_identity_generation: true
 autogen_async: true
-examples:
-  - name: "apigee_space_basic_test"
-    primary_resource_id: "space"
-    vars:
-      space_id: "tf-test-space"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+custom_code:
+  custom_import: templates/terraform/custom_import/apigee_space.go.tmpl
+samples:
+  - name: apigee_space_basic_test
+    primary_resource_id: space
+    exclude_basic_doc: true
     skip_vcr: true
-    external_providers: ["time"]
-  - name: "apigee_space_basic"
+    external_providers: [time]
+    steps:
+      - name: apigee_space_basic_test
+        resource_id_vars:
+          space_id: tf-test-space
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: apigee_space_basic
     exclude_test: true
+    steps:
+      - name: apigee_space_basic
 # This is a more verbose version of the above that creates all
 # the resources needed for the acceptance test.
 parameters:
-  - name: "orgId"
+  - name: orgId
     type: String
     description: |
       The Apigee Organization associated with the Apigee Space, in the format `organizations/{{org_name}}`.
     url_param_only: true
     required: true
     immutable: true
-  - name: 'spaceId'
+  - name: spaceId
     type: String
     description: |
       Space ID of the Apigee Space.
@@ -62,22 +66,22 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: "displayName"
+  - name: displayName
     type: String
     description: |
       The display name of the Space.
     required: true
-  - name: "name"
+  - name: name
     type: String
     description: |
       Identifier. Id of the space. This field is used as the resource name, and must follow AIP-122 guidelines.
     output: true
-  - name: "createTime"
+  - name: createTime
     type: String
     description: |
       Create timestamp of the space.
     output: true
-  - name: "updateTime"
+  - name: updateTime
     type: String
     description: |
       Last modified timestamp of the space.

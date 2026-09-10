@@ -27,23 +27,23 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
 exclude_delete: true
 autogen_status: UmV0cm9odW50
-
 custom_code:
   post_create: 'templates/terraform/post_create/chronicle_retrohunt_id.go.tmpl'
-examples:
+samples:
   - name: 'chronicle_retrohunt_basic'
     primary_resource_id: example
-    exclude_import_test: true
     skip_vcr: true
-    vars:
-      start_time: '2025-01-01T00:00:00Z'
-      end_time: '2025-01-01T12:00:00Z'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    test_vars_overrides:
-      start_time: 'time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)'
-      end_time: 'time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)'
-
+    steps:
+      - name: 'chronicle_retrohunt_basic'
+        exclude_import_test: true
+        resource_id_vars:
+          start_time: '2025-01-01T00:00:00Z'
+          end_time: '2025-01-01T12:00:00Z'
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        test_vars_overrides:
+          start_time: 'time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)'
+          end_time: 'time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)'
 async:
   actions: [create]
   type: OpAsync

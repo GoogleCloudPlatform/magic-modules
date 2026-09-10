@@ -417,7 +417,7 @@ func testAccCheckComputeImageResolution(t *testing.T, n string) resource.TestChe
 		family := rs.Primary.Attributes["family"]
 		link := rs.Primary.Attributes["self_link"]
 
-		url := fmt.Sprintf("%sprojects/%s/global/images/family/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), "debian-cloud", "debian-11")
+		url := fmt.Sprintf("%sprojects/%s/global/images/family/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), "debian-cloud", "debian-13")
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -595,7 +595,7 @@ func testAccCheckComputeImageHasSourceType(image *map[string]interface{}) resour
 func testAccComputeImage_resolving(name, family string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -644,7 +644,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_license(name string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -663,7 +663,7 @@ resource "google_compute_image" "foobar" {
     my-label    = "my-label-value"
   }
   licenses = [
-    "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-11-bullseye",
+    "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-13-trixie",
   ]
 }
 `, name, name)
@@ -701,7 +701,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_basedondisk(diskName, imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -721,7 +721,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_shieldedInstance_InitialState(imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -753,7 +753,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_shieldedInstance_UpdatedState(imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -781,7 +781,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_sourceImage(imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -795,7 +795,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_sourceSnapshot(diskName, snapshotName, imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -823,7 +823,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_sourceDiskEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -896,7 +896,7 @@ data "google_compute_default_service_account" "default" {
 func testAccComputeImage_sourceImageEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -969,7 +969,7 @@ data "google_compute_default_service_account" "default" {
 func testAccComputeImage_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1101,7 +1101,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 

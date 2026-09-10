@@ -447,6 +447,12 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
+
+	"ignore_node_count_changes": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state.`,
+	},
 }
 
 func ResourceContainerNodePool() *schema.Resource {

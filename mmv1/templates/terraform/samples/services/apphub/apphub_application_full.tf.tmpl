@@ -1,0 +1,29 @@
+resource "google_apphub_application" "{{$.PrimaryResourceId}}" {
+  location = "us-east1"
+  application_id = "{{index $.ResourceIdVars "application_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  scope {
+    type = "REGIONAL"
+  }
+  description = "{{index $.ResourceIdVars "desc"}}"
+  attributes {
+    environment {
+      type = "STAGING"
+		}
+		criticality {  
+      type = "MISSION_CRITICAL"
+		}
+		business_owners {
+		  display_name =  "{{index $.ResourceIdVars "business_name"}}"
+		  email        =  "{{index $.ResourceIdVars "business_email"}}"
+		}
+		developer_owners {
+		  display_name =  "{{index $.ResourceIdVars "developer_name"}}"
+		  email        =  "{{index $.ResourceIdVars "developer_email"}}"
+		}
+		operator_owners {
+		  display_name =  "{{index $.ResourceIdVars "operator_name"}}"
+		  email        =  "{{index $.ResourceIdVars "operator_email"}}"
+		}
+  }
+}

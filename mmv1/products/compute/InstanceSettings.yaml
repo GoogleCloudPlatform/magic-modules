@@ -48,9 +48,11 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 # excluding identity due to zone value inconsistency
 exclude_identity_generation: true
-examples:
+samples:
   - name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
+    steps:
+      - name: 'instance_settings_basic'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -63,13 +65,13 @@ properties:
   - name: 'fingerprint'
     type: Fingerprint
     description: |
-        The fingerprint used for optimistic locking of this resource.  Used
-        internally during updates.
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
     output: true
   - name: 'metadata'
     type: NestedObject
     description: |
-        The metadata key/value pairs assigned to all the instances in the corresponding scope.
+      The metadata key/value pairs assigned to all the instances in the corresponding scope.
     properties:
       - name: 'items'
         type: KeyValuePairs

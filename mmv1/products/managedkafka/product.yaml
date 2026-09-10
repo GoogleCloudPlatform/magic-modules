@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'ManagedKafka'
-display_name: 'Managed Kafka'
-versions:
-  - name: 'ga'
-    base_url: 'https://managedkafka.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://managedkafka.googleapis.com/v1/'
+name: ManagedKafka
+display_name: Managed Kafka
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://managedkafka.googleapis.com/v1/
+  - name: beta
+    base_url: https://managedkafka.googleapis.com/v1/

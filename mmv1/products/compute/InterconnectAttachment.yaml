@@ -42,34 +42,42 @@ custom_code:
   post_create: 'templates/terraform/post_create/interconnect_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/interconnect_attachment.go.tmpl'
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'interconnect_attachment_basic'
     primary_resource_id: 'on_prem'
-    vars:
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
+    steps:
+      - name: 'interconnect_attachment_basic'
+        resource_id_vars:
+          interconnect_attachment_name: 'on-prem-attachment'
+          router_name: 'router-1'
+          network_name: 'network-1'
   - name: 'interconnect_attachment_dedicated'
     primary_resource_id: 'on_prem'
-    vars:
-      interconnect_name: 'interconenct-1'
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'interconnect_attachment_dedicated'
+        resource_id_vars:
+          interconnect_name: 'interconenct-1'
+          interconnect_attachment_name: 'on-prem-attachment'
+          router_name: 'router-1'
+          network_name: 'network-1'
   - name: 'compute_interconnect_attachment_ipsec_encryption'
     primary_resource_id: 'ipsec-encrypted-interconnect-attachment'
-    vars:
-      interconnect_attachment_name: 'test-interconnect-attachment'
-      address_name: 'test-address'
-      router_name: 'test-router'
-      network_name: 'test-network'
+    steps:
+      - name: 'compute_interconnect_attachment_ipsec_encryption'
+        resource_id_vars:
+          interconnect_attachment_name: 'test-interconnect-attachment'
+          address_name: 'test-address'
+          router_name: 'test-router'
+          network_name: 'test-network'
   - name: 'compute_interconnect_attachment_custom_ranges'
     primary_resource_id: 'custom-ranges-interconnect-attachment'
-    vars:
-      interconnect_attachment_name: 'test-custom-ranges-interconnect-attachment'
-      router_name: 'test-router'
-      network_name: 'test-network'
+    steps:
+      - name: 'compute_interconnect_attachment_custom_ranges'
+        resource_id_vars:
+          interconnect_attachment_name: 'test-custom-ranges-interconnect-attachment'
+          router_name: 'test-router'
+          network_name: 'test-network'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -124,7 +132,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs
@@ -440,7 +448,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'vlanId'  # Represents the map key (VLAN tag)
+            - name: 'vlanId' # Represents the map key (VLAN tag)
               type: String
               description: 'The VLAN tag.'
             - name: 'name'

@@ -1,6 +1,6 @@
 ---
 title: "Review a pull request"
-weight: 30
+weight: 20
 aliases:
   - /contribute/review-pr
 ---
@@ -9,12 +9,8 @@ aliases:
 
 This page provides guidelines for reviewing a Magic Modules pull request (PR).
 
-## Special cases
-
-The following types of PRs may require additional scrutiny and/or multiple reviewers.
-
-- DCL to MMv1 migrations
-- Adding multi-actor fields (fields whose values can be altered as a side effect of changes made to a different resource)
+Google-driven changes must have a service team engineer review changes prior
+to review by repository maintainers. For community members, this is not required.
 
 ## Review
 
@@ -58,3 +54,12 @@ The following types of PRs may require additional scrutiny and/or multiple revie
    1. resource-level and field-level documentation are generated correctly for MMv1-based resource
    1. documentation is added manually for handwritten resources.   
 1. Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in [write release notes]({{< ref "release-notes" >}}) before merging the PR.
+
+If any of these steps are impossible, clearly explain that in a comment on the PR or in a summary before handing off to a maintainer for final review.
+
+## Special cases
+
+The following types of PRs may require additional scrutiny and/or multiple reviewers.
+
+- DCL to MMv1 migrations
+- Adding multi-actor fields (fields whose values can be altered as a side effect of changes made to a different resource)

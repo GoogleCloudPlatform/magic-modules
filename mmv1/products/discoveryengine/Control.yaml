@@ -20,6 +20,7 @@ references:
     Configure serving controls: https://cloud.google.com/gemini/enterprise/docs/configure-serving-controls
   api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.collections.engines.controls
 base_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls?controlId={{control_id}}
 update_mask: true

@@ -20,9 +20,8 @@ description: |
 references:
   guides:
     QUICKSTART_TITLE: https://docs.cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/ncc-gateway-overview
-  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.spokes.gatewayAdvertisedRoutes
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.spokes.gatewayAdvertisedRoutes
 base_url: projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes
-min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes?gatewayAdvertisedRouteId={{name}}
 update_mask: true
@@ -37,11 +36,9 @@ async:
 autogen_async: true
 samples:
   - name: network_connectivity_gateway_advertised_route_basic
-    min_version: beta
     primary_resource_id: default
     steps:
       - name: network_connectivity_gateway_advertised_route_basic
-        min_version: beta
         resource_id_vars:
           resource_name: gateway-advertised-route-name
           spoke_name: spoke-name

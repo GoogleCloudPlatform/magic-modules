@@ -31,7 +31,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	return tpgresource.GetResourceNameFromSelfLink(v.(string))
 }
 	{{ else }}
-    {{ if and (or $.WriteOnlyLegacy $.WriteOnly) }}
+    {{ if $.WriteOnly }}
     {{ else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
         {{- customTemplate $ $.CustomFlatten false }}
     {{ else }}
@@ -54,7 +54,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- end }}
   transformed := make(map[string]interface{})
       {{- range $prop := $.UserProperties }}
-        {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
+        {{- if $prop.WriteOnly }}
         {{- else if $prop.FlattenObject }}
     if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
       obj := {{ $prop.ApiName }}.([]interface{})[0]
@@ -100,7 +100,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- end }}
 
   {{- range $prop := $.ItemType.UserProperties }}
-    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnly) }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
     {{- end }}
   {{- end }}

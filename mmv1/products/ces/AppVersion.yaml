@@ -1,3 +1,4 @@
+---
 # Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
 name: AppVersion
 description: Description
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions
@@ -20,14 +20,16 @@ create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions?ap
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
-examples:
+samples:
   - name: "ces_app_version_basic"
     primary_resource_id: "my-app-version"
-    vars:
-      app_version_display_name: 'my-app-version'
-      app_display_name: 'my-app'
-      app_version_id: 'app-version-id'
-      app_id: 'app-id'
+    steps:
+      - name: "ces_app_version_basic"
+        resource_id_vars:
+          app_version_display_name: 'my-app-version'
+          app_display_name: 'my-app'
+          app_version_id: 'app-version-id'
+          app_id: 'app-id'
 autogen_status: QXBwVmVyc2lvbg==
 parameters:
   - name: location
@@ -299,8 +301,7 @@ properties:
                 Default agent type. The agent uses instructions and callbacks specified in
                 the agent to perform the task using a large language model.
               output: true
-              properties:
-                []
+              properties: []
             - name: modelSettings
               type: NestedObject
               description: Model settings contains various configurations for the LLM model.
@@ -360,6 +361,12 @@ properties:
                     The mapping of the app variables names to the Dialogflow session
                     parameters names to be sent to the Dialogflow agent as input.
                   output: true
+                - name: languageCodeVariable
+                  type: String
+                  description: |-
+                    The name of the variable that contains the language code to be used for
+                    the Dialogflow session.
+                  output: true
                 - name: outputVariableMapping
                   type: KeyValuePairs
                   description: |-
@@ -395,6 +402,77 @@ properties:
                     output: true
                     item_type:
                       type: String
+            - name: transferRules
+              type: Array
+              description: |-
+                List of transfer rules for the agent.
+                If multiple rules match, the first one in the list will be used.
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: childAgent
+                    type: String
+                    description: |-
+                      The resource name of the child agent the rule applies to.
+                      Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
+                    output: true
+                  - name: deterministicTransfer
+                    type: NestedObject
+                    description: |-
+                      Deterministic transfer rule. When the condition evaluates to true, the
+                      transfer occurs.
+                    output: true
+                    properties:
+                      - name: expressionCondition
+                        type: NestedObject
+                        description: |-
+                          A rule that evaluates a session state condition. If the condition
+                          evaluates to true, the transfer occurs.
+                        output: true
+                        properties:
+                          - name: expression
+                            type: String
+                            description: The string representation of cloud.api.Expression condition.
+                            output: true
+                      - name: pythonCodeCondition
+                        type: NestedObject
+                        description: |-
+                          A rule that uses Python code block to evaluate the conditions. If the
+                          condition evaluates to true, the transfer occurs.
+                        output: true
+                        properties:
+                          - name: pythonCode
+                            type: String
+                            description: |-
+                              The python code to execute. The function must be named
+                              `should_trigger_transfer_callback`.
+                            output: true
+                  - name: direction
+                    type: String
+                    description: |-
+                      The direction of the transfer.
+                      Possible values:
+                      * PARENT_TO_CHILD
+                      * CHILD_TO_PARENT
+                    output: true
+                  - name: disablePlannerTransfer
+                    type: NestedObject
+                    description: |-
+                      A rule that prevents the planner from transferring to the target agent.
+                    output: true
+                    properties:
+                      - name: expressionCondition
+                        type: NestedObject
+                        description: |-
+                          If the condition evaluates to true, planner will not be allowed to
+                          transfer to the target agent.
+                        output: true
+                        properties:
+                          - name: expression
+                            type: String
+                            description: The string representation of cloud.api.Expression condition.
+                            output: true
             - name: updateTime
               type: String
               description: Timestamp when the agent was last updated.
@@ -613,6 +691,35 @@ properties:
                     type: String
                     description: The title of the web widget.
                     output: true
+              - name: whatsappConfig
+                type: NestedObject
+                description: Configuration specific to WhatsApp deployments.
+                output: true
+                properties:
+                  - name: wabaId
+                    type: String
+                    description: The WhatsApp Business Account ID.
+                    output: true
+                  - name: phoneNumberId
+                    type: String
+                    description: The Meta phone number ID.
+                    output: true
+                  - name: phoneNumber
+                    type: String
+                    description: The phone number in E.164 format.
+                    output: true
+                  - name: displayName
+                    type: String
+                    description: The fetched Meta business page name.
+                    output: true
+                  - name: thumbnailUrl
+                    type: String
+                    description: The fetched Meta business profile thumbnail URL.
+                    output: true
+                  - name: description
+                    type: String
+                    description: The description of the Meta business page or profile.
+                    output: true
           - name: deploymentCount
             type: Integer
             description: Number of deployments in the app.
@@ -670,6 +777,49 @@ properties:
                           The success threshold for semantic similarity. Must be an integer
                           between 0 and 4. Default is >= 3.
                         output: true
+                      - name: semanticSimilarityChannel
+                        type: String
+                        description: |-
+                          The semantic similarity channel to use for evaluation.
+                          Possible values:
+                          SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED
+                          TEXT
+                          AUDIO
+                        output: true
+                  - name: toolMatchingSettings
+                    type: NestedObject
+                    description: |-
+                      The tool matching settings. An extra tool call is a tool call that is
+                      present in the execution but does not match any tool call in the golden
+                      expectation.
+                    output: true
+                    properties:
+                      - name: extraToolCallBehavior
+                        type: String
+                        description: |-
+                          Defines the behavior when an extra tool call is encountered. An extra
+                          tool call is a tool call that is present in the execution but does
+                          not match any tool call in the golden expectation.
+                          Possible values:
+                          FAIL
+                          ALLOW
+                        output: true
+              - name: goldenHallucinationMetricBehavior
+                type: String
+                description: |-
+                  The hallucination metric behavior for golden evaluations.
+                  Possible values:
+                  DISABLED
+                  ENABLED
+                output: true
+              - name: scenarioHallucinationMetricBehavior
+                type: String
+                description: |-
+                  The hallucination metric behavior for scenario evaluations.
+                  Possible values:
+                  DISABLED
+                  ENABLED
+                output: true
           - name: globalInstruction
             type: String
             description: |-
@@ -792,6 +942,27 @@ properties:
                   - name: disableConversationLogging
                     type: Boolean
                     description: Whether to disable conversation logging for the sessions.
+                    output: true
+                  - name: retentionWindow
+                    type: String
+                    description: |-
+                      Controls the retention window for the conversation.
+                      If not set, the conversation will be retained for 365 days.
+                    output: true
+              - name: metricAnalysisSettings
+                type: NestedObject
+                allow_empty_object: true
+                description: |-
+                  Settings to describe the conversation data collection behaviors for the LLM
+                  analysis pipeline for the app.
+                output: true
+                properties:
+                  - name: llmMetricsOptedOut
+                    type: Boolean
+                    description: |-
+                      Whether to collect conversation data for llm analysis metrics. If true,
+                      conversation data will not be collected for llm analysis metrics;
+                      otherwise, conversation data will be collected.
                     output: true
               - name: redactionConfig
                 type: NestedObject
@@ -1023,6 +1194,70 @@ properties:
                   The passphrase to decrypt the private key.
                   Should be left unset if the private key is not encrypted.
                 output: true
+          - name: vpcScSettings
+            type: NestedObject
+            description: VPC-SC settings for the app.
+            output: true
+            properties:
+              - name: allowedOrigins
+                type: Array
+                description: |-
+                  The allowed HTTP(s) origins that OpenAPI tools in the App are
+                  able to directly call when VPC Service Controls are enabled. These strings
+                  must match the origin exactly, including the port if specified. For
+                  example, "https://example.com" or "https://example.com:443". This list does
+                  not yet apply to Python tools that may make direct HTTP calls.
+                output: true
+                item_type:
+                  type: String
+          - name: errorHandlingSettings
+            type: NestedObject
+            description: |-
+              Settings to describe how errors should be handled in the app.
+            output: true
+            properties:
+              - name: errorHandlingStrategy
+                type: String
+                description: |-
+                  The strategy to use for error handling.
+                  Possible values:
+                  NONE
+                  FALLBACK_RESPONSE
+                  END_SESSION
+                output: true
+              - name: fallbackResponseConfig
+                type: NestedObject
+                description: |-
+                  Configuration for handling fallback responses.
+                output: true
+                properties:
+                  - name: customFallbackMessages
+                    type: KeyValuePairs
+                    description: |-
+                      The fallback messages in case of system errors (e.g. LLM errors),
+                      mapped by supported language code
+                      (https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/language).
+                    output: true
+                  - name: maxFallbackAttempts
+                    type: Integer
+                    description: |-
+                      The maximum number of fallback attempts to make before the agent
+                      emitting EndSession Signal.
+                    output: true
+              - name: endSessionConfig
+                type: NestedObject
+                allow_empty_object: true
+                description: |-
+                  Configuration for ending the session in case of system errors (e.g. LLM
+                  errors).
+                output: true
+                properties:
+                  - name: escalateSession
+                    type: Boolean
+                    description: |-
+                      Whether to escalate the session in EndSession. If session is escalated,
+                      metadata in EndSession will contain session_escalated = true.
+                    output: true
       - name: examples
         type: Array
         description: List of examples in the app.
@@ -1708,13 +1943,11 @@ properties:
                       output: true
                     - name: uniqueItems
                       type: Boolean
-                      description: Indicate the items in the array must be unique. Only applies
-                        to TYPE.ARRAY.
+                      description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
                       type: String
-                      description: A map of definitions for use by ref. Only allowed at the root
-                        of the schema.
+                      description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
@@ -1735,8 +1968,7 @@ properties:
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
                       type: String
-                      description: Optional. The instance value should be valid against at least
-                        one of the schemas in this list.
+                      description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
@@ -1821,13 +2053,11 @@ properties:
                       output: true
                     - name: uniqueItems
                       type: Boolean
-                      description: Indicate the items in the array must be unique. Only applies
-                        to TYPE.ARRAY.
+                      description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
                       type: String
-                      description: A map of definitions for use by ref. Only allowed at the root
-                        of the schema.
+                      description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
@@ -1848,8 +2078,7 @@ properties:
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
                       type: String
-                      description: Optional. The instance value should be valid against at least
-                        one of the schemas in this list.
+                      description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
                       custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
@@ -2024,13 +2253,11 @@ properties:
                                 properties:
                                   - name: collection
                                     type: String
-                                    description: Resource name of the collection the data store
-                                      belongs to.
+                                    description: Resource name of the collection the data store belongs to.
                                     output: true
                                   - name: collectionDisplayName
                                     type: String
-                                    description: Display name of the collection the data store belongs
-                                      to.
+                                    description: Display name of the collection the data store belongs to.
                                     output: true
                                   - name: dataSource
                                     type: String
@@ -2147,8 +2374,7 @@ properties:
                             output: true
                           - name: modelSettings
                             type: NestedObject
-                            description: Model settings contains various configurations for the
-                              LLM model.
+                            description: Model settings contains various configurations for the LLM model.
                             output: true
                             properties:
                               - name: model
@@ -2167,8 +2393,7 @@ properties:
                                 output: true
                           - name: prompt
                             type: String
-                            description: The prompt definition. If not set, default prompt will be
-                              used.
+                            description: The prompt definition. If not set, default prompt will be used.
                             output: true
                       - name: summarizationConfig
                         type: NestedObject
@@ -2181,8 +2406,7 @@ properties:
                             output: true
                           - name: modelSettings
                             type: NestedObject
-                            description: Model settings contains various configurations for the
-                              LLM model.
+                            description: Model settings contains various configurations for the LLM model.
                             output: true
                             properties:
                               - name: model
@@ -2201,8 +2425,7 @@ properties:
                                 output: true
                           - name: prompt
                             type: String
-                            description: The prompt definition. If not set, default prompt will be
-                              used.
+                            description: The prompt definition. If not set, default prompt will be used.
                             output: true
                 - name: name
                   type: String
@@ -2340,13 +2563,11 @@ properties:
                             type: String
                         - name: tokenEndpoint
                           type: String
-                          description: The token endpoint in the OAuth provider to exchange for an
-                            access token.
+                          description: The token endpoint in the OAuth provider to exchange for an access token.
                           output: true
                     - name: serviceAccountAuthConfig
                       type: NestedObject
-                      description: Configurations for authentication using a custom service
-                        account.
+                      description: Configurations for authentication using a custom service account.
                       output: true
                       properties:
                         - name: serviceAccount
@@ -2369,7 +2590,7 @@ properties:
                       allow_empty_object: true
                       send_empty_value: true
                       output: true
-                      properties: []  # Explicitly show no properties
+                      properties: [] # Explicitly show no properties
                 - name: description
                   type: String
                   description: |-
@@ -2379,8 +2600,7 @@ properties:
                   output: true
                 - name: ignoreUnknownFields
                   type: Boolean
-                  description: If true, the agent will ignore unknown fields in the API
-                    response.
+                  description: If true, the agent will ignore unknown fields in the API response.
                   output: true
                 - name: name
                   type: String
@@ -2510,8 +2730,7 @@ properties:
               output: true
             - name: displayName
               type: String
-              description: The display name of the toolset. Must be unique within the same
-                app.
+              description: The display name of the toolset. Must be unique within the same app.
               output: true
             - name: etag
               type: String
@@ -2522,8 +2741,7 @@ properties:
                 changes.
             - name: executionType
               type: String
-              description: |2-
-
+              description: |-
                 Possible values:
                 SYNCHRONOUS
                 ASYNCHRONOUS
@@ -2610,13 +2828,11 @@ properties:
                             type: String
                         - name: tokenEndpoint
                           type: String
-                          description: The token endpoint in the OAuth provider to exchange for an
-                            access token.
+                          description: The token endpoint in the OAuth provider to exchange for an access token.
                           output: true
                     - name: serviceAccountAuthConfig
                       type: NestedObject
-                      description: Configurations for authentication using a custom service
-                        account.
+                      description: Configurations for authentication using a custom service account.
                       output: true
                       properties:
                         - name: serviceAccount

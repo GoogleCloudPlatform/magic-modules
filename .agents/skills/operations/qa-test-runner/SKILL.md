@@ -19,4 +19,4 @@ Use the `invoke_subagent` tool. Pass the context of the change as part of the tr
 invoke_subagent("qa-test-runner", "Run <TEST_NAME>. We just made the following change: <CHANGE_DESCRIPTION>. Verify if it fails or passes. Use your active workspace to find the magic-modules path <PATH_TO_MAGIC_MODULES> and output debug logs to <PATH_TO_MAGIC_MODULES>/debug_output.")
 
 ### 3. Verify Report
-Read the human-readable Markdown report returned by the subagent. Formulate a fix strategy using `troubleshooting_reference.md` based on their analysis.
+Read the human-readable Markdown report returned by the subagent. Formulate a fix strategy using `.agents/skills/operations/troubleshooting_reference.md` based on their analysis.

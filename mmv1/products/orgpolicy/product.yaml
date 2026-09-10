@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'OrgPolicy'
-display_name: 'Organization Policy'
-versions:
-  - name: 'ga'
-    base_url: 'https://orgpolicy.googleapis.com/v2/'
-  - name: 'beta'
-    base_url: 'https://orgpolicy.googleapis.com/v2/'
+name: OrgPolicy
+display_name: Organization Policy
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://orgpolicy.googleapis.com/v2/
+  - name: beta
+    base_url: https://orgpolicy.googleapis.com/v2/

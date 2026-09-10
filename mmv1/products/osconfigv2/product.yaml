@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'OSConfigV2'
-display_name: 'OS Config v2'
-versions:
-  - name: 'ga'
-    base_url: 'https://osconfig.googleapis.com/v2/'
-  - name: 'beta'
-    base_url: 'https://osconfig.googleapis.com/v2beta/'
+name: OSConfigV2
+display_name: OS Config v2
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
-  - 'https://www.googleapis.com/auth/compute'
+  - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/compute
+versions:
+  - name: ga
+    base_url: https://osconfig.googleapis.com/v2/
+  - name: beta
+    base_url: https://osconfig.googleapis.com/v2beta/

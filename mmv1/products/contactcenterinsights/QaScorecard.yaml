@@ -15,6 +15,7 @@
 name: QaScorecard
 description: A QaScorecard represents a collection of questions to be scored during analysis.
 base_url: projects/{{project}}/locations/{{location}}/qaScorecards
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
 create_url: projects/{{project}}/locations/{{location}}/qaScorecards?qaScorecardId={{qa_scorecard_id}}
 update_mask: true
@@ -22,11 +23,13 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/qaScorecards/{{qa_scorecard_id}}
 autogen_status: UWFTY29yZWNhcmRBdXRvZ2VuVjJBZ2VudA==
-examples:
+samples:
   - name: contact_center_insights_qa_scorecard_basic
     primary_resource_id: default
-    vars:
-      scorecard_id: qa-scorecard
+    steps:
+      - name: contact_center_insights_qa_scorecard_basic
+        resource_id_vars:
+          scorecard_id: qa-scorecard
 parameters:
   - name: location
     type: String

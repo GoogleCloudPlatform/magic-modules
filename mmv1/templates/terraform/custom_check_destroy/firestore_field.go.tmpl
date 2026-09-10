@@ -23,6 +23,10 @@ if err != nil {
 		// We do not return the error in this case - destroy was successful
 		return nil
 	}
+	if e.Code == 404 && regexp.MustCompile(`Project .* or database .* does not exist`).MatchString(e.Message) {
+		// The project or database does not exist, which means the resource is destroyed.
+		return nil
+	}
 
 	// Return err in all other cases
 	return err

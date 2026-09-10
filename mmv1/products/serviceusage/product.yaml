@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ---
-name: 'ServiceUsage'
-display_name: 'Service Usage'
-versions:
-  - name: 'ga'
-    base_url: 'https://serviceusage.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://serviceusage.googleapis.com/v1beta1/'
+name: ServiceUsage
+display_name: Service Usage
+operation_retry: templates/terraform/operation_retry/service_usage.go.tmpl
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
-operation_retry: 'templates/terraform/operation_retry/service_usage.go.tmpl'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://serviceusage.googleapis.com/v1/
+  - name: beta
+    base_url: https://serviceusage.googleapis.com/v1beta1/

@@ -12,14 +12,14 @@
 # limitations under the License.
 
 ---
-name: 'VertexAI'
-display_name: 'Vertex AI'
-versions:
-  - name: 'ga'
-    base_url: 'https://{{region}}-aiplatform.googleapis.com/v1/'
-    cai_base_url: 'https://aiplatform.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://{{region}}-aiplatform.googleapis.com/v1beta1/'
-    cai_base_url: 'https://aiplatform.googleapis.com/v1beta1/'
+name: VertexAI
+display_name: Vertex AI
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1/
+    cai_base_url: https://aiplatform.googleapis.com/v1/
+  - name: beta
+    base_url: https://{{region}}-aiplatform.googleapis.com/v1beta1/
+    cai_base_url: https://aiplatform.googleapis.com/v1beta1/

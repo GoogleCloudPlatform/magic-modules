@@ -31,6 +31,21 @@ var ServicesListBeta = mapOf(
         "displayName" to "Activedirectory",
         "path" to "./google-beta/services/activedirectory"
     ),
+    "agentidentity" to mapOf(
+        "name" to "agentidentity",
+        "displayName" to "Agent Identity",
+        "path" to "./google-beta/services/agentidentity"
+    ),
+    "agenticapplications" to mapOf(
+        "name" to "agenticapplications",
+        "displayName" to "Agentic Applications",
+        "path" to "./google-beta/services/agenticapplications"
+    ),
+    "agentregistry" to mapOf(
+        "name" to "agentregistry",
+        "displayName" to "Agent Registry",
+        "path" to "./google-beta/services/agentregistry"
+    ),
     "alloydb" to mapOf(
         "name" to "alloydb",
         "displayName" to "Alloydb",
@@ -90,6 +105,11 @@ var ServicesListBeta = mapOf(
         "name" to "biglake",
         "displayName" to "Biglake",
         "path" to "./google-beta/services/biglake"
+    ),
+    "biglakehive" to mapOf(
+        "name" to "biglakehive",
+        "displayName" to "BiglakeHive",
+        "path" to "./google-beta/services/biglakehive"
     ),
     "biglakeiceberg" to mapOf(
         "name" to "biglakeiceberg",
@@ -235,6 +255,11 @@ var ServicesListBeta = mapOf(
         "name" to "cloudsecuritycompliance",
         "displayName" to "Cloud Security Compliance",
         "path" to "./google-beta/services/cloudsecuritycompliance"
+    ),
+    "cloudsupport" to mapOf(
+        "name" to "cloudsupport",
+        "displayName" to "Cloudsupport",
+        "path" to "./google-beta/services/cloudsupport"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
@@ -611,11 +636,6 @@ var ServicesListBeta = mapOf(
         "displayName" to "Migrationcenter",
         "path" to "./google-beta/services/migrationcenter"
     ),
-    "mlengine" to mapOf(
-        "name" to "mlengine",
-        "displayName" to "Mlengine",
-        "path" to "./google-beta/services/mlengine"
-    ),
     "modelarmor" to mapOf(
         "name" to "modelarmor",
         "displayName" to "ModelArmor",
@@ -651,6 +671,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Networkmanagement",
         "path" to "./google-beta/services/networkmanagement"
     ),
+    "networkmanagementv1" to mapOf(
+        "name" to "networkmanagementv1",
+        "displayName" to "Networkmanagementv1",
+        "path" to "./google-beta/services/networkmanagementv1"
+    ),
     "networksecurity" to mapOf(
         "name" to "networksecurity",
         "displayName" to "Networksecurity",
@@ -660,11 +685,6 @@ var ServicesListBeta = mapOf(
         "name" to "networkservices",
         "displayName" to "Networkservices",
         "path" to "./google-beta/services/networkservices"
-    ),
-    "notebooks" to mapOf(
-        "name" to "notebooks",
-        "displayName" to "Notebooks",
-        "path" to "./google-beta/services/notebooks"
     ),
     "observability" to mapOf(
         "name" to "observability",
@@ -831,6 +851,12 @@ var ServicesListBeta = mapOf(
         "displayName" to "Serviceusage",
         "path" to "./google-beta/services/serviceusage"
     ),
+     "serviceusagev2" to mapOf(
+         "name" to "serviceusagev2",
+         "displayName" to "ServiceUsageV2",
+         "path" to "./google-beta/services/serviceusagev2"
+     ),
+
     "siteverification" to mapOf(
         "name" to "siteverification",
         "displayName" to "Siteverification",
@@ -865,6 +891,11 @@ var ServicesListBeta = mapOf(
         "name" to "storagecontrol",
         "displayName" to "Storagecontrol",
         "path" to "./google-beta/services/storagecontrol"
+    ),
+    "storageftp" to mapOf(
+        "name" to "storageftp",
+        "displayName" to "Storageftp",
+        "path" to "./google-beta/services/storageftp"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",
@@ -905,6 +936,11 @@ var ServicesListBeta = mapOf(
         "name" to "vertexai",
         "displayName" to "Vertexai",
         "path" to "./google-beta/services/vertexai"
+    ),
+    "vertexaiaad" to mapOf(
+        "name" to "vertexaiaad",
+        "displayName" to "Vertexaiaad",
+        "path" to "./google-beta/services/vertexaiaad"
     ),
     "vmwareengine" to mapOf(
         "name" to "vmwareengine",

@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'BiglakeIceberg'
-legacy_name: 'biglake'
-display_name: 'Biglake'
-versions:
-  - name: 'ga'
-    base_url: 'https://biglake.googleapis.com/'
+name: BiglakeIceberg
+legacy_name: biglake
+display_name: Biglake
 scopes:
-  - 'https://www.googleapis.com/auth/bigquery'
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/bigquery
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://biglake.googleapis.com/

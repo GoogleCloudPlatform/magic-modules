@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 autogen_async: true
+generate_list_resource: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -48,26 +49,33 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
+samples:
   - name: 'network_services_authz_extension_basic'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
-      backend_name: 'authz-service'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_services_authz_extension_basic'
+        resource_id_vars:
+          resource_name: 'my-authz-ext'
+          backend_name: 'authz-service'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_services_authz_extension_basic_with_auth_grpc'
     min_version: 'beta'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext-with-grpc'
-      backend_name: 'authz-service-grpc'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'network_services_authz_extension_basic_with_auth_grpc'
+        min_version: 'beta'
+        resource_id_vars:
+          resource_name: 'my-authz-ext-with-grpc'
+          backend_name: 'authz-service-grpc'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'network_services_authz_extension_iap'
     primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
+    steps:
+      - name: 'network_services_authz_extension_iap'
+        resource_id_vars:
+          resource_name: 'my-authz-ext'
 parameters:
   - name: 'name'
     type: String
@@ -152,6 +160,17 @@ properties:
     type: Array
     description: |
       List of the HTTP headers to forward to the extension (from the client). If omitted, all headers are sent. Each element is a string indicating the header name.
+    item_type:
+      type: String
+  - name: 'forwardAttributes'
+    type: Array
+    description: |
+      List of the Envoy attributes to forward to the extension server. The attributes
+      provided here are included as part of the `ProcessingRequest.attributes` field
+      (of type `map`), where the keys are the attribute names. Refer to the
+      [documentation](https://cloud.google.com/service-extensions/docs/attributes)
+      for the names of attributes that can be forwarded. If omitted, no attributes
+      are sent. Each element is a string indicating the attribute name.
     item_type:
       type: String
   - name: 'wireFormat'

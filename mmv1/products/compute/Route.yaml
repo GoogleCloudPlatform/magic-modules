@@ -37,7 +37,6 @@ description: |
   A Route resource must have exactly one specification of either
   nextHopGateway, nextHopInstance, nextHopIp, nextHopVpnTunnel, or
   nextHopIlb.
-
 references:
   guides:
     'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
@@ -71,38 +70,44 @@ custom_code:
   decoder: 'templates/terraform/decoders/route.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/compute_route.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.IsPeeringOperationInProgress'
-examples:
+samples:
   - name: 'route_basic'
     primary_resource_id: 'default'
-    vars:
-      route_name: 'network-route'
-      network_name: 'compute-network'
+    steps:
+      - name: 'route_basic'
+        resource_id_vars:
+          route_name: 'network-route'
+          network_name: 'compute-network'
   - name: 'route_ilb'
     primary_resource_id: 'route-ilb'
-    vars:
-      network_name: 'compute-network'
-      subnet_name: 'compute-subnet'
-      forwarding_rule_name: 'compute-forwarding-rule'
-      health_check_name: 'proxy-health-check'
-      backend_name: 'compute-backend'
-      route_name: 'route-ilb'
+    steps:
+      - name: 'route_ilb'
+        resource_id_vars:
+          network_name: 'compute-network'
+          subnet_name: 'compute-subnet'
+          forwarding_rule_name: 'compute-forwarding-rule'
+          health_check_name: 'proxy-health-check'
+          backend_name: 'compute-backend'
+          route_name: 'route-ilb'
   - name: 'route_ilb_vip'
     primary_resource_id: 'route-ilb'
     min_version: 'beta'
-    vars:
-      producer_name: 'producer'
-      consumer_name: 'consumer'
-      forwarding_rule_name: 'compute-forwarding-rule'
-      health_check_name: 'proxy-health-check'
-      backend_name: 'compute-backend'
-      route_name: 'route-ilb'
-    test_vars_overrides:
-      # for backward compatible
-      producer_name: '"producer" + randomSuffix'
-      # for backward compatible
-      consumer_name: '"consumer" + randomSuffix'
+    steps:
+      - name: 'route_ilb_vip'
+        min_version: 'beta'
+        resource_id_vars:
+          producer_name: 'producer'
+          consumer_name: 'consumer'
+          forwarding_rule_name: 'compute-forwarding-rule'
+          health_check_name: 'proxy-health-check'
+          backend_name: 'compute-backend'
+          route_name: 'route-ilb'
+        test_vars_overrides:
+          # for backward compatible
+          producer_name: '"producer" + randomSuffix'
+          # for backward compatible
+          consumer_name: '"consumer" + randomSuffix'
 parameters:
 properties:
   - name: 'destRange'
@@ -379,7 +384,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

@@ -95,6 +95,9 @@ properties:
                     type: String
                     description: The effect of the taint.
                     ignore_read: true
+        - name: ignoreNodeCountChanges
+          type: Boolean
+          client_side: true
   - name: nodeConfig
     type: NestedObject
     description: Configuration for the nodes in the pool.
@@ -179,3 +182,11 @@ properties:
   - name: nodeVersion
     type: String
     ignore_read: true
+  - name: skipNodePoolRefresh
+    type: Boolean
+    client_side: true
+  - name: dataplaneOptimizationMode
+    type: String
+  - name: ignoreNodeCountChanges
+    type: Boolean
+    client_side: true

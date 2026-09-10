@@ -18,7 +18,7 @@
   {{- if $.Sensitive }}
   **Note**: This property is sensitive and will not be displayed in the plan.
   {{- end }}
-  {{- if or $.WriteOnlyLegacy $.WriteOnly }}
+  {{- if $.WriteOnly }}
   **Note**: This property is write-only and will not be read from the API.
 
   ~> **Note:** One of `{{ slice (underscore $.Name) 0 (sub (len (underscore $.Name)) 3) }}` or `{{ underscore $.Name }}` can only be set.

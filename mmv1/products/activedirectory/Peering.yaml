@@ -12,95 +12,96 @@
 # limitations under the License.
 
 ---
-name: 'Peering'
-kind: 'activedirectory#peering'
+name: Peering
 description: Creates a Peering for Managed AD instance.
-min_version: 'beta'
 references:
   guides:
-    'Active Directory Domain Peering': 'https://cloud.google.com/managed-microsoft-ad/docs/domain-peering'
-  api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1beta1/projects.locations.global.peerings'
+    Active Directory Domain Peering: https://cloud.google.com/managed-microsoft-ad/docs/domain-peering
+  api: https://cloud.google.com/managed-microsoft-ad/reference/rest/v1beta1/projects.locations.global.peerings
 docs:
-id_format: 'projects/{{project}}/locations/global/domains/{{peering_id}}'
-base_url: 'projects/{{project}}/locations/global/peerings'
+base_url: projects/{{project}}/locations/global/peerings
+min_version: beta
 self_link: '{{name}}'
-create_url: 'projects/{{project}}/locations/global/peerings?peeringId={{peering_id}}'
-update_verb: 'PATCH'
+create_url: projects/{{project}}/locations/global/peerings?peeringId={{peering_id}}
+delete_url: projects/{{project}}/locations/global/peerings/{{peering_id}}
 update_mask: false
-delete_url: 'projects/{{project}}/locations/global/peerings/{{peering_id}}'
-exclude_import: true
+update_verb: PATCH
+kind: activedirectory#peering
+id_format: projects/{{project}}/locations/global/domains/{{peering_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+exclude_import: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
-examples:
-  - name: 'active_directory_peering_basic'
-    primary_resource_id: 'ad-domain-peering'
-    vars:
-      domain_name: 'ad.test.hashicorptest.com'
-      project_id: 'my-peered-project'
-    test_vars_overrides:
-      # for backward compatible
-      domain_name: '"ad.test.hashicorptest.com" + randomSuffix'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-      # skip the test until Active Directory setup issue got resolved
+samples:
+  - name: active_directory_peering_basic
+    primary_resource_id: ad-domain-peering
     exclude_test: true
-    exclude_import_test: true
+    steps:
+      - name: active_directory_peering_basic
+        resource_id_vars:
+          domain_name: ad.test.hashicorptest.com
+          project_id: my-peered-project
+        test_vars_overrides:
+          # for backward compatible
+          domain_name: '"ad.test.hashicorptest.com" + randomSuffix'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          # skip the test until Active Directory setup issue got resolved
+        exclude_import_test: true
 parameters:
-  - name: 'peeringId'
+  - name: peeringId
     type: String
-    description: ''
-    min_version: 'beta'
+    description: ""
+    min_version: beta
     url_param_only: true
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Unique name of the peering in this scope including projects and location using the form: projects/{projectId}/locations/global/peerings/{peeringId}.
-    min_version: 'beta'
+    min_version: beta
     output: true
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
-    description: 'Resource labels that can contain user-provided metadata'
-    min_version: 'beta'
-  - name: 'authorizedNetwork'
+    description: Resource labels that can contain user-provided metadata
+    min_version: beta
+  - name: authorizedNetwork
     type: String
     description: |
       The full names of the Google Compute Engine networks to which the instance is connected. Caller needs to make sure that CIDR subnets do not overlap between networks, else peering creation will fail.
-    min_version: 'beta'
+    min_version: beta
     required: true
     immutable: true
-  - name: 'domainResource'
+  - name: domainResource
     type: String
     description: |
       Full domain resource path for the Managed AD Domain involved in peering. The resource path should be in the form projects/{projectId}/locations/global/domains/{domainName}
-    min_version: 'beta'
+    min_version: beta
     required: true
     immutable: true
-  - name: 'status'
+  - name: status
     type: String
     description: |
       The current state of this Peering.
-    min_version: 'beta'
+    min_version: beta
     url_param_only: true
     ignore_read: true
-  - name: 'statusMessage'
+  - name: statusMessage
     type: String
     description: |
       Additional information about the current status of this peering, if available.
-
-    min_version: 'beta'
+    min_version: beta
     ignore_read: true

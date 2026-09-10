@@ -30,10 +30,10 @@ func NormalizePath(p string) string {
 }
 
 // GetFilesTouchedByOpenPRs queries the GitHub CLI for open pull requests
-// updated in the last 2 months and returns a map of normalized paths to PR numbers.
-func GetFilesTouchedByOpenPRs() (map[string][]int, error) {
-	twoMonthsAgo := time.Now().AddDate(0, -2, 0).Format("2006-01-02")
-	searchQuery := fmt.Sprintf("state:open updated:>=%s", twoMonthsAgo)
+// updated in the last N days and returns a map of normalized paths to PR numbers.
+func GetFilesTouchedByOpenPRs(days int) (map[string][]int, error) {
+	sinceDate := time.Now().AddDate(0, 0, -days).Format("2006-01-02")
+	searchQuery := fmt.Sprintf("state:open updated:>=%s", sinceDate)
 
 	cmd := exec.Command("gh", "pr", "list",
 		"-R", "GoogleCloudPlatform/magic-modules",

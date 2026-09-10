@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -155,12 +156,19 @@ func testAccCheckProjectMetadataItemDestroyProducer(t *testing.T) func(s *terraf
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		project, err := tpgcompute.NewClient(config, config.UserAgent).Projects.Get(config.Project).Do()
+		project, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Projects.Get(config.Project).Do()
 		if err != nil {
 			return err
 		}
 
-		metadata := tpgcompute.FlattenMetadata(project.CommonInstanceMetadata)
+		var commonInstanceMetadataMap map[string]interface{}
+		if project.CommonInstanceMetadata != nil {
+			commonInstanceMetadataMap, err = tpgresource.ConvertToMap(project.CommonInstanceMetadata)
+			if err != nil {
+				return err
+			}
+		}
+		metadata := tpgcompute.FlattenMetadata(commonInstanceMetadataMap)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_project_metadata_item" {

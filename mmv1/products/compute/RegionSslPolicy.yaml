@@ -43,15 +43,19 @@ async:
 include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_ssl_policy.tmpl'
-examples:
+samples:
   - name: 'region_ssl_policy_basic'
     primary_resource_id: 'region-ssl-policy'
-    vars:
-      region_ssl_policy_name: 'region-ssl-policy'
+    steps:
+      - name: 'region_ssl_policy_basic'
+        resource_id_vars:
+          region_ssl_policy_name: 'region-ssl-policy'
   - name: 'region_ssl_policy_post_quantum'
     primary_resource_id: 'post-quantum-region-ssl-policy'
-    vars:
-      post_quantum_region_ssl_policy_name: 'post-quantum-region-ssl-policy'
+    steps:
+      - name: 'region_ssl_policy_post_quantum'
+        resource_id_vars:
+          post_quantum_region_ssl_policy_name: 'post-quantum-region-ssl-policy'
 parameters:
   - name: 'region'
     type: ResourceRef

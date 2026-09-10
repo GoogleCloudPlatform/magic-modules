@@ -78,11 +78,11 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
 	metadata := metadata.FromResource(resource)
-	bytes, err := yaml.Marshal(metadata)
+	metadataBytes, err := yaml.Marshal(metadata)
 	if err != nil {
 		glog.Exit("error marshalling yaml %v: %v", filePath)
 	}
-	err = os.WriteFile(filePath, bytes, 0644)
+	err = os.WriteFile(filePath, metadataBytes, 0644)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -124,6 +124,16 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 
 func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/list_resource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+// GenerateIamListResourceDocumentationFile emits one docs page covering every IAM
+// list kind the resource opts into, mirroring resource_iam.hyml.markdown.tmpl.
+func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_list_resource.html.markdown.tmpl"
 	templates := []string{
 		templatePath,
 	}
@@ -242,6 +252,17 @@ func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Reso
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+// GenerateIamQueryTestFile emits a Terraform query-mode acceptance test for every Iam
+// list kind the resource opts into (iam_policy.generate_list_resource)
+func (td *TemplateData) GenerateIamQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/iam_list_query_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/sweeper_file.go.tmpl"
 	templates := []string{
@@ -305,7 +326,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	sourceByte := contents.Bytes()
-	if len(sourceByte) == 0 {
+	if len(bytes.TrimSpace(sourceByte)) == 0 {
 		return
 	}
 

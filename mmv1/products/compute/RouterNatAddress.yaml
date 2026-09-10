@@ -64,16 +64,18 @@ custom_code:
 custom_diff:
   - 'resourceComputeRouterNatAddressDrainNatIpsCustomDiff'
 exclude_tgc: true
-examples:
+samples:
   - name: 'router_nat_address_count'
     primary_resource_id: 'nat_address'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name: 'nat-manual-ip'
     exclude_test: true
+    steps:
+      - name: 'router_nat_address_count'
+        resource_id_vars:
+          router_name: 'my-router'
+          nat_name: 'my-router-nat'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
+          address_name: 'nat-manual-ip'
 parameters:
   - name: 'router'
     type: ResourceRef

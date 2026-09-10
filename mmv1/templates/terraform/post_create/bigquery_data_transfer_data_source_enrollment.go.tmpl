@@ -1,0 +1,49 @@
+// Enrollment is eventually consistent. For a short window after enrollDataSources returns,
+// reads of the data source alternate between success and FAILED_PRECONDITION depending on
+// which replica serves them. Because that error is mapped to a 404 so drift is detected, the
+// read that follows create would otherwise drop the resource from state.
+//
+// Wait for the enrollment to become readable, requiring enough consecutive successes that a run
+// of lucky replicas is improbable rather than merely unlikely. Reads were measured succeeding
+// roughly half the time while a data source was still settling, so three in a row came up by
+// chance often enough to let the create through too early; eight does not. This does not
+// establish consistency - the API exposes no way to do that - it just makes the common case
+// reliable, since a single enroll normally converges within a few seconds.
+consecutiveReads := 0
+if err := transport_tpg.Retry(transport_tpg.RetryOptions{
+	Timeout: d.Timeout(schema.TimeoutCreate),
+	RetryFunc: func() error {
+		readUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/dataSources/{{"{{"}}data_source_id{{"}}"}}")
+		if err != nil {
+			return err
+		}
+
+		if _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    readUrl,
+			UserAgent: userAgent,
+		}); err != nil {
+			consecutiveReads = 0
+			return err
+		}
+
+		consecutiveReads++
+		if consecutiveReads < 8 {
+			return fmt.Errorf("data source enrollment is not consistently readable yet")
+		}
+		return nil
+	},
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+		func(err error) (bool, string) {
+			if strings.Contains(err.Error(), "BigQuery DataTransfer is not enabled for") ||
+				strings.Contains(err.Error(), "not consistently readable yet") {
+				return true, "waiting for data source enrollment to become consistently readable"
+			}
+			return false, ""
+		},
+	},
+}); err != nil {
+	return fmt.Errorf("Error waiting for DataSourceEnrollment %q to become readable: %s", d.Id(), err)
+}

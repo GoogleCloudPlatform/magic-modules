@@ -28,23 +28,29 @@ id_format: '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
 import_format:
   - "organizations/{{%organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
   - "{{%parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
-examples:
+samples:
   - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
     primary_resource_id: "example"
-    vars:
-      cloudcontrol_name: "example-cloudcontrol"
-    test_env_vars:
-      org_id: "ORG_ID"
+    steps:
+      - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
+        resource_id_vars:
+          cloudcontrol_name: "example-cloudcontrol"
+        test_env_vars:
+          org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_cloudcontrol_project_basic"
     primary_resource_id: "example"
-    vars:
-      cloudcontrol_name: "example-cloudcontrol"
+    steps:
+      - name: "cloudsecuritycompliance_cloudcontrol_project_basic"
+        resource_id_vars:
+          cloudcontrol_name: "example-cloudcontrol"
   - name: "cloudsecuritycompliance_cloudcontrol_org_basic_backward"
     primary_resource_id: "example"
-    vars:
-      cloudcontrol_name: "example-cloudcontrol"
-    test_env_vars:
-      org_id: "ORG_ID"
+    steps:
+      - name: "cloudsecuritycompliance_cloudcontrol_org_basic_backward"
+        resource_id_vars:
+          cloudcontrol_name: "example-cloudcontrol"
+        test_env_vars:
+          org_id: "ORG_ID"
 identity_schema_version: 2
 identity_upgraders: true
 autogen_status: Q2xvdWRDb250cm9s

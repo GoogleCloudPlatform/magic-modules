@@ -24,6 +24,7 @@ references:
     Configure analysis rules using the API: https://cloud.google.com/contact-center/insights/docs/analysis-rule
   api: https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.analysisRules
 base_url: projects/{{project}}/locations/{{location}}/analysisRules
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/analysisRules
 delete_url: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}

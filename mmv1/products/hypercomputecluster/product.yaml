@@ -13,12 +13,12 @@
 
 ---
 name: Hypercomputecluster
-packagepath: ""
 display_name: Cluster Director
+packagepath: ""
 scopes:
-    - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-    - base_url: https://hypercomputecluster.googleapis.com/v1/
-      name: ga
-    - base_url: https://hypercomputecluster.googleapis.com/v1beta/
-      name: beta
+  - base_url: https://hypercomputecluster.googleapis.com/v1/
+    name: ga
+  - base_url: https://hypercomputecluster.googleapis.com/v1beta/
+    name: beta

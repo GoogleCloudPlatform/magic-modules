@@ -192,7 +192,7 @@ The following arguments are supported:
 
 <a name="nested_scheduling"></a>The `scheduling` block supports:
 
-* `host_error_timeout_seconds` - [Beta](../guides/provider_versions.html.markdown) Time in seconds for host error detection.
+* `host_error_timeout_seconds` - Time in seconds for host error detection.
 
 * `preemptible` - Whether the instance is preemptible.
 
@@ -203,7 +203,7 @@ The following arguments are supported:
 * `automatic_restart` - Specifies if the instance should be
     restarted if it was terminated by Compute Engine (not a user).
     
-* `provisioning_model` - Describe the type of preemptible VM.
+* `provisioning_model` - Describe the type of provisioning model for the instance. Can be `STANDARD`, `SPOT`, `FLEX_START`, or `RESERVATION_BOUND`.
 
 * `instance_termination_action` - Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 

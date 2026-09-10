@@ -60,7 +60,6 @@ custom_code:
 custom_diff:
   - 'revisionNameCustomizeDiff'
 error_retry_predicates:
-
   - 'transport_tpg.IsCloudRunCreationConflict'
 schema_version: 2
 state_upgrade_base_schema_version: 1
@@ -178,6 +177,14 @@ samples:
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_iap'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-srv'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_sandbox'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloud_run_service_sandbox'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
         test_env_vars:
@@ -379,9 +386,7 @@ properties:
                 custom_expand: 'templates/terraform/custom_expand/cloud_run_service_revision_name.tmpl'
           - name: 'spec'
             type: NestedObject
-            description:
-              RevisionSpec holds the desired state of the Revision (from the
-              client).
+            description: RevisionSpec holds the desired state of the Revision (from the client).
             required: true
             default_from_api: true
             properties:
@@ -535,22 +540,17 @@ properties:
                         properties:
                           - name: 'name'
                             type: String
-                            description:
-                              If specified, used to specify which protocol to
-                              use. Allowed values are "http1" (HTTP/1) and "h2c"
-                              (HTTP/2 end-to-end). Defaults to "http1".
+                            description: If specified, used to specify which protocol to use. Allowed values are "http1" (HTTP/1) and "h2c" (HTTP/2 end-to-end). Defaults to "http1".
                             default_from_api: true
                           - name: 'protocol'
                             type: String
-                            description:
-                              Protocol for port. Must be "TCP". Defaults to
-                              "TCP".
+                            description: Protocol for port. Must be "TCP". Defaults to "TCP".
                           - name: 'containerPort'
                             type: Integer
-                            description:
-                              Port number the container listens on. This must be
-                              a valid port number (between 1 and 65535).
-                              Defaults to "8080".
+                            description: Port number the container listens on. This must be a valid port number (between 1 and 65535). Defaults to "8080".
+                    - name: 'sandboxLauncher'
+                      type: Boolean
+                      description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
                     - name: 'resources'
                       type: NestedObject
                       description: |-
@@ -1142,7 +1142,6 @@ properties:
                 URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
                 and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
                 but may not contain anything else (e.g. basic auth, url path, etc.)
-
               output: true
   - name: 'metadata'
     type: NestedObject

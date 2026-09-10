@@ -12,52 +12,54 @@
 # limitations under the License.
 
 ---
-name: 'GcpUserAccessBinding'
+name: GcpUserAccessBinding
 description: |
   Restricts access to Cloud Console and Google Cloud APIs for a set of users using Context-Aware Access.
 references:
   guides:
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/organizations.gcpUserAccessBindings'
+  api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/organizations.gcpUserAccessBindings
 docs:
-id_format: '{{name}}'
-base_url: 'organizations/{{organization_id}}/gcpUserAccessBindings'
+base_url: organizations/{{organization_id}}/gcpUserAccessBindings
 self_link: '{{name}}'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+id_format: '{{name}}'
 import_format:
   - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
+  actions: [create, delete, update]
   result:
     resource_inside_response: true
-custom_code:
-  custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
+autogen_async: true
 exclude_tgc: true
-examples:
-  - name: 'access_context_manager_gcp_user_access_binding_basic'
-    primary_resource_id: 'gcp_user_access_binding'
-    vars:
-      group_id: 'my-identity-group'
-      access_level_id: 'access_level_id_for_user_access_binding'
-      access_level_name: 'chromeos_no_lock'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
+custom_code:
+  custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
+samples:
+  - name: access_context_manager_gcp_user_access_binding_basic
+    primary_resource_id: gcp_user_access_binding
     # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
     exclude_test: true
+    steps:
+      - name: access_context_manager_gcp_user_access_binding_basic
+        resource_id_vars:
+          group_id: my-identity-group
+          access_level_id: access_level_id_for_user_access_binding
+          access_level_name: chromeos_no_lock
+        test_env_vars:
+          org_id: ORG_ID
+          org_domain: ORG_DOMAIN
+          cust_id: CUST_ID
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
-  - name: 'organizationId'
+  - name: organizationId
     type: String
     description: |
       Required. ID of the parent organization.
@@ -65,18 +67,23 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Immutable. Assigned by the server during creation. The last segment has an arbitrary length and has only URI unreserved characters (as defined by RFC 3986 Section 2.3). Should not be specified by the client during creation. Example: "organizations/256/gcpUserAccessBindings/b3-BhcX_Ud5N"
     output: true
-  - name: 'groupKey'
+  - name: groupKey
     type: String
     description: |
-      Required. Immutable. Google Group id whose members are subject to this binding's restrictions. See "id" in the G Suite Directory API's Groups resource. If a group's email address/alias is changed, this resource will continue to point at the changed group. This field does not accept group email addresses or aliases. Example: "01d520gv4vjcrht"
-    required: true
+      Immutable. Google Group id whose members are subject to this binding's restrictions.
+      See "id" in the Google Workspace Directory API's Group Resource (https://developers.google.com/admin-sdk/directory/v1/reference/groups#resource).
+      If a group's email address/alias is changed, this resource will continue to point at the changed group.
+      This field does not accept group email addresses or aliases.
+      Example: "01d520gv4vjcrht"
     immutable: true
-  - name: 'accessLevels'
+    conflicts:
+      - principal
+  - name: accessLevels
     type: Array
     description: |
       Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
@@ -84,46 +91,50 @@ properties:
       type: String
     min_size: 1
     max_size: 1
-  - name: 'sessionSettings'
+  - name: sessionSettings
     type: NestedObject
     description: |
       Optional. The Google Cloud session length (GCSL) policy for the group key.
     properties:
-      - name: 'sessionReauthMethod'
+      - name: sessionReauthMethod
         description: |
           Optional. The session challenges proposed to users when the Google Cloud session length is up.
         type: Enum
         enum_values:
-          - 'LOGIN'
-          - 'SECURITY_KEY'
-          - 'PASSWORD'
-      - name: 'sessionLength'
+          - LOGIN
+          - SECURITY_KEY
+          - PASSWORD
+      - name: sessionLength
         description: |
           Optional. The session length. Setting this field to zero is equal to disabling session. Also can set infinite session by flipping the enabled bit to false below. If useOidcMaxAge is true, for OIDC apps, the session length will be the minimum of this field and OIDC max_age param.
+          If this field is set to zero, `session_length_enabled` must be set to false or left unset.
         type: String
-      - name: 'maxInactivity'
+      - name: maxInactivity
         description: |
           Optional. How long a user is allowed to take between actions before a new access token must be issued. Only set for Google Cloud apps.
         type: String
-      - name: 'useOidcMaxAge'
+      - name: useOidcMaxAge
         description: |
           Optional. Only useful for OIDC apps. When false, the OIDC max_age param, if passed in the authentication request will be ignored. When true, the re-auth period will be the minimum of the sessionLength field and the max_age OIDC param.
         type: Boolean
-      - name: 'sessionLengthEnabled'
+      - name: sessionLengthEnabled
         type: Boolean
         description: |
           Optional. This field enables or disables Google Cloud session length. When false, all fields set above will be disregarded and the session length is basically infinite.
-  - name: 'scopedAccessSettings'
+          If `session_length` is set to zero, this field must be false.
+  - name: scopedAccessSettings
     type: Array
+    description: |
+      Optional. A list of scoped access settings that set this binding's restrictions on a subset of applications.
     item_type:
       type: NestedObject
       properties:
-        - name: 'scope'
+        - name: scope
           type: NestedObject
           description: |
             Optional. Application, etc. to which the access settings will be applied to. Implicitly, this is the scoped access settings key; as such, it must be unique and non-empty.
           properties:
-            - name: 'clientScope'
+            - name: clientScope
               type: NestedObject
               description: |
                 Optional. Client scope for this access scope.
@@ -141,10 +152,10 @@ properties:
                       type: String
                       description: |
                         The name of the application. Example: "Cloud Console"
-        - name: 'activeSettings'
+        - name: activeSettings
           type: NestedObject
           description: |
-            Optional. Access settings for this scoped access settings. This field may be empty if dryRunSettings is set.
+            Optional. Access settings for this scoped access settings. This field may be empty if `dry_run_settings` is set.
           properties:
             - name: accessLevels
               type: Array
@@ -157,34 +168,36 @@ properties:
               description: |
                 Optional. Session settings applied to user access on a given AccessScope.
               properties:
-                - name: 'sessionReauthMethod'
+                - name: sessionReauthMethod
                   description: |
                     Optional. The session challenges proposed to users when the Google Cloud session length is up.
                   type: Enum
                   enum_values:
-                    - 'LOGIN'
-                    - 'SECURITY_KEY'
-                    - 'PASSWORD'
-                - name: 'sessionLength'
+                    - LOGIN
+                    - SECURITY_KEY
+                    - PASSWORD
+                - name: sessionLength
                   description: |
                     Optional. The session length. Setting this field to zero is equal to disabling session. Also can set infinite session by flipping the enabled bit to false below. If useOidcMaxAge is true, for OIDC apps, the session length will be the minimum of this field and OIDC max_age param.
+                    If this field is set to zero, `session_length_enabled` must be set to false or left unset.
                   type: String
-                - name: 'maxInactivity'
+                - name: maxInactivity
                   description: |
                     Optional. How long a user is allowed to take between actions before a new access token must be issued. Only set for Google Cloud apps.
                   type: String
-                - name: 'useOidcMaxAge'
+                - name: useOidcMaxAge
                   description: |
                     Optional. Only useful for OIDC apps. When false, the OIDC max_age param, if passed in the authentication request will be ignored. When true, the re-auth period will be the minimum of the sessionLength field and the max_age OIDC param.
                   type: Boolean
-                - name: 'sessionLengthEnabled'
+                - name: sessionLengthEnabled
                   type: Boolean
                   description: |
                     Optional. This field enables or disables Google Cloud session length. When false, all fields set above will be disregarded and the session length is basically infinite.
-        - name: 'dryRunSettings'
+                    If `session_length` is set to zero, this field must be false.
+        - name: dryRunSettings
           type: NestedObject
           description: |
-            Optional. Dry-run access settings for this scoped access settings. This field may be empty if activeSettings is set. Cannot contain session settings.
+            Optional. Dry-run access settings for this scoped access settings. This field may be empty if `active_settings` is set. Cannot contain session settings.
           properties:
             - name: accessLevels
               type: Array
@@ -194,5 +207,37 @@ properties:
                 Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
               min_size: 1
               max_size: 1
+
+  - name: dryRunAccessLevels
+    type: Array
     description: |
-      Optional. A list of scoped access settings that set this binding's restrictions on a subset of applications.
+      Optional. Dry run access level that will be evaluated but will not be enforced. The
+      access denial based on dry run policy will be logged. Only one access
+      level is supported, not multiple. This list must have exactly one element.
+      Example: "accessPolicies/9522/accessLevels/device_trusted"
+    item_type:
+      type: String
+    min_size: 1
+    max_size: 1
+
+  - name: principal
+    type: NestedObject
+    description: |
+      Optional. Immutable. The principal that is subject to the access policies in this policy binding.
+    conflicts:
+      - group_key
+    properties:
+      - name: serviceAccountProjectNumber
+        type: String
+        immutable: true
+        description: |
+          Immutable. Cloud project number used to assign policies to all service accounts owned by the project.
+      - name: serviceAccount
+        type: String
+        immutable: true
+        description: |
+          Immutable. Service account email used to assign policies to a single service account.
+          If a service account is subject to multiple policies (e.g., if there is a policy for all
+          service accounts in a project and a policy for the service account), the closest (i.e.
+          the most specific) dry-run policy will be used for the dry-run functionality and the
+          closest policy will be used for the enforcement.

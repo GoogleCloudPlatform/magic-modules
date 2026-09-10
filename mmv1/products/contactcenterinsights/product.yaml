@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'ContactCenterInsights'
-display_name: 'Contact Center AI Insights'
+name: ContactCenterInsights
+display_name: Contact Center AI Insights
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-  - base_url: 'https://contactcenterinsights.googleapis.com/v1/'
-    name: 'ga'
+  - base_url: https://contactcenterinsights.googleapis.com/v1/
+    name: ga

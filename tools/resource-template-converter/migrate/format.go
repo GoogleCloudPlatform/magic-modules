@@ -58,6 +58,7 @@ func init() {
 	nestedKeyOrders["operation"] = getYamlStructFieldOrder(api.Operation{})
 	nestedKeyOrders["iam_policy"] = getYamlStructFieldOrder(resource.IamPolicy{})
 	nestedKeyOrders["custom_code"] = getYamlStructFieldOrder(resource.CustomCode{})
+	nestedKeyOrders["steps"] = getYamlStructFieldOrder(resource.Step{})
 }
 
 func sortMappingNode(mappingNode *yaml.Node, keyOrder []string) {

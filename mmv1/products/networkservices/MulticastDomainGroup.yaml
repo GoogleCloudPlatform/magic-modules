@@ -46,6 +46,7 @@ async:
   include_project: false
 autogen_status: TXVsdGljYXN0RG9tYWluR3JvdXA=
 autogen_async: true
+generate_list_resource: true
 samples:
   - name: network_services_multicast_domain_group_basic
     primary_resource_id: mdg_test

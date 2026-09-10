@@ -14,7 +14,6 @@
 ---
 name: 'RegionResizeRequest'
 api_resource_type_kind: InstanceGroupManagerResizeRequest
-min_version: beta
 description: |
   Represents a Regional Managed Instance Group Resize Request
 
@@ -25,7 +24,7 @@ references:
   guides:
     'About resize requests in a MIG': 'https://cloud.google.com/compute/docs/instance-groups/about-resize-requests-mig'
   # Link to the REST API reference for the resource.
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagerResizeRequests'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceGroupManagerResizeRequests'
 docs:
 ### List Method ###
 base_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests'
@@ -42,16 +41,15 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/compute_rmig_resize_request_delete.go.tmpl'
-# Examples for testing
-examples:
+samples:
   - name: 'compute_rmig_resize_request'
-    min_version: beta
     primary_resource_id: 'a3_resize_request'
-    vars:
-      resize_request_name: 'a3-dws'
+    steps:
+      - name: 'compute_rmig_resize_request'
+        resource_id_vars:
+          resize_request_name: 'a3-dws'
 # Resize request parameters injected via URL
 parameters:
   - name: 'region'

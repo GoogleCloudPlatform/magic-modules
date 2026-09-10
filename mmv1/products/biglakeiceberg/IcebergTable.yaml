@@ -13,6 +13,9 @@
 
 ---
 name: IcebergTable
+api_resource_type_kind: Table
+api_variant_patterns:
+  - projects/{project}/catalogs/{catalog}/namespaces/{namespace}/tables/{table}
 description: |
   IcebergTables are the primary objects in an IcebergCatalog.
 base_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables
@@ -42,7 +45,11 @@ custom_code:
   encoder: templates/terraform/encoders/biglake_iceberg_table_create.go.tmpl
   update_encoder: templates/terraform/encoders/biglake_iceberg_table.go.tmpl
   constants: templates/terraform/constants/biglake_iceberg_table.go.tmpl
+  pre_create: templates/terraform/pre_create/biglake_iceberg_table.go.tmpl
+  pre_read: templates/terraform/pre_read/biglake_iceberg_table.go.tmpl
   post_read: templates/terraform/post_read/biglake_iceberg_table.go.tmpl
+  pre_update: templates/terraform/pre_update/biglake_iceberg_table.go.tmpl
+  pre_delete: templates/terraform/pre_delete/biglake_iceberg_table.go.tmpl
 samples:
   - name: biglake_iceberg_table_basic
     primary_resource_id: my_iceberg_table
@@ -97,6 +104,7 @@ properties:
       The location of the table.
     immutable: true
     default_from_api: true
+    diff_suppress_func: icebergTableLocationDiffSuppress
   - name: schema
     type: NestedObject
     required: true

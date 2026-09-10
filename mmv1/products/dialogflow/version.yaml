@@ -12,67 +12,69 @@
 # limitations under the License.
 
 ---
-name: 'Version'
+name: Version
 description: |
   You can create multiple versions of your agent and publish them to separate environments.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent.versions'
+    Official Documentation: https://cloud.google.com/dialogflow/docs/
+  api: https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent.versions
 docs:
-id_format: '{{parent}}/versions/{{name}}'
 base_url: '{{parent}}/versions'
-update_verb: 'PATCH'
 update_mask: true
+update_verb: PATCH
+id_format: '{{parent}}/versions/{{name}}'
 import_format:
   - '{{parent}}/versions/{{name}}'
 timeouts:
   insert_minutes: 40
   update_minutes: 40
   delete_minutes: 20
-custom_code:
-  custom_import: 'templates/terraform/custom_import/dialogflowcx_version.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_version_full'
-    primary_resource_id: 'full_version'
-    vars:
-      project_id: 'my-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
+custom_code:
+  custom_import: templates/terraform/custom_import/dialogflowcx_version.go.tmpl
+samples:
+  - name: dialogflow_version_full
+    primary_resource_id: full_version
     external_providers:
-      - "time"
+      - time
+    steps:
+      - name: dialogflow_version_full
+        resource_id_vars:
+          project_id: my-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_acct: BILLING_ACCT
 parameters:
 properties:
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The Flow to create an Version for.
       Format: projects/<Project ID>/agent.
     url_param_only: true
     immutable: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique identifier of this agent version.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'versionNumber'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: versionNumber
     type: Integer
     description: |
       The sequential number of this version.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The developer-provided description of this version.
-  - name: 'status'
+  - name: status
     type: Enum
     description: |
       The status of this version.
     output: true
     enum_values:
-      - 'IN_PROGRESS'
-      - 'READY'
-      - 'FAILED'
+      - IN_PROGRESS
+      - READY
+      - FAILED

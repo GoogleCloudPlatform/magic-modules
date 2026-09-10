@@ -12,18 +12,18 @@
 # limitations under the License.
 
 ---
-name: 'Workflows'
-display_name: 'Workflows'
-versions:
-  - name: 'beta'
-    base_url: 'https://workflows.googleapis.com/v1/'
-  - name: 'ga'
-    base_url: 'https://workflows.googleapis.com/v1/'
-scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+name: Workflows
 async:
-  type: "OpAsync"
+  type: OpAsync
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+display_name: Workflows
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: beta
+    base_url: https://workflows.googleapis.com/v1/
+  - name: ga
+    base_url: https://workflows.googleapis.com/v1/

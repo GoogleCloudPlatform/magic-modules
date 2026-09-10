@@ -24,45 +24,60 @@ update_verb: PATCH
 update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/evaluations/{{evaluation_id}}
-examples:
+samples:
   - name: ces_evaluation_basic
     min_version: beta
     primary_resource_id: ces_evaluation_basic
-    vars:
-      evaluation_id: eval-basic
-      app_id: app-id
-      app_display_name: my-app
+    steps:
+      - name: ces_evaluation_basic
+        min_version: beta
+        resource_id_vars:
+          evaluation_id: eval-basic
+          app_id: app-id
+          app_display_name: my-app
   - name: ces_evaluation_full
     min_version: beta
     primary_resource_id: ces_evaluation_full
-    vars:
-      evaluation_id: evaluation-id-full
-      app_id: app-id-full
-      app_display_name: my-app-full
-      tool_id: tool-id-full
+    steps:
+      - name: ces_evaluation_full
+        min_version: beta
+        resource_id_vars:
+          evaluation_id: evaluation-id-full
+          app_id: app-id-full
+          app_display_name: my-app-full
+          tool_id: tool-id-full
   - name: ces_evaluation_toolset
     min_version: beta
     primary_resource_id: ces_evaluation_toolset
-    vars:
-      evaluation_id: eval-toolset
-      app_id: app-id-toolset
-      app_display_name: my-app-toolset
+    steps:
+      - name: ces_evaluation_toolset
+        min_version: beta
+        resource_id_vars:
+          evaluation_id: eval-toolset
+          app_id: app-id-toolset
+          app_display_name: my-app-toolset
   - name: ces_evaluation_scenario_full
     min_version: beta
     primary_resource_id: ces_evaluation_scenario_full
-    vars:
-      evaluation_id: eval-scenario-full
-      app_id: app-id-scenario
-      app_display_name: my-app-scenario
-      tool_id: tool-id-scenario
+    steps:
+      - name: ces_evaluation_scenario_full
+        min_version: beta
+        resource_id_vars:
+          evaluation_id: eval-scenario-full
+          app_id: app-id-scenario
+          app_display_name: my-app-scenario
+          tool_id: tool-id-scenario
   - name: ces_evaluation_scenario_toolset
     min_version: beta
     primary_resource_id: ces_evaluation_scenario_toolset
-    vars:
-      evaluation_id: eval-scen-ts
-      app_id: app-id-scenario-ts
-      app_display_name: my-app-scenario-ts
-      toolset_id: ts-scen
+    steps:
+      - name: ces_evaluation_scenario_toolset
+        min_version: beta
+        resource_id_vars:
+          evaluation_id: eval-scen-ts
+          app_id: app-id-scenario-ts
+          app_display_name: my-app-scenario-ts
+          toolset_id: ts-scen
 parameters:
   - name: location
     type: String

@@ -14,8 +14,12 @@ resource "google_datastream_connection_profile" "default" {
         replica_set = "myReplicaSet"
         username    = "mongoUser"
         password    = "mongoPassword"
-        database    = "myDatabase"
 
-        standard_connection_format = {}
+        standard_connection_format {}
+
+        additional_options = {
+          readPreference     = "secondary"
+          readPreferenceTags = "nodeType:ANALYTICS"
+        }
     }
 }

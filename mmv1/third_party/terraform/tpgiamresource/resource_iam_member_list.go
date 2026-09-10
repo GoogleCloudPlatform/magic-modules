@@ -1,0 +1,193 @@
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+// IAM list resources enumerate rows for google_*_iam_member instances by reading
+// IAM policies on one or more GCP resources (policy targets).
+// Shared machinery lives in iamListCore (resource_iam_list.go); this file keeps only the
+// member-specific result shaping.
+
+package tpgiamresource
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/cloudresourcemanager/v1"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+var _ list.ListResource = &IamMemberListResource{}
+var _ list.ListResourceWithRawV5Schemas = &IamMemberListResource{}
+var _ list.ListResourceWithConfigure = &IamMemberListResource{}
+
+// IamMemberListResource lists IAM member rows by reading IAM policies on one or more policy targets.
+// It embeds iamListCore for all shared behaviour and adds only member-specipic shaping below.
+type IamMemberListResource struct {
+	IamListCore
+}
+
+func NewIamMemberListResource(typeName string, memberResource *schema.Resource, newUpdater NewResourceIamUpdaterFunc, listCallConfig IamListCallConfig) list.ListResource {
+	return &IamMemberListResource{
+		IamListCore: buildIamListCore(typeName, memberResource, newUpdater, listCallConfig),
+	}
+}
+
+func (r *IamMemberListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+	policyTargets, err := r.discoverPolicyTargets(ctx, req)
+	if err != nil {
+		var diags diag.Diagnostics
+		diags.AddError("Error discovering policy targets", err.Error())
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
+	roleFilter, memberFilter, diags := r.readFilters(ctx, req)
+	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
+	stream.Results = func(yield func(list.ListResult) bool) {
+		var yielded int64
+		for _, targetRd := range policyTargets {
+			if req.Limit > 0 && yielded >= req.Limit {
+				return
+			}
+			updater, err := r.newUpdater(targetRd, r.Client)
+			if err != nil {
+				res := req.NewListResult(ctx)
+				res.Diagnostics.AddError("API Error", err.Error())
+				if !yield(res) {
+					return
+				}
+				continue
+			}
+			p, err := iamPolicyReadWithRetry(updater)
+			if err != nil {
+				res := req.NewListResult(ctx)
+				res.Diagnostics.AddError("API Error", err.Error())
+				if !yield(res) {
+					return
+				}
+				continue
+			}
+
+			if !r.yieldPolicyMembers(ctx, req, targetRd, updater, p, roleFilter, memberFilter, &yielded, yield) {
+				return
+			}
+		}
+	}
+}
+
+// yieldPolicyMembers yields one list result per IAM binding member for a single policy target.
+func (r *IamMemberListResource) yieldPolicyMembers(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, p *cloudresourcemanager.Policy, roleFilter string, memberFilter string, yielded *int64, yield func(list.ListResult) bool) bool {
+	for _, binding := range p.Bindings {
+		if roleFilter != "" && binding.Role != roleFilter {
+			continue
+		}
+		for _, mem := range binding.Members {
+			normalized := tpgresource.NormalizeIamPrincipalCasing(mem)
+
+			if memberFilter != "" && normalized != memberFilter {
+				continue
+			}
+			if strings.HasPrefix(mem, "deleted:") {
+				continue
+			}
+			if req.Limit > 0 && *yielded >= req.Limit {
+				return true
+			}
+			res, err := r.buildMemberResult(ctx, req, targetRd, updater, binding, normalized, p.Etag)
+			if err != nil {
+				res = req.NewListResult(ctx)
+				res.Diagnostics.AddError("Error building IAM member result", err.Error())
+			}
+			*yielded++
+			if !yield(res) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// buildMemberResult populates a ResourceData for one binding member and converts it to a ListResult.
+func (r *IamMemberListResource) buildMemberResult(ctx context.Context, req list.ListRequest, targetRd *schema.ResourceData, updater ResourceIamUpdater, binding *cloudresourcemanager.Binding, member, etag string) (list.ListResult, error) {
+	rd := r.iamResource.TestResourceData()
+	for k := range r.iamResourceSchema {
+		if v, ok := targetRd.GetOk(k); ok {
+			if err := rd.Set(k, v); err != nil {
+				return list.ListResult{}, fmt.Errorf("setting %s: %w", k, err)
+			}
+		}
+	}
+
+	normalized := tpgresource.NormalizeIamPrincipalCasing(member)
+	for k, v := range map[string]interface{}{
+		"role":   binding.Role,
+		"member": normalized,
+	} {
+		if err := rd.Set(k, v); err != nil {
+			return list.ListResult{}, fmt.Errorf("set %s: %w", k, err)
+		}
+	}
+
+	if binding.Condition != nil {
+		if err := rd.Set("condition", FlattenIamCondition(binding.Condition)); err != nil {
+			return list.ListResult{}, fmt.Errorf("set condition: %w", err)
+		}
+	}
+
+	id := updater.GetResourceId() + "/" + binding.Role + "/" + normalized
+	if k := conditionKeyFromCondition(binding.Condition); !k.Empty() {
+		id += "/" + k.String()
+	}
+	rd.SetId(id)
+
+	identity, err := rd.Identity()
+	if err != nil {
+		return list.ListResult{}, fmt.Errorf("identity: %w", err)
+	}
+	condTitle := ""
+	if binding.Condition != nil {
+		condTitle = binding.Condition.Title
+	}
+	setIamMemberResourceIdentity(identity, rd, r.iamResourceSchema, binding.Role, normalized, condTitle)
+
+	res := req.NewListResult(ctx)
+	tfIdent, err := rd.TfTypeIdentityState()
+	if err != nil {
+		return list.ListResult{}, fmt.Errorf("identity state: %w", err)
+	}
+	if err := res.Identity.Set(ctx, *tfIdent); err != nil {
+		return list.ListResult{}, fmt.Errorf("set identity: %v", err)
+	}
+
+	if err := rd.Set("etag", etag); err != nil {
+		return list.ListResult{}, fmt.Errorf("set etag: %w", err)
+	}
+
+	if binding.Condition != nil {
+		if err := rd.Set("condition", FlattenIamCondition(binding.Condition)); err != nil {
+			return list.ListResult{}, fmt.Errorf("set condition: %W", err)
+		}
+	}
+
+	if req.IncludeResource {
+		tfRes, err := rd.TfTypeResourceState()
+		if err != nil {
+			return list.ListResult{}, fmt.Errorf("resource state: %w", err)
+		}
+		if err := res.Resource.Set(ctx, *tfRes); err != nil {
+			return list.ListResult{}, fmt.Errorf("set resource: %v", err)
+		}
+	}
+
+	res.DisplayName = fmt.Sprintf("%s %s %s", updater.DescribeResource(), binding.Role, normalized)
+	return res, nil
+}

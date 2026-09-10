@@ -1,0 +1,14 @@
+resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.ResourceIdVars "backend_service_name"}}"
+  health_checks = [google_compute_health_check.default.id]
+}
+
+resource "google_compute_health_check" "default" {
+  name               = "{{index $.ResourceIdVars "health_check_name"}}"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
+}
