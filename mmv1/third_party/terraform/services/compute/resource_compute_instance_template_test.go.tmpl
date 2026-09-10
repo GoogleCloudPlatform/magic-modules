@@ -6230,3 +6230,67 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, suffix, suffix)
 }
 {{- end }}
+
+func TestAccComputeInstanceTemplate_schedulingExposeHostTopology(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate map[string]interface{}
+	var templateName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_schedulingExposeHostTopology(templateName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "scheduling.0.expose_host_topology", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeInstanceTemplate_schedulingExposeHostTopology(templateName, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "scheduling.0.expose_host_topology", "false"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeInstanceTemplate_schedulingExposeHostTopology(template string, expose bool) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    expose_host_topology = %t
+  }
+}
+`, template, expose)
+}

@@ -14702,3 +14702,64 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
+func TestAccComputeInstance_schedulingExposeHostTopology(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_schedulingExposeHostTopology(instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.expose_host_topology", "true"),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			{
+				Config: testAccComputeInstance_schedulingExposeHostTopology(instanceName, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.expose_host_topology", "false"),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+func testAccComputeInstance_schedulingExposeHostTopology(instance string, expose bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    expose_host_topology = %t
+  }
+}
+`, instance, expose)
+}
