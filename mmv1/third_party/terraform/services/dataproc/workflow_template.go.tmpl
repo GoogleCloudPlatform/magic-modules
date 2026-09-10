@@ -673,6 +673,7 @@ type WorkflowTemplatePlacementManagedClusterConfigMasterConfig struct {
 	ManagedGroupConfig *WorkflowTemplatePlacementManagedClusterConfigMasterConfigManagedGroupConfig `json:"managedGroupConfig"`
 	Accelerators       []WorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators      `json:"accelerators"`
 	MinCpuPlatform     *string                                                                      `json:"minCpuPlatform"`
+	InstanceFlexibilityPolicy *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy `json:"instanceFlexibilityPolicy"`
 }
 
 type jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfig WorkflowTemplatePlacementManagedClusterConfigMasterConfig
@@ -709,6 +710,8 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfig) UnmarshalJSO
 		r.Accelerators = res.Accelerators
 
 		r.MinCpuPlatform = res.MinCpuPlatform
+
+		r.InstanceFlexibilityPolicy = res.InstanceFlexibilityPolicy
 
 	}
 	return nil
@@ -878,6 +881,159 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators) 
 }
 
 func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigAccelerators) HashCode() string {
+	// Placeholder for a more complex hash method that handles ordering, etc
+	// Hash resource body for easy comparison later
+	hash := sha256.Sum256([]byte(r.String()))
+	return fmt.Sprintf("%x", hash)
+}
+
+type WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy struct {
+	empty                    bool                                                                                               `json:"-"`
+	InstanceMachineTypes     map[string]string                                                                                  `json:"instanceMachineTypes"`
+	InstanceSelectionList    []WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection    `json:"instanceSelectionList"`
+	InstanceSelectionResults []WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult `json:"instanceSelectionResults"`
+}
+
+type jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy) UnmarshalJSON(data []byte) error {
+	var res jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	var m map[string]interface{}
+	json.Unmarshal(data, &m)
+
+	if len(m) == 0 {
+		*r = *EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy
+	} else {
+
+		r.InstanceMachineTypes = res.InstanceMachineTypes
+
+		r.InstanceSelectionList = res.InstanceSelectionList
+
+		r.InstanceSelectionResults = res.InstanceSelectionResults
+
+	}
+	return nil
+}
+
+// This object is used to assert a desired state where this WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy = &WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy{empty: true}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy) Empty() bool {
+	return r.empty
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy) String() string {
+	return dcl.SprintResource(r)
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicy) HashCode() string {
+	// Placeholder for a more complex hash method that handles ordering, etc
+	// Hash resource body for easy comparison later
+	hash := sha256.Sum256([]byte(r.String()))
+	return fmt.Sprintf("%x", hash)
+}
+
+type WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection struct {
+	empty        bool                                                                     `json:"-"`
+	MachineTypes []string                                                                 `json:"machineTypes"`
+	Rank         *int64                                                                   `json:"rank"`
+	DiskConfig   *WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig     `json:"diskConfig"`
+}
+
+type jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection) UnmarshalJSON(data []byte) error {
+	var res jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	var m map[string]interface{}
+	json.Unmarshal(data, &m)
+
+	if len(m) == 0 {
+		*r = *EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection
+	} else {
+
+		r.MachineTypes = res.MachineTypes
+
+		r.Rank = res.Rank
+
+		r.DiskConfig = res.DiskConfig
+
+	}
+	return nil
+}
+
+// This object is used to assert a desired state where this WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection = &WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection{empty: true}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection) Empty() bool {
+	return r.empty
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection) String() string {
+	return dcl.SprintResource(r)
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelection) HashCode() string {
+	// Placeholder for a more complex hash method that handles ordering, etc
+	// Hash resource body for easy comparison later
+	hash := sha256.Sum256([]byte(r.String()))
+	return fmt.Sprintf("%x", hash)
+}
+
+type WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult struct {
+	empty       bool    `json:"-"`
+	MachineType *string `json:"machineType"`
+	VMCount     *int64  `json:"vmCount"`
+}
+
+type jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult) UnmarshalJSON(data []byte) error {
+	var res jsonWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	var m map[string]interface{}
+	json.Unmarshal(data, &m)
+
+	if len(m) == 0 {
+		*r = *EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult
+	} else {
+
+		r.MachineType = res.MachineType
+
+		r.VMCount = res.VMCount
+
+	}
+	return nil
+}
+
+// This object is used to assert a desired state where this WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult = &WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult{empty: true}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult) Empty() bool {
+	return r.empty
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult) String() string {
+	return dcl.SprintResource(r)
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigInstanceFlexibilityPolicyInstanceSelectionResult) HashCode() string {
 	// Placeholder for a more complex hash method that handles ordering, etc
 	// Hash resource body for easy comparison later
 	hash := sha256.Sum256([]byte(r.String()))

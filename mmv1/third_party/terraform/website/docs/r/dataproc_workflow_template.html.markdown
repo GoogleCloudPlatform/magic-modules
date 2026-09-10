@@ -777,6 +777,10 @@ The `master_config` block supports:
 * `managed_group_config` -
   Output only. The config for Compute Engine Instance Group Manager that manages this group. This is only used for preemptible instance groups.
 
+* `instance_flexibility_policy` -
+  (Optional)
+  Instance flexibility Policy allowing a mixture of VM shapes and provisioning models. Supported on `master_config`, `worker_config`, and `secondary_worker_config` (provisioning models are supported exclusively on `secondary_worker_config`). Structure is [documented below](#nested_instance_flexibility_policy).
+
 <a name="nested_worker_config"></a>The `worker_config` block supports:
 
 * `accelerators` -
