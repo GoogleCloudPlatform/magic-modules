@@ -493,3 +493,15 @@ func ListArrayPages(opt ListArrayPagesOptions) error {
 	}
 	return nil
 }
+
+// nextListPageToken returns the next page token if the list response includes a
+// non-empty string token. Empty, null, or non-string values mean pagination is done.
+// A naive res["nextPageToken"].(string) panics on JSON null, and an empty token
+// would replay the first page forever (TF_ACC 6h timeout panic).
+func nextListPageToken(res map[string]interface{}) (string, bool) {
+	token, ok := res["nextPageToken"].(string)
+	if !ok || token == "" {
+		return "", false
+	}
+	return token, true
+}

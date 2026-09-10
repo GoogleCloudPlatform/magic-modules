@@ -20,6 +20,7 @@ references:
     Setup HTTP Services: https://cloud.google.com/traffic-director/docs/set-up-envoy-http-mesh
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.httpRoutes
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/global/httpRoutes
 self_link: projects/{{project}}/locations/global/httpRoutes/{{name}}
 create_url: projects/{{project}}/locations/global/httpRoutes?httpRouteId={{name}}

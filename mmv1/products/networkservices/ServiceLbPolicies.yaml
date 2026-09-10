@@ -21,6 +21,7 @@ references:
   guides:
   api: https://cloud.google.com/service-mesh/docs/reference/network-services/rest/v1/projects.locations.serviceLbPolicies
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/{{location}}/serviceLbPolicies
 min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/serviceLbPolicies/{{name}}

@@ -19,6 +19,7 @@ references:
   guides:
   api: https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/global/edgeCacheOrigins
 self_link: projects/{{project}}/locations/global/edgeCacheOrigins/{{name}}
 create_url: projects/{{project}}/locations/global/edgeCacheOrigins?edgeCacheOriginId={{name}}
