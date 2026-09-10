@@ -2012,6 +2012,16 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigSchema() *
 				Description: "Output only. The config for Compute Engine Instance Group Manager that manages this group. This is only used for preemptible instance groups.",
 				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfigSchema(),
 			},
+
+			"instance_flexibility_policy": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Optional. Instance flexibility Policy allowing a mixture of VM shapes.",
+				MaxItems:    1,
+				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicySchema(),
+			},
 		},
 	}
 }
@@ -2041,6 +2051,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig
 		Schema: map[string]*schema.Schema{
 			"boot_disk_size_gb": {
 				Type:        schema.TypeInt,
+				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
 				Description: "Optional. Size in GB of the boot disk (default is 500GB).",
@@ -2048,6 +2059,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig
 
 			"boot_disk_type": {
 				Type:        schema.TypeString,
+				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
 				Description: "Optional. Type of the boot disk (default is \"pd-standard\"). Valid values: \"pd-balanced\" (Persistent Disk Balanced Solid State Drive), \"pd-ssd\" (Persistent Disk Solid State Drive), or \"pd-standard\" (Persistent Disk Hard Disk Drive). See [Disk types](https://cloud.google.com/compute/docs/disks#disk-types).",
@@ -2077,6 +2089,88 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGro
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Output only. The name of the Instance Template used for the Managed Instance Group.",
+			},
+		},
+	}
+}
+
+func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"instance_machine_types": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: "Output only. A map of instance names to their machine type.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"instance_selection_list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
+				ForceNew: true,
+				AtLeastOneOf: []string{
+					"placement.0.managed_cluster.0.config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list",
+				},
+				Description: "Optional. List of instance selection options that the group will use when creating new VMs.",
+				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionSchema(),
+			},
+
+			"instance_selection_results": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Output only. A list of instance selection results that were successfully allocated.",
+				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResultSchema(),
+			},
+		},
+	}
+}
+
+func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"disk_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Optional. Disk configuration to apply to the instances in this instance selection.",
+				MaxItems:    1,
+				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigSchema(),
+			},
+
+			"machine_types": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Optional:    true,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Optional. Full machine-type names, e.g. \"n1-standard-16\".",
+			},
+
+			"rank": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Optional. Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.",
+			},
+		},
+	}
+}
+
+func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResultSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"machine_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Output only. Full machine-type names, e.g. \"n1-standard-16\".",
+			},
+
+			"vm_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Output only. Number of VM provisioned with the corresponding machine_type.",
 			},
 		},
 	}
@@ -4044,13 +4138,14 @@ func expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfig(o i
 	}
 	obj := objArr[0].(map[string]interface{})
 	return &WorkflowTemplatePlacementManagedClusterConfigWorkerConfig{
-		Accelerators:   expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsArray(obj["accelerators"]),
-		DiskConfig:     expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(obj["disk_config"]),
-		Image:          dcl.String(obj["image"].(string)),
-		MachineType:    dcl.String(obj["machine_type"].(string)),
-		MinCpuPlatform: dcl.StringOrNil(obj["min_cpu_platform"].(string)),
-		NumInstances:   dcl.Int64(int64(obj["num_instances"].(int))),
-		Preemptibility: WorkflowTemplatePlacementManagedClusterConfigWorkerConfigPreemptibilityEnumRef(obj["preemptibility"].(string)),
+		Accelerators:              expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsArray(obj["accelerators"]),
+		DiskConfig:                expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(obj["disk_config"]),
+		Image:                     dcl.String(obj["image"].(string)),
+		MachineType:               dcl.String(obj["machine_type"].(string)),
+		MinCpuPlatform:            dcl.StringOrNil(obj["min_cpu_platform"].(string)),
+		NumInstances:              dcl.Int64(int64(obj["num_instances"].(int))),
+		Preemptibility:            WorkflowTemplatePlacementManagedClusterConfigWorkerConfigPreemptibilityEnumRef(obj["preemptibility"].(string)),
+		InstanceFlexibilityPolicy: expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy(obj["instance_flexibility_policy"]),
 	}
 }
 
@@ -4059,16 +4154,17 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfig(ob
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"accelerators":         flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsArray(obj.Accelerators),
-		"disk_config":          flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(obj.DiskConfig),
-		"image":                obj.Image,
-		"machine_type":         obj.MachineType,
-		"min_cpu_platform":     obj.MinCpuPlatform,
-		"num_instances":        obj.NumInstances,
-		"preemptibility":       obj.Preemptibility,
-		"instance_names":       obj.InstanceNames,
-		"is_preemptible":       obj.IsPreemptible,
-		"managed_group_config": flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig(obj.ManagedGroupConfig),
+		"accelerators":                flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigAcceleratorsArray(obj.Accelerators),
+		"disk_config":                 flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(obj.DiskConfig),
+		"image":                       obj.Image,
+		"machine_type":                obj.MachineType,
+		"min_cpu_platform":            obj.MinCpuPlatform,
+		"num_instances":               obj.NumInstances,
+		"preemptibility":              obj.Preemptibility,
+		"instance_names":              obj.InstanceNames,
+		"is_preemptible":              obj.IsPreemptible,
+		"managed_group_config":        flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigManagedGroupConfig(obj.ManagedGroupConfig),
+		"instance_flexibility_policy": flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy(obj.InstanceFlexibilityPolicy),
 	}
 
 	return []interface{}{transformed}
@@ -4142,8 +4238,8 @@ func expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDisk
 	}
 	obj := objArr[0].(map[string]interface{})
 	return &WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig{
-		BootDiskSizeGb: dcl.Int64(int64(obj["boot_disk_size_gb"].(int))),
-		BootDiskType:   dcl.String(obj["boot_disk_type"].(string)),
+		BootDiskSizeGb: dcl.Int64OrNil(int64(obj["boot_disk_size_gb"].(int))),
+		BootDiskType:   dcl.StringOrNil(obj["boot_disk_type"].(string)),
 		NumLocalSsds:   dcl.Int64OrNil(int64(obj["num_local_ssds"].(int))),
 	}
 }
@@ -4173,6 +4269,137 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigMan
 
 	return []interface{}{transformed}
 
+}
+
+func expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy(o interface{}) *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy {
+	if o == nil {
+		return nil
+	}
+	objArr := o.([]interface{})
+	if len(objArr) == 0 || objArr[0] == nil {
+		return nil
+	}
+	obj := objArr[0].(map[string]interface{})
+	isl := expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionArray(obj["instance_selection_list"])
+	if len(isl) == 0 {
+		return nil
+	}
+	return &WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy{
+		InstanceSelectionList: isl,
+	}
+}
+
+func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy(obj *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicy) interface{} {
+	if obj == nil || obj.Empty() {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"instance_machine_types":     obj.InstanceMachineTypes,
+		"instance_selection_list":    flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionArray(obj.InstanceSelectionList),
+		"instance_selection_results": flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResultArray(obj.InstanceSelectionResults),
+	}
+
+	return []interface{}{transformed}
+}
+
+func expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionArray(o interface{}) []WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection {
+	if o == nil {
+		return nil
+	}
+
+	objs := o.([]interface{})
+	if len(objs) == 0 || objs[0] == nil {
+		return nil
+	}
+
+	items := make([]WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection, 0, len(objs))
+	for _, item := range objs {
+		i := expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection(item)
+		if i != nil {
+			items = append(items, *i)
+		}
+	}
+
+	return items
+}
+
+func expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection(o interface{}) *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection {
+	if o == nil {
+		return nil
+	}
+	obj := o.(map[string]interface{})
+	m := &WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection{}
+	if v, ok := obj["machine_types"].([]interface{}); ok {
+		for _, item := range v {
+			if s, ok := item.(string); ok && s != "" {
+				m.MachineTypes = append(m.MachineTypes, s)
+			}
+		}
+	}
+	if v, ok := obj["rank"].(int); ok {
+		m.Rank = dcl.Int64(int64(v))
+	}
+	if v, ok := obj["disk_config"]; ok {
+		m.DiskConfig = expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(v)
+	}
+	return m
+}
+
+func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionArray(objs []WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection) []interface{} {
+	if objs == nil {
+		return nil
+	}
+
+	items := []interface{}{}
+	for _, item := range objs {
+		i := flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection(&item)
+		if i != nil {
+			items = append(items, i)
+		}
+	}
+
+	return items
+}
+
+func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection(obj *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelection) interface{} {
+	if obj == nil || obj.Empty() {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"disk_config":   flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig(obj.DiskConfig),
+		"machine_types": obj.MachineTypes,
+		"rank":          obj.Rank,
+	}
+
+	return transformed
+}
+
+func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResultArray(objs []WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResult) []interface{} {
+	if objs == nil {
+		return nil
+	}
+
+	items := []interface{}{}
+	for _, item := range objs {
+		i := flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResult(&item)
+		if i != nil {
+			items = append(items, i)
+		}
+	}
+
+	return items
+}
+
+func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResult(obj *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigInstanceFlexibilityPolicyInstanceSelectionResult) interface{} {
+	if obj == nil || obj.Empty() {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"machine_type": obj.MachineType,
+		"vm_count":     obj.VMCount,
+	}
+
+	return transformed
 }
 
 func expandDataprocWorkflowTemplateEncryptionConfig(o interface{}) *WorkflowTemplateEncryptionConfig {
