@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const rootCmdDesc = "Utilities for template checks."
+const rootCmdDesc = "Utilities for repository and template checks."
 
 type rootOptions struct {
 }
@@ -23,6 +23,7 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 	}
 	cmd.AddCommand(newversionGuardCmd(o))
 	cmd.AddCommand(newUnusedTmplCmd(o))
+	cmd.AddCommand(newDisallowLegacyApiaryCmd(o))
 	return cmd, o, nil
 }
 
