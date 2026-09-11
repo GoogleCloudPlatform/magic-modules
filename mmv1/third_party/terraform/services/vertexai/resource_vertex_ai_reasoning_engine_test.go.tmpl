@@ -758,7 +758,7 @@ data "google_project" "project" {
 
 resource "google_cloudbuild_worker_pool" "pool" {
   provider = google-beta
-  name     = "pool-%{random_suffix}"
+  name     = "tf-test-pool-%{random_suffix}"
   location = "us-central1"
   worker_config {
     disk_size_gb   = 100

@@ -109,11 +109,6 @@ samples:
           network_name: 'network'
           network_attachment_name: 'network-attachment'
           subnetwork_name: 'subnetwork'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          subnetwork_name: '"subnetwork" + randomSuffix'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_full'
@@ -132,10 +127,6 @@ samples:
           service_account_id: 'sa'
         test_vars_overrides:
           'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
-          # for backward compatible
-          secret_name: '"secret" + randomSuffix'
-          # for backward compatible
-          service_account_id: '"sa" + randomSuffix'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_context_spec'
