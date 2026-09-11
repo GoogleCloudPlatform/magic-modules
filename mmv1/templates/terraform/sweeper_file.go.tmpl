@@ -16,7 +16,7 @@ import (
 {{- end }}
 	"strings"
 	"testing"
-{{- if $.Sweeper.EnsureValue }}
+{{- if or $.Sweeper.EnsureValue $.Sweeper.WaitForDelete }}
 	"time"
 {{- end }}
 
@@ -499,8 +499,12 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 	url = url + "{{ $.Sweeper.QueryString }}"
 	{{- end }}
 
+	{{ if $.Sweeper.WaitForDelete -}}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	{{- else -}}
 	// Don't wait on operations as we may have a lot to delete
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	{{- end }}
 		Config:    config,
 		Method:    "DELETE",
 		Project:   config.Project,
@@ -513,6 +517,14 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 	} else {
 		log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, name)
 	}
+	{{- if $.Sweeper.WaitForDelete }}
+	err = {{ $.ClientNamePascal }}OperationWaitTime(
+		config, res, config.Project, "Deleting Network", config.UserAgent,
+		time.Minute*5)
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] Error waiting for deletion of %s resource (%s): %s", resourceName, name, err)
+	}
+	{{- end }}
 
 	return deletionerror
 }
