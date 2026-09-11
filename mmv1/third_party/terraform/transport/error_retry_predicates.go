@@ -749,3 +749,16 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry on Discovery Engine CmekConfig 400 error when datastores connected to the CmekConfig are still being deleted.
+func IsDiscoveryEngineCmekConfigInUseError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "connected to this CmekConfig") {
+			return true, "DataStores are still connected to this CmekConfig, waiting for deletion to complete"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "connected to this CmekConfig") {
+		return true, "DataStores are still connected to this CmekConfig, waiting for deletion to complete"
+	}
+	return false, ""
+}
