@@ -72,6 +72,15 @@ samples:
           dataset_id: dataset_id
           table_id: table
           bucket_name: bucket
+  - name: analyst_agent_persona_methodology_export_options
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_methodology_export_options
+        resource_id_vars:
+          persona_id: methodology
+      - name: analyst_agent_persona_methodology_export_options_update
+        resource_id_vars:
+          persona_id: methodology
 
 parameters:
   - name: location
@@ -338,6 +347,24 @@ properties:
               PDF
               DOCX
               GOOGLE_DOCS
+      - name: methodologyExportOptions
+        type: NestedObject
+        description: Options for methodology export.
+        properties:
+          - name: appendMethodology
+            type: Boolean
+            description: If true, append the detailed methodology to the final response.
+          - name: exportFormat
+            type: String
+            description: |-
+              Format for methodology export.
+              Possible values:
+              MARKDOWN
+              HTML
+              PDF
+          - name: exportMethodologyArtifact
+            type: Boolean
+            description: If true, export the detailed methodology as a separate artifact.
       - name: slideGenerationOptions
         type: NestedObject
         description: Options for slide generation.
