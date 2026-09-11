@@ -13,6 +13,7 @@ For more information, see the [official HashiCorp documentation for Write-only A
 The Google Cloud provider has added the following write-only arguments:
 - [`google_sql_user: password_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user#password-1)
 - [`google_secret_manager_secret_version: secret_data_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_version#secret_data_wo)
+- [`google_secret_manager_regional_secret_version: secret_data_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_regional_secret_version#secret_data_wo)
 - [`google_bigquery_data_transfer_config: sensitive_params.secret_access_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_data_transfer_config#secret_access_key_wo)
 
 These were chosen due to them being marked as sensitive already in the provider. Although sensitive arguments do not appear in `terraform plan`, they are still stored in the Terraform state. Write-only arguments allow users to access and use data in their configurations without that data being stored in Terraform state.
