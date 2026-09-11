@@ -1,6 +1,7 @@
 package secretmanagerregional_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -79,6 +80,40 @@ func TestAccSecretManagerRegionalRegionalSecretVersion_cmekOutputOnly(t *testing
 			},
 		},
 	})
+}
+
+func TestAccSecretManagerRegionalRegionalSecretVersion_neitherSecretDataSet(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccSecretManagerRegionalRegionalSecretVersion_noSecretData(context),
+				ExpectError: regexp.MustCompile(`Invalid combination of arguments`),
+			},
+		},
+	})
+}
+
+func testAccSecretManagerRegionalRegionalSecretVersion_noSecretData(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_regional_secret" "secret-basic" {
+  secret_id = "tf-test-secret-version-%{random_suffix}"
+  location = "us-central1"
+}
+
+resource "google_secret_manager_regional_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_regional_secret.secret-basic.name
+  secret_data_wo_version = 3
+}
+`, context)
 }
 
 func testAccSecretManagerRegionalRegionalSecretVersion_basic(context map[string]interface{}) string {
