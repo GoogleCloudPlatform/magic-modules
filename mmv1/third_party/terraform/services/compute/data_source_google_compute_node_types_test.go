@@ -56,7 +56,7 @@ func testAccCheckGoogleComputeNodeTypes(n string) resource.TestCheckFunc {
 		}
 
 		for i := 0; i < cnt; i++ {
-			idx := fmt.Sprintf("names.%d", i)
+			idx := fmt.Sprintf("tf-test-names.%d", i)
 			v, ok := rs.Primary.Attributes[idx]
 			if !ok {
 				return fmt.Errorf("expected %q, version not found", idx)

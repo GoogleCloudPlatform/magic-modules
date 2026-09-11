@@ -218,7 +218,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -348,7 +348,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -405,7 +405,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -463,7 +463,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {

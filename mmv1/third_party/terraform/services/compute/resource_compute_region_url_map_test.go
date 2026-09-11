@@ -43,7 +43,7 @@ func testAccComputeRegionUrlMap_headerAction1(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-headeraction-%s"
+  name          = "tf-test-regionurlmap-headeraction-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -51,7 +51,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-headeraction-%s"
+  name     = "tf-test-regionurlmap-headeraction-%s"
   http_health_check {
     port = 80
   }
@@ -59,7 +59,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-headeraction-%s"
+  name            = "tf-test-regionurlmap-headeraction-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   // root-level header_action
@@ -108,7 +108,7 @@ func testAccComputeRegionUrlMap_headerAction2(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-headeraction-%s"
+  name          = "tf-test-regionurlmap-headeraction-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -116,7 +116,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-headeraction-%s"
+  name     = "tf-test-regionurlmap-headeraction-%s"
   http_health_check {
     port = 80
   }
@@ -124,7 +124,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-headeraction-%s"
+  name            = "tf-test-regionurlmap-headeraction-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   // root-level header_action updated
@@ -393,7 +393,7 @@ func testAccComputeRegionUrlMap_basic1(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -401,7 +401,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-test-%s"
+  name     = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -409,7 +409,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-test-%s"
+  name            = "tf-test-regionurlmap-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   host_rule {
@@ -440,7 +440,7 @@ func testAccComputeRegionUrlMap_basic2(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -448,7 +448,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-test-%s"
+  name     = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -456,7 +456,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-test-%s"
+  name            = "tf-test-regionurlmap-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   host_rule {
@@ -487,7 +487,7 @@ func testAccComputeRegionUrlMap_advanced1(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -495,7 +495,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-test-%s"
+  name     = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -503,7 +503,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-test-%s"
+  name            = "tf-test-regionurlmap-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   host_rule {
@@ -543,7 +543,7 @@ func testAccComputeRegionUrlMap_advanced2(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -551,7 +551,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-test-%s"
+  name     = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -559,7 +559,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-test-%s"
+  name            = "tf-test-regionurlmap-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   host_rule {
@@ -619,7 +619,7 @@ func testAccComputeRegionUrlMap_noPathRules(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   region        = "us-central1"
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol      = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   health_checks = [google_compute_region_health_check.zero.self_link]
@@ -627,7 +627,7 @@ resource "google_compute_region_backend_service" "foobar" {
 
 resource "google_compute_region_health_check" "zero" {
   region   = "us-central1"
-  name     = "regionurlmap-test-%s"
+  name     = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -635,7 +635,7 @@ resource "google_compute_region_health_check" "zero" {
 
 resource "google_compute_region_url_map" "foobar" {
   region          = "us-central1"
-  name            = "regionurlmap-test-%s"
+  name            = "tf-test-regionurlmap-%s"
   default_service = google_compute_region_backend_service.foobar.self_link
 
   host_rule {
@@ -660,7 +660,7 @@ resource "google_compute_region_url_map" "foobar" {
 func testAccComputeRegionUrlMap_ilbPath(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   description = "a description"
   default_service = google_compute_region_backend_service.home.self_link
 
@@ -746,7 +746,7 @@ resource "google_compute_region_url_map" "foobar" {
 }
 
 resource "google_compute_region_backend_service" "home" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -755,7 +755,7 @@ resource "google_compute_region_backend_service" "home" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -766,7 +766,7 @@ resource "google_compute_region_health_check" "default" {
 func testAccComputeRegionUrlMap_ilbPathUpdate(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   description = "a description"
   default_service = google_compute_region_backend_service.home2.self_link
 
@@ -852,7 +852,7 @@ resource "google_compute_region_url_map" "foobar" {
 }
 
 resource "google_compute_region_backend_service" "home" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -861,7 +861,7 @@ resource "google_compute_region_backend_service" "home" {
 }
 
 resource "google_compute_region_backend_service" "home2" {
-  name          = "regionurlmap-test-%s-2"
+  name          = "tf-test-regionurlmap-%s-2"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -870,7 +870,7 @@ resource "google_compute_region_backend_service" "home2" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -881,7 +881,7 @@ resource "google_compute_region_health_check" "default" {
 func testAccComputeRegionUrlMap_ilbRoute(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   description = "a description"
   default_service = google_compute_region_backend_service.home.self_link
 
@@ -948,7 +948,7 @@ resource "google_compute_region_url_map" "foobar" {
 }
 
 resource "google_compute_region_backend_service" "home" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -957,7 +957,7 @@ resource "google_compute_region_backend_service" "home" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -968,7 +968,7 @@ resource "google_compute_region_health_check" "default" {
 func testAccComputeRegionUrlMap_ilbRouteUpdate(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   description = "a description"
   default_service = google_compute_region_backend_service.home.self_link
 
@@ -1031,7 +1031,7 @@ resource "google_compute_region_url_map" "foobar" {
 }
 
 resource "google_compute_region_backend_service" "home" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -1040,7 +1040,7 @@ resource "google_compute_region_backend_service" "home" {
 }
 
 resource "google_compute_region_backend_service" "home2" {
-  name          = "regionurlmap-test-%s-2"
+  name          = "tf-test-regionurlmap-%s-2"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -1049,7 +1049,7 @@ resource "google_compute_region_backend_service" "home2" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  name          = "regionurlmap-test-%s"
+  name          = "tf-test-regionurlmap-%s"
   http_health_check {
     port = 80
   }
@@ -1060,7 +1060,7 @@ resource "google_compute_region_health_check" "default" {
 func testAccComputeRegionUrlMap_defaultUrlRedirectConfig(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
-  name            = "urlmap-test-%s"
+  name            = "tf-test-urlmap-%s"
   default_url_redirect {
     https_redirect = true
     strip_query    = false
@@ -1072,7 +1072,7 @@ resource "google_compute_region_url_map" "foobar" {
 func testAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcherConfig(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
-  name            = "urlmap-test-%s"
+  name            = "tf-test-urlmap-%s"
   default_url_redirect {
     https_redirect = true
     strip_query    = false
@@ -1098,7 +1098,7 @@ func testAccComputeRegionUrlMap_defaultRouteAction_full(randomSuffix string) str
 resource "google_compute_region_url_map" "foobar" {
   region = "us-central1"
 
-  name        = "regionurlmap%s"
+  name        = "tf-test-regionurlmap%s"
   description = "a description"
 
   default_route_action {
@@ -1209,7 +1209,7 @@ resource "google_compute_region_url_map" "foobar" {
 resource "google_compute_region_backend_service" "login" {
   region = "us-central1"
 
-  name        = "login%s"
+  name        = "tf-test-login%s"
   protocol    = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec = 10
@@ -1218,7 +1218,7 @@ resource "google_compute_region_backend_service" "login" {
 resource "google_compute_region_backend_service" "home" {
   region = "us-central1"
 
-  name        = "home%s"
+  name        = "tf-test-home%s"
   protocol    = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec = 10
@@ -1231,7 +1231,7 @@ func testAccComputeRegionUrlMap_defaultRouteAction_full_update(randomSuffix stri
 resource "google_compute_region_url_map" "foobar" {
   region = "us-central1"
 
-  name        = "regionurlmap%s"
+  name        = "tf-test-regionurlmap%s"
   description = "a description"
 
   default_route_action {
@@ -1350,7 +1350,7 @@ resource "google_compute_region_url_map" "foobar" {
 resource "google_compute_region_backend_service" "login" {
   region = "us-central1"
 
-  name        = "login%s"
+  name        = "tf-test-login%s"
   protocol    = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec = 10
@@ -1359,7 +1359,7 @@ resource "google_compute_region_backend_service" "login" {
 resource "google_compute_region_backend_service" "home" {
   region = "us-central1"
 
-  name        = "home%s"
+  name        = "tf-test-home%s"
   protocol    = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec = 10

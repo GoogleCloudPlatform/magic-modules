@@ -82,7 +82,7 @@ resource "google_compute_global_network_endpoint" "default" {
 func testAccComputeGlobalNetworkEndpoint_noNetworkEndpoints(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_global_network_endpoint_group" "neg" {
-  name                  = "neg-%{random_suffix}"
+  name                  = "tf-test-neg-%{random_suffix}"
   default_port          = "%{default_port}"
   network_endpoint_type = "INTERNET_IP_PORT"
 }

@@ -104,14 +104,14 @@ type expectedAddress struct {
 }
 
 func (r expectedAddress) checkAddressMatch(index int, attrs map[string]string) (bool, error) {
-	map_name := fmt.Sprintf("addresses.%d.name", index)
+	map_name := fmt.Sprintf("tf-test-addresses.%d.name", index)
 	address_name := attrs[map_name]
 
 	if address_name != r.name {
 		return false, nil
 	}
 
-	map_region := fmt.Sprintf("addresses.%d.region", index)
+	map_region := fmt.Sprintf("tf-test-addresses.%d.region", index)
 	region, found := attrs[map_region]
 	if !found {
 		return false, fmt.Errorf("%s doesn't exists", map_region)
@@ -121,7 +121,7 @@ func (r expectedAddress) checkAddressMatch(index int, attrs map[string]string) (
 	}
 
 {{ if ne $.TargetVersionName `ga` -}} 
-	map_label := fmt.Sprintf("addresses.%d.labels.mykey", index)
+	map_label := fmt.Sprintf("tf-test-addresses.%d.labels.mykey", index)
 	label_value, found := attrs[map_label]
 	if !found {
 		return false, fmt.Errorf("label with key 'mykey' not found for %s", address_name)

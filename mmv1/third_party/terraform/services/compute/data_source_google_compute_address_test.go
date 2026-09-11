@@ -80,7 +80,7 @@ func TestAccDataSourceComputeAddress(t *testing.T) {
 	addressName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	rsName := "foobar"
-	rsFullName := fmt.Sprintf("google_compute_address.%s", rsName)
+	rsFullName := fmt.Sprintf("tf-test-google_compute_address.%s", rsName)
 	dsName := "my_address"
 	dsFullName := fmt.Sprintf("data.google_compute_address.%s", dsName)
 

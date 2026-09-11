@@ -18,7 +18,7 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 
 	rsName := "foo_" + randomSuffix
-	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
+	rsFullName := fmt.Sprintf("tf-test-google_compute_resource_policy.%s", rsName)
 	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 
@@ -64,7 +64,7 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 func testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_resource_policy" "%s" {
-  name   = "policy-%s"
+  name   = "tf-test-policy-%s"
   region = "us-central1"
   snapshot_schedule_policy {
     schedule {
