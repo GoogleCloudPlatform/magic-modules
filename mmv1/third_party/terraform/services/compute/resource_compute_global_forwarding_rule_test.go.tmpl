@@ -127,7 +127,10 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_allApisLabels(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("tf-test-frtest%s", acctest.RandString(t, 10))
+	// NOTE: no tf-test prefix. PSC Google APIs forwarding rule names must match
+	// ^[a-z][a-z0-9]{0,19}$ (no hyphens or underscores), so neither "tf-test" nor
+	// "tf_test" is a legal prefix for this resource.
+	fr := fmt.Sprintf("frtest%s", acctest.RandString(t, 10))
 	address := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -160,7 +163,10 @@ func TestAccComputeGlobalForwardingRule_allApisLabels(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_vpcscLabels(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("tf-test-frtest%s", acctest.RandString(t, 10))
+	// NOTE: no tf-test prefix. PSC Google APIs forwarding rule names must match
+	// ^[a-z][a-z0-9]{0,19}$ (no hyphens or underscores), so neither "tf-test" nor
+	// "tf_test" is a legal prefix for this resource.
+	fr := fmt.Sprintf("frtest%s", acctest.RandString(t, 10))
 	address := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{

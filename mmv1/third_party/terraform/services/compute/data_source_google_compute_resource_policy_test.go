@@ -18,7 +18,7 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 
 	rsName := "foo_" + randomSuffix
-	rsFullName := fmt.Sprintf("tf-test-google_compute_resource_policy.%s", rsName)
+	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
 	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 

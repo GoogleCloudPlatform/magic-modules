@@ -15,7 +15,7 @@ func TestAccDataSourceComputeGlobalAddress(t *testing.T) {
 	t.Parallel()
 
 	rsName := "foobar"
-	rsFullName := fmt.Sprintf("tf-test-google_compute_global_address.%s", rsName)
+	rsFullName := fmt.Sprintf("google_compute_global_address.%s", rsName)
 	dsName := "my_address"
 	dsFullName := fmt.Sprintf("data.google_compute_global_address.%s", dsName)
 	addressName := fmt.Sprintf("tf-test-address-%s", acctest.RandString(t, 10))

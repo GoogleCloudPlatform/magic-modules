@@ -16,7 +16,7 @@ func TestAccDataSourceComputeReservation(t *testing.T) {
 
 	rsName := "foobar"
 	dsName := "my_reservation"
-	rsFullName := fmt.Sprintf("tf-test-google_compute_reservation.%s", rsName)
+	rsFullName := fmt.Sprintf("google_compute_reservation.%s", rsName)
 	dsFullName := fmt.Sprintf("data.google_compute_reservation.%s", dsName)
 
 	acctest.VcrTest(t, resource.TestCase{

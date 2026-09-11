@@ -384,7 +384,7 @@ func testAccComputeForwardingRule_basic(poolName, ruleName string) string {
 resource "google_compute_target_pool" "foo-tp" {
   description = "Resource created for Terraform acceptance testing"
   instances   = ["us-central1-a/foo", "us-central1-b/bar"]
-  name        = "%s"
+  name        = "%s-foo"
 }
 
 resource "google_compute_forwarding_rule" "foobar" {
@@ -665,7 +665,7 @@ func testAccComputeForwardingRule_serviceDirectoryRegistrations(poolName, ruleNa
 resource "google_compute_target_pool" "foo-tp" {
   description = "Resource created for Terraform acceptance testing"
   instances   = ["us-central1-a/foo", "us-central1-b/bar"]
-  name        = "%s"
+  name        = "%s-foo"
 }
 
 resource "google_compute_forwarding_rule" "foobar" {

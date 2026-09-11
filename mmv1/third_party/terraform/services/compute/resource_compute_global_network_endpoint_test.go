@@ -18,7 +18,7 @@ func TestAccComputeGlobalNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 		"default_port":  90,
 		"modified_port": 100,
 	}
-	negId := fmt.Sprintf("projects/%s/global/networkEndpointGroups/neg-%s",
+	negId := fmt.Sprintf("projects/%s/global/networkEndpointGroups/tf-test-neg-%s",
 		envvar.GetTestProjectFromEnv(), context["random_suffix"])
 
 	acctest.VcrTest(t, resource.TestCase{

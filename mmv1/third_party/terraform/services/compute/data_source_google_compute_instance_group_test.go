@@ -134,7 +134,7 @@ func testAccCheckDataSourceGoogleComputeInstanceGroup(dataSourceName string) res
 		namedPortItemKeys := []string{"name", "value"}
 		for i := 0; i < dsNoOfNamedPorts; i++ {
 			for _, key := range namedPortItemKeys {
-				idx := fmt.Sprintf("tf-test-named_port.%d.%s", i, key)
+				idx := fmt.Sprintf("named_port.%d.%s", i, key)
 				if dsAttrs[idx] != rsAttrs[idx] {
 					return fmt.Errorf("%s is %s; want %s", idx, dsAttrs[idx], rsAttrs[idx])
 				}
