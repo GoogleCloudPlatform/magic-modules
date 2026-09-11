@@ -46,6 +46,13 @@ autogen_async: true
 include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/apphub_application.go.tmpl
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: application_id
+  allowed_iam_role: roles/apphub.admin
+  import_format:
+    - projects/{{project}}/locations/{{location}}/applications/{{application_id}}
+    - '{{application_id}}'
 samples:
   - name: apphub_application_basic
     primary_resource_id: example
