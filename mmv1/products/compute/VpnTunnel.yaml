@@ -22,6 +22,7 @@ references:
 base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
 immutable: true
 has_self_link: true
+generate_list_resource: true
 collection_url_key: items
 kind: compute#vpnTunnel
 id_format: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}
