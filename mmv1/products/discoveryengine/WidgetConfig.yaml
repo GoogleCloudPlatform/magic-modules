@@ -13,6 +13,8 @@
 
 ---
 name: WidgetConfig
+api_variant_patterns:
+  - projects/{project}/locations/{location}/collections/{collection}/engines/{engine}/widgetConfigs/{widgetConfig}
 description: Represents a WidgetConfig.
 references:
   api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1alpha/projects.locations.collections.engines.widgetConfigs
