@@ -51,13 +51,6 @@ samples:
           name: instance
           network_name: network
           address_name: address
-        test_vars_overrides:
-          # for backward compatible
-          name: '"instance" + randomSuffix'
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
         ignore_read_extra:
           - update_time
   - name: parallelstore_instance_basic
@@ -68,13 +61,6 @@ samples:
           name: instance
           network_name: network
           address_name: address
-        test_vars_overrides:
-          # for backward compatible
-          name: '"instance" + randomSuffix'
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
         ignore_read_extra:
           - update_time
 parameters:
