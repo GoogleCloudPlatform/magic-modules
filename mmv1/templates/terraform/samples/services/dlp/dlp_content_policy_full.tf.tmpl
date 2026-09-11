@@ -1,0 +1,304 @@
+resource "google_data_loss_prevention_content_policy" "{{$.PrimaryResourceId}}" {
+  parent       = "projects/{{index $.TestEnvVars "project"}}/locations/{{index $.TestEnvVars "location"}}"
+  display_name = "tf-test-dlp-content-policy-full"
+
+  inspect_config {
+    content_options    = ["CONTENT_TEXT", "CONTENT_IMAGE"]
+    include_quote      = true
+    exclude_info_types = false
+    min_likelihood     = "LIKELY"
+
+    info_types {
+      name = "PHONE_NUMBER"
+      sensitivity_score {
+        score = "SENSITIVITY_LOW"
+      }
+    }
+
+    info_types {
+      name = "EMAIL_ADDRESS"
+    }
+
+    info_types {
+      name    = "PERSON_NAME"
+      version = "latest"
+    }
+
+    info_types {
+      name = "FIRST_NAME"
+    }
+
+    info_types {
+      name = "LAST_NAME"
+    }
+
+    min_likelihood_per_info_type {
+      info_type {
+        name    = "PERSON_NAME"
+        version = "latest"
+      }
+      min_likelihood = "LIKELY"
+    }
+
+    custom_info_types {
+      info_type {
+        name    = "MY_CUSTOM_TYPE"
+        version = "0.1"
+        sensitivity_score {
+          score = "SENSITIVITY_LOW"
+        }
+      }
+      sensitivity_score {
+        score = "SENSITIVITY_MODERATE"
+      }
+      likelihood     = "UNLIKELY"
+      exclusion_type = "EXCLUSION_TYPE_EXCLUDE"
+      regex {
+        pattern       = "test.*"
+        group_indexes = [0]
+      }
+    }
+
+    custom_info_types {
+      info_type {
+        name = "MY_WORD_LIST_TYPE"
+      }
+      likelihood = "POSSIBLE"
+      dictionary {
+        word_list {
+          words = ["badword1", "badword2"]
+        }
+      }
+    }
+
+    custom_info_types {
+      info_type {
+        name = "MY_STORAGE_TYPE"
+      }
+      likelihood = "POSSIBLE"
+      dictionary {
+        cloud_storage_path {
+          path = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+        }
+      }
+    }
+
+    custom_info_types {
+      info_type {
+        name = "MY_STORED_TYPE"
+      }
+      likelihood = "POSSIBLE"
+      stored_type {
+        name = google_data_loss_prevention_stored_info_type.basic.id
+      }
+    }
+
+    limits {
+      max_findings_per_item    = 10
+      max_findings_per_request = 50
+      max_findings_per_info_type {
+        max_findings = 10
+        info_type {
+          name    = "PERSON_NAME"
+          version = "latest"
+          sensitivity_score {
+            score = "SENSITIVITY_HIGH"
+          }
+        }
+      }
+    }
+
+    rule_set {
+      info_types {
+        name = "PHONE_NUMBER"
+        sensitivity_score {
+          score = "SENSITIVITY_LOW"
+        }
+      }
+      rules {
+        exclusion_rule {
+          matching_type = "MATCHING_TYPE_FULL_MATCH"
+          exclude_info_types {
+            info_types {
+              name    = "PERSON_NAME"
+              version = "latest"
+              sensitivity_score {
+                score = "SENSITIVITY_LOW"
+              }
+            }
+          }
+        }
+      }
+    }
+
+    rule_set {
+      info_types {
+        name = "EMAIL_ADDRESS"
+      }
+      rules {
+        exclusion_rule {
+          matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+          regex {
+            pattern       = ".*@example\\.com"
+            group_indexes = [0]
+          }
+        }
+      }
+    }
+
+    rule_set {
+      info_types {
+        name    = "PERSON_NAME"
+        version = "latest"
+      }
+      rules {
+        exclusion_rule {
+          matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+          dictionary {
+            word_list {
+              words = ["test"]
+            }
+          }
+        }
+      }
+      rules {
+        exclusion_rule {
+          matching_type = "MATCHING_TYPE_PARTIAL_MATCH"
+          dictionary {
+            cloud_storage_path {
+              path = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+            }
+          }
+        }
+      }
+    }
+
+    rule_set {
+      info_types {
+        name = "FIRST_NAME"
+      }
+      rules {
+        exclusion_rule {
+          matching_type = "MATCHING_TYPE_FULL_MATCH"
+          exclude_by_hotword {
+            hotword_regex {
+              pattern       = "zone.*"
+              group_indexes = [0]
+            }
+            proximity {
+              window_before = 1
+              window_after  = 2
+            }
+          }
+        }
+      }
+    }
+
+    rule_set {
+      info_types {
+        name = "LAST_NAME"
+      }
+      rules {
+        hotword_rule {
+          hotword_regex {
+            pattern       = "patient.*"
+            group_indexes = [0]
+          }
+          proximity {
+            window_before = 1
+            window_after  = 2
+          }
+          likelihood_adjustment {
+            fixed_likelihood = "VERY_LIKELY"
+          }
+        }
+      }
+    }
+  }
+
+  rules {
+    conditions {
+      info_type_condition {
+        any_info_type {}
+        min_count     = 2
+      }
+    }
+    action {
+      return_verdict = "BLOCK"
+    }
+  }
+
+  unsupported_file_type {
+    return_verdict = "ALLOW"
+  }
+
+  input_too_large {
+    return_verdict = "ALLOW"
+  }
+
+  failed_to_scan_supported_file_type {
+    return_verdict = "BLOCK"
+  }
+
+  default_action {
+    return_verdict = "ALLOW"
+  }
+
+  logging_configs {
+    log_to_big_query {
+      project_id = google_bigquery_table.default.project
+      dataset_id = google_bigquery_dataset.default.dataset_id
+      table_id   = google_bigquery_table.default.table_id
+    }
+  }
+}
+
+resource "google_data_loss_prevention_stored_info_type" "basic" {
+  parent       = "projects/{{index $.TestEnvVars "project"}}/locations/{{index $.TestEnvVars "location"}}"
+  description  = "Description for stored info type"
+  display_name = "tf-test-stored-info-type"
+
+  regex {
+    pattern       = ".*"
+    group_indexes = [0]
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name    = "tf-test-wordlist"
+  bucket  = google_storage_bucket.bucket.name
+  content = "word1\nword2\n"
+}
+
+resource "google_bigquery_dataset" "default" {
+  dataset_id                  = "{{index $.ResourceIdVars "dataset_id"}}"
+  friendly_name               = "tf-test-dataset"
+  description                 = "Description for the dataset created by terraform"
+  location                    = "US"
+  default_table_expiration_ms = 3600000
+  delete_contents_on_destroy  = true
+}
+
+resource "google_bigquery_table" "default" {
+  dataset_id          = google_bigquery_dataset.default.dataset_id
+  table_id            = "{{index $.ResourceIdVars "table_id"}}"
+  deletion_protection = false
+
+  schema = <<EOF
+[
+  {
+    "name": "quantity",
+    "type": "NUMERIC",
+    "mode": "NULLABLE",
+    "description": "The quantity"
+  }
+]
+EOF
+}
