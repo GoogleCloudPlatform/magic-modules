@@ -208,10 +208,8 @@ samples:
           home_region_backend_service_name: '"home" + randomSuffix'
   - name: 'region_url_map_default_mirror_percent'
     primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
     steps:
       - name: 'region_url_map_default_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           region_url_map_name: 'regionurlmap'
           home_backend_service_name: 'home'
@@ -226,10 +224,8 @@ samples:
           mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'region_url_map_path_matcher_default_mirror_percent'
     primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
     steps:
       - name: 'region_url_map_path_matcher_default_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           region_url_map_name: 'regionurlmap'
           home_backend_service_name: 'home'
@@ -244,10 +240,8 @@ samples:
           mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'region_url_map_path_rule_mirror_percent'
     primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
     steps:
       - name: 'region_url_map_path_rule_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           region_url_map_name: 'regionurlmap'
           home_backend_service_name: 'home'
@@ -262,10 +256,8 @@ samples:
           mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'region_url_map_route_rule_mirror_percent'
     primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
     steps:
       - name: 'region_url_map_route_rule_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           region_url_map_name: 'regionurlmap'
           home_backend_service_name: 'home'
@@ -932,7 +924,6 @@ properties:
                         resource: 'RegionBackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
-                        min_version: beta
                         type: Double
                         description: |
                           The percentage of requests to be mirrored to backendService.
@@ -1402,7 +1393,6 @@ properties:
                         resource: 'RegionBackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
-                        min_version: beta
                         type: Double
                         description: |
                           The percentage of requests to be mirrored to backendService.
@@ -2017,7 +2007,6 @@ properties:
                   resource: 'BackendService'
                   imports: 'selfLink'
                 - name: 'mirrorPercent'
-                  min_version: beta
                   type: Double
                   description: |
                     The percentage of requests to be mirrored to backendService.
@@ -2504,7 +2493,6 @@ properties:
             resource: 'RegionBackendService'
             imports: 'selfLink'
           - name: 'mirrorPercent'
-            min_version: beta
             type: Double
             description: |
               The percentage of requests to be mirrored to backendService.
