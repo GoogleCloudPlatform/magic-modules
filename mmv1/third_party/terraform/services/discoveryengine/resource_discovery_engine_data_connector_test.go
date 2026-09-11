@@ -56,7 +56,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
   data_source_version          = 3
-  params = {
+  params = jsonencode({
     auth_type                  = "OAUTH_PASSWORD_GRANT"
     instance_uri               = "https://gcpconnector1.service-now.com/"
     client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
@@ -64,7 +64,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     static_ip_enabled          = "false"
     user_account               = "connectorsuserqa@google.com"
     password                   = "SECRET_MANAGER_RESOURCE_NAME"
-  }
+  })
   refresh_interval             = "86400s"
   entities {
     entity_name                = "catalog"
@@ -107,7 +107,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
       host = "https://gcpconnector1.service-now.com/"
       port = 123
     }
-    params.                    = jsonencode({
+    params                     = jsonencode({
       "destination_type": "private"
     })
   }
@@ -153,9 +153,9 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
-  params = {
+  params = jsonencode({
     max_qps                    = "100"
-  }
+  })
   refresh_interval             = "172800s"
   entities {
     entity_name                = "catalog"

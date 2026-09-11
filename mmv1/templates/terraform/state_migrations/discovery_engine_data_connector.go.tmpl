@@ -23,6 +23,26 @@ func ResourceDiscoveryEngineDataConnectorUpgradeV0(_ context.Context, rawState m
 	return rawState, nil
 }
 
+func ResourceDiscoveryEngineDataConnectorUpgradeV1(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
+	// Version 1 had params as KeyValuePairs; Version 2 makes it a json string.
+	if p, ok := rawState["params"]; ok && p != nil {
+		if _, isString := p.(string); !isString {
+			b, err := json.Marshal(p)
+			if err != nil {
+				b = []byte(fmt.Sprintf("%v", p))
+			}
+			rawState["params"] = string(b)
+		}
+	}
+	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+	return rawState, nil
+}
+
+func resourceDiscoveryEngineDataConnectorResourceV1() *schema.Resource {
+	return resourceDiscoveryEngineDataConnectorResourceV0()
+}
+
 func resourceDiscoveryEngineDataConnectorResourceV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
