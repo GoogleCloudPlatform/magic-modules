@@ -150,6 +150,15 @@ samples:
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
+  - name: workstation_config_reservation_affinity
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: workstation_config_reservation_affinity
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          reservation_name: workstation-reservation
 parameters:
   - name: workstationConfigId
     type: String
@@ -261,6 +270,7 @@ properties:
       - host.gceInstance.disableSsh
       - host.gceInstance.vmTags
       - host.gceInstance.instanceMetadata
+      - host.gceInstance.reservationAffinity
     properties:
       - name: gceInstance
         type: NestedObject
@@ -415,6 +425,37 @@ properties:
                         description: |
                           Number of accelerator cards exposed to the instance.
                         required: true
+                - name: reservationAffinity
+                  type: NestedObject
+                  description: |
+                    Optional. Specifies the reservations that this boosted instance can consume from.
+                  min_version: beta
+                  default_from_api: true
+                  properties:
+                    - name: consumeReservationType
+                      type: Enum
+                      description: |
+                        Specifies the type of reservation from which this boosted instance can consume resources:
+                        NO_RESERVATION, ANY_RESERVATION (default), or SPECIFIC_RESERVATION.
+                      enum_values:
+                        - 'NO_RESERVATION'
+                        - 'ANY_RESERVATION'
+                        - 'SPECIFIC_RESERVATION'
+                    - name: key
+                      type: String
+                      description: |
+                        Corresponds to the label key of a reservation resource. To target a
+                        SPECIFIC_RESERVATION by name, use compute.googleapis.com/reservation-name
+                        as the key and specify the name of your reservation as its value.
+                    - name: values
+                      type: Array
+                      item_type:
+                        type: String
+                      description: |
+                        Corresponds to the label values of a reservation resource. This can be
+                        either a name to a reservation in the same project or
+                        "projects/different-project/reservations/some-reservation-name"
+                        to target a shared reservation in the same zone but in a different project.
           - name: vmTags
             type: KeyValuePairs
             description: |
@@ -427,6 +468,37 @@ properties:
             type: KeyValuePairs
             description: |
               Client-specified metadata key-value pairs, to be passed to the start-up script in the VM.
+          - name: reservationAffinity
+            type: NestedObject
+            description: |
+              Optional. Specifies the reservations that this instance can consume from.
+            min_version: beta
+            default_from_api: true
+            properties:
+              - name: consumeReservationType
+                type: Enum
+                description: |
+                  Specifies the type of reservation from which this instance can consume resources:
+                  NO_RESERVATION, ANY_RESERVATION (default), or SPECIFIC_RESERVATION.
+                enum_values:
+                  - 'NO_RESERVATION'
+                  - 'ANY_RESERVATION'
+                  - 'SPECIFIC_RESERVATION'
+              - name: key
+                type: String
+                description: |
+                  Corresponds to the label key of a reservation resource. To target a
+                  SPECIFIC_RESERVATION by name, use compute.googleapis.com/reservation-name
+                  as the key and specify the name of your reservation as its value.
+              - name: values
+                type: Array
+                item_type:
+                  type: String
+                description: |
+                  Corresponds to the label values of a reservation resource. This can be
+                  either a name to a reservation in the same project or
+                  "projects/different-project/reservations/some-reservation-name"
+                  to target a shared reservation in the same zone but in a different project.
   - name: persistentDirectories
     type: Array
     description: |
