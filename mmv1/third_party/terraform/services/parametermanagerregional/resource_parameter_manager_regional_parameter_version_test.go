@@ -22,6 +22,9 @@ func TestAccParameterManagerRegionalRegionalParameterVersion_update(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config: testAccParameterManagerRegionalRegionalParameterVersion_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_regional_parameter_version.regional-parameter-version-update", "data_crc32c", "4019737965"),
+				),
 			},
 			{
 				ResourceName:            "google_parameter_manager_regional_parameter_version.regional-parameter-version-update",
@@ -31,6 +34,21 @@ func TestAccParameterManagerRegionalRegionalParameterVersion_update(t *testing.T
 			},
 			{
 				Config: testAccParameterManagerRegionalRegionalParameterVersion_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_regional_parameter_version.regional-parameter-version-update", "data_crc32c", "4019737965"),
+				),
+			},
+			{
+				ResourceName:            "google_parameter_manager_regional_parameter_version.regional-parameter-version-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parameter", "parameter_version_id", "data_crc32c"},
+			},
+			{
+				Config: testAccParameterManagerRegionalRegionalParameterVersion_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_regional_parameter_version.regional-parameter-version-update", "data_crc32c", "4019737965"),
+				),
 			},
 			{
 				ResourceName:            "google_parameter_manager_regional_parameter_version.regional-parameter-version-update",
@@ -38,11 +56,30 @@ func TestAccParameterManagerRegionalRegionalParameterVersion_update(t *testing.T
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parameter", "parameter_version_id"},
 			},
+		},
+	})
+}
+
+func TestAccParameterManagerRegionalRegionalParameterVersion_dataCrc32c(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckParameterManagerRegionalRegionalParameterVersionDestroyProducer(t),
+		Steps: []resource.TestStep{
 			{
-				Config: testAccParameterManagerRegionalRegionalParameterVersion_basic(context),
+				Config: testAccParameterManagerRegionalRegionalParameterVersion_dataCrc32c(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_regional_parameter_version.regional-parameter-version-crc32c", "data_crc32c", "4019737965"),
+				),
 			},
 			{
-				ResourceName:            "google_parameter_manager_regional_parameter_version.regional-parameter-version-update",
+				ResourceName:            "google_parameter_manager_regional_parameter_version.regional-parameter-version-crc32c",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parameter", "parameter_version_id"},
@@ -78,6 +115,22 @@ resource "google_parameter_manager_regional_parameter_version" "regional-paramet
   parameter_version_id = "tf_test_regional_parameter_version%{random_suffix}"
   parameter_data = "regional-parameter-version-data"
   disabled = true
+}
+`, context)
+}
+
+func testAccParameterManagerRegionalRegionalParameterVersion_dataCrc32c(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_regional_parameter" "regional-parameter-crc32c" {
+  parameter_id = "tf_test_regional_parameter%{random_suffix}"
+  location = "us-central1"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "regional-parameter-version-crc32c" {
+  parameter = google_parameter_manager_regional_parameter.regional-parameter-crc32c.id
+  parameter_version_id = "tf_test_regional_parameter_version%{random_suffix}"
+  parameter_data = "regional-parameter-version-data"
+  data_crc32c = "4019737965"
 }
 `, context)
 }
