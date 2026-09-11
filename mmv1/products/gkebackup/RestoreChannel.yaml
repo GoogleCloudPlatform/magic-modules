@@ -39,6 +39,7 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: gkebackup_restorechannel_basic
