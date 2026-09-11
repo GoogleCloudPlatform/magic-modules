@@ -2,9 +2,10 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
   name           = "{{index $.ResourceIdVars "instance_name"}}"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
+  region         = "us-west1"
 
-  location_id             = "us-central1-a"
-  alternative_location_id = "us-central1-f"
+  location_id             = "us-west1-a"
+  alternative_location_id = "us-west1-b"
 
   authorized_network = data.google_compute_network.redis-network.id
 
