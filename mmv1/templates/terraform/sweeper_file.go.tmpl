@@ -519,7 +519,7 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 	}
 	{{- if $.Sweeper.WaitForDelete }}
 	err = {{ $.ClientNamePascal }}OperationWaitTime(
-		config, res, config.Project, "Deleting Network", config.UserAgent,
+		config, res, config.Project, "Deleting {{ $.ClientNamePascal }}", config.UserAgent,
 		time.Minute*5)
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error waiting for deletion of %s resource (%s): %s", resourceName, name, err)
