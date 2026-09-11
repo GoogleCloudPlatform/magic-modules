@@ -31,7 +31,7 @@ resource "google_sql_user" "sqldb_user" {
 resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location              = "us-central1"
   connection_profile_id = "{{index $.ResourceIdVars "from_profile"}}"
-  display_name          = "{{index $.ResourceIdVars "from_profile"}}_display"
+  display_name          = "{{index $.ResourceIdVars "from_profile"}}-display"
   labels = { 
     foo = "bar"
   }
@@ -56,7 +56,7 @@ resource "google_database_migration_service_connection_profile" "{{$.PrimaryReso
 resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}_destination" {
   location              = "us-central1"
   connection_profile_id = "{{index $.ResourceIdVars "to_profile"}}"
-  display_name          = "{{index $.ResourceIdVars "to_profile"}}_displayname"
+  display_name          = "{{index $.ResourceIdVars "to_profile"}}-displayname"
   labels = { 
     foo = "bar"
   }
