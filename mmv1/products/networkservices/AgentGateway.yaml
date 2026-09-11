@@ -234,3 +234,10 @@ properties:
         description: |
           Service Account used by Service Extensions to operate.
         output: true
+  - name: agentConnectivityTemplate
+    type: String
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    description: |
+      The resource name of the AgentConnectivityTemplate.
+      Format:
+      `projects/{project}/locations/{location}/agentConnectivityTemplates/{template}`
