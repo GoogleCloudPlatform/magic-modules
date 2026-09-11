@@ -34,7 +34,7 @@ iam_policy:
   fetch_iam_policy_verb: GET
   allowed_iam_role: roles/biglake.editor
   parent_resource_attribute: name
-  base_url: v1/projects/{{project}}/catalogs/{{name}}
+  base_url: hive/v1/projects/{{project}}/catalogs/{{name}}
   import_format:
     - projects/{{project}}/catalogs/{{name}}
     - '{{name}}'

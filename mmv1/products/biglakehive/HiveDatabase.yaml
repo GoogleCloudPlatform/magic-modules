@@ -35,9 +35,9 @@ iam_policy:
   allowed_iam_role: roles/biglake.editor
   parent_resource_attribute: name
   sample_config_body: templates/terraform/iam/example_config_body/biglake_hive_database.tf.tmpl
-  base_url: v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}
+  base_url: hive/v1/projects/{{project}}/catalogs/{{catalog}}/databases/{{name}}
   import_format:
-    - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}
+    - projects/{{project}}/catalogs/{{catalog}}/databases/{{name}}
     - '{{name}}'
 samples:
   - name: 'biglake_hive_database'
