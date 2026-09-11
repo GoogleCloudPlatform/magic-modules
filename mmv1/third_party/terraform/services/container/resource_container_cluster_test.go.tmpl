@@ -13531,10 +13531,8 @@ resource "google_container_cluster" "primary" {
   # if the test is broken.
   enable_k8s_beta_apis {
     enabled_apis = [
-	  "resource.k8s.io/v1beta1/deviceclasses",
-	  "resource.k8s.io/v1beta1/resourceclaims",
-	  "resource.k8s.io/v1beta1/resourceclaimtemplates",
-	  "resource.k8s.io/v1beta1/resourceslices"
+	  "networking.k8s.io/v1beta1/servicecidrs",
+	  "storage.k8s.io/v1beta1/volumeattributesclasses"
 	]
   }
   network    = "%s"
