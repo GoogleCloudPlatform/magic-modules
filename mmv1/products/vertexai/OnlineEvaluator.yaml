@@ -1,0 +1,437 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: OnlineEvaluator
+description: |
+  An OnlineEvaluator contains the configuration for an Online Evaluation. It
+  periodically samples traces or sessions emitted by an agent and evaluates them
+  using the configured metric sources.
+references:
+  guides:
+    'Official Documentation': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/optimize/evaluation/evaluate-online'
+  api: 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest#rest-resource:-v1beta1.projects.locations.onlineevaluators'
+docs:
+base_url: projects/{{project}}/locations/{{region}}/onlineEvaluators
+self_link: projects/{{project}}/locations/{{region}}/onlineEvaluators/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/onlineEvaluators
+update_verb: PATCH
+update_mask: true
+generate_list_resource: true
+id_format: projects/{{project}}/locations/{{region}}/onlineEvaluators/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/onlineEvaluators/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 60
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+custom_code:
+samples:
+  - name: vertex_ai_online_evaluator_basic
+    primary_resource_id: evaluator
+    steps:
+      - name: vertex_ai_online_evaluator_basic
+        resource_id_vars:
+          evaluator_name: online-evaluator
+          engine_name: reasoning-engine
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: vertex_ai_online_evaluator_full
+    primary_resource_id: evaluator
+    steps:
+      - name: vertex_ai_online_evaluator_full
+        resource_id_vars:
+          evaluator_name: online-evaluator
+          engine_name: reasoning-engine
+          metric_name: eval-metric
+        test_env_vars:
+          project: PROJECT_NAME
+parameters:
+  - name: region
+    type: String
+    description: The region of the OnlineEvaluator (e.g. us-central1).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the OnlineEvaluator. This is the final component of
+      the resource path.
+      Format: projects/{{project}}/locations/{{region}}/onlineEvaluators/{{id}}.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      Human-readable name for the OnlineEvaluator. The name doesn't have to be
+      unique. The name can consist of any UTF-8 characters. The maximum length
+      is 63 characters.
+  - name: agentResource
+    type: String
+    required: true
+    immutable: true
+    description: |
+      The name of the agent that the OnlineEvaluator evaluates periodically.
+      This value is used to filter the traces with a matching cloud.resource_id
+      and link the evaluation results with relevant dashboards/UIs. This field
+      is immutable; once set, it cannot be changed.
+  - name: config
+    type: NestedObject
+    required: true
+    description: |
+      Configuration for sampling behavior of the OnlineEvaluator. The
+      OnlineEvaluator runs at a fixed interval of 10 minutes.
+    properties:
+      - name: maxEvaluatedSamplesPerRun
+        type: String
+        description: |
+          The maximum number of evaluations to perform per run. If set to 0, the
+          number is unbounded.
+      - name: randomSampling
+        type: NestedObject
+        description: |
+          Configuration for random sampling. This is the sampling method used to
+          select traces for evaluation.
+        properties:
+          - name: percentage
+            type: Integer
+            required: true
+            description: |
+              The percentage of traces to sample for evaluation. Must be an
+              integer between 1 and 100.
+  - name: cloudObservability
+    type: NestedObject
+    required: true
+    description: |
+      Data source for the OnlineEvaluator, based on the Google Cloud
+      Observability stack (Cloud Trace & Cloud Logging). The data source type is
+      immutable once set. Within `cloud_observability`, `log_view` and
+      `trace_view` can be updated; the eval scope (`trace_scope` /
+      `session_scope`) and the convention (`open_telemetry`) are immutable.
+    properties:
+      - name: logView
+        type: String
+        description: |
+          Optional log view that will be used to query logs. If empty, the
+          project's default view (`projects/{{project_id}}`) will be used.
+      - name: traceView
+        type: String
+        description: |
+          Optional trace view that will be used to query traces. If empty, the
+          `_AllSpans` view from the `_Trace` US bucket will be used.
+      - name: openTelemetry
+        type: NestedObject
+        required: true
+        immutable: true
+        ignore_read: true
+        description: |
+          Configuration for a data source following the OpenTelemetry
+          convention. This is the convention that the data source follows.
+        properties:
+          - name: semconvVersion
+            type: String
+            required: true
+            immutable: true
+            description: |
+              Defines which version of the OTel Semantic Convention the data
+              follows. Can be "1.39.0" or newer.
+      - name: traceScope
+        type: NestedObject
+        immutable: true
+        description: |
+          If chosen, the OnlineEvaluator will evaluate single traces matching
+          the specified filter. Exactly one of `trace_scope` or `session_scope`
+          must be set.
+        properties:
+          - name: filter
+            type: Array
+            immutable: true
+            description: |
+              A list of predicates to filter traces. Multiple predicates are
+              combined using AND. The maximum number of predicates is 10.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: duration
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the duration of a trace (in seconds).
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: totalTokenUsage
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the total token usage within a trace.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+      - name: sessionScope
+        type: NestedObject
+        immutable: true
+        description: |
+          If chosen, the OnlineEvaluator will evaluate sessions matching the
+          specified filter. A session is a group of traces with a common
+          `gen_ai.conversation.id`. Exactly one of `trace_scope` or
+          `session_scope` must be set.
+        properties:
+          - name: inactivityTrigger
+            type: NestedObject
+            immutable: true
+            description: |
+              Session is considered ready for evaluation when there are no new
+              traces for a specified period of inactivity.
+            properties:
+              - name: threshold
+                type: String
+                required: true
+                immutable: true
+                description: |
+                  The amount of time that must pass with no new traces before a
+                  session is considered ready for evaluation. Must be a positive
+                  duration no greater than 7 days (604800 seconds), e.g. "3600s".
+          - name: filter
+            type: Array
+            immutable: true
+            description: |
+              A list of predicates to filter sessions. Multiple predicates are
+              combined using AND. The maximum number of predicates is 10.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: totalTokenUsage
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the total token usage within a session.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: userTurns
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the number of user turns within a session.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: modelCalls
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the number of underlying LLM calls within a session.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: modelCallErrors
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the number of LLM call errors within a session.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: toolCalls
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the number of underlying tool calls within a session.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: toolCallErrors
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the number of tool call errors within a session.
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+                - name: duration
+                  type: NestedObject
+                  immutable: true
+                  description: Filter on the duration of a session (in seconds).
+                  properties:
+                    - name: comparisonOperator
+                      type: String
+                      required: true
+                      immutable: true
+                      description: |
+                        The comparison operator to apply. Possible values are:
+                        LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL,
+                        GREATER.
+                    - name: value
+                      type: Double
+                      required: true
+                      immutable: true
+                      description: The value to compare against.
+  - name: metricSources
+    type: Array
+    required: true
+    immutable: true
+    description: |
+      A list of metric sources to be used for evaluating samples. At least one
+      metric source must be provided. Only predefined metrics (inline `metric`)
+      and registered metrics (`metric_resource_name`) are supported. Every
+      registered metric must have a `display_name` (or `title`) and a
+      `score_range` defined, otherwise the evaluations will fail. The maximum
+      number of metric sources is 25. Exactly one of `metric` or
+      `metric_resource_name` must be set per metric source.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: metric
+          type: String
+          immutable: true
+          description: |
+            Inline metric config, provided as a JSON-formatted string using
+            camelCase field names to match the API format (see the
+            [Metric API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/Metric)).
+            Suggested predefined `metricSpecName` values:
+            `final_response_quality_v1`, `tool_use_quality_v1`,
+            `hallucination_v1`, `safety_v1`, `multi_turn_task_success_v1`,
+            `multi_turn_tool_use_quality_v1`, `multi_turn_trajectory_quality_v1`.
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+          custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+          validation:
+            function: validation.StringIsJSON
+        - name: metricResourceName
+          type: String
+          immutable: true
+          description: |
+            Resource name of a registered metric (a
+            `google_vertex_ai_evaluation_metric`), e.g.
+            projects/{{project}}/locations/{{region}}/evaluationMetrics/{{id}}.
+  - name: state
+    type: String
+    output: true
+    description: |
+      The state of the OnlineEvaluator. Possible values are: ACTIVE, SUSPENDED,
+      FAILED, WARNING.
+  - name: stateDetails
+    type: Array
+    output: true
+    description: |
+      Contains additional information about the state of the OnlineEvaluator.
+      This is used to provide more details in the event of a failure.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: message
+          type: String
+          output: true
+          description: |
+            Human-readable message describing the state of the OnlineEvaluator.
+  - name: createTime
+    type: String
+    output: true
+    description: Timestamp when the OnlineEvaluator was created.
+  - name: updateTime
+    type: String
+    output: true
+    description: Timestamp when the OnlineEvaluator was last updated.
