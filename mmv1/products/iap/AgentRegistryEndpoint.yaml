@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 name: AgentRegistryEndpoint
 description: |
@@ -36,14 +37,16 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_tgc: true
-examples:
+samples:
   - name: agent_registry_endpoint_basic
     primary_resource_id: default
     external_providers: [time]
-    vars:
-      endpoint_id: endpoint-id
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: agent_registry_endpoint_basic
+        resource_id_vars:
+          endpoint_id: endpoint-id
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: location
     type: String
