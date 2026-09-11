@@ -1,0 +1,16 @@
+resource "google_chronicle_request_template" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name      = "Access Request Form"
+  visual_family     = "Authentication"
+  environments      = ["Default Environment"]
+  allow_description = false
+
+  event_field_definitions {
+    name      = "user.email"
+    watermark = "user@example.com"
+    type      = "EMAIL"
+  }
+}
