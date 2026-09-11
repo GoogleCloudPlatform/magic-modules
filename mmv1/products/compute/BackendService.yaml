@@ -781,6 +781,7 @@ properties:
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
+        send_empty_value: true
       - name: 'maxTtl'
         type: Integer
         description: |
@@ -791,6 +792,7 @@ properties:
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
+        send_empty_value: true
       - name: 'negativeCaching'
         type: Boolean
         description: |
