@@ -103,16 +103,6 @@ samples:
           data: '"./test-fixtures/parameter_data_yaml_format.yaml"'
           # for backward compatible
           parameter_id: '"parameter" + randomSuffix'
-  - name: parameter_version_with_data_crc32c
-    primary_resource_id: parameter-version-with-data-crc32c
-    steps:
-      - name: parameter_version_with_data_crc32c
-        resource_id_vars:
-          parameter_id: parameter
-          parameter_version_id: parameter_version
-        test_vars_overrides:
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
 parameters:
   - name: parameter
     type: ResourceRef
@@ -169,12 +159,6 @@ properties:
         immutable: true
         sensitive: true
         custom_expand: templates/terraform/custom_expand/base64.go.tmpl
-      - name: dataCrc32c
-        type: String
-        description: |
-          The integrity checksum of the payload.
-        immutable: true
-        default_from_api: true
   - name: kmsKeyVersion
     type: String
     output: true
