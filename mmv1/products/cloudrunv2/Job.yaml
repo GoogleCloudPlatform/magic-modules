@@ -302,7 +302,6 @@ properties:
     default_from_api: true
     enum_values:
       - FUNCTIONAL_TYPE_AGENT
-      - FUNCTIONAL_TYPE_MCP_SERVER
   - name: binaryAuthorization
     type: NestedObject
     description: |
