@@ -48,6 +48,12 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
+sweeper:
+  prefixes:
+    # PSC Google APIs forwarding rule names must match ^[a-z][a-z0-9]{0,19}$,
+    # so neither "tf-test" nor "tf_test" is a legal prefix for them. The tests
+    # use "frtest" instead; register it so those rules are still swept.
+    - "frtest"
 samples:
   - name: 'external_ssl_proxy_lb_mig_backend'
     primary_resource_id: 'default'
