@@ -29,6 +29,8 @@ import_format:
   - '{{env_id}}/references/{{name}}'
   - '{{env_id}}/{{name}}'
 # Resource creation race
+generate_list_resource: true
+
 timeouts:
   insert_minutes: 1
   update_minutes: 20
