@@ -79,8 +79,9 @@ type MissingDocInfo struct {
 }
 
 type MissingDocsSummary struct {
-	Resource   []MissingDocInfo
-	DataSource []MissingDocInfo
+	Resource        []MissingDocInfo
+	DataSource      []MissingDocInfo
+	MissingIdentity []MissingDocInfo
 }
 
 type Errors struct {
@@ -629,6 +630,24 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 		return nil, err
 	}
 	return missingTests, rnr.PopDir()
+}
+
+// Run the missing identity doc detector and return the results.
+func detectMissingIdentityDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) ([]MissingDocInfo, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-identity-docs", tpgbLocalPath}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []MissingDocInfo
+	if err = json.Unmarshal([]byte(output), &result); err != nil {
+		return nil, err
+	}
+	return result, rnr.PopDir()
 }
 
 // Run the missing doc detector and return the results.
