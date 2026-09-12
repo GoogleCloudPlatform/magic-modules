@@ -168,6 +168,22 @@ samples:
           cloud_run_job_name: cloudrun-job
         ignore_read_extra:
           - deletion_protection
+  - name: cloudrunv2_job_agent_identity
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: cloudrunv2_job_agent_identity
+        min_version: beta
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
+      - name: cloudrunv2_job_agent_identity_update
+        min_version: beta
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
 virtual_fields:
   - name: deletion_protection
     description: |
@@ -272,6 +288,20 @@ properties:
       - BETA
       - GA
       - DEPRECATED
+  - name: functionalType
+    type: Enum
+    description: |
+      The functional type of the Job. Declares the primary purpose of the workload so that it can be
+      registered with [Agent Platform](https://cloud.google.com/run/docs/ai/agent-platform-features).
+      Once set, this field cannot be changed or unset.
+
+      Jobs only support `FUNCTIONAL_TYPE_AGENT`; only Cloud Run services can be exposed as MCP servers.
+      A Job with `FUNCTIONAL_TYPE_AGENT` must also set
+      `template.template.workload_identity_config.identity_type` to `IDENTITY_TYPE_AGENT_IDENTITY`.
+    min_version: beta
+    default_from_api: true
+    enum_values:
+      - FUNCTIONAL_TYPE_AGENT
   - name: binaryAuthorization
     type: NestedObject
     description: |
@@ -689,6 +719,35 @@ properties:
             type: String
             description: Email address of the IAM service account associated with the Task of a Job. The service account represents the identity of the running task, and determines what permissions the task has. If not provided, the task will use the project's default service account.
             default_from_api: true
+          - name: workloadIdentityConfig
+            type: NestedObject
+            description: |-
+              The Task's workload identity settings. Used to assign an
+              [Agent Platform](https://cloud.google.com/run/docs/ai/agent-platform-features) identity to the workload.
+            min_version: beta
+            default_from_api: true
+            properties:
+              - name: identityType
+                type: Enum
+                description: |-
+                  The type of identity to use. `IDENTITY_TYPE_AGENT_IDENTITY` assigns a system-managed agent identity
+                  and is required when the Job's `functional_type` is `FUNCTIONAL_TYPE_AGENT`. Once set, this field
+                  cannot be changed or unset.
+                default_from_api: true
+                enum_values:
+                  - IDENTITY_TYPE_SERVICE_ACCOUNT
+                  - IDENTITY_TYPE_AGENT_IDENTITY
+              - name: identityCertificateEnabled
+                type: Boolean
+                description: |-
+                  Controls whether an instance receives a managed workload identity (MWLID) certificate.
+                  Defaults to true when `identity_type` is `IDENTITY_TYPE_AGENT_IDENTITY`.
+                default_from_api: true
+              - name: identity
+                type: String
+                description: |-
+                  The Task's SPIFFE workload identity. Enables provisioning of SPIFFE workload certificates.
+                default_from_api: true
           - name: executionEnvironment
             type: Enum
             description: The execution environment being used to host this Task.
