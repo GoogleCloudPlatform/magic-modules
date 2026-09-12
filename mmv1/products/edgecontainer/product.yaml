@@ -19,3 +19,5 @@ scopes:
 versions:
   - name: ga
     base_url: https://edgecontainer.googleapis.com/v1/
+  - name: beta
+    base_url: https://edgecontainer.googleapis.com/v1/
