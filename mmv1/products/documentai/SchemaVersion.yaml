@@ -1,0 +1,139 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SchemaVersion
+description: SchemaVersion is a version of the Schema which is created in SchemaGroup.
+base_url: 'projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions'
+immutable: true
+self_link: 'projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions/{{name}}'
+autogen_status: U2NoZW1hVmVyc2lvbg==
+samples:
+  - name: documentai_schema_version
+    primary_resource_id: schema_version
+    steps:
+      - name: documentai_schema_version
+        vars:
+          schema_display_name: test-schema
+          version_display_name: my-schema-version
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: The location of the resource.
+    immutable: true
+    url_param_only: true
+  - name: schema_id
+    type: String
+    required: true
+    description: The parent schema scope.
+    immutable: true
+    url_param_only: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+properties:
+  - name: name
+    type: String
+    description: The resource name of the SchemaVersion.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: displayName
+    type: String
+    description: The user-defined name of the SchemaVersion.
+    required: true
+  - name: labels
+    type: KeyValueLabels
+    description: The Google Cloud labels for the SchemaVersion.
+  - name: createTime
+    type: Time
+    description: The time when the SchemaVersion was created.
+    output: true
+  - name: schema
+    type: NestedObject
+    required: true
+    description: The schema defines the output of the processed document by a processor.
+    properties:
+      - name: description
+        type: String
+        description: Description of the schema.
+      - name: displayName
+        type: String
+        description: Display name to show users.
+      - name: documentPrompt
+        type: String
+        description: Document level prompt provided by the user.
+      - name: entityTypes
+        type: Array
+        description: Entity types of the schema.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: baseTypes
+              type: Array
+              description: The entity type that this type is derived from.
+              item_type:
+                type: String
+            - name: displayName
+              type: String
+              description: User defined name for the type.
+            - name: enumValues
+              type: NestedObject
+              description: Defines the a list of enum values.
+              properties:
+                - name: values
+                  type: Array
+                  description: The individual values that this enum values type can include.
+                  item_type:
+                    type: String
+            - name: name
+              type: String
+              description: Name of the type.
+            - name: properties
+              type: Array
+              description: Description the nested structure, or composition of an entity.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: displayName
+                    type: String
+                    description: User defined name for the property.
+                  - name: method
+                    type: String
+                    description: Specifies how the entity value is obtained.
+                  - name: name
+                    type: String
+                    description: The name of the property.
+                  - name: occurrenceType
+                    type: String
+                    description: Occurrence type limits the number of instances an entity type appears.
+                  - name: valueType
+                    type: String
+                    description: A reference to the value type of the property.
+      - name: metadata
+        type: NestedObject
+        description: Metadata for global schema behavior.
+        properties:
+          - name: documentAllowMultipleLabels
+            type: Boolean
+            description: If true, there can be multiple document annotations.
+          - name: documentSplitter
+            type: Boolean
+            description: If true, a document entity type can be applied to subdocument.
+          - name: prefixedNamingOnProperties
+            type: Boolean
+            description: If set, all the nested entities must be prefixed.
+          - name: skipNamingValidation
+            type: Boolean
+            description: If set, this will skip the naming format validation.
