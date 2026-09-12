@@ -213,7 +213,7 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 			Timeout:   4 * time.Minute,
 		})
 
-		log.Printf("Response is, %s", res)
+		log.Printf("[DEBUG] Response is, %s", res)
 		if err != nil {
 			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
 		}
@@ -346,7 +346,7 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 			Timeout:   20 * time.Minute,
 		})
 
-		log.Printf("Response is, %s", res)
+		log.Printf("[DEBUG] Response is, %s", res)
 		if err != nil {
 			t.Fatalf("Error bootstrapping storage pool %s: %s", storagePoolName, err)
 		}
