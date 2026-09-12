@@ -106,4 +106,4 @@ properties:
     type: String
     description: |
       The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.
-    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId'
