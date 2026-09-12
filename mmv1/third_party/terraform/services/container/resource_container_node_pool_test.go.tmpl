@@ -5021,7 +5021,7 @@ resource "google_container_cluster" "cluster" {
   initial_node_count       = 1
   remove_default_node_pool = true
   node_config {
-    machine_type = "e2-micro"
+    machine_type = "e2-medium"
   }
 
   lifecycle {
