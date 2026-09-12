@@ -1,34 +1,36 @@
 ---
 name: run-acctests
-description: "Executes acceptance tests (testacc) for a specific resource or suite in the provider and outputs verbose debug logs."
+description: "Generate downstream providers and run acceptance tests sequentially (Beta, then GA) for a specific service (and optionally, a test pattern), outputting verbose debug logs and short-circuiting on Beta failure. Use this skill when checking if downstream providers pass acceptance tests."
 ---
 
 # `run-acctests`
 
-> **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your current roadblock or required task.
+> **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your required task.
+> This skill generates downstream providers from local Magic Modules code into isolated scratch directories, compiles binaries, and runs acceptance tests sequentially (first Beta, then GA) with `TF_LOG=DEBUG`. If Beta acceptance tests fail, the script **short-circuits (stops immediately)** and skips the GA test run. Output logs are written to `scratch/acctest-<version>/logs/test_output_<version>.log`.
 
 ## Prerequisites
-* You must be in the relevant provider root directory, e.g., `$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta`.
-* You must know the specific service path (e.g., `./google-beta/services/compute`) and test name (e.g., `TestAccComputeInstance_basic`) you wish to run.
+
+- You must be operating in the `magic-modules` root directory.
+- You must know the target service name (e.g. `compute`) and optional test name pattern (e.g. `TestAccComputeInstance_basic`).
 
 ## Execution Steps
 
-### 1. Verification
+### 1. Execute Acceptance Test Runner
 
-#### Verify Directory Structure
+Run the acceptance test runner script:
+
 ```bash
-pwd # Verify we are in the generated provider directory
+# General usage:
+# ./.agents/skills/utils/run-acctests/scripts/run_acctests.sh <service> [test_name_pattern]
+
+# Example: Run a specific acceptance test sequentially (Beta then GA)
+./.agents/skills/utils/run-acctests/scripts/run_acctests.sh compute TestAccComputeInstance_basic
+
+# Example: Run all acceptance tests for a service sequentially (Beta then GA)
+./.agents/skills/utils/run-acctests/scripts/run_acctests.sh storage
 ```
 
-### 2. The Core Commands
-Run the acceptance test with `TF_LOG=DEBUG` enabled, and stream the output to a log file (`test_output.log`) so it can be parsed later if it fails.
+### 2. Verification & Handoff
 
-#### Execute Acceptance Test
-```bash
-# Replace <SERVICE_NAME> and <TEST_NAME> with the appropriate values
-TF_LOG=DEBUG make testacc TEST=./google-beta/services/<SERVICE_NAME> TESTARGS='-run=<TEST_NAME>$$' > test_output.log 2>&1
-```
-
-### 3. Verification & Handoff
-* If the test succeeds, return to your primary workflow.
-* If the test fails, do **NOT** attempt a blind fix immediately. You MUST invoke the `parse-debug-logs` skill on `test_output.log` to understand the API failure before proposing a fix.
+* If the tests succeed, return to your primary workflow.
+* If any test fails, do **NOT** attempt a blind fix immediately. You MUST invoke the `parse-debug-logs` skill on `scratch/acctest-<version>/logs/test_output_<version>.log` (where `<version>` is `beta` or `ga`) to analyze the API failure before proposing a fix.
