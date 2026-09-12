@@ -279,3 +279,13 @@ properties:
     output: true
     item_type:
       type: String
+  - name: hasNonexistenceChecks
+    type: Boolean
+    description: |-
+      Output only. Indicates whether the rule has non-existence checks.
+    output: true
+  - name: timeWindowDuration
+    type: String
+    description: |-
+      Output only. The time window of the rule. For rules that do not specify a time window, this will be zero.
+    output: true
