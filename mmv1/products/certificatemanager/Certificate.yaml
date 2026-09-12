@@ -28,6 +28,7 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/certificates/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/certificates/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -59,11 +60,17 @@ autogen_async: true
 include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/cert_manager.tmpl
+  decoder: templates/terraform/decoders/colab_runtime.go.tmpl
   tgc_encoder: templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl
   tgc_decoder: templates/tgc_next/decoders/certificatemanager_certificate.go.tmpl
 samples:
-  - name: certificate_manager_google_managed_certificate_dns
+  - name: certificate_manager_self_managed_certificate_regional
     primary_resource_id: default
+    steps:
+      - name: certificate_manager_self_managed_certificate_regional
+        resource_id_vars:
+          cert_name: self-managed-cert
+  - name: certificate_manager_google_managed_certificate_dns
     steps:
       - name: certificate_manager_google_managed_certificate_dns
         resource_id_vars:
@@ -103,12 +110,6 @@ samples:
     skip_vcr: true
     steps:
       - name: certificate_manager_self_managed_certificate_write_only
-        resource_id_vars:
-          cert_name: self-managed-cert
-  - name: certificate_manager_self_managed_certificate_regional
-    primary_resource_id: default
-    steps:
-      - name: certificate_manager_self_managed_certificate_regional
         resource_id_vars:
           cert_name: self-managed-cert
   - name: certificate_manager_google_managed_certificate_issuance_config_all_regions
@@ -162,6 +163,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: location
     type: String
     description: |
