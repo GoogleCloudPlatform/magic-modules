@@ -107,7 +107,7 @@ properties:
       - name: principalSet
         type: String
         description: |
-          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
           Examples for each one of the following supported principal set types:
           * Project:
             * `//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER`
@@ -115,6 +115,20 @@ properties:
           * Workload Identity Pool: `//iam.googleapis.com/projects/PROJECT_NUMBER/locations/LOCATION/workloadIdentityPools/WORKLOAD_POOL_ID`
           It must be parent by the policy binding's parent (the project).
         immutable: true
+        exactly_one_of:
+          - target.0.principal_set
+          - target.0.resource
+      - name: resource
+        type: String
+        description: |
+          Immutable. Full Resource Name used for access policy bindings.
+          Examples:
+          * `//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER`
+          * `//cloudresourcemanager.googleapis.com/projects/PROJECT_ID`
+        immutable: true
+        exactly_one_of:
+          - target.0.principal_set
+          - target.0.resource
   - name: policyKind
     type: String
     description: |
