@@ -110,6 +110,67 @@ samples:
           name: '"basic" + randomSuffix'
         oics_vars_overrides:
           deletion_protection: "false"
+  - name: gkehub_membership_oidc_jwks
+    primary_resource_id: membership
+    exclude_basic_doc: true
+    steps:
+      - name: gkehub_membership_oidc_jwks
+        resource_id_vars:
+          name: basic
+          cluster_name: basic-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          # for backward compatible
+          name: '"basic" + randomSuffix'
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkehub_membership_monitoring_config
+    primary_resource_id: membership
+    exclude_basic_doc: true
+    steps:
+      - name: gkehub_membership_monitoring_config
+        resource_id_vars:
+          name: basic
+          cluster_name: basic-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          # for backward compatible
+          name: '"basic" + randomSuffix'
+        oics_vars_overrides:
+          deletion_protection: "false"
+  - name: gkehub_membership_resource_options
+    primary_resource_id: membership
+    exclude_basic_doc: true
+    steps:
+      - name: gkehub_membership_resource_options
+        resource_id_vars:
+          name: basic
+          cluster_name: basic-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
+        test_vars_overrides:
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          # for backward compatible
+          name: '"basic" + randomSuffix'
+        oics_vars_overrides:
+          deletion_protection: "false"
 parameters:
   - name: location
     type: String
@@ -139,7 +200,7 @@ properties:
   - name: endpoint
     type: NestedObject
     description: |
-      If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
+      Endpoint information to reach this member.
     immutable: true
     properties:
       - name: gkeCluster
@@ -147,6 +208,12 @@ properties:
         description: |
           If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
         immutable: true
+        exactly_one_of:
+          - endpoint.0.gke_cluster
+          - endpoint.0.on_prem_cluster
+          - endpoint.0.multi_cloud_cluster
+          - endpoint.0.edge_cluster
+          - endpoint.0.appliance_cluster
         properties:
           - name: resourceLink
             type: String
@@ -160,6 +227,269 @@ properties:
             immutable: true
             diff_suppress_func: suppressGkeHubEndpointSelfLinkDiff
             custom_expand: templates/terraform/custom_expand/gke_hub_membership.tmpl
+          - name: clusterMissing
+            type: Boolean
+            description: |
+              If cluster_missing is set then it denotes that the GKE cluster no longer exists in the
+              GKE Control Plane.
+            output: true
+      - name: onPremCluster
+        type: NestedObject
+        description: |
+          If this Membership is a Kubernetes API server hosted on GKE On-Prem, this is a self link to its
+          GCP resource.
+        immutable: true
+        exactly_one_of:
+          - endpoint.0.gke_cluster
+          - endpoint.0.on_prem_cluster
+          - endpoint.0.multi_cloud_cluster
+          - endpoint.0.edge_cluster
+          - endpoint.0.appliance_cluster
+        properties:
+          - name: resourceLink
+            type: String
+            description: |
+              Self-link of the GCP resource for the GKE On-Prem cluster. For example:
+              `//gkeonprem.googleapis.com/projects/my-project/locations/us-west1-a/vmwareClusters/my-cluster`
+              `//gkeonprem.googleapis.com/projects/my-project/locations/us-west1-a/bareMetalClusters/my-cluster`
+            required: true
+            immutable: true
+          - name: clusterMissing
+            type: Boolean
+            description: |
+              If cluster_missing is set then it denotes that the API(gkeonprem.googleapis.com) resource
+              for this GKE On-Prem cluster no longer exists.
+            output: true
+          - name: adminCluster
+            type: Boolean
+            description: |
+              Whether the cluster is an admin cluster.
+            immutable: true
+          - name: clusterType
+            type: Enum
+            description: |
+              The on prem cluster's type.
+            immutable: true
+            enum_values:
+              - CLUSTERTYPE_UNSPECIFIED
+              - BOOTSTRAP
+              - HYBRID
+              - STANDALONE
+              - USER
+      - name: multiCloudCluster
+        type: NestedObject
+        description: |
+          If this Membership is a Kubernetes API server hosted on GKE multi-cloud, this is a self link to
+          its GCP resource.
+        immutable: true
+        exactly_one_of:
+          - endpoint.0.gke_cluster
+          - endpoint.0.on_prem_cluster
+          - endpoint.0.multi_cloud_cluster
+          - endpoint.0.edge_cluster
+          - endpoint.0.appliance_cluster
+        properties:
+          - name: resourceLink
+            type: String
+            description: |
+              Self-link of the GCP resource for the GKE Multi-Cloud cluster. For example:
+              `//gkemulticloud.googleapis.com/projects/my-project/locations/us-west1-a/awsClusters/my-cluster`
+              `//gkemulticloud.googleapis.com/projects/my-project/locations/us-west1-a/azureClusters/my-cluster`
+              `//gkemulticloud.googleapis.com/projects/my-project/locations/us-west1-a/attachedClusters/my-cluster`
+            required: true
+            immutable: true
+          - name: clusterMissing
+            type: Boolean
+            description: |
+              If cluster_missing is set then it denotes that the API(gkemulticloud.googleapis.com)
+              resource for this GKE Multi-Cloud cluster no longer exists.
+            output: true
+      - name: edgeCluster
+        type: NestedObject
+        description: |
+          If this Membership is a Kubernetes API server hosted on Google Edge, this is a self link to
+          its GCP resource.
+        immutable: true
+        exactly_one_of:
+          - endpoint.0.gke_cluster
+          - endpoint.0.on_prem_cluster
+          - endpoint.0.multi_cloud_cluster
+          - endpoint.0.edge_cluster
+          - endpoint.0.appliance_cluster
+        properties:
+          - name: resourceLink
+            type: String
+            description: |
+              Self-link of the GCP resource for the Edge Cluster. For example:
+              `//edgecontainer.googleapis.com/projects/my-project/locations/us-west1-a/clusters/my-cluster`
+            required: true
+            immutable: true
+      - name: applianceCluster
+        type: NestedObject
+        description: |
+          If this Membership is a Kubernetes API server hosted on a GDC Edge Appliance, this is a self
+          link to its GCP resource.
+        immutable: true
+        exactly_one_of:
+          - endpoint.0.gke_cluster
+          - endpoint.0.on_prem_cluster
+          - endpoint.0.multi_cloud_cluster
+          - endpoint.0.edge_cluster
+          - endpoint.0.appliance_cluster
+        properties:
+          - name: resourceLink
+            type: String
+            description: |
+              Self-link of the GCP resource for the Appliance Cluster. For example:
+              `//transferappliance.googleapis.com/projects/my-project/locations/us-west1-a/appliances/my-appliance`
+            required: true
+            immutable: true
+      - name: kubernetesMetadata
+        type: NestedObject
+        description: |
+          Useful Kubernetes-specific metadata.
+        output: true
+        properties:
+          - name: kubernetesApiServerVersion
+            type: String
+            description: |
+              Kubernetes API server version string as reported by `/version`.
+            output: true
+          - name: nodeProviderId
+            type: String
+            description: |
+              Node providerID as reported by the first node in the list of nodes on the Kubernetes
+              endpoint. On Kubernetes platforms that support zero-node clusters (like GKE-on-GCP),
+              the nodeCount will be zero and the nodeProviderId will be empty.
+            output: true
+          - name: nodeCount
+            type: Integer
+            description: |
+              Node count as reported by Kubernetes nodes resources.
+            output: true
+          - name: vcpuCount
+            type: Integer
+            description: |
+              vCPU count as reported by Kubernetes nodes resources.
+            output: true
+          - name: memoryMb
+            type: Integer
+            description: |
+              The total memory capacity as reported by the sum of all Kubernetes nodes resources,
+              defined in MB.
+            output: true
+          - name: updateTime
+            type: String
+            description: |
+              The time at which these details were last updated. This update_time is different from the
+              Membership-level update_time since EndpointDetails are updated internally for API consumers.
+            output: true
+      - name: kubernetesResource
+        type: NestedObject
+        description: |
+          The in-cluster Kubernetes Resources that should be applied for a correctly registered cluster,
+          in the steady state. These resources:
+
+          * Ensure that the cluster is exclusively registered to one and only one Hub Membership.
+          * Propagate Workload Pool Information available in the Membership Authority field.
+          * Ensure proper initial configuration of default Hub Features.
+        properties:
+          - name: membershipCrManifest
+            type: String
+            description: |
+              The YAML representation of the Membership CR. This field is ignored for GKE clusters where
+              Hub can read the CR directly.
+
+              Callers should provide the CR that is currently present in the cluster during
+              CreateMembership or UpdateMembership, or leave this field empty if none exists. The CR
+              manifest is used to validate the cluster has not been registered with another Membership.
+            ignore_read: true
+          - name: membershipResources
+            type: Array
+            description: |
+              Additional Kubernetes resources that need to be applied to the cluster after Membership
+              creation, and after every update.
+
+              This field is only populated in the Membership returned from a successful long-running
+              operation from CreateMembership or UpdateMembership. It is not populated during normal
+              GetMembership or ListMemberships requests. To get the resource manifest after the initial
+              registration, the caller should make a UpdateMembership call with an empty field mask.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: manifest
+                  type: String
+                  description: |
+                    YAML manifest of the resource.
+                  output: true
+                - name: clusterScoped
+                  type: Boolean
+                  description: |
+                    Whether the resource provided in the manifest is `cluster_scoped`. If unset, the
+                    manifest is assumed to be namespace scoped.
+
+                    This field is used for REST mapping when applying the resource in a cluster.
+                  output: true
+          - name: connectResources
+            type: Array
+            description: |
+              The Kubernetes resources for installing the GKE Connect agent
+
+              This field is only populated in the Membership returned from a successful long-running
+              operation from CreateMembership or UpdateMembership. It is not populated during normal
+              GetMembership or ListMemberships requests. To get the resource manifest after the initial
+              registration, the caller should make a UpdateMembership call with an empty field mask.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: manifest
+                  type: String
+                  description: |
+                    YAML manifest of the resource.
+                  output: true
+                - name: clusterScoped
+                  type: Boolean
+                  description: |
+                    Whether the resource provided in the manifest is `cluster_scoped`. If unset, the
+                    manifest is assumed to be namespace scoped.
+
+                    This field is used for REST mapping when applying the resource in a cluster.
+                  output: true
+          - name: resourceOptions
+            type: NestedObject
+            description: |
+              Options for Kubernetes resource generation.
+            properties:
+              - name: connectVersion
+                type: String
+                description: |
+                  The Connect agent version to use for connect_resources. Defaults to the latest GKE
+                  Connect version. The version must be a currently supported version, obsolete versions
+                  will be rejected.
+              - name: v1beta1Crd
+                type: Boolean
+                description: |
+                  Use `apiextensions/v1beta1` instead of `apiextensions/v1` for CustomResourceDefinition
+                  resources. This option should be set for clusters with Kubernetes apiserver versions
+                  <1.16.
+              - name: k8sVersion
+                type: String
+                description: |
+                  Major and minor version of the Kubernetes cluster. This is only used to determine which
+                  version to use for the CustomResourceDefinition resources, `apiextensions/v1beta1` or
+                  `apiextensions/v1`.
+              - name: k8sGitVersion
+                type: String
+                description: |
+                  Git version of the Kubernetes cluster. This is only used to gate the Connect Agent
+                  migration to svc.id.goog on GDC-SO 1.33.100 patch and above.
+      - name: googleManaged
+        type: Boolean
+        description: |
+          Whether the lifecycle of this membership is managed by a google cluster platform service.
+        output: true
   - name: authority
     type: NestedObject
     description: |
@@ -174,3 +504,137 @@ properties:
           with length <2000 characters. For example: `https://container.googleapis.com/v1/projects/my-project/locations/us-west1/clusters/my-cluster`. If the cluster is provisioned with Terraform, this is `"https://container.googleapis.com/v1/${google_container_cluster.my-cluster.id}"`.
         required: true
         immutable: true
+      - name: workloadIdentityPool
+        type: String
+        description: |
+          The name of the workload identity pool in which `issuer` will be recognized.
+
+          There is a single Workload Identity Pool per Hub that is shared between all Memberships that
+          belong to that Hub. For a Hub hosted in {PROJECT_ID}, the workload pool format is
+          `{PROJECT_ID}.hub.id.goog`, although this is subject to change in newer versions of this API.
+        output: true
+      - name: identityProvider
+        type: String
+        description: |
+          An identity provider that reflects the `issuer` in the workload identity pool.
+        output: true
+      - name: oidcJwks
+        type: String
+        description: |
+          Optional. OIDC verification keys for this Membership in JWKS format (RFC 7517). When this
+          field is set, OIDC discovery will NOT be performed on `issuer`, and instead OIDC tokens will
+          be validated using this field.
+      - name: scopeTenancyWorkloadIdentityPool
+        type: String
+        description: |
+          The name of the scope-tenancy workload identity pool. This pool is set in the fleet-level
+          feature.
+        output: true
+      - name: scopeTenancyIdentityProvider
+        type: String
+        description: |
+          The identity provider for the scope-tenancy workload identity pool.
+        output: true
+  - name: state
+    type: NestedObject
+    description: |
+      State of the Membership resource.
+    output: true
+    properties:
+      - name: code
+        type: Enum
+        description: |
+          The current state of the Membership resource.
+        output: true
+        enum_values:
+          - CODE_UNSPECIFIED
+          - CREATING
+          - READY
+          - DELETING
+          - UPDATING
+          - SERVICE_UPDATING
+  - name: createTime
+    type: String
+    description: |
+      When the Membership was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      When the Membership was last updated.
+    output: true
+  - name: deleteTime
+    type: String
+    description: |
+      When the Membership was deleted.
+    output: true
+  - name: externalId
+    type: String
+    description: |
+      An externally-generated and managed ID for this Membership. This ID may be modified after
+      creation, but this is not recommended.
+
+      The ID must match the regex: `[a-zA-Z0-9][a-zA-Z0-9_\-\.]*`
+
+      If this Membership represents a Kubernetes cluster, this value should be set to the UID of the
+      `kube-system` namespace object.
+  - name: lastConnectionTime
+    type: String
+    description: |
+      For clusters using Connect, the timestamp of the most recent connection established with Google
+      Cloud. This time is updated every several minutes, not continuously. For clusters that do not use
+      GKE Connect, or that have never connected successfully, this field will be unset.
+    output: true
+  - name: uniqueId
+    type: String
+    description: |
+      Google-generated UUID for this resource. This is unique across all Membership resources. If a
+      Membership resource is deleted and another resource with the same name is created, it gets a
+      different unique_id.
+    output: true
+  - name: monitoringConfig
+    type: NestedObject
+    description: |
+      The monitoring config information for this membership.
+    properties:
+      - name: projectId
+        type: String
+        description: |
+          Project used to report Metrics
+      - name: location
+        type: String
+        description: |
+          Location used to report Metrics
+      - name: cluster
+        type: String
+        description: |
+          Cluster name used to report metrics. For Anthos on VMWare/Baremetal/MultiCloud clusters, it
+          would be in format `{cluster_type}/{cluster_name}`, e.g., "awsClusters/cluster_1".
+      - name: kubernetesMetricsPrefix
+        type: String
+        description: |
+          Kubernetes system metrics, if available, are written to this prefix. This defaults to
+          kubernetes.io for GKE, and kubernetes.io/anthos for Anthos eventually. Noted: Anthos MultiCloud
+          will have kubernetes.io prefix today but will migration to be under kubernetes.io/anthos.
+      - name: clusterHash
+        type: String
+        description: |
+          For GKE and Multicloud clusters, this is the UUID of the cluster resource. For VMWare and
+          Baremetal clusters, this is the kube-system UID.
+  - name: clusterTier
+    type: Enum
+    description: |
+      The tier of the cluster.
+    output: true
+    enum_values:
+      - CLUSTER_TIER_UNSPECIFIED
+      - STANDARD
+      - ENTERPRISE
+  - name: membershipType
+    type: Enum
+    description: |
+      The type of the membership.
+    output: true
+    enum_values:
+      - MEMBERSHIP_TYPE_UNSPECIFIED
+      - LIGHTWEIGHT
