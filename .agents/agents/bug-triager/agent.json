@@ -1,0 +1,6 @@
+{
+  "name": "bug-triager",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

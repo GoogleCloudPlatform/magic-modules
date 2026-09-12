@@ -44,3 +44,4 @@ specific one.
 
 *   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
 *   **`removal-auditor`** (`.agents/agents/removal-auditor/`): Audits deprecation status on `main`, sync status on the major release branch, and scans repository dependencies for resource and field removals.
+*   **`bug-triager`** (`.agents/agents/bug-triager/`): Investigates reported provider bugs, inspecting issue comments and linked Buganizer tickets (`b/XXXX`), gathering external API documentation, internal MMv1 context, and historical Git changes to produce structured triage and context reports.
