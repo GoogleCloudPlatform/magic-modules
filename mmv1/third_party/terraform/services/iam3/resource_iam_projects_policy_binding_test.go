@@ -131,3 +131,134 @@ resource "google_iam_projects_policy_binding" "my-project-binding" {
 }
 `, context)
 }
+
+func TestAccIAM3ProjectsPolicyBinding_iamAccessPolicyBinding(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAM3ProjectsPolicyBindingDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIAM3ProjectsPolicyBinding_iamAccessPolicyBinding(context),
+			},
+			{
+				ResourceName:            "google_iam_projects_policy_binding.my-project-binding",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "location", "policy_binding_id"},
+			},
+			{
+				Config: testAccIAM3ProjectsPolicyBinding_iamAccessPolicyBinding_update(context),
+			},
+			{
+				ResourceName:            "google_iam_projects_policy_binding.my-project-binding",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "location", "policy_binding_id"},
+			},
+		},
+	})
+}
+
+func testAccIAM3ProjectsPolicyBinding_iamAccessPolicyBinding(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google
+}
+
+resource "google_service_account" "test_sa" {
+  account_id   = "tf-test-sa%{random_suffix}"
+  display_name = "Test Service Account for Access Policy"
+}
+
+resource "google_iam_organization_access_policy" "access_policy" {
+  organization     = "%{org_id}"
+  location         = "global"
+  access_policy_id = "tf-test-org-policy%{random_suffix}"
+  details {
+    rules {
+      effect      = "ALLOW"
+      principals  = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
+      operation {
+        permissions = ["eventarc.googleapis.com/messageBuses.publish"]
+      }
+    }
+  }
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_iam_organization_access_policy.access_policy]
+}
+
+resource "google_iam_projects_policy_binding" "my-project-binding" {
+  depends_on        = [time_sleep.wait_60_seconds]
+  project           = data.google_project.project.project_id
+  location          = "global"
+  display_name      = "test project binding%{random_suffix}"
+  policy_kind       = "ACCESS"
+  policy_binding_id = "tf-test-project-binding%{random_suffix}"
+  policy            = "organizations/%{org_id}/locations/global/accessPolicies/${google_iam_organization_access_policy.access_policy.access_policy_id}"
+  target {
+    resource = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.project_id}"
+  }
+}
+`, context)
+}
+
+func testAccIAM3ProjectsPolicyBinding_iamAccessPolicyBinding_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google
+}
+
+resource "google_service_account" "test_sa" {
+  account_id   = "tf-test-sa%{random_suffix}"
+  display_name = "Test Service Account for Access Policy"
+}
+
+resource "google_iam_organization_access_policy" "access_policy" {
+  organization     = "%{org_id}"
+  location         = "global"
+  access_policy_id = "tf-test-org-policy%{random_suffix}"
+  details {
+    rules {
+      effect      = "ALLOW"
+      principals  = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
+      operation {
+        permissions = ["eventarc.googleapis.com/messageBuses.publish"]
+      }
+    }
+  }
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_iam_organization_access_policy.access_policy]
+}
+
+resource "google_iam_projects_policy_binding" "my-project-binding" {
+  depends_on        = [time_sleep.wait_60_seconds]
+  project           = data.google_project.project.project_id
+  location          = "global"
+  display_name      = "test project binding%{random_suffix}"
+  policy_kind       = "ACCESS"
+  policy_binding_id = "tf-test-project-binding%{random_suffix}"
+  policy            = "organizations/%{org_id}/locations/global/accessPolicies/${google_iam_organization_access_policy.access_policy.access_policy_id}"
+  annotations       = {"foo": "bar"}
+  target {
+    resource = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.project_id}"
+  }
+}
+`, context)
+}
