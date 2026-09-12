@@ -2,139 +2,113 @@ package test
 
 import (
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestCheckDiffSuppressFunc(t *testing.T) {
-	// Define a dummy schema with DiffSuppressFunc
-	resourceSchema := &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"simple_string": {
-				Type:     schema.TypeString,
-				Optional: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return new == "suppress_me"
-				},
-			},
-			"nested_list": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"inner_string": {
-							Type:     schema.TypeString,
-							Optional: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return new == "suppress_nested"
-							},
-						},
-					},
-				},
-			},
-			"map_with_suppress": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// Suppress if key is "ignored_key"
-					// k will be "map_with_suppress.ignored_key"
-					return k == "map_with_suppress.ignored_key"
-				},
-			},
-			"nested_schema_list": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-					DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-						return new == "suppress_primitive"
-					},
-				},
-			},
-		},
-	}
-
-	provider := &schema.Provider{
-		ResourcesMap: map[string]*schema.Resource{
-			"dummy_resource": resourceSchema,
-		},
-	}
-
+func TestFindMissingKeys(t *testing.T) {
 	tests := []struct {
-		name         string
-		key          string
-		val          any
-		resourceType string
-		want         bool
+		name          string
+		map1          map[string]any
+		map2          map[string]any
+		ignoredFields map[string]any
+		want          []string
 	}{
 		{
-			name:         "Simple string suppressed",
-			key:          "simple_string",
-			val:          "suppress_me",
-			resourceType: "dummy_resource",
-			want:         true,
+			name: "identical maps",
+			map1: map[string]any{"foo": "bar", "num": 123},
+			map2: map[string]any{"foo": "bar", "num": 123},
+			want: nil,
 		},
 		{
-			name:         "Simple string not suppressed",
-			key:          "simple_string",
-			val:          "keep_me",
-			resourceType: "dummy_resource",
-			want:         false,
+			name: "missing key in map2",
+			map1: map[string]any{"foo": "bar", "num": 123, "missing": "yes"},
+			map2: map[string]any{"foo": "bar", "num": 123},
+			want: []string{"missing"},
 		},
 		{
-			name:         "Nested list string suppressed",
-			key:          "nested_list.0.inner_string",
-			val:          "suppress_nested",
-			resourceType: "dummy_resource",
-			want:         true,
+			name:          "missing key ignored",
+			map1:          map[string]any{"foo": "bar", "missing": "yes"},
+			map2:          map[string]any{"foo": "bar"},
+			ignoredFields: map[string]any{"missing": struct{}{}},
+			want:          nil,
 		},
 		{
-			name:         "Map key suppressed by parent map",
-			key:          "map_with_suppress.ignored_key",
-			val:          "any_val",
-			resourceType: "dummy_resource",
-			want:         true,
+			name: "nested map missing key",
+			map1: map[string]any{
+				"foo": "bar",
+				"nested": map[string]any{
+					"inner":   "val",
+					"missing": "yes",
+				},
+			},
+			map2: map[string]any{
+				"foo": "bar",
+				"nested": map[string]any{
+					"inner": "val",
+				},
+			},
+			want: []string{"nested.missing"},
 		},
 		{
-			name:         "Map key not suppressed",
-			key:          "map_with_suppress.other_key",
-			val:          "any_val",
-			resourceType: "dummy_resource",
-			want:         false,
+			name: "nested map missing key ignored",
+			map1: map[string]any{
+				"foo": "bar",
+				"nested": map[string]any{
+					"inner":   "val",
+					"missing": "yes",
+				},
+			},
+			map2: map[string]any{
+				"foo": "bar",
+				"nested": map[string]any{
+					"inner": "val",
+				},
+			},
+			ignoredFields: map[string]any{"nested.missing": struct{}{}},
+			want:          nil,
 		},
 		{
-			name:         "Primitive list suppressed",
-			key:          "nested_schema_list.0",
-			val:          "suppress_primitive",
-			resourceType: "dummy_resource",
-			want:         true,
+			name: "slice of maps missing key",
+			map1: map[string]any{
+				"list": []any{
+					map[string]any{"key": "val", "missing": "yes"},
+				},
+			},
+			map2: map[string]any{
+				"list": []any{
+					map[string]any{"key": "val"},
+				},
+			},
+			want: []string{"list.0.missing"},
 		},
 		{
-			name:         "Unknown resource",
-			key:          "simple_string",
-			val:          "suppress_me",
-			resourceType: "unknown_resource",
-			want:         false,
-		},
-		{
-			name:         "Unknown field",
-			key:          "unknown_field",
-			val:          "val",
-			resourceType: "dummy_resource",
-			want:         false,
+			name: "slice of maps missing key partial ignore",
+			map1: map[string]any{
+				"list": []any{
+					map[string]any{"key": "val", "missing": "yes"},
+				},
+			},
+			map2: map[string]any{
+				"list": []any{
+					map[string]any{"key": "val"},
+				},
+			},
+			ignoredFields: map[string]any{"list.missing": struct{}{}},
+			want:          nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var resSchema *schema.Resource
-			if res, ok := provider.ResourcesMap[tt.resourceType]; ok {
-				resSchema = res
+			got := findMissingKeys(tt.map1, tt.map2, "", tt.ignoredFields)
+			if len(got) != len(tt.want) {
+				t.Errorf("findMissingKeys() = %v, want %v", got, tt.want)
+				return
 			}
-			got := isDiffSuppressed(tt.key, tt.val, resSchema)
-			if got != tt.want {
-				t.Errorf("isDiffSuppressed() = %v, want %v", got, tt.want)
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("findMissingKeys() = %v, want %v", got, tt.want)
+					break
+				}
 			}
 		})
 	}
