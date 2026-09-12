@@ -2779,6 +2779,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	databaseVersion := d.Get("database_version").(string)
 
+	// Capture the planned settings before any of the conditional
+	// resourceSqlDatabaseInstanceRead calls below run. Those reads call d.Set("settings", ...),
+	// and helper/schema resolves d.Get through the "set" level in preference to "diff", so a
+	// d.Get("settings") issued after a read returns the instance's remote values rather than the
+	// planned ones. Capturing it late silently drops the user's change: the apply reports success
+	// and the same diff reappears on the next plan.
+	desiredSetting := d.Get("settings")
+
 	// Check if the activation policy is being updated. If it is being changed to ALWAYS this should be done first.
 	if d.HasChange("settings.0.activation_policy") && d.Get("settings.0.activation_policy").(string) == "ALWAYS" {
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{ActivationPolicy: "ALWAYS"}}
@@ -3048,7 +3056,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
     	}
 	}
 
-	desiredSetting := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
@@ -3072,7 +3079,31 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
 	// to make an update call with the proto version before patch and fails. To resolve this issue we update the setting version
 	// before making the update call.
-	instance.Settings.SettingsVersion = int64(_settings["version"].(int))
+	//
+	// settings.version in state is only as fresh as the last read, and every
+	// resourceSqlDatabaseInstanceRead above is guarded by a d.HasChange. An update that changes
+	// none of those fields would therefore send a settingsVersion that the API has already moved
+	// past and be rejected with "Error 412: Condition does not match., staleData", leaving the
+	// user to run a refresh by hand. Fetch the current settingsVersion directly instead of calling
+	// resourceSqlDatabaseInstanceRead here: that read would d.Set the rest of the resource and, per
+	// the comment above, shadow the planned values that are still read from d below.
+	var currentInstance *sqladmin.DatabaseInstance
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			currentInstance, rerr = NewClient(config, userAgent).Instances.Get(project, d.Get("name").(string)).Do()
+			return rerr
+		},
+		Timeout:              d.Timeout(schema.TimeoutRead),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error, failed to read the current settings version for %s: %s", d.Get("name").(string), err)
+	}
+	if currentInstance.Settings != nil {
+		instance.Settings.SettingsVersion = currentInstance.Settings.SettingsVersion
+	} else {
+		instance.Settings.SettingsVersion = int64(_settings["version"].(int))
+	}
 	// Collation cannot be included in the update request
 	instance.Settings.Collation = ""
 	instance.Settings.DataCacheConfig = expandDataCacheConfig(_settings["data_cache_config"].([]interface{}))
