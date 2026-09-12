@@ -70,7 +70,7 @@ func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkN
 	subnetOptions := map[string]interface{}{
 		"privateIpGoogleAccess": true,
 	}
-	return tpgcompute.BootstrapSubnetWithOverrides(t, subnetName, networkName, subnetOptions)
+	return tpgcompute.BootstrapSubnetWithOverrides(t, subnetName, networkName, envvar.GetTestRegionFromEnv(), subnetOptions)
 }
 
 func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {

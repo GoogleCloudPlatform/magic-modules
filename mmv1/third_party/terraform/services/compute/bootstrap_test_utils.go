@@ -167,12 +167,11 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 }
 
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
-	return BootstrapSubnetWithOverrides(t, subnetName, networkName, make(map[string]interface{}))
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, envvar.GetTestRegionFromEnv(), make(map[string]interface{}))
 }
 
-func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
+func BootstrapSubnetWithOverrides(t *testing.T, subnetName, networkName, region string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
-	region := envvar.GetTestRegionFromEnv()
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
@@ -194,7 +193,6 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 
 		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
-			"region ":     region,
 			"network":     networkUrl,
 			"ipCidrRange": "10.77.0.0/20",
 		}
