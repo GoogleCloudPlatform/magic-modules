@@ -63,10 +63,10 @@ Because you're adding fields to an existing resource, try to modify existing tes
 
 ### 6. Test and Debug
 
-- Use [`repo-sync`](`.agents/skills/operations/repo-sync/`) to ensure the downstream repositories are in sync with magic-modules.
-- Use [`generate-provider`](.agents/skills/operations/generate-provider/`) to generate the provider code into the downstream repositories.
-- Invoke [`qa-test-runner`](.agents/skills/workflows/qa-test-runner/) to run all acceptance tests for the modified resource.
-- Invoke [`test-fixer`](.agents/skills/operations/test-fixer/`) to fix any issues found by the `qa-test-runner` skill. Return to step 4 after any changes.
+- Use [`repo-sync`](.agents/skills/operations/repo-sync/SKILL.md) to ensure the downstream repositories are in sync with magic-modules.
+- Use [`generate-provider`](.agents/skills/operations/generate-provider/SKILL.md) to generate the provider code into the downstream repositories.
+- Invoke [`qa-test-runner`](.agents/skills/operations/qa-test-runner/SKILL.md) (or delegate to the `qa-test-runner` subagent) to run all acceptance tests for the modified resource.
+- Invoke [`test-fixer`](.agents/skills/workflows/test_fix/SKILL.md) (or delegate to the `test-fixer` subagent) to fix any issues found by the `qa-test-runner` skill. Return to step 4 after any changes.
 
 ---
 
