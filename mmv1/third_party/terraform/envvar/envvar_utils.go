@@ -123,6 +123,11 @@ var vmwareengineProjectEnvVars = []string{
 	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
+// This value is the project used for chronicle tenant tests.
+var TenantGcpProjectEnvVars = []string{
+	"GOOGLE_TENANT_GCP_PROJECT",
+}
+
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return MultiEnvSearch(ProjectNumberEnvVars)
@@ -230,6 +235,11 @@ func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
 func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, vmwareengineProjectEnvVars...)
 	return MultiEnvSearch(vmwareengineProjectEnvVars)
+}
+
+func GetTestTenantGcpProjectFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, TenantGcpProjectEnvVars...)
+	return MultiEnvSearch(TenantGcpProjectEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

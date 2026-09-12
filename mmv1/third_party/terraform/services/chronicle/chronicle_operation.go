@@ -3,6 +3,7 @@ package chronicle
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -21,10 +22,12 @@ func (w *ChronicleOperationWaiter) QueryOp() (interface{}, error) {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
 
-	region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
-
-	// Returns the proper get.
-	url := fmt.Sprintf("https://%s-chronicle.googleapis.com/v1/%s", region, w.CommonOperationWaiter.Op.Name)
+	baseUrl := transport_tpg.BaseUrl(Product, w.Config)
+	if strings.Contains(baseUrl, "{{location}}") {
+		region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
+		baseUrl = strings.ReplaceAll(baseUrl, "{{location}}", region)
+	}
+	url := fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    w.Config,

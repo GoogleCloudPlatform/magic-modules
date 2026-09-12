@@ -1,0 +1,16 @@
+resource "google_chronicle_tenant" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name       = "Basic Tenant {{index $.Vars "resource_name"}}"
+  retention_duration = "ONE_YEAR"
+  tenant_gcp_project = "{{index $.TestEnvVars "tenant_gcp_project"}}"
+  billing_account    = "{{index $.TestEnvVars "billing_account"}}"
+  provisioning_flow  = "BACKSTORY_API_PARITY"
+  auth_method        = "CLOUD_IDENTITY"
+  customer_code      = lower("cust%{random_suffix}")
+  frontend_path_configs {
+    frontend_path = "path-%{random_suffix}"
+  }
+}
