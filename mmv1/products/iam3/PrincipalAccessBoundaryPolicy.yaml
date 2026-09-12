@@ -171,6 +171,26 @@ properties:
                 The access relationship of principals to the resources in this rule.
                 Possible values: ALLOW
               required: true
+            - name: operation
+              type: NestedObject
+              description: |
+                The operation attributes that determine whether this rule applies to a request.
+                If this field is not specified, the rule applies to all operations.
+              properties:
+                - name: permissions
+                  type: Array
+                  is_set: true
+                  description: |
+                    The permissions that are explicitly affected by this rule.
+                  item_type:
+                    type: String
+                - name: excludedPermissions
+                  type: Array
+                  is_set: true
+                  description: |
+                    Specifies the permissions that this rule excludes from the set of affected permissions.
+                  item_type:
+                    type: String
       - name: enforcementVersion
         type: String
         description: |
