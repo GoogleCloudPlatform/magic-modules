@@ -1,0 +1,74 @@
+/*
+ * Artifact Registry requires `virtual_repository_config` to be present on a
+ * VIRTUAL_REPOSITORY-mode repository, including one with zero
+ * `upstream_policies` configured yet (the Artifact Registry REST API accepts
+ * `virtualRepositoryConfig: {upstreamPolicies: []}` and creates the repo
+ * fine).
+ *
+ * The default generated expand uses reflect.ValueOf(...)+IsEmptyValue to
+ * decide whether to include the "upstreamPolicies" key, which drops it
+ * whenever the list is empty. That in turn makes the returned
+ * `virtualRepositoryConfig` map itself empty, so the surrounding
+ * create/update logic (which also gates on IsEmptyValue) drops the whole
+ * `virtualRepositoryConfig` key from the request. The API then rejects the
+ * request with "Virtual repository config is not specified", even though an
+ * explicitly empty upstream_policies list is valid input.
+ *
+ * Fix: include "upstreamPolicies" whenever it was actually expanded (i.e.
+ * the block was set), regardless of whether the resulting list is empty.
+ *
+ * NB: a custom_expand on this property replaces generation for its whole
+ * subtree, so the (otherwise-identical) upstream_policies expand is inlined
+ * below rather than calling a separately-generated helper.
+ */
+func expandArtifactRegistryRepositoryVirtualRepositoryConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedUpstreamPolicies, err := expandArtifactRegistryRepositoryVirtualRepositoryConfigUpstreamPolicies(original["upstream_policies"], d, config)
+	if err != nil {
+		return nil, err
+	} else if transformedUpstreamPolicies != nil {
+		transformed["upstreamPolicies"] = transformedUpstreamPolicies
+	}
+
+	return transformed, nil
+}
+
+func expandArtifactRegistryRepositoryVirtualRepositoryConfigUpstreamPolicies(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	l := v.([]interface{})
+	req := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		original := raw.(map[string]interface{})
+		transformed := make(map[string]interface{})
+
+		if val := reflect.ValueOf(original["id"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["id"] = original["id"]
+		}
+
+		if val := reflect.ValueOf(original["repository"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["repository"] = original["repository"]
+		}
+
+		if val := reflect.ValueOf(original["priority"]); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["priority"] = original["priority"]
+		}
+
+		req = append(req, transformed)
+	}
+	return req, nil
+}
