@@ -43,6 +43,7 @@ async:
     resource_inside_response: false
 autogen_async: true
 custom_code:
+error_retry_predicates: ['transport_tpg.IsDatabaseMigrationServiceOperationTimeoutError']
 samples:
   - name: database_migration_service_private_connection
     primary_resource_id: default
