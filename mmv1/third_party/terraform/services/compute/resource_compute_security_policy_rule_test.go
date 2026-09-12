@@ -686,7 +686,7 @@ resource "google_compute_security_policy" "policy" {
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.policy.name
   description     = "Rule with preconfiguredWafConfig - create"
-  action   = "deny"
+  action   = "deny(403)"
   priority = "1000"
   match {
     expr {
@@ -743,7 +743,7 @@ resource "google_compute_security_policy" "policy" {
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.policy.name
   description     = "Rule with preconfiguredWafConfig - update"
-  action   = "deny"
+  action   = "deny(403)"
   priority = "1000"
   match {
     expr {
@@ -797,7 +797,7 @@ resource "google_compute_security_policy" "policy" {
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.policy.name
   description     = "Rule with preconfiguredWafConfig - clear"
-  action   = "deny"
+  action   = "deny(403)"
   priority = "1000"
   match {
     expr {
