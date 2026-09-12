@@ -311,8 +311,9 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"operation": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The operation name for the last GKE operation performed on this resource.",
 			},
 
 			"location": {

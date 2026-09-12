@@ -1490,7 +1490,7 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1538,7 +1538,7 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1632,7 +1632,7 @@ func TestAccContainerCluster_withManagedMLDiagnosticsConfig(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2047,7 +2047,7 @@ func TestAccContainerCluster_withTpu(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -3320,7 +3320,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	})
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -3330,7 +3330,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -5838,8 +5838,6 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
@@ -5998,7 +5996,6 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T) {
 	t.Parallel()
@@ -6937,7 +6934,7 @@ func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -6963,7 +6960,7 @@ func TestAccContainerCluster_withProtectConfig(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderBetaFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -10724,7 +10721,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName, workloadMetadataConfigMode, networkName, subnetworkName)
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withSandboxConfig(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -17976,7 +17973,6 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName string) string {
     return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
@@ -18271,7 +18267,6 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_withClusterBootDisk(t *testing.T) {
 	t.Parallel()

@@ -606,9 +606,9 @@ fields:
     api_field: 'nodePools.config.accelerators.acceleratorType'
   - field: 'node_pool.node_config.gvnic.enabled'
     api_field: 'nodePools.config.gvnic.enabled'
+{{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.node_config.host_maintenance_policy.maintenance_interval'
     api_field: 'nodePools.config.hostMaintenancePolicy.maintenanceInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.maintenance_availability_window'
     api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.maintenanceAvailabilityWindow'
   - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.min_nodes_per_pool'

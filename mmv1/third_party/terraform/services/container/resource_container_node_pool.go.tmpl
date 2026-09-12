@@ -281,8 +281,9 @@ func ResourceContainerNodePool() *schema.Resource {
 					Description: `The location (region or zone) of the cluster.`,
 				},
 				"operation": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The operation name for the last GKE operation performed on this resource.",
 				},
 				//UDP schema start
 				"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
