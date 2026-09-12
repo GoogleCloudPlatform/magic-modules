@@ -1,0 +1,21 @@
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location     = "{{index $.ResourceIdVars "location"}}"
+  tool_key     = "{{index $.ResourceIdVars "tool_key"}}"
+  display_name = "function-tool"
+  description  = "A tool with Function spec"
+
+  function_spec {
+    input_schema = jsonencode({
+      type = "object"
+      properties = {
+        param1 = { type = "string" }
+      }
+    })
+    output_schema = jsonencode({
+      type = "object"
+      properties = {
+        result = { type = "string" }
+      }
+    })
+  }
+}
