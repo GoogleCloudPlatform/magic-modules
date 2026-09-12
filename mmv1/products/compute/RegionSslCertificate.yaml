@@ -111,6 +111,7 @@ properties:
       The chain must include at least one intermediate cert.
     required: true
     sensitive: true
+    write_only: true
     is_missing_in_cai: true
   - name: 'creationTimestamp'
     type: Time
@@ -146,7 +147,7 @@ properties:
       function: 'verify.ValidateGCEName'
   - name: 'privateKey'
     type: String
-    description: 'The write-only private key in PEM format.'
+    description: 'The private key in PEM format.'
     required: true
     immutable: true
     ignore_read: true
