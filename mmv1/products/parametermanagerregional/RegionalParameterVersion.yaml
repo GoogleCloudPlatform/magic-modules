@@ -91,6 +91,13 @@ samples:
           data: regional-parameter-yaml-data.yaml
         test_vars_overrides:
           data: '"./test-fixtures/regional_parameter_data_yaml_format.yaml"'
+  - name: regional_parameter_version_with_data_crc32c
+    primary_resource_id: regional-parameter-version-with-data-crc32c
+    steps:
+      - name: regional_parameter_version_with_data_crc32c
+        resource_id_vars:
+          parameter_id: regional_parameter
+          parameter_version_id: regional_parameter_version
 parameters:
   - name: parameter
     type: ResourceRef
@@ -153,6 +160,12 @@ properties:
         immutable: true
         sensitive: true
         custom_expand: templates/terraform/custom_expand/base64.go.tmpl
+      - name: dataCrc32c
+        type: String
+        description: |
+          The integrity checksum of the payload.
+        immutable: true
+        default_from_api: true
   - name: kmsKeyVersion
     type: String
     output: true
