@@ -498,6 +498,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
+* `jwt_authenticator_config` - (Optional, Beta)
+  JWTAuthenticatorConfig provides configuration for Native K8s Structured Authentication. Structure is [documented below](#nested_jwt_authenticator_config).
+
 * `deletion_policy` - 
   (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
   When a 'terraform destroy' or 'terraform apply' would delete the resource,
@@ -2081,6 +2084,46 @@ registry_hosts {
     * `ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED`: Default value. This should not be used.
     * `NONE`: Do not apply any taints based on architecture.
     * `ARM`: Apply ARM taint to the nodes.
+
+<a name="nested_jwt_authenticator_config"></a>The `jwt_authenticator_config` block supports:
+
+* `authenticators` - (Optional) List of JWT authenticators that the kube-apiserver uses to validate JWT tokens from an IDP. Structure is [documented below](#nested_jwt_authenticators).
+
+<a name="nested_jwt_authenticators"></a>The `authenticators` block supports:
+
+* `issuer_url` - (Required) The URL of the OpenID Connect issuer that asserts the JWT.
+* `discovery_url` - (Optional) The URL of the OpenID Connect discovery document, if different from the default `issuer_url + /.well-known/openid-configuration`.
+* `audiences` - (Optional) The list of acceptable `aud` claims for the JWT.
+* `certificate_authority` - (Optional) The PEM-encoded certificate authority used to verify the TLS certificate when connecting to the issuer's discovery URL.
+* `claim_mappings` - (Optional) The mappings of the JWT claims to Kubernetes user identity fields. Structure is [documented below](#nested_jwt_claim_mappings).
+* `claim_validation_rules` - (Optional) The list of additional validation rules that the JWT token must satisfy in order to be authenticated. Structure is [documented below](#nested_jwt_claim_validation_rules).
+* `user_validation_rules` - (Optional) The list of validation rules applied to the Kubernetes user identity before the request is authenticated. Structure is [documented below](#nested_jwt_user_validation_rules).
+
+<a name="nested_jwt_claim_mappings"></a>The `claim_mappings` block supports:
+
+* `username` - (Optional) The map used to derive the authenticated user's username from the JWT claim. Structure is [documented below](#nested_jwt_claim_expression).
+* `groups` - (Optional) The map used to derive the authenticated user's groups from the JWT claim. Structure is [documented below](#nested_jwt_claim_expression).
+* `uid` - (Optional) The map used to derive the authenticated user's UID from the JWT claim. Structure is [documented below](#nested_jwt_claim_expression).
+* `extra_mappings` - (Optional) Extra mappings for JWT claims to additional Kubernetes user attributes. Structure is [documented below](#nested_jwt_extra_mappings).
+
+<a name="nested_jwt_claim_expression"></a>The `username`, `groups`, and `uid` blocks support:
+
+* `expression` - (Required) The CEL expression that computes the Kubernetes identity field from the JWT claim.
+
+<a name="nested_jwt_extra_mappings"></a>The `extra_mappings` block supports:
+
+* `key` - (Required) The name of the Kubernetes extra user attribute to populate.
+* `value_expression` - (Required) The CEL expression that computes the value of the Kubernetes extra user attribute from the JWT claim.
+
+<a name="nested_jwt_claim_validation_rules"></a>The `claim_validation_rules` block supports:
+
+* `expression` - (Required) The CEL expression to validate the claim.
+* `message` - (Optional) The error message to return if the expression is not valid.
+
+<a name="nested_jwt_user_validation_rules"></a>The `user_validation_rules` block supports:
+
+* `expression` - (Required) A CEL expression that is evaluated against the user identity.
+* `message` - (Optional) The error message returned to the client if the associated user validation rule evaluates to false.
 
 ## Attributes Reference
 
