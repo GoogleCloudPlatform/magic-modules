@@ -118,6 +118,7 @@ properties:
           Input only. The client secret of the OAuth application.
           It will be provided as plain text, but encrypted and stored in developer
           connect. As INPUT_ONLY field, it will not be included in the output.
+        sensitive: true
       - name: hostUri
         type: String
         required: true
