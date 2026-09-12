@@ -67,7 +67,5 @@ tpgtools/serialization.go
 /bazel-*
 /.ijwb/
 MODULE.bazel.lock
-go.work
-go.work.sum
 terraform-provider-google/
 debug_output/
