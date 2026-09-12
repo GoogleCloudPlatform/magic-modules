@@ -1,5 +1,6 @@
 {
   "name": "qa-test-runner",
+  "description": "Staff QA Engineer that reproduces acceptance test failures and parses debug logs into structured API traces without modifying code.",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }
