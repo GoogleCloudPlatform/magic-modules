@@ -5023,6 +5023,9 @@ resource "google_container_cluster" "primary" {
   node_config {
     machine_type = "e2-micro"
   }
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   network            = "%s"
   subnetwork         = "%s"
   deletion_protection = false
@@ -8405,6 +8408,10 @@ resource "google_container_cluster" "primary" {
     machine_type = "e2-micro"
   }
 
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
   node_locations = [
     "us-central1-b",
     "us-central1-c",
@@ -8446,6 +8453,10 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true # Not worth updating
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   node_locations = [
@@ -9084,6 +9095,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
     machine_type = "e2-micro"
   }
 
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
   network_policy {
     enabled  = true
     provider = "CALICO"
@@ -9203,6 +9218,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
     machine_type = "e2-micro"
   }
 
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
   network    = "%s"
   subnetwork = "%s"
 
@@ -9220,6 +9239,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   network_policy {
@@ -9242,6 +9265,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   network_policy {
@@ -12775,6 +12802,10 @@ resource "google_container_cluster" "with_workload_identity_config" {
     machine_type = "e2-micro"
   }
 
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
   network    = "%s"
   subnetwork = "%s"
 
@@ -12832,6 +12863,9 @@ resource "google_container_cluster" "with_workload_identity_config" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+  lifecycle {
+    ignore_changes = [node_config]
   }
   %s
 
@@ -13182,6 +13216,9 @@ resource "google_container_cluster" "with_mesh_certificates_config" {
   node_config {
     machine_type = "e2-micro"
   }
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   workload_identity_config {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
@@ -13209,6 +13246,9 @@ resource "google_container_cluster" "with_mesh_certificates_config" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+  lifecycle {
+    ignore_changes = [node_config]
   }
   workload_identity_config {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
@@ -19438,6 +19478,10 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   skip_node_pool_refresh = %t

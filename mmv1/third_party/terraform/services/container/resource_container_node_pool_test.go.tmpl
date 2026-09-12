@@ -5023,6 +5023,10 @@ resource "google_container_cluster" "cluster" {
   node_config {
     machine_type = "e2-micro"
   }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 }
 
 resource "google_container_node_pool" "np_with_gpudirect" {
@@ -5445,6 +5449,10 @@ resource "google_container_cluster" "cluster" {
   node_config {
     machine_type = "e2-micro"
   }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   min_master_version       = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
   network                  = "%s"
   subnetwork               = "%s"
@@ -5486,6 +5494,10 @@ resource "google_container_cluster" "cluster" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
   min_master_version       = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
   network                  = "%s"
@@ -6302,6 +6314,10 @@ resource "google_container_cluster" "primary" {
     machine_type = "e2-micro"
   }
 
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
   deletion_protection = false
   network             = "%{network}"
   subnetwork          = "%{subnet}"
@@ -6350,6 +6366,10 @@ resource "google_container_cluster" "primary" {
   initial_node_count       = 1
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   deletion_protection = false
@@ -6401,6 +6421,10 @@ resource "google_container_cluster" "primary" {
   initial_node_count       = 1
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   deletion_protection = false
@@ -7035,7 +7059,11 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true
   initial_node_count       = 1
   node_config {
-    machine_type = "e2-micro"
+    machine_type = "e2-medium"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 
   datapath_provider       = "ADVANCED_DATAPATH"
@@ -7511,6 +7539,10 @@ resource "google_container_cluster" "cluster" {
   remove_default_node_pool = true
   node_config {
     machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
   }
 }
 
