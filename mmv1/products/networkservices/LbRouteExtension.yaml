@@ -20,6 +20,7 @@ references:
     'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/configure-callout#configure_a_route_extension'
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1/projects.locations.lbRouteExtensions'
 docs:
+generate_list_resource: true
 base_url: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions'
 self_link: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions?lbRouteExtensionId={{name}}'

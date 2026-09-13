@@ -20,6 +20,7 @@ references:
     Setup TCP Services: https://cloud.google.com/traffic-director/docs/set-up-tcp-route
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tcpRoutes
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/global/tcpRoutes
 self_link: projects/{{project}}/locations/global/tcpRoutes/{{name}}
 create_url: projects/{{project}}/locations/global/tcpRoutes?tcpRouteId={{name}}

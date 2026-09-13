@@ -19,6 +19,7 @@ references:
   guides:
   api: https://cloud.google.com/network-services/docs/reference/network-services/rest/v1/projects.locations.agentGateways
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/{{location}}/agentGateways
 self_link: projects/{{project}}/locations/{{location}}/agentGateways/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/agentGateways?agentGatewayId={{name}}
@@ -40,6 +41,14 @@ async:
 autogen_async: true
 error_retry_predicates: ['transport_tpg.IsAgentGatewayInUseError']
 samples:
+  - name: network_services_agent_gateway_client_to_agent
+    primary_resource_id: default
+    steps:
+      - name: network_services_agent_gateway_client_to_agent
+        resource_id_vars:
+          name: my-client-to-agent-gateway
+        test_env_vars:
+          project: PROJECT_NAME
   - name: network_services_agent_gateway_full
     primary_resource_id: default
     steps:
@@ -50,14 +59,6 @@ samples:
           subnetwork_name: my-gateway-subnetwork
           network_attachment_name: my-gateway-attachment
           dns_zone_name: my-gateway-zone
-        test_env_vars:
-          project: PROJECT_NAME
-  - name: network_services_agent_gateway_client_to_agent
-    primary_resource_id: default
-    steps:
-      - name: network_services_agent_gateway_client_to_agent
-        resource_id_vars:
-          name: my-client-to-agent-gateway
         test_env_vars:
           project: PROJECT_NAME
   - name: network_services_agent_gateway_self_managed

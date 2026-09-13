@@ -15,6 +15,7 @@ resource "google_compute_health_check" "{{$.PrimaryResourceId}}" {
 resource "google_network_services_tls_route" "{{$.PrimaryResourceId}}" {
   name                   = "{{index $.ResourceIdVars "resource_name"}}"
   description             = "my description"
+  location               = "{{index $.Vars "location"}}"
   rules                   {
     matches {
       sni_host = ["example.com"]
