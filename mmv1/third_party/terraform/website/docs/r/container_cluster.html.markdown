@@ -676,7 +676,6 @@ addons_config {
 
 * `enabled` - (Required) Whether Cloud TPU integration is enabled or not.
 * `use_service_networking` - (Optional) Whether to use service networking for Cloud TPU or not.
-* `ipv4_cidr_block` - (Output) The IPv4 CIDR block reserved for Cloud TPU in the VPC.
 
 <a name="nested_high_scale_checkpointing_config"></a>The `high_scale_checkpointing_config` block supports:
 
@@ -1586,7 +1585,6 @@ notification_config {
 * `service_account_signing_keys` - (Optional) The Cloud KMS cryptoKeyVersions to use for signing service account JWTs issued by this cluster.
 * `service_account_verification_keys` - (Optional) The Cloud KMS cryptoKeyVersions to use for verifying service account JWTs issued by this cluster.
 * `control_plane_disk_encryption_key` - (Optional) The Cloud KMS cryptoKey to use for Confidential Hyperdisk on the control plane nodes.
-* `control_plane_disk_encryption_key_versions` - (Output) The Cloud KMS cryptoKey versions to use for Confidential Hyperdisk on the control plane nodes.
 * `gkeops_etcd_backup_encryption_key` - (Optional) Resource path of the Cloud KMS cryptoKey to use for encryption of internal etcd backups.
 
 <a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
@@ -2087,14 +2085,6 @@ registry_hosts {
 
 * `membership_type` - (Optional) Sets the membership type of the cluster.  Available option is `LIGHTWEIGHT` to support only lightweight compatible features.  If unspecified, the membership_type will be a regular membership that supports all features.
 
-* `membership` - (Output) Full resource name of the registered fleet membership of the cluster.
-
-* `pre_registered` - (Output) Whether the cluster has been registered via the fleet API.
-
-* `membership_id` - (Output) Short name of the fleet membership, for example "member-1".
-
-* `membership_location` - (Output) Location of the fleet membership, for example "us-central1".
-
 <a name="nested_workload_alts_config"></a>The `workload_alts_config` block supports:
 
 * `enable_alts` - (Required) Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity ([workloadPool]((#nested_workload_identity_config)) must be non-empty).
@@ -2102,8 +2092,6 @@ registry_hosts {
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
 * `desired_tier` - (Optional) (DEPRECATED) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`. Deprecated as GKE Enterprise features are now available without an Enterprise tier. See https://cloud.google.com/blog/products/containers-kubernetes/gke-gets-new-pricing-and-capabilities-on-10th-birthday for the announcement of this change.
-
-* `cluster_tier` - (Output) The effective tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`. Deprecated as GKE Enterprise features are now available without an Enterprise tier.
 
 <a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
 
@@ -2188,9 +2176,9 @@ exported:
 
 * `emulated_version` - The current emulated Kubernetes version running on the GKE cluster control plane.
 
-* `operation` - The operation name for the last GKE operation performed on this resource.
-
 * `user_managed_keys_config.0.control_plane_disk_encryption_key_versions` - The Cloud KMS cryptoKey versions to use for Confidential Hyperdisk on the control plane nodes.
+
+* `tpu_config.0.ipv4_cidr_block` - The IPv4 CIDR block reserved for Cloud TPU in the VPC.
 
 ## Timeouts
 

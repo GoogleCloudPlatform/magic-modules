@@ -391,8 +391,6 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `managed_instance_group_urls` - List of instance group URLs which have been assigned to this node pool.
 
-* `operation` - The operation name for the last GKE operation performed on this resource.
-
 * `node_config.0.effective_taints` - List of kubernetes taints applied to each node.
 
 <a id="timeouts"></a>
