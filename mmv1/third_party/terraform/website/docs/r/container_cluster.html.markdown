@@ -495,6 +495,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `node_creation_config` - (Optional)
   Configuration for [node creation config](https://clouddocs.devsite.corp.google.com/kubernetes-engine/security/control-plane-node-creation). Structure is [documented below](#node_creation_config).
 
+* `control_plane_egress` - (Optional)
+  Configuration for control plane egress control. Structure is [documented below](#nested_control_plane_egress).
+
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
@@ -2061,6 +2064,10 @@ registry_hosts {
 <a name="node_creation_config"></a>The `node_creation_config` block supports:
 
 * `node_creation_mode` - (Required) Sets the node creation mode. Available options include `VIA_KUBELET` and `VIA_CONTROL_PLANE`.
+
+<a name="nested_control_plane_egress"></a>The `control_plane_egress` block supports:
+
+* `mode` - (Required) Sets the egress mode of the control plane. Available options include `VIA_CONTROL_PLANE` and `NONE`.
 
 <a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
 

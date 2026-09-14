@@ -985,3 +985,103 @@ func TestContainerCluster_RunClusterOperation_NonRetryableFailsFast(t *testing.T
 	}
 }
 
+func TestContainerCluster_expandControlPlaneEgress(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name  string
+		input []interface{}
+		want  *container.ControlPlaneEgress
+	}{
+		{
+			name:  "nil input",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty input",
+			input: []interface{}{},
+			want:  nil,
+		},
+		{
+			name: "mode NONE",
+			input: []interface{}{
+				map[string]interface{}{
+					"mode": "NONE",
+				},
+			},
+			want: &container.ControlPlaneEgress{
+				Mode: "NONE",
+			},
+		},
+		{
+			name: "mode VIA_CONTROL_PLANE",
+			input: []interface{}{
+				map[string]interface{}{
+					"mode": "VIA_CONTROL_PLANE",
+				},
+			},
+			want: &container.ControlPlaneEgress{
+				Mode: "VIA_CONTROL_PLANE",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := expandControlPlaneEgress(tc.input)
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("expandControlPlaneEgress() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestContainerCluster_flattenControlPlaneEgress(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name  string
+		input *container.ControlPlaneEgress
+		want  []map[string]interface{}
+	}{
+		{
+			name:  "nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name: "mode NONE",
+			input: &container.ControlPlaneEgress{
+				Mode: "NONE",
+			},
+			want: []map[string]interface{}{
+				{
+					"mode": "NONE",
+				},
+			},
+		},
+		{
+			name: "mode VIA_CONTROL_PLANE",
+			input: &container.ControlPlaneEgress{
+				Mode: "VIA_CONTROL_PLANE",
+			},
+			want: []map[string]interface{}{
+				{
+					"mode": "VIA_CONTROL_PLANE",
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := flattenControlPlaneEgress(tc.input)
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("flattenControlPlaneEgress() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+
