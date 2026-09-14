@@ -64,7 +64,7 @@ func testSweepContainerClusters(region string) error {
 
 		if err != nil {
 			log.Printf("Error, failed to delete cluster %s: %s", cluster.Name, err)
-			return nil
+			continue
 		}
 	}
 
