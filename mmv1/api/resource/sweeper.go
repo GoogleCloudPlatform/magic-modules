@@ -80,10 +80,10 @@ type Sweeper struct {
 	// struct for configuration details.
 	EnsureValue *EnsureValue `yaml:"ensure_value,omitempty"`
 
-	// WaitForDelete specifies that the sweeper should actually wait for a delete
-	// operation to finish. For efficiency, this isn't the default behavior, but
-	// it can be useful when debugging.
-	WaitForDelete bool `yaml:"wait_for_delete,omitempty"`
+	// WaitForDeleteOperation is a flag for locally debugging sweeper failures and
+	// should never be checked in. It only works for resources that use operations
+	// for deletion.
+	WaitForDeleteOperation bool `yaml:"wait_for_delete_operation,omitempty"`
 }
 
 // EnsureValue specifies a field and value that must be set before a resource can be deleted.
