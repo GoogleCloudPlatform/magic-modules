@@ -1,0 +1,21 @@
+func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// If the resource has no id then it hasn't been created yet
+	// Check to see if any fields are set in the config at create time that shouldn't be there
+	if diff.Id() == "" {
+		fieldNames := []string{
+			"description",
+			// More to be added
+		}
+		found := []string{}
+		for _, field := range fieldNames {
+			if _, ok := diff.GetOk(field); ok {
+				found = append(found, field)
+			}
+		}
+		if len(found) > 0 {
+			return fmt.Errorf("these fields cannot be set at create time: %s", strings.Join(found, ","))
+		}
+	}
+	// Either we are not creating a resource, or no disallowed fields are present
+	return nil
+}
