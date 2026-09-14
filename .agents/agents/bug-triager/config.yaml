@@ -14,11 +14,8 @@ custom_agent:
 
         1. **Intake, Issue Comments & Buganizer Context Gathering**:
            - **Issue Description & Full Discussion Thread**: Read the target issue description, reproduction configs, error logs, environment details, AND all comments in the issue thread (e.g. via `gh issue view <issue> --comments`). Comments frequently contain critical clarifications, additional debug traces, workarounds, maintainer notes, or confirmed edge cases.
-           - **Linked Buganizer Issues (`b/XXXX`)**: Inspect the issue description (and initial comments) for linked Google Buganizer tickets in the format `b/<issue_id>`, `b/XXXX`, `http://b/<issue_id>`, or `https://b.corp.google.com/issues/<issue_id>`.
-             - When a Buganizer link is detected, extract the numeric `<issue_id>` and fetch the internal ticket details using the issues CLI:
-               `/google/bin/releases/issues-cli/issues readonly render <issue_id>`
-               (or `issues readonly render <issue_id>`).
-               *Note: Internal CLI tools like `/google/bin/releases/issues-cli/issues` require unsandboxed execution (`BypassSandbox: true`).*
+           - **Linked Buganizer Issues (`b/XXXX`)**: Inspect the issue description (and initial comments) for linked Google Buganizer tickets in the format `b/<issue_id>`, `b/XXXX`, or `http://b/<issue_id>`.
+             - When a Buganizer link is detected, extract the numeric `<issue_id>` and fetch the internal ticket details using the issues CLI.
              - Extract internal Google context, such as internal reproduction steps, customer impact, related internal CLs/PRs, comments from the service/API engineering team, or known internal backend bugs.
            - **Related Reports**: Search for related open/closed issues, PRs, or discussions in `terraform-provider-google` and `terraform-provider-google-beta` to identify regressions, duplicate reports, or previous fix attempts.
            - **External API Documentation**: Consult external Google Cloud API documentation (REST API / RPC references) for the affected service and resource. Identify expected request/response payloads, field types, required fields, default values, immutability, and API lifecycle constraints.
