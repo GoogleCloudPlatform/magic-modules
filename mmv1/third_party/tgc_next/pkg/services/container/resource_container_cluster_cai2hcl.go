@@ -134,6 +134,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	// enterprise_config is deprecated and will be removed in a future major release; do not convert
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(asset.Resource.Data["anonymousAuthenticationConfig"])
 	hclData["node_creation_config"] = flattenNodeCreationConfig(asset.Resource.Data["nodeCreationConfig"])
+	hclData["control_plane_egress"] = flattenControlPlaneEgress(asset.Resource.Data["controlPlaneEgress"])
 	hclData["notification_config"] = flattenNotificationConfig(asset.Resource.Data["notificationConfig"])
 	hclData["binary_authorization"] = flattenBinaryAuthorization(asset.Resource.Data["binaryAuthorization"])
 	if !enableAutopilot {
@@ -1990,6 +1991,20 @@ func flattenNodeCreationConfig(v interface{}) []map[string]interface{} {
 	}
 	transformed := map[string]interface{}{
 		"node_creation_mode": ncc["nodeCreationMode"],
+	}
+	return []map[string]interface{}{transformed}
+}
+
+func flattenControlPlaneEgress(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	cpe, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"mode": cpe["mode"],
 	}
 	return []map[string]interface{}{transformed}
 }

@@ -2817,6 +2817,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"control_plane_egress": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `Configuration for control plane egress control.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_CONTROL_PLANE", "NONE"}, false),
+							Description: `The egress mode of the control plane.
+ Accepted values are:
+* VIA_CONTROL_PLANE: Control plane egress traffic goes through cluster control plane.
+* NONE: Control plane egress traffic is blocked.`,
+						},
+					},
+				},
+			},
 			"rbac_binding_config": {
 				Type:        schema.TypeList,
 				Optional:    true,

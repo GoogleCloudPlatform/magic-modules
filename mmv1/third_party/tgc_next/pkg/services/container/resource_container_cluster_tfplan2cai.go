@@ -311,6 +311,10 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		cluster.NodeCreationConfig = expandNodeCreationConfig(v)
 	}
 
+	if v, ok := d.GetOk("control_plane_egress"); ok {
+		cluster.ControlPlaneEgress = expandControlPlaneEgress(v)
+	}
+
 	if v, ok := d.GetOk("rbac_binding_config"); ok {
 		cluster.RbacBindingConfig = expandRBACBindingConfig(v)
 	}
@@ -1754,6 +1758,20 @@ func expandNodeCreationConfig(v interface{}) *container.NodeCreationConfig {
 	config := l[0].(map[string]interface{})
 	return &container.NodeCreationConfig{
 		NodeCreationMode: config["node_creation_mode"].(string),
+	}
+}
+
+func expandControlPlaneEgress(v interface{}) *container.ControlPlaneEgress {
+	if v == nil {
+		return nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ControlPlaneEgress{
+		Mode: config["mode"].(string),
 	}
 }
 
