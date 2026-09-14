@@ -127,9 +127,6 @@ samples:
           forwarding_rule_name: 'global-rule'
           http_proxy_name: 'target-proxy'
           backend_service_name: 'backend'
-        test_vars_overrides:
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
         ignore_read_extra:
           - 'port_range'
           - 'target'
@@ -144,9 +141,6 @@ samples:
           http_proxy_name: 'target-proxy'
           backend_service_name: 'backend'
           igm_name: 'igm-internal'
-        test_vars_overrides:
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
         ignore_read_extra:
           - 'port_range'
           - 'target'
@@ -158,9 +152,6 @@ samples:
           forwarding_rule_name: 'global-rule'
           http_proxy_name: 'target-proxy'
           backend_service_name: 'backend'
-        test_vars_overrides:
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
         ignore_read_extra:
           - 'port_range'
           - 'target'
