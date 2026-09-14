@@ -219,8 +219,10 @@ samples:
           global_address_name: 'global-psconnect-ip'
           forwarding_rule_name: 'globalrule'
         test_vars_overrides:
-          # for backward compatible
-          forwarding_rule_name: '"globalrule" + randomSuffix'
+          # The name must match ^[a-z][a-z0-9]{0,19}$, so the generator's
+          # automatic "tf-test-" prefix is not legal here. Use the "frtest"
+          # prefix registered on this resource's sweeper instead.
+          forwarding_rule_name: '"frtest" + randomSuffix'
         test_env_vars:
           project: 'PROJECT_NAME'
         ignore_read_extra:
@@ -237,8 +239,10 @@ samples:
           global_address_name: 'global-psconnect-ip'
           forwarding_rule_name: 'globalrule'
         test_vars_overrides:
-          # for backward compatible
-          forwarding_rule_name: '"globalrule" + randomSuffix'
+          # The name must match ^[a-z][a-z0-9]{0,19}$, so the generator's
+          # automatic "tf-test-" prefix is not legal here. Use the "frtest"
+          # prefix registered on this resource's sweeper instead.
+          forwarding_rule_name: '"frtest" + randomSuffix'
         test_env_vars:
           project: 'PROJECT_NAME'
         ignore_read_extra:
