@@ -276,3 +276,25 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 		t.Errorf("Error not detected as retryable")
 	}
 }
+
+func TestIsDefaultNetworkNotFoundError_retryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "Invalid value for field 'resource.networkInterfaces[0].network': 'projects/tf-test-12345/global/networks/default'. The referenced network resource cannot be found.",
+	}
+	isRetryable, _ := isDefaultNetworkNotFoundError(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIsDefaultNetworkNotFoundError_customNetworkNotRetryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "Invalid value for field 'resource.networkInterfaces[0].network': 'projects/tf-test-12345/global/networks/my-custom-network'. The referenced network resource cannot be found.",
+	}
+	isRetryable, _ := isDefaultNetworkNotFoundError(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}

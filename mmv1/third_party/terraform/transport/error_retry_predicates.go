@@ -60,6 +60,11 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// apply a mutex. If we attempt an operation w/ an unready network, retry
 	// it.
 	isNetworkUnreadyError,
+
+	// In newly created projects, the default network may not be provisioned until
+	// the first compute request triggers its creation. Retry 400 errors when the
+	// default network is not yet found.
+	isDefaultNetworkNotFoundError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -163,6 +168,19 @@ func isNetworkUnreadyError(err error) (bool, string) {
 	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "networks") {
 		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ 'networks': %s", err)
 		return true, "Network not ready"
+	}
+	return false, ""
+}
+
+func isDefaultNetworkNotFoundError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 400 && strings.Contains(gerr.Body, "/global/networks/default") && strings.Contains(gerr.Body, "The referenced network resource cannot be found") {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and default network not found: %s", err)
+		return true, "Default network not ready"
 	}
 	return false, ""
 }
