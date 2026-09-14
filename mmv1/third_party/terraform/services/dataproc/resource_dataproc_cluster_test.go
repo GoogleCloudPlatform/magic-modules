@@ -2297,22 +2297,22 @@ func testAccDataprocCluster_withResourceManagerTags(pid, rnd, subnetworkName str
 	return fmt.Sprintf(`
 resource "google_tags_tag_key" "tag_key" {
   parent = "projects/%s"
-  short_name = "key-%s"
+  short_name = "tf-test-key-%s"
 }
 
 resource "google_tags_tag_value" "tag_value" {
   parent = "tagKeys/${google_tags_tag_key.tag_key.name}"
-  short_name = "val-%s"
+  short_name = "tf-test-val-%s"
 }
 
 resource "google_tags_tag_key" "tag_key_2" {
   parent = "projects/%s"
-  short_name = "key-2-%s"
+  short_name = "tf-test-key-2-%s"
 }
 
 resource "google_tags_tag_value" "tag_value_2" {
   parent = "tagKeys/${google_tags_tag_key.tag_key_2.name}"
-  short_name = "val-2-%s"
+  short_name = "tf-test-val-2-%s"
 }
 
 resource "google_dataproc_cluster" "basic" {
