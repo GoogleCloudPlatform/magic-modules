@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/dataform"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/sourcerepo"
 )
 
 func TestAccDataformRepository_updated(t *testing.T) {
@@ -47,10 +46,6 @@ func TestAccDataformRepository_updated(t *testing.T) {
 
 func testAccDataformRepository_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_sourcerepo_repository" "git_repository" {
-  name = "my/repository%{random_suffix}"
-}
-
 resource "google_secret_manager_secret" "secret" {
   secret_id = "secret"
 
@@ -69,7 +64,7 @@ resource "google_dataform_repository" "dataform_repository" {
   name = "tf_test_dataform_repository%{random_suffix}"
 
   git_remote_settings {
-      url = google_sourcerepo_repository.git_repository.url
+      url = "https://github.com/OWNER/REPOSITORY.git"
       default_branch = "main"
       authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
   }
@@ -85,10 +80,6 @@ resource "google_dataform_repository" "dataform_repository" {
 
 func testAccDataformRepository_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_sourcerepo_repository" "git_repository" {
-  name = "my/repository%{random_suffix}"
-}
-
 resource "google_secret_manager_secret" "secret" {
   secret_id = "tf-test-secret%{random_suffix}"
 
@@ -107,7 +98,7 @@ resource "google_dataform_repository" "dataform_repository" {
   name = "tf_test_dataform_repository%{random_suffix}"
 
   git_remote_settings {
-      url = google_sourcerepo_repository.git_repository.url
+      url = "https://github.com/OWNER/REPOSITORY.git"
       default_branch = "main"
       authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
   }
