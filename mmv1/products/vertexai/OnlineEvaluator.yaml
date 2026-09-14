@@ -391,10 +391,14 @@ properties:
             Inline metric config, provided as a JSON-formatted string using
             camelCase field names to match the API format (see the
             [Metric API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/Metric)).
-            Suggested predefined `metricSpecName` values:
-            `final_response_quality_v1`, `tool_use_quality_v1`,
-            `hallucination_v1`, `safety_v1`, `multi_turn_task_success_v1`,
-            `multi_turn_tool_use_quality_v1`, `multi_turn_trajectory_quality_v1`.
+            The suggested predefined `metricSpecName` values depend on the
+            evaluation scope configured in `cloud_observability`; a predefined
+            metric must match the scope or the create request will be rejected:
+              - `trace_scope` (single trace): `final_response_quality_v1`,
+                `tool_use_quality_v1`, `hallucination_v1`, `safety_v1`.
+              - `session_scope` (multi-turn session):
+                `multi_turn_task_success_v1`, `multi_turn_tool_use_quality_v1`,
+                `multi_turn_trajectory_quality_v1`.
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
           custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
           custom_expand: templates/terraform/custom_expand/json_schema.tmpl
