@@ -1,7 +1,10 @@
 package storage
 
 import (
+	"errors"
 	"testing"
+
+	"google.golang.org/api/googleapi"
 )
 
 func TestLabelDiffSuppress(t *testing.T) {
@@ -80,5 +83,45 @@ func TestLabelDiffSuppress(t *testing.T) {
 		if resourceDataplexLabelDiffSuppress(tc.K, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, %q: %q => %q expect DiffSuppress to return %t", tn, tc.K, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
+	}
+}
+
+func TestIsIgnorableStorageObjectDeleteError(t *testing.T) {
+	cases := map[string]struct {
+		err      error
+		expected bool
+	}{
+		"nil": {
+			err:      nil,
+			expected: true,
+		},
+		"404 no such object": {
+			err:      &googleapi.Error{Code: 404, Message: "No such object: example-bucket/path/to/object"},
+			expected: true,
+		},
+		"410 gone": {
+			err:      &googleapi.Error{Code: 410, Message: "Gone"},
+			expected: true,
+		},
+		"403 forbidden": {
+			err:      &googleapi.Error{Code: 403, Message: "Forbidden"},
+			expected: false,
+		},
+		"409 conflict": {
+			err:      &googleapi.Error{Code: 409, Message: "Conflict"},
+			expected: false,
+		},
+		"non-googleapi error": {
+			err:      errors.New("network timeout"),
+			expected: false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if got := isIgnorableStorageObjectDeleteError(tc.err); got != tc.expected {
+				t.Fatalf("isIgnorableStorageObjectDeleteError(%v) = %v, want %v", tc.err, got, tc.expected)
+			}
+		})
 	}
 }
