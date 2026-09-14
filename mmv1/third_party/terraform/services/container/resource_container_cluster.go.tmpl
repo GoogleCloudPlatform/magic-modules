@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"reflect"
@@ -3073,6 +3074,162 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+{{- if ne $.TargetVersionName "ga" }}
+			"jwt_authenticator_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `JWTAuthenticatorConfig provides configuration for Native K8s Structured Authentication.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"authenticators": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `List of JWT authenticators that the kube-apiserver uses to validate JWT tokens from an IDP.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"issuer_url": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `The issuer URL that identifies the IDP that issued the JWT.`,
+									},
+									"discovery_url": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The URL from which the kube-apuserver retrieves the OIDC discovery document instead of using the issuer_url.`,
+									},
+									"audiences": {
+										Type:        schema.TypeList,
+										Required:    true,
+										Description: `The list of accepted audiences for the JWT token.`,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+									"certificate_authority": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The certificate authority used to verify the TLS certificate when connecting to the issuer's discovery URL.`,
+									},
+									"claim_validation_rules": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: `The list of additional validation rules that the JWT token must satisfy in order to be authenticated.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"expression": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `The CEL expression to validate the claim.`,
+												},
+												"message": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The error message to return if the expression is not valid.`,
+												},
+											},
+										},
+									},
+									"claim_mappings": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: `The mappings of the JWT claims to Kubernetes user identity fields.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"username": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													MaxItems:    1,
+													Description: `The map used to derive the authenticated user's username from the JWT claim.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"expression": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: `The CEL expression that computes the Kubernetes username from the JWT claim.`,
+															},
+														},
+													},
+												},
+												"groups": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													MaxItems:    1,
+													Description: `The map used to derive the authenticated user's groups from the JWT claim.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"expression": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: `The CEL expression that computes the Kubernetes groups from the JWT claim.`,
+															},
+														},
+													},
+												},
+												"uid": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													MaxItems:    1,
+													Description: `The map used to derive the authenticated user's UID from the JWT claim.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"expression": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: `The CEL expression that computes the Kubernetes UID from the JWT claim.`,
+															},
+														},
+													},
+												},
+												"extra_mappings": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Description: `Extra mappings for JWT claims to additional Kubernetes user attributes.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"key": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: `The name of the Kubernetes extra user attribute to populate.`,
+															},
+															"value_expression": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: `The CEL expression that computes the value of the Kubernetes extra user attribute from the JWT claim.`,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"user_validation_rules": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: `The list of validation rules applied to the Kubernetes user identity before the request is authenticated.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"expression": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: `A CEL expression that is evaluated against the user identity.`,
+												},
+												"message": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The error message returned to the client if the associated user validation rule evaluates to false.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+{{- end }}
 	//UDP schema start
             "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 	//UDP schema end
@@ -3447,6 +3604,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
   if v, ok := d.GetOk("rbac_binding_config"); ok {
     cluster.RbacBindingConfig = expandRBACBindingConfig(v)
   }
+
+{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := d.GetOk("jwt_authenticator_config"); ok {
+		cluster.JwtAuthenticatorConfig = expandJwtAuthenticatorConfig(v)
+	}
+{{- end }}
 
   needUpdateAfterCreate := false
 
@@ -4086,6 +4249,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("rbac_binding_config", flattenRBACBindingConfig(cluster.RbacBindingConfig)); err != nil {
     return err
   }
+
+{{- if ne $.TargetVersionName "ga" }}
+	if err := d.Set("jwt_authenticator_config", flattenJwtAuthenticatorConfig(cluster.JwtAuthenticatorConfig, d)); err != nil {
+		return err
+	}
+{{- end }}
 
 
     if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
@@ -5580,6 +5749,33 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
     log.Printf("[INFO] GKE cluster %s's RBAC binding config has been updated", d.Id())
   }
+
+{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("jwt_authenticator_config") {
+		req := &container.UpdateClusterRequest{}
+		if v, ok := d.GetOk("jwt_authenticator_config"); !ok {
+			req.Update = &container.ClusterUpdate{
+				DesiredJwtAuthenticatorConfig: &container.JWTAuthenticatorConfig{
+					Authenticators:  []*container.JWTAuthenticator{},
+					ForceSendFields: []string{"Authenticators"},
+				},
+				ForceSendFields: []string{"DesiredJwtAuthenticatorConfig"},
+			}
+		} else {
+			req.Update = &container.ClusterUpdate{
+				DesiredJwtAuthenticatorConfig: expandJwtAuthenticatorConfig(v),
+			}
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster JWT authenticator config")
+		// Call update serially.
+		if err := updateF(); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's JWT authenticator config has been updated", d.Id())
+	}
+{{- end }}
 
 	if d.HasChange("autopilot_cluster_policy_config") {
 		if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
@@ -9377,6 +9573,375 @@ func flattenAgentSandboxConfig(v *container.AgentSandboxConfig) []interface{} {
         },
     }
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandJwtAuthenticatorConfig(v interface{}) *container.JWTAuthenticatorConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil
+	}
+	data := ls[0].(map[string]interface{})
+	config := &container.JWTAuthenticatorConfig{}
+
+	if v, ok := data["authenticators"]; ok && v != nil {
+		config.Authenticators = expandJwtAuthenticators(v)
+	}
+
+	return config
+}
+
+func expandJwtAuthenticators(v interface{}) []*container.JWTAuthenticator {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	authenticators := make([]*container.JWTAuthenticator, 0, len(ls))
+
+	for _, raw := range ls {
+		if raw == nil {
+			continue
+		}
+		data := raw.(map[string]interface{})
+		auth := &container.JWTAuthenticator{}
+
+		if v, ok := data["issuer_url"]; ok {
+			auth.IssuerUrl = v.(string)
+		}
+		if v, ok := data["discovery_url"]; ok {
+			auth.DiscoveryUrl = v.(string)
+		}
+		if v, ok := data["audiences"]; ok {
+			auth.Audiences = tpgresource.ConvertStringArr(v.([]interface{}))
+		}
+		if v, ok := data["certificate_authority"]; ok && v.(string) != "" {
+			caStr := v.(string)
+			if _, err := base64.StdEncoding.DecodeString(caStr); err == nil && !strings.Contains(caStr, "-----BEGIN") {
+				auth.CertificateAuthority = caStr
+			} else {
+				auth.CertificateAuthority = base64.StdEncoding.EncodeToString([]byte(caStr))
+			}
+		}
+		if v, ok := data["claim_validation_rules"]; ok && v != nil {
+			auth.ClaimValidationRules = expandClaimValidationRules(v)
+		}
+		if v, ok := data["claim_mappings"]; ok && v != nil {
+			auth.ClaimMappings = expandClaimMappings(v)
+		}
+		if v, ok := data["user_validation_rules"]; ok && v != nil {
+			auth.UserValidationRules = expandUserValidationRules(v)
+		}
+
+		authenticators = append(authenticators, auth)
+	}
+
+	return authenticators
+}
+
+func expandClaimValidationRules(v interface{}) []*container.ClaimValidationRule {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	rules := make([]*container.ClaimValidationRule, 0, len(ls))
+
+	for _, raw := range ls {
+		if raw == nil {
+			continue
+		}
+		data := raw.(map[string]interface{})
+		rule := &container.ClaimValidationRule{}
+
+		if v, ok := data["expression"]; ok {
+			rule.Expression = v.(string)
+		}
+		if v, ok := data["message"]; ok {
+			rule.Message = v.(string)
+		}
+
+		rules = append(rules, rule)
+	}
+
+	return rules
+}
+
+func expandClaimMappings(v interface{}) *container.ClaimMappings {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil
+	}
+	data := ls[0].(map[string]interface{})
+	mappings := &container.ClaimMappings{}
+
+	if v, ok := data["username"]; ok && v != nil {
+		mappings.Username = expandClaimExpression(v)
+	}
+	if v, ok := data["groups"]; ok && v != nil {
+		mappings.Groups = expandClaimExpression(v)
+	}
+	if v, ok := data["uid"]; ok && v != nil {
+		mappings.Uid = expandClaimExpression(v)
+	}
+	if v, ok := data["extra_mappings"]; ok && v != nil {
+		mappings.ExtraMappings = expandExtraMappings(v)
+	}
+
+	return mappings
+}
+
+func expandClaimExpression(v interface{}) *container.ClaimExpression {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil
+	}
+	data := ls[0].(map[string]interface{})
+	expr := &container.ClaimExpression{}
+
+	if v, ok := data["expression"]; ok {
+		expr.Expression = v.(string)
+	}
+
+	return expr
+}
+
+func expandExtraMappings(v interface{}) []*container.ExtraMapping {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	extra := make([]*container.ExtraMapping, 0, len(ls))
+
+	for _, raw := range ls {
+		if raw == nil {
+			continue
+		}
+		data := raw.(map[string]interface{})
+		m := &container.ExtraMapping{}
+
+		if v, ok := data["key"]; ok {
+			m.Key = v.(string)
+		}
+		if v, ok := data["value_expression"]; ok {
+			m.ValueExpression = v.(string)
+		}
+
+		extra = append(extra, m)
+	}
+
+	return extra
+}
+
+func expandUserValidationRules(v interface{}) []*container.UserValidationRule {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	rules := make([]*container.UserValidationRule, 0, len(ls))
+
+	for _, raw := range ls {
+		if raw == nil {
+			continue
+		}
+		data := raw.(map[string]interface{})
+		rule := &container.UserValidationRule{}
+
+		if v, ok := data["expression"]; ok {
+			rule.Expression = v.(string)
+		}
+		if v, ok := data["message"]; ok {
+			rule.Message = v.(string)
+		}
+
+		rules = append(rules, rule)
+	}
+
+	return rules
+}
+
+func isGkeDefaultUserValidationRule(rule *container.UserValidationRule) bool {
+	if rule == nil {
+		return false
+	}
+	return (rule.Expression == "!user.username.startsWith('system:')" &&
+		(rule.Message == "" || rule.Message == "Username cannot use the reserved 'system:' prefix.")) ||
+		(rule.Expression == "user.groups.all(group, !group.startsWith('system:'))" &&
+			(rule.Message == "" || rule.Message == "Groups cannot use the reserved 'system:' prefix."))
+}
+
+func flattenJwtAuthenticatorConfig(config *container.JWTAuthenticatorConfig, d *schema.ResourceData) []interface{} {
+	if config == nil || len(config.Authenticators) == 0 {
+		return nil
+	}
+	m := make(map[string]interface{})
+	if config.Authenticators != nil {
+		m["authenticators"] = flattenJwtAuthenticators(config.Authenticators, d)
+	}
+	return []interface{}{m}
+}
+
+func flattenJwtAuthenticators(authenticators []*container.JWTAuthenticator, d *schema.ResourceData) []interface{} {
+	if authenticators == nil {
+		return nil
+	}
+
+	var configuredAuths []interface{}
+	if d != nil {
+		if raw, ok := d.GetOk("jwt_authenticator_config"); ok {
+			if ls, ok := raw.([]interface{}); ok && len(ls) > 0 && ls[0] != nil {
+				if m, ok := ls[0].(map[string]interface{}); ok {
+					if auths, ok := m["authenticators"].([]interface{}); ok {
+						configuredAuths = auths
+					}
+				}
+			}
+		}
+	}
+
+	ls := make([]interface{}, 0, len(authenticators))
+	for i, auth := range authenticators {
+		if auth == nil {
+			continue
+		}
+		var configuredUserRules []interface{}
+		if i < len(configuredAuths) && configuredAuths[i] != nil {
+			if authMap, ok := configuredAuths[i].(map[string]interface{}); ok {
+				if rules, ok := authMap["user_validation_rules"].([]interface{}); ok {
+					configuredUserRules = rules
+				}
+			}
+		}
+
+		m := make(map[string]interface{})
+		m["issuer_url"] = auth.IssuerUrl
+		m["discovery_url"] = auth.DiscoveryUrl
+		m["audiences"] = auth.Audiences
+		if auth.CertificateAuthority != "" {
+			if decoded, err := base64.StdEncoding.DecodeString(auth.CertificateAuthority); err == nil {
+				m["certificate_authority"] = string(decoded)
+			} else {
+				m["certificate_authority"] = auth.CertificateAuthority
+			}
+		}
+		if auth.ClaimValidationRules != nil {
+			m["claim_validation_rules"] = flattenClaimValidationRules(auth.ClaimValidationRules)
+		}
+		if auth.ClaimMappings != nil {
+			m["claim_mappings"] = flattenClaimMappings(auth.ClaimMappings)
+		}
+		if auth.UserValidationRules != nil {
+			m["user_validation_rules"] = flattenUserValidationRules(auth.UserValidationRules, configuredUserRules)
+		}
+		ls = append(ls, m)
+	}
+	return ls
+}
+
+func flattenClaimValidationRules(rules []*container.ClaimValidationRule) []interface{} {
+	if rules == nil {
+		return nil
+	}
+	ls := make([]interface{}, 0, len(rules))
+	for _, rule := range rules {
+		if rule == nil {
+			continue
+		}
+		m := make(map[string]interface{})
+		m["expression"] = rule.Expression
+		m["message"] = rule.Message
+		ls = append(ls, m)
+	}
+	return ls
+}
+
+func flattenClaimMappings(mappings *container.ClaimMappings) []interface{} {
+	if mappings == nil {
+		return nil
+	}
+	m := make(map[string]interface{})
+	if mappings.Username != nil {
+		m["username"] = flattenClaimExpression(mappings.Username)
+	}
+	if mappings.Groups != nil {
+		m["groups"] = flattenClaimExpression(mappings.Groups)
+	}
+	if mappings.Uid != nil {
+		m["uid"] = flattenClaimExpression(mappings.Uid)
+	}
+	if mappings.ExtraMappings != nil {
+		m["extra_mappings"] = flattenExtraMappings(mappings.ExtraMappings)
+	}
+	return []interface{}{m}
+}
+
+func flattenClaimExpression(expr *container.ClaimExpression) []interface{} {
+	if expr == nil {
+		return nil
+	}
+	return []interface{}{
+		map[string]interface{}{
+			"expression": expr.Expression,
+		},
+	}
+}
+
+func flattenExtraMappings(extra []*container.ExtraMapping) []interface{} {
+	if extra == nil {
+		return nil
+	}
+	ls := make([]interface{}, 0, len(extra))
+	for _, m := range extra {
+		if m == nil {
+			continue
+		}
+		ls = append(ls, map[string]interface{}{
+			"key":              m.Key,
+			"value_expression": m.ValueExpression,
+		})
+	}
+	return ls
+}
+
+func flattenUserValidationRules(rules []*container.UserValidationRule, configuredRules []interface{}) []interface{} {
+	if rules == nil {
+		return nil
+	}
+
+	configuredExprs := make(map[string]bool)
+	for _, raw := range configuredRules {
+		if raw == nil {
+			continue
+		}
+		if data, ok := raw.(map[string]interface{}); ok {
+			if expr, ok := data["expression"].(string); ok && expr != "" {
+				configuredExprs[expr] = true
+			}
+		}
+	}
+
+	ls := make([]interface{}, 0, len(rules))
+	for _, rule := range rules {
+		if rule == nil {
+			continue
+		}
+		if isGkeDefaultUserValidationRule(rule) && !configuredExprs[rule.Expression] {
+			continue
+		}
+		m := make(map[string]interface{})
+		m["expression"] = rule.Expression
+		m["message"] = rule.Message
+		ls = append(ls, m)
+	}
+	return ls
+}
+{{- end }}
 
 func init() {
 	registry.Schema{

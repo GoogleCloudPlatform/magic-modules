@@ -19997,3 +19997,122 @@ resource "google_container_cluster" "with_hsc_config" {
 }
 `, clusterName, networkName, subnetworkName, enabled)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccContainerCluster_jwtAuthenticatorConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_jwtAuthenticatorConfig(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.#", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.issuer_url", "https://accounts.google.com"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.audiences.#", "2"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.audiences.0", "https://invalid.audience.com"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.audiences.1", "https://container.googleapis.com"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.claim_mappings.0.username.0.expression", "claims.sub"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_jwt_auth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_jwtAuthenticatorConfigUpdated(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.#", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.claim_mappings.0.username.0.expression", "claims.email"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.0.authenticators.0.claim_validation_rules.0.expression", "claims.email_verified == true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_jwt_auth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_jwtAuthenticatorConfigDisabled(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_jwt_auth", "jwt_authenticator_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_jwtAuthenticatorConfig(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_jwt_auth" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  min_master_version  = "1.36.3-gke.1587000"
+
+  jwt_authenticator_config {
+    authenticators {
+      issuer_url = "https://accounts.google.com"
+      audiences  = ["https://invalid.audience.com", "https://container.googleapis.com"]
+
+      claim_mappings {
+        username {
+          expression = "claims.sub"
+        }
+      }
+    }
+  }
+}
+`, clusterName)
+}
+
+func testAccContainerCluster_jwtAuthenticatorConfigUpdated(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_jwt_auth" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  min_master_version  = "1.36.3-gke.1587000"
+
+  jwt_authenticator_config {
+    authenticators {
+      issuer_url = "https://accounts.google.com"
+      audiences  = ["https://invalid.audience.com", "https://container.googleapis.com"]
+      claim_validation_rules {
+        expression = "claims.email_verified == true"
+        message    = "Email must be verified by the identity provider."
+      }
+      claim_mappings {
+        username {
+          expression = "claims.email"
+        }
+      }
+    }
+  }
+}
+`, clusterName)
+}
+
+func testAccContainerCluster_jwtAuthenticatorConfigDisabled(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_jwt_auth" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  min_master_version  = "1.36.3-gke.1587000"
+}
+`, clusterName)
+}
+{{- end }}
+
