@@ -28,6 +28,9 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobFull(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_run_v2_job.default", "template.0.delay_execution", "false"),
+				),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
@@ -37,6 +40,9 @@ func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobFullUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_run_v2_job.default", "template.0.delay_execution", "true"),
+				),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
@@ -53,6 +59,7 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
   resource "google_cloud_run_v2_job" "default" {
     name     = "tf-test-cloudrun-job%{random_suffix}"
     location = "us-central1"
+    launch_stage = "BETA"
     labels = {
       label-1 = "value-1"
     }
@@ -71,6 +78,7 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
       }
       parallelism = 4
       task_count = 4
+      delay_execution = false
       template {
         timeout = "300s"
         service_account = google_service_account.service_account.email
@@ -121,6 +129,7 @@ func testAccCloudRunV2Job_cloudrunv2JobFullUpdate(context map[string]interface{}
 resource "google_cloud_run_v2_job" "default" {
   name     = "tf-test-cloudrun-job%{random_suffix}"
   location = "us-central1"
+  launch_stage = "BETA"
   deletion_protection = false
   binary_authorization {
     use_default = true
@@ -144,6 +153,7 @@ resource "google_cloud_run_v2_job" "default" {
     }
     parallelism = 2
     task_count = 8
+    delay_execution = true
     template {
       timeout = "500s"
       service_account = google_service_account.service_account.email
@@ -178,12 +188,6 @@ resource "google_cloud_run_v2_job" "default" {
       }
       max_retries = 0
     }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      launch_stage,
-    ]
   }
 }
 resource "google_service_account" "service_account" {
