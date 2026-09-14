@@ -30,6 +30,7 @@ examples:
     primary_resource_id: "subscription"
     vars:
       subscription_id: "my-subscription"
+      topic_name: "test-topic"
     test_env_vars:
       org_id: "ORG_ID"
       project_id: "PROJECT_NAME"
@@ -37,6 +38,7 @@ examples:
     primary_resource_id: "subscription"
     vars:
       subscription_id: "my-subscription"
+      topic_name: "test-topic-2"
     test_env_vars:
       org_id: "ORG_ID"
       project_id: "PROJECT_NAME"
