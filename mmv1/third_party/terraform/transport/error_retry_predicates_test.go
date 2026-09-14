@@ -1,8 +1,10 @@
 package transport
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
+	"time"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -274,5 +276,62 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 	isRetryable, _ := ExternalIpServiceNotActive(&err)
 	if !isRetryable {
 		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIsApphubLeaseConflictError(t *testing.T) {
+	serviceLeaseErr := fmt.Errorf("Error code 9, message: failed to add registration status to discovered service since the discovered service is under lease")
+	isRetryableService, _ := IsApphubLeaseConflictError(serviceLeaseErr)
+	if !isRetryableService {
+		t.Errorf("Service lease conflict operation error not detected as retryable")
+	}
+
+	workloadLeaseErr := fmt.Errorf("Error code 9, message: failed to add registration status to discovered workload since the discovered workload is under lease")
+	isRetryableWorkload, _ := IsApphubLeaseConflictError(workloadLeaseErr)
+	if !isRetryableWorkload {
+		t.Errorf("Workload lease conflict operation error not detected as retryable")
+	}
+
+	nonLeaseErr := fmt.Errorf("Error code 3, message: invalid resource name")
+	isRetryableNonLease, _ := IsApphubLeaseConflictError(nonLeaseErr)
+	if isRetryableNonLease {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}
+
+func TestRetryWithIsApphubLeaseConflictError(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		err  error
+	}{
+		{
+			name: "service",
+			err:  fmt.Errorf("Error code 9, message: failed to add registration status to discovered service since the discovered service is under lease"),
+		},
+		{
+			name: "workload",
+			err:  fmt.Errorf("Error code 9, message: failed to add registration status to discovered workload since the discovered workload is under lease"),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			attempts := 0
+			err := Retry(RetryOptions{
+				RetryFunc: func() error {
+					attempts++
+					if attempts == 1 {
+						return tc.err
+					}
+					return nil
+				},
+				Timeout:              5 * time.Second,
+				ErrorRetryPredicates: []RetryErrorPredicateFunc{IsApphubLeaseConflictError},
+			})
+			if err != nil {
+				t.Fatalf("expected Retry to succeed after %s lease conflict, got: %v", tc.name, err)
+			}
+			if attempts != 2 {
+				t.Errorf("expected 2 attempts for %s, got %d", tc.name, attempts)
+			}
+		})
 	}
 }

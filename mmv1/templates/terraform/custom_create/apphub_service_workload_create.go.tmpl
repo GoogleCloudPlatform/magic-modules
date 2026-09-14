@@ -1,0 +1,186 @@
+{{/* 
+  ==============================================================================
+  FILE: apphub_service_workload_create.go.tmpl
+  
+  HOW TO READ THIS FILE (TEMPLATES VS RUNTIME):
+  1. Everything inside {{ ... }} is evaluated at BUILD TIME by Magic Modules to
+     generate a Go file.
+  2. Everything else is plain GO CODE executed at RUNTIME when a user runs
+     'terraform apply'.
+  
+  WHY DOES THIS CUSTOM CREATE EXIST? (The App Hub Race Condition):
+  When an App Hub Service or Workload is unregistered, Google Cloud holds an
+  internal temporary lease (lock) on that underlying infrastructure for a few
+  minutes. If a user immediately runs 'terraform apply' to re-register it:
+    1. The initial HTTP POST succeeds immediately (returns 200/202 with an LRO).
+    2. Seconds later, the asynchronous LRO background worker fails with:
+       "FailedPrecondition: ... is under lease"
+  
+  Standard Magic Modules code only polls the LRO; once the LRO fails, standard
+  code terminates with an error. This custom template wraps BOTH the HTTP POST
+  and the LRO wait inside a retry loop, automatically re-attempting registration
+  until the lease expires.
+  ==============================================================================
+*/}}
+
+// STEP 1: GENERATE USER AGENT
+// Constructs the HTTP User-Agent header (e.g., "HashiCorp/1.0 Terraform/1.5.0 Google/5.0.0")
+// so Google Cloud can identify and track requests coming from Terraform.
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+// STEP 2: BUILD THE JSON REQUEST BODY ("obj")
+// This map will be serialized to JSON and sent as the HTTP POST body.
+obj := make(map[string]interface{})
+
+{{/* 
+  ==============================================================================
+  STEP 2A: THE SETTABLE PROPERTIES LOOP & EXPANDERS
+  
+  1. WHAT IS AN EXPANDER?
+     Terraform stores raw inputs in 'd' (strings, lists, maps). Google Cloud's API
+     expects strongly-typed Go structs/JSON. An "expander" is an auto-generated
+     translator function:
+         expandApphubServiceDisplayName(d.Get("display_name"), d, config)
+     It translates Terraform HCL inputs into the format expected by the GCP API.
+  
+  2. SYNTAX BREAKDOWN: {{ $prop.CamelizeProperty }}Prop
+     - $prop: The current property in the loop (e.g., 'display_name').
+     - $prop.CamelizeProperty: Converts snake_case to camelCase ('displayName').
+     - Prop: Literal characters glued to the end (no space).
+     Resulting Go variable name: 'displayNameProp' (prevents variable collisions).
+  
+  3. WHY WE STRIPPED DEAD BRANCHES FROM resource.go.tmpl:
+     The generic MMv1 generator includes 4 flags for quirks in other GCP services:
+       - '$.NestedQuery': App Hub resources are not nested queries.
+       - '$prop.FlattenObject': App Hub has no flattened objects (no 'nil' needed).
+       - '$prop.WriteOnly': App Hub has no write-only secret fields.
+       - '$prop.SendEmptyValue': App Hub has no fields requiring empty values.
+     Trimming those dead branches reduced a 250-character unreadable line into a
+     clean, standard expander call while maintaining 100% feature parity.
+  
+  4. WHY THE 3-PART GUARD?
+     - ok (GetOkExists): Did the user explicitly configure this field in HCL?
+     - !IsEmptyValue: Don't send empty strings/maps ({}, "") that might wipe
+       out server defaults or trigger API validation errors.
+     - !reflect.DeepEqual: Avoid sending redundant zero-values.
+  ==============================================================================
+*/}}
+{{- range $prop := $.SettableProperties }}
+	{{ $prop.CamelizeProperty }}Prop, err := expand{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}(d.Get("{{ underscore $prop.Name }}"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("{{ underscore $prop.Name }}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty }}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty }}Prop)) {
+		obj["{{ $prop.ApiName }}"] = {{ $prop.CamelizeProperty }}Prop
+	}
+{{- end }}
+
+// STEP 3: CONSTRUCT THE TARGET API URL
+// In YAML, CreateUri is parameterized (e.g. ".../locations/{location}/services").
+// ReplaceVars substitutes those template markers with actual values from Terraform's state ('d').
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.CreateUri }}")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Creating new {{ $.Name }}: %#v", obj)
+billingProject := ""
+
+// STEP 4: RESOLVE PROJECT & BILLING PROJECT
+// Google Cloud differentiates between the project hosting the resource and the
+// project paying for API quota/billing. We check for a provider billing_project override.
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for {{ $.Name }}: %s", err)
+}
+billingProject = project
+
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+headers := make(http.Header)
+var res map[string]interface{}
+
+// STEP 5: THE RETRY LOOP (HANDLING LEASE CONFLICTS)
+// transport_tpg.Retry repeats RetryFunc if an error matches ErrorRetryPredicates.
+err = transport_tpg.Retry(transport_tpg.RetryOptions{
+	RetryFunc: func() error {
+		var reqErr error
+		
+		// 5A: SEND HTTP POST
+		// NOTE: We deliberately DO NOT attach ErrorRetryPredicates here.
+		// App Hub's POST request returns 200/202 with an operation ID immediately;
+		// it does not fail here. Adding retry predicates here creates redundant,
+		// nested 20-minute retry loops.
+		res, reqErr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "{{ upper $.CreateVerb }}",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      obj,
+			Timeout:   d.Timeout(schema.TimeoutCreate),
+			Headers:   headers,
+		})
+		if reqErr != nil {
+			return reqErr // Network error or HTTP 4xx/5xx on the POST itself
+		}
+
+		// 5B: POLL THE LONG-RUNNING OPERATION (LRO)
+		// {{ $.ClientNamePascal -}}OperationWaitTime polls the GCP API until the operation completes.
+		// If the resource is under lease, this call returns an error:
+		//   "Error code 9, message: ... is under lease"
+		// Returning this error triggers the enclosing transport_tpg.Retry.
+		return {{ $.ClientNamePascal -}}OperationWaitTime(
+			config, res, project, "Creating {{ $.Name }}", userAgent,
+			d.Timeout(schema.TimeoutCreate))
+	},
+	Timeout: d.Timeout(schema.TimeoutCreate),
+	// If the error contains "is under lease", transport_tpg.Retry sleeps with backoff
+	// and invokes RetryFunc again from the beginning, issuing a fresh HTTP POST!
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsApphubLeaseConflictError},
+})
+if err != nil {
+	return fmt.Errorf("Error creating {{ $.Name }}: %s", err)
+}
+
+// STEP 6: SET THE TERRAFORM RESOURCE ID
+// In Terraform, calling d.SetId() is the official signal that resource creation succeeded.
+// If d.SetId() is not called, Terraform considers the resource failed and will not track it.
+id, err := tpgresource.ReplaceVars(d, config, "{{ $.IdFormat }}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+log.Printf("[DEBUG] Finished creating {{ $.Name }} %q: %#v", d.Id(), res)
+
+{{ if not $.ExcludeIdentityGeneration -}}
+// STEP 7: POPULATE TERRAFORM IDENTITY KEYS
+// WHAT IS "IDENTITY"?
+// Modern Terraform tracks natural keys (e.g. project, location, service_id) in a
+// structured identity store (d.Identity()) separate from the legacy combined ID string.
+// This enables reliable cross-resource references and state migrations.
+// Only generate this block if the resource YAML does not disable it.
+identity, err := d.Identity()
+if err == nil && identity != nil {
+{{- range $p := $.IdentityProperties }}
+	// For each primary identity key, ensure it is non-empty before recording it:
+	if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name }}"); ok && {{ $p.CamelizeProperty }}Value.(string) != "" {
+		if err = identity.Set("{{ underscore $p.Name }}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+			return fmt.Errorf("Error setting {{ underscore $p.Name }}: %s", err)
+		}
+	}
+{{- end }}
+} else {
+	log.Printf("[DEBUG] (Create) identity not set: %s", err)
+}
+{{- end }}
+
+// STEP 8: POST-CREATE REFRESH ("READ")
+// Calling Read fetches server-generated attributes (create_time, uid, status)
+// that were not part of the initial POST request and stores them into terraform.tfstate.
+return resource{{ $.ResourceName -}}Read(d, meta)
