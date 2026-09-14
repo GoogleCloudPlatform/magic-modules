@@ -21,7 +21,7 @@ Delegate initial issue intake, deep codebase research, external documentation lo
   )
   ```
 * **Subagent Scope & Responsibilities:**
-  * **External & Issue context:** Reads the target issue description, full issue comments thread (e.g., `gh issue view --comments`), linked Buganizer issues (`b/XXXX` or `b/<id>` links in description rendered via `/google/bin/releases/issues-cli/issues readonly render <issue_id>`), related bug reports, and external API documentation (e.g., Google Cloud REST API references).
+  * **External & Issue context:** Reads the target issue description, full issue comments thread (e.g., `gh issue view --comments`), linked Buganizer issues (`b/XXXX` or `b/<id>` links in description), related bug reports, and external API documentation (e.g., Google Cloud REST API references).
   * **Internal context:** Consults the Knowledge Index (`.agents/knowledge/index.md`) for relevant topics/patterns, searches the codebase for affected schemas, fields, expanders, flatteners, or custom code, and inspects existing tests/samples to identify reproduction candidates.
   * **Historical context:** Traces Git history (`git log`, PRs, blame) in `magic-modules` and downstream providers to identify how the defect was introduced or how similar resources behave.
   * **Synthesis:** Formulates root cause hypothesis and recommends how to recreate the bug with a new test or by modifying an existing test.
