@@ -496,6 +496,10 @@ fields:
     api_field: 'nodePools.networkConfig.acceleratorNetworkProfile'
   - field: 'node_pool.network_config.additional_node_network_configs.network'
     api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.network'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'node_pool.network_config.additional_node_network_configs.stack_type'
+    api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.stackType'
+{{- end }}
   - field: 'node_pool.network_config.additional_node_network_configs.subnetwork'
     api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.subnetwork'
   - field: 'node_pool.network_config.additional_pod_network_configs.max_pods_per_node'
