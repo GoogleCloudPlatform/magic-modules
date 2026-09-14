@@ -142,6 +142,63 @@ func valueIsInArray(value interface{}, array []interface{}) bool {
 // If the same table column is found in both the TF config and live state,
 // and the column in the live state has data policies when the column in the TF config doesn't,
 // copy the data policies from live state into the TF config.
+func dataPoliciesMatchDataPolicyList(dataPolicies interface{}, dataPolicyList interface{}) bool {
+	var listA []interface{}
+	if dataPolicies != nil {
+		if s, ok := dataPolicies.([]interface{}); ok {
+			listA = s
+		}
+	}
+
+	var listB []interface{}
+	if dataPolicyList != nil {
+		if m, ok := dataPolicyList.(map[string]interface{}); ok {
+			if s, ok := m["dataPolicies"].([]interface{}); ok {
+				listB = s
+			}
+		}
+	}
+
+	if len(listA) == 0 && len(listB) == 0 {
+		return true
+	}
+	if len(listA) != len(listB) {
+		return false
+	}
+
+	namesA := make([]string, 0, len(listA))
+	for _, item := range listA {
+		if m, ok := item.(map[string]interface{}); ok {
+			if name, ok := m["name"].(string); ok {
+				namesA = append(namesA, name)
+			}
+		}
+	}
+	namesB := make([]string, 0, len(listB))
+	for _, item := range listB {
+		if m, ok := item.(map[string]interface{}); ok {
+			if name, ok := m["name"].(string); ok {
+				namesB = append(namesB, name)
+			}
+		}
+	}
+
+	if len(namesA) != len(namesB) || len(namesA) != len(listA) {
+		bA, errA := json.Marshal(listA)
+		bB, errB := json.Marshal(listB)
+		if errA != nil || errB != nil {
+			return false
+		}
+		return string(bA) == string(bB)
+	}
+
+	sort.Strings(namesA)
+	sort.Strings(namesB)
+	return reflect.DeepEqual(namesA, namesB)
+}
+
+// When ignore_schema_changes=["dataPolicies"] is enabled, this function is called to
+// copy the data policies from live state into the TF config.
 func mergeDataPoliciesIntoMap(old, new []interface{}) {
 	oldMap := make(map[string]map[string]interface{})
 	for _, v := range old {
@@ -165,6 +222,12 @@ func mergeDataPoliciesIntoMap(old, new []interface{}) {
 				if dp, hasDP := oldField["dataPolicies"]; hasDP {
 					newField["dataPolicies"] = dp
 					log.Printf("[DEBUG] Added live data policy to schema: %v", dp)
+				}
+			}
+			if _, specified := newField["dataPolicyList"]; !specified {
+				if dpl, hasDPL := oldField["dataPolicyList"]; hasDPL {
+					newField["dataPolicyList"] = dpl
+					log.Printf("[DEBUG] Added live data policy list to schema: %v", dpl)
 				}
 			}
 
@@ -212,29 +275,60 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		eq := bigQueryTableNormalizeDataGovernanceTagsInfo(valA) == nil && bigQueryTableNormalizeDataGovernanceTagsInfo(valB) == nil
 		return eq
 	case "dataPolicies":
-		if d == nil {
-			return false
-		}
-		// Access the ignore_schema_changes list from the Terraform configuration
-		var ignoreSchemaChanges []interface{}
-		if val := d.Get("ignore_schema_changes"); val != nil {
-			ignoreSchemaChanges = val.([]interface{})
-		}
-
-		// If dataPolicies is ignored...
-		if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
-			// Check if the NEW value (valB) is empty or nil.
-			// If it is empty, we suppress the diff (return true) to keep backend values.
-			if valB == nil {
-				return true
-			}
-			if s, ok := valB.([]interface{}); ok && len(s) == 0 {
-				return true
+		if d != nil {
+			// Access the ignore_schema_changes list from the Terraform configuration
+			var ignoreSchemaChanges []interface{}
+			if val := d.Get("ignore_schema_changes"); val != nil {
+				ignoreSchemaChanges = val.([]interface{})
 			}
 
-			// If the user EXPLICITLY provided dataPolicies, we return false.
-			// This tells Terraform "There is a difference, and I want you to apply it."
-			return false
+			// If dataPolicies is ignored...
+			if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+				// Check if the NEW value (valB) is empty or nil.
+				// If it is empty, we suppress the diff (return true) to keep backend values.
+				if valB == nil {
+					return true
+				}
+				if s, ok := valB.([]interface{}); ok && len(s) == 0 {
+					return true
+				}
+
+				// If the user EXPLICITLY provided dataPolicies, we return false.
+				// This tells Terraform "There is a difference, and I want you to apply it."
+				return false
+			}
+		}
+
+		if valB == nil && dataPoliciesMatchDataPolicyList(valA, objectB["dataPolicyList"]) {
+			return true
+		}
+		if valA == nil && dataPoliciesMatchDataPolicyList(valB, objectA["dataPolicyList"]) {
+			return true
+		}
+		return false
+	case "dataPolicyList":
+		if d != nil {
+			var ignoreSchemaChanges []interface{}
+			if val := d.Get("ignore_schema_changes"); val != nil {
+				ignoreSchemaChanges = val.([]interface{})
+			}
+
+			if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+				if valB == nil {
+					return true
+				}
+				if m, ok := valB.(map[string]interface{}); ok && len(m) == 0 {
+					return true
+				}
+				return false
+			}
+		}
+
+		if valB == nil && dataPoliciesMatchDataPolicyList(objectB["dataPolicies"], valA) {
+			return true
+		}
+		if valA == nil && dataPoliciesMatchDataPolicyList(objectA["dataPolicies"], valB) {
+			return true
 		}
 		return false
 	}

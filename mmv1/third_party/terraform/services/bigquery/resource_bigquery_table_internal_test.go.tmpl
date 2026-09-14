@@ -547,6 +547,16 @@ func TestBigQueryTableSchemaDiffSuppress_WithIgnore(t *testing.T) {
 			New:                `[{"name": "col1", "dataPolicies": [{"name": "same_policy"}]}]`,
 			ExpectDiffSuppress: true,
 		},
+		"suppress if explicit policy matches backend with dataPolicyList present": {
+			Old:                `[{"name": "col1", "dataPolicies": [{"name": "same_policy"}], "dataPolicyList": {"dataPolicies": [{"name": "same_policy"}]}}]`,
+			New:                `[{"name": "col1", "dataPolicies": [{"name": "same_policy"}]}]`,
+			ExpectDiffSuppress: true,
+		},
+		"ignore top level policy removal with dataPolicyList in backend": {
+			Old:                `[{"name": "col1", "dataPolicies": [{"name": "p1"}], "dataPolicyList": {"dataPolicies": [{"name": "p1"}]}}]`,
+			New:                `[{"name": "col1"}]`,
+			ExpectDiffSuppress: true,
+		},
 		"mixed: ignore policy removal but detect description change": {
 			Old:                `[{"name": "col1", "description": "old", "dataPolicies": [{"name": "p1"}]}]`,
 			New:                `[{"name": "col1", "description": "new"}]`,
