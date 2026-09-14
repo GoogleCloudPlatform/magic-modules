@@ -3574,7 +3574,7 @@ resource "google_container_node_pool" "np" {
   name               = "%s"
   location           = "us-central1"
   cluster            = google_container_cluster.cluster.name
-  initial_node_count = 2
+  initial_node_count = 1
   autoscaling {
     min_node_count = 1
     max_node_count = 3
@@ -3661,7 +3661,7 @@ resource "google_container_node_pool" "np" {
   name               = "%s"
   location           = "us-central1"
   cluster            = google_container_cluster.cluster.name
-  initial_node_count = 1
+  initial_node_count = 2
 }
 `, cluster, networkName, subnetworkName, np)
 }
@@ -3681,7 +3681,7 @@ resource "google_container_node_pool" "np" {
   name               = "%s"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
-  initial_node_count = 2
+  initial_node_count = 1
   autoscaling {
     min_node_count = 1
     max_node_count = 3
@@ -3705,7 +3705,7 @@ resource "google_container_node_pool" "np" {
   name               = "%s"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
-  initial_node_count = 2
+  initial_node_count = 1
   autoscaling {
     min_node_count = 0
     max_node_count = 5

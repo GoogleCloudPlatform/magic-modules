@@ -11683,7 +11683,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     autoscaling {
       min_node_count = 1
       max_node_count = 3
@@ -11705,7 +11705,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     autoscaling {
       min_node_count = 1
       max_node_count = 5
@@ -11788,7 +11788,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 1
+    initial_node_count = 2
   }
   network    = "%s"
   subnetwork = "%s"
