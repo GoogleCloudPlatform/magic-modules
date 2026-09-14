@@ -749,3 +749,16 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// IsApphubLeaseConflictError retries on App Hub 400 / FailedPrecondition error when the discovered service or workload is under a temporary registration lease.
+func IsApphubLeaseConflictError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "is under lease") {
+			return true, "Waiting for resource lease to be released or expire"
+		}
+	}
+	if err != nil && strings.Contains(strings.ToLower(err.Error()), "is under lease") {
+		return true, "Waiting for resource lease to be released or expire"
+	}
+	return false, ""
+}
