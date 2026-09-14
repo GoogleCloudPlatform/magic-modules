@@ -86,7 +86,7 @@ resource "time_sleep" "wait_120_seconds" {
 
 resource "google_compute_network" "network" {
   project = google_project.target_project.project_id
-  name                    = "test"
+  name                    = "tf-test-test-vpc%{random_suffix}"
   auto_create_subnetworks = false
   depends_on = [time_sleep.wait_120_seconds]
 }
@@ -108,13 +108,13 @@ data "google_project" "test_project" {
 }
 
 resource "google_integration_connectors_managed_zone" "testmanagedzone" {
-  name     = "test%{random_suffix}"
+  name     = "tf-test-test%{random_suffix}"
   description = "tf created description"
   labels = {
     intent = "example"
   }
   target_project = google_project.target_project.project_id
-  target_vpc="test"
+  target_vpc="tf-test-test-vpc%{random_suffix}"
   dns=google_dns_managed_zone.zone.dns_name
   depends_on = [google_project_iam_member.dns_peer_binding,google_dns_managed_zone.zone]
 }
@@ -154,7 +154,7 @@ resource "time_sleep" "wait_120_seconds" {
 
 resource "google_compute_network" "network" {
   project = google_project.target_project.project_id
-  name                    = "test"
+  name                    = "tf-test-test-vpc%{random_suffix}"
   auto_create_subnetworks = false
   depends_on = [time_sleep.wait_120_seconds]
 }
@@ -176,13 +176,13 @@ data "google_project" "test_project" {
 }
 
 resource "google_integration_connectors_managed_zone" "testmanagedzone" {
-  name     = "test%{random_suffix}"
+  name     = "tf-test-test%{random_suffix}"
   description = "tf updated description"
   labels = {
     intent = "example"
   }
   target_project = google_project.target_project.project_id
-  target_vpc="test"
+  target_vpc="tf-test-test-vpc%{random_suffix}"
   dns=google_dns_managed_zone.zone.dns_name
   depends_on = [google_project_iam_member.dns_peer_binding,google_dns_managed_zone.zone]
 }
