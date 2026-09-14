@@ -12814,7 +12814,6 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
@@ -13022,7 +13021,6 @@ resource "google_container_cluster" "with_flexible_cidr" {
 }
 `, containerNetName, clusterName)
 }
-{{- end }}
 
 func testAccContainerCluster_withInitialCIDR(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
