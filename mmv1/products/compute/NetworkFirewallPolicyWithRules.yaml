@@ -53,8 +53,6 @@ samples:
           security_profile: 'sp'
         test_vars_overrides:
           # for backward compatible
-          network: '"network" + randomSuffix'
-          # for backward compatible
           security_profile_group: '"spg" + randomSuffix'
           # for backward compatible
           security_profile: '"sp" + randomSuffix'
