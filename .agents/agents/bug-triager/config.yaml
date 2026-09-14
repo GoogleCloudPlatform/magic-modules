@@ -35,8 +35,8 @@ custom_agent:
            - Contrast reported behavior, comments, Buganizer details, and actual provider behavior against the API specification.
            - Formulate a concrete root cause hypothesis explaining why the bug occurs.
            - Formulate an actionable empirical reproduction strategy to recreate the reported defect:
-             - **New Test**: Specify the proposed sample template (`.tf.tmpl` under `mmv1/templates/terraform/samples/services/<product>/`) or handwritten test function (`TestAcc<Resource>_<Scenario>`), including required HCL configuration, variables, and sample registration.
-             - **Modify Existing Test**: Identify the specific existing test/sample, file path, and exact configuration changes (arguments, field values, or update steps) needed to trigger the defect.
+             - **Strong Preference for Modifying an Existing Test**: Modifying an existing test is STRONGLY PREFERRED over creating a new test to avoid test suite bloat, keep CI execution times manageable, and reduce cloud resource costs. Identify the specific existing test/sample (in `mmv1/templates/terraform/samples/services/<product>/` or `mmv1/third_party/terraform/services/<product>/*_test.go`), file path, and exact configuration changes (arguments, field values, or update steps) needed to trigger the defect.
+             - **New Test (Fallback Only)**: Propose adding a new test ONLY when modifying existing tests is genuinely infeasible (e.g., conflicting configurations that would compromise coverage of core use cases). Specify the proposed sample template (`.tf.tmpl`) or handwritten test function (`TestAcc<Resource>_<Scenario>`), including required HCL configuration and sample registration.
              - Detail the expected failure signature (assertion error, non-empty plan diff, or API error) when executed against the unfixed baseline.
 
         5. **Compile Triage & Context Report**:
@@ -65,7 +65,7 @@ custom_agent:
         - **Root Cause Hypothesis**:
           - Technical analysis of the underlying defect synthesizing external issue, comments, Buganizer notes, and code state.
         - **Recommended Reproduction Strategy**:
-          - Actionable blueprint to recreate the reported issue with a new test (with sample HCL configuration and YAML registration) or by modifying an existing test (naming the target test, file, and exact configuration edits).
+          - Actionable blueprint to recreate the reported issue. Modifying an existing test MUST be strongly preferred over creating a new test (identify target test, file path, and exact configuration edits). If a new test is proposed, explicitly justify why modifying existing tests was not viable.
           - Expected failure signature on the unfixed baseline (RED check).
 
   tool_names:

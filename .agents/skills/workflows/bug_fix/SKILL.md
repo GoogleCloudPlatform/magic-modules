@@ -17,22 +17,27 @@ Delegate initial issue intake, deep codebase research, external documentation lo
   invoke_subagent(
       TypeName="bug-triager",
       Role="Bug Triage & Context Gatherer",
-      Prompt="Triage reported bug: <ISSUE_URL_OR_DESCRIPTION>. Inspect issue comments and any linked Buganizer tickets (b/XXXX in description), gather external API docs, inspect Magic Modules schemas and code in mmv1/, check git history for introducing changes, consult .agents/knowledge/index.md, and return a comprehensive Triage & Context Report with root cause hypothesis and concrete reproduction strategy (recommending a new test or modifying an existing test)."
+      Prompt="Triage reported bug: <ISSUE_URL_OR_DESCRIPTION>. Inspect issue comments and any linked Buganizer tickets (b/XXXX in description), gather external API docs, inspect Magic Modules schemas and code in mmv1/, check git history for introducing changes, consult .agents/knowledge/index.md, and return a comprehensive Triage & Context Report with root cause hypothesis and concrete reproduction strategy (strongly preferring modifying an existing test over creating a new test)."
   )
   ```
 * **Subagent Scope & Responsibilities:**
   * **External & Issue context:** Reads the target issue description, full issue comments thread (e.g., `gh issue view --comments`), linked Buganizer issues (`b/XXXX` or `b/<id>` links in description), related bug reports, and external API documentation (e.g., Google Cloud REST API references).
   * **Internal context:** Consults the Knowledge Index (`.agents/knowledge/index.md`) for relevant topics/patterns, searches the codebase for affected schemas, fields, expanders, flatteners, or custom code, and inspects existing tests/samples to identify reproduction candidates.
   * **Historical context:** Traces Git history (`git log`, PRs, blame) in `magic-modules` and downstream providers to identify how the defect was introduced or how similar resources behave.
-  * **Synthesis:** Formulates root cause hypothesis and recommends how to recreate the bug with a new test or by modifying an existing test.
+  * **Synthesis:** Formulates root cause hypothesis and recommends how to recreate the bug, strongly preferring modifying an existing test over adding a new test.
 * **Handoff:** Review the returned **Triage & Context Report**. Use the identified components, reproduction strategy, and root cause hypothesis to proceed directly to Step 2.
 
 ### 2. Empirical Issue Reproduction & Remediation Plan
 
 #### Recreating the Defect with a Test (RED Check)
-Recreate the reported defect on the unfixed baseline using either a new test or a modified existing test based on `bug-triager`'s analysis:
+Recreate the reported defect on the unfixed baseline using the reproduction strategy formulated by `bug-triager`. **Modifying an existing test is strongly preferred over adding a new test** to prevent test bloat, minimize CI execution times, and avoid unnecessary cloud resource costs.
 
-* **Option A: Add a New Acceptance/Regression Test (Preferred for distinct scenarios or missing coverage)**:
+* **Option A: Modify an Existing Test (Strongly Preferred)**:
+  * Identify an existing acceptance test or sample covering the affected resource (`mmv1/templates/terraform/samples/services/<product>/` or `mmv1/third_party/terraform/services/<product>/*_test.go`).
+  * Modify the test configuration (e.g., adding the problematic field, setting an edge-case value combination, or adding an update step) to exercise the reported bug path.
+
+* **Option B: Add a New Acceptance/Regression Test (Fallback / Only when modification is infeasible)**:
+  * Use this option ONLY when modifying an existing test is genuinely infeasible (e.g., conflicting configurations that would compromise coverage of core use cases).
   * **MMv1 Generated Resources:**
     1. Create a new sample template file: `mmv1/templates/terraform/samples/services/<product>/<sample_name>.tf.tmpl` containing the minimal HCL configuration to trigger the bug.
     2. Register the sample in the resource YAML (`mmv1/products/<product>/<Resource>.yaml`) under `samples:`. Follow sample conventions from [`docs/content/test/test.md`](../../../docs/content/test/test.md) (use `resource_id_vars` for identifiers needing `tf-test` prefixes and random suffixes; use `vars` for values that vary between test steps; hardcode constants).
@@ -40,10 +45,6 @@ Recreate the reported defect on the unfixed baseline using either a new test or 
     - Add a new test function `TestAcc<Resource>_<BugScenario>` in `mmv1/third_party/terraform/services/<product>/resource_<name>_test.go` or `data_source_<name>_test.go`.
   * **Pure Go Functions (Unit Tests):**
     - If the bug is isolated to an algorithmic Go helper (`DiffSuppress`, `ValidateFunc`, state parsers) per [`.agents/knowledge/test/unit-test-scope.md`](../../../knowledge/test/unit-test-scope.md), add a focused unit test in `*_test.go`.
-
-* **Option B: Modify an Existing Test**:
-  * Identify an existing acceptance test or sample covering the affected resource.
-  * Modify the test configuration (e.g., adding the problematic field, setting an edge-case value combination, or adding an update step) to exercise the reported bug path.
 
 * **Execute Baseline Reproduction (RED Check):**
   1. Generate downstream code: `make provider VERSION=<ga|beta>` so the new or modified test is compiled into the provider repository.
