@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/servicedirectory"
+	servicedirectory "github.com/hashicorp/terraform-provider-google/google/services/servicedirectory"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -129,9 +128,9 @@ func TestAccServiceDirectoryEndpoint_networkDiffSuppress(t *testing.T) {
 	})
 }
 
-// TestUnitServiceDirectoryEndpointNetworkDiffSuppress verifies the diff suppress
-// function used on the network field handles project ID vs project number equivalence.
-func TestUnitServiceDirectoryEndpointNetworkDiffSuppress(t *testing.T) {
+// TestUnitServiceDirectoryEndpointNetworkProjectIDNumberEquivalent verifies the
+// fallback used when Resource Manager cannot resolve the project identifier.
+func TestUnitServiceDirectoryEndpointNetworkProjectIDNumberEquivalent(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
@@ -167,9 +166,9 @@ func TestUnitServiceDirectoryEndpointNetworkDiffSuppress(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			got := tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId("", tc.Old, tc.New, nil)
+			got := servicedirectory.ServiceDirectoryEndpointNetworkProjectIDNumberEquivalent(tc.Old, tc.New)
 			if got != tc.Expect {
-				t.Errorf("CompareSelfLinkRelativePathsIgnoreProjectId(%q, %q) = %v; want %v",
+				t.Errorf("serviceDirectoryEndpointNetworkProjectIDNumberEquivalent(%q, %q) = %v; want %v",
 					tc.Old, tc.New, got, tc.Expect)
 			}
 		})

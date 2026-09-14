@@ -36,8 +36,11 @@ exclude_identity_generation: true
 custom_code:
   encoder: templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl
   decoder: templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl
+  constants: templates/terraform/constants/service_directory_endpoint.go.tmpl
   pre_update: templates/terraform/pre_update/service_directory_endpoint.go.tmpl
   custom_import: templates/terraform/custom_import/service_directory_endpoint.go.tmpl
+custom_diff:
+  - serviceDirectoryEndpointCustomizeDiff
 samples:
   - name: service_directory_endpoint_basic
     primary_resource_id: example
@@ -106,4 +109,4 @@ properties:
     type: String
     description: |
       The URL to the network, such as projects/PROJECT_NUMBER/locations/global/networks/NETWORK_NAME.
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId'
+    immutable: true
