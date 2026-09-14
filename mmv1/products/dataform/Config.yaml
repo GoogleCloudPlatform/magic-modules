@@ -20,7 +20,6 @@ references:
     Official Documentation: https://cloud.google.com/dataform/docs/
   api: https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations
 base_url: projects/{{project}}/locations/{{region}}/config
-min_version: beta
 self_link: projects/{{project}}/locations/{{region}}/config
 update_mask: true
 create_verb: PATCH
@@ -51,11 +50,9 @@ samples:
           billing_account: BILLING_ACCT
   - name: dataform_config_without_kms_key
     primary_resource_id: config
-    min_version: beta
     external_providers: [time]
     steps:
       - name: dataform_config_without_kms_key
-        min_version: beta
         resource_id_vars:
           project_name: project-1
         test_env_vars:
@@ -65,13 +62,11 @@ parameters:
   - name: region
     type: String
     required: true
-    min_version: beta
     description: A reference to the region
     immutable: true
     url_param_only: true
 properties:
   - name: defaultKmsKeyName
     type: String
-    min_version: beta
     description: |
       Optional. A reference to the customer-managed encryption key (CMEK) that will be used by default to encrypt user data.
