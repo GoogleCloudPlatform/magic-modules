@@ -108,7 +108,7 @@ func TestAccDataprocWorkflowTemplate_encryptionConfig(t *testing.T) {
 func testAccDataprocWorkflowTemplate_basic(context map[string]interface{}) string {
   return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
-  name = "template%{random_suffix}"
+  name = "tf-test-template%{random_suffix}"
   location = "us-central1"
   placement {
     managed_cluster {
@@ -174,7 +174,7 @@ resource "google_dataproc_workflow_template" "template" {
 func testAccDataprocWorkflowTemplate_withShieldedVMs(context map[string]interface{}) string {
   return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "shielded_vms_template" {
-  name = "template%{random_suffix}"
+  name = "tf-test-template%{random_suffix}"
   location = "us-central1"
   placement {
     managed_cluster {
@@ -235,7 +235,7 @@ resource "google_dataproc_workflow_template" "shielded_vms_template" {
 func testAccDataprocWorkflowTemplate_encryptionConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
-  name = "template%{random_suffix}"
+  name = "tf-test-template%{random_suffix}"
   location = "us-central1"
   encryption_config {
     kms_key = "%{kms_key_name}"

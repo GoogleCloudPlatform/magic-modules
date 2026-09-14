@@ -961,7 +961,7 @@ func TestAccDataprocCluster_withConfigOverrides(t *testing.T) {
 func TestAccDataprocCluster_withServiceAcc(t *testing.T) {
 	t.Parallel()
 
-	sa := "a" + acctest.RandString(t, 10)
+	sa := "tf-test-" + acctest.RandString(t, 10)
 	saEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", sa, envvar.GetTestProjectFromEnv())
 	rnd := acctest.RandString(t, 10)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
@@ -1235,7 +1235,7 @@ func TestAccDataprocCluster_withNetworkRefs(t *testing.T) {
 
 	var c1, c2 dataproc.Cluster
 	rnd := acctest.RandString(t, 10)
-	netName := fmt.Sprintf(`dproc-cluster-test-%s-net`, rnd)
+	netName := fmt.Sprintf(`tf-test-dproc-%s-net`, rnd)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -2427,7 +2427,7 @@ func testAccDataprocCluster_withNodeGroupAffinity(rnd, subnetworkName string) st
 	return fmt.Sprintf(`
 
 resource "google_compute_node_template" "nodetmpl" {
-  name   = "test-nodetmpl-%s"
+  name   = "tf-test-nodetmpl-%s"
   region = "us-central1"
 
   node_affinity_labels = {
@@ -2440,7 +2440,7 @@ resource "google_compute_node_template" "nodetmpl" {
 }
 
 resource "google_compute_node_group" "nodes" {
-  name = "test-nodegroup-%s"
+  name = "tf-test-nodegroup-%s"
   zone = "us-central1-f"
 
   initial_size	= 3
@@ -3295,7 +3295,7 @@ resource "time_sleep" "wait_120_seconds" {
 }
 
 resource "google_dataproc_cluster" "with_service_account" {
-  name   = "dproc-cluster-test-%s"
+  name   = "tf-test-dproc-cluster-%s"
   region = "us-central1"
 
   cluster_config {
