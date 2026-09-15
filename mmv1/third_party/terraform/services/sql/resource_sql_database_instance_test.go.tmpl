@@ -2938,6 +2938,36 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_confidentialHyperdisk(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: acctest.Nprintf(
+					testGoogleSqlDatabaseInstance_confidentialHyperdisk, context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.master", "encryption_confidential_mode", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.master",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
 func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testing.T) {
 	t.Parallel()
 
@@ -8948,6 +8978,47 @@ func testGoogleSqlDatabaseInstance_insights_enhanced_postgres17(instanceName str
 `, instanceName, enhanced)
 }
 
+var testGoogleSqlDatabaseInstance_confidentialHyperdisk = `
+data "google_project" "project" {
+  project_id = "%{project_id}"
+}
+resource "google_kms_key_ring" "keyring" {
+  name     = "%{key_name}"
+  location = "us-west4"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name     = "%{key_name}"
+  key_ring = google_kms_key_ring.keyring.id
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
+}
+
+resource "google_sql_database_instance" "master" {
+  name                = "%{instance_name}-master"
+  database_version    = "POSTGRES_15"
+  region              = "us-west4"
+  deletion_protection = false
+  encryption_key_name = google_kms_crypto_key.key.id
+  encryption_confidential_mode = true
+
+  settings {
+    tier = "db-c4a-highmem-8"
+    edition = "ENTERPRISE_PLUS"
+    availability_type = "ZONAL"
+    disk_type         = "HYPERDISK_BALANCED"
+    location_preference {
+      zone = "us-west4-a"
+    }
+  }
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+`
 var testGoogleSqlDatabaseInstance_encryptionKey = `
 data "google_project" "project" {
   project_id = "%{project_id}"
