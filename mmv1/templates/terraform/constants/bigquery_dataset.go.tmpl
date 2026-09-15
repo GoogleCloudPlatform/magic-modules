@@ -31,23 +31,25 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 }
 
 {{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
-// bigqueryDatasetAccessHash is a custom hash function for the access block.
-// It normalizes
-// 1) the 'role' field before hashing, treating legacy roles
-// and their modern IAM equivalents as the same,
-// 2) the 'user_by_email' and 'group_by_email' fields to be case-insensitive.
 func resourceBigqueryDatasetAccessHash(v interface{}) int {
 	m, ok := v.(map[string]interface{})
 	if !ok {
 		return 0
 	}
-	// Make a copy of the map to avoid modifying the underlying data.
 	copy := make(map[string]interface{}, len(m))
 	for k, val := range m {
 		copy[k] = val
 	}
 
-	// Normalize user_by_email and group_by_email to be case-insensitive
+	// Normalize nil to "" for string fields so the hash stays stable
+	// across state roundtrips. The SDK may store "" where the config
+	// originally had nil, and schema.HashResource treats them differently.
+	for _, key := range []string{"domain", "group_by_email", "user_by_email", "special_group", "iam_member", "role"} {
+		if copy[key] == nil {
+			copy[key] = ""
+		}
+	}
+
 	if email, ok := copy["user_by_email"].(string); ok && email != "" {
 		copy["user_by_email"] = strings.ToLower(email)
 	}
@@ -55,14 +57,12 @@ func resourceBigqueryDatasetAccessHash(v interface{}) int {
 		copy["group_by_email"] = strings.ToLower(email)
 	}
 
-	// Normalize the role if it exists and matches a legacy role.
 	if role, ok := copy["role"].(string); ok {
 		if newRole, ok := bigqueryDatasetAccessPrimitiveToRoleMap[role]; ok {
 			copy["role"] = newRole
 		}
 	}
 
-	// Use the default HashResource function on the (potentially modified) copy.
 	return schema.HashResource(bigqueryDatasetAccessSchema())(copy)
 }
 {{- end }}
