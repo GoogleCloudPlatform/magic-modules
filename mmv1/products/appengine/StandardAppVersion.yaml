@@ -86,7 +86,6 @@ samples:
         ignore_read_extra:
           - delete_service_on_destroy
   - name: app_engine_standard_app_version_vpc_access
-    min_version: beta
     primary_resource_id: gae-std-app-ver-vpc-access
     steps:
       - name: app_engine_standard_app_version_vpc_access
@@ -354,7 +353,6 @@ properties:
           The egress setting for the connector, controlling what traffic is diverted through it.
   - name: vpcAccess
     type: NestedObject
-    min_version: beta
     description: |
       Direct VPC Access settings for standard apps.
     conflicts:
@@ -364,11 +362,11 @@ properties:
         api_name: vpcEgress
         type: String
         description: |
-          The egress setting for the VPC Access, controlling what traffic is diverted through it.
+          The traffic egress setting for the VPC network interface, controlling what traffic is diverted through it.
       - name: networkInterfaces
         type: Array
         description: |
-          List of network interfaces for the VPC Access. Currently only a single network interface is supported.
+          The Direct VPC configuration. Currently only a single network interface is supported.
         item_type:
           type: NestedObject
           properties:
@@ -376,19 +374,19 @@ properties:
               type: String
               diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
               description: |
-                The name of the VPC network to which the version connects (e.g. `projects/my-project/global/networks/default`).
+                The VPC network that the App Engine resource will be able to send traffic to. At least one of `network` or `subnetwork` must be specified. If `network` is not specified, it will be looked up from the subnetwork. Example: `{VPC_NETWORK}` or `projects/{HOST_PROJECT_ID}/global/networks/{VPC_NETWORK}`.
             - name: subnetwork
               api_name: subnet
               type: String
               diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
               description: |
-                The name of the subnetwork to which the version connects (e.g. `projects/my-project/regions/us-central1/subnetworks/default`).
+                The VPC subnetwork that the App Engine resource will get IPs from. At least one of `network` or `subnetwork` must be specified. If `subnetwork` is not specified, the subnetwork with the same name as the network will be used. Example: `{SUBNET_NAME}` or `projects/{HOST_PROJECT_ID}/regions/{REGION}/subnetworks/{SUBNET_NAME}`.
             - name: tags
               type: Array
               item_type:
                 type: String
               description: |
-                Network tags applied to this App Engine version.
+                The network tags that will be applied to this App Engine resource.
   - name: inboundServices
     type: Array
     description: |
