@@ -1412,9 +1412,11 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 // be ignored during force_destroy. A 404/410 means the listed generation is already
 // gone (concurrent delete, eventual consistency, or a stale list page). Callers are
 // expected to check err != nil first, so a nil error is not reported as ignorable.
+// A typed-nil *googleapi.Error in an error interface is also treated as not
+// ignorable (errors.As would otherwise succeed and panic on Code access).
 func isIgnorableStorageObjectDeleteError(err error) bool {
 	var gerr *googleapi.Error
-	if !errors.As(err, &gerr) {
+	if !errors.As(err, &gerr) || gerr == nil {
 		return false
 	}
 	return gerr.Code == 404 || gerr.Code == 410
