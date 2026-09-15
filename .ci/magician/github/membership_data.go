@@ -128,7 +128,7 @@ var (
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 9, 15),
+					startDate: newDate(2026, 9, 14),
 					endDate:   newDate(2026, 12, 31),
 				},
 			},
