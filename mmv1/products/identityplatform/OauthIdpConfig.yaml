@@ -75,6 +75,7 @@ properties:
     type: String
     description: |
       The client secret of the OAuth client, to enable OIDC code flow.
+    sensitive: true
   - name: responseType
     type: NestedObject
     description: |
