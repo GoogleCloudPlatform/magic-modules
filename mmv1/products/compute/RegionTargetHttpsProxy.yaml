@@ -24,6 +24,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies'
 has_self_link: true
+generate_list_resource: true
 immutable: true
 datasource_experimental:
   generate: true
