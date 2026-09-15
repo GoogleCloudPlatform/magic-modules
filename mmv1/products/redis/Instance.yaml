@@ -30,6 +30,10 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
 custom_diff:
   - customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)
   - tpgresource.DefaultProviderProject

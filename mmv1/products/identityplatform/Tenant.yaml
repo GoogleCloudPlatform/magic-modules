@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 include_in_tgc_next: true
+generate_list_resource: true
 samples:
   - name: identity_platform_tenant_basic
     primary_resource_id: tenant

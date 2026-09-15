@@ -108,6 +108,7 @@ timeouts:
 sweeper:
   url_substitutions:
     - region: us-central1
+    - region: us-west1
     - region: us-east1
     - region: europe-west1
   ensure_value:
@@ -236,7 +237,7 @@ samples:
           deletion_protection_enabled: "true"
         test_vars_overrides:
           deletion_protection_enabled: "false"
-          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-west1").CryptoKey.Name
         oics_vars_overrides:
           deletion_protection_enabled: "false"
   - name: redis_cluster_flexible_ca
@@ -385,6 +386,15 @@ properties:
       - AUTH_MODE_UNSPECIFIED
       - AUTH_MODE_IAM_AUTH
       - AUTH_MODE_DISABLED
+  - name: aclPolicy
+    type: String
+    description: |
+      Optional. The name of the ACL policy to attach to the cluster.
+  - name: isAclPolicyInSync
+    type: Boolean
+    description: |
+      Optional. Whether the ACL policy is in sync with the cluster.
+    output: true
   - name: transitEncryptionMode
     type: Enum
     description: |

@@ -61,18 +61,6 @@ var (
 
 	// This is for the random-assignee rotation.
 	reviewerRotation = map[string]ReviewerConfig{
-		"BBBmau": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 7, 1),
-					endDate:   newDate(2025, 7, 17),
-				},
-				{
-					startDate: newDate(2026, 6, 11),
-					endDate:   newDate(2026, 6, 14),
-				},
-			},
-		},
 		"c2thorn": {
 			vacations: []Vacation{
 				{
@@ -88,9 +76,6 @@ var (
 					endDate:   newDate(2026, 7, 17),
 				},
 			},
-		},
-		"malhotrasagar2212": {
-			vacations: []Vacation{},
 		},
 		"melinath": {
 			vacations: []Vacation{
@@ -148,14 +133,6 @@ var (
 				},
 			},
 		},
-		"shuyama1": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2026, 07, 28),
-					endDate:   newDate(2026, 12, 31),
-				},
-			},
-		},
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
@@ -180,12 +157,15 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":    {},
-		"tavasyag":   {},
-		"hao-nan-li": {},
-		"NickElliot": {},
-		"trodge":     {},
-		"zli82016":   {},
-		"vr-ibm":     {},
+		"BBBmau":            {},
+		"malhotrasagar2212": {},
+		"bbasata":           {},
+		"tavasyag":          {},
+		"hao-nan-li":        {},
+		"NickElliot":        {},
+		"shuyama1":          {},
+		"trodge":            {},
+		"zli82016":          {},
+		"vr-ibm":            {},
 	}
 )

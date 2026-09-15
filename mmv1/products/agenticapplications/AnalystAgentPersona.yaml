@@ -1,0 +1,939 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AnalystAgentPersona
+description: Represents a persona configuration for an analyst agent in Agentic Applications.
+base_url: projects/{{project}}/locations/{{location}}/analystAgentPersonas
+self_link: projects/{{project}}/locations/{{location}}/analystAgentPersonas/{{analyst_agent_persona_id}}
+create_url: projects/{{project}}/locations/{{location}}/analystAgentPersonas?analystAgentPersonaId={{analyst_agent_persona_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/analystAgentPersonas/{{analyst_agent_persona_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: QW5hbHlzdEFnZW50UGVyc29uYUF1dG9nZW5WMkFnZW50
+autogen_async: true
+custom_code:
+  encoder: templates/terraform/encoder/agenticapplications_analyst_agent_persona.go.tmpl
+
+samples:
+  - name: analyst_agent_persona_basic
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_basic
+        resource_id_vars:
+          persona_id: basic
+        vars:
+          display_name: "Test Analyst Persona"
+          customer_context: "Sample customer context for testing"
+          additional_context: "Initial additional context"
+          file_title: "financial_summary.txt"
+          skill_description: "Skill for finance analysis"
+      - name: analyst_agent_persona_basic
+        resource_id_vars:
+          persona_id: basic
+        vars:
+          display_name: "Updated Test Analyst Persona"
+          customer_context: "Updated customer context for testing"
+          additional_context: "Updated additional context"
+          file_title: "financial_summary_updated.txt"
+          skill_description: "Updated skill description for finance analysis"
+  - name: analyst_agent_persona_full
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_full
+        resource_id_vars:
+          persona_id: full
+          dataset_id: dataset_id
+          table_id: table
+          bucket_name: bucket
+      - name: analyst_agent_persona_full_update
+        resource_id_vars:
+          persona_id: full
+          dataset_id: dataset_id
+          table_id: table
+          bucket_name: bucket
+
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: analystAgentPersonaId
+    type: String
+    required: true
+    description: |-
+      Id of the requesting object
+      If auto-generating Id server-side, remove this field and
+      analyst_agent_persona_id from the method_signature of Create RPC
+    immutable: true
+    url_param_only: true
+properties:
+  - name: artifactExamples
+    type: Array
+    description: The output artifact examples to be used by the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: resource
+          type: NestedObject
+          required: true
+          description: Represents a resource that can be used by the Analyst Agent.
+          properties:
+            - name: bigqueryResource
+              type: NestedObject
+              description: Represents a BigQuery resource.
+              properties:
+                - name: bigqueryDataset
+                  type: String
+                  description: |-
+                    Points to a bigquery dataset to use.
+
+                    Expected Format:
+                    projects/{project_id_or_number}/datasets/{dataset_id}
+                - name: bigqueryTable
+                  type: String
+                  description: |-
+                    Points to a bigquery table to use.
+
+                    Expected Format:
+                    projects/{project_id_or_number}/datasets/{dataset_id}/tables/{table_id}
+                - name: columnDescriptions
+                  type: KeyValuePairs
+                  description: A map of column names to column descriptions for the bigquery_table.
+            - name: displayLabel
+              type: String
+              description: |-
+                A user-friendly name for this resource. This can be shown to the user
+                and used by the model.
+            - name: f1Resource
+              type: NestedObject
+              description: '- Represents an F1 resource.'
+              properties:
+                - name: f1Table
+                  type: String
+                  description: |-
+                    ## - Points to an f1 table to use.
+
+                    - Expected Format:
+                    - {group}.{table_name}
+            - name: googleCloudStorageResource
+              type: NestedObject
+              description: Represents a Google Cloud Storage resource.
+              properties:
+                - name: fileExtensionRestrictions
+                  type: Array
+                  description: |-
+                    If non-empty, only files with these extensions are included when
+                    expanding the resource.  If empty, all files are included.
+                  item_type:
+                    type: String
+                - name: googleCloudStorageObject
+                  type: String
+                  required: true
+                  description: |-
+                    The Google Cloud Storage object or folder.
+
+                    Format: /
+                    or: //
+
+                    Note that to refer to a folder, it _must_ end in a slash.
+            - name: googleDriveResource
+              type: NestedObject
+              description: Represents a Google Drive resource.
+              properties:
+                - name: fileExtensionRestrictions
+                  type: Array
+                  description: |-
+                    If non-empty, only files with these extensions are included when
+                    expanding the resource.  If empty, all files are included.
+                  item_type:
+                    type: String
+                - name: fileReference
+                  type: String
+                  description: |-
+                    Points to a drive file to use. May refer to workspace files or folders
+                    as well.  If folder is specifically, all files in the folder
+                    (recursively) are used.
+
+                    Expected Format:
+                    files/{file_id}
+            - name: modelDescription
+              type: String
+              description: |-
+                A description of the resource. The model may use this, it will not be
+                shown to users.
+            - name: rawFileResource
+              type: NestedObject
+              description: Represents a raw file resource.
+              properties:
+                - name: fileContent
+                  type: String
+                  required: true
+                  description: The raw file content.
+                - name: fileTitle
+                  type: String
+                  required: true
+                  description: The title of the file.
+                - name: mimeType
+                  type: String
+                  required: true
+                  description: The mime type of the file.
+            - name: useRag
+              type: Boolean
+              description: |-
+                If true, use RAG to retrieve relevant information from the resources.
+
+                Must only be set for file-based resources.
+  - name: artifactsConfig
+    type: NestedObject
+    description: Configuration for artifacts generated by the analyst agent.
+    properties:
+      - name: documentGenerationOptions
+        type: NestedObject
+        description: Options for document generation.
+        properties:
+          - name: documentExamples
+            type: Array
+            description: Examples for document generation.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: resource
+                  type: NestedObject
+                  required: true
+                  description: Represents a resource that can be used by the Analyst Agent.
+                  properties:
+                    - name: bigqueryResource
+                      type: NestedObject
+                      description: Represents a BigQuery resource.
+                      properties:
+                        - name: bigqueryDataset
+                          type: String
+                          description: |-
+                            Points to a bigquery dataset to use.
+
+                            Expected Format:
+                            projects/{project_id_or_number}/datasets/{dataset_id}
+                        - name: bigqueryTable
+                          type: String
+                          description: |-
+                            Points to a bigquery table to use.
+
+                            Expected Format:
+                            projects/{project_id_or_number}/datasets/{dataset_id}/tables/{table_id}
+                        - name: columnDescriptions
+                          type: KeyValuePairs
+                          description: A map of column names to column descriptions for the bigquery_table.
+                    - name: displayLabel
+                      type: String
+                      description: |-
+                        A user-friendly name for this resource. This can be shown to the user
+                        and used by the model.
+                    - name: f1Resource
+                      type: NestedObject
+                      description: '- Represents an F1 resource.'
+                      properties:
+                        - name: f1Table
+                          type: String
+                          description: |-
+                            ## - Points to an f1 table to use.
+
+                            - Expected Format:
+                            - {group}.{table_name}
+                    - name: googleCloudStorageResource
+                      type: NestedObject
+                      description: Represents a Google Cloud Storage resource.
+                      properties:
+                        - name: fileExtensionRestrictions
+                          type: Array
+                          description: |-
+                            If non-empty, only files with these extensions are included when
+                            expanding the resource.  If empty, all files are included.
+                          item_type:
+                            type: String
+                        - name: googleCloudStorageObject
+                          type: String
+                          required: true
+                          description: |-
+                            The Google Cloud Storage object or folder.
+
+                            Format: /
+                            or: //
+
+                            Note that to refer to a folder, it _must_ end in a slash.
+                    - name: googleDriveResource
+                      type: NestedObject
+                      description: Represents a Google Drive resource.
+                      properties:
+                        - name: fileExtensionRestrictions
+                          type: Array
+                          description: |-
+                            If non-empty, only files with these extensions are included when
+                            expanding the resource.  If empty, all files are included.
+                          item_type:
+                            type: String
+                        - name: fileReference
+                          type: String
+                          description: |-
+                            Points to a drive file to use. May refer to workspace files or folders
+                            as well.  If folder is specifically, all files in the folder
+                            (recursively) are used.
+
+                            Expected Format:
+                            files/{file_id}
+                    - name: modelDescription
+                      type: String
+                      description: |-
+                        A description of the resource. The model may use this, it will not be
+                        shown to users.
+                    - name: rawFileResource
+                      type: NestedObject
+                      description: Represents a raw file resource.
+                      properties:
+                        - name: fileContent
+                          type: String
+                          required: true
+                          description: The raw file content.
+                        - name: fileTitle
+                          type: String
+                          required: true
+                          description: The title of the file.
+                        - name: mimeType
+                          type: String
+                          required: true
+                          description: The mime type of the file.
+                    - name: useRag
+                      type: Boolean
+                      description: |-
+                        If true, use RAG to retrieve relevant information from the resources.
+
+                        Must only be set for file-based resources.
+          - name: exportFormat
+            type: String
+            description: |-
+              Format for document export.
+              Possible values:
+              PDF
+              DOCX
+              GOOGLE_DOCS
+      - name: slideGenerationOptions
+        type: NestedObject
+        description: Options for slide generation.
+        properties:
+          - name: exportFormat
+            type: String
+            description: |-
+              Format for slide export.
+              Possible values:
+              PDF
+              PNG
+              PPTX
+              GOOGLE_SLIDES
+          - name: slideExamples
+            type: Array
+            description: Examples for slide generation.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: resource
+                  type: NestedObject
+                  required: true
+                  description: Represents a resource that can be used by the Analyst Agent.
+                  properties:
+                    - name: bigqueryResource
+                      type: NestedObject
+                      description: Represents a BigQuery resource.
+                      properties:
+                        - name: bigqueryDataset
+                          type: String
+                          description: |-
+                            Points to a bigquery dataset to use.
+
+                            Expected Format:
+                            projects/{project_id_or_number}/datasets/{dataset_id}
+                        - name: bigqueryTable
+                          type: String
+                          description: |-
+                            Points to a bigquery table to use.
+
+                            Expected Format:
+                            projects/{project_id_or_number}/datasets/{dataset_id}/tables/{table_id}
+                        - name: columnDescriptions
+                          type: KeyValuePairs
+                          description: A map of column names to column descriptions for the bigquery_table.
+                    - name: displayLabel
+                      type: String
+                      description: |-
+                        A user-friendly name for this resource. This can be shown to the user
+                        and used by the model.
+                    - name: f1Resource
+                      type: NestedObject
+                      description: '- Represents an F1 resource.'
+                      properties:
+                        - name: f1Table
+                          type: String
+                          description: |-
+                            ## - Points to an f1 table to use.
+
+                            - Expected Format:
+                            - {group}.{table_name}
+                    - name: googleCloudStorageResource
+                      type: NestedObject
+                      description: Represents a Google Cloud Storage resource.
+                      properties:
+                        - name: fileExtensionRestrictions
+                          type: Array
+                          description: |-
+                            If non-empty, only files with these extensions are included when
+                            expanding the resource.  If empty, all files are included.
+                          item_type:
+                            type: String
+                        - name: googleCloudStorageObject
+                          type: String
+                          required: true
+                          description: |-
+                            The Google Cloud Storage object or folder.
+
+                            Format: /
+                            or: //
+
+                            Note that to refer to a folder, it _must_ end in a slash.
+                    - name: googleDriveResource
+                      type: NestedObject
+                      description: Represents a Google Drive resource.
+                      properties:
+                        - name: fileExtensionRestrictions
+                          type: Array
+                          description: |-
+                            If non-empty, only files with these extensions are included when
+                            expanding the resource.  If empty, all files are included.
+                          item_type:
+                            type: String
+                        - name: fileReference
+                          type: String
+                          description: |-
+                            Points to a drive file to use. May refer to workspace files or folders
+                            as well.  If folder is specifically, all files in the folder
+                            (recursively) are used.
+
+                            Expected Format:
+                            files/{file_id}
+                    - name: modelDescription
+                      type: String
+                      description: |-
+                        A description of the resource. The model may use this, it will not be
+                        shown to users.
+                    - name: rawFileResource
+                      type: NestedObject
+                      description: Represents a raw file resource.
+                      properties:
+                        - name: fileContent
+                          type: String
+                          required: true
+                          description: The raw file content.
+                        - name: fileTitle
+                          type: String
+                          required: true
+                          description: The title of the file.
+                        - name: mimeType
+                          type: String
+                          required: true
+                          description: The mime type of the file.
+                    - name: useRag
+                      type: Boolean
+                      description: |-
+                        If true, use RAG to retrieve relevant information from the resources.
+
+                        Must only be set for file-based resources.
+      - name: visualizationOptions
+        type: NestedObject
+        description: Options for visualizations.
+        properties:
+          - name: visualizationExamples
+            type: Array
+            description: Examples for visualizations.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: resource
+                  type: NestedObject
+                  required: true
+                  description: Represents a resource that can be used by the Analyst Agent.
+                  properties:
+                    - name: bigqueryResource
+                      type: NestedObject
+                      description: Represents a BigQuery resource.
+                      properties:
+                        - name: bigqueryDataset
+                          type: String
+                          description: |-
+                            Points to a bigquery dataset to use.
+
+                            Expected Format:
+                            projects/{project_id_or_number}/datasets/{dataset_id}
+                        - name: bigqueryTable
+                          type: String
+                          description: |-
+                            Points to a bigquery table to use.
+
+                            Expected Format:
+                            projects/{project_id_or_number}/datasets/{dataset_id}/tables/{table_id}
+                        - name: columnDescriptions
+                          type: KeyValuePairs
+                          description: A map of column names to column descriptions for the bigquery_table.
+                    - name: displayLabel
+                      type: String
+                      description: |-
+                        A user-friendly name for this resource. This can be shown to the user
+                        and used by the model.
+                    - name: f1Resource
+                      type: NestedObject
+                      description: '- Represents an F1 resource.'
+                      properties:
+                        - name: f1Table
+                          type: String
+                          description: |-
+                            ## - Points to an f1 table to use.
+
+                            - Expected Format:
+                            - {group}.{table_name}
+                    - name: googleCloudStorageResource
+                      type: NestedObject
+                      description: Represents a Google Cloud Storage resource.
+                      properties:
+                        - name: fileExtensionRestrictions
+                          type: Array
+                          description: |-
+                            If non-empty, only files with these extensions are included when
+                            expanding the resource.  If empty, all files are included.
+                          item_type:
+                            type: String
+                        - name: googleCloudStorageObject
+                          type: String
+                          required: true
+                          description: |-
+                            The Google Cloud Storage object or folder.
+
+                            Format: /
+                            or: //
+
+                            Note that to refer to a folder, it _must_ end in a slash.
+                    - name: googleDriveResource
+                      type: NestedObject
+                      description: Represents a Google Drive resource.
+                      properties:
+                        - name: fileExtensionRestrictions
+                          type: Array
+                          description: |-
+                            If non-empty, only files with these extensions are included when
+                            expanding the resource.  If empty, all files are included.
+                          item_type:
+                            type: String
+                        - name: fileReference
+                          type: String
+                          description: |-
+                            Points to a drive file to use. May refer to workspace files or folders
+                            as well.  If folder is specifically, all files in the folder
+                            (recursively) are used.
+
+                            Expected Format:
+                            files/{file_id}
+                    - name: modelDescription
+                      type: String
+                      description: |-
+                        A description of the resource. The model may use this, it will not be
+                        shown to users.
+                    - name: rawFileResource
+                      type: NestedObject
+                      description: Represents a raw file resource.
+                      properties:
+                        - name: fileContent
+                          type: String
+                          required: true
+                          description: The raw file content.
+                        - name: fileTitle
+                          type: String
+                          required: true
+                          description: The title of the file.
+                        - name: mimeType
+                          type: String
+                          required: true
+                          description: The mime type of the file.
+                    - name: useRag
+                      type: Boolean
+                      description: |-
+                        If true, use RAG to retrieve relevant information from the resources.
+
+                        Must only be set for file-based resources.
+                - name: visualizationType
+                  type: String
+                  required: true
+                  description: The type of the visualization (e.g. "Bar Chart", "Line Chart").
+  - name: createTime
+    type: String
+    description: Create time stamp.
+    output: true
+  - name: customerContext
+    type: Array
+    description: The customer-specific context to be used by the agent.
+    item_type:
+      type: String
+  - name: displayDescription
+    type: String
+    description: The description of the persona, shown to users.
+  - name: displayName
+    type: String
+    required: true
+    description: The display name of the persona, shown to users.
+  - name: externalDataSources
+    type: Array
+    description: The external data source selections to be used by the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: airQuality
+          type: NestedObject
+          description: Configurations for the AirQuality external data source.
+          properties: []
+        - name: bureauLaborStatistics
+          type: NestedObject
+          description: Configurations for the BureauLaborStatistics external data source.
+          properties: []
+        - name: coindesk
+          type: NestedObject
+          description: Configurations for the Coindesk external data source.
+          properties: []
+        - name: enabled
+          type: Boolean
+          required: true
+          description: Whether this external data source is enabled for the current analysis.
+        - name: finnhub
+          type: NestedObject
+          description: Configurations for the Finnhub external data source.
+          properties: []
+        - name: fred
+          type: NestedObject
+          description: Configurations for the Fred external data source.
+          properties: []
+        - name: secEdgar
+          type: NestedObject
+          description: Configurations for the SecEdgar external data source.
+          properties: []
+        - name: selectionName
+          type: String
+          description: |-
+            The name of the external data source, used for custom org policy
+            evaluation. Output-only (populated automatically with the selection case
+            name).
+          output: true
+        - name: treasurySecuritiesAuctions
+          type: NestedObject
+          description: Configurations for the TreasurySecuritiesAuctions external data source.
+          properties: []
+        - name: usda
+          type: NestedObject
+          description: Configurations for the USDA external data source.
+          properties: []
+  - name: geminiEnterpriseEngine
+    type: String
+    description: |-
+      The Gemini Enterprise Engine ID associated with this persona.
+      If set, any requests coming from this GE Engine will be routed to this
+      persona.
+      If not set, requests from GE will only be routed to this persona if its
+      name ends in "/default".
+  - name: mcpDataSources
+    type: Array
+    description: The MCP data source selections to be used by the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: apiKey
+          type: String
+          description: Input only. The API key of the MCP server.
+          ignore_read: true
+          sensitive: true
+        - name: apiKeyName
+          type: String
+          description: The API key parameter name.
+        - name: clientId
+          type: String
+          description: The client ID for authentication.
+        - name: clientSecret
+          type: String
+          description: Input only. The client secret for authentication.
+          ignore_read: true
+          sensitive: true
+        - name: description
+          type: String
+          required: true
+          description: The description of the MCP agent.
+        - name: displayName
+          type: String
+          required: true
+          description: |-
+            The display name of the MCP server. Must be no longer than 63 characters
+            and can only contain letters, numbers, spaces, underscores, and hyphens.
+        - name: enabled
+          type: Boolean
+          required: true
+          description: Whether this external data source is enabled for the current analysis.
+        - name: oauthTokenUrl
+          type: String
+          description: The URL to use for retrieving the OAuth token.
+        - name: prompt
+          type: String
+          description: The custom prompt for the MCP agent.
+        - name: serverUrl
+          type: String
+          required: true
+          description: The URL of the MCP server.
+  - name: modelDescription
+    type: String
+    description: The description of the persona review, used by the model.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the analyst agent persona.
+      Format:
+      projects/{project}/locations/{location}/analystAgentPersonas/{analyst_agent_persona}
+    output: true
+  - name: resources
+    type: Array
+    description: The resources to be used by the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: bigqueryResource
+          type: NestedObject
+          description: Represents a BigQuery resource.
+          properties:
+            - name: bigqueryDataset
+              type: String
+              description: |-
+                Points to a bigquery dataset to use.
+
+                Expected Format:
+                projects/{project_id_or_number}/datasets/{dataset_id}
+            - name: bigqueryTable
+              type: String
+              description: |-
+                Points to a bigquery table to use.
+
+                Expected Format:
+                projects/{project_id_or_number}/datasets/{dataset_id}/tables/{table_id}
+            - name: columnDescriptions
+              type: KeyValuePairs
+              description: A map of column names to column descriptions for the bigquery_table.
+        - name: displayLabel
+          type: String
+          description: |-
+            A user-friendly name for this resource. This can be shown to the user
+            and used by the model.
+        - name: f1Resource
+          type: NestedObject
+          description: '- Represents an F1 resource.'
+          properties:
+            - name: f1Table
+              type: String
+              description: |-
+                ## - Points to an f1 table to use.
+
+                - Expected Format:
+                - {group}.{table_name}
+        - name: googleCloudStorageResource
+          type: NestedObject
+          description: Represents a Google Cloud Storage resource.
+          properties:
+            - name: fileExtensionRestrictions
+              type: Array
+              description: |-
+                If non-empty, only files with these extensions are included when
+                expanding the resource.  If empty, all files are included.
+              item_type:
+                type: String
+            - name: googleCloudStorageObject
+              type: String
+              required: true
+              description: |-
+                The Google Cloud Storage object or folder.
+
+                Format: /
+                or: //
+
+                Note that to refer to a folder, it _must_ end in a slash.
+        - name: googleDriveResource
+          type: NestedObject
+          description: Represents a Google Drive resource.
+          properties:
+            - name: fileExtensionRestrictions
+              type: Array
+              description: |-
+                If non-empty, only files with these extensions are included when
+                expanding the resource.  If empty, all files are included.
+              item_type:
+                type: String
+            - name: fileReference
+              type: String
+              description: |-
+                Points to a drive file to use. May refer to workspace files or folders
+                as well.  If folder is specifically, all files in the folder
+                (recursively) are used.
+
+                Expected Format:
+                files/{file_id}
+        - name: modelDescription
+          type: String
+          description: |-
+            A description of the resource. The model may use this, it will not be
+            shown to users.
+        - name: rawFileResource
+          type: NestedObject
+          description: Represents a raw file resource.
+          properties:
+            - name: fileContent
+              type: String
+              required: true
+              description: The raw file content.
+            - name: fileTitle
+              type: String
+              required: true
+              description: The title of the file.
+            - name: mimeType
+              type: String
+              required: true
+              description: The mime type of the file.
+        - name: useRag
+          type: Boolean
+          description: |-
+            If true, use RAG to retrieve relevant information from the resources.
+
+            Must only be set for file-based resources.
+  - name: role
+    type: String
+    description: |-
+      Possible values:
+      ANALYST_ROLE_GENERIC_FINANCE_ANALYST
+      ANALYST_ROLE_CORPORATE_FINANCE_ANALYST
+      ANALYST_ROLE_CROSS_ASSET_DERIVATIVES_STRATEGIST
+      ANALYST_ROLE_KYC_ANALYST
+      ANALYST_ROLE_SALES_TRADER
+      ANALYST_ROLE_QUANT_ANALYST
+      ANALYST_ROLE_EXCHANGE_MANAGER
+      ANALYST_ROLE_PORTFOLIO_MANAGER
+      ANALYST_ROLE_WEALTH_MANAGER
+      ANALYST_ROLE_INSTITUTIONAL_PORTFOLIO_STRATEGIST
+      ANALYST_ROLE_MNA_EXECUTION_ANALYST
+      ANALYST_ROLE_ECM_ORIGINATION_STRATEGIST
+      ANALYST_ROLE_LEVERAGED_FINANCE_SPECIALIST
+      ANALYST_ROLE_INVESTMENT_RESEARCH_ANALYST
+      ANALYST_ROLE_CORPORATE_BANKING_ANALYST
+      ANALYST_ROLE_CREDIT_RISK_STRATEGIST
+      ANALYST_ROLE_BEHAVIORAL_FINANCIAL_STRATEGIST
+      ANALYST_ROLE_FUND_ACCOUNTANT
+      ANALYST_ROLE_MODEL_VALIDATION_AUDITOR
+      ANALYST_ROLE_PRIVATE_EQUITY_SPECIALIST
+      ANALYST_ROLE_TREASURY_ANALYST
+      ANALYST_ROLE_VENTURE_CAPITAL_ANALYST
+      ANALYST_ROLE_AML_INVESTIGATOR
+      ANALYST_ROLE_DUE_DILIGENCE_ANALYST
+      ANALYST_ROLE_INSURANCE_CLAIMS_ANALYST
+      ANALYST_ROLE_SPECIALTY_LIABILITY_UNDERWRITER
+      ANALYST_ROLE_CATASTROPHE_EXPOSURE_MODELER
+  - name: skills
+    type: Array
+    description: Skills for the agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: content
+          type: String
+          required: true
+          description: The markdown text content of the skill.
+        - name: description
+          type: String
+          description: The description of the skill.
+        - name: references
+          type: Array
+          description: References for the skill.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: content
+                type: String
+                required: true
+                description: The content of the reference.
+              - name: referenceId
+                type: String
+                required: true
+                description: |-
+                  The identifier of the reference within the skill. Use a descriptive
+                  string that reflects the reference's function.
+        - name: skillId
+          type: String
+          required: true
+          description: |-
+            The identifier of the skill. Use a descriptive string that reflects the
+            skill's function.
+  - name: tables
+    type: Array
+    description: |-
+      Schema overrides for bigquery tables. Used to override the schema of a
+      table in the customer's database, e.g. to provide additional context to the
+      agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: columns
+          type: Array
+          description: The columns in the table.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: dataType
+                type: String
+                required: true
+                description: |-
+                  The data type of the column. This should be a GoogleSQL data type.
+                  Parameterized types such as PROTO, ENUM, ARRAY, STRUCT<...>, and
+                  RANGE are not supported.
+              - name: description
+                type: String
+                description: The description of the column.
+              - name: name
+                type: String
+                required: true
+                description: The name of the column.
+        - name: description
+          type: String
+          description: The description of the table.
+        - name: name
+          type: String
+          required: true
+          description: The name of the table.
+  - name: updateTime
+    type: String
+    description: Update time stamp.
+    output: true

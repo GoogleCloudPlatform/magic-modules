@@ -258,6 +258,11 @@ type Resource struct {
 	// types that share the same API URL (e.g. engines filtered by solutionType).
 	ListFilter string `yaml:"list_filter,omitempty"`
 
+	// [Optional] If true, the list API response is a bare JSON array instead of
+	// a wrapped object with a named key. Use ListArrayPages instead of ListPages
+	// when generating the list function.
+	ListResponseIsArray bool `yaml:"list_response_is_array,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -796,7 +801,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy || p.WriteOnly
+		return p.WriteOnly
 	})
 }
 
@@ -1833,6 +1838,25 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
+// FirstRunnableTestConfig is FirstTestConfig plus skip_test. List-query tests
+// use this so they do not apply a skipped sample as setup.
+func (r Resource) FirstRunnableTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || sample.SkipTest != "" || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) SamplePrimaryResourceId() string {
 	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
@@ -2586,7 +2610,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide {
 			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}

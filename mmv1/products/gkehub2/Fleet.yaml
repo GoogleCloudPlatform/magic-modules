@@ -55,6 +55,10 @@ properties:
     description: |
       A user-assigned display name of the Fleet. When present, it must be between 4 to 30 characters.
       Allowed characters are: lowercase and uppercase letters, numbers, hyphen, single-quote, double-quote, space, and exclamation point.
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels for this Fleet.
   - name: createTime
     type: Time
     description: |
@@ -136,3 +140,22 @@ properties:
               - VULNERABILITY_DISABLED
               - VULNERABILITY_BASIC
               - VULNERABILITY_ENTERPRISE
+      - name: compliancePostureConfig
+        type: NestedObject
+        description: Enable/Disable Compliance Posture features for the cluster.
+        properties:
+          - name: mode
+            type: Enum
+            description: Sets which mode to use for Compliance Posture features.
+            enum_values:
+              - DISABLED
+              - ENABLED
+          - name: complianceStandards
+            type: Array
+            description: List of enabled compliance standards.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: standard
+                  type: String
+                  description: Name of the compliance standard.

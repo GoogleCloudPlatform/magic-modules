@@ -77,6 +77,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
+  timeout      = "30s"
 
   open_api_toolset {
     open_api_schema = <<-EOT
@@ -138,6 +139,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Updated toolset display name"
+  timeout      = "60s"
 
   open_api_toolset {
     open_api_schema = <<-EOT
@@ -1403,6 +1405,11 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
     api_authentication {
         service_agent_id_token_auth_config {}
     }
+    tool_overrides {
+      tool = "my-tool"
+      name_override = "my_tool_override"
+      description_override = "A tool description override"
+    }
   }
 }
 `, context)
@@ -1446,6 +1453,11 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
     }
     api_authentication {
         service_agent_id_token_auth_config {}
+    }
+    tool_overrides {
+      tool = "my-tool"
+      name_override = "my_tool_override_updated"
+      description_override = "A tool description override updated"
     }
   }
 }

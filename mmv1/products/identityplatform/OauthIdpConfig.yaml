@@ -24,12 +24,16 @@ docs:
 base_url: projects/{{project}}/oauthIdpConfigs
 self_link: projects/{{project}}/oauthIdpConfigs/{{name}}
 create_url: projects/{{project}}/oauthIdpConfigs?oauthIdpConfigId={{name}}
+# api_resource_type_kind is OAuthIdpConfig, which camelizes to oAuthIdpConfigs.
+# The ListOAuthIdpConfigsResponse key is oauthIdpConfigs.
+collection_url_key: oauthIdpConfigs
 update_mask: true
 update_verb: PATCH
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
 custom_code:
 samples:
   - name: identity_platform_oauth_idp_config_basic
