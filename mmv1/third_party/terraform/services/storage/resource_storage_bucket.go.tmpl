@@ -1359,6 +1359,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 				// Treat 404/410 as success: parallel deletes and list/delete races
 				// commonly return "No such object" for generations that are already gone.
 				if isIgnorableStorageObjectDeleteError(err) {
+					log.Printf("[DEBUG] Ignoring %v when deleting object %q (generation %d) in bucket %q during force_destroy; object already gone", err, object.Name, object.Generation, bucket)
 					return
 				}
 				errMu.Lock()
