@@ -5,8 +5,14 @@ resource "google_firebase_app_hosting_traffic" "example" {
 
   rollout_policy {
     codebase_branch = "{{index $.ResourceIdVars "branch"}}"
-    ignored_paths   = [{pattern: "foo/bar/excluded/*", type: "GLOB"}]
-    required_paths  = [{pattern: "foo/bar/*", type: "GLOB"}]
+    ignored_paths {
+      pattern = "foo/bar/excluded/*"
+      type = "GLOB"
+    }
+    required_paths {
+      pattern = "foo/bar/*"
+      type = "GLOB"
+    }
   }
 }
 
