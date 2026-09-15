@@ -1711,6 +1711,82 @@ API (for read pools, effective_availability_type may differ from availability_ty
 					},
 				},
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			"blue_green_deployment": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Configuration for Blue-Green Deployment to perform near-zero downtime major version upgrades.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"deployment_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `A unique identifier for the blue-green deployment within the project and region.`,
+						},
+						"target_database_version": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The target database version for Major Version Upgrades (e.g., MYSQL_8_4 or POSTGRES_15).`,
+						},
+						"active_environment": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "SOURCE",
+							ValidateFunc: validation.StringInSlice([]string{"SOURCE", "TARGET"}, false),
+							Description:  `Permissible values: "SOURCE" (default) or "TARGET". Changing to "TARGET" triggers the atomic switchover.`,
+						},
+						"delete_old_source_on_destroy": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: `Defaults to false. If true, removing the blue_green_deployment block after switchover automatically deletes the former Blue (Source) instance from GCP.`,
+						},
+						"target_instance_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The auto-generated name of the Green instance (e.g., my-prod-mysql-target-xxxx).`,
+						},
+						"target_instance_connection_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The Cloud SQL Auth Proxy connection string for the Green instance.`,
+						},
+						"target_instance_ip_addresses": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `Standard Cloud SQL IP address list for the Green instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_address": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"time_to_retire": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"old_source_instance_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Renamed GCP identifier of the former Blue (Source) instance post-switchover.`,
+						},
+						"old_source_instance_connection_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Auth Proxy connection string for the former Blue instance post-switchover.`,
+						},
+					},
+				},
+			},
+			{{- end }}
 			//UDP schema start
 			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 			//UDP schema end
