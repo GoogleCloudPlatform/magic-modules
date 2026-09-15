@@ -38,6 +38,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
+error_retry_predicates:
+  - transport_tpg.IsCloudIdentityGroup409
 async:
   type: PollAsync
   actions: [create, update, delete]
