@@ -445,6 +445,7 @@ properties:
     description: Configuration specific for a Virtual Repository.
     conflicts:
       - remote_repository_config
+    custom_expand: templates/terraform/custom_expand/artifact_registry_repository_virtual_repository_config.go.tmpl
     properties:
       - name: upstreamPolicies
         type: Array
