@@ -10558,3 +10558,90 @@ resource "google_sql_database_instance" "instance" {
 `, instanceName, enforce)
 }
 
+
+// TestAccSqlDatabaseInstance_updateWithStaleSettingsVersion covers updating an instance from
+// state that Terraform has not refreshed. Between the two steps the instance's settingsVersion is
+// advanced out of band, and AdditionalCLIOptions makes every plan run with -refresh=false so that
+// the stale settingsVersion is still in state when the update is built. The update path only
+// refreshes settings.version inside d.HasChange guards, none of which this test trips, so without
+// an unconditional refresh of that one field the update is rejected with
+// "Error 412: Condition does not match., staleData".
+//
+// See https://github.com/hashicorp/terraform-provider-google/issues/15762.
+func TestAccSqlDatabaseInstance_updateWithStaleSettingsVersion(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		// The update step has to plan from the state the previous step wrote. A refresh would
+		// repair settings.version on its own and the scenario under test could not occur.
+		AdditionalCLIOptions: &resource.AdditionalCLIOptions{
+			Plan: resource.PlanOptions{NoRefresh: true},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_staleSettingsVersion, databaseName, "one"),
+			},
+			{
+				PreConfig: func() {
+					testAccSqlDatabaseInstanceBumpSettingsVersion(t, databaseName)
+				},
+				Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_staleSettingsVersion, databaseName, "two"),
+				// Assert the planned label actually reached the API. An update that reads the
+				// instance before capturing the planned settings would send the remote values
+				// back, report success, and leave the same diff pending.
+				Check: resource.TestCheckResourceAttr(
+					"google_sql_database_instance.instance", "settings.0.user_labels.track", "two"),
+			},
+		},
+	})
+}
+
+var testGoogleSqlDatabaseInstance_staleSettingsVersion = `
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    user_labels = {
+      track = "%s"
+    }
+  }
+}
+`
+
+// testAccSqlDatabaseInstanceBumpSettingsVersion patches the instance outside of Terraform so that
+// its settingsVersion advances past the one recorded in state. It reuses the user_labels key the
+// test configuration manages so that the following apply overwrites it and no drift is left
+// behind.
+func testAccSqlDatabaseInstanceBumpSettingsVersion(t *testing.T, instance string) {
+	config := acctest.GoogleProviderConfig(t)
+	sqlAdminClient := sql.NewClient(config, config.UserAgent)
+
+	inst, err := sqlAdminClient.Instances.Get(config.Project, instance).Do()
+	if err != nil {
+		t.Errorf("Could not get database instance %q: %s", instance, err)
+		return
+	}
+
+	operation, err := sqlAdminClient.Instances.Patch(config.Project, instance, &sqladmin.DatabaseInstance{
+		Settings: &sqladmin.Settings{
+			SettingsVersion: inst.Settings.SettingsVersion,
+			UserLabels:      map[string]string{"track": "out-of-band"},
+		},
+	}).Do()
+	if err != nil {
+		t.Errorf("Could not patch database instance %q out of band: %s", instance, err)
+		return
+	}
+
+	if err := sql.SqlAdminOperationWaitTime(config, operation, config.Project, "Waiting for out-of-band patch", config.UserAgent, 10*time.Minute); err != nil {
+		t.Errorf("Could not wait for out-of-band patch to complete: %s", err)
+	}
+}
