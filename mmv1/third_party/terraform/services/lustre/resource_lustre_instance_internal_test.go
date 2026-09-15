@@ -1,9 +1,11 @@
 package lustre
+
 import (
-	"testing"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	"testing"
 )
+
 func TestLustreInstanceTargetVersionDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		New              string
@@ -90,13 +92,13 @@ func TestLustreInstanceVersionUpgradeCustomDiff(t *testing.T) {
 	// HasChange compares the two values directly, so use nil to mean "absent".
 	policy := []interface{}{map[string]interface{}{}}
 	cases := map[string]struct {
-		BeforeTargetVersion  interface{}
-		AfterTargetVersion   interface{}
-		BeforeCapacityGib    interface{}
-		AfterCapacityGib     interface{}
-		BeforeMaintenance    interface{}
-		AfterMaintenance     interface{}
-		ExpectError          bool
+		BeforeTargetVersion interface{}
+		AfterTargetVersion  interface{}
+		BeforeCapacityGib   interface{}
+		AfterCapacityGib    interface{}
+		BeforeMaintenance   interface{}
+		AfterMaintenance    interface{}
+		ExpectError         bool
 	}{
 		"no version change is always allowed": {
 			BeforeCapacityGib: "18000",
