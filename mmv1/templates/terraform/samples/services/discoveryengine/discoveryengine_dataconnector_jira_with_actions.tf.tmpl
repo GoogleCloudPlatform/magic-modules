@@ -4,14 +4,14 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
   collection_display_name      = "Jira Federated"
   data_source                  = "jira"
   data_source_version          = 3
-  params = {
+  params                       = jsonencode({
     instance_uri               = "https://example.atlassian.net"
     instance_id                = "SECRET_MANAGER_RESOURCE_NAME"
     client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
     client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
     refresh_token              = "SECRET_MANAGER_RESOURCE_NAME"
     auth_type                  = "OAUTH"
-  }
+  })
   refresh_interval             = "86400s"
   entities {
     entity_name                = "project"
