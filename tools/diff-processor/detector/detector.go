@@ -323,3 +323,57 @@ func listToMap(items []string) map[string]bool {
 	}
 	return m
 }
+
+// DetectMissingIdentityDocs detects resources that declare ResourceIdentity but are
+// missing documentation for one or more of the identity fields.
+// Returns a map of resource name to MissingDocDetails for those with gaps.
+func DetectMissingIdentityDocs(schemaDiff diff.SchemaDiff, newResourceMap map[string]*schema.Resource, repoPath string) (map[string]MissingDocDetails, error) {
+	ret := make(map[string]MissingDocDetails)
+	for resource, resourceDiff := range schemaDiff {
+		if resourceDiff.ResourceConfig.New == nil {
+			// Skip deleted resources.
+			continue
+		}
+		res, ok := newResourceMap[resource]
+		if !ok {
+			continue
+		}
+		if res.Identity == nil || len(res.Identity.SchemaMap()) == 0 {
+			continue
+		}
+
+		docFilePath, err := resourceToDocFile(resource, repoPath)
+		var docContent []byte
+		if err == nil {
+			docContent, err = os.ReadFile(docFilePath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
+			}
+		}
+
+		var fieldsInDoc map[string]bool
+		if len(docContent) > 0 {
+			parser := documentparser.NewParser()
+			if parseErr := parser.Parse(docContent); parseErr != nil {
+				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, parseErr)
+			}
+			fieldsInDoc = listToMap(parser.FlattenFields())
+		}
+
+		var missing []string
+		for fieldName := range res.Identity.SchemaMap() {
+			if !fieldsInDoc[fieldName] {
+				missing = append(missing, fieldName)
+			}
+		}
+		if len(missing) > 0 {
+			sort.Strings(missing)
+			ret[resource] = MissingDocDetails{
+				Name:     resource,
+				FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+				Fields:   missing,
+			}
+		}
+	}
+	return ret, nil
+}
