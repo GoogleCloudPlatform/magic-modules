@@ -179,6 +179,19 @@ samples:
         test_env_vars:
           project_name: PROJECT_NAME
           location: REGION
+        vars:
+          sql_dialect: GOOGLE_SQL
+      - name: dataplex_datascan_documentation
+        resource_id_vars:
+          datascan_name: datadocumentation
+        test_vars_overrides:
+          # for backward compatible
+          datascan_name: '"datadocumentation" + randomSuffix'
+        test_env_vars:
+          project_name: PROJECT_NAME
+          location: REGION
+        vars:
+          sql_dialect: SPARK_SQL
   - name: dataplex_datascan_onetime_documentation
     primary_resource_id: onetime_documentation
     steps:
@@ -905,3 +918,12 @@ properties:
         type: Boolean
         description: |
           If set, the latest DataScan job result will be published to Knowledge Catalog.
+      - name: sqlDialect
+        type: Enum
+        description: |
+          The SQL dialect to use in the generated SQL queries.
+          If not specified, the default dialect is Google SQL.
+        enum_values:
+          - GOOGLE_SQL
+          - SPARK_SQL
+        default_from_api: true

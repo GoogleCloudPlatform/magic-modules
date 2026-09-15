@@ -119,3 +119,35 @@ properties:
     required: true
     immutable: true
     description: Environment data retention in months.
+  - name: base64Image
+    type: String
+    description: Environment icon.
+  - name: dynamicParameters
+    type: Array
+    description: Additional custom properties for enriching the environment.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: value
+          type: String
+          required: true
+          description: The value of the dynamic parameter.
+        - name: dynamicParameterId
+          type: Integer
+          required: true
+          description: The ID of the dynamic parameter.
+        - name: environmentId
+          type: Integer
+          output: true
+          description: The ID of the environment.
+  - name: instanceUri
+    type: String
+    description: |-
+      URL of the environment. Used to route UI links to the correct SIEM instance
+      when making cross-SecOps requests from SOAR.
+  - name: weight
+    type: Integer
+    description: |-
+      The weight of the environment, enabling customers to control distribution
+      of resources between the separate environments in a single instance of
+      Chronicle SOAR.

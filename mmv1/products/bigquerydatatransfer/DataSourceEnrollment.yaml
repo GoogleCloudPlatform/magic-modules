@@ -1,0 +1,245 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataSourceEnrollment'
+api_resource_type_kind: DataSource
+description: |
+  Enrolls a BigQuery Data Transfer Service data source in a project, making it available
+  for use by `google_bigquery_data_transfer_config`. Some data sources, notably Google Cloud
+  Carbon Footprint exports, must be enrolled before a transfer config can be created against
+  them.
+
+  Enrollment is project-wide: a data source enrolled in a project is available in every
+  location that offers it.
+
+  Enrollment is eventually consistent, so a newly created or recreated enrollment may briefly
+  read as absent before it settles.
+references:
+  guides:
+    'Working with transfers': 'https://cloud.google.com/bigquery/docs/working-with-transfers'
+    'Export your carbon footprint': 'https://cloud.google.com/carbon-footprint/docs/export'
+  api: 'https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects/enrollDataSources'
+docs:
+id_format: 'projects/{{project}}/dataSources/{{data_source_id}}'
+base_url: 'projects/{{project}}/dataSources'
+self_link: 'projects/{{project}}/dataSources/{{data_source_id}}'
+create_url: 'projects/{{project}}:enrollDataSources'
+# There is no project-level unenroll method; only projects.locations.unenrollDataSources exists.
+# Unenrolling through any single location removes the enrollment project-wide, so unenroll_location
+# selects an endpoint only - it is not part of this resource's identity. Do not move it into id_format.
+delete_url: 'projects/{{project}}/locations/{{unenroll_location}}:unenrollDataSources'
+delete_verb: 'POST'
+immutable: true
+import_format:
+  - 'projects/{{project}}/dataSources/{{data_source_id}}'
+  - '{{data_source_id}}'
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+# An un-enrolled data source returns 400 FAILED_PRECONDITION rather than 404, so the generated
+# read cannot detect deletion without remapping the code.
+read_error_transform: 'transformBigqueryDataTransferDataSourceEnrollmentReadError'
+exclude_sweeper: true
+custom_code:
+  encoder: 'templates/terraform/encoders/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/bigquery_data_transfer_data_source_enrollment.go.tmpl'
+samples:
+  - name: 'bigquerydatatransfer_data_source_enrollment_carbon'
+    primary_resource_id: 'carbon'
+    steps:
+      - name: 'bigquerydatatransfer_data_source_enrollment_carbon'
+        # Enrollment is eventually consistent: for a short window after enrollDataSources
+        # returns, reads of the data source alternate between success and FAILED_PRECONDITION
+        # depending on which replica serves them. Importing a settled enrollment is reliable,
+        # but importing one created seconds earlier is not, so the generated import step is
+        # excluded. Create, read and destroy coverage is retained.
+        exclude_import_test: true
+        test_env_vars:
+          project: 'PROJECT_NAME'
+parameters:
+  - name: 'dataSourceId'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the data source to enroll. For Google Cloud Carbon Footprint exports this is
+      `61cede5a-0000-2440-ad42-883d24f8f7b8`. Call `projects.dataSources.list` to see the data
+      sources currently enrolled in a project.
+  - name: 'unenrollLocation'
+    type: String
+    default_value: 'us'
+    immutable: true
+    url_param_only: true
+    description: |
+      The location whose `unenrollDataSources` endpoint is called when this resource is destroyed.
+      Enrollment itself is project-wide and unenrolling through any location removes it everywhere;
+      this only exists because the API offers no project-level unenroll method. Override it only if
+      `us` is not routable for the project, for example under a data-residency organization policy.
+properties:
+  - name: 'name'
+    type: String
+    output: true
+    description: |
+      The resource name of the data source.
+  - name: 'displayName'
+    type: String
+    output: true
+    description: |
+      User friendly name of the enrolled data source, for example
+      `Google Cloud Carbon Footprint Exports`.
+  - name: 'description'
+    type: String
+    output: true
+    description: |
+      User friendly data source description string.
+  - name: 'clientId'
+    type: String
+    output: true
+    description: |
+      Data source client id which should be used to receive refresh token.
+  - name: 'scopes'
+    type: Array
+    output: true
+    item_type:
+      type: String
+    description: |
+      Api auth scopes for which refresh token needs to be obtained.
+  - name: 'updateDeadlineSeconds'
+    type: Integer
+    output: true
+    description: |
+      The number of seconds to wait for a transfer to start before declaring the failure.
+  - name: 'defaultSchedule'
+    type: String
+    output: true
+    description: |
+      Default data transfer schedule.
+  - name: 'supportsCustomSchedule'
+    type: Boolean
+    output: true
+    description: |
+      Specifies whether the data source supports a user defined schedule.
+  - name: 'parameters'
+    type: Array
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'paramId'
+          type: String
+          output: true
+          description: |
+            Parameter identifier.
+        - name: 'displayName'
+          type: String
+          output: true
+          description: |
+            User friendly parameter name.
+        - name: 'description'
+          type: String
+          output: true
+          description: |
+            Parameter description.
+        - name: 'type'
+          type: String
+          output: true
+          description: |
+            Parameter type.
+        - name: 'required'
+          type: Boolean
+          output: true
+          description: |
+            Is parameter required.
+        - name: 'validationRegex'
+          type: String
+          output: true
+          description: |
+            Regular expression which can be used for parameter validation.
+        - name: 'allowedValues'
+          type: Array
+          output: true
+          item_type:
+            type: String
+          description: |
+            All possible values for parameters with fixed list of options.
+        - name: 'minValue'
+          type: Double
+          output: true
+          description: |
+            For integer and double values specifies minimum allowed value.
+        - name: 'maxValue'
+          type: Double
+          output: true
+          description: |
+            For integer and double values specifies maximum allowed value.
+        - name: 'validationDescription'
+          type: String
+          output: true
+          description: |
+            Description of the requirements for this field, in case the user input does not fulfill the regex.
+        - name: 'validationHelpUrl'
+          type: String
+          output: true
+          description: |
+            URL to a help document to further explain the naming requirements.
+        - name: 'immutable'
+          type: Boolean
+          output: true
+          description: |
+            Cannot be changed after initial transfer config creation. Applies only to custom data sources.
+        - name: 'deprecated'
+          type: Boolean
+          output: true
+          description: |
+            If true, it should not be used in new transfers, and it should not be visible to users.
+        - name: 'maxListSize'
+          type: Integer
+          output: true
+          description: |
+            For list parameters, the max size of the list.
+    description: |
+      Data source parameters.
+  - name: 'helpUrl'
+    type: String
+    output: true
+    description: |
+      Url to the documentation about the data source.
+  - name: 'authorizationType'
+    type: String
+    output: true
+    description: |
+      Indicates the type of authorization.
+  - name: 'dataRefreshType'
+    type: String
+    output: true
+    description: |
+      Data refresh type.
+  - name: 'defaultDataRefreshWindowDays'
+    type: Integer
+    output: true
+    description: |
+      Default data refresh window on days.
+  - name: 'manualRunsDisabled'
+    type: Boolean
+    output: true
+    description: |
+      Disables support for manual transfer runs.
+  - name: 'minimumScheduleInterval'
+    type: String
+    output: true
+    description: |
+      The minimum interval between two scheduled runs.

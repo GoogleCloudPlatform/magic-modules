@@ -112,6 +112,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-identity", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
 		},
 	} {
@@ -331,6 +332,42 @@ func TestFormatDiffComment(t *testing.T) {
 			data: diffCommentData{},
 			notExpectedStrings: []string{
 				"## Missing doc report",
+			},
+		},
+		"missing identity is displayed": {
+			data: diffCommentData{
+				MissingIdentity: map[string]*MissingIdentityInfo{
+					"google_example_resource": {
+						MissingCRUD:       []string{"Create", "Update"},
+						MissingImportTest: true,
+					},
+				},
+			},
+			expectedStrings: []string{
+				"## Missing ResourceIdentity coverage",
+				"`google_example_resource`",
+				"`Create`",
+				"`Update`",
+				"Missing import identity test",
+				"override-missing-identity",
+			},
+			notExpectedStrings: []string{
+				"## Breaking Change(s) Detected",
+				"## Errors",
+			},
+		},
+		"missing identity is not displayed when empty": {
+			data: diffCommentData{
+				MissingIdentity: map[string]*MissingIdentityInfo{},
+			},
+			notExpectedStrings: []string{
+				"## Missing ResourceIdentity coverage",
+			},
+		},
+		"missing identity is not displayed when nil": {
+			data: diffCommentData{},
+			notExpectedStrings: []string{
+				"## Missing ResourceIdentity coverage",
 			},
 		},
 	}

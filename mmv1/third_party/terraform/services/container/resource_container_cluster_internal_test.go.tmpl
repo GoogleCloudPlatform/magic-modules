@@ -1,15 +1,20 @@
 package container
 
 import (
+	"context"
+	"errors"
 {{ if ne $.TargetVersionName `ga` -}}
 	"strings"
 {{- end }}
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"google.golang.org/api/googleapi"
 
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/container/v1"
@@ -664,6 +669,10 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 						Optional: true,
 						Elem:     &schema.Resource{Schema: map[string]*schema.Schema{"create_pod_range": {Type: schema.TypeBool}}},
 					},
+					"ignore_node_count_changes": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
 				},
 			},
 			Optional: true,
@@ -701,6 +710,7 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 					"managed_instance_group_urls": []string{},
 					"version":                     "",
 					"network_config":              []map[string]interface{}{},
+					"ignore_node_count_changes":   false,
 				},
 				{
 					"name":                        "pool-2",
@@ -713,6 +723,7 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 					"managed_instance_group_urls": []string{},
 					"version":                     "",
 					"network_config":              []map[string]interface{}{},
+					"ignore_node_count_changes":   false,
 				},
 			},
 			expectError: false,
@@ -773,3 +784,204 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 		})
 	}
 }
+
+func TestContainerClusterApiDictatedPrivateEndpointField(t *testing.T) {
+	t.Parallel()
+
+	const (
+		enablePrivateEndpointKey = "private_cluster_config.0.enable_private_endpoint"
+		enablePrivateNodesKey    = "private_cluster_config.0.enable_private_nodes"
+		masterGlobalAccessKey    = "private_cluster_config.0.master_global_access_config.0.enabled"
+		ipEndpointsCountKey      = "control_plane_endpoints_config.0.ip_endpoints_config.#"
+		ipEndpointsEnabledKey    = "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled"
+	)
+
+	cases := map[string]struct {
+		key string
+		// planned holds the new side of the diff; only new values are read.
+		planned  map[string]interface{}
+		expected bool
+	}{
+		// Reproduces hashicorp/terraform-provider-google#27901: with IP endpoints
+		// disabled the API forces enable_private_endpoint to true, so a configured
+		// value of false would permanently diff.
+		"enable_private_endpoint with ip endpoints disabled": {
+			key: enablePrivateEndpointKey,
+			planned: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				ipEndpointsCountKey:      1,
+				ipEndpointsEnabledKey:    false,
+			},
+			expected: true,
+		},
+		// The second permadiff from #27901: with IP endpoints disabled the API forces
+		// master_global_access_config.enabled to false.
+		"master_global_access_config with ip endpoints disabled": {
+			key: masterGlobalAccessKey,
+			planned: map[string]interface{}{
+				masterGlobalAccessKey: true,
+				ipEndpointsCountKey:   1,
+				ipEndpointsEnabledKey: false,
+			},
+			expected: true,
+		},
+		// With IP endpoints enabled the API honors both fields, so their diffs must
+		// reach the regular suppression logic.
+		"enable_private_endpoint with ip endpoints enabled": {
+			key: enablePrivateEndpointKey,
+			planned: map[string]interface{}{
+				enablePrivateEndpointKey: false,
+				ipEndpointsCountKey:      1,
+				ipEndpointsEnabledKey:    true,
+			},
+			expected: false,
+		},
+		// IP endpoints are enabled by default, so an absent block dictates nothing.
+		"master_global_access_config without control_plane_endpoints_config": {
+			key: masterGlobalAccessKey,
+			planned: map[string]interface{}{
+				masterGlobalAccessKey: true,
+			},
+			expected: false,
+		},
+		// Only the two fields the API overrides are affected; the rest of
+		// private_cluster_config stays user-controlled.
+		"unaffected private_cluster_config field with ip endpoints disabled": {
+			key: enablePrivateNodesKey,
+			planned: map[string]interface{}{
+				enablePrivateNodesKey: false,
+				ipEndpointsCountKey:   1,
+				ipEndpointsEnabledKey: false,
+			},
+			expected: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			d := &tpgresource.ResourceDiffMock{After: tc.planned}
+			if got := containerClusterApiDictatedPrivateEndpointField(tc.key, d); got != tc.expected {
+				t.Errorf("%s: expected %v, but was %v", tn, tc.expected, got)
+			}
+		})
+	}
+}
+
+func TestContainerCluster_IsClusterUpdateRetryableError(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		err      error
+		expected bool
+	}{
+		"400 failedPrecondition in error items - retryable": {
+			err: &googleapi.Error{
+				Code:    400,
+				Message: "Operation cannot be completed because cluster is busy",
+				Errors: []googleapi.ErrorItem{
+					{Reason: "failedPrecondition", Message: "cluster is undergoing changes"},
+				},
+			},
+			expected: true,
+		},
+		"400 invalidArgument - non-retryable": {
+			err: &googleapi.Error{
+				Code:    400,
+				Message: "invalidArgument: invalid node pool name",
+				Errors: []googleapi.ErrorItem{
+					{Reason: "invalidArgument", Message: "invalid node pool name"},
+				},
+			},
+			expected: false,
+		},
+		"400 bad request without failedPrecondition - non-retryable": {
+			err:      &googleapi.Error{Code: 400, Message: "bad request"},
+			expected: false,
+		},
+		"409 conflict - retryable": {
+			err:      &googleapi.Error{Code: 409, Message: "conflict: resource already in use"},
+			expected: true,
+		},
+		"412 precondition failed - retryable": {
+			err:      &googleapi.Error{Code: 412, Message: "precondition failed"},
+			expected: true,
+		},
+		"429 quota exceeded - retryable": {
+			err:      &googleapi.Error{Code: 429, Message: "Resource exhausted: rateLimitExceeded"},
+			expected: true,
+		},
+		"503 service unavailable - retryable": {
+			err:      &googleapi.Error{Code: 503, Message: "service unavailable"},
+			expected: true,
+		},
+		"404 not found - non-retryable": {
+			err:      &googleapi.Error{Code: 404, Message: "cluster not found"},
+			expected: false,
+		},
+		"500 internal server error - non-retryable": {
+			err:      &googleapi.Error{Code: 500, Message: "internal error"},
+			expected: false,
+		},
+		"generic non-googleapi error - non-retryable": {
+			err:      errors.New("connection reset by peer"),
+			expected: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			got := isClusterUpdateRetryableError(tc.err)
+			if got != tc.expected {
+				t.Errorf("%s: expected isClusterUpdateRetryableError=%v, got %v", tn, tc.expected, got)
+			}
+		})
+	}
+}
+
+func TestContainerCluster_RunClusterOperation_ContextCancellation(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	attempts := 0
+	err := retry.RetryContext(ctx, 1*time.Minute, func() *retry.RetryError {
+		attempts++
+		apiErr := &googleapi.Error{Code: 400, Message: "failedPrecondition: busy"}
+		if isClusterUpdateRetryableError(apiErr) {
+			return retry.RetryableError(apiErr)
+		}
+		return retry.NonRetryableError(apiErr)
+	})
+
+	if err == nil {
+		t.Fatal("expected error on cancelled context, got nil")
+	}
+	if attempts > 2 {
+		t.Fatalf("expected retry loop to abort quickly on canceled context, but got %d attempts", attempts)
+	}
+}
+
+func TestContainerCluster_RunClusterOperation_NonRetryableFailsFast(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	attempts := 0
+	nonRetryableErr := &googleapi.Error{Code: 400, Message: "invalidArgument: bad field value"}
+
+	err := retry.RetryContext(ctx, 1*time.Minute, func() *retry.RetryError {
+		attempts++
+		if isClusterUpdateRetryableError(nonRetryableErr) {
+			return retry.RetryableError(nonRetryableErr)
+		}
+		return retry.NonRetryableError(nonRetryableErr)
+	})
+
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if attempts != 1 {
+		t.Fatalf("expected non-retryable error to fail immediately on attempt 1, but ran %d attempts", attempts)
+	}
+}
+

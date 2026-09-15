@@ -40,6 +40,20 @@ Please add an acceptance test which includes these fields. The test should inclu
 
 {{- end }}
 {{end}}
+{{- if gt (len .MissingIdentity) 0}}
+## Missing ResourceIdentity coverage
+Your PR includes resources that declare `ResourceIdentity` but are missing identity handling.
+{{ range $resourceName, $info := .MissingIdentity }}
+Resource: `{{ $resourceName }}`
+{{- if $info.MissingCRUD }}
+- Missing `SetResourceIdentityAttributes` in: {{range $i, $fn := $info.MissingCRUD}}{{if gt $i 0}}, {{end}}`{{$fn}}`{{end}}
+{{- end }}
+{{- if $info.MissingImportTest }}
+- Missing import identity test (`TestAcc..._importBlockWithResourceIdentity`)
+{{- end }}
+{{ end }}
+An `override-missing-identity` label can be added to allow merging.
+{{end}}
 
 {{if gt (len .MissingServiceLabels) 0}}
 ## Missing service labels

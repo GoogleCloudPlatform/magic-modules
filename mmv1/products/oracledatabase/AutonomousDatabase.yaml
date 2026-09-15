@@ -58,7 +58,7 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
   - name: oracledatabase_autonomous_database_full
     primary_resource_id: myADB
@@ -78,12 +78,12 @@ samples:
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           deletion_protection: "false"
           database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
           endpoint_name: fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))
-          odb_network: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
-          odb_subnet: '"projects/oci-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_autonomous_database_odbnetwork
     primary_resource_id: myADB
     steps:
@@ -99,10 +99,10 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
-          odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-          odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_autonomous_database_publicip
     primary_resource_id: myADB
     steps:
@@ -116,7 +116,7 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
   - name: oracledatabase_autonomous_database_disaster_recovery
     primary_resource_id: myADB
@@ -133,7 +133,7 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           location: '"us-west3"'
           database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
           enable_backup_replication: "true"

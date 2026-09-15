@@ -54,6 +54,5 @@ if err := func() error {
 	}
 	return nil
 }(); err != nil {
-	resourceGKEHub2RolloutSequencePostCreateFailure(d, meta)
-	return err
+	return resourceGKEHub2RolloutSequencePostCreateFailure(d, meta, err)
 }

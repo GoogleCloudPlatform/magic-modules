@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_import: true
+generate_list_resource: true
 async:
   type: OpAsync
   operation:

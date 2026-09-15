@@ -610,6 +610,39 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_replicationLagMaxSeconds(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	replicaName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_replicationLagMaxSeconds(instanceName, replicaName, 600),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.replica", "settings.0.replication_lag_max_seconds", "600"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.replica",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_replicationLagMaxSeconds(instanceName, replicaName, 1200),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.replica", "settings.0.replication_lag_max_seconds", "1200"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_settings_secondary(t *testing.T) {
 	t.Parallel()
 
@@ -1272,6 +1305,7 @@ func TestAccSqlDatabaseInstance_updateMCPEnabled(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1302,6 +1336,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(t *testi
 		},
 	})
 }
+{{- end }}
 
 func TestAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(t *testing.T) {
 	t.Parallel()
@@ -5892,9 +5927,6 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "%s"
     edition = "%s"
-	backup_configuration {
-	  transaction_log_retention_days = 7
-    }
   }
 }`, databaseName, tier, edition)
 }
@@ -6095,6 +6127,40 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, instanceName)
+}
+
+func testGoogleSqlDatabaseInstanceConfig_replicationLagMaxSeconds(instanceName, replicaName string, lagMaxSeconds int) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+
+  settings {
+    tier = "db-n1-standard-1"
+
+    backup_configuration {
+      binary_log_enabled = "true"
+      enabled            = "true"
+      start_time         = "18:00"
+    }
+  }
+}
+
+resource "google_sql_database_instance" "replica" {
+  name                 = "%s"
+  region               = "us-central1"
+  database_version     = "MYSQL_5_7"
+  master_instance_name = google_sql_database_instance.instance.name
+  deletion_protection  = false
+
+  settings {
+    tier                        = "db-n1-standard-1"
+    replication_lag_max_seconds = %d
+  }
+}
+`, instanceName, replicaName, lagMaxSeconds)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withReplica(instanceName, failoverName string) string {
@@ -7434,6 +7500,7 @@ resource "google_sql_database_instance" "instance" {
 `, projectId, projectId, orgId, billingAccount, instanceName)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccSqlDatabaseInstance_withPSCEnabled_withAutoConnectionPolicy(instanceName string, networkName string, projectId string) string {
 	return fmt.Sprintf(`
 resource "google_project_service_identity" "gcp_sa_cloud_sql" {
@@ -7522,6 +7589,7 @@ resource "google_compute_network" "default" {
 }
 `, projectId, projectId, projectId, projectId, networkName)
 }
+{{- end }}
 
 func testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName string, projectId string, orgId string, billingAccount string) string {
 	return fmt.Sprintf(`
@@ -8808,6 +8876,14 @@ resource "google_sql_database_instance" "instance" {
       running_threads_threshold         = 100
       seconds_behind_source_threshold   = 3600
       transaction_duration_threshold    = 300
+      cpu_utilization_threshold_percent     = 80
+      memory_usage_threshold_percent        = 80
+      history_list_length_threshold_count   = 100000
+      semaphore_wait_threshold_count        = 100
+      transaction_lock_wait_threshold_count = 100
+      transaction_kill_threshold_seconds    = 600
+      transaction_kill_type                 = "READ_ONLY_TRANSACTIONS"
+      transaction_kill_excluded_user_hosts  = ["app_user", "admin@10.1.2.3"]
     }
   }
 }
@@ -8835,6 +8911,14 @@ resource "google_sql_database_instance" "instance" {
       running_threads_threshold         = 200
       seconds_behind_source_threshold   = 3700
       transaction_duration_threshold    = 300
+      cpu_utilization_threshold_percent     = 90
+      memory_usage_threshold_percent        = 90
+      history_list_length_threshold_count   = 200000
+      semaphore_wait_threshold_count        = 200
+      transaction_lock_wait_threshold_count = 200
+      transaction_kill_threshold_seconds    = 700
+      transaction_kill_type                 = "ALL_TRANSACTIONS"
+      transaction_kill_excluded_user_hosts  = ["app_user"]
     }
   }
 }

@@ -162,6 +162,7 @@ resource "google_network_services_authz_extension" "default" {
   timeout               = "0.1s"
   fail_open             = false
   forward_headers       = ["Authorization"]
+  forward_attributes    = ["request.host", "request.path"]
 }
 `, context)
 }
@@ -281,6 +282,7 @@ resource "google_network_services_authz_extension" "default" {
   timeout               = "0.1s"
   fail_open             = false
   forward_headers       = ["Authorization"]
+  forward_attributes    = ["request.host", "request.path", "request.scheme"]
 
   metadata = {
     forwarding_rule_id = google_compute_forwarding_rule.default.id

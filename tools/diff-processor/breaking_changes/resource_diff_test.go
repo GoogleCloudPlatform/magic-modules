@@ -368,6 +368,37 @@ var resourceSchemaRule_AddingExactlyOneOf_TestCases = []resourceSchemaTestCase{
 		},
 	},
 	{
+		name: "adding ExactlyOneOf to new fields within a new required block nested inside a newly-added, optional ancestor",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"parent.child.field-a,parent.child.field-b": {"parent.child.field-a": {}, "parent.child.field-b": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"parent": {
+					Old: nil,
+					New: &schema.Schema{Description: "parent", Optional: true, Type: schema.TypeList},
+				},
+				"parent.child": {
+					Old: nil,
+					New: &schema.Schema{Description: "child", Required: true, Type: schema.TypeList},
+				},
+				"parent.child.field-a": {
+					Old: nil,
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"parent.child.field-b": {
+					Old: nil,
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
+			},
+		},
+	},
+	{
 		name: "adding ExactlyOneOf to existing fields that are all within an existing, optional ancestor",
 		resourceDiff: diff.ResourceDiff{
 			FieldSets: diff.ResourceFieldSetsDiff{
