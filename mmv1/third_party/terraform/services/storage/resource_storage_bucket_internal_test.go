@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"google.golang.org/api/googleapi"
@@ -91,9 +92,10 @@ func TestIsIgnorableStorageObjectDeleteError(t *testing.T) {
 		err      error
 		expected bool
 	}{
+		// Callers check err != nil before calling, so nil is not an ignorable error.
 		"nil": {
 			err:      nil,
-			expected: true,
+			expected: false,
 		},
 		"404 no such object": {
 			err:      &googleapi.Error{Code: 404, Message: "No such object: example-bucket/path/to/object"},
@@ -103,12 +105,20 @@ func TestIsIgnorableStorageObjectDeleteError(t *testing.T) {
 			err:      &googleapi.Error{Code: 410, Message: "Gone"},
 			expected: true,
 		},
+		"wrapped 404": {
+			err:      fmt.Errorf("deleting object: %w", &googleapi.Error{Code: 404, Message: "No such object: example-bucket/path/to/object"}),
+			expected: true,
+		},
 		"403 forbidden": {
 			err:      &googleapi.Error{Code: 403, Message: "Forbidden"},
 			expected: false,
 		},
 		"409 conflict": {
 			err:      &googleapi.Error{Code: 409, Message: "Conflict"},
+			expected: false,
+		},
+		"wrapped 403": {
+			err:      fmt.Errorf("deleting object: %w", &googleapi.Error{Code: 403, Message: "Forbidden"}),
 			expected: false,
 		},
 		"non-googleapi error": {

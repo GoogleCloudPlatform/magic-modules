@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -1356,17 +1357,20 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 			wp.Submit(func() {
 				defer func() { <-sem }()
 				err := NewClient(config, userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do()
-				// Treat 404/410 as success: parallel deletes and list/delete races
-				// commonly return "No such object" for generations that are already gone.
-				if isIgnorableStorageObjectDeleteError(err) {
-					log.Printf("[DEBUG] Ignoring %v when deleting object %q (generation %d) in bucket %q during force_destroy; object already gone", err, object.Name, object.Generation, bucket)
-					return
-				}
-				errMu.Lock()
-				defer errMu.Unlock()
-				if deleteObjectError == nil {
-					deleteObjectError = err
-					log.Printf("[DEBUG] Failed to delete object %q in bucket %q: %s", object.Name, bucket, err)
+				if err != nil {
+					// Parallel deletes and stale list pages race with each other, so a
+					// generation that was listed can already be gone by the time it is
+					// deleted. That is the desired end state, so do not fail the destroy.
+					if isIgnorableStorageObjectDeleteError(err) {
+						log.Printf("[DEBUG] Object %q (generation %d) in bucket %q already deleted: %s", object.Name, object.Generation, bucket, err)
+						return
+					}
+					errMu.Lock()
+					defer errMu.Unlock()
+					if deleteObjectError == nil {
+						deleteObjectError = err
+						log.Printf("[DEBUG] Failed to delete object %q in bucket %q: %s", object.Name, bucket, err)
+					}
 				}
 			})
 		}
@@ -1404,15 +1408,13 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-// isIgnorableStorageObjectDeleteError reports whether an Objects.Delete error
-// can be ignored during force_destroy. A 404/410 means the listed generation is
-// already gone (concurrent delete, eventual consistency, or a stale list page).
+// isIgnorableStorageObjectDeleteError reports whether an Objects.Delete error can
+// be ignored during force_destroy. A 404/410 means the listed generation is already
+// gone (concurrent delete, eventual consistency, or a stale list page). Callers are
+// expected to check err != nil first, so a nil error is not reported as ignorable.
 func isIgnorableStorageObjectDeleteError(err error) bool {
-	if err == nil {
-		return true
-	}
-	gerr, ok := err.(*googleapi.Error)
-	if !ok {
+	var gerr *googleapi.Error
+	if !errors.As(err, &gerr) {
 		return false
 	}
 	return gerr.Code == 404 || gerr.Code == 410
