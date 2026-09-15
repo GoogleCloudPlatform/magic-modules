@@ -31,6 +31,9 @@ fields:
     provider_only: true
   - api_field: 'networkConfig.acceleratorNetworkProfile'
   - api_field: 'networkConfig.additionalNodeNetworkConfigs.network'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'networkConfig.additionalNodeNetworkConfigs.stackType'
+{{- end }}
   - api_field: 'networkConfig.additionalNodeNetworkConfigs.subnetwork'
   - field: 'network_config.additional_pod_network_configs.max_pods_per_node'
     api_field: 'networkConfig.additionalPodNetworkConfigs.maxPodsPerNode.maxPodsPerNode'
