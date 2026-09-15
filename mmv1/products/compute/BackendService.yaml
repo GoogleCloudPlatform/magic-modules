@@ -152,6 +152,10 @@ samples:
         resource_id_vars:
           backend_service_name: 'backend-service'
           health_check_name: 'health-check'
+          network_name: 'custom-vpc'
+          subnetwork_name: 'custom-subnet'
+          instance_template_name: 'instance-template'
+          igm_name: 'instance-group-manager'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     steps:
@@ -918,6 +922,7 @@ properties:
     description: |
       Settings for enabling Cloud Identity Aware Proxy.
       If OAuth client is not set, the Google-managed OAuth client is used.
+    diff_suppress_func: 'suppressIapDiffWhenUnset'
     send_empty_value: true
     properties:
       - name: 'enabled'

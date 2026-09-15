@@ -851,6 +851,12 @@ var ServicesListBeta = mapOf(
         "displayName" to "Serviceusage",
         "path" to "./google-beta/services/serviceusage"
     ),
+     "serviceusagev2" to mapOf(
+         "name" to "serviceusagev2",
+         "displayName" to "ServiceUsageV2",
+         "path" to "./google-beta/services/serviceusagev2"
+     ),
+
     "siteverification" to mapOf(
         "name" to "siteverification",
         "displayName" to "Siteverification",
@@ -885,6 +891,11 @@ var ServicesListBeta = mapOf(
         "name" to "storagecontrol",
         "displayName" to "Storagecontrol",
         "path" to "./google-beta/services/storagecontrol"
+    ),
+    "storageftp" to mapOf(
+        "name" to "storageftp",
+        "displayName" to "Storageftp",
+        "path" to "./google-beta/services/storageftp"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

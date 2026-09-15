@@ -4,10 +4,10 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   psc_configs {
     network = google_compute_network.consumer_net.id
   }
-  region = "us-central1"
+  region = "us-west1"
   zone_distribution_config {
     mode = "SINGLE_ZONE"
-    zone = "us-central1-f"
+    zone = "us-west1-a"
   }
   maintenance_policy {
     weekly_maintenance_window {
@@ -29,7 +29,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
 
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "{{index $.ResourceIdVars "policy_name"}}"
-  location = "us-central1"
+  location = "us-west1"
   service_class = "gcp-memorystore-redis"
   description   = "my basic service connection policy"
   network = google_compute_network.consumer_net.id
@@ -41,7 +41,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 resource "google_compute_subnetwork" "consumer_subnet" {
   name          = "{{index $.ResourceIdVars "subnet_name"}}"
   ip_cidr_range = "10.0.0.248/29"
-  region        = "us-central1"
+  region        = "us-west1"
   network       = google_compute_network.consumer_net.id
 }
 

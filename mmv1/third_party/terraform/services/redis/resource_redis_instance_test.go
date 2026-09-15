@@ -129,7 +129,7 @@ resource "google_redis_instance" "test" {
   display_name   = "redissss"
   memory_size_gb = 5
 	tier = "STANDARD_HA"
-  region         = "us-central1"
+  region         = "us-west1"
 	%s
   redis_configs = {
     maxmemory-policy       = "allkeys-lru"
@@ -153,7 +153,7 @@ resource "google_redis_instance" "test" {
   display_name   = "redissss"
   memory_size_gb = 5
   tier = "STANDARD_HA"
-  region         = "us-central1"
+  region         = "us-west1"
 	%s
   redis_configs = {
     maxmemory-policy       = "allkeys-lru"
@@ -179,7 +179,7 @@ resource "google_redis_instance" "test" {
   display_name   = "redissss"
   memory_size_gb = 5
   tier = "STANDARD_HA"
-  region         = "us-central1"
+  region         = "us-west1"
 	%s
   redis_configs = {
     maxmemory-policy       = "allkeys-lru"
@@ -300,7 +300,7 @@ resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "pre-update"
   memory_size_gb = 1
-  region         = "us-central1"
+  region         = "us-west1"
 	%s
 
   labels = {
@@ -330,6 +330,7 @@ resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "post-update"
   memory_size_gb = 1
+  region         = "us-west1"
 	%s
 
   labels = {
@@ -360,6 +361,7 @@ func testAccRedisInstance_redisInstanceAuthEnabled(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
+  region         = "us-west1"
   memory_size_gb = 1
   auth_enabled = true
 }
@@ -370,6 +372,7 @@ func testAccRedisInstance_redisInstanceAuthDisabled(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_redis_instance" "cache" {
   name           = "tf-test-memory-cache%{random_suffix}"
+  region         = "us-west1"
   memory_size_gb = 1
   auth_enabled = false
 }
@@ -382,7 +385,7 @@ resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "redissss"
   memory_size_gb = 1
-  region         = "us-central1"
+  region         = "us-west1"
 
   redis_configs = {
     maxmemory-policy       = "allkeys-lru"
@@ -399,7 +402,7 @@ resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "redissss"
   memory_size_gb = 1
-  region         = "us-central1"
+  region         = "us-west1"
 
   redis_configs = {
     maxmemory-policy       = "allkeys-lru"
@@ -421,7 +424,7 @@ func TestAccRedisInstance_deletionprotection(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisInstance_deletionprotection(name, "us-central1", true),
+				Config: testAccRedisInstance_deletionprotection(name, "us-west1", true),
 			},
 			{
 				ResourceName:            "google_redis_instance.test",
@@ -434,7 +437,7 @@ func TestAccRedisInstance_deletionprotection(t *testing.T) {
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccRedisInstance_deletionprotection(name, "us-central1", false),
+				Config: testAccRedisInstance_deletionprotection(name, "us-west1", false),
 			},
 		},
 	})

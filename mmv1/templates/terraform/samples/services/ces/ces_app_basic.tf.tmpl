@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "fake_private_key_secret" {
-  secret_id = "fake-pk-secret-app-tf1"
+  secret_id = "fake-pk-secret-app-tf{{index $.ResourceIdVars "secret_id"}}"
 
   replication {
     auto{}
@@ -82,6 +82,10 @@ resource "google_ces_app" "ces_app_basic" {
     conversation_logging_settings {
       disable_conversation_logging = true
     }
+
+    metric_analysis_settings {
+      llm_metrics_opted_out = false
+    }
   }
 
   model_settings {
@@ -94,11 +98,17 @@ resource "google_ces_app" "ces_app_basic" {
       turn_level_metrics_thresholds {
         semantic_similarity_success_threshold        = 3
         overall_tool_invocation_correctness_threshold = 1.0
+        semantic_similarity_channel                   = "TEXT"
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 1.0
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "ALLOW"
+      }
     }
+    golden_hallucination_metric_behavior   = "ENABLED"
+    scenario_hallucination_metric_behavior = "ENABLED"
   }
 
 variable_declarations {
@@ -163,6 +173,12 @@ variable_declarations {
       modality = "CHAT_ONLY"
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
+      security_settings {
+        enable_public_access = true
+        enable_origin_check  = false
+        enable_recaptcha     = false
+        allowed_origins      = ["https://example.com"]
+      }
     }
   }
 
