@@ -3320,7 +3320,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	})
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -5844,8 +5844,6 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
@@ -6004,7 +6002,6 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T) {
 	t.Parallel()
@@ -10772,7 +10769,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName, workloadMetadataConfigMode, networkName, subnetworkName)
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withSandboxConfig(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -12878,7 +12875,6 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
@@ -13086,7 +13082,6 @@ resource "google_container_cluster" "with_flexible_cidr" {
 }
 `, containerNetName, clusterName)
 }
-{{- end }}
 
 func testAccContainerCluster_withInitialCIDR(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
@@ -18049,7 +18044,6 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName string) string {
     return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
@@ -18344,7 +18338,6 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_withClusterBootDisk(t *testing.T) {
 	t.Parallel()
