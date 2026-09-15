@@ -56,7 +56,7 @@ samples:
           - update_time
   - name: parallelstore_instance_basic
     primary_resource_id: instance
-    exclude_test: true 
+    exclude_test: true
     steps:
       - name: parallelstore_instance_basic
         resource_id_vars:
