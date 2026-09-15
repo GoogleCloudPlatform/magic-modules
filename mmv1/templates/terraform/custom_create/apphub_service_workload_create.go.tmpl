@@ -1,0 +1,99 @@
+	// App Hub Service and Workload creation uses a long-running operation (LRO).
+	// When a discovered service or workload is unregistered, a temporary registration lease
+	// remains on it. Re-registering before the lease expires fails inside the LRO with
+	// FailedPrecondition ("... is under lease"). To retry on lease conflicts, both the POST
+	// request and the LRO wait must be retried together.
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	obj := make(map[string]interface{})
+{{- range $prop := $.SettableProperties }}
+	{{ $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
+	if err != nil {
+		return err
+	{{- if $prop.SendEmptyValue -}}
+	} else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
+	{{- else if $prop.FlattenObject -}}
+	} else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) {
+	{{- else -}}
+	} else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
+	{{- end}}
+		obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
+	}
+{{- end}}
+
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.CreateUri}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
+	billingProject := ""
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+	}
+	billingProject = project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	headers := make(http.Header)
+	var res map[string]interface{}
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			var reqErr error
+			res, reqErr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:               config,
+				Method:               "{{ upper $.CreateVerb -}}",
+				Project:              billingProject,
+				RawURL:               url,
+				UserAgent:            userAgent,
+				Body:                 obj,
+				Timeout:              d.Timeout(schema.TimeoutCreate),
+				Headers:              headers,
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsApphubLeaseConflictError},
+			})
+			if reqErr != nil {
+				return reqErr
+			}
+
+			return ApphubOperationWaitTime(
+				config, res, project, "Creating {{ $.Name -}}", userAgent,
+				d.Timeout(schema.TimeoutCreate))
+		},
+		Timeout:              d.Timeout(schema.TimeoutCreate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsApphubLeaseConflictError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
+	}
+
+	// Store the ID now
+	id, err := tpgresource.ReplaceVars(d, config, "{{ $.IdFormat -}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	log.Printf("[DEBUG] Finished creating {{ $.Name }} %q: %#v", d.Id(), res)
+
+	identity, err := d.Identity()
+	if err == nil && identity != nil {
+	{{- range $p := $.IdentityProperties }}
+		if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string) != "" {
+			if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+				return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+			}
+		}
+	{{- end }}
+	} else {
+		log.Printf("[DEBUG] (Create) identity not set: %s", err)
+	}
+
+	return resource{{ $.ResourceName -}}Read(d, meta)

@@ -1,8 +1,10 @@
 package transport
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
+	"time"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -274,5 +276,52 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 	isRetryable, _ := ExternalIpServiceNotActive(&err)
 	if !isRetryable {
 		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIsApphubLeaseConflictError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "failed to add registration status to discovered service since the discovered service is under lease",
+	}
+	isRetryable, _ := IsApphubLeaseConflictError(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+
+	opErr := fmt.Errorf("Error code 9, message: failed to add registration status to discovered service since the discovered service is under lease")
+	isRetryableOp, _ := IsApphubLeaseConflictError(opErr)
+	if !isRetryableOp {
+		t.Errorf("Operation error not detected as retryable")
+	}
+
+	nonLeaseErr := googleapi.Error{
+		Code: 400,
+		Body: "invalid resource name",
+	}
+	isRetryableNonLease, _ := IsApphubLeaseConflictError(&nonLeaseErr)
+	if isRetryableNonLease {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}
+
+func TestRetryWithIsApphubLeaseConflictError(t *testing.T) {
+	attempts := 0
+	err := Retry(RetryOptions{
+		RetryFunc: func() error {
+			attempts++
+			if attempts == 1 {
+				return fmt.Errorf("Error code 9, message: failed to add registration status to discovered service since the discovered service is under lease")
+			}
+			return nil
+		},
+		Timeout:              5 * time.Second,
+		ErrorRetryPredicates: []RetryErrorPredicateFunc{IsApphubLeaseConflictError},
+	})
+	if err != nil {
+		t.Fatalf("expected Retry to succeed after lease conflict, got: %v", err)
+	}
+	if attempts != 2 {
+		t.Errorf("expected 2 attempts, got %d", attempts)
 	}
 }
