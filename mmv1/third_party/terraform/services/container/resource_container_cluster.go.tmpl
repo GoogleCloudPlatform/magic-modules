@@ -1051,6 +1051,13 @@ func ResourceContainerCluster() *schema.Resource {
 						  Optional:    true,
 						  Description: `Specifies whether default compute class behaviour is enabled. If enabled, cluster autoscaler will use Compute Class with name default for all the workloads, if not overriden.`,
 						},
+						"autopilot_general_profile": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NONE", "NO_PERFORMANCE"}, false),
+							Description:  `The Autopilot general profile for the cluster. Set to NO_PERFORMANCE to turn off Autopilot's proactive capacity provisioning, which avoids extra IP consumption at the cost of slower scale-up for general-purpose workloads. Accepted values are NONE and NO_PERFORMANCE. Only applicable to Autopilot clusters.`,
+						},
 					},
 				},
 			},
@@ -6306,6 +6313,7 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 		ResourceLimits:                   resourceLimits,
 		DefaultComputeClassConfig:        defaultCCConfig,
 		AutoscalingProfile:               config["autoscaling_profile"].(string),
+		AutopilotGeneralProfile:          config["autopilot_general_profile"].(string),
 		AutoprovisioningNodePoolDefaults: defaults,
 		AutoprovisioningLocations:        tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})),
 	}
@@ -8263,6 +8271,7 @@ func flattenClusterAutoscaling(a *container.ClusterAutoscaling) []map[string]int
 	}
 	r["resource_limits"] = resourceLimits
 	r["autoscaling_profile"] = a.AutoscalingProfile
+	r["autopilot_general_profile"] = a.AutopilotGeneralProfile
 	if a.AutoprovisioningNodePoolDefaults != nil {
 		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
 	}
