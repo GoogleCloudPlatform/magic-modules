@@ -1,0 +1,64 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegistryMode'
+min_version: beta
+description: A Managed Service for Apache Kafka schema registry mode.
+
+base_url: 'projects/{{project}}/locations/{{location}}/schemaRegistries/{{schema_registry_id}}/mode'
+self_link: 'projects/{{project}}/locations/{{location}}/schemaRegistries/{{schema_registry_id}}/mode'
+create_url: 'projects/{{project}}/locations/{{location}}/schemaRegistries/{{schema_registry_id}}/mode'
+# Indicates that create/update are the same endpoint
+create_verb: 'PUT'
+update_verb: 'PUT'
+# Cannot delete registry level mode
+exclude_delete: true
+
+immutable: false
+
+# We'll need to modify the url before making the API request if a context is present
+custom_code:
+  pre_create: templates/terraform/pre_create/managedkafka_registry_mode.go.tmpl
+  pre_read: templates/terraform/pre_read/managedkafka_registry_mode.go.tmpl
+  pre_update: templates/terraform/pre_update/managedkafka_registry_mode.go.tmpl
+  pre_delete: templates/terraform/pre_delete/managedkafka_registry_mode.go.tmpl
+
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "ID of the location of the Kafka resource. See
+      https://cloud.google.com/managed-kafka/docs/locations for a list of
+      supported locations."
+  - name: 'schemaRegistryId'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "ID of the schema_registry."
+  - name: 'context'
+    type: String
+    required: false
+    immutable: true
+    url_param_only: true
+    description: "Name of the context. It is optional. If not specified, it will use the default context."
+
+properties:
+  - name: 'mode'
+    type: String
+    required: true
+    description: "The mode of the Schema Registry cluster. Accepted values are: IMPORT, READONLY, and READWRITE."
