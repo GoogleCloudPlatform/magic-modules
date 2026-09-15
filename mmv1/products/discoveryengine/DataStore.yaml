@@ -108,6 +108,13 @@ samples:
       - name: 'discoveryengine_datastore_acl_config'
         resource_id_vars:
           data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_federated_search_config'
+    primary_resource_id: 'federated_search_config'
+    exclude_basic_doc: true
+    steps:
+      - name: 'discoveryengine_datastore_federated_search_config'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
 parameters:
   - name: 'location'
     type: String
@@ -463,6 +470,23 @@ properties:
                   required: false
                   item_type:
                     type: String
+  - name: 'federatedSearchConfig'
+    type: NestedObject
+    description: |
+      Configuration for federated search.
+    required: false
+    properties:
+      - name: 'notebooklmConfig'
+        type: NestedObject
+        description: |
+          Configuration for NotebookLM.
+        required: false
+        properties:
+          - name: 'searchConfig'
+            type: String
+            description: |
+              The search config resource name for NotebookLM.
+            required: false
   - name: 'createTime'
     type: Time
     description: |
