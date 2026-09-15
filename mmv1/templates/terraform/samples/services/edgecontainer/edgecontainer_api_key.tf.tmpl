@@ -1,0 +1,17 @@
+resource "google_edgecontainer_api_key" "{{$.PrimaryResourceId}}" {
+  provider             = google-beta
+  api_key_id           = "test-key"
+  location             = "us-central1"
+  service_account_name = "projects/example-project/locations/us-central1/serviceAccounts/test-sa"
+  zone                 = "us-central1-edge-example-edgesite"
+  validity             = "3600s"
+
+  api_targets {
+    service = "compute.googleapis.com"
+    methods = ["*"]
+  }
+
+  labels = {
+    env = "test"
+  }
+}
