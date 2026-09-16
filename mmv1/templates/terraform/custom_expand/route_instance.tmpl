@@ -21,7 +21,11 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 			UserAgent: userAgent,
 		})
 		if err != nil {
-				return nil, err
+			return nil, err
 		}
-		return res["selfLink"], nil
+		selfLink, ok := res["selfLink"].(string)
+		if !ok {
+			return nil, fmt.Errorf("Error reading instance %s: selfLink not found in response", val.Name)
+		}
+		return selfLink, nil
 }
