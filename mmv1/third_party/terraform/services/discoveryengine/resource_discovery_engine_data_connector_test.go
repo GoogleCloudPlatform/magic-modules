@@ -32,7 +32,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
@@ -41,7 +41,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 		},
 	})
@@ -56,7 +56,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
   data_source_version          = 3
-  params = jsonencode({
+  json_params = jsonencode({
     auth_type                  = "OAUTH_PASSWORD_GRANT"
     instance_uri               = "https://gcpconnector1.service-now.com/"
     client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
@@ -153,7 +153,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
-  params = jsonencode({
+  json_params = jsonencode({
     max_qps                    = "100"
   })
   refresh_interval             = "172800s"
