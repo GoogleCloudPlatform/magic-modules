@@ -749,3 +749,16 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry on Database Migration Service operation timeout error.
+func IsDatabaseMigrationServiceOperationTimeoutError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if strings.Contains(gerr.Body, "Operation timed out") {
+			return true, "Database Migration Service operation timed out, retrying"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "Operation timed out") {
+		return true, "Database Migration Service operation timed out, retrying"
+	}
+	return false, ""
+}

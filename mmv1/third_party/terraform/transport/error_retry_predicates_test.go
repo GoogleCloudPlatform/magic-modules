@@ -276,3 +276,14 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 		t.Errorf("Error not detected as retryable")
 	}
 }
+
+func TestIsDatabaseMigrationServiceOperationTimeoutError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "Operation timed out.",
+	}
+	isRetryable, _ := IsDatabaseMigrationServiceOperationTimeoutError(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
