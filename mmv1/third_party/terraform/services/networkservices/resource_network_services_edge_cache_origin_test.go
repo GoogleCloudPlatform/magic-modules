@@ -53,7 +53,7 @@ func testAccNetworkServicesEdgeCacheOrigin_update_0(name string) string {
 			connect_timeout = "10s"
 		}
 		flex_shielding {
-			flex_shielding_regions = ["AFRICA_SOUTH1"]
+			flex_shielding_regions = ["EUROPE_WEST3"]
 		}
 	}
 `, name)
@@ -73,7 +73,7 @@ func testAccNetworkServicesEdgeCacheOrigin_update_1(name string) string {
 			read_timeout = "13s"
 		}
 		flex_shielding {
-			flex_shielding_regions = ["ME_CENTRAL1"]
+			flex_shielding_regions = ["US_EAST5"]
 		}
 	}
 `, name)
