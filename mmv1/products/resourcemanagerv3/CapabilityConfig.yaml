@@ -89,24 +89,19 @@ properties:
     type: Array
     description: |-
       The capabilities enabled for the resource and its sub-tree.
-      Possible values: ["APP_MANAGEMENT", "AGENT_MANAGEMENT"].
+      Possible values: "AGENT_MANAGEMENT".
     required: true
+    min_size: 1
+    is_set: true
     item_type:
       type: String
   - name: managementProject
     type: String
     description: |-
-      The management project for the capability config.
+      The management project for the capability config. If unspecified, a project will be created automatically.
       Format: `projects/{project_number}`.
     immutable: true
     default_from_api: true
-  - name: boundaries
-    type: Array
-    description: |-
-      The boundaries associated with this capability config.
-      Format: `organizations/{organization}/boundaries/{boundary}`, `folders/{folder}/boundaries/{boundary}`, or `projects/{project}/boundaries/{boundary}`.
-    item_type:
-      type: String
   - name: state
     type: String
     description: |-
