@@ -20,6 +20,7 @@ references:
     Create keysets: https://cloud.google.com/media-cdn/docs/create-keyset
   api: https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheKeysets
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/global/edgeCacheKeysets
 self_link: projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}
 create_url: projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{name}}

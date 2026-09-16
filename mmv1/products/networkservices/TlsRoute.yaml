@@ -19,6 +19,7 @@ references:
   guides:
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tlsRoutes
 docs:
+generate_list_resource: true
 base_url: projects/{{project}}/locations/{{location}}/tlsRoutes
 self_link: projects/{{project}}/locations/{{location}}/tlsRoutes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/tlsRoutes?tlsRouteId={{name}}
@@ -55,6 +56,10 @@ samples:
           resource_name: my-tls-route
           backend_service_name: my-backend-service
           health_check_name: backend-service-health-check
+        vars:
+          location: 'global'
+        test_vars_overrides:
+          location: envvar.GetTestRegionFromEnv()
   - name: network_services_tls_route_regional_basic
     primary_resource_id: default
     steps:
