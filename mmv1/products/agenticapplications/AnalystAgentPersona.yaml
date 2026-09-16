@@ -622,6 +622,15 @@ properties:
                   type: String
                   required: true
                   description: The type of the visualization (e.g. "Bar Chart", "Line Chart").
+          - name: visualizationMode
+            type: String
+            description: |-
+              Mode for generating visualizations.
+              Possible values:
+              VISUALIZATION_MODE_EXPLICIT_ONLY
+              VISUALIZATION_MODE_WHEN_NECESSARY
+              VISUALIZATION_MODE_WHEN_HELPFUL
+              VISUALIZATION_MODE_ALWAYS
   - name: createTime
     type: String
     description: Create time stamp.
@@ -713,6 +722,11 @@ properties:
           description: Input only. The API key of the MCP server.
           ignore_read: true
           sensitive: true
+        - name: apiKeyHeader
+          type: String
+          description: |-
+            The HTTP header when the API key is passed in a request header
+            (e.g. `x-api-key`, `api-key`, `X-Auth-Token`).
         - name: apiKeyName
           type: String
           description: The API key parameter name.
@@ -979,6 +993,11 @@ properties:
     type: NestedObject
     description: Configuration for web search grounding for the analyst agent.
     properties:
+      - name: disabled
+        type: Boolean
+        description: |-
+          Whether web search grounding is disabled for the analyst agent.
+          Defaults to false if not specified (i.e. web search grounding is enabled).
       - name: excludedDomains
         type: Array
         description: |-
