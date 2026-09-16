@@ -1,0 +1,137 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: OrganizationCapabilityConfig
+description: |
+  A CapabilityConfig allows managing experiences like applications and agents
+  on a logical administrative perimeter of Projects (Boundary).
+legacy_name: google_organization_capability_config
+api_resource_type_kind: CapabilityConfig
+api_variant_patterns:
+  - organizations/{organization}/capabilityConfigs/{capabilityConfig}
+base_url: organizations/{{organization}}/capabilityConfigs
+self_link: organizations/{{organization}}/capabilityConfigs/{{capability_config_id}}
+create_url: organizations/{{organization}}/capabilityConfigs?capabilityConfigId={{capability_config_id}}
+update_mask: true
+update_verb: PATCH
+id_format: organizations/{{organization}}/capabilityConfigs/{{capability_config_id}}
+import_format:
+  - "organizations/{{organization}}/capabilityConfigs/{{capability_config_id}}"
+  - "{{organization}}/{{capability_config_id}}"
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, update, delete]
+autogen_async: true
+autogen_status: T3JnYW5pemF0aW9uQ2FwYWJpbGl0eUNvbmZpZ0F1dG9nZW5WMkFnZW50
+samples:
+  - name: organization_capability_config_update
+    primary_resource_id: tf_test_primary
+    steps:
+      - name: organization_capability_config_basic
+        test_env_vars:
+          org_id: ORG_ID
+      - name: organization_capability_config_full
+        test_env_vars:
+          org_id: ORG_ID
+parameters:
+  - name: organization
+    type: String
+    description: |
+      The parent organization of the CapabilityConfig.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: capabilityConfigId
+    type: String
+    description: |
+      The user-assigned ID of the CapabilityConfig. It must be 6 to 30 lowercase
+      ASCII letters, digits, or hyphens. It must start with a letter.
+      Trailing hyphens are prohibited.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      Identifier. The unique resource name of the CapabilityConfig.
+      Format: `organizations/{organization}/capabilityConfigs/{capability_config_id}`
+    output: true
+  - name: displayName
+    type: String
+    description: |
+      Human-readable non-unique display name of the CapabilityConfig.
+      When present it must be between 4 to 30 characters.
+  - name: types
+    type: Array
+    description: |
+      The CapabilityConfig types.
+      Possible values:
+      * AGENT_MANAGEMENT
+      * APP_MANAGEMENT (defined in API proto but currently rejected by the backend service)
+    required: true
+    item_type:
+      type: Enum
+      description: |
+        The CapabilityConfig type.
+      enum_values:
+        - APP_MANAGEMENT
+        - AGENT_MANAGEMENT
+  - name: managementProject
+    type: String
+    description: |
+      The Management Project associated with this CapabilityConfig.
+      If not provided during creation, a management project will be automatically
+      created.
+      Cannot be modified after creation.
+      Format: `projects/{project_number}`
+    immutable: true
+    default_from_api: true
+  - name: boundaries
+    type: Array
+    description: |
+      The list of Boundaries associated with this CapabilityConfig.
+      Format: `organizations/{organization}/boundaries/{boundary}`
+      Note: Boundary resources require internal allowlisting / organization-level
+      configuration and cannot be dynamically created in standard automated tests.
+    item_type:
+      type: String
+  - name: state
+    type: String
+    description: |
+      Output only. The lifecycle state of the CapabilityConfig.
+    output: true
+  - name: etag
+    type: String
+    description: |
+      Output only. This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+    output: true
+  - name: createTime
+    type: String
+    description: |
+      Output only. The creation time of the CapabilityConfig.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      Output only. The most recent time this CapabilityConfig was modified.
+    output: true

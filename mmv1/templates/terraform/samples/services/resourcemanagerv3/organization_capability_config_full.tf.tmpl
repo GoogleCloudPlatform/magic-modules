@@ -1,0 +1,6 @@
+resource "google_organization_capability_config" "{{$.PrimaryResourceId}}" {
+  organization          = "{{index $.TestEnvVars "org_id"}}"
+  capability_config_id  = "tf-test-%{random_suffix}"
+  types                 = ["AGENT_MANAGEMENT"]
+  display_name          = "Updated Capability Config"
+}
