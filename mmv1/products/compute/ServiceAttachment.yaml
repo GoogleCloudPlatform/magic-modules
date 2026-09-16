@@ -124,9 +124,6 @@ samples:
       - name: 'service_attachment_cross_region_ilb'
         resource_id_vars:
           name: 'sa'
-        test_vars_overrides:
-          # for backward compatible
-          name: '"sa" + randomSuffix'
 parameters:
   - name: 'region'
     type: ResourceRef

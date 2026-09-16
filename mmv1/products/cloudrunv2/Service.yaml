@@ -80,6 +80,15 @@ samples:
           concurrency_util: '0.8'
         ignore_read_extra:
           - 'deletion_protection'
+      - name: 'cloudrunv2_service_scaling_controls'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        vars:
+          cpu_util: '0.6'
+          concurrency_util: '0'
+        ignore_read_extra:
+          - 'deletion_protection'
   - name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
     steps:
@@ -489,6 +498,7 @@ properties:
         description: |
           Scaling settings for this Revision.
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/cloudrunv2_service_template_scaling.go.tmpl'
         properties:
           - name: 'minInstanceCount'
             type: Integer

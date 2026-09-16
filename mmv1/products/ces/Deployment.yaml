@@ -43,6 +43,16 @@ samples:
           app_version_display_name: my-app-version
           app_version_id: app-version-id
           deployment_display_name: my-deployment
+  - name: ces_deployment_whatsapp
+    primary_resource_id: my-deployment
+    steps:
+      - name: ces_deployment_whatsapp
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
+          deployment_display_name: my-deployment
 parameters:
   - name: location
     type: String
@@ -85,6 +95,8 @@ properties:
           CONTACT_CENTER_AS_A_SERVICE
           FIVE9
           CONTACT_CENTER_INTEGRATION
+          WHATSAPP
+          INSTAGRAM
       - name: disableBargeInControl
         type: Boolean
         description: |-
@@ -160,6 +172,33 @@ properties:
                 description: |-
                   Indicates whether reCAPTCHA verification for the web widget is enabled.
                 send_empty_value: true
+      - name: whatsappConfig
+        type: NestedObject
+        description: Configuration specific to WhatsApp deployments.
+        properties:
+          - name: description
+            type: String
+            description: Output only. The description of the Meta business page or profile.
+            output: true
+          - name: displayName
+            type: String
+            description: Output only. The fetched Meta business page name.
+            output: true
+          - name: phoneNumber
+            type: String
+            description: Optional. The phone number in E.164 format.
+          - name: phoneNumberId
+            type: String
+            required: true
+            description: Required. The Meta phone number ID.
+          - name: thumbnailUrl
+            type: String
+            description: Output only. The fetched Meta business profile thumbnail URL.
+            output: true
+          - name: wabaId
+            type: String
+            required: true
+            description: Required. The WhatsApp Business Account ID.
   - name: createTime
     type: String
     description: Timestamp when this deployment was created.

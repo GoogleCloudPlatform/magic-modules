@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google-beta"
-    }
-  }
-}
-
 resource "google_storage_bucket" "bucket" {
   name          = "{{index $.ResourceIdVars "bucket_name"}}"
   location      = "us-central1"

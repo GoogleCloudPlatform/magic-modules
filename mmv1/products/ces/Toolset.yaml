@@ -676,6 +676,26 @@ properties:
           set in the session variables. See
           https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
           for more details.
+      - name: toolOverrides
+        type: Array
+        description: |-
+          A list of tool overrides for the toolset.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: descriptionOverride
+              type: String
+              description: |-
+                The description override for the tool.
+            - name: nameOverride
+              type: String
+              description: |-
+                The name override for the tool.
+            - name: tool
+              type: String
+              description: |-
+                The name of the tool to be overridden.
+              required: true
   - name: timeout
     type: String
     description: |-

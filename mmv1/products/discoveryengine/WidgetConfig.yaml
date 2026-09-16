@@ -13,6 +13,8 @@
 
 ---
 name: WidgetConfig
+api_variant_patterns:
+  - projects/{project}/locations/{location}/collections/{collection}/engines/{engine}/widgetConfigs/{widgetConfig}
 description: Represents a WidgetConfig.
 references:
   api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1alpha/projects.locations.collections.engines.widgetConfigs
@@ -265,6 +267,13 @@ properties:
       - name: enableCreateAgentButton
         type: Boolean
         description: If set to true, the widget will enable the create agent button.
+      - name: sourceAdminDisplayNameEnabled
+        type: Boolean
+        send_empty_value: true
+        description: |
+          Whether to show the admin-configured display name for data connectors in
+          the widget sources UI (instead of the connector kind). Opt-in; defaults
+          to false.
   - name: uiBranding
     type: NestedObject
     description: |

@@ -2,8 +2,10 @@ package transport_test
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -238,6 +240,29 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 	}
 }
 
+func TestGetCredentials_doesNotLeakCredentialsInError(t *testing.T) {
+	// A service-account key whose "type" is corrupted: still valid JSON, so it
+	// reaches the credential load and fails to parse there. The returned error
+	// surfaces to the terminal and CI logs, so it must not echo the key material.
+	const secret = "MIISECRETKEYMATERIAL_DO_NOT_LEAK"
+	creds := fmt.Sprintf(`{"type":"service_acount","project_id":"my-proj","private_key_id":"abc","private_key":"-----BEGIN PRIVATE KEY-----\n%s\n-----END PRIVATE KEY-----\n","client_email":"sa@my-proj.iam.gserviceaccount.com","token_uri":"https://oauth2.googleapis.com/token"}`, secret)
+
+	config := &transport_tpg.Config{
+		Context:     context.Background(),
+		Credentials: creds,
+		Project:     "my-gce-project",
+		Region:      "us-central1",
+	}
+
+	_, err := config.GetCredentials([]string{testOauthScope}, false)
+	if err == nil {
+		t.Fatalf("expected an error loading invalid credentials, got nil")
+	}
+	if strings.Contains(err.Error(), secret) {
+		t.Fatalf("credentials leaked in error message: %s", err)
+	}
+}
+
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(envvar.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
@@ -258,7 +283,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected call with loaded config client to work, got error: %s", err)
 	}
@@ -286,7 +311,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -324,7 +349,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -360,7 +385,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.NewClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}

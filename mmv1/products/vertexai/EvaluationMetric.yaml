@@ -27,6 +27,7 @@ base_url: projects/{{project}}/locations/{{region}}/evaluationMetrics
 self_link: projects/{{project}}/locations/{{region}}/evaluationMetrics/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/evaluationMetrics?evaluationMetricId={{evaluation_metric_id}}
 immutable: true
+generate_list_resource: true
 id_format: projects/{{project}}/locations/{{region}}/evaluationMetrics/{{name}}
 import_format:
   - projects/{{project}}/locations/{{region}}/evaluationMetrics/{{name}}

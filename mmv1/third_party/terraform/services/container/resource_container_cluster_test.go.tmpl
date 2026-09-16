@@ -3320,7 +3320,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	})
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -5020,6 +5020,12 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   network            = "%s"
   subnetwork         = "%s"
   deletion_protection = false
@@ -5838,8 +5844,6 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
@@ -5998,7 +6002,6 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T) {
 	t.Parallel()
@@ -7454,7 +7457,7 @@ resource "google_privateca_ca_pool" "aggregation_ca" {
 }
 
 resource "google_privateca_certificate_authority" "cluster_ca" {
-  certificate_authority_id = "my-authority"
+  certificate_authority_id = "tf-test-my-authority"
   location                 = "us-central1"
   pool                     = google_privateca_ca_pool.cluster_ca.name
   type = "SELF_SIGNED"
@@ -7499,7 +7502,7 @@ resource "google_privateca_certificate_authority" "cluster_ca" {
 }
 
 resource "google_privateca_certificate_authority" "etcd_api_ca" {
-  certificate_authority_id = "my-authority"
+  certificate_authority_id = "tf-test-my-authority"
   location                 = "us-central1"
   pool                     = google_privateca_ca_pool.etcd_api_ca.name
   type = "SELF_SIGNED"
@@ -7543,7 +7546,7 @@ resource "google_privateca_certificate_authority" "etcd_api_ca" {
 }
 
 resource "google_privateca_certificate_authority" "etcd_peer_ca" {
-  certificate_authority_id = "my-authority"
+  certificate_authority_id = "tf-test-my-authority"
   location                 = "us-central1"
   pool                     = google_privateca_ca_pool.etcd_peer_ca.name
   type = "SELF_SIGNED"
@@ -7587,7 +7590,7 @@ resource "google_privateca_certificate_authority" "etcd_peer_ca" {
 }
 
 resource "google_privateca_certificate_authority" "aggregation_ca" {
-  certificate_authority_id = "my-authority"
+  certificate_authority_id = "tf-test-my-authority"
   location                 = "us-central1"
   pool                     = google_privateca_ca_pool.aggregation_ca.name
   type = "SELF_SIGNED"
@@ -8234,7 +8237,7 @@ func testAccContainerCluster_network_tier_config(clusterName, networkName, subne
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 2
+  initial_node_count = 1
   dns_config {
     cluster_dns      = "CLOUD_DNS"
   }
@@ -8257,7 +8260,7 @@ func testAccContainerCluster_network_tier_config_none(clusterName, networkName, 
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 2
+  initial_node_count = 1
   dns_config {
     cluster_dns      = "CLOUD_DNS"
   }
@@ -8398,6 +8401,13 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
 
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   node_locations = [
     "us-central1-b",
@@ -8438,6 +8448,13 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
 
   remove_default_node_pool = true # Not worth updating
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   node_locations = [
     "us-central1-f",
@@ -8654,7 +8671,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = true
@@ -8674,7 +8691,7 @@ func testAccContainerCluster_disableNotificationConfig(clusterName, networkName,
 resource "google_container_cluster" "notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = false
@@ -8699,7 +8716,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "filtered_notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = true
@@ -8728,7 +8745,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "filtered_notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
 	pubsub {
 	  enabled = true
@@ -8756,7 +8773,7 @@ resource "google_pubsub_topic" "%s" {
 resource "google_container_cluster" "filtered_notification_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   notification_config {
     pubsub {
       enabled = true
@@ -8941,7 +8958,7 @@ resource "google_container_cluster" "confidential_nodes" {
     name               = "%s"
     initial_node_count = 1
     node_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-micro"
     }
   }
 
@@ -8968,7 +8985,7 @@ resource "google_container_cluster" "confidential_nodes" {
     name               = "%s"
     initial_node_count = 1
     node_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-micro"
     }
   }
 
@@ -8995,7 +9012,7 @@ resource "google_container_cluster" "confidential_nodes" {
     name = "%s"
     initial_node_count = 1
     node_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-micro"
     }
   }
 
@@ -9021,7 +9038,7 @@ resource "google_container_cluster" "confidential_nodes" {
     name               = "%s"
     initial_node_count = 1
     node_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-micro"
     }
   }
 
@@ -9049,7 +9066,7 @@ resource "google_container_cluster" "confidential_nodes" {
     name               = "%s"
     initial_node_count = 1
     node_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-micro"
     }
   }
 
@@ -9071,6 +9088,13 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   network_policy {
     enabled  = true
@@ -9187,6 +9211,13 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   network    = "%s"
   subnetwork = "%s"
@@ -9203,6 +9234,13 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   network_policy {
     enabled = false
@@ -9222,6 +9260,13 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   network_policy {
     enabled = false
@@ -9811,7 +9856,7 @@ func testAccContainerCluster_withMasterAuthNoCert(clusterName, networkName, subn
 resource "google_container_cluster" "with_master_auth_no_cert" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
   master_auth {
     client_certificate_config {
       issue_client_certificate = false
@@ -10420,7 +10465,7 @@ resource "google_container_cluster" "with_node_config_scope_alias" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "e2-medium"
+    machine_type = "e2-micro"
     disk_size_gb = 15
     oauth_scopes = ["compute-rw", "storage-ro", "logging-write", "monitoring"]
   }
@@ -10440,7 +10485,7 @@ resource "google_container_cluster" "with_node_config" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "e2-medium"
+    machine_type = "e2-micro"
     disk_size_gb = 15
     disk_type    = "pd-ssd"
     oauth_scopes = [
@@ -10724,7 +10769,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName, workloadMetadataConfigMode, networkName, subnetworkName)
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withSandboxConfig(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -11055,7 +11100,7 @@ resource "google_compute_http_health_check" "default" {
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
 
   node_locations = [
     "us-central1-b",
@@ -11086,7 +11131,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
   }
 
   network    = "%s"
@@ -11111,7 +11156,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     version            = data.google_container_engine_versions.central1a.valid_node_versions[2]
   }
   network    = "%s"
@@ -11136,7 +11181,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     version            = data.google_container_engine_versions.central1a.valid_node_versions[1]
   }
   network    = "%s"
@@ -11635,7 +11680,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     autoscaling {
       min_node_count = 1
       max_node_count = 3
@@ -11657,7 +11702,7 @@ resource "google_container_cluster" "with_node_pool" {
 
   node_pool {
     name               = "%s"
-    initial_node_count = 2
+    initial_node_count = 1
     autoscaling {
       min_node_count = 1
       max_node_count = 5
@@ -12750,6 +12795,13 @@ resource "google_container_cluster" "with_workload_identity_config" {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   network    = "%s"
   subnetwork = "%s"
@@ -12806,6 +12858,12 @@ resource "google_container_cluster" "with_workload_identity_config" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   %s
 
   network    = "%s"
@@ -12817,7 +12875,6 @@ resource "google_container_cluster" "with_workload_identity_config" {
 }
 
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
@@ -12884,14 +12941,14 @@ resource "google_compute_subnetwork_iam_member" "service_network_gke_user" {
 }
 
 resource "google_compute_network" "shared_network" {
-  name    = "test-%s"
+  name    = "tf-test-%s"
   project = google_compute_shared_vpc_host_project.host_project.project
 
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "shared_subnetwork" {
-  name          = "test-%s"
+  name          = "tf-test-%s"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.shared_network.self_link
@@ -13000,7 +13057,7 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 resource "google_container_cluster" "with_flexible_cidr" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
 
   networking_mode = "VPC_NATIVE"
   network         = google_compute_network.container_network.name
@@ -13025,7 +13082,6 @@ resource "google_container_cluster" "with_flexible_cidr" {
 }
 `, containerNetName, clusterName)
 }
-{{- end }}
 
 func testAccContainerCluster_withInitialCIDR(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
@@ -13152,6 +13208,12 @@ resource "google_container_cluster" "with_mesh_certificates_config" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   workload_identity_config {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
@@ -13177,6 +13239,12 @@ resource "google_container_cluster" "with_mesh_certificates_config" {
   location           = "us-central1-a"
   initial_node_count = 1
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+  lifecycle {
+    ignore_changes = [node_config]
+  }
   workload_identity_config {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
     }
@@ -14982,7 +15050,7 @@ data "google_project" "project" {
 
 resource "google_tags_tag_key" "key1" {
   parent      = data.google_project.project.id
-  short_name  = "foobarbaz-%[2]s"
+  short_name  = "tf-test-foobarbaz-%[2]s"
   description = "For foo/bar resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -14992,14 +15060,14 @@ resource "google_tags_tag_key" "key1" {
 
 resource "google_tags_tag_value" "value1" {
   parent      = google_tags_tag_key.key1.id
-  short_name  = "foo-%[2]s"
+  short_name  = "tf-test-foo-%[2]s"
   description = "For foo resources"
 }
 
 # To test updates: create two key / value sets, and swap them for the update
 resource "google_tags_tag_key" "key2" {
   parent      = data.google_project.project.id
-  short_name  = "qux-%[2]s"
+  short_name  = "tf-test-qux-%[2]s"
   description = "For qux resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15009,7 +15077,7 @@ resource "google_tags_tag_key" "key2" {
 
 resource "google_tags_tag_value" "value2" {
   parent      = google_tags_tag_key.key2.id
-  short_name  = "qux-%[2]s"
+  short_name  = "tf-test-qux-%[2]s"
   description = "For qux resources"
 }
 
@@ -15046,7 +15114,7 @@ data "google_project" "project" {
 
 resource "google_tags_tag_key" "key1" {
   parent      = "projects/%[1]s"
-  short_name  = "foobarbaz1-%[2]s"
+  short_name  = "tf-test-foobarbaz1-%[2]s"
   description = "For foo/bar1 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15058,13 +15126,13 @@ resource "google_tags_tag_key" "key1" {
 
 resource "google_tags_tag_value" "value1" {
   parent      = google_tags_tag_key.key1.id
-  short_name  = "foo1-%[2]s"
+  short_name  = "tf-test-foo1-%[2]s"
   description = "For foo1 resources"
 }
 
 resource "google_tags_tag_key" "key2" {
   parent      = "projects/%[1]s"
-  short_name  = "foobarbaz2-%[2]s"
+  short_name  = "tf-test-foobarbaz2-%[2]s"
   description = "For foo/bar2 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15079,7 +15147,7 @@ resource "google_tags_tag_key" "key2" {
 
 resource "google_tags_tag_value" "value2" {
   parent      = google_tags_tag_key.key2.id
-  short_name  = "foo2-%[2]s"
+  short_name  = "tf-test-foo2-%[2]s"
   description = "For foo2 resources"
 }
 
@@ -15150,7 +15218,7 @@ data "google_project" "project" {
 
 resource "google_tags_tag_key" "key1" {
   parent      = "projects/%[1]s"
-  short_name  = "foobarbaz1-%[2]s"
+  short_name  = "tf-test-foobarbaz1-%[2]s"
   description = "For foo/bar1 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15162,13 +15230,13 @@ resource "google_tags_tag_key" "key1" {
 
 resource "google_tags_tag_value" "value1" {
   parent      = google_tags_tag_key.key1.id
-  short_name  = "foo1-%[2]s"
+  short_name  = "tf-test-foo1-%[2]s"
   description = "For foo1 resources"
 }
 
 resource "google_tags_tag_key" "key2" {
   parent      = "projects/%[1]s"
-  short_name  = "foobarbaz2-%[2]s"
+  short_name  = "tf-test-foobarbaz2-%[2]s"
   description = "For foo/bar2 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15183,7 +15251,7 @@ resource "google_tags_tag_key" "key2" {
 
 resource "google_tags_tag_value" "value2" {
   parent      = google_tags_tag_key.key2.id
-  short_name  = "foo2-%[2]s"
+  short_name  = "tf-test-foo2-%[2]s"
   description = "For foo2 resources"
 }
 
@@ -15255,7 +15323,7 @@ data "google_project" "project" {
 
 resource "google_tags_tag_key" "key1" {
   parent      = "projects/%[1]s"
-  short_name  = "foobarbaz1-%[2]s"
+  short_name  = "tf-test-foobarbaz1-%[2]s"
   description = "For foo/bar1 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15267,13 +15335,13 @@ resource "google_tags_tag_key" "key1" {
 
 resource "google_tags_tag_value" "value1" {
   parent      = google_tags_tag_key.key1.id
-  short_name  = "foo1-%[2]s"
+  short_name  = "tf-test-foo1-%[2]s"
   description = "For foo1 resources"
 }
 
 resource "google_tags_tag_key" "key2" {
   parent      = "projects/%[1]s"
-  short_name  = "foobarbaz2-%[2]s"
+  short_name  = "tf-test-foobarbaz2-%[2]s"
   description = "For foo/bar2 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
@@ -15288,7 +15356,7 @@ resource "google_tags_tag_key" "key2" {
 
 resource "google_tags_tag_value" "value2" {
   parent      = google_tags_tag_key.key2.id
-  short_name  = "foo2-%[2]s"
+  short_name  = "tf-test-foo2-%[2]s"
   description = "For foo2 resources"
 }
 
@@ -16997,8 +17065,8 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesPMU_Standard(t *testing.
 	suffix := acctest.RandString(t, 10)
 	clusterResourceName := "google_container_cluster.primary"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
-	networkName := fmt.Sprintf("test-network-%s", suffix)
-	subnetworkName := fmt.Sprintf("test-subnetwork-%s", suffix)
+	networkName := fmt.Sprintf("tf-test-network-%s", suffix)
+	subnetworkName := fmt.Sprintf("tf-test-subnetwork-%s", suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -17024,8 +17092,8 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesPMU_Architectural(t *tes
 	suffix := acctest.RandString(t, 10)
 	clusterResourceName := "google_container_cluster.primary"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
-	networkName := fmt.Sprintf("test-network-%s", suffix)
-	subnetworkName := fmt.Sprintf("test-subnetwork-%s", suffix)
+	networkName := fmt.Sprintf("tf-test-network-%s", suffix)
+	subnetworkName := fmt.Sprintf("tf-test-subnetwork-%s", suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -17976,7 +18044,6 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName string) string {
     return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
@@ -18271,7 +18338,6 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_withClusterBootDisk(t *testing.T) {
 	t.Parallel()
@@ -18317,7 +18383,7 @@ resource "google_container_cluster" "cluster" {
   provider            = google.user-project-override
   name                = "%s"
   location            = "us-central1-a"
-  initial_node_count  = 3
+  initial_node_count  = 1
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
@@ -18345,7 +18411,7 @@ resource "google_container_cluster" "cluster" {
   provider            = google.user-project-override
   name                = "%s"
   location            = "us-central1-a"
-  initial_node_count  = 3
+  initial_node_count  = 1
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
@@ -19403,6 +19469,13 @@ resource "google_container_cluster" "primary" {
 
   # We must delete the default node pool to ensure we only have our standalone node pool
   remove_default_node_pool = true
+  node_config {
+    machine_type = "e2-micro"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
 
   skip_node_pool_refresh = %t
 }
@@ -19415,7 +19488,7 @@ resource "google_container_node_pool" "extra" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-medium"
+    machine_type = "e2-micro"
   }
 }
 `, suffix, suffix, clusterName, skipRefresh, poolName)

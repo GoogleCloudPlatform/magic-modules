@@ -29,7 +29,7 @@ resource "google_sql_user" "source_sqldb_user" {
 resource "google_database_migration_service_connection_profile" "source_cp" {
   location              = "us-central1"
   connection_profile_id = "{{index $.ResourceIdVars "source_cp"}}"
-  display_name          = "{{index $.ResourceIdVars "source_cp"}}_display"
+  display_name          = "{{index $.ResourceIdVars "source_cp"}}-display"
   labels = {
     foo = "bar"
   }
@@ -95,7 +95,7 @@ resource "google_compute_network" "default" {
 resource "google_database_migration_service_connection_profile" "destination_cp" {
   location              = "us-central1"
   connection_profile_id = "{{index $.ResourceIdVars "destination_cp"}}"
-  display_name          = "{{index $.ResourceIdVars "destination_cp"}}_display"
+  display_name          = "{{index $.ResourceIdVars "destination_cp"}}-display"
   labels = {
     foo = "bar"
   }
@@ -108,7 +108,7 @@ resource "google_database_migration_service_connection_profile" "destination_cp"
 resource "google_database_migration_service_migration_job" "{{$.PrimaryResourceId}}" {
   location              = "us-central1"
   migration_job_id = "{{index $.ResourceIdVars "migration_id"}}"
-  display_name = "{{index $.ResourceIdVars "migration_id"}}_display"
+  display_name = "{{index $.ResourceIdVars "migration_id"}}-display"
   labels = {
     foo = "bar"
   }
