@@ -29,7 +29,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name", "data_store_ids"},
 			},
 			{
 				Config: testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(context),
@@ -38,7 +38,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name", "data_store_ids"},
 			},
 		},
 	})
@@ -118,7 +118,7 @@ resource "google_discovery_engine_search_engine" "basic" {
   collection_id = "default_collection"
   location = google_discovery_engine_data_store.basic.location
   display_name = "Updated Example Display Name"
-  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
+  data_store_ids = [google_discovery_engine_data_store.second.data_store_id, google_discovery_engine_data_store.basic.data_store_id]
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
   disable_analytics = true
   common_config {
