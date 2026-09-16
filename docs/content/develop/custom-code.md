@@ -184,27 +184,41 @@ CRUD operations can be modified with pre/post hooks. This code will be injected 
 - Use `pre_delete` to detach a disk before deleting it.
 - Use `post_import` to parse attributes from the import ID and call `d.Set("field")` so that the resource can be read from the API.
 
-### Custom create error handling
+### Custom error handling
 
 ```yaml
 custom_code:
   post_create_failure: templates/terraform/post_create_failure/PRODUCT_RESOURCE.go.tmpl
+  post_update_failure: templates/terraform/post_update_failure/PRODUCT_RESOURCE.go.tmpl
+  post_delete_failure: templates/terraform/post_delete_failure/PRODUCT_RESOURCE.go.tmpl
 ```
 
-Use `custom_code.post_create_failure` to inject code that runs if a Create request to the API returns an error.
+Use `custom_code.post_create_failure`, `custom_code.post_update_failure`, or `custom_code.post_delete_failure` to inject code that runs if a Create, Update, or Delete request to the API returns an error.
 
-The post_create_failure code will be wrapped in a function like:
+The failure hook code will be wrapped in functions like:
 
 ```go
-func resourceProductResourcePostCreateFailure(d *schema.ResourceData, meta interface{}) {
+func resourceProductResourcePostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_create_failure hook: %v", err)
+    // Your code will be injected here.
+}
+
+func resourceProductResourcePostUpdateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_update_failure hook: %v", err)
+    // Your code will be injected here.
+}
+
+func resourceProductResourcePostDeleteFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_delete_failure hook: %v", err)
     // Your code will be injected here.
 }
 ```
 
-The parameters the function receives are:
+The parameters the functions receive are:
 
 - `d`: Terraform resource data. Use `d.Get("field_name")` to get a field's current value.
 - `meta`: Can be cast to a Config object (which can make API calls) using `meta.(*transport_tpg.Config)`
+- `err`: The error returned by the API call or operation. The hook should return an error (either `err` or a modified error).
 
 ### Custom retry handling
 

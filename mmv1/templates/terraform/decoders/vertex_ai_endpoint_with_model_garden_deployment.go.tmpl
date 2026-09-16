@@ -1,0 +1,71 @@
+{{/*
+	The license inside this block applies to this file.
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+deployedModelId, _ := d.Get("deployed_model_id").(string)
+
+deployedModels, _ := res["deployedModels"].([]interface{})
+var deployedModel map[string]interface{}
+for _, raw := range deployedModels {
+	m, ok := raw.(map[string]interface{})
+	if !ok {
+		continue
+	}
+	if id, _ := m["id"].(string); id == deployedModelId {
+		deployedModel = m
+		break
+	}
+}
+if deployedModel == nil {
+	d.SetId("")
+	return nil, nil
+}
+
+apiResources, _ := deployedModel["dedicatedResources"].(map[string]interface{})
+if apiResources == nil {
+	apiResources = map[string]interface{}{}
+}
+
+const resourcesPrefix = "deploy_config.0.dedicated_resources.0."
+
+dedicatedResources := map[string]interface{}{
+	"spot":                   d.Get(resourcesPrefix + "spot"),
+	"autoscalingMetricSpecs": d.Get(resourcesPrefix + "autoscaling_metric_specs"),
+}
+
+// The API omits these when they hold their zero value, so fall back to state
+// rather than reporting drift that isn't there.
+for apiKey, stateKey := range map[string]string{
+	"minReplicaCount":      "min_replica_count",
+	"maxReplicaCount":      "max_replica_count",
+	"requiredReplicaCount": "required_replica_count",
+} {
+	if v, ok := apiResources[apiKey]; ok {
+		dedicatedResources[apiKey] = v
+	} else {
+		dedicatedResources[apiKey] = d.Get(resourcesPrefix + stateKey)
+	}
+}
+
+res["deployConfig"] = map[string]interface{}{
+	"dedicatedResources": dedicatedResources,
+	"systemLabels":       d.Get("deploy_config.0.system_labels"),
+	"fastTryoutEnabled":  d.Get("deploy_config.0.fast_tryout_enabled"),
+}
+
+res["publisherModelName"] = d.Get("publisher_model_name")
+res["huggingFaceModelId"] = d.Get("hugging_face_model_id")
+res["deployedModelId"] = deployedModelId
+if v, ok := deployedModel["displayName"]; ok {
+	res["deployedModelDisplayName"] = v
+}
+
+return res, nil

@@ -34,5 +34,9 @@ go_test(
         "terraform_tgc_next_test.go",
     ],
     embed = [":provider"],
-    deps = ["//mmv1/api"],
+    deps = [
+        "//mmv1/api",
+        "//mmv1/api/product",
+        "//mmv1/google",
+    ],
 )

@@ -42,5 +42,9 @@ specific one.
 
 ## Subagents:
 
-*   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
+*   **`autogen`** (`.agents/agents/autogen/`): Generates new Terraform resources and acceptance tests from OpenAPI specifications using the autogen tool.
+*   **`qa-test-runner`** (`.agents/agents/qa-test-runner/`): Reproduces acceptance test failures and parses debug logs into structured API traces without modifying code.
 *   **`removal-auditor`** (`.agents/agents/removal-auditor/`): Audits deprecation status on `main`, sync status on the major release branch, and scans repository dependencies for resource and field removals.
+*   **`repo-sync`** (`.agents/agents/repo-sync/`): Initializes and synchronizes downstream provider repositories with Magic Modules to establish a clean verification baseline.
+*   **`test-fixer`** (`.agents/agents/test-fixer/`): Automates diagnosis, remediation in Magic Modules, provider generation, and re-testing for failing acceptance tests.
+*   **`test-monitor`** (`.agents/agents/test-monitor/`): Monitors nightly acceptance test runs, aggregates failures across a 7-day window, correlates GitHub issues, and produces test health reports.

@@ -65,7 +65,7 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           odb_network_id: '"tf-test-permanent-odbnetwork"'
           odb_subnet_id: fmt.Sprintf("tf-test-odbsubnet-%s", acctest.RandString(t, 10))
           cidr_range: fmt.Sprintf("10.1.%d.0/24", acctest.RandInt(t) % 200 + 10)

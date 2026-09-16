@@ -167,6 +167,51 @@ properties:
                             required: true
                             description: |
                               Required. Summary text for the section.
+                - name: toolCallInfo
+                  type: Array
+                  description: |
+                    List of request and response for tool calls executed.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: toolCall
+                        type: NestedObject
+                        required: true
+                        description: |
+                          Request for a tool call.
+                        properties:
+                          - name: tool
+                            type: String
+                            description: |
+                              The tool associated with this call.
+                          - name: action
+                            type: String
+                            description: |
+                              The name of the tool's action associated with this call.
+                      - name: toolCallResult
+                        type: NestedObject
+                        required: true
+                        description: |
+                          Response for a tool call.
+                        properties:
+                          - name: action
+                            type: String
+                            description: |
+                              The name of the tool's action associated with this call.
+                          - name: error
+                            type: NestedObject
+                            description: |
+                              An error produced by the tool call.
+                            properties:
+                              - name: message
+                                type: String
+                                description: |
+                                  The error message of the function.
+                              - name: retryable
+                                type: Boolean
+                                send_empty_value: true
+                                description: |
+                                  Specifies whether the tool call is retryable.
             - name: summarizationSectionList
               type: NestedObject
               description: |
