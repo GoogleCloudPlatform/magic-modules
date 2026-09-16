@@ -749,3 +749,11 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// IsApphubLeaseConflictError retries on App Hub FailedPrecondition error when the discovered service or workload is under a temporary registration lease.
+func IsApphubLeaseConflictError(err error) (bool, string) {
+	if err != nil && strings.Contains(strings.ToLower(err.Error()), "is under lease") {
+		return true, "Waiting for resource lease to be released or expire"
+	}
+	return false, ""
+}

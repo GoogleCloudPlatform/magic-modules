@@ -40,6 +40,7 @@ autogen_status: U2VydmljZQ==
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+  custom_create: 'templates/terraform/custom_create/apphub_service_workload_create.go.tmpl'
 samples:
   - name: apphub_service_basic
     primary_resource_id: example
