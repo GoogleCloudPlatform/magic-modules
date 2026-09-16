@@ -4809,7 +4809,7 @@ func TestAccComputeInstance_GracefulShutdownWithResetUpdate(t *testing.T) {
 		"instance_name":             instanceName,
 		"allow_stopping_for_update": fmt.Sprintf("allow_stopping_for_update = %t", true),
 		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 3601),
+		"seconds":                   fmt.Sprintf("seconds = %d", 86400),
 		"nanos":                     "",
 	}
 	ivalid_2 := map[string]interface{}{
@@ -4853,7 +4853,7 @@ func TestAccComputeInstance_GracefulShutdownWithResetUpdate(t *testing.T) {
 			},
 			{
 				Config:      testAccComputeInstance_GracefulShutdownUpdate(ivalid_1),
-				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 1 hour., invalid"),
+				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 6 hours., invalid"),
 			},
 			{
 				Config:      testAccComputeInstance_GracefulShutdownUpdate(ivalid_2),
@@ -4907,7 +4907,7 @@ func TestAccComputeInstance_GracefulShutdownWithoutResetUpdate(t *testing.T) {
 		"instance_name":             instanceName,
 		"allow_stopping_for_update": "",
 		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 3601),
+		"seconds":                   fmt.Sprintf("seconds = %d", 86400),
 		"nanos":                     "",
 	}
 	ivalid_4 := map[string]interface{}{
@@ -4956,7 +4956,7 @@ func TestAccComputeInstance_GracefulShutdownWithoutResetUpdate(t *testing.T) {
 			},
 			{
 				Config:      testAccComputeInstance_GracefulShutdownUpdate(ivalid_3),
-				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 1 hour., invalid"),
+				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 6 hours., invalid"),
 			},
 			{
 				Config:      testAccComputeInstance_GracefulShutdownUpdate(ivalid_4),
