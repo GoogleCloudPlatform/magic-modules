@@ -13,6 +13,10 @@
 
 ---
 name: CapabilityConfig
+api_variant_patterns:
+  - folders/{folder}/capabilityConfigs/{capabilityConfig}
+  - organizations/{organization}/capabilityConfigs/{capabilityConfig}
+  - projects/{project}/capabilityConfigs/{capabilityConfig}
 description: |-
   Capability configs define the enabled capabilities and their scope of
   enforcement for folders, organizations, or projects within the resource hierarchy.
@@ -28,7 +32,7 @@ delete_url: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
 update_verb: PATCH
 update_mask: true
 import_format:
-  - '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+  - '{{%parent}}/capabilityConfigs/{{capability_config_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -38,8 +42,6 @@ async:
     base_url: '{{op_id}}'
   actions: [create, update, delete]
 autogen_async: true
-custom_code:
-  custom_import: templates/terraform/custom_import/resource_manager_capability_config.go.tmpl
 samples:
   - name: resource_manager_capability_config_basic
     primary_resource_id: capability_config
