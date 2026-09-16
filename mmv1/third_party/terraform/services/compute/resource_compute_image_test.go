@@ -89,6 +89,8 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 	t.Parallel()
 
 	var image map[string]interface{}
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	imageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -96,7 +98,7 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeImage_basedondisk(acctest.RandString(t, 10), acctest.RandString(t, 10)),
+				Config: testAccComputeImage_basedondisk(diskName, imageName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeImageExists(
 						t, "google_compute_image.foobar", &image),
