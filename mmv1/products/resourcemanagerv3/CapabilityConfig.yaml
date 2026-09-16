@@ -1,0 +1,127 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CapabilityConfig
+description: |-
+  Capability configs define the enabled capabilities and their scope of
+  enforcement for folders, organizations, or projects within the resource hierarchy.
+references:
+  guides:
+    Official Documentation: https://docs.cloud.google.com/resource-manager/docs/manage-applications
+  api: https://docs.cloud.google.com/resource-manager/reference/rest
+base_url: '{{parent}}/capabilityConfigs'
+self_link: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+create_url: '{{parent}}/capabilityConfigs?capabilityConfigId={{capability_config_id}}'
+update_url: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+delete_url: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+update_verb: PATCH
+update_mask: true
+import_format:
+  - '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, update, delete]
+autogen_async: true
+custom_code:
+  custom_import: templates/terraform/custom_import/resource_manager_capability_config.go.tmpl
+samples:
+  - name: resource_manager_capability_config_basic
+    primary_resource_id: capability_config
+    steps:
+      - name: resource_manager_capability_config_basic
+        resource_id_vars:
+          capability_config_id: capcfg
+          display_name: capdisp
+        test_env_vars:
+          org_id: ORG_ID
+      - name: resource_manager_capability_config_update
+        resource_id_vars:
+          capability_config_id: capcfg
+        test_env_vars:
+          org_id: ORG_ID
+parameters:
+  - name: parent
+    type: String
+    description: |-
+      The parent resource in which to create the capability config.
+      Format: `folders/{folder_id}`, `organizations/{organization_id}`, or `projects/{project_id}`.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: capability_config_id
+    type: String
+    description: |-
+      User-specified identifier of the capability config. Must be 6 to 30 characters,
+      and contain only lowercase letters, numbers, and hyphens.
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      The identifier for the capability config.
+      Format: `{parent}/capabilityConfigs/{capability_config_id}`.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      User-defined name for the capability config. Must be between 4 and 30 characters.
+  - name: types
+    type: Array
+    description: |-
+      The capabilities enabled for the resource and its sub-tree.
+      Possible values: ["APP_MANAGEMENT", "AGENT_MANAGEMENT"].
+    required: true
+    item_type:
+      type: String
+  - name: managementProject
+    type: String
+    description: |-
+      The management project for the capability config.
+      Format: `projects/{project_number}`.
+    immutable: true
+    default_from_api: true
+  - name: boundaries
+    type: Array
+    description: |-
+      The boundaries associated with this capability config.
+      Format: `organizations/{organization}/boundaries/{boundary}`, `folders/{folder}/boundaries/{boundary}`, or `projects/{project}/boundaries/{boundary}`.
+    item_type:
+      type: String
+  - name: state
+    type: String
+    description: |-
+      The state of the capability config.
+    output: true
+  - name: etag
+    type: String
+    description: |-
+      An opaque tag indicating the current version of the capability config, used for concurrency control.
+    output: true
+  - name: createTime
+    type: Time
+    description: |-
+      The time when the capability config was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |-
+      The time when the capability config was last updated.
+    output: true
