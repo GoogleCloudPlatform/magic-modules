@@ -44,6 +44,9 @@ samples:
           persona_id: basic
         vars:
           display_name: "Test Analyst Persona"
+          customer_context: "Sample customer context for testing"
+          additional_context: "Initial additional context"
+          file_title: "financial_summary.txt"
           skill_description: "Skill for finance analysis"
           math_rendering_mode: "MATH_RENDERING_MODE_LATEX"
           excluded_domain: "example.com"
@@ -52,6 +55,9 @@ samples:
           persona_id: basic
         vars:
           display_name: "Updated Test Analyst Persona"
+          customer_context: "Updated customer context for testing"
+          additional_context: "Updated additional context"
+          file_title: "financial_summary_updated.txt"
           skill_description: "Updated skill description for finance analysis"
           math_rendering_mode: "MATH_RENDERING_MODE_PLAIN_TEXT"
           excluded_domain: "updated-example.com"
