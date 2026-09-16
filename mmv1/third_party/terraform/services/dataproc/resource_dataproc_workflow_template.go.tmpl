@@ -1658,16 +1658,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig
 				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
-				Deprecated:  "Use `type` instead.",
-				Description: "Optional. Deprecated: Use `type` instead. The disk type of the attached disk. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
-			},
-
-			"type": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Optional. Attached disk type. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
+				Description: "Optional. The disk type of the attached disk. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
 			},
 
 			"provisioned_iops": {
@@ -1996,16 +1987,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigD
 				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
-				Deprecated:  "Use `type` instead.",
-				Description: "Optional. Deprecated: Use `type` instead. The disk type of the attached disk. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
-			},
-
-			"type": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Optional. Attached disk type. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
+				Description: "Optional. The disk type of the attached disk. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
 			},
 
 			"provisioned_iops": {
@@ -2513,16 +2495,7 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig
 				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
-				Deprecated:  "Use `type` instead.",
-				Description: "Optional. Deprecated: Use `type` instead. The disk type of the attached disk. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
-			},
-
-			"type": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Optional. Attached disk type. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
+				Description: "Optional. The disk type of the attached disk. Currently only supports Hyperdisks: `hyperdisk-balanced`, `hyperdisk-extreme`, `hyperdisk-ml`, `hyperdisk-throughput`.",
 			},
 
 			"provisioned_iops": {
@@ -4339,18 +4312,9 @@ func expandDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDisk
 	}
 
 	obj := o.(map[string]interface{})
-	diskType := dcl.StringOrNil(obj["disk_type"].(string))
-	typeVal := dcl.StringOrNil(obj["type"].(string))
-	if typeVal == nil && diskType != nil {
-		typeVal = diskType
-	}
-	if diskType == nil && typeVal != nil {
-		diskType = typeVal
-	}
 	return &WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAttachedDiskConfig{
 		DiskSizeGb:            dcl.Int64OrNil(int64(obj["disk_size_gb"].(int))),
-		DiskType:              diskType,
-		Type:                  typeVal,
+		DiskType:              dcl.StringOrNil(obj["disk_type"].(string)),
 		ProvisionedIops:       dcl.Int64OrNil(int64(obj["provisioned_iops"].(int))),
 		ProvisionedThroughput: dcl.Int64OrNil(int64(obj["provisioned_throughput"].(int))),
 	}
@@ -4374,18 +4338,9 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigMasterConfigDis
 	if obj == nil || obj.Empty() {
 		return nil
 	}
-	diskType := obj.DiskType
-	typeVal := obj.Type
-	if diskType == nil && typeVal != nil {
-		diskType = typeVal
-	}
-	if typeVal == nil && diskType != nil {
-		typeVal = diskType
-	}
 	transformed := map[string]interface{}{
 		"disk_size_gb":           obj.DiskSizeGb,
-		"disk_type":              diskType,
-		"type":                   typeVal,
+		"disk_type":              obj.DiskType,
 		"provisioned_iops":       obj.ProvisionedIops,
 		"provisioned_throughput": obj.ProvisionedThroughput,
 	}
@@ -4729,18 +4684,9 @@ func expandDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerC
 	}
 
 	obj := o.(map[string]interface{})
-	diskType := dcl.StringOrNil(obj["disk_type"].(string))
-	typeVal := dcl.StringOrNil(obj["type"].(string))
-	if typeVal == nil && diskType != nil {
-		typeVal = diskType
-	}
-	if diskType == nil && typeVal != nil {
-		diskType = typeVal
-	}
 	return &WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigAttachedDiskConfig{
 		DiskSizeGb:            dcl.Int64OrNil(int64(obj["disk_size_gb"].(int))),
-		DiskType:              diskType,
-		Type:                  typeVal,
+		DiskType:              dcl.StringOrNil(obj["disk_type"].(string)),
 		ProvisionedIops:       dcl.Int64OrNil(int64(obj["provisioned_iops"].(int))),
 		ProvisionedThroughput: dcl.Int64OrNil(int64(obj["provisioned_throughput"].(int))),
 	}
@@ -4764,18 +4710,9 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigSecondaryWorker
 	if obj == nil || obj.Empty() {
 		return nil
 	}
-	diskType := obj.DiskType
-	typeVal := obj.Type
-	if diskType == nil && typeVal != nil {
-		diskType = typeVal
-	}
-	if typeVal == nil && diskType != nil {
-		typeVal = diskType
-	}
 	transformed := map[string]interface{}{
 		"disk_size_gb":           obj.DiskSizeGb,
-		"disk_type":              diskType,
-		"type":                   typeVal,
+		"disk_type":              obj.DiskType,
 		"provisioned_iops":       obj.ProvisionedIops,
 		"provisioned_throughput": obj.ProvisionedThroughput,
 	}
@@ -5231,18 +5168,9 @@ func expandDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDisk
 	}
 
 	obj := o.(map[string]interface{})
-	diskType := dcl.StringOrNil(obj["disk_type"].(string))
-	typeVal := dcl.StringOrNil(obj["type"].(string))
-	if typeVal == nil && diskType != nil {
-		typeVal = diskType
-	}
-	if diskType == nil && typeVal != nil {
-		diskType = typeVal
-	}
 	return &WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAttachedDiskConfig{
 		DiskSizeGb:            dcl.Int64OrNil(int64(obj["disk_size_gb"].(int))),
-		DiskType:              diskType,
-		Type:                  typeVal,
+		DiskType:              dcl.StringOrNil(obj["disk_type"].(string)),
 		ProvisionedIops:       dcl.Int64OrNil(int64(obj["provisioned_iops"].(int))),
 		ProvisionedThroughput: dcl.Int64OrNil(int64(obj["provisioned_throughput"].(int))),
 	}
@@ -5266,18 +5194,9 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDis
 	if obj == nil || obj.Empty() {
 		return nil
 	}
-	diskType := obj.DiskType
-	typeVal := obj.Type
-	if diskType == nil && typeVal != nil {
-		diskType = typeVal
-	}
-	if typeVal == nil && diskType != nil {
-		typeVal = diskType
-	}
 	transformed := map[string]interface{}{
 		"disk_size_gb":           obj.DiskSizeGb,
-		"disk_type":              diskType,
-		"type":                   typeVal,
+		"disk_type":              obj.DiskType,
 		"provisioned_iops":       obj.ProvisionedIops,
 		"provisioned_throughput": obj.ProvisionedThroughput,
 	}

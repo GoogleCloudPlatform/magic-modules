@@ -804,7 +804,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig) Ha
 type WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAttachedDiskConfig struct {
 	empty                 bool    `json:"-"`
 	DiskType              *string `json:"diskType"`
-	Type                  *string `json:"type"`
 	DiskSizeGb            *int64  `json:"diskSizeGb"`
 	ProvisionedIops       *int64  `json:"provisionedIops"`
 	ProvisionedThroughput *int64  `json:"provisionedThroughput"`
@@ -826,8 +825,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAtta
 	} else {
 
 		r.DiskType = res.DiskType
-
-		r.Type = res.Type
 
 		r.DiskSizeGb = res.DiskSizeGb
 
@@ -1253,7 +1250,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig) Ha
 type WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAttachedDiskConfig struct {
 	empty                 bool    `json:"-"`
 	DiskType              *string `json:"diskType"`
-	Type                  *string `json:"type"`
 	DiskSizeGb            *int64  `json:"diskSizeGb"`
 	ProvisionedIops       *int64  `json:"provisionedIops"`
 	ProvisionedThroughput *int64  `json:"provisionedThroughput"`
@@ -1275,8 +1271,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAtta
 	} else {
 
 		r.DiskType = res.DiskType
-
-		r.Type = res.Type
 
 		r.DiskSizeGb = res.DiskSizeGb
 
@@ -1702,7 +1696,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskC
 type WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigAttachedDiskConfig struct {
 	empty                 bool    `json:"-"`
 	DiskType              *string `json:"diskType"`
-	Type                  *string `json:"type"`
 	DiskSizeGb            *int64  `json:"diskSizeGb"`
 	ProvisionedIops       *int64  `json:"provisionedIops"`
 	ProvisionedThroughput *int64  `json:"provisionedThroughput"`
@@ -1724,8 +1717,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskC
 	} else {
 
 		r.DiskType = res.DiskType
-
-		r.Type = res.Type
 
 		r.DiskSizeGb = res.DiskSizeGb
 

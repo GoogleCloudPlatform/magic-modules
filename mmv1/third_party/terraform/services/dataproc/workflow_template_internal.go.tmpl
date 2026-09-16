@@ -2377,11 +2377,6 @@ func canonicalizeWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskCo
 	} else {
 		cDes.DiskType = des.DiskType
 	}
-	if dcl.StringCanonicalize(des.Type, initial.Type) || dcl.IsZeroValue(des.Type) {
-		cDes.Type = initial.Type
-	} else {
-		cDes.Type = des.Type
-	}
 	if dcl.IsZeroValue(des.DiskSizeGb) || (dcl.IsEmptyValueIndirect(des.DiskSizeGb) && dcl.IsEmptyValueIndirect(initial.DiskSizeGb)) {
 		// Desired and initial values are equivalent, so set canonical desired value to initial value.
 		cDes.DiskSizeGb = initial.DiskSizeGb
@@ -2448,9 +2443,6 @@ func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigMasterConfigDis
 
 	if dcl.StringCanonicalize(des.DiskType, nw.DiskType) {
 		nw.DiskType = des.DiskType
-	}
-	if dcl.StringCanonicalize(des.Type, nw.Type) {
-		nw.Type = des.Type
 	}
 
 	return nw
@@ -3340,11 +3332,6 @@ func canonicalizeWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskCo
 	} else {
 		cDes.DiskType = des.DiskType
 	}
-	if dcl.StringCanonicalize(des.Type, initial.Type) || dcl.IsZeroValue(des.Type) {
-		cDes.Type = initial.Type
-	} else {
-		cDes.Type = des.Type
-	}
 	if dcl.IsZeroValue(des.DiskSizeGb) || (dcl.IsEmptyValueIndirect(des.DiskSizeGb) && dcl.IsEmptyValueIndirect(initial.DiskSizeGb)) {
 		// Desired and initial values are equivalent, so set canonical desired value to initial value.
 		cDes.DiskSizeGb = initial.DiskSizeGb
@@ -3411,9 +3398,6 @@ func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDis
 
 	if dcl.StringCanonicalize(des.DiskType, nw.DiskType) {
 		nw.DiskType = des.DiskType
-	}
-	if dcl.StringCanonicalize(des.Type, nw.Type) {
-		nw.Type = des.Type
 	}
 
 	return nw
@@ -4213,11 +4197,6 @@ func canonicalizeWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerCon
 	} else {
 		cDes.DiskType = des.DiskType
 	}
-	if dcl.StringCanonicalize(des.Type, initial.Type) || dcl.IsZeroValue(des.Type) {
-		cDes.Type = initial.Type
-	} else {
-		cDes.Type = des.Type
-	}
 	if dcl.IsZeroValue(des.DiskSizeGb) || (dcl.IsEmptyValueIndirect(des.DiskSizeGb) && dcl.IsEmptyValueIndirect(initial.DiskSizeGb)) {
 		// Desired and initial values are equivalent, so set canonical desired value to initial value.
 		cDes.DiskSizeGb = initial.DiskSizeGb
@@ -4284,9 +4263,6 @@ func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigSecondaryWorker
 
 	if dcl.StringCanonicalize(des.DiskType, nw.DiskType) {
 		nw.DiskType = des.DiskType
-	}
-	if dcl.StringCanonicalize(des.Type, nw.Type) {
-		nw.Type = des.Type
 	}
 
 	return nw
@@ -10164,13 +10140,6 @@ func compareWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigA
 		diffs = append(diffs, ds...)
 	}
 
-	if ds, err := dcl.Diff(desired.Type, actual.Type, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("Type")); len(ds) != 0 || err != nil {
-		if err != nil {
-			return nil, err
-		}
-		diffs = append(diffs, ds...)
-	}
-
 	if ds, err := dcl.Diff(desired.DiskSizeGb, actual.DiskSizeGb, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("DiskSizeGb")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
@@ -10718,13 +10687,6 @@ func compareWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigA
 		diffs = append(diffs, ds...)
 	}
 
-	if ds, err := dcl.Diff(desired.Type, actual.Type, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("Type")); len(ds) != 0 || err != nil {
-		if err != nil {
-			return nil, err
-		}
-		diffs = append(diffs, ds...)
-	}
-
 	if ds, err := dcl.Diff(desired.DiskSizeGb, actual.DiskSizeGb, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("DiskSizeGb")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
@@ -11181,13 +11143,6 @@ func compareWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDi
 	}
 
 	if ds, err := dcl.Diff(desired.DiskType, actual.DiskType, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("DiskType")); len(ds) != 0 || err != nil {
-		if err != nil {
-			return nil, err
-		}
-		diffs = append(diffs, ds...)
-	}
-
-	if ds, err := dcl.Diff(desired.Type, actual.Type, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("Type")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -14567,9 +14522,6 @@ func expandWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAt
 	if v := f.DiskType; !dcl.IsEmptyValueIndirect(v) {
 		m["diskType"] = v
 	}
-	if v := f.Type; !dcl.IsEmptyValueIndirect(v) {
-		m["type"] = v
-	}
 	if v := f.DiskSizeGb; !dcl.IsEmptyValueIndirect(v) {
 		m["diskSizeGb"] = v
 	}
@@ -14597,13 +14549,6 @@ func flattenWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigA
 		return EmptyWorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAttachedDiskConfig
 	}
 	r.DiskType = dcl.FlattenString(m["diskType"])
-	r.Type = dcl.FlattenString(m["type"])
-	if r.DiskType == nil && r.Type != nil {
-		r.DiskType = r.Type
-	}
-	if r.Type == nil && r.DiskType != nil {
-		r.Type = r.DiskType
-	}
 	r.DiskSizeGb = dcl.FlattenInteger(m["diskSizeGb"])
 	r.ProvisionedIops = dcl.FlattenInteger(m["provisionedIops"])
 	r.ProvisionedThroughput = dcl.FlattenInteger(m["provisionedThroughput"])
@@ -15616,9 +15561,6 @@ func expandWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAt
 	if v := f.DiskType; !dcl.IsEmptyValueIndirect(v) {
 		m["diskType"] = v
 	}
-	if v := f.Type; !dcl.IsEmptyValueIndirect(v) {
-		m["type"] = v
-	}
 	if v := f.DiskSizeGb; !dcl.IsEmptyValueIndirect(v) {
 		m["diskSizeGb"] = v
 	}
@@ -15646,13 +15588,6 @@ func flattenWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigA
 		return EmptyWorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAttachedDiskConfig
 	}
 	r.DiskType = dcl.FlattenString(m["diskType"])
-	r.Type = dcl.FlattenString(m["type"])
-	if r.DiskType == nil && r.Type != nil {
-		r.DiskType = r.Type
-	}
-	if r.Type == nil && r.DiskType != nil {
-		r.Type = r.DiskType
-	}
 	r.DiskSizeGb = dcl.FlattenInteger(m["diskSizeGb"])
 	r.ProvisionedIops = dcl.FlattenInteger(m["provisionedIops"])
 	r.ProvisionedThroughput = dcl.FlattenInteger(m["provisionedThroughput"])
@@ -16499,9 +16434,6 @@ func expandWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDis
 	if v := f.DiskType; !dcl.IsEmptyValueIndirect(v) {
 		m["diskType"] = v
 	}
-	if v := f.Type; !dcl.IsEmptyValueIndirect(v) {
-		m["type"] = v
-	}
 	if v := f.DiskSizeGb; !dcl.IsEmptyValueIndirect(v) {
 		m["diskSizeGb"] = v
 	}
@@ -16529,13 +16461,6 @@ func flattenWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDi
 		return EmptyWorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigAttachedDiskConfig
 	}
 	r.DiskType = dcl.FlattenString(m["diskType"])
-	r.Type = dcl.FlattenString(m["type"])
-	if r.DiskType == nil && r.Type != nil {
-		r.DiskType = r.Type
-	}
-	if r.Type == nil && r.DiskType != nil {
-		r.Type = r.DiskType
-	}
 	r.DiskSizeGb = dcl.FlattenInteger(m["diskSizeGb"])
 	r.ProvisionedIops = dcl.FlattenInteger(m["provisionedIops"])
 	r.ProvisionedThroughput = dcl.FlattenInteger(m["provisionedThroughput"])
