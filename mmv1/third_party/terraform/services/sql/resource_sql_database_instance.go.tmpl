@@ -251,6 +251,9 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
 			activeDirectoryCustomizeDiff,
+			{{- if ne $.TargetVersionName "ga" }}
+			blueGreenDeploymentCustomizeDiff,
+			{{- end }}
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
@@ -2813,6 +2816,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
 	    return err
 	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if err := readBlueGreenDeployment(d, config, project, instance.Name, instance.Region, userAgent); err != nil {
+		return err
+	}
+	{{- end }}
 	
 
 	return nil
@@ -3321,6 +3329,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
            return err
          }
       }
+
+	{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, userAgent); err != nil {
+			return err
+		}
+	}
+	{{- end }}
 
       return resourceSqlDatabaseInstanceRead(d, meta)
 }
@@ -4319,6 +4335,239 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 	}
 	return fmt.Sprintf("%s:%s", project, drReplicaName)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if !d.HasChange("blue_green_deployment") {
+		return nil
+	}
+
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	oldList := oldVal.([]interface{})
+	newList := newVal.([]interface{})
+
+	if len(oldList) == 0 && len(newList) > 0 && newList[0] != nil {
+		newMap := newList[0].(map[string]interface{})
+		newName, _ := newMap["deployment_name"].(string)
+		newEnv, _ := newMap["active_environment"].(string)
+		if newEnv == "TARGET" {
+			return fmt.Errorf(
+				"cannot create new Blue-Green Deployment %q with active_environment = %q: initial active_environment must be \"SOURCE\"",
+				newName, newEnv,
+			)
+		}
+	}
+
+	if len(oldList) > 0 && len(newList) > 0 && oldList[0] != nil && newList[0] != nil {
+		oldMap := oldList[0].(map[string]interface{})
+		newMap := newList[0].(map[string]interface{})
+
+		oldName, _ := oldMap["deployment_name"].(string)
+		newName, _ := newMap["deployment_name"].(string)
+		if oldName != "" && newName != "" && oldName != newName {
+			return fmt.Errorf(
+				"cannot create new Blue-Green Deployment %q: Blue-Green Deployment %q already exists on instance %q. No new Blue-Green Deployment can be created when one already exists",
+				newName, oldName, d.Get("name").(string),
+			)
+		}
+
+		oldDbVer, _ := oldMap["target_database_version"].(string)
+		newDbVer, _ := newMap["target_database_version"].(string)
+		if oldDbVer != newDbVer {
+			return fmt.Errorf(
+				"cannot change target_database_version from %q to %q on existing Blue-Green Deployment %q: target_database_version is immutable after creation",
+				oldDbVer, newDbVer, oldName,
+			)
+		}
+	}
+
+	return nil
+}
+
+func getInstanceDeploymentId(config *transport_tpg.Config, project, instanceName, userAgent string) (string, error) {
+	inst, err := NewClient(config, userAgent).Instances.Get(project, instanceName).Do()
+	if err != nil {
+		return "", err
+	}
+	if inst != nil && inst.DeploymentInfo != nil {
+		return inst.DeploymentInfo.DeploymentId, nil
+	}
+	return "", nil
+}
+
+func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, userAgent string) error {
+	deploymentName := ""
+	if depId, err := getInstanceDeploymentId(config, project, instanceName, userAgent); err == nil && depId != "" {
+		deploymentName = depId
+	} else if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+		bgdStateMap := v.([]interface{})[0].(map[string]interface{})
+		if name, ok := bgdStateMap["deployment_name"].(string); ok {
+			deploymentName = name
+		}
+	}
+
+	if deploymentName == "" {
+		if err := d.Set("blue_green_deployment", nil); err != nil {
+			return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
+		}
+		return nil
+	}
+
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
+	bgdRes, err := NewClient(config, userAgent).BlueGreenDeployments.Get(bgdName).Do()
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			if err := d.Set("blue_green_deployment", nil); err != nil {
+				return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
+			}
+			return nil
+		}
+		return fmt.Errorf("Error reading BlueGreenDeployment %q: %s", deploymentName, err)
+	}
+
+	targetDbVersion := ""
+	if bgdRes.RequestedConfig != nil && bgdRes.RequestedConfig.DatabaseVersion != "" {
+		targetDbVersion = bgdRes.RequestedConfig.DatabaseVersion
+	}
+	if targetDbVersion == "" {
+		if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			bgdStateMap := v.([]interface{})[0].(map[string]interface{})
+			if dbVer, ok := bgdStateMap["target_database_version"].(string); ok {
+				targetDbVersion = dbVer
+			}
+		}
+	}
+
+	activeEnv := "SOURCE"
+	if bgdRes.State == "SWITCHOVER_COMPLETED" || bgdRes.State == "SWITCHOVER_IN_PROGRESS" {
+		activeEnv = "TARGET"
+	}
+
+	deleteOldSource := false
+	if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+		bgdStateMap := v.([]interface{})[0].(map[string]interface{})
+		if val, ok := bgdStateMap["delete_old_source_on_destroy"].(bool); ok {
+			deleteOldSource = val
+		}
+	}
+
+	targetInstanceName := bgdRes.SwitchoverTargetInstance
+	targetConnName := ""
+	targetIpAddresses := []map[string]interface{}{}
+	if targetInstanceName != "" {
+		targetInst, err := NewClient(config, userAgent).Instances.Get(project, targetInstanceName).Do()
+		if err == nil && targetInst != nil {
+			targetInstanceName = targetInst.Name
+			targetConnName = targetInst.ConnectionName
+			targetIpAddresses = flattenIpAddresses(targetInst.IpAddresses)
+		}
+	}
+
+	oldSourceInstanceName := ""
+	oldSourceConnName := ""
+	if activeEnv == "TARGET" && bgdRes.SourceInstance != "" {
+		oldSourceInstanceName = bgdRes.SourceInstance
+		oldInst, err := NewClient(config, userAgent).Instances.Get(project, oldSourceInstanceName).Do()
+		if err == nil && oldInst != nil {
+			oldSourceInstanceName = oldInst.Name
+			oldSourceConnName = oldInst.ConnectionName
+		}
+	}
+
+	bgdMap := map[string]interface{}{
+		"deployment_name":                     deploymentName,
+		"target_database_version":             targetDbVersion,
+		"active_environment":                  activeEnv,
+		"delete_old_source_on_destroy":        deleteOldSource,
+		"target_instance_name":                targetInstanceName,
+		"target_instance_connection_name":     targetConnName,
+		"target_instance_ip_addresses":        targetIpAddresses,
+		"old_source_instance_name":            oldSourceInstanceName,
+		"old_source_instance_connection_name": oldSourceConnName,
+	}
+
+	if err := d.Set("blue_green_deployment", []map[string]interface{}{bgdMap}); err != nil {
+		return fmt.Errorf("Error setting blue_green_deployment: %s", err)
+	}
+
+	return nil
+}
+
+func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_tpg.Config, project, userAgent string) error {
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	oldList := oldVal.([]interface{})
+	newList := newVal.([]interface{})
+
+	instanceName := d.Get("name").(string)
+	region := d.Get("region").(string)
+
+	// Case 1: Adding a new blue_green_deployment block
+	if len(oldList) == 0 && len(newList) > 0 && newList[0] != nil {
+		newMap := newList[0].(map[string]interface{})
+		deploymentName, _ := newMap["deployment_name"].(string)
+		targetDbVersion, _ := newMap["target_database_version"].(string)
+
+		return createBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, targetDbVersion, userAgent)
+	}
+
+	// Case 2: Removing an existing blue_green_deployment block (or deleting out-of-band BGD in Scenario A)
+	if len(oldList) > 0 && len(newList) == 0 {
+		// TODO: Implement delete Blue-Green Deployment logic in future PR
+		return nil
+	}
+
+	// Case 3: Modifying an existing blue_green_deployment block
+	if len(oldList) > 0 && len(newList) > 0 && oldList[0] != nil && newList[0] != nil {
+		oldMap := oldList[0].(map[string]interface{})
+		newMap := newList[0].(map[string]interface{})
+		oldName, _ := oldMap["deployment_name"].(string)
+		newName, _ := newMap["deployment_name"].(string)
+
+		if oldName != "" && newName != "" && oldName != newName {
+			return fmt.Errorf(
+				"cannot create new Blue-Green Deployment %q: Blue-Green Deployment %q already exists on instance %q. No new Blue-Green Deployment can be created when one already exists",
+				newName, oldName, instanceName,
+			)
+		}
+	}
+
+	return nil
+}
+
+func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, targetDbVersion, userAgent string) error {
+	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
+	bgdReq := &sqladmin.BlueGreenDeployment{
+		SourceInstance: instanceName,
+	}
+	if targetDbVersion != "" {
+		bgdReq.RequestedConfig = &sqladmin.RequestedConfig{
+			DatabaseVersion: targetDbVersion,
+		}
+	}
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Create(parent, bgdReq).BlueGreenDeploymentId(deploymentName).Do()
+			return rerr
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error creating Blue-Green Deployment %q on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	err = SqlAdminOperationWaitTime(
+		config, op, project, "Creating Blue-Green Deployment", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return fmt.Errorf("Error waiting for Blue-Green Deployment %q creation on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	return nil
+}
+{{- end }}
 
 func init() {
 	registry.Schema{
