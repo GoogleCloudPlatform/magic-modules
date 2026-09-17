@@ -150,6 +150,7 @@ samples:
         resource_id_vars:
           network_name: network-reserved-internal-range
           subnetwork_name: subnetwork-reserved-internal-range
+          internal_range_name: reserved
   - name: subnetwork_reserved_secondary_range
     primary_resource_id: subnetwork-reserved-secondary-range
     min_version: beta

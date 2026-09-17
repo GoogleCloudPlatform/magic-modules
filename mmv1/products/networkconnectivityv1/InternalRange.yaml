@@ -73,6 +73,7 @@ samples:
         resource_id_vars:
           internal_range_name: overlap-range
           network_name: internal-ranges
+          subnetwork_name: overlapping-subnet
   - name: network_connectivity_internal_ranges_migration
     primary_resource_id: default
     steps:

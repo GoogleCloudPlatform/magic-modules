@@ -37,6 +37,8 @@ samples:
       - name: vmware_engine_network_peering_ven
         resource_id_vars:
           name: sample-network-peering
+          network_name: default-np-nw
+          peer_network_name: peer-np-nw
         test_env_vars:
           region: REGION
   - name: vmware_engine_network_peering_standard
@@ -45,6 +47,8 @@ samples:
       - name: vmware_engine_network_peering_standard
         resource_id_vars:
           name: sample-network-peering
+          vpc_name: default-vpc
+          network_name: default-standard-nw-np
         test_env_vars:
           region: REGION
 parameters:
