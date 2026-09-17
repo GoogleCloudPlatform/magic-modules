@@ -2663,10 +2663,8 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
 	if instance.DiskEncryptionConfiguration != nil {
-		if instance.DiskEncryptionConfiguration.KmsKeyName != "" {
-			if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
-				return fmt.Errorf("Error setting encryption_key_name: %s", err)
-			}
+		if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
+			return fmt.Errorf("Error setting encryption_key_name: %s", err)
 		}
 		if err := d.Set("encryption_confidential_mode", instance.DiskEncryptionConfiguration.ConfidentialMode); err != nil {
 			return fmt.Errorf("Error setting encryption_confidential_mode: %s", err)
