@@ -66,6 +66,7 @@ samples:
           org_id: ORG_ID
   - name: resource_manager_capability_config_folder
     primary_resource_id: capability_config
+    external_providers: [time]
     steps:
       - name: resource_manager_capability_config_folder
         resource_id_vars:
