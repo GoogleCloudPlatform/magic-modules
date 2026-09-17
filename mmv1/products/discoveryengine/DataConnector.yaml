@@ -303,6 +303,10 @@ properties:
     description: |
       Action configuration for the data connector. Configures action
       capabilities for connectors that support the ACTIONS connector mode.
+    update_mask_fields:
+      - 'actionConfig.actionParams'
+      - 'actionConfig.createBapConnection'
+    custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_data_connector_action_config.go.tmpl'
     properties:
       - name: 'actionParams'
         type: KeyValuePairs
@@ -310,6 +314,8 @@ properties:
           Params needed to configure the actions in the format of
           String-to-String (Key, Value) pairs. Contains connection
           credentials and configuration for the action connector.
+        # Secret credential keys (e.g. client_secret) are redacted/omitted by the API on GET.
+        # actionConfig custom_flatten hydrates non-secret keys on import and merges prior state secrets on read.
         ignore_read: true
       - name: 'isActionConfigured'
         type: Boolean
@@ -322,7 +328,7 @@ properties:
         description: |
           Whether to create a BAP (Business Application Platform) connection
           for this action connector.
-        ignore_read: true
+        default_from_api: true
   - name: 'bapConfig'
     type: NestedObject
     description: |
@@ -461,7 +467,7 @@ properties:
     type: Boolean
     description: |
       Indicates whether full syncs are paused for this connector
-    ignore_read: true
+    default_from_api: true
   - name: 'incrementalSyncDisabled'
     type: Boolean
     description: |
