@@ -176,3 +176,23 @@ properties:
         enum_values:
           - ALL_TRAFFIC
           - PRIVATE_RANGES_ONLY
+      - name: tlsConfig
+        type: NestedObject
+        description: |
+          The TLS configuration for the egress traffic.
+        properties:
+          - name: trustConfig
+            type: String
+            immutable: true
+            description: |
+              The trust config resource name.
+              Format: projects/{project}/locations/{location}/trustConfigs/{trust_config}
+          - name: additionalRoots
+            type: Enum
+            required: true
+            immutable: true
+            description: |
+              Defines whether additional roots should be trusted.
+            enum_values:
+              - NO_ADDITIONAL_ROOTS
+              - PUBLICLY_TRUSTED_ROOTS
