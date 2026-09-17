@@ -34,6 +34,7 @@ sweeper:
   url_substitutions:
     - region: us-central1
     - region: us-west1
+    - region: us-east1
 timeouts:
   insert_minutes: 10
   update_minutes: 20
@@ -76,7 +77,7 @@ samples:
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
-          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
           prevent_destroy: "false"
   - name: dataproc_batch_sparksql
     primary_resource_id: example_batch_sparsql

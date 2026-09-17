@@ -21,7 +21,7 @@ func testSweepDataprocCluster(region string) error {
 	resourceName := "DataprocCluster"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
-	regions := []string{"us-central1", "us-west1"}
+	regions := []string{"us-central1", "us-west1", "us-east1"}
 	for _, r := range regions {
 		config, err := sweeper.SharedConfigForRegion(r)
 		if err != nil {

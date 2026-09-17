@@ -662,7 +662,7 @@ func matchError(attr, tf interface{}, gcp interface{}) string {
 var singleNodeClusterConfig = `
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-job-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     # Keep the costs down with smallest config we can get away with
@@ -674,8 +674,9 @@ resource "google_dataproc_cluster" "basic" {
 
     master_config {
       num_instances = 1
-      machine_type  = "e2-standard-2"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }

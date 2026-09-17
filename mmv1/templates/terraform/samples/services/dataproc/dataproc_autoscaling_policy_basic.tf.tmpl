@@ -1,6 +1,6 @@
 resource "google_dataproc_autoscaling_policy" "{{$.PrimaryResourceId}}" {
   policy_id = "{{index $.ResourceIdVars "name"}}"
-  location  = "us-west1"
+  location  = "us-east1"
 
   worker_config {
     max_instances = 3

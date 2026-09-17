@@ -159,7 +159,7 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 
 	project := envvar.GetTestProjectFromEnv()
 	acceleratorType := "nvidia-tesla-t4"
-	zone := "us-west1-a"
+	zone := "us-east1-b"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
 	subnetworkName := BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
@@ -666,7 +666,7 @@ func TestAccDataprocCluster_spotWithInstanceFlexibilityPolicy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.spot_with_instance_flexibility_policy", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "3"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_size_gb", "40"),
 				),
@@ -679,9 +679,9 @@ func TestAccDataprocCluster_allInstanceFlexibilityPolicy(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
-	expectedMasterMachines := []string{"n2d-standard-2", "e2-standard-2"}
-	expectedWorkerMachines := []string{"n2d-standard-2", "e2-standard-2"}
-	expectedPreemptibleWorkerMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	expectedMasterMachines := []string{"n4-standard-2", "n4-standard-4"}
+	expectedWorkerMachines := []string{"n4-standard-2", "n4-standard-4"}
+	expectedPreemptibleWorkerMachines := []string{"n4-standard-2", "n4-standard-4"}
 	var cluster dataproc.Cluster
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -692,9 +692,9 @@ func TestAccDataprocCluster_allInstanceFlexibilityPolicy(t *testing.T) {
 				Config: testAccDataprocCluster_allInstanceFlexibilityPolicy(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.all_instance_flexibility_policy", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
@@ -711,7 +711,7 @@ func TestAccDataprocCluster_masterInstanceFlexibilityPolicy(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
-	expectedMasterMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	expectedMasterMachines := []string{"n4-standard-2", "n4-standard-4"}
 	var cluster dataproc.Cluster
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -722,7 +722,7 @@ func TestAccDataprocCluster_masterInstanceFlexibilityPolicy(t *testing.T) {
 				Config: testAccDataprocCluster_masterInstanceFlexibilityPolicy(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.master_instance_flexibility_policy", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
 					resource.TestCheckResourceAttrWith("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedMasterMachines)),
 				),
@@ -757,7 +757,7 @@ func TestAccDataprocCluster_workerInstanceFlexibilityPolicy(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(t, 10)
-	expectedWorkerMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	expectedWorkerMachines := []string{"n4-standard-2", "n4-standard-4"}
 	var cluster dataproc.Cluster
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -768,12 +768,12 @@ func TestAccDataprocCluster_workerInstanceFlexibilityPolicy(t *testing.T) {
 				Config: testAccDataprocCluster_workerInstanceFlexibilityPolicy(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.worker_instance_flexibility_policy", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
 					resource.TestCheckResourceAttrWith("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedWorkerMachines)),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_size_gb", "35"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "pd-ssd"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
 				),
 			},
 		},
@@ -1431,8 +1431,8 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	pid := envvar.GetTestProjectFromEnv()
 	basicServiceId := "tf-test-metastore-srv-" + acctest.RandString(t, 10)
 	updateServiceId := "tf-test-metastore-srv-update-" + acctest.RandString(t, 10)
-	msName_basic := fmt.Sprintf("projects/%s/locations/us-west1/services/%s", pid, basicServiceId)
-	msName_update := fmt.Sprintf("projects/%s/locations/us-west1/services/%s", pid, updateServiceId)
+	msName_basic := fmt.Sprintf("projects/%s/locations/us-east1/services/%s", pid, basicServiceId)
+	msName_update := fmt.Sprintf("projects/%s/locations/us-east1/services/%s", pid, updateServiceId)
 
 	var cluster dataproc.Cluster
 	clusterName := "tf-test-" + acctest.RandString(t, 10)
@@ -1510,7 +1510,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_dataproc_cluster" "tier_cluster" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 	%s
@@ -1588,7 +1588,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_dataproc_cluster" "engine_cluster" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 	%s
@@ -1665,7 +1665,7 @@ func testAccDataprocCluster_withClusterTypeSingleNode(rnd, subnetworkName string
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "type_cluster" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 	cluster_type = "SINGLE_NODE"
@@ -1696,7 +1696,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_dataproc_cluster" "type_cluster" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 	cluster_type = "ZERO_SCALE"
@@ -1872,26 +1872,23 @@ func validateDataprocCluster_withConfigOverrides(n string, cluster *dataproc.Clu
 			{"cluster_config.0.master_config.0.num_instances", "3", strconv.Itoa(int(cluster.Config.MasterConfig.NumInstances))},
 			{"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb", "35", strconv.Itoa(int(cluster.Config.MasterConfig.DiskConfig.BootDiskSizeGb))},
 			{"cluster_config.0.master_config.0.disk_config.0.num_local_ssds", "0", strconv.Itoa(int(cluster.Config.MasterConfig.DiskConfig.NumLocalSsds))},
-			{"cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "pd-ssd", cluster.Config.MasterConfig.DiskConfig.BootDiskType},
-			{"cluster_config.0.master_config.0.disk_config.0.local_ssd_interface", "nvme", cluster.Config.MasterConfig.DiskConfig.LocalSsdInterface},
-			{"cluster_config.0.master_config.0.machine_type", "n1-standard-2", tpgresource.GetResourceNameFromSelfLink(cluster.Config.MasterConfig.MachineTypeUri)},
+			{"cluster_config.0.master_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced", cluster.Config.MasterConfig.DiskConfig.BootDiskType},
+			{"cluster_config.0.master_config.0.machine_type", "n4-standard-2", tpgresource.GetResourceNameFromSelfLink(cluster.Config.MasterConfig.MachineTypeUri)},
 			{"cluster_config.0.master_config.0.instance_names.#", "3", strconv.Itoa(len(cluster.Config.MasterConfig.InstanceNames))},
-			{"cluster_config.0.master_config.0.min_cpu_platform", "Intel Skylake", cluster.Config.MasterConfig.MinCpuPlatform},
+			{"cluster_config.0.master_config.0.min_cpu_platform", "Intel Emerald Rapids", cluster.Config.MasterConfig.MinCpuPlatform},
 
 			{"cluster_config.0.worker_config.0.num_instances", "3", strconv.Itoa(int(cluster.Config.WorkerConfig.NumInstances))},
 			{"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb", "35", strconv.Itoa(int(cluster.Config.WorkerConfig.DiskConfig.BootDiskSizeGb))},
-			{"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds", "1", strconv.Itoa(int(cluster.Config.WorkerConfig.DiskConfig.NumLocalSsds))},
-			{"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type", "pd-standard", cluster.Config.WorkerConfig.DiskConfig.BootDiskType},
-			{"cluster_config.0.worker_config.0.disk_config.0.local_ssd_interface", "scsi", cluster.Config.WorkerConfig.DiskConfig.LocalSsdInterface},
-			{"cluster_config.0.worker_config.0.machine_type", "n1-standard-2", tpgresource.GetResourceNameFromSelfLink(cluster.Config.WorkerConfig.MachineTypeUri)},
+			{"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds", "0", strconv.Itoa(int(cluster.Config.WorkerConfig.DiskConfig.NumLocalSsds))},
+			{"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced", cluster.Config.WorkerConfig.DiskConfig.BootDiskType},
+			{"cluster_config.0.worker_config.0.machine_type", "n4-standard-2", tpgresource.GetResourceNameFromSelfLink(cluster.Config.WorkerConfig.MachineTypeUri)},
 			{"cluster_config.0.worker_config.0.instance_names.#", "3", strconv.Itoa(len(cluster.Config.WorkerConfig.InstanceNames))},
-			{"cluster_config.0.worker_config.0.min_cpu_platform", "Intel Broadwell", cluster.Config.WorkerConfig.MinCpuPlatform},
+			{"cluster_config.0.worker_config.0.min_cpu_platform", "Intel Emerald Rapids", cluster.Config.WorkerConfig.MinCpuPlatform},
 
 			{"cluster_config.0.preemptible_worker_config.0.num_instances", "1", strconv.Itoa(int(cluster.Config.SecondaryWorkerConfig.NumInstances))},
 			{"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_size_gb", "35", strconv.Itoa(int(cluster.Config.SecondaryWorkerConfig.DiskConfig.BootDiskSizeGb))},
-			{"cluster_config.0.preemptible_worker_config.0.disk_config.0.num_local_ssds", "1", strconv.Itoa(int(cluster.Config.SecondaryWorkerConfig.DiskConfig.NumLocalSsds))},
-			{"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type", "pd-ssd", cluster.Config.SecondaryWorkerConfig.DiskConfig.BootDiskType},
-			{"cluster_config.0.preemptible_worker_config.0.disk_config.0.local_ssd_interface", "nvme", cluster.Config.SecondaryWorkerConfig.DiskConfig.LocalSsdInterface},
+			{"cluster_config.0.preemptible_worker_config.0.disk_config.0.num_local_ssds", "0", strconv.Itoa(int(cluster.Config.SecondaryWorkerConfig.DiskConfig.NumLocalSsds))},
+			{"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced", cluster.Config.SecondaryWorkerConfig.DiskConfig.BootDiskType},
 			{"cluster_config.0.preemptible_worker_config.0.instance_names.#", "1", strconv.Itoa(len(cluster.Config.SecondaryWorkerConfig.InstanceNames))},
 		}
 
@@ -2006,7 +2003,7 @@ func testAccDataprocCluster_basic(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 }
 `, rnd)
 }
@@ -2019,7 +2016,7 @@ data "google_project" "project" {
 
 resource "google_container_cluster" "primary" {
   name     = "tf-test-gke-%s"
-  location = "us-west1-a"
+  location = "us-east1-b"
   network    = "%s"
   subnetwork    = "%s"
 
@@ -2048,7 +2045,7 @@ resource "google_dataproc_cluster" "virtual_cluster" {
 	]
   
 	name   	= "tf-test-dproc-%s"
-	region  = "us-west1"
+	region  = "us-east1"
   
 	virtual_cluster_config {
 	  kubernetes_cluster_config {
@@ -2090,7 +2087,7 @@ func testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone, subnetw
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "accelerated_cluster" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     software_config {
@@ -2140,7 +2137,7 @@ resource "google_compute_subnetwork" "dataproc_subnetwork" {
   name                     = "tf-test-dproc-subnet-%s"
   ip_cidr_range            = var.subnetwork_cidr
   network                  = google_compute_network.dataproc_network.self_link
-  region                   = "us-west1"
+  region                   = "us-east1"
   private_ip_google_access = true
 }
 
@@ -2175,7 +2172,7 @@ resource "google_compute_firewall" "dataproc_network_firewall" {
 
 resource "google_dataproc_cluster" "basic" {
   name       = "tf-test-dproc-%s"
-  region     = "us-west1"
+  region     = "us-east1"
   depends_on = [google_compute_firewall.dataproc_network_firewall]
 
   cluster_config {
@@ -2197,7 +2194,7 @@ func testAccDataprocCluster_withShieldedConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2216,7 +2213,7 @@ func testAccDataprocCluster_withConfidentialCompute(rnd, subnetworkName string, 
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "confidential" {
     name   = "tf-test-dproc-%s"
-    region = "us-west1"
+    region = "us-east1"
 
     cluster_config {
         gce_cluster_config {
@@ -2246,7 +2243,7 @@ func testAccDataprocCluster_withConfidentialComputeType(rnd, subnetworkName, ima
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "confidential_type" {
     name   = "tf-test-dproc-%s"
-    region = "us-west1"
+    region = "us-east1"
 
 
     cluster_config {
@@ -2277,7 +2274,7 @@ func testAccDataprocCluster_withMetadataAndTags(rnd, subnetworkName string) stri
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2317,7 +2314,7 @@ resource "google_tags_tag_value" "tag_value_2" {
 
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2336,7 +2333,7 @@ func testAccDataprocCluster_withMinNumInstances(rnd, subnetworkName string) stri
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_min_num_instances" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
  
   cluster_config {
     gce_cluster_config {
@@ -2359,12 +2356,12 @@ func testAccDataprocCluster_withReservationAffinity(rnd, subnetworkName string) 
 
 resource "google_compute_reservation" "reservation" {
   name = "tf-test-dproc-reservation-%s"
-  zone = "us-west1-a"
+  zone = "us-east1-b"
 
   specific_reservation {
     count = 10
     instance_properties {
-      machine_type = "n1-standard-2"
+      machine_type = "n4-standard-2"
     }
   }
   specific_reservation_required = true
@@ -2372,20 +2369,28 @@ resource "google_compute_reservation" "reservation" {
 
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     master_config {
-      machine_type  = "n1-standard-2"
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
+        boot_disk_size_gb = 35
+      }
     }
 
     worker_config {
-      machine_type  = "n1-standard-2"
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
+        boot_disk_size_gb = 35
+      }
     }
 
     gce_cluster_config {
       subnetwork = "%s"
-      zone = "us-west1-a"
+      zone = "us-east1-b"
       reservation_affinity {
         consume_reservation_type = "SPECIFIC_RESERVATION"
         key = "compute.googleapis.com/reservation-name"
@@ -2401,7 +2406,7 @@ func testAccDataprocCluster_withDataprocMetricConfig(rnd, subnetworkName string)
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2428,7 +2433,7 @@ func testAccDataprocCluster_withNodeGroupAffinity(rnd, subnetworkName string) st
 
 resource "google_compute_node_template" "nodetmpl" {
   name   = "test-nodetmpl-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   node_affinity_labels = {
     tfacc = "test"
@@ -2441,7 +2446,7 @@ resource "google_compute_node_template" "nodetmpl" {
 
 resource "google_compute_node_group" "nodes" {
   name = "test-nodegroup-%s"
-  zone = "us-west1-a"
+  zone = "us-east1-b"
 
   initial_size	= 3
   node_template = google_compute_node_template.nodetmpl.self_link
@@ -2449,7 +2454,7 @@ resource "google_compute_node_group" "nodes" {
 
 resource "google_dataproc_cluster" "basic" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     master_config {
@@ -2463,7 +2468,7 @@ resource "google_dataproc_cluster" "basic" {
     }
     gce_cluster_config {
       subnetwork = "%s"
-      zone = "us-west1-a"
+      zone = "us-east1-b"
       node_group_affinity {
         node_group_uri = google_compute_node_group.nodes.name
       }
@@ -2477,7 +2482,7 @@ func testAccDataprocCluster_singleNodeCluster(rnd, subnetworkName string) string
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "single_node_cluster" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2499,7 +2504,7 @@ func testAccDataprocCluster_withConfigOverrides(rnd, subnetworkName string) stri
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_config_overrides" {
   name     = "tf-test-dproc-%s"
-  region   = "us-west1"
+  region   = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2507,35 +2512,30 @@ resource "google_dataproc_cluster" "with_config_overrides" {
     }
     master_config {
       num_instances = 3
-      machine_type  = "n1-standard-2"  // can't be e2 because of min_cpu_platform
+      machine_type  = "n4-standard-2"
       disk_config {
-        boot_disk_type    = "pd-ssd"
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
-        local_ssd_interface = "nvme"
       }
-      min_cpu_platform = "Intel Skylake"
+      min_cpu_platform = "Intel Emerald Rapids"
     }
 
     worker_config {
       num_instances = 3
-      machine_type  = "n1-standard-2"  // can't be e2 because of min_cpu_platform
+      machine_type  = "n4-standard-2"
       disk_config {
-        boot_disk_type    = "pd-standard"
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
-        num_local_ssds    = 1
-        local_ssd_interface = "scsi"
       }
 
-      min_cpu_platform = "Intel Broadwell"
+      min_cpu_platform = "Intel Emerald Rapids"
     }
 
     preemptible_worker_config {
       num_instances = 1
       disk_config {
-        boot_disk_type    = "pd-ssd"
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
-        num_local_ssds    = 1
-        local_ssd_interface = "nvme"
       }
     }
   }
@@ -2564,7 +2564,7 @@ EOL
 
 resource "google_dataproc_cluster" "with_init_action" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2573,15 +2573,15 @@ resource "google_dataproc_cluster" "with_init_action" {
 
     # Keep the costs down with smallest config we can get away with
     software_config {
-      image_version = "2.0.35-debian10"
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2602,22 +2602,24 @@ func testAccDataprocCluster_updatable(rnd string, w, p int) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "updatable" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
   graceful_decommission_timeout = "0.2s"
 
   cluster_config {
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
 
     worker_config {
       num_instances = "%d"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2625,6 +2627,7 @@ resource "google_dataproc_cluster" "updatable" {
     preemptible_worker_config {
       num_instances = "%d"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2637,7 +2640,7 @@ func testAccDataprocCluster_nonPreemptibleSecondary(rnd, subnetworkName string) 
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "non_preemptible_secondary" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2646,16 +2649,18 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
   
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2664,6 +2669,7 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
       num_instances = "1"
       preemptibility = "NON_PREEMPTIBLE"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2676,7 +2682,7 @@ func testAccDataprocCluster_spotSecondary(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "spot_secondary" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2685,16 +2691,18 @@ resource "google_dataproc_cluster" "spot_secondary" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2703,6 +2711,7 @@ resource "google_dataproc_cluster" "spot_secondary" {
       num_instances = "1"
       preemptibility = "SPOT"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2714,22 +2723,23 @@ func testAccDataprocCluster_allInstanceFlexibilityPolicy(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "all_instance_flexibility_policy" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
     master_config {
       num_instances = "1"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
 			instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["n2d-standard-2"]
+					machine_types = ["n4-standard-2"]
 					rank          = 1
 				}
 				instance_selection_list {
-					machine_types = ["e2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 2
 				}
 			}
@@ -2738,15 +2748,16 @@ resource "google_dataproc_cluster" "all_instance_flexibility_policy" {
     worker_config {
       num_instances = "2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
       instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["n2d-standard-2"]
+					machine_types = ["n4-standard-2"]
 					rank          = 2
 				}
 				instance_selection_list {
-					machine_types = ["e2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 1
 				}
 			}
@@ -2755,15 +2766,16 @@ resource "google_dataproc_cluster" "all_instance_flexibility_policy" {
     preemptible_worker_config {
       num_instances = "3"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
       instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["n2d-standard-2"]
+					machine_types = ["n4-standard-2"]
 					rank          = 1
 				}
 				instance_selection_list {
-					machine_types = ["e2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 2
 				}
 			}
@@ -2776,14 +2788,15 @@ func testAccDataprocCluster_workerInstanceFlexibilityPolicy(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "worker_instance_flexibility_policy" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2792,20 +2805,19 @@ resource "google_dataproc_cluster" "worker_instance_flexibility_policy" {
       num_instances = "2"
       instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["n2d-standard-2"]
+					machine_types = ["n4-standard-2"]
 					rank          = 1
 					disk_config {
 						boot_disk_size_gb = 35
-						boot_disk_type = "pd-ssd"
-						num_local_ssds = 1
+						boot_disk_type = "hyperdisk-balanced"
 					}
 				}
 				instance_selection_list {
-					machine_types = ["e2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 3
 					disk_config {
 						boot_disk_size_gb = 35
-						boot_disk_type = "pd-standard"
+						boot_disk_type = "hyperdisk-balanced"
 					}
 				}
 			}
@@ -2819,22 +2831,23 @@ func testAccDataprocCluster_masterInstanceFlexibilityPolicy(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "master_instance_flexibility_policy" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
     master_config {
       num_instances = "1"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
 			instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["n2d-standard-2"]
+					machine_types = ["n4-standard-2"]
 					rank          = 1
 				}
 				instance_selection_list {
-					machine_types = ["e2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 2
 				}
 			}
@@ -2842,8 +2855,9 @@ resource "google_dataproc_cluster" "master_instance_flexibility_policy" {
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-standard-2"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2851,6 +2865,7 @@ resource "google_dataproc_cluster" "master_instance_flexibility_policy" {
     preemptible_worker_config {
       num_instances = "3"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2862,21 +2877,23 @@ func testAccDataprocCluster_spotWithInstanceFlexibilityPolicy(rnd string) string
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2886,11 +2903,11 @@ resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
       preemptibility = "SPOT"
 	  instance_flexibility_policy {
         instance_selection_list {
-          machine_types = ["n2d-standard-2"]
+          machine_types = ["n4-standard-2"]
           rank          = 3
           disk_config {
             boot_disk_size_gb = 40
-						boot_disk_type = "pd-standard"
+						boot_disk_type = "hyperdisk-balanced"
           }
         }
       }
@@ -2904,7 +2921,7 @@ func testAccDataprocCluster_spotOnDemandMixing(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "spot_mixing" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -2912,16 +2929,18 @@ resource "google_dataproc_cluster" "spot_mixing" {
     }
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -2930,6 +2949,7 @@ resource "google_dataproc_cluster" "spot_mixing" {
       num_instances = "3"
       preemptibility = "SPOT"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
       instance_flexibility_policy {
@@ -2948,21 +2968,23 @@ func testAccDataprocCluster_withAuxiliaryNodeGroups(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_auxiliary_node_groups" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3019,7 +3041,7 @@ func testAccDataprocCluster_withStagingBucketAndCluster(clusterName, bucketName,
 
 resource "google_dataproc_cluster" "with_bucket" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     staging_bucket = google_storage_bucket.bucket.name
@@ -3030,15 +3052,15 @@ resource "google_dataproc_cluster" "with_bucket" {
 
     # Keep the costs down with smallest config we can get away with
     software_config {
-      image_version = "2.0.35-debian10"
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3053,7 +3075,7 @@ func testAccDataprocCluster_withTempBucketAndCluster(clusterName, bucketName, su
 
 resource "google_dataproc_cluster" "with_bucket" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     temp_bucket = google_storage_bucket.bucket.name
@@ -3064,15 +3086,15 @@ resource "google_dataproc_cluster" "with_bucket" {
 
     # Keep the costs down with smallest config we can get away with
     software_config {
-      image_version = "2.0.35-debian10"
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3085,7 +3107,7 @@ func testAccDataprocCluster_withLabels(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_labels" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
@@ -3106,7 +3128,7 @@ func testAccDataprocCluster_withLabelsUpdate(rnd, subnetworkName string) string 
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_labels" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
@@ -3127,7 +3149,7 @@ func testAccDataprocCluster_withoutLabels(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_labels" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
@@ -3144,7 +3166,7 @@ func testAccDataprocCluster_withEndpointConfig(rnd, subnetworkName string) strin
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_endpoint_config" {
 	name                  = "tf-test-%s"
-	region                = "us-west1"
+	region                = "us-east1"
 
 	cluster_config {
     gce_cluster_config {
@@ -3163,7 +3185,7 @@ func testAccDataprocCluster_withImageVersion(rnd, version, subnetworkName string
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_image_version" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3182,7 +3204,7 @@ func testAccDataprocCluster_withOptionalComponents(rnd, subnetworkName string) s
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_opt_components" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3201,7 +3223,7 @@ func testAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(rnd, tm, subnetwork
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3220,7 +3242,7 @@ func testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, tm, subnetw
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
  name   = "tf-test-dproc-%s"
- region = "us-west1"
+ region = "us-east1"
 
  cluster_config {
   gce_cluster_config {
@@ -3239,7 +3261,7 @@ func testAccDataprocCluster_withLifecycleConfigIdleStopTtl(rnd, tm, subnetworkNa
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3258,7 +3280,7 @@ func testAccDataprocCluster_withLifecycleConfigAutoStopTime(rnd, tm, subnetworkN
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
  name   = "tf-test-dproc-%s"
- region = "us-west1"
+ region = "us-east1"
 
  cluster_config {
   gce_cluster_config {
@@ -3296,20 +3318,20 @@ resource "time_sleep" "wait_120_seconds" {
 
 resource "google_dataproc_cluster" "with_service_account" {
   name   = "dproc-cluster-test-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     # Keep the costs down with smallest config we can get away with
     software_config {
-      image_version = "2.0.35-debian10"
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3374,7 +3396,7 @@ resource "google_compute_firewall" "dataproc_network_firewall" {
 
 resource "google_dataproc_cluster" "with_net_ref_by_name" {
   name       = "tf-test-dproc-net-%s"
-  region     = "us-west1"
+  region     = "us-east1"
   depends_on = [google_compute_firewall.dataproc_network_firewall]
 
   cluster_config {
@@ -3387,8 +3409,9 @@ resource "google_dataproc_cluster" "with_net_ref_by_name" {
     }
 
     master_config {
-      machine_type = "e2-standard-2"
+      machine_type = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3402,7 +3425,7 @@ resource "google_dataproc_cluster" "with_net_ref_by_name" {
 
 resource "google_dataproc_cluster" "with_net_ref_by_url" {
   name       = "tf-test-dproc-url-%s"
-  region     = "us-west1"
+  region     = "us-east1"
   depends_on = [google_compute_firewall.dataproc_network_firewall]
 
   cluster_config {
@@ -3415,8 +3438,9 @@ resource "google_dataproc_cluster" "with_net_ref_by_url" {
     }
 
     master_config {
-      machine_type = "e2-standard-2"
+      machine_type = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3434,7 +3458,7 @@ func testAccDataprocCluster_KMS(rnd, kmsKey, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "kms" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3463,7 +3487,7 @@ resource "google_storage_bucket_object" "password" {
 
 resource "google_dataproc_cluster" "kerb" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3485,7 +3509,7 @@ func testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName string) strin
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "identity_config" {
   name   = "tf-test-dataproc-identity-%s"
-  region = "us-west1"
+  region = "us-east1"
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
@@ -3506,7 +3530,7 @@ func testAccDataprocCluster_updateIdentityConfig(rnd, subnetworkName, user, sa s
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "identity_config_user_mapping" {
   name   = "tf-test-dataproc-update-identity-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 	gce_cluster_config {
@@ -3521,11 +3545,19 @@ resource "google_dataproc_cluster" "identity_config_user_mapping" {
 	}
 	master_config {
 	  num_instances = 1
-	  machine_type  = "n1-standard-2"
+	  machine_type  = "n4-standard-2"
+	  disk_config {
+		boot_disk_type    = "hyperdisk-balanced"
+		boot_disk_size_gb = 35
+	  }
 	}
 	worker_config {
 	  num_instances = 2
-	  machine_type  = "n1-standard-2"
+	  machine_type  = "n4-standard-2"
+	  disk_config {
+		boot_disk_type    = "hyperdisk-balanced"
+		boot_disk_size_gb = 35
+	  }
 	}
   }
 }
@@ -3536,7 +3568,7 @@ func testAccDataprocCluster_withAutoscalingPolicy(rnd, subnetworkName string) st
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name     = "tf-test-dataproc-policy-%s"
-  region   = "us-west1"
+  region   = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3551,7 +3583,7 @@ resource "google_dataproc_cluster" "basic" {
 
 resource "google_dataproc_autoscaling_policy" "asp" {
   policy_id = "tf-test-dataproc-policy-%s"
-  location  = "us-west1"
+  location  = "us-east1"
 
   worker_config {
     max_instances = 3
@@ -3572,7 +3604,7 @@ func testAccDataprocCluster_removeAutoscalingPolicy(rnd, subnetworkName string) 
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
   name     = "tf-test-dataproc-policy-%s"
-  region   = "us-west1"
+  region   = "us-east1"
 
   cluster_config {
     gce_cluster_config {
@@ -3587,7 +3619,7 @@ resource "google_dataproc_cluster" "basic" {
 
 resource "google_dataproc_autoscaling_policy" "asp" {
   policy_id = "tf-test-dataproc-policy-%s"
-  location  = "us-west1"
+  location  = "us-east1"
 
   worker_config {
     max_instances = 3
@@ -3608,7 +3640,7 @@ func testAccDataprocCluster_withMetastoreConfig(clusterName, serviceId string) s
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
   name                  = "%s"
-  region                = "us-west1"
+  region                = "us-east1"
 
   cluster_config {
     metastore_config {
@@ -3619,7 +3651,7 @@ resource "google_dataproc_cluster" "with_metastore_config" {
 
 resource "google_dataproc_metastore_service" "ms" {
   service_id = "%s"
-  location   = "us-west1"
+  location   = "us-east1"
   port       = 9080
   tier       = "DEVELOPER"
 
@@ -3639,7 +3671,7 @@ func testAccDataprocCluster_withMetastoreConfig_update(clusterName, serviceId st
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
   name                  = "%s"
-  region                = "us-west1"
+  region                = "us-east1"
 
   cluster_config {
     metastore_config {
@@ -3650,7 +3682,7 @@ resource "google_dataproc_cluster" "with_metastore_config" {
 
 resource "google_dataproc_metastore_service" "ms" {
   service_id = "%s"
-  location   = "us-west1"
+  location   = "us-east1"
   port       = 9080
   tier       = "DEVELOPER"
 
@@ -3718,7 +3750,7 @@ func testAccDataprocCluster_withProvisionedIopsAndThroughput(clusterName string)
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "tf_test_cluster" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
@@ -3752,7 +3784,7 @@ func testAccDataprocCluster_withProvisionedIopsAndThroughputNodePools(clusterNam
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "tf_test_cluster" {
   name   = "%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
@@ -3803,8 +3835,8 @@ func TestAccDataprocCluster_instanceFlexibilityDiskConfig(t *testing.T) {
 				Config: testAccDataprocCluster_instanceFlexibilityDiskConfig(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.instance_flexibility_disk_config", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2-standard-2"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n4-standard-4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_size_gb", "40"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_size_gb", "100"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_throughput", "140"),
@@ -3824,13 +3856,14 @@ func testAccDataprocCluster_instanceFlexibilityDiskConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "instance_flexibility_disk_config" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
@@ -3839,11 +3872,11 @@ resource "google_dataproc_cluster" "instance_flexibility_disk_config" {
       num_instances = "2"
 			instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["n2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 1
 					disk_config {
 						boot_disk_size_gb = 40
-						boot_disk_type = "pd-standard"
+						boot_disk_type = "hyperdisk-balanced"
 					}
 				}
 				instance_selection_list {
@@ -3937,7 +3970,7 @@ func testAccDataprocCluster_attachedDiskConfigMaster(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "attached_disk_config_master" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
@@ -3955,7 +3988,11 @@ resource "google_dataproc_cluster" "attached_disk_config_master" {
     }
 		worker_config {
 			num_instances = 2
-			machine_type  = "n1-standard-2"
+			machine_type  = "n4-standard-2"
+			disk_config {
+				boot_disk_size_gb = 30
+				boot_disk_type    = "hyperdisk-balanced"
+			}
 		}
 	}
 }
@@ -3966,13 +4003,17 @@ func testAccDataprocCluster_attachedDiskConfigWorker(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "attached_disk_config_worker" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
 		master_config {
 			num_instances = 1
-			machine_type  = "n1-standard-2"
+			machine_type  = "n4-standard-2"
+			disk_config {
+				boot_disk_size_gb = 30
+				boot_disk_type    = "hyperdisk-balanced"
+			}
 		}
 
     worker_config {
@@ -3996,29 +4037,37 @@ func testAccDataprocCluster_attachedDiskConfigSecondary(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "attached_disk_config_secondary" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
 
 		master_config {
 			num_instances = 1
-			machine_type  = "n1-standard-2"
+			machine_type  = "n4-standard-2"
+			disk_config {
+				boot_disk_size_gb = 30
+				boot_disk_type    = "hyperdisk-balanced"
+			}
 		}
 
 		worker_config {
 			num_instances = 2
-			machine_type  = "n1-standard-2"
+			machine_type  = "n4-standard-2"
+			disk_config {
+				boot_disk_size_gb = 30
+				boot_disk_type    = "hyperdisk-balanced"
+			}
 		}
 		
 		preemptible_worker_config {
 			num_instances = "2"
 			instance_flexibility_policy {
 				instance_selection_list {
-					machine_types = ["e2-standard-2"]
+					machine_types = ["n4-standard-4"]
 					rank          = 1
 					disk_config {
 						boot_disk_size_gb = 40
-						boot_disk_type = "pd-standard"
+						boot_disk_type = "hyperdisk-balanced"
 					}
 				}
 				instance_selection_list {
@@ -4055,7 +4104,7 @@ func TestAccDataprocCluster_PreemptibleWorkerDiskConfig(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.preemptible_disk_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.preemptible_disk_config", "cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_size_gb", "30"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.preemptible_disk_config", "cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.preemptible_disk_config", "cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
 				),
 			},
 		},
@@ -4066,20 +4115,25 @@ func testAccDataprocCluster_preemptibleWorkerDiskConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "preemptible_disk_config" {
   name   = "tf-test-dproc-%s"
-  region = "us-west1"
+  region = "us-east1"
 
   cluster_config {
     master_config {
       num_instances = 1
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
       disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
       }
     }
 
     worker_config {
       num_instances = 2
-      machine_type  = "e2-medium"
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type    = "hyperdisk-balanced"
+        boot_disk_size_gb = 35
+      }
     }
 
     preemptible_worker_config {
@@ -4088,7 +4142,7 @@ resource "google_dataproc_cluster" "preemptible_disk_config" {
 
       disk_config {
         boot_disk_size_gb = 30
-        boot_disk_type    = "pd-standard"
+        boot_disk_type    = "hyperdisk-balanced"
       }
     }
   }
