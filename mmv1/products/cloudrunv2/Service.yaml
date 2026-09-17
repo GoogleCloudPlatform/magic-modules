@@ -1299,6 +1299,28 @@ properties:
                   type: String
                   description: |-
                     Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+      - name: 'workloadIdentityConfig'
+        type: NestedObject
+        description: |-
+          Workload identity settings for this Revision.
+        properties:
+          - name: 'identity'
+            type: String
+            description: |-
+              The Revision's SPIFFE workload identity. Enables provisioning of SPIFFE workload certificates.
+          - name: 'identityCertificateEnabled'
+            type: Boolean
+            description: |-
+              Controls whether an instance receives a MWLID certificate.
+            send_empty_value: true
+          - name: 'identityType'
+            type: Enum
+            description: |-
+              The type of identity to use.
+            enum_values:
+              - 'IDENTITY_TYPE_SERVICE_ACCOUNT'
+              - 'IDENTITY_TYPE_WORKLOAD_IDENTITY'
+              - 'IDENTITY_TYPE_AGENT_IDENTITY'
   - name: 'traffic'
     type: Array
     description: |-
