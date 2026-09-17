@@ -33,6 +33,15 @@ samples:
           app_id: app-id
           child_agent_id: child-agent-id
           toolset_id: toolset-id
+  - name: ces_agent_remote_a2a_agent
+    primary_resource_id: ces_agent_remote_a2a_agent
+    steps:
+      - name: ces_agent_remote_a2a_agent
+        resource_id_vars:
+          agent_display_name: my-agent
+          agent_id: agent-id
+          app_display_name: my-app
+          app_id: app-id
   - name: ces_agent_remote_dialogflow_agent
     primary_resource_id: ces_agent_remote_dialogflow_agent
     steps:
@@ -279,9 +288,232 @@ properties:
     description: |-
       Default agent type. The agent uses instructions and callbacks specified in
       the agent to perform the task using a large language model.
-    send_empty_value: true
     allow_empty_object: true
+    send_empty_value: true
     properties: []
+  - name: remoteA2aAgent
+    type: NestedObject
+    description: |-
+      The agent which will transfer execution to a remote
+      [A2A](https://github.com/a2aproject/A2A) agent.
+    properties:
+      - name: a2aConfig
+        type: NestedObject
+        required: true
+        description: The A2A connection configuration.
+        properties:
+          - name: agentCard
+            type: NestedObject
+            description: The full agent card defined inline.
+            properties:
+              - name: description
+                type: String
+                required: true
+                description: A description of the agent's domain of action/solution space.
+              - name: name
+                type: String
+                required: true
+                description: A human-readable name for the agent.
+              - name: skills
+                type: Array
+                required: true
+                description: |-
+                  Skills represent a unit of ability an agent can perform. This may
+                  somewhat abstract but represents a more focused set of actions that the
+                  agent is highly likely to succeed at.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: description
+                      type: String
+                      required: true
+                      description: A detailed description of the skill.
+                    - name: examples
+                      type: Array
+                      description: Example prompts or scenarios that this skill can handle.
+                      item_type:
+                        type: String
+                    - name: id
+                      type: String
+                      required: true
+                      description: A unique identifier for the agent's skill.
+                    - name: inputModes
+                      type: Array
+                      description: |-
+                        The set of supported input media types for this skill, overriding the
+                        agent's defaults.
+                      item_type:
+                        type: String
+                    - name: name
+                      type: String
+                      required: true
+                      description: A human-readable name for the skill.
+                    - name: outputModes
+                      type: Array
+                      description: |-
+                        The set of supported output media types for this skill, overriding the
+                        agent's defaults.
+                      item_type:
+                        type: String
+                    - name: tags
+                      type: Array
+                      required: true
+                      description: A set of keywords describing the skill's capabilities.
+                      item_type:
+                        type: String
+              - name: supportedInterfaces
+                type: Array
+                required: true
+                description: Ordered list of supported interfaces. The first entry is preferred.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: protocolBinding
+                      type: String
+                      required: true
+                      description: |-
+                        The protocol binding supported at this URL. The core ones officially
+                        supported are JSONRPC, GRPC and HTTP+JSON.
+                    - name: protocolVersion
+                      type: String
+                      required: true
+                      description: |-
+                        The version of the A2A protocol this interface exposes.
+                        Examples: "0.3", "1.0"
+                    - name: tenant
+                      type: String
+                      description: Tenant ID to be used in the request when calling the agent.
+                    - name: url
+                      type: String
+                      required: true
+                      description: |-
+                        The URL where this interface is available. Must be a valid absolute HTTPS
+                        URL in production.
+              - name: version
+                type: String
+                required: true
+                description: The version of the agent.
+          - name: agentRegistry
+            type: String
+            description: |-
+              Reference to the agent in the Agent Registry.
+              Format: `projects/{project}/locations/{location}/agents/{agent}`
+          - name: apiAuthentication
+            type: NestedObject
+            description: |-
+              Authentication configuration for calling the remote agent.
+              Optional if the registry reference already handles authentication.
+            properties:
+              - name: apiKeyConfig
+                type: NestedObject
+                description: Configurations for authentication with API key.
+                properties:
+                  - name: apiKeySecretVersion
+                    type: String
+                    required: true
+                    description: |-
+                      The name of the SecretManager secret version resource storing the API key.
+                      Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                      Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
+                      service agent
+                      `service-@gcp-sa-ces.iam.gserviceaccount.com`.
+                  - name: keyName
+                    type: String
+                    required: true
+                    description: |-
+                      The parameter name or the header name of the API key.
+                      E.g., If the API request is "https://example.com/act?X-Api-Key=", "X-Api-Key" would be the parameter name.
+                  - name: requestLocation
+                    type: String
+                    required: true
+                    description: |-
+                      Key location in the request.
+                      Possible values:
+                      HEADER
+                      QUERY_STRING
+              - name: bearerTokenConfig
+                type: NestedObject
+                description: Configurations for authentication with a bearer token.
+                properties:
+                  - name: token
+                    type: String
+                    required: true
+                    description: |-
+                      The bearer token.
+                      Must be in the format `$context.variables.<name_of_variable>`.
+              - name: oauthConfig
+                type: NestedObject
+                description: Configurations for authentication with OAuth.
+                properties:
+                  - name: clientId
+                    type: String
+                    required: true
+                    description: The client ID from the OAuth provider.
+                  - name: clientSecretVersion
+                    type: String
+                    required: true
+                    description: |-
+                      The name of the SecretManager secret version resource storing the
+                      client secret.
+                      Format: `projects/{project}/secrets/{secret}/versions/{version}`
+
+                      Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
+                      service agent
+                      `service-@gcp-sa-ces.iam.gserviceaccount.com`.
+                  - name: oauthGrantType
+                    type: String
+                    required: true
+                    description: |-
+                      OAuth grant types.
+                      Possible values:
+                      CLIENT_CREDENTIAL
+                  - name: scopes
+                    type: Array
+                    description: The OAuth scopes to grant.
+                    item_type:
+                      type: String
+                  - name: tokenEndpoint
+                    type: String
+                    required: true
+                    description: The token endpoint in the OAuth provider to exchange for an access token.
+              - name: serviceAccountAuthConfig
+                type: NestedObject
+                description: Configurations for authentication using a custom service account.
+                properties:
+                  - name: scopes
+                    type: Array
+                    description: |-
+                      The OAuth scopes to grant. If not specified, the default scope
+                      `https://www.googleapis.com/auth/cloud-platform` is used.
+                    item_type:
+                      type: String
+                  - name: serviceAccount
+                    type: String
+                    required: true
+                    description: |-
+                      The email address of the service account used for authenticatation. CES
+                      uses this service account to exchange an access token and the access token
+                      is then sent in the `Authorization` header of the request.
+
+                      The service account must have the
+                      `roles/iam.serviceAccountTokenCreator` role granted to the
+                      CES service agent
+                      `service-@gcp-sa-ces.iam.gserviceaccount.com`.
+          - name: contextId
+            type: String
+            description: |-
+              If not empty, interactions with the remote A2A agent will use this context
+              ID. This context_id field can refer to a session variable like
+              `$context.variables.order_agent_session_id`.
+          - name: inputVariableMapping
+            type: KeyValuePairs
+            description: Mapping of input variable names of remote agent to GECX variable names.
+          - name: outputVariableMapping
+            type: KeyValuePairs
+            description: Mapping of output variable names of remote agent to GECX variable names.
+          - name: streamingEnabled
+            type: Boolean
+            description: Whether streaming is enabled for the remote agent.
   - name: remoteDialogflowAgent
     type: NestedObject
     description: |-
