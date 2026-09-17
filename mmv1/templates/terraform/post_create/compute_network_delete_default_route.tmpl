@@ -1,21 +1,27 @@
 if d.Get("delete_default_routes_on_create").(bool) {
+	networkUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/networks/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return err
+	}
+	network, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    networkUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error finding network in proj: %s", err)
+	}
+
+	selfLink, ok := network["selfLink"].(string)
+	if !ok {
+		return fmt.Errorf("Error finding network in proj: selfLink not found in response")
+	}
+
 	token := ""
 	for paginate := true; paginate; {
-		networkUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/networks/{{"{{"}}name{{"}}"}}")
-		if err != nil {
-			return err
-		}
-		network, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   project,
-			RawURL:    networkUrl,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return fmt.Errorf("Error finding network in proj: %s", err)
-		}
-		filter := fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", network["selfLink"].(string))
+		filter := fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", selfLink)
 		log.Printf("[DEBUG] Getting routes for network %q with filter '%q'", d.Get("name").(string), filter)
 
 		params := map[string]string{
@@ -54,7 +60,10 @@ if d.Get("delete_default_routes_on_create").(bool) {
 			if !ok {
 				continue
 			}
-			routeName, _ := route["name"].(string)
+			routeName, ok := route["name"].(string)
+			if !ok || routeName == "" {
+				continue
+			}
 			routeUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/routes/"+routeName)
 			if err != nil {
 				return err
