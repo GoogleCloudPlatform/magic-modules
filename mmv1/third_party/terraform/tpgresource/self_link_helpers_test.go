@@ -17,6 +17,16 @@ func TestCompareSelfLinkOrResourceName(t *testing.T) {
 			New:    "another-network",
 			Expect: false,
 		},
+		"short path, same": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "global/networks/a-network",
+			Expect: true,
+		},
+		"short path, different": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "global/networks/another-network",
+			Expect: false,
+		},
 		"partial path, same": {
 			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
 			New:    "projects/your-project/global/networks/a-network",
