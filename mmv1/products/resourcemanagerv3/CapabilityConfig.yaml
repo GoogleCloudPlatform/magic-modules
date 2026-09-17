@@ -57,15 +57,46 @@ samples:
           capability_config_id: capcfg
         test_env_vars:
           org_id: ORG_ID
+      # Verifies that an optional field can be updated from a non-zero value to
+      # a zero value, i.e. that display_name can be removed once it is set.
+      - name: resource_manager_capability_config_no_display_name
+        resource_id_vars:
+          capability_config_id: capcfg
+        test_env_vars:
+          org_id: ORG_ID
+  - name: resource_manager_capability_config_folder
+    primary_resource_id: capability_config
+    steps:
+      - name: resource_manager_capability_config_folder
+        resource_id_vars:
+          capability_config_id: capcfg
+          folder_name: capcfg-fldr
+          management_project_id: capcfg-mgmt
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: resource_manager_capability_config_project
+    primary_resource_id: capability_config
+    external_providers: [time]
+    steps:
+      - name: resource_manager_capability_config_project
+        resource_id_vars:
+          capability_config_id: capcfg
+          project_id: capcfg-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
 parameters:
   - name: parent
     type: String
     description: |-
       The parent resource in which to create the capability config.
-      Format: `folders/{folder_id}`, `organizations/{organization_id}`, or `projects/{project_id}`.
+      Format: `folders/{folder_id}`, `organizations/{organization_id}`, or `projects/{project_number}`.
     required: true
     url_param_only: true
     immutable: true
+    validation:
+      regex: '^(?:folders|organizations|projects)/\d+$'
   - name: capability_config_id
     type: String
     description: |-
@@ -99,6 +130,7 @@ properties:
     type: String
     description: |-
       The management project for the capability config. If unspecified, a project will be created automatically.
+      Must be specified for project-scoped capability config.
       Format: `projects/{project_number}`.
     immutable: true
     default_from_api: true

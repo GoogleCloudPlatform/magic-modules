@@ -1,0 +1,5 @@
+resource "google_resource_manager_capability_config" "{{$.PrimaryResourceId}}" {
+  parent               = "organizations/{{index $.TestEnvVars "org_id"}}"
+  capability_config_id = "{{index $.ResourceIdVars "capability_config_id"}}"
+  types                = ["AGENT_MANAGEMENT"]
+}
