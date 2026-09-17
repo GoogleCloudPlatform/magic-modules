@@ -1,6 +1,6 @@
 resource "google_dataproc_cluster" "basic" {
   name     = "{{index $.ResourceIdVars "name"}}"
-  region   = "us-central1"
+  region   = "us-west1"
 
   cluster_config {
     autoscaling_config {
@@ -11,7 +11,7 @@ resource "google_dataproc_cluster" "basic" {
 
 resource "google_dataproc_autoscaling_policy" "{{$.PrimaryResourceId}}" {
   policy_id = "{{index $.ResourceIdVars "name"}}"
-  location  = "us-central1"
+  location  = "us-west1"
 
   worker_config {
     max_instances = 3

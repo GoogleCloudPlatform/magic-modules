@@ -85,7 +85,7 @@ func TestAccDataprocWorkflowTemplate_encryptionConfig(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 		"project":       envvar.GetTestProjectFromEnv(),
 		"version":       "2.0.35-debian10",
-		"kms_key_name":  kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-workflow").CryptoKey.Name,
+		"kms_key_name":  kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tf-bootstrap-dataproc-workflow").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,13 +109,13 @@ func testAccDataprocWorkflowTemplate_basic(context map[string]interface{}) strin
   return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
   name = "template%{random_suffix}"
-  location = "us-central1"
+  location = "us-west1"
   placement {
     managed_cluster {
       cluster_name = "my-cluster"
       config {
         gce_cluster_config {
-          zone = "us-central1-a"
+          zone = "us-west1-a"
           tags = ["foo", "bar"]
         }
         master_config {
@@ -175,13 +175,13 @@ func testAccDataprocWorkflowTemplate_withShieldedVMs(context map[string]interfac
   return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "shielded_vms_template" {
   name = "template%{random_suffix}"
-  location = "us-central1"
+  location = "us-west1"
   placement {
     managed_cluster {
       cluster_name = "my-shielded-cluster"
       config {
         gce_cluster_config {
-          zone = "us-central1-a"
+          zone = "us-west1-a"
           tags = ["foo", "bar"]
           shielded_instance_config {
             enable_secure_boot = true
@@ -236,7 +236,7 @@ func testAccDataprocWorkflowTemplate_encryptionConfig(context map[string]interfa
 	return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
   name = "template%{random_suffix}"
-  location = "us-central1"
+  location = "us-west1"
   encryption_config {
     kms_key = "%{kms_key_name}"
   }
@@ -245,7 +245,7 @@ resource "google_dataproc_workflow_template" "template" {
       cluster_name = "my-cluster"
       config {
         gce_cluster_config {
-          zone = "us-central1-a"
+          zone = "us-west1-a"
           tags = ["foo", "bar"]
         }
         master_config {
@@ -373,7 +373,7 @@ func testAccDataprocWorkflowTemplate_instanceFlexibilityPolicy(context map[strin
 	return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
   name          = "tf-test-workflow-%{random_suffix}"
-  location      = "us-central1"
+  location      = "us-west1"
   placement {
     managed_cluster {
       cluster_name = "tf-test-cluster-%{random_suffix}"
@@ -532,7 +532,7 @@ func testAccDataprocWorkflowTemplate_diskConfig(context map[string]interface{}) 
 	return acctest.Nprintf(`
 resource "google_dataproc_workflow_template" "template" {
   name          = "tf-test-workflow-%{random_suffix}"
-  location      = "us-central1"
+  location      = "us-west1"
   placement {
     managed_cluster {
       cluster_name = "tf-test-cluster-%{random_suffix}"

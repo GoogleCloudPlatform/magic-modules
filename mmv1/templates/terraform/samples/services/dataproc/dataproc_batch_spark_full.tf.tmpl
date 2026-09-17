@@ -6,7 +6,7 @@ data "google_storage_project_service_account" "gcs_account" {
 
 resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
     batch_id      = "{{index $.ResourceIdVars "dataproc_batch"}}"
-    location      = "us-central1"
+    location      = "us-west1"
     labels        = {"batch_test": "terraform"}
 
     runtime_config {
@@ -60,7 +60,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key_member_1" {
 
 resource "google_dataproc_cluster" "basic" {
   name   = "{{index $.ResourceIdVars "dataproc_batch"}}"
-  region = "us-central1"
+  region = "us-west1"
 
   cluster_config {
     # Keep the costs down with smallest config we can get away with
@@ -91,7 +91,7 @@ resource "google_dataproc_cluster" "basic" {
 
  resource "google_dataproc_metastore_service" "ms" {
   service_id = "{{index $.ResourceIdVars "dataproc_batch"}}"
-  location   = "us-central1"
+  location   = "us-west1"
   port       = 9080
   tier       = "DEVELOPER"
 

@@ -5,8 +5,8 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_dataproc_session_template" "{{$.PrimaryResourceId}}" {
-    name     = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/sessionTemplates/{{index $.ResourceIdVars "name"}}"
-    location      = "us-central1"
+    name     = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-west1/sessionTemplates/{{index $.ResourceIdVars "name"}}"
+    location      = "us-west1"
     labels        = {"session_template_test": "terraform"}
 
     runtime_config {
@@ -60,7 +60,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key_member_1" {
 
 resource "google_dataproc_cluster" "basic" {
   name   = "{{index $.ResourceIdVars "name"}}"
-  region = "us-central1"
+  region = "us-west1"
 
   cluster_config {
     # Keep the costs down with smallest config we can get away with
@@ -95,7 +95,7 @@ resource "google_dataproc_cluster" "basic" {
 
 resource "google_dataproc_metastore_service" "ms" {
   service_id = "{{index $.ResourceIdVars "name"}}"
-  location   = "us-central1"
+  location   = "us-west1"
   port       = 9080
   tier       = "DEVELOPER"
 
@@ -110,7 +110,7 @@ resource "google_dataproc_metastore_service" "ms" {
 
   network_config {
     consumers {
-      subnetwork = "projects/{{index $.TestEnvVars "project_name"}}/regions/us-central1/subnetworks/{{index $.ResourceIdVars "subnetwork_name"}}"
+      subnetwork = "projects/{{index $.TestEnvVars "project_name"}}/regions/us-west1/subnetworks/{{index $.ResourceIdVars "subnetwork_name"}}"
     }
   }
 }
