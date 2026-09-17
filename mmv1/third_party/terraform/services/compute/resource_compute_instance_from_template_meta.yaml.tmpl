@@ -251,10 +251,10 @@ fields:
   - api_field: 'scheduling.onInstanceStopAction.discardLocalSsd'
   - api_field: 'scheduling.preemptible'
   - api_field: 'scheduling.provisioningModel'
-{{- if ne $.TargetVersionName "ga" }}
-  - api_field: 'scheduling.skipGuestOsShutdown'
   - api_field: 'scheduling.preemptionNoticeDuration.nanos'
   - api_field: 'scheduling.preemptionNoticeDuration.seconds'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'scheduling.skipGuestOsShutdown'
 {{- end }}
   - api_field: 'scheduling.terminationTime'
   - api_field: 'disks.deviceName'

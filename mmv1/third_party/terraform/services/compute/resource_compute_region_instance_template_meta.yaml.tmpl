@@ -239,13 +239,13 @@ fields:
     api_field: 'properties.scheduling.preemptible'
   - field: 'scheduling.provisioning_model'
     api_field: 'properties.scheduling.provisioningModel'
-{{- if ne $.TargetVersionName "ga" }}
-  - api_field: 'properties.scheduling.skipGuestOsShutdown'
-    field: 'scheduling.skip_guest_os_shutdown'
   - field: 'scheduling.preemption_notice_duration.nanos'
     api_field: 'properties.scheduling.preemptionNoticeDuration.nanos'
   - field: 'scheduling.preemption_notice_duration.seconds'
     api_field: 'properties.scheduling.preemptionNoticeDuration.seconds'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'properties.scheduling.skipGuestOsShutdown'
+    field: 'scheduling.skip_guest_os_shutdown'
 {{- end }}
   - api_field: 'properties.scheduling.terminationTime'
     field: 'scheduling.termination_time'

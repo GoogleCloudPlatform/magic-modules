@@ -248,6 +248,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		result["skipGuestOsShutdown"] = v.(bool)
 	}
 
+{{- end }}
 	if v, ok := original["preemption_notice_duration"]; ok {
 		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration(v)
 		if err != nil {
@@ -257,7 +258,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["preemptionNoticeDuration"] = transformedPreemptionNoticeDuration
 		}
 	}
-{{- end }}
+
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
@@ -437,11 +438,11 @@ func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok {
 		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(gs)
 	}
+{{- end }}
 
 	if pnd, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok {
 		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(pnd)
 	}
-{{- end }}
 
 	if lsrt, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(lsrt)
@@ -524,6 +525,7 @@ func flattenGracefulShutdownMaxDuration(v map[string]interface{}) []interface{} 
 	transformed["seconds"] = getInt(v["seconds"])
 	return []interface{}{transformed}
 }
+{{- end }}
 
 func expandComputePreemptionNoticeDuration(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
@@ -561,7 +563,6 @@ func flattenComputePreemptionNoticeDuration(v map[string]interface{}) []interfac
 	transformed["seconds"] = getInt(v["seconds"])
 	return []interface{}{transformed}
 }
-{{- end }}
 
 func flattenAccessConfigs(accessConfigs []interface{}) ([]map[string]interface{}, string) {
 	flattened := make([]map[string]interface{}, 0, len(accessConfigs))

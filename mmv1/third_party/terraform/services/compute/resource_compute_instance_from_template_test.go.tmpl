@@ -438,7 +438,6 @@ func TestAccComputeInstanceFromTemplate_TerminationTime(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceFromTemplate_schedulingPreemptionNoticeDuration(t *testing.T) {
 	t.Parallel()
 
@@ -464,7 +463,6 @@ func TestAccComputeInstanceFromTemplate_schedulingPreemptionNoticeDuration(t *te
 		},
 	})
 }
-{{ end }}
 
 func TestAccComputeInstanceFromTemplate_overrideMetadataDotStartupScript(t *testing.T) {
 	var instance map[string]interface{}
@@ -1743,7 +1741,6 @@ resource "google_compute_instance_from_template" "inst" {
 `, templateDisk, template, instance)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromTemplate_schedulingPreemptionNoticeDuration(template, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1838,7 +1835,6 @@ resource "google_compute_instance_from_template" "foobar" {
 }
 `, template, template, instance)
 }
-{{- end }}
 
 func testAccComputeInstanceFromTemplate_terminationTime(templateDisk, template, termination_time, instance string) string {
 	return fmt.Sprintf(`
