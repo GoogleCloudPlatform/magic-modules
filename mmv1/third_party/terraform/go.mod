@@ -130,6 +130,5 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20260715232425-e75dac1f907d // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260715232425-e75dac1f907d // indirect
-	google.golang.org/genproto/googleapis/bytestream v0.0.0-20260819154853-08b0e4226688 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
