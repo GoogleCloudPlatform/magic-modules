@@ -8,14 +8,18 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// This will sweep both Standard and Flexible App Engine App Versions
+// This sweeps App Engine services, which is what reclaims the versions created
+// by the Standard and Flexible App Version tests: deleting a service deletes
+// all of its versions. App Engine applications themselves cannot be deleted, so
+// the service is the largest reclaimable unit, and the "default" service can
+// never be deleted either and is skipped below.
 func init() {
-	sweeper.AddTestSweepersLegacy("AppEngineAppVersion", testSweepAppEngineAppVersion)
+	sweeper.AddTestSweepersLegacy("AppEngineService", testSweepAppEngineService)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepAppEngineAppVersion(region string) error {
-	resourceName := "AppEngineAppVersion"
+func testSweepAppEngineService(region string) error {
+	resourceName := "AppEngineService"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := sweeper.SharedConfigForRegion(region)
@@ -62,6 +66,10 @@ func testSweepAppEngineAppVersion(region string) error {
 		}
 
 		id := obj["id"].(string)
+		// The "default" service can never be deleted, so never attempt it.
+		if id == "default" {
+			continue
+		}
 		// Increment count and skip if resource is not sweepable.
 		if !sweeper.IsSweepableTestResource(id) {
 			nonPrefixCount++
