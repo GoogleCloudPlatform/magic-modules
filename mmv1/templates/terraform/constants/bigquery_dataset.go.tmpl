@@ -35,7 +35,8 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 // It normalizes
 // 1) the 'role' field before hashing, treating legacy roles
 // and their modern IAM equivalents as the same,
-// 2) the 'user_by_email' and 'group_by_email' fields to be case-insensitive.
+// 2) the 'user_by_email' and 'group_by_email' fields to be case-insensitive,
+// 3) nil string values to "" so the hash stays stable across state roundtrips.
 func resourceBigqueryDatasetAccessHash(v interface{}) int {
 	m, ok := v.(map[string]interface{})
 	if !ok {
@@ -45,6 +46,15 @@ func resourceBigqueryDatasetAccessHash(v interface{}) int {
 	copy := make(map[string]interface{}, len(m))
 	for k, val := range m {
 		copy[k] = val
+	}
+
+	// Normalize nil to "" for string fields so the hash stays stable
+	// across state roundtrips. The SDK may store "" where the config
+	// originally had nil, and schema.HashResource treats them differently.
+	for _, key := range []string{"domain", "group_by_email", "user_by_email", "special_group", "iam_member", "role"} {
+		if copy[key] == nil {
+			copy[key] = ""
+		}
 	}
 
 	// Normalize user_by_email and group_by_email to be case-insensitive

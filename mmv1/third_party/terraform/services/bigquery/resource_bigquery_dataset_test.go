@@ -366,6 +366,28 @@ func TestAccBigQueryDataset_accessMixedCase_groupByEmail(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataset_accessNilVsEmptyStringPermadiff(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_access_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDatasetWithThreeAccess(datasetID),
+			},
+			{
+				Config:             testAccBigQueryDatasetWithThreeAccess(datasetID),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
 func TestAccBigQueryDataset_regionalLocation(t *testing.T) {
 	t.Parallel()
 
