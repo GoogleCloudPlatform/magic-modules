@@ -180,14 +180,22 @@ properties:
     type: KeyValuePairs
     description: |
       Params needed to access the source in the format of String-to-String (Key, Value) pairs.
+    deprecation_message: '`params` is deprecated and will be removed in a future major release. Use `json_params` instead.'
     ignore_read: true
     exactly_one_of:
       - params
       - json_params
   - name: 'jsonParams'
     type: String
+    api_name: 'params'
     description: |
-      Params needed to access the source in the format of json string.
+      Params needed to access the source in structured json format.
+    diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    validation:
+      function: 'validation.StringIsJSON'
     ignore_read: true
     exactly_one_of:
       - params
