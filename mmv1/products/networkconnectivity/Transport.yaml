@@ -24,7 +24,10 @@ base_url: projects/{{project}}/locations/{{region}}/transports
 self_link: projects/{{project}}/locations/{{region}}/transports/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/transports?transportId={{name}}
 update_verb: PATCH
-collection_url_key: items
+# ListTransportsResponse returns the list under "transports". This was set to
+# the compute-style "items", which this API never returns, so the sweeper read a
+# key that could not exist and always reported nothing to sweep.
+collection_url_key: transports
 timeouts:
   insert_minutes: 20
   update_minutes: 20
