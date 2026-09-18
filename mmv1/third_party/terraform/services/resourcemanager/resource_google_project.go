@@ -264,12 +264,9 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
-		err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
-		// Retry if API is not yet enabled.
-		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
-			time.Sleep(15 * time.Second)
-			err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
-		}
+		err = retryProjectDefaultNetworkDeletion(func() error {
+			return forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
+		}, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", project.ProjectId)
@@ -279,6 +276,18 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 	return nil
+}
+
+func retryProjectDefaultNetworkDeletion(deleteNetwork func() error, timeout time.Duration) error {
+	return transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: deleteNetwork,
+		Timeout:   timeout,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+			func(err error) (bool, string) {
+				return transport_tpg.IsApiNotEnabledError(err), "Compute Engine API enablement is still propagating"
+			},
+		},
+	})
 }
 
 func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *schema.ResourceData, userAgent string) error {

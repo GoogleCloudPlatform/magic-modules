@@ -3,11 +3,46 @@ package resourcemanager
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/googleapi"
 )
+
+func TestRetryProjectDefaultNetworkDeletion_RetriesApiNotEnabled(t *testing.T) {
+	attempts := 0
+	err := retryProjectDefaultNetworkDeletion(func() error {
+		attempts++
+		if attempts < 3 {
+			return &googleapi.Error{Code: 403, Errors: []googleapi.ErrorItem{{Reason: "accessNotConfigured"}}}
+		}
+		return nil
+	}, 5*time.Second)
+
+	if err != nil {
+		t.Fatalf("retryProjectDefaultNetworkDeletion() returned error: %v", err)
+	}
+	if attempts != 3 {
+		t.Fatalf("expected 3 deletion attempts, got %d", attempts)
+	}
+}
+
+func TestRetryProjectDefaultNetworkDeletion_DoesNotRetryOther403(t *testing.T) {
+	attempts := 0
+	err := retryProjectDefaultNetworkDeletion(func() error {
+		attempts++
+		return &googleapi.Error{Code: 403}
+	}, time.Second)
+
+	if err == nil {
+		t.Fatal("retryProjectDefaultNetworkDeletion() returned nil, want error")
+	}
+	if attempts != 1 {
+		t.Fatalf("expected 1 deletion attempt, got %d", attempts)
+	}
+}
 
 func TestPopulateGoogleProjectResourceData_DoesNotCopyAllLabelsToTerraformLabelsWhenUnset(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, ResourceGoogleProject().Schema, map[string]interface{}{
