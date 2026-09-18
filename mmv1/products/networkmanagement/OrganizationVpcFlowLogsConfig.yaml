@@ -20,6 +20,10 @@ create_url: organizations/{{organization}}/locations/{{location}}/vpcFlowLogsCon
 update_mask: true
 update_verb: PATCH
 id_format: organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}
+# The response is the shared ListVpcFlowLogsConfigsResponse, whose list is under
+# "vpcFlowLogsConfigs". The resource name would otherwise derive the key
+# "organizationVpcFlowLogsConfigs", which the API never returns.
+collection_url_key: vpcFlowLogsConfigs
 import_format:
   - organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}
 timeouts:
