@@ -40,7 +40,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_status: 'U2VtYW50aWNHb3Zlcm5hbmNlUG9saWN5QXV0b2dlblYyQWdlbnQ='
 samples:
   - name: 'vertex_ai_semantic_governance_policy_basic'
     primary_resource_id: 'policy'
