@@ -724,7 +724,7 @@ func schemaNodeConfig() *schema.Schema {
 								Type:         schema.TypeString,
 								Required:     true,
 								Description:  `Type of the sandbox to use for the node (e.g. 'gvisor')`,
-								ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"gvisor", "microvm"}, false),
 							},
 						},
 					},
