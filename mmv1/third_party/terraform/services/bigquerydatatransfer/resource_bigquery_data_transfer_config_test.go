@@ -590,7 +590,7 @@ func testAccCheckDataTransferServiceAccountNamePrefix(resourceName string, prefi
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		if !strings.HasPrefix(rs.Primary.Attributes["service_account_name"], "bqwriter"+prefix) {
+		if !strings.HasPrefix(rs.Primary.Attributes["service_account_name"], "tf-test-bqwriter"+prefix) {
 			return fmt.Errorf("Transfer config service account not updated")
 		}
 
@@ -634,7 +634,7 @@ resource "google_project_iam_member" "permissions" {
 resource "google_bigquery_dataset" "my_dataset" {
   depends_on = [google_project_iam_member.permissions]
 
-  dataset_id    = "my_dataset%s"
+  dataset_id    = "tf_test_my_dataset%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
@@ -688,7 +688,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suf
 data "google_project" "project" {}
 
 resource "google_service_account" "bqwriter" {
-  account_id = "bqwriter%s"
+  account_id = "tf-test-bqwriter%s"
 }
 
 resource "google_project_iam_member" "data_editor" {
@@ -699,7 +699,7 @@ resource "google_project_iam_member" "data_editor" {
 }
 
 resource "google_bigquery_dataset" "my_dataset" {
-  dataset_id    = "my_dataset%s"
+  dataset_id    = "tf_test_my_dataset%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
@@ -745,7 +745,7 @@ resource "google_pubsub_topic" "my_topic" {
 }
 
 resource "google_bigquery_dataset" "my_dataset" {
-  dataset_id    = "my_dataset%s"
+  dataset_id    = "tf_test_my_dataset%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
@@ -802,7 +802,7 @@ resource "google_project_iam_member" "permissions" {
 resource "google_bigquery_dataset" "source_dataset" {
   depends_on = [google_project_iam_member.permissions]
 
-  dataset_id    = "source_%s"
+  dataset_id    = "tf_test_source_%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
@@ -811,7 +811,7 @@ resource "google_bigquery_dataset" "source_dataset" {
 resource "google_bigquery_dataset" "destination_dataset" {
   depends_on = [google_project_iam_member.permissions]
 
-  dataset_id    = "destination_%s"
+  dataset_id    = "tf_test_destination_%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
@@ -840,18 +840,18 @@ data "google_project" "project" {
 }
 
 resource "google_kms_key_ring" "example_keyring" {
-  name     = "keyring-test-%s"
+  name     = "tf-test-keyring-%s"
   location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "example_crypto_key" {
-  name = "crypto-key-%s"
+  name = "tf-test-crypto-key-%s"
   key_ring = google_kms_key_ring.example_keyring.id
   purpose = "ENCRYPT_DECRYPT"
 }
 
 resource "google_service_account" "bqwriter%s" {
-  account_id = "bqwriter%s"
+  account_id = "tf-test-bqwriter%s"
 }
 
 resource "google_project_iam_member" "data_editor" {
@@ -894,7 +894,7 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 }
 
 resource "google_bigquery_dataset" "my_dataset" {
-  dataset_id    = "my_dataset_%s"
+  dataset_id    = "tf_test_my_dataset_%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "us-central1"
@@ -959,7 +959,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_updateServiceAccount(rando
 data "google_project" "project" {}
 
 resource "google_service_account" "bqwriter%s" {
-  account_id = "bqwriter%s"
+  account_id = "tf-test-bqwriter%s"
 }
 
 resource "google_project_iam_member" "data_editor" {
@@ -970,7 +970,7 @@ resource "google_project_iam_member" "data_editor" {
 }
 
 resource "google_bigquery_dataset" "my_dataset" {
-  dataset_id    = "my_dataset%s"
+  dataset_id    = "tf_test_my_dataset%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
