@@ -97,28 +97,15 @@ data "google_agent_registry_agent" "agent_2" {
   depends_on = [time_sleep.wait_for_ingestion]
 }
 
-data "google_agent_registry_mcp_server" "mcp_server" {
-  project    = google_project.project.project_id
-  location   = "us-central1"
-  filter     = "displayName=\"${google_agent_registry_service.mcp_service.display_name}\""
-  depends_on = [time_sleep.wait_for_ingestion]
-}
-
+# The policy is updated to point at a different agent, and all of the optional
+# fields set in the previous steps are removed, to verify that they can be
+# cleared via update_mask.
 resource "google_vertex_ai_semantic_governance_policy" "{{$.PrimaryResourceId}}" {
   project                       = google_project.project.project_id
   semantic_governance_policy_id = "{{index $.ResourceIdVars "semantic_governance_policy_id"}}"
   region                        = "us-central1"
-  natural_language_constraint   = "Do not access internal developer endpoints"
-  agent                         = data.google_agent_registry_agent.agent.id
-
-  mcp_tools {
-    mcp_server = data.google_agent_registry_mcp_server.mcp_server.id
-    tools      = ["get_order_status"]
-  }
-
-  agent_response_customization {
-    denial_message = "Access denied: constraint violation"
-  }
+  natural_language_constraint   = "{{index $.Vars "natural_language_constraint"}}"
+  agent                         = data.google_agent_registry_agent.agent_2.id
 
   depends_on = [google_vertex_ai_semantic_governance_policy_engine.sgpe]
 }

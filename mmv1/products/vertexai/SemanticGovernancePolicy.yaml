@@ -58,6 +58,7 @@ samples:
           project_id: 'sgp'
           semantic_governance_policy_id: 'sgp'
           reasoning_engine_display_name: 'sgp-agent'
+          reasoning_engine_display_name_2: 'sgp-agent-2'
           mcp_service_id: 'sgp-mcp'
         test_env_vars:
           org_id: 'ORG_ID'
@@ -69,6 +70,7 @@ samples:
           project_id: 'sgp'
           semantic_governance_policy_id: 'sgp'
           reasoning_engine_display_name: 'sgp-agent'
+          reasoning_engine_display_name_2: 'sgp-agent-2'
           mcp_service_id: 'sgp-mcp'
         test_env_vars:
           org_id: 'ORG_ID'
@@ -76,6 +78,23 @@ samples:
         vars:
           display_name: 'updated-policy'
           description: 'Updated description for semantic governance policy'
+          natural_language_constraint: 'Do not access restricted storage buckets'
+        ignore_read_extra:
+          - 'etag'
+      # Switches the policy to a different agent and removes every optional
+      # field, so that updating the mutable `agent` field and clearing
+      # previously set fields are both covered.
+      - name: 'vertex_ai_semantic_governance_policy_test_clear'
+        resource_id_vars:
+          project_id: 'sgp'
+          semantic_governance_policy_id: 'sgp'
+          reasoning_engine_display_name: 'sgp-agent'
+          reasoning_engine_display_name_2: 'sgp-agent-2'
+          mcp_service_id: 'sgp-mcp'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        vars:
           natural_language_constraint: 'Do not access restricted storage buckets'
         ignore_read_extra:
           - 'etag'

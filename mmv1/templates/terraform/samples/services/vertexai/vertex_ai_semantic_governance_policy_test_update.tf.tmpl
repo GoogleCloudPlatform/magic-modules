@@ -47,6 +47,19 @@ resource "google_vertex_ai_reasoning_engine" "agent" {
   depends_on = [time_sleep.wait_for_api_enablement]
 }
 
+# Second agent, used to verify that the policy's agent can be updated in place.
+resource "google_vertex_ai_reasoning_engine" "agent_2" {
+  project      = google_project.project.project_id
+  display_name = "{{index $.ResourceIdVars "reasoning_engine_display_name_2"}}"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "AGENT_IDENTITY"
+  }
+
+  depends_on = [time_sleep.wait_for_api_enablement]
+}
+
 resource "google_agent_registry_service" "mcp_service" {
   project      = google_project.project.project_id
   location     = "us-central1"
@@ -66,7 +79,7 @@ resource "google_agent_registry_service" "mcp_service" {
 }
 
 resource "time_sleep" "wait_for_ingestion" {
-  depends_on      = [google_vertex_ai_reasoning_engine.agent, google_agent_registry_service.mcp_service]
+  depends_on      = [google_vertex_ai_reasoning_engine.agent, google_vertex_ai_reasoning_engine.agent_2, google_agent_registry_service.mcp_service]
   create_duration = "120s"
 }
 
@@ -74,6 +87,13 @@ data "google_agent_registry_agent" "agent" {
   project    = google_project.project.project_id
   location   = "us-central1"
   filter     = "displayName=\"${google_vertex_ai_reasoning_engine.agent.display_name}\""
+  depends_on = [time_sleep.wait_for_ingestion]
+}
+
+data "google_agent_registry_agent" "agent_2" {
+  project    = google_project.project.project_id
+  location   = "us-central1"
+  filter     = "displayName=\"${google_vertex_ai_reasoning_engine.agent_2.display_name}\""
   depends_on = [time_sleep.wait_for_ingestion]
 }
 
