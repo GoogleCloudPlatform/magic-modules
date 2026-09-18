@@ -1,3 +1,7 @@
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region  = "us-central1"
+}
+
 resource "google_vertex_ai_reasoning_engine" "agent" {
   display_name = "example-agent"
   region       = "us-central1"

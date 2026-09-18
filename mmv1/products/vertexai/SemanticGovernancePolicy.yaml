@@ -19,7 +19,7 @@ description: |
 references:
   guides:
     'Semantic governance overview': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.semanticGovernancePolicies'
+  api: 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.semanticGovernancePolicies'
 docs:
 id_format: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies/{{semantic_governance_policy_id}}'
 base_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies'
@@ -43,6 +43,7 @@ async:
 samples:
   - name: 'vertex_ai_semantic_governance_policy_basic'
     primary_resource_id: 'policy'
+    # Simplified docs-only sample
     exclude_test: true
     external_providers: [time]
     steps:
@@ -93,7 +94,6 @@ parameters:
       The region of the SemanticGovernancePolicy, e.g. 'us-central1'.
     url_param_only: true
     immutable: true
-    default_from_api: true
 properties:
   - name: 'name'
     type: String
@@ -115,7 +115,6 @@ properties:
     type: String
     description: |
       Used to perform consistent read-modify-write transactions.
-      If provided, the request will only succeed if the etag matches the current value.
     output: true
   - name: 'displayName'
     type: String
