@@ -131,3 +131,157 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 data "google_project" "project" {}
 `, context)
 }
+
+func TestAccVertexAIEndpoint_dedicatedEndpointExtended(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"endpoint_name": "tf-test-endpoint-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpoint_dedicatedEndpointExtended(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_endpoint.endpoint",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccVertexAIEndpoint_dedicatedEndpointExtendedUpdate(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_endpoint.endpoint",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpoint_dedicatedEndpointExtended(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint" "endpoint" {
+  name         = "%{endpoint_name}"
+  display_name = "tf-test-sample-dedicated-endpoint"
+  description  = "A sample dedicated vertex endpoint"
+  location     = "us-central1"
+  region       = "us-central1"
+  labels       = {
+    label-one = "value-one"
+  }
+  dedicated_endpoint_enabled = true
+  client_connection_config {
+    inference_timeout = "60s"
+  }
+  gdc_config {
+    zone = "us-central1-a"
+  }
+  gen_ai_advanced_features_config {
+    rag_config {
+      enable_rag = true
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIEndpoint_dedicatedEndpointExtendedUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint" "endpoint" {
+  name         = "%{endpoint_name}"
+  display_name = "tf-test-updated-dedicated-endpoint"
+  description  = "An updated sample dedicated vertex endpoint"
+  location     = "us-central1"
+  region       = "us-central1"
+  labels       = {
+    label-two = "value-two"
+  }
+  dedicated_endpoint_enabled = true
+  client_connection_config {
+    inference_timeout = "60s"
+  }
+  gdc_config {
+    zone = "us-central1-a"
+  }
+  gen_ai_advanced_features_config {
+    rag_config {
+      enable_rag = false
+    }
+  }
+}
+`, context)
+}
+
+func TestAccVertexAIEndpoint_enablePrivateServiceConnect(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"endpoint_name": "tf-test-endpoint-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpoint_enablePrivateServiceConnect(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_endpoint.endpoint",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "enable_private_service_connect"},
+			},
+			{
+				Config: testAccVertexAIEndpoint_enablePrivateServiceConnectUpdate(context),
+			},
+			{
+				ResourceName:            "google_vertex_ai_endpoint.endpoint",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "enable_private_service_connect"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpoint_enablePrivateServiceConnect(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint" "endpoint" {
+  name                           = "%{endpoint_name}"
+  display_name                   = "tf-test-sample-psc-endpoint"
+  description                    = "A sample psc vertex endpoint"
+  location                       = "us-central1"
+  region                         = "us-central1"
+  enable_private_service_connect = true
+  labels                         = {
+    label-one = "value-one"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIEndpoint_enablePrivateServiceConnectUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint" "endpoint" {
+  name                           = "%{endpoint_name}"
+  display_name                   = "tf-test-updated-psc-endpoint"
+  description                    = "An updated sample psc vertex endpoint"
+  location                       = "us-central1"
+  region                         = "us-central1"
+  enable_private_service_connect = true
+  labels                         = {
+    label-two = "value-two"
+  }
+}
+`, context)
+}
