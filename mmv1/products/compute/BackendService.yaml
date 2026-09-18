@@ -775,6 +775,7 @@ properties:
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'maxTtl'
         type: Integer
         description: |
@@ -785,6 +786,7 @@ properties:
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'negativeCaching'
         type: Boolean
         description: |
