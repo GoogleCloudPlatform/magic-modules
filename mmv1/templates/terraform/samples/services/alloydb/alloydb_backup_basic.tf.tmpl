@@ -1,5 +1,5 @@
 resource "google_alloydb_backup" "{{$.PrimaryResourceId}}" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "{{index $.ResourceIdVars "alloydb_backup_id"}}"
   cluster_name = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
 
@@ -8,7 +8,7 @@ resource "google_alloydb_backup" "{{$.PrimaryResourceId}}" {
 
 resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   cluster_id = "{{index $.ResourceIdVars "alloydb_cluster_name"}}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = google_compute_network.default.id
   }
