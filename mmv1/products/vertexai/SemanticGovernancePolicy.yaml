@@ -50,7 +50,6 @@ samples:
   - name: 'vertex_ai_semantic_governance_policy_update'
     primary_resource_id: 'policy'
     exclude_basic_doc: true
-    skip_vcr: true
     external_providers: [time]
     steps:
       - name: 'vertex_ai_semantic_governance_policy_test_create'
