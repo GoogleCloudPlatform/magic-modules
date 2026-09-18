@@ -1735,14 +1735,15 @@ func TestAccContainerNodePool_gpuSharingConfigUpdate(t *testing.T) {
 			},
 			// count and type stay ForceNew: the GKE API rejects updating them in place.
 			{
-				Config:             testAccContainerNodePool_guestAcceleratorNoSharing(cluster, np, networkName, subnetworkName, 2),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
+				Config: testAccContainerNodePool_guestAcceleratorNoSharing(cluster, np, networkName, subnetworkName, 2),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
 					},
 				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.guest_accelerator.0.count", "2"),
+				),
 			},
 		},
 	})
