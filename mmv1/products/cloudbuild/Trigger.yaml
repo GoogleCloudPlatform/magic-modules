@@ -29,6 +29,9 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+# ListBuildTriggersResponse returns the list under "triggers"; without this the
+# sweeper would look for the derived default "buildTriggers" and find nothing.
+collection_url_key: 'triggers'
 update_verb: 'PATCH'
 # import by default only works with old-style self links ending in a name
 import_format:
