@@ -1,0 +1,30 @@
+resource "google_vertex_ai_semantic_governance_policy_engine" "sgpe" {
+  region  = "us-central1"
+}
+
+resource "google_vertex_ai_reasoning_engine" "agent" {
+  display_name = "example-agent"
+  region       = "us-central1"
+
+  spec {
+    identity_type = "AGENT_IDENTITY"
+  }
+}
+
+resource "time_sleep" "wait_for_ingestion" {
+  depends_on      = [google_vertex_ai_reasoning_engine.agent]
+  create_duration = "120s"
+}
+
+data "google_agent_registry_agent" "agent" {
+  location   = "us-central1"
+  filter     = "displayName=\"${google_vertex_ai_reasoning_engine.agent.display_name}\""
+  depends_on = [time_sleep.wait_for_ingestion]
+}
+
+resource "google_vertex_ai_semantic_governance_policy" "{{$.PrimaryResourceId}}" {
+  semantic_governance_policy_id = "example-policy"
+  region                        = "us-central1"
+  natural_language_constraint   = "Do not access internal developer endpoints"
+  agent                         = data.google_agent_registry_agent.agent.id
+}
