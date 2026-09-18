@@ -37,6 +37,8 @@ timeouts:
 async:
   operation:
     base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
@@ -137,14 +139,15 @@ parameters:
       The location in which the batch will be created in.
     immutable: true
     url_param_only: true
+properties:
   - name: batchId
     type: String
     description: |
       The ID to use for the batch, which will become the final component of the batch's resource name.
       This value must be 4-63 characters. Valid characters are /[a-z][0-9]-/.
     immutable: true
-    url_param_only: true
-properties:
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
   - name: name
     type: String
     description: |
