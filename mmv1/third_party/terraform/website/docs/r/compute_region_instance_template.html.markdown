@@ -670,6 +670,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `host_error_timeout_seconds` - (Optional) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
 
+* `expose_host_topology` - (Optional) Opt-in flag to expose the hashed physical host ID in the VM's ResourceStatus.
+
 * `max_run_duration` -  (Optional)  The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
 
 <a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
