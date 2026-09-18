@@ -61,6 +61,8 @@ samples:
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
+        ignore_read_extra:
+          - 'etag'
       - name: 'vertex_ai_semantic_governance_policy_test_update'
         resource_id_vars:
           project_id: 'sgp'
@@ -74,6 +76,8 @@ samples:
           display_name: 'updated-policy'
           description: 'Updated description for semantic governance policy'
           natural_language_constraint: 'Do not access restricted storage buckets'
+        ignore_read_extra:
+          - 'etag'
 parameters:
   - name: 'semanticGovernancePolicyId'
     type: String
