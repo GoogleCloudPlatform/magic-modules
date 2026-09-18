@@ -3917,27 +3917,13 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		return []map[string]interface{}{}
 	}
 
-	resourceManagerTags := gcc.ResourceManagerTags
-	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.resource_manager_tags"); ok {
-		cfgTags := v.(map[string]interface{})
-		if len(cfgTags) > 0 && resourceManagerTags != nil {
-			filteredTags := make(map[string]string, len(cfgTags))
-			for k, val := range resourceManagerTags {
-				if _, exists := cfgTags[k]; exists {
-					filteredTags[k] = val
-				}
-			}
-			resourceManagerTags = filteredTags
-		}
-	}
-
 	gceConfig := map[string]interface{}{
 		"tags":                  schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
 		"service_account":       gcc.ServiceAccount,
 		"zone":                  tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
 		"internal_ip_only":      gcc.InternalIpOnly,
 		"metadata":              gcc.Metadata,
-		"resource_manager_tags": resourceManagerTags,
+		"resource_manager_tags": gcc.ResourceManagerTags,
 	}
 
 	if gcc.NetworkUri != "" {
@@ -3975,20 +3961,10 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		}
 	}
 	if gcc.ConfidentialInstanceConfig != nil {
-		enableConfidentialCompute := gcc.ConfidentialInstanceConfig.EnableConfidentialCompute
-		confidentialInstanceType := gcc.ConfidentialInstanceConfig.ConfidentialInstanceType
-		if !enableConfidentialCompute && confidentialInstanceType != "" {
-			if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.enable_confidential_compute"); ok && v.(bool) {
-				enableConfidentialCompute = true
-				if _, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.confidential_instance_type"); !ok {
-					confidentialInstanceType = ""
-				}
-			}
-		}
 		gceConfig["confidential_instance_config"] = []map[string]interface{}{
 			{
-				"enable_confidential_compute": enableConfidentialCompute,
-				"confidential_instance_type":  confidentialInstanceType,
+				"enable_confidential_compute": gcc.ConfidentialInstanceConfig.EnableConfidentialCompute,
+				"confidential_instance_type":  gcc.ConfidentialInstanceConfig.ConfidentialInstanceType,
 			},
 		}
 	}
@@ -4313,11 +4289,7 @@ func flattenAttachedDiskConfig(configs []*dataproc.AttachedDiskConfig) []map[str
 		}
 		m := make(map[string]interface{})
 		m["disk_size_gb"] = c.DiskSizeGb
-		diskType := c.DiskType
-		if diskType == "" && c.Type != "" {
-			diskType = strings.ToUpper(strings.ReplaceAll(c.Type, "-", "_"))
-		}
-		m["disk_type"] = diskType
+		m["disk_type"] = c.DiskType
 		if c.ProvisionedIops > 0 {
 			m["provisioned_iops"] = c.ProvisionedIops
 		}

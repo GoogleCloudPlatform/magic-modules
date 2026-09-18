@@ -173,9 +173,6 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
-	if r, ok := subnetOptions["region"].(string); ok && r != "" {
-		region = r
-	}
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
@@ -197,7 +194,7 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 
 		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
-			"region":      region,
+			"region ":     region,
 			"network":     networkUrl,
 			"ipCidrRange": "10.77.0.0/20",
 		}

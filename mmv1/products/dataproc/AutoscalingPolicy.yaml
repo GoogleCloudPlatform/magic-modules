@@ -30,11 +30,6 @@ iam_policy:
     - '{{policy_id}}'
 import_format:
   - projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}
-sweeper:
-  url_substitutions:
-    - region: us-central1
-    - region: us-west1
-    - region: us-east1
 include_in_tgc_next: true
 cai_asset_name_format: projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}
 samples:
