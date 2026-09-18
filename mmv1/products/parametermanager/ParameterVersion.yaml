@@ -41,9 +41,6 @@ samples:
         resource_id_vars:
           parameter_id: parameter
           parameter_version_id: parameter_version
-        test_vars_overrides:
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
   - name: parameter_version_with_json_format
     primary_resource_id: parameter-version-with-json-format
     steps:
@@ -51,9 +48,6 @@ samples:
         resource_id_vars:
           parameter_id: parameter
           parameter_version_id: parameter_version
-        test_vars_overrides:
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
   - name: parameter_version_with_kms_key
     primary_resource_id: parameter-version-with-kms-key
     bootstrap_iam:
@@ -67,8 +61,6 @@ samples:
           kms_key: kms-key
         test_vars_overrides:
           kms_key: kms.BootstrapKMSKey(t).CryptoKey.Name
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
   - name: parameter_version_with_yaml_format
     primary_resource_id: parameter-version-with-yaml-format
     steps:
@@ -76,9 +68,6 @@ samples:
         resource_id_vars:
           parameter_id: parameter
           parameter_version_id: parameter_version
-        test_vars_overrides:
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
   - name: parameter_version_with_json_format_with_file
     primary_resource_id: parameter-version-with-json-format-with-file
     steps:
@@ -89,8 +78,6 @@ samples:
           data: parameter-json-data.json
         test_vars_overrides:
           data: '"./test-fixtures/parameter_data_json_format.json"'
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
   - name: parameter_version_with_yaml_format_with_file
     primary_resource_id: parameter-version-with-yaml-format-with-file
     steps:
@@ -101,8 +88,6 @@ samples:
           data: parameter-yaml-data.yaml
         test_vars_overrides:
           data: '"./test-fixtures/parameter_data_yaml_format.yaml"'
-          # for backward compatible
-          parameter_id: '"parameter" + randomSuffix'
 parameters:
   - name: parameter
     type: ResourceRef
