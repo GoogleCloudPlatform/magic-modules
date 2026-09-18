@@ -37,6 +37,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 mutex: tagKeys/{{parent}}
+# tagKeys.list is scoped by a ?parent= query parameter, and the generated
+# sweeper truncates its list URL at the first "?", so a generated sweeper here
+# would issue an unscoped GET and fail. Swept instead by the handwritten
+# sweeper in third_party/terraform/services/tags/resource_tags_tag_key_sweeper.go,
+# which also reclaims the key's TagValues first.
 exclude_sweeper: true
 async:
   type: OpAsync
