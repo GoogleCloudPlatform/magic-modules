@@ -953,10 +953,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithStartExecutionToken(context1),
 			},
 			{
-				ResourceName:            "google_cloud_run_v2_job.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
+				ResourceName:      "google_cloud_run_v2_job.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The API drops start_execution_token once an execution is created
+				// out of band, so an imported job may have no value to compare
+				// against.
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection", "start_execution_token"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithStartExecutionToken(context2),
@@ -965,7 +968,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithStartExecutionTokenUpdate(t *testing.
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection", "start_execution_token"},
 			},
 		},
 	})
@@ -1011,10 +1014,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunExecutionTokenUpdate(t *testing.T)
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context1),
 			},
 			{
-				ResourceName:            "google_cloud_run_v2_job.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
+				ResourceName:      "google_cloud_run_v2_job.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The API drops run_execution_token once an execution is created
+				// out of band, so an imported job may have no value to compare
+				// against.
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection", "run_execution_token"},
 			},
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context2),
@@ -1023,7 +1029,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunExecutionTokenUpdate(t *testing.T)
 				ResourceName:            "google_cloud_run_v2_job.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection", "run_execution_token"},
 			},
 		},
 	})
