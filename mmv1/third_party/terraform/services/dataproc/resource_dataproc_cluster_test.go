@@ -2389,12 +2389,12 @@ func testAccDataprocCluster_withReservationAffinity(rnd, subnetworkName string) 
 
 resource "google_compute_reservation" "reservation" {
   name = "tf-test-dproc-reservation-%s"
-  zone = "us-east1-c"
+  zone = "us-east1-b"
 
   specific_reservation {
     count = 1
     instance_properties {
-      machine_type = "n4-standard-2"
+      machine_type = "c3-standard-4"
     }
   }
   specific_reservation_required = true
@@ -2406,7 +2406,7 @@ resource "google_dataproc_cluster" "basic" {
 
   cluster_config {
     master_config {
-      machine_type  = "n4-standard-2"
+      machine_type  = "c3-standard-4"
       disk_config {
         boot_disk_type    = "hyperdisk-balanced"
         boot_disk_size_gb = 35
@@ -2421,7 +2421,7 @@ resource "google_dataproc_cluster" "basic" {
 
     gce_cluster_config {
       subnetwork = "%s"
-      zone = "us-east1-c"
+      zone = "us-east1-b"
       reservation_affinity {
         consume_reservation_type = "SPECIFIC_RESERVATION"
         key = "compute.googleapis.com/reservation-name"
