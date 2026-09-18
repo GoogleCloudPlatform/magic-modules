@@ -14,7 +14,7 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 	t.Parallel()
 
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,7 +38,7 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 	t.Parallel()
 
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -65,7 +65,7 @@ func TestAccContainerClusterDatasource_skipNodePoolRefresh(t *testing.T) {
 	t.Parallel()
 
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

@@ -204,7 +204,7 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 
 		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
-			"region ":     region,
+			"region":      region,
 			"network":     networkUrl,
 			"ipCidrRange": "10.77.0.0/20",
 		}

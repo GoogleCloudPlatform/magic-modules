@@ -50,7 +50,7 @@ func TestAccContainerCluster_basic(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -95,7 +95,7 @@ func TestAccContainerCluster_basic_noCpaUpgrade(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -130,7 +130,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	bootstrapGkeTagManagerServiceAgents(t)
 	acctest.VcrTest(t, resource.TestCase{
@@ -188,7 +188,7 @@ func TestAccContainerCluster_networkingModeRoutes(t *testing.T) {
 
 	// separate shared network name because test requests a specific CIDR
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster-moderoutes")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-moderoutes-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-moderoutes", networkName, "us-east1", "10.79.0.0/20")
 	firstClusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	secondClusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
@@ -223,7 +223,7 @@ func TestAccContainerCluster_misc(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -261,7 +261,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -296,7 +296,7 @@ func TestAccContainerCluster_agentSandbox(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -355,7 +355,7 @@ func TestAccContainerCluster_withDeletionProtection(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -393,7 +393,7 @@ func TestAccContainerCluster_withNotificationConfig(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	newTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -447,7 +447,7 @@ func TestAccContainerCluster_withFilteredNotificationConfig(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	newTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -491,7 +491,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -552,7 +552,7 @@ func TestAccContainerCluster_withLocalSsdEncryptionMode(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -578,7 +578,7 @@ func TestAccContainerCluster_withMaxRunDuration(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -622,7 +622,7 @@ func TestAccContainerCluster_withFlexStart(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -655,7 +655,7 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -699,7 +699,7 @@ func TestAccContainerCluster_omittedILBSubsetting(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -743,7 +743,7 @@ func TestAccContainerCluster_disableL4LbFirewallReconciliation(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -809,7 +809,7 @@ func TestAccContainerCluster_inTransitEncryptionConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -848,7 +848,7 @@ func TestAccContainerCluster_networkPerformanceConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -919,7 +919,7 @@ func TestAccContainerCluster_withAdditiveVPC(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -944,7 +944,7 @@ func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -972,7 +972,7 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	orgDomain := envvar.GetTestOrgDomainFromEnv(t)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -1069,7 +1069,7 @@ func TestAccContainerCluster_withPodAutoscaling(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1266,7 +1266,7 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1339,7 +1339,7 @@ func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1374,7 +1374,7 @@ func TestAccContainerCluster_withReleaseChannelEnabledDefaultVersion(t *testing.
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1441,7 +1441,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1460,7 +1460,7 @@ func TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1486,7 +1486,7 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1534,7 +1534,7 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1628,7 +1628,7 @@ func TestAccContainerCluster_withManagedMLDiagnosticsConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -1729,7 +1729,7 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1798,7 +1798,7 @@ func TestAccContainerCluster_withGcpPublicCidrsAccessEnabledToggle(t *testing.T)
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1892,7 +1892,7 @@ func TestAccContainerCluster_withAuthorizedNetworkPrivateEnforcementToggle(t *te
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1952,7 +1952,7 @@ func TestAccContainerCluster_regional(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -1978,7 +1978,7 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -2005,7 +2005,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -2073,7 +2073,7 @@ func TestAccContainerCluster_nodePoolWithUpgradeSettings(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2192,7 +2192,7 @@ func TestAccContainerCluster_withPrivateClusterConfigGlobalAccessEnabledOnly(t *
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2226,7 +2226,7 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2266,7 +2266,7 @@ func TestAccContainerCluster_withVersion(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -2291,7 +2291,7 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2325,7 +2325,7 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2369,7 +2369,7 @@ func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2519,7 +2519,7 @@ func TestAccContainerCluster_withKubeletConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -2581,7 +2581,7 @@ func TestAccContainerCluster_withKubeletConfigShutdownGracePeriod(t *testing.T) 
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2614,7 +2614,7 @@ func TestAccContainerCluster_withInlineNodePoolShutdownGracePeriod(t *testing.T)
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2648,7 +2648,7 @@ func TestAccContainerCluster_withNodeConfigFastSocket(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2701,7 +2701,7 @@ func TestAccContainerCluster_withNodeConfigGcfsConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2744,7 +2744,7 @@ func TestAccContainerCluster_withNodeConfigKubeletConfigSettingsUpdates(t *testi
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2802,7 +2802,7 @@ func TestAccContainerCluster_withNodeConfigKubeletConfigSettingsInNodePool(t *te
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2827,7 +2827,7 @@ func TestAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodePool(t 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2854,7 +2854,7 @@ func TestAccContainerCluster_withInsecureKubeletReadonlyPortEnabledDefaultsUpdat
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2927,7 +2927,7 @@ func TestAccContainerCluster_withLoggingVariantInNodeConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2952,7 +2952,7 @@ func TestAccContainerCluster_withLoggingVariantInNodePool(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2976,7 +2976,7 @@ func TestAccContainerCluster_withLoggingVariantUpdates(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -3019,7 +3019,7 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesInNodePool(t *testing.T)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -3043,7 +3043,7 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:         func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -3102,7 +3102,7 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3127,7 +3127,7 @@ func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) 
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3152,7 +3152,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinity(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3184,7 +3184,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinitySpecific(t *testin
     reservationName := fmt.Sprintf("tf-test-reservation-%s", acctest.RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3222,7 +3222,7 @@ func TestAccContainerCluster_withNodeConfigReservationAffinityAnyReservationThen
     reservationName := fmt.Sprintf("tf-test-reservation-%s", acctest.RandString(t, 10))
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3253,7 +3253,7 @@ func TestAccContainerCluster_withNodeConfigNodeImageConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3273,7 +3273,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -3326,7 +3326,7 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3384,7 +3384,7 @@ func TestAccContainerCluster_withSandboxConfigType(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -3410,7 +3410,7 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us-east1")
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
@@ -3472,7 +3472,7 @@ func TestAccContainerCluster_backend(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3498,7 +3498,7 @@ func TestAccContainerCluster_withNodePoolBasic(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3524,7 +3524,7 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3559,7 +3559,7 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3600,7 +3600,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3656,7 +3656,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3721,7 +3721,7 @@ func TestAccContainerCluster_withNodePoolNamePrefix(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	npNamePrefix := "tf-test-np-"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3747,7 +3747,7 @@ func TestAccContainerCluster_withNodePoolMultiple(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	npNamePrefix := "tf-test-np-"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3774,7 +3774,7 @@ func TestAccContainerCluster_withNodePoolConflictingNameFields(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npPrefix := "tf-test-np"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3795,7 +3795,7 @@ func TestAccContainerCluster_withNodePoolNodeConfig(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3821,7 +3821,7 @@ func TestAccContainerCluster_withNodePoolNodeDrainConfig(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3859,7 +3859,7 @@ func TestAccContainerCluster_withNodePoolMaintenancePolicy(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3889,7 +3889,7 @@ func TestAccContainerCluster_withClusterDisruptionBudget(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_cluster_disruption_budget"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:         func() { acctest.AccTestPreCheck(t) },
@@ -3915,7 +3915,7 @@ func TestAccContainerCluster_withDailyMaintenanceWindow(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_window"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3957,7 +3957,7 @@ func TestAccContainerCluster_withRecurringTimeWindow(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_recurring_maintenance_window"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -4010,7 +4010,7 @@ func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_recurring_maintenance_window"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -4060,7 +4060,7 @@ func TestAccContainerCluster_withMaintenanceExclusionWindow(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_window"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4096,7 +4096,7 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4129,7 +4129,7 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions_untilEndOfSupport(t
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4160,7 +4160,7 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4210,7 +4210,7 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4258,7 +4258,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	// step1: create a new cluster and initialize the maintenceExclusion without exclusion scopes,
 	// step2: add exclusion scopes to the maintenancePolicy,
@@ -4328,7 +4328,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	// step1: create a new cluster and initialize the maintenceExclusion without exclusion scopes,
 	// step2: add exclusion scopes to the maintenancePolicy,
@@ -4394,7 +4394,7 @@ func TestAccContainerCluster_deleteExclusionWindow(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_window"
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4605,7 +4605,7 @@ func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -4685,7 +4685,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	includeMinCpuPlatform := true
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4738,7 +4738,7 @@ func TestAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(t *testing.
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4776,7 +4776,7 @@ func TestAccContainerCluster_nodeAutoprovisioningNetworkTags(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -4805,7 +4805,7 @@ func TestAccContainerCluster_withDefaultComputeClassEnabled(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -4845,7 +4845,7 @@ func TestAccContainerCluster_withAutopilotDefaultComputeClassEnabled(t *testing.
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -4933,7 +4933,7 @@ func TestAccContainerCluster_withAutopilotClusterPolicy(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5047,7 +5047,7 @@ func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -5190,7 +5190,7 @@ func TestAccContainerCluster_withAutopilotKubeletConfig(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
   networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5240,7 +5240,7 @@ func TestAccContainerCluster_withAutopilot_withNodePoolAutoConfig(t *testing.T) 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5266,7 +5266,7 @@ func TestAccContainerCluster_withStandard_withNodePoolDefaults(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5355,7 +5355,7 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5400,7 +5400,7 @@ func TestAccContainerCluster_withWorkloadIdentityConfigAutopilot(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	pid := envvar.GetTestProjectFromEnv()
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5425,7 +5425,7 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5486,7 +5486,7 @@ func TestAccContainerCluster_withSecretSyncConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5556,7 +5556,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	minVersion := "1.36"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -5648,7 +5648,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -5769,7 +5769,7 @@ func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
 
 	resourceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -5792,7 +5792,7 @@ func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -5829,7 +5829,7 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -5882,7 +5882,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEnabledBool(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -5916,7 +5916,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeAutopilot(t *t
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -5950,7 +5950,7 @@ func TestAccContainerCluster_withBinaryAuthorizationEvaluationModeClassic(t *tes
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -6008,7 +6008,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskSizeGb(t *testing.T
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	includeDiskSizeGb := true
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -6043,7 +6043,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsDiskType(t *testing.T) 
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	includeDiskType := true
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -6078,7 +6078,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsImageType(t *testing.T)
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	includeImageType := true
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -6114,7 +6114,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us-east1")
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
@@ -6150,7 +6150,7 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsShieldedInstance(t *tes
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -6175,7 +6175,7 @@ func TestAccContainerCluster_autoprovisioningDefaultsManagement(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6209,7 +6209,7 @@ func TestAccContainerCluster_autoprovisioningLocations(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6355,7 +6355,7 @@ func TestAccContainerCluster_withExternalIpsConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -6390,7 +6390,7 @@ func TestAccContainerCluster_withMeshCertificatesConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -6434,7 +6434,7 @@ func TestAccContainerCluster_withCostManagementConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -6469,7 +6469,7 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	// Use the bootstrapped KMS key so we can avoid creating keys needlessly
 	// as they will pile up in the project because they can not be completely
@@ -6511,7 +6511,7 @@ func TestAccContainerCluster_withAdvancedDatapath(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6536,7 +6536,7 @@ func TestAccContainerCluster_dataplaneOptimizationMode(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6592,7 +6592,7 @@ func TestAccContainerCluster_enableCiliumPolicies(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -6687,7 +6687,7 @@ func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
 	datesetId := fmt.Sprintf("tf_test_cluster_resource_usage_%s", suffix)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6758,7 +6758,7 @@ func TestAccContainerCluster_withEnableKubernetesAlpha(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6783,7 +6783,7 @@ func TestAccContainerCluster_withEnableKubernetesBetaAPIs(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6808,7 +6808,7 @@ func TestAccContainerCluster_withEnableKubernetesBetaAPIsOnExistingCluster(t *te
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6842,7 +6842,7 @@ func TestAccContainerCluster_withIncompatibleMasterVersionNodeVersion(t *testing
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func(){acctest.AccTestPreCheck(t)},
@@ -6864,7 +6864,7 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	domainName := fmt.Sprintf("tf-test-domain-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -6896,7 +6896,7 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -6962,7 +6962,7 @@ func TestAccContainerCluster_withProtectConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -6997,7 +6997,7 @@ func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -7058,7 +7058,7 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	projectID := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -7155,7 +7155,7 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -7361,7 +7361,7 @@ func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
 	suffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	// Bootstrap KMS keys and needed IAM role.
 	diskKey := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "control-plane-disk-encryption")
@@ -7677,7 +7677,7 @@ func TestAccContainerCluster_kubeDns_minimal(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -7701,7 +7701,7 @@ func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -7725,7 +7725,7 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -7778,7 +7778,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 	domain := "additive.autopilot.example"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -7842,7 +7842,7 @@ func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -7883,7 +7883,7 @@ func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
 	domain := "additive-mutating.autopilot.example"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -7937,7 +7937,7 @@ func TestAccContainerCluster_autopilot_net_admin(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -7980,7 +7980,7 @@ func TestAccContainerCluster_autopilot_privileged_admission(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -8146,7 +8146,7 @@ func TestAccContainerCluster_withCpuCfsQuotaPool(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -8181,7 +8181,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -9602,7 +9602,7 @@ func TestAccContainerCluster_withEnablePrivateEndpointToggle(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -14540,7 +14540,7 @@ func TestAccContainerCluster_customPlacementPolicy(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	policy := fmt.Sprintf("tf-test-policy-%s", acctest.RandString(t, 10))
 
@@ -14690,7 +14690,7 @@ func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
 	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us-east1")
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
@@ -14756,7 +14756,7 @@ func TestAccContainerCluster_withConfidentialBootDiskNodeConfig(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	bootstrapped := kms.BootstrapKMSKeyInLocation(t, "us-east1")
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
@@ -14819,7 +14819,7 @@ func TestAccContainerCluster_withoutConfidentialBootDisk(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -15420,7 +15420,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	secretID := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -15747,7 +15747,7 @@ func TestAccContainerCluster_registryHosts(t *testing.T) {
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	secretID := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -16067,7 +16067,7 @@ func TestAccContainerCluster_writableCgroups(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16224,7 +16224,7 @@ func TestAccContainerCluster_withProviderDefaultLabels(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -16387,7 +16387,7 @@ func TestAccContainerCluster_storagePoolsWithNodePool(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	location := "us-east1-b"
 
 	storagePoolResourceName := tpgcompute.BootstrapComputeStoragePoolInZone(t, "basic-1", "hyperdisk-balanced", location)
@@ -16443,7 +16443,7 @@ func TestAccContainerCluster_storagePoolsWithNodeConfig(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	location := "us-east1-b"
 
 	storagePoolResourceName := tpgcompute.BootstrapComputeStoragePoolInZone(t, "basic-1", "hyperdisk-balanced", location)
@@ -16530,7 +16530,7 @@ func TestAccContainerCluster_withAutopilotGcpFilestoreCsiDriver(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16604,7 +16604,7 @@ func TestAccContainerCluster_withDnsEndpoint(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16679,7 +16679,7 @@ func TestAccContainerCluster_withDnsEndpointAndEnableK8sTokensViaDns(t *testing.
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16737,7 +16737,7 @@ func TestAccContainerCluster_withDnsEndpointAndEnableK8sCertsViaDns(t *testing.T
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16795,7 +16795,7 @@ func TestAccContainerCluster_withCgroupMode(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16824,7 +16824,7 @@ func TestAccContainerCluster_withCgroupModeUpdate(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -16879,7 +16879,7 @@ func TestAccContainerCluster_withEnterpriseConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	pid := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -16962,7 +16962,7 @@ func TestAccContainerCluster_disableControlPlaneIP(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
   acctest.VcrTest(t, resource.TestCase{
     PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -17195,17 +17195,15 @@ func bootstrapAdditionalIpRangesNetworkConfig(t *testing.T, name string, additio
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, fmt.Sprintf("%s-network", name))
 	mainSubnet := tpgcompute.BootstrapSubnetWithOverrides(t, fmt.Sprintf("%s-subnet-main", name), networkName, map[string]interface{}{
 		"region":      "us-east1",
-		"ipCidrRange": "10.2.0.0/24",
+		"ipCidrRange": "10.12.0.0/24",
 		"secondaryIpRanges": []map[string]interface{}{
 			{
-				"rangeName": "pods",
-				"region":      "us-east1",
-		"ipCidrRange": "10.3.0.0/16",
+				"rangeName":   "pods",
+				"ipCidrRange": "10.13.0.0/16",
 			},
 			{
-				"rangeName": "services",
-				"region":      "us-east1",
-		"ipCidrRange": "10.4.0.0/16",
+				"rangeName":   "services",
+				"ipCidrRange": "10.14.0.0/16",
 			},
 		},
 	})
@@ -17223,9 +17221,8 @@ func bootstrapAdditionalIpRangesNetworkConfig(t *testing.T, name string, additio
 		for rangeIndex := 0; rangeIndex < secondaryRangeCount; rangeIndex++ {
 			rangeName := fmt.Sprintf("range-%d", cumulativeRangeIndex)
 			r := map[string]interface{}{
-				"rangeName": rangeName,
-				"region":      "us-east1",
-		"ipCidrRange": fmt.Sprintf("10.0.%d.0/24", cumulativeRangeIndex),
+				"rangeName":   rangeName,
+				"ipCidrRange": fmt.Sprintf("10.10.%d.0/24", cumulativeRangeIndex),
 			}
 			rangeNames = append(rangeNames, rangeName)
 			ranges = append(ranges, r)
@@ -17233,8 +17230,8 @@ func bootstrapAdditionalIpRangesNetworkConfig(t *testing.T, name string, additio
 		}
 
 		subnetOverrides := map[string]interface{}{
-			"region":      "us-east1",
-		"ipCidrRange": fmt.Sprintf("10.1.%d.0/24", subnetIndex),
+			"region":            "us-east1",
+			"ipCidrRange":       fmt.Sprintf("10.11.%d.0/24", subnetIndex),
 			"secondaryIpRanges": ranges,
 		}
 
@@ -17364,7 +17361,7 @@ func TestAccContainerCluster_auto_ipam_config_enabled(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
@@ -17436,7 +17433,7 @@ func TestAccContainerCluster_auto_ipam_config_none(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -17476,7 +17473,7 @@ func TestAccContainerCluster_withAnonymousAuthenticationConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -17574,7 +17571,7 @@ func TestAccContainerCluster_WithCPAFeaturesUpdate(t *testing.T) {
 	suffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	// Bootstrap KMS keys and needed IAM role.
 	diskKey := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "control-plane-disk-encryption")
@@ -17707,7 +17704,7 @@ func TestAccContainerCluster_RbacBindingConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -17771,7 +17768,7 @@ func TestAccContainerCluster_withKubeletResourceManagerConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -18348,7 +18345,7 @@ func TestAccContainerCluster_withClusterBootDisk(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -18793,7 +18790,7 @@ func TestAccContainerCluster_withNodeCreationConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -18834,7 +18831,7 @@ func TestAccContainerCluster_withCustomNodeInitGcs(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -18864,7 +18861,7 @@ func TestAccContainerCluster_withCustomNodeInitSecret(t *testing.T) {
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	secretId := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -18897,7 +18894,7 @@ func TestAccContainerCluster_withCustomNodeInitInline(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
 	secretId := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -19151,7 +19148,7 @@ func TestAccContainerCluster_withSlurmOperatorConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-slurm-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -19222,7 +19219,7 @@ func TestAccContainerCluster_withTaintConfig(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	importIgnore := []string{"min_master_version", "deletion_protection"}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -19343,7 +19340,7 @@ func TestAccContainerCluster_withNodePoolTaintConfig(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	importIgnore := []string{"min_master_version", "deletion_protection"}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -19377,7 +19374,7 @@ func TestAccContainerCluster_withNodePoolTaintConfig_none(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	importIgnore := []string{"min_master_version", "deletion_protection"}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -19502,7 +19499,7 @@ func TestAccContainerCluster_desiredEmulatedVersion(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -19746,7 +19743,7 @@ func TestAccContainerCluster_desiredEmulatedVersionAutopilot(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-auto-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -19947,7 +19944,7 @@ func TestAccContainerCluster_withNodeReadinessConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-nrc-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -20018,7 +20015,7 @@ func TestAccContainerCluster_withHighScaleCheckpointingConfig(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-hsc-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-us-east1", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
