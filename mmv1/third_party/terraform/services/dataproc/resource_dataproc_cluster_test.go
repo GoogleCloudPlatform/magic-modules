@@ -313,7 +313,7 @@ func TestAccDataprocCluster_withConfidentialCompute(t *testing.T) {
 
 					// Check master
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
-						"cluster_config.0.master_config.0.machine_type", "n4d-standard-2"),
+						"cluster_config.0.master_config.0.machine_type", "c4d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
 						"cluster_config.0.master_config.0.image_uri", imageUri),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
@@ -321,7 +321,7 @@ func TestAccDataprocCluster_withConfidentialCompute(t *testing.T) {
 
 					// Check worker
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
-						"cluster_config.0.worker_config.0.machine_type", "n4d-standard-2"),
+						"cluster_config.0.worker_config.0.machine_type", "c4d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
 						"cluster_config.0.worker_config.0.image_uri", imageUri),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
@@ -2224,7 +2224,7 @@ resource "google_dataproc_cluster" "confidential" {
         }
 
         master_config {
-            machine_type     = "n4d-standard-2"
+            machine_type     = "c4d-standard-2"
             image_uri        = "%s"
             min_cpu_platform = "AMD Turin"
             disk_config {
@@ -2233,7 +2233,7 @@ resource "google_dataproc_cluster" "confidential" {
         }
 
         worker_config {
-            machine_type     = "n4d-standard-2"
+            machine_type     = "c4d-standard-2"
             image_uri        = "%s"
             min_cpu_platform = "AMD Turin"
             disk_config {
@@ -2261,7 +2261,7 @@ resource "google_dataproc_cluster" "confidential_type" {
         }
 
         master_config {
-            machine_type     = "n4d-standard-2"
+            machine_type     = "c4d-standard-2"
             image_uri        = "%s"
             min_cpu_platform = "AMD Turin"
             disk_config {
@@ -2270,7 +2270,7 @@ resource "google_dataproc_cluster" "confidential_type" {
         }
 
         worker_config {
-            machine_type     = "n4d-standard-2"
+            machine_type     = "c4d-standard-2"
             image_uri        = "%s"
             min_cpu_platform = "AMD Turin"
             disk_config {
@@ -2362,6 +2362,7 @@ resource "google_dataproc_cluster" "with_min_num_instances" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+      zone       = "us-east1-b"
     }
     master_config {
       num_instances = 1
@@ -2388,10 +2389,10 @@ func testAccDataprocCluster_withReservationAffinity(rnd, subnetworkName string) 
 
 resource "google_compute_reservation" "reservation" {
   name = "tf-test-dproc-reservation-%s"
-  zone = "us-east1-b"
+  zone = "us-east1-c"
 
   specific_reservation {
-    count = 10
+    count = 1
     instance_properties {
       machine_type = "n4-standard-2"
     }
@@ -2412,17 +2413,15 @@ resource "google_dataproc_cluster" "basic" {
       }
     }
 
-    worker_config {
-      machine_type  = "n4-standard-2"
-      disk_config {
-        boot_disk_type    = "hyperdisk-balanced"
-        boot_disk_size_gb = 35
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
       }
     }
 
     gce_cluster_config {
       subnetwork = "%s"
-      zone = "us-east1-b"
+      zone = "us-east1-c"
       reservation_affinity {
         consume_reservation_type = "SPECIFIC_RESERVATION"
         key = "compute.googleapis.com/reservation-name"
