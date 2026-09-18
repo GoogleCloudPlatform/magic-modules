@@ -3917,13 +3917,27 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		return []map[string]interface{}{}
 	}
 
+	resourceManagerTags := gcc.ResourceManagerTags
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.resource_manager_tags"); ok {
+		cfgTags := v.(map[string]interface{})
+		if len(cfgTags) > 0 && resourceManagerTags != nil {
+			filteredTags := make(map[string]string, len(cfgTags))
+			for k, val := range resourceManagerTags {
+				if _, exists := cfgTags[k]; exists {
+					filteredTags[k] = val
+				}
+			}
+			resourceManagerTags = filteredTags
+		}
+	}
+
 	gceConfig := map[string]interface{}{
 		"tags":                  schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
 		"service_account":       gcc.ServiceAccount,
 		"zone":                  tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
 		"internal_ip_only":      gcc.InternalIpOnly,
 		"metadata":              gcc.Metadata,
-		"resource_manager_tags": gcc.ResourceManagerTags,
+		"resource_manager_tags": resourceManagerTags,
 	}
 
 	if gcc.NetworkUri != "" {

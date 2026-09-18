@@ -313,19 +313,19 @@ func TestAccDataprocCluster_withConfidentialCompute(t *testing.T) {
 
 					// Check master
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
-						"cluster_config.0.master_config.0.machine_type", "n2d-standard-2"),
+						"cluster_config.0.master_config.0.machine_type", "n4d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
 						"cluster_config.0.master_config.0.image_uri", imageUri),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
-						"cluster_config.0.master_config.0.min_cpu_platform", "AMD Rome"),
+						"cluster_config.0.master_config.0.min_cpu_platform", "AMD Turin"),
 
 					// Check worker
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
-						"cluster_config.0.worker_config.0.machine_type", "n2d-standard-2"),
+						"cluster_config.0.worker_config.0.machine_type", "n4d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
 						"cluster_config.0.worker_config.0.image_uri", imageUri),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
-						"cluster_config.0.worker_config.0.min_cpu_platform", "AMD Rome"),
+						"cluster_config.0.worker_config.0.min_cpu_platform", "AMD Turin"),
 				),
 			},
 		},
@@ -2224,15 +2224,21 @@ resource "google_dataproc_cluster" "confidential" {
         }
 
         master_config {
-            machine_type     = "n2d-standard-2"
+            machine_type     = "n4d-standard-2"
             image_uri        = "%s"
-            min_cpu_platform = "AMD Rome"
+            min_cpu_platform = "AMD Turin"
+            disk_config {
+                boot_disk_type = "hyperdisk-balanced"
+            }
         }
 
         worker_config {
-            machine_type     = "n2d-standard-2"
+            machine_type     = "n4d-standard-2"
             image_uri        = "%s"
-            min_cpu_platform = "AMD Rome"
+            min_cpu_platform = "AMD Turin"
+            disk_config {
+                boot_disk_type = "hyperdisk-balanced"
+            }
         }
     }
 }
@@ -2255,15 +2261,21 @@ resource "google_dataproc_cluster" "confidential_type" {
         }
 
         master_config {
-            machine_type     = "n2d-standard-2"
+            machine_type     = "n4d-standard-2"
             image_uri        = "%s"
-            min_cpu_platform = "AMD Rome"
+            min_cpu_platform = "AMD Turin"
+            disk_config {
+                boot_disk_type = "hyperdisk-balanced"
+            }
         }
 
         worker_config {
-            machine_type     = "n2d-standard-2"
+            machine_type     = "n4d-standard-2"
             image_uri        = "%s"
-            min_cpu_platform = "AMD Rome"
+            min_cpu_platform = "AMD Turin"
+            disk_config {
+                boot_disk_type = "hyperdisk-balanced"
+            }
         }
     }
 }
@@ -2317,6 +2329,18 @@ resource "google_dataproc_cluster" "basic" {
   region = "us-east1"
 
   cluster_config {
+    master_config {
+      machine_type = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+      }
+    }
+    worker_config {
+      machine_type = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+      }
+    }
     gce_cluster_config {
       subnetwork = "%s"
       resource_manager_tags = {
@@ -2339,12 +2363,20 @@ resource "google_dataproc_cluster" "with_min_num_instances" {
     gce_cluster_config {
       subnetwork = "%s"
     }
-    master_config{
-      num_instances=1
+    master_config {
+      num_instances = 1
+      machine_type  = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+      }
     }
-    worker_config{
-      num_instances = 3
+    worker_config {
+      num_instances     = 3
       min_num_instances = 2
+      machine_type      = "n4-standard-2"
+      disk_config {
+        boot_disk_type = "hyperdisk-balanced"
+      }
     }
   }
 }
