@@ -2939,6 +2939,8 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_confidentialHyperdisk(t *testing.T) {
+	// Confidential Hyperdisk currently requires project allowlisting
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
