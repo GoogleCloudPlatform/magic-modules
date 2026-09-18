@@ -1286,7 +1286,7 @@ resource "google_compute_instance" "vm" {
   machine_type = "n1-standard-1"
 
   network_interface {
-    network = "default"
+    network = "global/networks/default"
   }
 
   metadata = {
