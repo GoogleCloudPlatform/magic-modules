@@ -43,7 +43,7 @@ samples:
         resource_id_vars:
           app_id: app-id
           display_name: my-app
-          secret_id: 1
+          secret_id: fake-pk-secret-app-tf
   - name: ces_app_ambient_sound_gcs_uri
     primary_resource_id: ces_app_ambient_sound_gcs_uri
     steps:
