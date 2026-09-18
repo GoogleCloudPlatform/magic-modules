@@ -1,0 +1,17 @@
+
+# Default Terraform test flags
+test --test_env=TF_ACC=1
+test --test_env=GOOGLE_PROJECT
+test --test_env=GOOGLE_REGION
+test --test_env=GOOGLE_ZONE
+test --test_env=GOOGLE_CREDENTIALS
+test --test_env=GOOGLE_APPLICATION_CREDENTIALS
+test --test_env=VCR_MODE
+test --test_env=VCR_PATH
+test --test_env=TF_LOG
+test --test_env=GOOGLE_BILLING_ACCOUNT
+test --test_env=GOOGLE_ORG
+
+# Config presets for testing against different Terraform versions
+test:tf_1_9 --//build_defs:terraform_version=1.9.8
+test:tf_1_14 --//build_defs:terraform_version=1.14.0

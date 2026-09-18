@@ -1,0 +1,6 @@
+go 1.26.5
+
+use (
+	./mmv1
+	./mmv1/third_party/terraform
+)

@@ -1,5 +1,7 @@
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 
+exports_files(["go.mod"])
+
 go_library(
     name = "mmv1_lib",
     srcs = ["main.go"],
