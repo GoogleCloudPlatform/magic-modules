@@ -22,6 +22,8 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/memberships
 self_link: projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
+# ListMembershipsResponse returns the list under "resources", not "memberships".
+collection_url_key: resources
 create_url: projects/{{project}}/locations/{{location}}/memberships?membershipId={{membership_id}}
 update_url: projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}
 update_mask: true
@@ -39,8 +41,19 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-# Skip sweeper gen since this is a child resource.
-exclude_sweeper: true
+sweeper:
+  # Memberships default to `global`, and the regional sample uses the test
+  # region. Without these the sweeper would only list `us-central1` (the generic
+  # fallback) and would never see the `global` memberships the tests create.
+  # `REGION` interpolates to envvar.GetTestRegionFromEnv(), the same accessor
+  # the regional sample uses, so this follows GOOGLE_REGION rather than pinning.
+  url_substitutions:
+    - location: global
+    - location: 'REGION'
+  # Deleting a membership fails with FAILED_PRECONDITION if it still has
+  # subresources (bindings, feature memberships), which is exactly the state a
+  # leaked test membership is in. `force` applies to the delete URL only.
+  query_string: "?force=true"
 async:
   type: OpAsync
   operation:
@@ -70,8 +83,6 @@ samples:
         test_vars_overrides:
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
           subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-          # for backward compatible
-          name: '"basic" + randomSuffix'
   - name: gkehub_membership_basic
     primary_resource_id: membership
     steps:
@@ -86,8 +97,6 @@ samples:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
           subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-          # for backward compatible
-          name: '"basic" + randomSuffix'
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkehub_membership_issuer
@@ -106,8 +115,6 @@ samples:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
           subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-          # for backward compatible
-          name: '"basic" + randomSuffix'
         oics_vars_overrides:
           deletion_protection: "false"
 parameters:
