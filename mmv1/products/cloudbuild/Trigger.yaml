@@ -52,6 +52,10 @@ custom_diff:
 schema_version: 2
 state_upgraders: true
 sweeper:
+  # The delete URL ends in {{trigger_id}}, so the sweeper would otherwise match
+  # on the output-only "id" (a server-generated UUID) rather than "name", which
+  # is where the tf-test prefix lives.
+  identifier_field: name
   url_substitutions:
     - region: "us-central1"
     - region: "global"
