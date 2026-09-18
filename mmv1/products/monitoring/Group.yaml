@@ -26,6 +26,9 @@ docs:
 base_url: v3/projects/{{project}}/groups
 self_link: v3/{{name}}
 id_format: '{{name}}'
+# ListGroupsResponse returns the list under the singular "group", not "groups";
+# without this the sweeper would find nothing.
+collection_url_key: group
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
