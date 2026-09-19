@@ -1,0 +1,6 @@
+resource "google_integrations_integration_version" "{{$.PrimaryResourceId}}" {
+  location = "us-east4"
+  integration = "{{index $.ResourceIdVars "integration_name"}}"
+  description = "Integration version with CMEK"
+  cloud_kms_key = "{{index $.ResourceIdVars "kms_key_name"}}"
+}
