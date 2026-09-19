@@ -14,9 +14,9 @@ import (
 func TestAccFilestoreInstance_restore(t *testing.T) {
 	t.Parallel()
 
-	srcInstancetName := fmt.Sprintf("tf-fs-inst-source-%d", acctest.RandInt(t))
-	restoreInstanceName := fmt.Sprintf("tf-fs-inst-restored-%d", acctest.RandInt(t))
-	backupName := fmt.Sprintf("tf-fs-bkup-%d", acctest.RandInt(t))
+	srcInstancetName := fmt.Sprintf("tf-test-fs-inst-source-%d", acctest.RandInt(t))
+	restoreInstanceName := fmt.Sprintf("tf-test-fs-inst-restored-%d", acctest.RandInt(t))
+	backupName := fmt.Sprintf("tf-test-fs-bkup-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -122,7 +122,7 @@ func testAccFilestoreInstance_restoreBackupDR(instanceID string, backupVaultID s
 data "google_project" "project" {}
 
 resource "google_filestore_instance" "source_instance" {
-  name     = "tf-source-instance-%{instance_id}"
+  name     = "%{instance_id}-source-instance"
   location = "%{location}"
   tier     = "REGIONAL"
 
@@ -145,7 +145,7 @@ resource "google_filestore_instance" "source_instance" {
 
 resource "google_backup_dr_backup_plan" "backup_plan" {
  location       = "%{location}"
- backup_plan_id = "tf-backup-plan-%{instance_id}"
+ backup_plan_id = "%{instance_id}-backup-plan"
  resource_type  = "file.googleapis.com/Instance"
  backup_vault   = "%{backup_vault_name}"
 
@@ -168,7 +168,7 @@ resource "google_backup_dr_backup_plan" "backup_plan" {
 
 resource "google_backup_dr_backup_plan_association" "bpa" {
  location = "%{location}"
- backup_plan_association_id = "tf-backup-plan-association-%{instance_id}"
+ backup_plan_association_id = "%{instance_id}-backup-plan-association"
  resource = google_filestore_instance.source_instance.id
  resource_type= "file.googleapis.com/Instance"
  backup_plan = google_backup_dr_backup_plan.backup_plan.name
@@ -194,7 +194,7 @@ data "google_backup_dr_backup" "filestore_backups" {
 
 
 resource "google_filestore_instance" "instance" {
-  name     = "tf-restored-instance-%{instance_id}"
+  name     = "%{instance_id}-restored-instance"
   location = "%{location}"
   tier     = "REGIONAL"
 

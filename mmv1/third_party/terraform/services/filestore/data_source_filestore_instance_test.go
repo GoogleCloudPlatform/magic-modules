@@ -29,7 +29,7 @@ func TestAccFilestoreInstanceDatasource_basic(t *testing.T) {
 func testAccFilestoreInstanceDatasourceConfig(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "filestore" {
-  name        = "tf-instance-%s"
+  name        = "tf-test-instance-%s"
   location    = "us-central1-b"
   tier        = "BASIC_HDD"
   description = "A basic filestore instance created during testing."
