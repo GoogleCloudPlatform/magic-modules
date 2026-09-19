@@ -4728,7 +4728,7 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   # Zonal rather than regional to reduce setup time and node count per zone.
-  location           = "us-east1-c"
+  location           = "us-east1-b"
   initial_node_count = 1
   node_config {
     machine_type = "n4-standard-2"
@@ -4805,7 +4805,7 @@ resource "google_container_node_pool" "with_tier1_net" {
   cluster    = google_container_cluster.cluster.name
   node_count = 1
   node_locations = [
-    "us-east1-c",
+    "us-east1-b",
   ]
   network_config {
     network_performance_config {
@@ -4813,7 +4813,7 @@ resource "google_container_node_pool" "with_tier1_net" {
     }
   }
   node_config {
-    machine_type = "c3-standard-44"
+    machine_type = "c4-standard-48"
     gvnic {
       enabled = true
     }
@@ -5069,6 +5069,7 @@ resource "google_container_node_pool" "np_with_gpudirect" {
 
   node_config {
     machine_type = "a4-highgpu-8g"
+    flex_start   = true
 
     guest_accelerator {
 		type  = "nvidia-b200"
@@ -5691,7 +5692,7 @@ func testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "us-east1-d"
+  location           = "us-east1-b"
   initial_node_count = 1
   node_config {
     machine_type = "n4-standard-2"
@@ -5703,7 +5704,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "us-east1-d"
+  location           = "us-east1-b"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
@@ -7132,6 +7133,7 @@ resource "google_container_node_pool" "np" {
   
   node_config {
     machine_type = "a4-highgpu-8g"
+    flex_start   = true
     
     guest_accelerator {
       type  = "nvidia-b200"
@@ -7259,6 +7261,7 @@ resource "google_container_node_pool" "np" {
   }
   node_config {
     machine_type = "a4-highgpu-8g"
+    flex_start   = true
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 	guest_accelerator {
 		type = "nvidia-b200"
@@ -7338,6 +7341,7 @@ resource "google_container_node_pool" "np" {
   }
   node_config {
     machine_type = "a4-highgpu-8g"
+    flex_start   = true
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 	guest_accelerator {
 		type = "nvidia-b200"
@@ -7412,6 +7416,7 @@ resource "google_container_node_pool" "np" {
   }
   node_config {
     machine_type = "a4-highgpu-8g"
+    flex_start   = true
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 	guest_accelerator {
 		type = "nvidia-b200"

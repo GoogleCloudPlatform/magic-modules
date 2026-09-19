@@ -8799,7 +8799,7 @@ func testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkN
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
-  location           = "us-east1-d"
+  location           = "us-east1-b"
 
   node_pool {
     name = "%s"
@@ -12143,6 +12143,9 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
   name               = "%s"
   location           = "us-east1-b"
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
 
   maintenance_policy {
     recurring_window {
@@ -17196,14 +17199,14 @@ func testAccContainerCluster_networkPerformanceConfig(name, networkName, subnetw
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name                         = "%s"
-  location                     = "us-east1-c"
+  location                     = "us-east1-b"
   initial_node_count           = 1
   network                      = "%s"
   subnetwork                   = "%s"
   deletion_protection          = false
 
   node_config {
-	machine_type = "c3-standard-44"
+	machine_type = "c4-standard-48"
 	gvnic {
       enabled = true
 	}
@@ -18026,6 +18029,7 @@ resource "google_container_cluster" "primary" {
     }
     node_config {
       machine_type = "a4-highgpu-8g"
+      flex_start   = true
       guest_accelerator {
         type  = "nvidia-b200"
         count = 8
@@ -18144,6 +18148,7 @@ resource "google_container_cluster" "primary" {
     
 	node_config {
 		machine_type = "a4-highgpu-8g"
+		flex_start   = true
 		oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 		guest_accelerator {
 			type = "nvidia-b200"
@@ -18217,6 +18222,7 @@ resource "google_container_cluster" "primary" {
     
 	node_config {
 		machine_type = "a4-highgpu-8g"
+		flex_start   = true
 		oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 		guest_accelerator {
 			type = "nvidia-b200"
@@ -18283,6 +18289,7 @@ resource "google_container_cluster" "primary" {
     
 	node_config {
 		machine_type = "a4-highgpu-8g"
+		flex_start   = true
 		oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 		guest_accelerator {
 			type = "nvidia-b200"
