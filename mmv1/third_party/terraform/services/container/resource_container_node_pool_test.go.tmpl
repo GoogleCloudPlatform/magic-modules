@@ -57,22 +57,22 @@ func TestAccContainerNodePool_resourceManagerTags(t *testing.T) {
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
 	tagData := map[string]interface{}{
 		"purpose": "GCE_FIREWALL",
-		"purpose_data": map[string]interface{}{
+		"purposeData": map[string]interface{}{
 			"network": pid + "/" + networkName,
 		},
 	}
-	tagKey1 := tags.BootstrapSharedTestProjectTagKey(t, "resourceManagerTags1", tagData)
-	tagKey2 := tags.BootstrapSharedTestProjectTagKey(t, "resourceManagerTags2", tagData)
+	tagKey1Details := tags.BootstrapSharedTestTagKeyDetails(t, "resourceManagerTagsGke1", "projects/"+pid, tagData)
+	tagKey2Details := tags.BootstrapSharedTestTagKeyDetails(t, "resourceManagerTagsGke2", "projects/"+pid, tagData)
 
 	context := map[string]interface{}{
 		"pid":           pid,
 		"org":           envvar.GetTestOrgFromEnv(t),
-        "network":       networkName,
+		"network":       networkName,
 		"subnet":        tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20"),
-		"tagKey1":       tagKey1,
-		"tagValue1":     tags.BootstrapSharedTestProjectTagValue(t, "resourceManagerTags1", tagKey1),
-		"tagKey2":       tagKey2,
-		"tagValue2":     tags.BootstrapSharedTestProjectTagValue(t, "resourceManagerTags2", tagKey2),
+		"tagKey1":       tagKey1Details["name"],
+		"tagValue1":     tags.BootstrapSharedTestTagValueDetails(t, "resourceManagerTagsGke1", tagKey1Details["shared_tag_key"], pid)["name"],
+		"tagKey2":       tagKey2Details["name"],
+		"tagValue2":     tags.BootstrapSharedTestTagValueDetails(t, "resourceManagerTagsGke2", tagKey2Details["shared_tag_key"], pid)["name"],
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -1694,9 +1694,10 @@ func TestAccContainerNodePool_withRDMA(t *testing.T) {
 				Config: testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName),
 			},
 			{
-				ResourceName:      "google_container_node_pool.np_with_gpudirect",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_container_node_pool.np_with_gpudirect",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_node_count"},
 			},
 		},
 	})
@@ -2349,6 +2350,9 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-east1-b"
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -2361,7 +2365,7 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n4-standard-2"
+    machine_type = "n1-standard-2"
     ephemeral_storage_config {
       local_ssd_count = 1
     }
@@ -2409,6 +2413,9 @@ resource "google_container_cluster" "cluster" {
   location           = "us-east1-b"
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -2421,7 +2428,7 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n4-standard-2"
+    machine_type = "n1-standard-2"
     ephemeral_storage_local_ssd_config {
       local_ssd_count = 1
     }
@@ -2467,6 +2474,9 @@ resource "google_container_cluster" "cluster" {
   location           = "us-east1-b"
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -2479,7 +2489,7 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n4-standard-2"
+    machine_type = "n1-standard-2"
     ephemeral_storage_local_ssd_config {
 	  local_ssd_count = 1
       data_cache_count = 1
@@ -2526,6 +2536,9 @@ resource "google_container_cluster" "cluster" {
   location           = "us-east1-b"
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -2538,7 +2551,7 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n4-standard-2"
+    machine_type = "n1-standard-2"
     ephemeral_storage_local_ssd_config {
 	  local_ssd_count = 0
       data_cache_count = 1
@@ -2586,6 +2599,9 @@ resource "google_container_cluster" "cluster" {
   location           = "us-east1-b"
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
@@ -2598,7 +2614,7 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n4-standard-2"
+    machine_type = "n1-standard-2"
     local_nvme_ssd_block_config {
       local_ssd_count = 1
     }
@@ -4712,8 +4728,11 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   # Zonal rather than regional to reduce setup time and node count per zone.
-  location           = "us-east1-d"
+  location           = "us-east1-c"
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
 
   network    = google_compute_network.container_network.name
   subnetwork = google_compute_subnetwork.container_subnetwork.name
@@ -4737,6 +4756,7 @@ resource "google_container_node_pool" "with_manual_pod_cidr" {
     pod_range        = google_compute_subnetwork.container_subnetwork.secondary_ip_range[2].range_name
   }
   node_config {
+    machine_type = "n4-standard-2"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -4754,6 +4774,7 @@ resource "google_container_node_pool" "with_auto_pod_cidr" {
     pod_ipv4_cidr_block = "10.2.0.0/20"
   }
   node_config {
+    machine_type = "n4-standard-2"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -4771,6 +4792,7 @@ resource "google_container_node_pool" "with_pco_disabled" {
     }
   }
   node_config {
+    machine_type = "n4-standard-2"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -4783,7 +4805,7 @@ resource "google_container_node_pool" "with_tier1_net" {
   cluster    = google_container_cluster.cluster.name
   node_count = 1
   node_locations = [
-    "us-east1-d",
+    "us-east1-c",
   ]
   network_config {
     network_performance_config {
@@ -4791,7 +4813,7 @@ resource "google_container_node_pool" "with_tier1_net" {
     }
   }
   node_config {
-    machine_type = "n4-standard-32"
+    machine_type = "c3-standard-44"
     gvnic {
       enabled = true
     }
@@ -5005,12 +5027,12 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 func testAccContainerNodePool_withRDMA(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1b" {
-  location = "us-east1-c"
+  location = "us-east1-d"
 }
 
 resource "google_container_cluster" "cluster" {
   name                = "%s"
-  location            = "us-east1-c"
+  location            = "us-east1-d"
   min_master_version  = data.google_container_engine_versions.central1b.latest_master_version
   deletion_protection = false
   network             = "%s"
@@ -5031,16 +5053,30 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np_with_gpudirect" {
   name     = "%s"
-  location = "us-east1-c"
+  location = "us-east1-d"
   cluster  = google_container_cluster.cluster.name
+  initial_node_count = 0
+
+  queued_provisioning {
+    enabled = true
+  }
+  autoscaling {
+    min_node_count = 0
+    max_node_count = 1
+  }
+
   network_config { accelerator_network_profile = "auto" }
 
   node_config {
-    machine_type = "a3-ultragpu-8g"
+    machine_type = "a4-highgpu-8g"
 
     guest_accelerator {
-		type  = "nvidia-h200-141gb"
+		type  = "nvidia-b200"
 		count = 8
+   }
+
+   reservation_affinity {
+     consume_reservation_type = "NO_RESERVATION"
    }
 
    gpudirect_strategy = "RDMA"
@@ -5057,13 +5093,16 @@ resource "google_container_node_pool" "np_with_gpudirect" {
 func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1c" {
-  location = "us-east1-d"
+  location = "us-east1-b"
 }
 
 resource "google_container_cluster" "cluster" {
   name                = "%s"
-  location            = "us-east1-d"
+  location            = "us-east1-b"
   initial_node_count  = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   min_master_version  = data.google_container_engine_versions.central1c.latest_master_version
   deletion_protection = false
   network             = "%s"
@@ -5072,7 +5111,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np_with_gpu" {
   name     = "%s"
-  location = "us-east1-d"
+  location = "us-east1-b"
   cluster  = google_container_cluster.cluster.name
 
   initial_node_count = 1
@@ -5603,7 +5642,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "", "n2d-standard-2"),
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "", "c4d-standard-4"),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -5611,7 +5650,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 				ImportStateVerify:       true,
 			},
 			{
-				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, true, "", "n2d-standard-2"),
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, true, "", "c4d-standard-4"),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -5619,7 +5658,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 				ImportStateVerify:       true,
 			},
 			{
-                                Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "SEV", "n2d-standard-2"),
+                                Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "SEV", "c4d-standard-4"),
                         },
                         {
                                 ResourceName:            "google_container_node_pool.np",
@@ -5652,8 +5691,11 @@ func testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "us-east1-c"
+  location           = "us-east1-d"
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -5661,7 +5703,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "us-east1-c"
+  location           = "us-east1-d"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
@@ -6337,7 +6379,7 @@ resource "google_container_node_pool" "primary_nodes" {
     disk_size_gb = 15
 
     resource_manager_tags = {
-      "%{pid}/%{tagKey1}" = "%{tagValue1}"
+      "%{tagKey1}" = "%{tagValue1}"
     }
   }
 }
@@ -6391,8 +6433,8 @@ resource "google_container_node_pool" "primary_nodes" {
     disk_size_gb = 15
 
     resource_manager_tags = {
-      "%{pid}/%{tagKey1}" = "%{tagValue1}"
-      "%{pid}/%{tagKey2}" = "%{tagValue2}"
+      "%{tagKey1}" = "%{tagValue1}"
+      "%{tagKey2}" = "%{tagValue2}"
     }
   }
 }
@@ -7089,10 +7131,10 @@ resource "google_container_node_pool" "np" {
   }
   
   node_config {
-    machine_type = "a3-edgegpu-8g"
+    machine_type = "a4-highgpu-8g"
     
     guest_accelerator {
-      type  = "nvidia-h100-80gb"
+      type  = "nvidia-b200"
       count = 8
       gpu_driver_installation_config {
         gpu_driver_version = "LATEST"
@@ -7105,7 +7147,7 @@ resource "google_container_node_pool" "np" {
     }
     
     ephemeral_storage_local_ssd_config {
-      local_ssd_count = 16
+      local_ssd_count = 32
     }
     
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
@@ -7135,7 +7177,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
                 Config: testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName),
                 Check: resource.ComposeTestCheckFunc(
                     resource.TestCheckResourceAttr(resourceName, "name", npName),
-                    resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a3-edgegpu-8g"),
+                    resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a4-highgpu-8g"),
                     resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", "auto"),
 					resource.TestCheckResourceAttrSet(resourceName, "network_config.0.additional_node_network_configs.0.network"),
                     resource.TestCheckResourceAttrSet(resourceName, "network_config.0.additional_node_network_configs.0.subnetwork"),
@@ -7196,6 +7238,9 @@ resource "google_container_cluster" "cluster" {
 
   deletion_protection = false
   initial_node_count  = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
 }
 
 resource "google_container_node_pool" "np" {
@@ -7213,10 +7258,10 @@ resource "google_container_node_pool" "np" {
     max_node_count = 1
   }
   node_config {
-    machine_type = "a3-edgegpu-8g"
+    machine_type = "a4-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 	guest_accelerator {
-		type = "nvidia-h100-80gb"
+		type = "nvidia-b200"
 		count = 8
 		gpu_driver_installation_config {
 			gpu_driver_version = "LATEST"
@@ -7227,7 +7272,7 @@ resource "google_container_node_pool" "np" {
       consume_reservation_type = "NO_RESERVATION"
     }
 	ephemeral_storage_local_ssd_config {
-      local_ssd_count = 16
+      local_ssd_count = 32
     }
   }
 
@@ -7272,6 +7317,9 @@ resource "google_container_cluster" "cluster" {
 
   deletion_protection = false
   initial_node_count  = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
 }
 
 resource "google_container_node_pool" "np" {
@@ -7289,10 +7337,10 @@ resource "google_container_node_pool" "np" {
     max_node_count = 1
   }
   node_config {
-    machine_type = "a3-edgegpu-8g"
+    machine_type = "a4-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 	guest_accelerator {
-		type = "nvidia-h100-80gb"
+		type = "nvidia-b200"
 		count = 8
 		gpu_driver_installation_config {
 			gpu_driver_version = "LATEST"
@@ -7303,7 +7351,7 @@ resource "google_container_node_pool" "np" {
       consume_reservation_type = "NO_RESERVATION"
     }
 	ephemeral_storage_local_ssd_config {
-      local_ssd_count = 16
+      local_ssd_count = 32
     }
   }
 
@@ -7343,6 +7391,9 @@ resource "google_container_cluster" "cluster" {
 
   deletion_protection = false
   initial_node_count  = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
 }
 
 resource "google_container_node_pool" "np" {
@@ -7360,10 +7411,10 @@ resource "google_container_node_pool" "np" {
     max_node_count = 1
   }
   node_config {
-    machine_type = "a3-edgegpu-8g"
+    machine_type = "a4-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
 	guest_accelerator {
-		type = "nvidia-h100-80gb"
+		type = "nvidia-b200"
 		count = 8
 		gpu_driver_installation_config {
 			gpu_driver_version = "LATEST"
@@ -7374,7 +7425,7 @@ resource "google_container_node_pool" "np" {
       consume_reservation_type = "NO_RESERVATION"
     }
 	ephemeral_storage_local_ssd_config {
-      local_ssd_count = 16
+      local_ssd_count = 32
     }
   }
 
@@ -7404,7 +7455,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", npName),
-					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a3-edgegpu-8g"),
+					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a4-highgpu-8g"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
