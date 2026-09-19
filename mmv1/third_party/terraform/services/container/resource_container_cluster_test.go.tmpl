@@ -188,7 +188,7 @@ func TestAccContainerCluster_networkingModeRoutes(t *testing.T) {
 
 	// separate shared network name because test requests a specific CIDR
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster-moderoutes")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-moderoutes", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster-moderoutes", networkName, "us-east1", "10.80.0.0/20")
 	firstClusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	secondClusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
@@ -491,7 +491,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -499,7 +499,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "", "c4d-standard-4"),
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -508,7 +508,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, true, "", "c4d-standard-4"),
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, true, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -517,7 +517,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-                                Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV", "c4d-standard-4"),
+                                Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV", "n2d-standard-2"),
                         },
                         {
                                 ResourceName:            "google_container_cluster.confidential_nodes",
@@ -6539,7 +6539,7 @@ func TestAccContainerCluster_dataplaneOptimizationMode(t *testing.T) {
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -6567,7 +6567,7 @@ func testAccContainerCluster_dataplaneOptimizationMode(clusterName, networkName,
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
-  location           = "us-east1-b"
+  location           = "us-central1-a"
   initial_node_count = 1
 
   network    = "%s"
@@ -6576,6 +6576,12 @@ resource "google_container_cluster" "primary" {
   networking_mode = "VPC_NATIVE"
   datapath_provider = "ADVANCED_DATAPATH"
   dataplane_optimization_mode = "SCALE_OPTIMIZED"
+
+  addons_config {
+    dns_cache_config {
+      enabled = false
+    }
+  }
 
   ip_allocation_policy {
     cluster_ipv4_cidr_block  = "/14"
@@ -8799,7 +8805,7 @@ func testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkN
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
-  location           = "us-east1-b"
+  location           = "us-central1-a"
 
   node_pool {
     name = "%s"

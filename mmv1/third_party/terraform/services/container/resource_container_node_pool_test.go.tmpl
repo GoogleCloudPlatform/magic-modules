@@ -5635,7 +5635,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(t, 10))
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -5643,7 +5643,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "", "c4d-standard-4"),
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -5651,7 +5651,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 				ImportStateVerify:       true,
 			},
 			{
-				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, true, "", "c4d-standard-4"),
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, true, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -5659,7 +5659,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 				ImportStateVerify:       true,
 			},
 			{
-                                Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "SEV", "c4d-standard-4"),
+                                Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "SEV", "n2d-standard-2"),
                         },
                         {
                                 ResourceName:            "google_container_node_pool.np",
@@ -5692,11 +5692,8 @@ func testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "us-east1-b"
+  location           = "us-central1-a"
   initial_node_count = 1
-  node_config {
-    machine_type = "n4-standard-2"
-  }
   deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
@@ -5704,7 +5701,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "us-east1-b"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
