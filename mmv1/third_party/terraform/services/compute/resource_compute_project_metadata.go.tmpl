@@ -157,7 +157,16 @@ func resourceComputeProjectMetadataDelete(d *schema.ResourceData, meta interface
 func resourceComputeProjectMetadataSet(d *schema.ResourceData, projectID, userAgent string, config *transport_tpg.Config, mdItems map[string]interface{}, timeout time.Duration) error {
 	createMD := func() error {
 		log.Printf("[DEBUG] Loading project service: %s", projectID)
-		project, err := getComputeProject(d, config, projectID, userAgent)
+		var project map[string]interface{}
+		err := transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				var getErr error
+				project, getErr = getComputeProject(d, config, projectID, userAgent)
+				return getErr
+			},
+			Timeout:              timeout,
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsNotFoundRetryableError("compute project retrieval")},
+		})
 		if err != nil {
 			return fmt.Errorf("Error loading project '%s': %s", projectID, err)
 		}
