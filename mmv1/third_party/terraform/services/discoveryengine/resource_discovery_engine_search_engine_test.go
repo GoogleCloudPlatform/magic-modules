@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(t *testing.T) {
@@ -149,4 +149,48 @@ resource "google_discovery_engine_search_engine" "basic" {
   }
 }
 `, context)
+}
+
+func TestDiscoveryEngineSearchEngineFeaturesDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Key, Old, New      string
+		ExpectDiffSuppress bool
+	}{
+		"server provided feature in state when config is empty": {
+			Key:                "features.enable-end-user-sharing-with-groups",
+			Old:                "FEATURE_STATE_OFF",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"server provided feature in config": {
+			Key:                "features.enable-end-user-sharing-with-groups",
+			Old:                "FEATURE_STATE_OFF",
+			New:                "FEATURE_STATE_ON",
+			ExpectDiffSuppress: false,
+		},
+		"other feature in state when config is empty": {
+			Key:                "features.agent-sharing-without-admin-approval",
+			Old:                "FEATURE_STATE_OFF",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+		"features map item count delta": {
+			Key:                "features.%",
+			Old:                "3",
+			New:                "2",
+			ExpectDiffSuppress: true,
+		},
+		"other map item count delta": {
+			Key:                "other_map.%",
+			Old:                "3",
+			New:                "2",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if discoveryengine.DiscoveryEngineSearchEngineFeaturesDiffSuppress(tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, key=%q %q => %q expect DiffSuppress to return %t", tn, tc.Key, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
 }
