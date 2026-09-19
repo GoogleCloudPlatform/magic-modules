@@ -53,6 +53,13 @@ autogen_status: SW5zdGFuY2U=
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+  constants: 'templates/terraform/constants/lustre_instance.go.tmpl'
+  encoder: 'templates/terraform/encoder/lustre_instance.go.tmpl'
+  # Required so that the create encoder above does not also run on update; MMv1
+  # falls back to `encoder` on the update path when `update_encoder` is unset.
+  update_encoder: 'templates/terraform/update_encoder/lustre_instance.go.tmpl'
+custom_diff:
+  - 'lustreInstanceVersionUpgradeCustomDiff'
 samples:
   - name: lustre_instance_basic
     primary_resource_id: instance
@@ -143,6 +150,12 @@ properties:
           This user squash UID applies to all root users connecting from clients
           that are not matched by any of the access rules. If not set, the default
           is 0 (no UID squash).
+  - name: availableVersion
+    type: String
+    description: |-
+      The version this instance can be upgraded to, if one is available. Empty
+      when the instance is already running the newest release.
+    output: true
   - name: capacityGib
     type: String
     required: true
@@ -173,6 +186,12 @@ properties:
           DISABLED
           DEFAULT_CACHE
         immutable: true
+  - name: effectiveVersion
+    type: String
+    description: |-
+      The version of Managed Lustre software that this instance is currently
+      running.
+    output: true
   - name: filesystem
     type: String
     required: true
@@ -431,6 +450,20 @@ properties:
     type: String
     description: The reason why the instance is in a certain state (e.g. SUSPENDED).
     output: true
+  - name: targetVersion
+    type: String
+    description: |-
+      The version to upgrade this instance to. Set this to the value reported in
+      `availableVersion`, or to `latest` to move to the newest version available
+      at the time of the upgrade.
+      This field cannot be set when the instance is created; new instances are
+      always provisioned from the current release. It also cannot be changed in
+      the same operation as `capacityGib` or `maintenancePolicy`, and the
+      instance must be ACTIVE and outside of the hour preceding a scheduled
+      maintenance window.
+      The API clears this field once the upgrade finishes, so it always reads
+      back as empty on an idle instance.
+    diff_suppress_func: 'lustreInstanceTargetVersionDiffSuppress'
   - name: uid
     type: String
     description: |-
