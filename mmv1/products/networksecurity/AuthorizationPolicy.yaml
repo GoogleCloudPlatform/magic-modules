@@ -19,13 +19,14 @@ references:
   guides:
   api: https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.authorizationPolicies
 docs:
-base_url: projects/{{project}}/locations/{{location}}/authorizationPolicies
+base_url: projects/{{project}}/locations/global/authorizationPolicies
 min_version: beta
 create_url: projects/{{project}}/locations/{{location}}/authorizationPolicies?authorizationPolicyId={{name}}
 update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/authorizationPolicies/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
