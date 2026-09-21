@@ -99,11 +99,11 @@ func testSweepDataprocCluster(region string) error {
 				continue
 			}
 
-			deleteTemplate := "https://dataproc.googleapis.com/v1/projects/{{project}}/regions/{{region}}/clusters/{cluster_id}"
+			deleteTemplate := "https://dataproc.googleapis.com/v1/projects/{{project}}/regions/{{region}}/clusters/"
 			deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
-				return nil
+				continue
 			}
 			deleteUrl = deleteUrl + name
 
