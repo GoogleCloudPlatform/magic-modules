@@ -17,8 +17,8 @@ description: |-
   ReasoningEngine provides a customizable runtime for models to determine which actions to take and in which order.
 references:
   guides:
-    'Develop and deploy agents on Vertex AI Agent Engine': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.reasoningEngines/'
+    'Scale your agents': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale'
+  api: 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.reasoningEngines'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
@@ -26,6 +26,7 @@ create_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 update_verb: 'PATCH'
 update_mask: true
 deletion_policy_custom_docs: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -108,11 +109,6 @@ samples:
           network_name: 'network'
           network_attachment_name: 'network-attachment'
           subnetwork_name: 'subnetwork'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          subnetwork_name: '"subnetwork" + randomSuffix'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_full'
@@ -131,10 +127,6 @@ samples:
           service_account_id: 'sa'
         test_vars_overrides:
           'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
-          # for backward compatible
-          secret_name: '"secret" + randomSuffix'
-          # for backward compatible
-          service_account_id: '"sa" + randomSuffix'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_context_spec'
@@ -149,10 +141,8 @@ samples:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_granular_ttl'
     primary_resource_id: 'reasoning_engine'
-    min_version: beta
     steps:
       - name: 'vertex_ai_reasoning_engine_granular_ttl'
-        min_version: beta
         resource_id_vars:
           name: 're-gran-ttl'
         ignore_read_extra:
@@ -677,7 +667,6 @@ properties:
               - 'EXPERIMENTAL'
           - name: 'agentGatewayConfig'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Agent Gateway configuration for a Reasoning Engine deployment.
             properties:
@@ -868,7 +857,6 @@ properties:
                       The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
           - name: 'agentConfigSource'
             type: NestedObject
-            min_version: 'beta'
             description: |-
               Optional. Specification for the deploying from agent config.
             properties:
@@ -939,7 +927,6 @@ properties:
           function: 'validation.StringIsJSON'
       - name: 'buildSpec'
         type: NestedObject
-        min_version: 'beta'
         description: |-
           Optional. Configuration for building container image.
         properties:
@@ -947,8 +934,11 @@ properties:
             type: String
             description: |-
               Optional. The resource name of the Cloud Build WorkerPool to use for the build.
+          - name: 'serviceAccount'
+            type: String
+            description: |-
+              Optional. The service account that the Cloud Build builder runs as.
   - name: 'contextSpec'
-    min_version: 'beta'
     type: NestedObject
     default_from_api: true
     description: |-
@@ -1280,6 +1270,42 @@ properties:
                                                 type: String
                                                 description: |-
                                                   The end offset of the video.
+                                          - name: 'audioTranscription'
+                                            type: NestedObject
+                                            description: |-
+                                              Audio (input or output) transcription. This is only set when this Part contains audio data.
+                                            properties:
+                                              - name: 'speakerLabel'
+                                                type: String
+                                                description: |-
+                                                  A label identifying the speaker of this audio segment (e.g. spk_1, spk_2). Present when diarization is set.
+                                              - name: 'text'
+                                                type: String
+                                                description: |-
+                                                  The transcription text of this audio segment.
+                                                required: true
+                                              - name: 'words'
+                                                type: Array
+                                                description: |-
+                                                  Detailed word-level transcriptions and timing details. Present when word_timestamp is set.
+                                                item_type:
+                                                  type: NestedObject
+                                                  properties:
+                                                    - name: 'endOffset'
+                                                      type: String
+                                                      diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+                                                      description: |-
+                                                        End offset in time of the word relative to the start of the audio.
+                                                    - name: 'startOffset'
+                                                      type: String
+                                                      diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+                                                      description: |-
+                                                        Start offset in time of the word relative to the start of the audio.
+                                                    - name: 'word'
+                                                      type: String
+                                                      description: |-
+                                                        Transcript of the word.
+                                                      required: true
                       - name: 'generatedMemories'
                         type: Array
                         description: |-

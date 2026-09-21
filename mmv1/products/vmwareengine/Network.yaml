@@ -56,6 +56,8 @@ samples:
     primary_resource_id: vmw-engine-network
     steps:
       - name: vmware_engine_network_standard
+        resource_id_vars:
+          network_name: standard-nw
   - name: vmware_engine_network_legacy
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: vmw-engine-network

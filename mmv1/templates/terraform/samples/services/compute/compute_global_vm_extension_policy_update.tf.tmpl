@@ -1,5 +1,5 @@
 resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
-  name        = "global-ops-agent-vme-policy-%{random_suffix}"
+  name        = "{{index $.ResourceIdVars "policy_name"}}"
   description = "A basic global VM extension policy"
   priority    = 20
 

@@ -172,6 +172,12 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s.html.markdown", object.TerraformName()))
 			templateData.GenerateListResourceDocumentationFile(listDocFilePath, object)
 		}
+
+		if object.IamPolicy.AnyListResource() {
+			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s_iam.html.markdown", object.TerraformName()))
+			templateData.GenerateIamListResourceDocumentationFile(listDocFilePath, object)
+		}
 	}
 }
 
@@ -191,6 +197,19 @@ func (t *Terraform) GenerateListResource(object api.Resource, templateData Templ
 
 		t.GenerateListResourceQueryTest(object, templateData, targetFolder)
 	}
+}
+
+// GenerateIamListResource emits list_iam_<resource>.go containing every IAM list
+// kind requested via iam_policy.generate_list_resource, mirroring iam_policy.go.tmpl.
+func (t *Terraform) GenerateIamListResource(object api.Resource, templateData TemplateData, targetFolder string) {
+	if !object.IamPolicy.AnyListResource() {
+		return
+	}
+
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s.go", t.ResourceGoFilename(object)))
+	templatePath := "templates/terraform/iam_list_resource.go.tmpl"
+	templateData.GenerateFile(targetFilePath, templatePath, object, true, templatePath)
+	t.GenerateIamListResourceQueryTest(object, templateData, targetFolder)
 }
 
 // GenerateResourceFile is the Bazel counterpart to GenerateResource(), generating *only() the .go file and
@@ -256,11 +275,24 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	if object.Examples != nil {
 		log.Fatalf("Examples block exists in %v", object.Name)
 	}
-	if object.Samples == nil || !t.hasEligibleSample(object) {
+	if object.Samples == nil || object.FirstRunnableTestConfig().Sample == nil {
 		return
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateQueryTestFile(targetFilePath, object)
+}
+
+// GenerateIamListResourceQueryTest emits list_iam_<resource>_generated_test.go.
+func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
+	samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	if len(samples) == 0 {
+		log.Printf("[WARNING] No IAM list resource test generated for %s: no non-excluded samples available", object.Name)
+		return
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateIamQueryTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
@@ -379,6 +411,9 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
+
+		// Iam list resource (terraform query support)
+		t.GenerateIamListResource(object, templateData, targetFolder)
 
 		// Only generate test if testable example configs exist.
 		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
@@ -854,6 +889,12 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	sourceByte, err := os.ReadFile(targetFile)
 	if err != nil {
 		log.Fatalf("Cannot read file %s to add Hashicorp copy right: %s", targetFile, err)
+	}
+
+	source := string(sourceByte)
+	if strings.Contains(source, "Copyright IBM Corp. 2014, 2026") &&
+		strings.Contains(source, "SPDX-License-Identifier: MPL-2.0") {
+		return
 	}
 
 	sourceByte = google.Concat([]byte(header), sourceByte)

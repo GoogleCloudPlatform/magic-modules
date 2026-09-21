@@ -402,6 +402,7 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/bigquery/bigquery_table.go":                       "third_party/tgc/services/bigquery/bigquery_table.go",
 		"converters/google/resources/services/bigtable/bigtable_cluster.go":                     "third_party/tgc/services/bigtable/bigtable_cluster.go",
 		"converters/google/resources/services/bigtable/bigtable_instance.go":                    "third_party/tgc/services/bigtable/bigtable_instance.go",
+		"converters/google/resources/services/bigtable/bigtable_app_profile_handwritten.go":     "third_party/terraform/services/bigtable/bigtable_app_profile_handwritten.go",
 		"converters/google/resources/cai/iam_helpers.go":                                        "third_party/tgc/cai/iam_helpers.go",
 		"converters/google/resources/cai/iam_helpers_test.go":                                   "third_party/tgc/cai/iam_helpers_test.go",
 		"converters/google/resources/services/resourcemanager/organization_iam.go":              "third_party/tgc/services/resourcemanager/organization_iam.go",

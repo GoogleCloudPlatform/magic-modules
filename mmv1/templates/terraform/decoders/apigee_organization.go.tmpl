@@ -1,0 +1,9 @@
+// The list response returns items where the org name is in "organization".
+// For a direct read response the org name is already in "name". Normalise so
+// the identity field ("name") is always populated.
+if name, ok := res["name"].(string); !ok || name == "" {
+	if orgName, ok := res["organization"].(string); ok && orgName != "" {
+		res["name"] = orgName
+	}
+}
+return res, nil

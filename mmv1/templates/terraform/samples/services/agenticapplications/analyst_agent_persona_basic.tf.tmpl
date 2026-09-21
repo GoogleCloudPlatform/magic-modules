@@ -25,4 +25,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
     description = "{{index .Vars "skill_description"}}"
     content     = "# Finance Analysis\nAnalyze financial data."
   }
+
+  math_rendering_mode = "{{index .Vars "math_rendering_mode"}}"
+
+  web_search_config {
+    excluded_domains = ["{{index .Vars "excluded_domain"}}"]
+  }
 }

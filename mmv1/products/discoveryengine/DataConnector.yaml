@@ -62,6 +62,11 @@ samples:
       - name: 'discoveryengine_dataconnector_jira_with_actions'
         resource_id_vars:
           collection_id: 'collection-id'
+        ignore_read_extra:
+          - action_state
+          - errors
+          - state
+          - update_time
 parameters:
   - name: 'location'
     type: String
@@ -467,3 +472,45 @@ properties:
     description: |
       Indicates whether incremental syncs are paused for this connector.
     ignore_read: true
+  - name: 'tag'
+    type: String
+    description: |
+      User-facing, version-independent label for this connector.
+    immutable: true
+  - name: 'metadata'
+    type: NestedObject
+    description: |
+      User-facing metadata for the connector.
+    default_from_api: true
+    immutable: true
+    properties:
+      - name: 'title'
+        type: String
+        description: |
+          Display title of the connector.
+        default_from_api: true
+        immutable: true
+      - name: 'description'
+        type: String
+        description: |
+          Human-readable description of the connector.
+        default_from_api: true
+        immutable: true
+      - name: 'shortDescription'
+        type: String
+        description: |
+          Short, subtitle-length description of the connector.
+        default_from_api: true
+        immutable: true
+      - name: 'author'
+        type: String
+        description: |
+          The party that authored the connector, e.g. "Google" or a third-party provider name.
+        default_from_api: true
+        immutable: true
+      - name: 'note'
+        type: String
+        description: |
+          Free-form, multi-line note about the connector's capabilities.
+        default_from_api: true
+        immutable: true

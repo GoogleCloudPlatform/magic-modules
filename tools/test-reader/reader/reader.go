@@ -17,11 +17,40 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
-type Resource map[string]any // config of one resource in a test
+// Block is the flattened set of attributes in one block body, keyed by
+// attribute path, e.g. {"boot_disk.initialize_params.image": "..."}.
+type Block map[string]any
 
-type Resources map[string]Resource // map of resource names to resource configs
+// Blocks is a map of name labels to blocks. The name label is a block's second
+// label, e.g. "foobar" in `resource "google_compute_instance" "foobar"`.
+type Blocks map[string]Block
 
-type Step map[string]Resources // map of resource types to resources of that type
+// TypeLabels is a map of type labels to the blocks carrying that label. The
+// type label is a block's first label, e.g. "google_compute_instance" in
+// `resource "google_compute_instance" "foobar"`.
+type TypeLabels map[string]Blocks
+
+// BlockType is the type of a top-level block, in HCL's sense of the term:
+// "resource", "data", "list" or "ephemeral". Not to be confused with a block's
+// type label, which names the resource type (see TypeLabels).
+//
+// It holds the literal keyword from the config rather than a closed set, so
+// block types Terraform adds in the future are recorded under their own type
+// rather than being dropped or attributed to an existing one.
+type BlockType string
+
+const (
+	ResourceBlock  BlockType = "resource"
+	DataBlock      BlockType = "data"
+	ListBlock      BlockType = "list"
+	EphemeralBlock BlockType = "ephemeral"
+)
+
+// Step is a map of block types to the blocks declared with that type.
+// Block types are kept separate because a data, list or ephemeral block can
+// share a type label with a resource block without sharing its schema, so an
+// attribute set on one says nothing about the same-named attribute on another.
+type Step map[BlockType]TypeLabels
 
 type Test struct {
 	Name  string
@@ -314,58 +343,50 @@ func readConfigStr(configStr string) (Step, error) {
 	if diagnostics.HasErrors() {
 		return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
 	}
-	content, diagnostics := file.Body.Content(&hcl.BodySchema{
-		Blocks: []hcl.BlockHeaderSchema{
-			{
-				Type:       "resource",
-				LabelNames: []string{"type", "name"},
-			},
-			{
-				Type:       "data",
-				LabelNames: []string{"type", "name"},
-			},
-			{
-				Type:       "output",
-				LabelNames: []string{"name"},
-			},
-			{
-				Type:       "provider",
-				LabelNames: []string{"name"},
-			},
-			{
-				Type: "locals",
-			},
-		},
-	})
-	if diagnostics.HasErrors() {
-		return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
+	// Iterate over the top-level blocks directly rather than validating the
+	// body against a schema of known block types. Only blocks with a type and
+	// a name label (resource, data, ephemeral, list, ...) are of interest, and
+	// every other block is skipped below. Enumerating block types here would
+	// mean a config using any block Terraform adds later fails to parse, which
+	// silently drops the whole test step.
+	body, ok := file.Body.(*hclsyntax.Body)
+	if !ok {
+		return nil, fmt.Errorf("couldn't get hclsyntax body from %v", file.Body)
 	}
-	m := make(map[string]Resources)
+	step := make(Step)
 	errs := make([]error, 0)
-	for _, block := range content.Blocks {
+	for _, block := range body.Blocks {
 		if len(block.Labels) != 2 {
+			// Not a type-and-name block: terraform, locals, variable, check,
+			// output, provider, module and moved blocks all have zero or one
+			// label and declare nothing whose attributes could be under test.
 			continue
 		}
-		if _, ok := m[block.Labels[0]]; !ok {
-			// Create an empty map for this resource type.
-			m[block.Labels[0]] = make(Resources)
+		blockType := BlockType(block.Type)
+		typeLabel, nameLabel := block.Labels[0], block.Labels[1]
+		if _, ok := step[blockType]; !ok {
+			// Create an empty map for this block type.
+			step[blockType] = make(TypeLabels)
 		}
-		// Use the resource name as a key.
-		resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
+		if _, ok := step[blockType][typeLabel]; !ok {
+			// Create an empty map for this type label.
+			step[blockType][typeLabel] = make(Blocks)
+		}
+		blockConfig, err := readHCLBlockBody(block.Body, file.Bytes)
 		if err != nil {
 			errs = append(errs, err)
 		}
-		resourceConfig = flattenResource(resourceConfig, "")
-		m[block.Labels[0]][block.Labels[1]] = resourceConfig
+		blockConfig = flattenBlock(blockConfig, "")
+		step[blockType][typeLabel][nameLabel] = blockConfig
 	}
 	if len(errs) > 0 {
-		return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
+		return step, fmt.Errorf("errors reading hcl blocks: %v", errs)
 	}
-	return m, nil
+	return step, nil
 }
 
-func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
-	var m Resource
+func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Block, error) {
+	var m Block
 	gohcl.DecodeBody(body, nil, &m)
 	for k, v := range m {
 		if attr, ok := v.(*hcl.Attribute); ok {
@@ -383,9 +404,9 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 			errs = append(errs, err)
 		}
 		if existing, ok := m[block.Type]; ok {
-			// Merge the fields from the current block into the existing resource config.
-			if existingResource, ok := existing.(Resource); ok {
-				mergeResources(existingResource, blockConfig)
+			// Merge the attributes from the current block into the existing one.
+			if existingBlock, ok := existing.(Block); ok {
+				mergeBlocks(existingBlock, blockConfig)
 			}
 		} else {
 			m[block.Type] = blockConfig
@@ -398,12 +419,12 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 }
 
 // Perform a recursive one-way merge of b into a.
-func mergeResources(a, b Resource) {
+func mergeBlocks(a, b Block) {
 	for k, bv := range b {
 		if av, ok := a[k]; ok {
-			if avr, ok := av.(Resource); ok {
-				if bvr, ok := bv.(Resource); ok {
-					mergeResources(avr, bvr)
+			if avr, ok := av.(Block); ok {
+				if bvr, ok := bv.(Block); ok {
+					mergeBlocks(avr, bvr)
 				}
 			}
 		} else {
@@ -412,18 +433,21 @@ func mergeResources(a, b Resource) {
 	}
 }
 
-func flattenResource(r Resource, parent string) Resource {
-	flattened := make(Resource)
+// Flatten nested blocks into dotted attribute paths, e.g. a boot_disk block
+// containing an initialize_params block containing an image attribute becomes
+// "boot_disk.initialize_params.image".
+func flattenBlock(b Block, parent string) Block {
+	flattened := make(Block)
 
 	if parent != "" {
 		parent += "."
 	}
 
-	for fieldName, fieldValue := range r {
+	for fieldName, fieldValue := range b {
 		key := parent + fieldName
-		nestedObject, _ := fieldValue.(Resource)
+		nestedObject, _ := fieldValue.(Block)
 		if nestedObject != nil {
-			for childKey, childField := range flattenResource(nestedObject, key) {
+			for childKey, childField := range flattenBlock(nestedObject, key) {
 				flattened[childKey] = childField
 			}
 		} else {

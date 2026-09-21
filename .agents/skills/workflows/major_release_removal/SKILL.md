@@ -34,7 +34,7 @@ The subagent will inspect `upstream/main` (deprecation & replacement checks), `u
 - **If deprecation is missing on `main`**:
   - Present the blocker to the user.
   - If user directs staging both changes in the session, first execute [deprecate-resource-or-field-workflow](../deprecate_resource_or_field/SKILL.md) on `main`, push the branch, and then proceed with the removal on `${FEATURE_BRANCH}`.
-- **If the release branch is not synced with `main`**: Stop this workflow. Invoke [`sync-main-to-major-release-branch`](file:///usr/local/google/home/camthornton/.gemini/config/skills/sync-main-to-major-release-branch/SKILL.md) first.
+- **If the release branch is not synced with `main`**: Stop this workflow. Flag this as a blocker to the user so the major release branch can be synced with `upstream/main` first.
 
 ---
 
