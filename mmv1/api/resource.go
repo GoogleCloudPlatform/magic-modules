@@ -732,10 +732,14 @@ func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
 	identities := r.Identity
+	resourceImportFormat := r.ImportFormat
 	if r.ExcludeIdentityFromIdentityImport {
 		identities = nil
+		// import_format may describe formats (e.g. an aggregate of mutually exclusive
+		// fields) that aren't meaningful as a resource identity; fall back to base_url.
+		resourceImportFormat = nil
 	}
-	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
+	importFormat := r.ExtractIdentifiers(ImportIdFormats(resourceImportFormat, identities, r.BaseUrl)[0])
 	// Collapse any nested objects marked with flatten_object so that identifiers
 	// nested under them (e.g. datasetReference.datasetId -> dataset_id) are
 	// matched against the import format.
