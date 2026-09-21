@@ -4,6 +4,9 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   gce_setup {
     machine_type = "n4-standard-2"
+    boot_disk {
+      disk_type = "HYPERDISK_BALANCED"
+    }
     container_image {
       repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py310"
       tag = "latest"

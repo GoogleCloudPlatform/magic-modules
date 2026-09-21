@@ -4,6 +4,9 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   gce_setup {
     machine_type = "n4-standard-4"
+    boot_disk {
+      disk_type = "HYPERDISK_BALANCED"
+    }
 
     shielded_instance_config {
       enable_secure_boot = false

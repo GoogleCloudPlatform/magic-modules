@@ -70,6 +70,7 @@ samples:
         resource_id_vars:
           instance_name: 'workbench-instance'
         ignore_read_extra:
+          - 'gce_setup.0.boot_disk.0.disk_type'
           - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
@@ -79,6 +80,7 @@ samples:
         resource_id_vars:
           instance_name: 'workbench-instance'
         ignore_read_extra:
+          - 'gce_setup.0.boot_disk.0.disk_type'
           - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
@@ -90,6 +92,8 @@ samples:
           reservation_name: 'wbi-reservation'
         ignore_read_extra:
           - 'gce_setup.0.vm_image'
+          - 'gce_setup.0.boot_disk.0.disk_type'
+          - 'gce_setup.0.data_disks.0.disk_type'
           - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
@@ -103,6 +107,7 @@ samples:
           service_account: 'SERVICE_ACCT'
         ignore_read_extra:
           - 'desired_state'
+          - 'gce_setup.0.boot_disk.0.disk_type'
           - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
@@ -145,6 +150,7 @@ samples:
           project_id: 'PROJECT_NAME'
           project_number: 'PROJECT_NUMBER'
         ignore_read_extra:
+          - 'gce_setup.0.boot_disk.0.disk_type'
           - 'update_time'
 virtual_fields:
   - name: 'desired_state'
