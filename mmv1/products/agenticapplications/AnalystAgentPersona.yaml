@@ -48,6 +48,8 @@ samples:
           additional_context: "Initial additional context"
           file_title: "financial_summary.txt"
           skill_description: "Skill for finance analysis"
+          math_rendering_mode: "MATH_RENDERING_MODE_LATEX"
+          excluded_domain: "example.com"
       - name: analyst_agent_persona_basic
         resource_id_vars:
           persona_id: basic
@@ -57,6 +59,8 @@ samples:
           additional_context: "Updated additional context"
           file_title: "financial_summary_updated.txt"
           skill_description: "Updated skill description for finance analysis"
+          math_rendering_mode: "MATH_RENDERING_MODE_PLAIN_TEXT"
+          excluded_domain: "updated-example.com"
   - name: analyst_agent_persona_full
     primary_resource_id: example
     steps:
@@ -691,6 +695,13 @@ properties:
       persona.
       If not set, requests from GE will only be routed to this persona if its
       name ends in "/default".
+  - name: mathRenderingMode
+    type: String
+    description: |-
+      The math rendering mode selected for this persona.
+      Possible values:
+      MATH_RENDERING_MODE_LATEX
+      MATH_RENDERING_MODE_PLAIN_TEXT
   - name: mcpDataSources
     type: Array
     description: The MCP data source selections to be used by the agent.
@@ -964,3 +975,14 @@ properties:
     type: String
     description: Update time stamp.
     output: true
+  - name: webSearchConfig
+    type: NestedObject
+    description: Configuration for web search grounding for the analyst agent.
+    properties:
+      - name: excludedDomains
+        type: Array
+        description: |-
+          List of domains to be excluded from Google Search / Enterprise Web Search
+          grounding.
+        item_type:
+          type: String
