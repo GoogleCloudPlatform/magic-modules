@@ -71,8 +71,6 @@ samples:
           deletion_protection: "true"
         test_vars_overrides:
           deletion_protection: "false"
-          # for backward compatible
-          username: '"user" + randomSuffix'
         oics_vars_overrides:
           deletion_protection: "false"
         ignore_read_extra:

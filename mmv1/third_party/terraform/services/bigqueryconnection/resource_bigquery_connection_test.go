@@ -143,21 +143,18 @@ resource "google_bigquery_connection" "connection" {
 }
 
 func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic_cmek_wo(t *testing.T) {
-	// Uses random provider
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":    acctest.RandString(t, 10),
+		"password":         acctest.RandString(t, 16),
+		"updated_password": acctest.RandString(t, 16),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryConnectionConnection_bigqueryConnectionBasic_cmek_wo(context),
@@ -199,15 +196,10 @@ resource "google_sql_database" "db" {
     name     = "db"
 }
 
-resource "random_password" "pwd" {
-    length = 16
-    special = false
-}
-
 resource "google_sql_user" "user" {
     name = "username"
     instance = google_sql_database_instance.instance.name
-    password = random_password.pwd.result
+    password = "%{password}"
 }
 
 resource "google_bigquery_connection" "connection" {
@@ -247,15 +239,10 @@ resource "google_sql_database" "db" {
     name     = "db2"
 }
 
-resource "random_password" "pwd" {
-    length = 16
-    special = false
-}
-
 resource "google_sql_user" "user" {
     name = "username"
     instance = google_sql_database_instance.instance.name
-    password = random_password.pwd.result
+    password = "%{updated_password}"
 }
 
 resource "google_bigquery_connection" "connection" {
