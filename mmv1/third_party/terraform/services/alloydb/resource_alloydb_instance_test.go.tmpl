@@ -1581,8 +1581,6 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
-
 func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 	t.Parallel()
 	random_suffix := acctest.RandString(t, 10)
@@ -1806,4 +1804,3 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
-{{- end }}
