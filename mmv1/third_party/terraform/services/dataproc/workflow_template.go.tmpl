@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
@@ -804,7 +803,7 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfig) Ha
 
 type WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAttachedDiskConfig struct {
 	empty                 bool    `json:"-"`
-	DiskType              *string `json:"diskType"`
+	DiskType              *string `json:"type"`
 	DiskSizeGb            *int64  `json:"diskSizeGb"`
 	ProvisionedIops       *int64  `json:"provisionedIops"`
 	ProvisionedThroughput *int64  `json:"provisionedThroughput"`
@@ -826,12 +825,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigMasterConfigDiskConfigAtta
 	} else {
 
 		r.DiskType = res.DiskType
-		if r.DiskType == nil {
-			if t, ok := m["type"].(string); ok && t != "" {
-				dt := strings.ToUpper(strings.ReplaceAll(t, "-", "_"))
-				r.DiskType = &dt
-			}
-		}
 
 		r.DiskSizeGb = res.DiskSizeGb
 
@@ -1256,7 +1249,7 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfig) Ha
 
 type WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAttachedDiskConfig struct {
 	empty                 bool    `json:"-"`
-	DiskType              *string `json:"diskType"`
+	DiskType              *string `json:"type"`
 	DiskSizeGb            *int64  `json:"diskSizeGb"`
 	ProvisionedIops       *int64  `json:"provisionedIops"`
 	ProvisionedThroughput *int64  `json:"provisionedThroughput"`
@@ -1278,12 +1271,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigWorkerConfigDiskConfigAtta
 	} else {
 
 		r.DiskType = res.DiskType
-		if r.DiskType == nil {
-			if t, ok := m["type"].(string); ok && t != "" {
-				dt := strings.ToUpper(strings.ReplaceAll(t, "-", "_"))
-				r.DiskType = &dt
-			}
-		}
 
 		r.DiskSizeGb = res.DiskSizeGb
 
@@ -1708,7 +1695,7 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskC
 
 type WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskConfigAttachedDiskConfig struct {
 	empty                 bool    `json:"-"`
-	DiskType              *string `json:"diskType"`
+	DiskType              *string `json:"type"`
 	DiskSizeGb            *int64  `json:"diskSizeGb"`
 	ProvisionedIops       *int64  `json:"provisionedIops"`
 	ProvisionedThroughput *int64  `json:"provisionedThroughput"`
@@ -1730,12 +1717,6 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigSecondaryWorkerConfigDiskC
 	} else {
 
 		r.DiskType = res.DiskType
-		if r.DiskType == nil {
-			if t, ok := m["type"].(string); ok && t != "" {
-				dt := strings.ToUpper(strings.ReplaceAll(t, "-", "_"))
-				r.DiskType = &dt
-			}
-		}
 
 		r.DiskSizeGb = res.DiskSizeGb
 

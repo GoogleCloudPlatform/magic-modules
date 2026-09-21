@@ -156,6 +156,14 @@ func LocationDiffSuppressHelper(a, b string) bool {
 		strings.Replace(a, "/locations/", "/zones/", 1) == b
 }
 
+func normalizeAttachedDiskType(v string) string {
+	return strings.ToLower(strings.ReplaceAll(v, "_", "-"))
+}
+
+func AttachedDiskTypeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return normalizeAttachedDiskType(old) == normalizeAttachedDiskType(new)
+}
+
 func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
 		return true
@@ -987,10 +995,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																ForceNew:    true,
 															},
 															"disk_type": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																ForceNew:    true,
+																Type:             schema.TypeString,
+																Optional:         true,
+																DiffSuppressFunc: AttachedDiskTypeDiffSuppress,
+																Description:      `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:         true,
 															},
 															"provisioned_iops": {
 																Type:        schema.TypeInt,
@@ -1129,10 +1138,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																						ForceNew:    true,
 																					},
 																					"disk_type": {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																						ForceNew:    true,
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: AttachedDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
 																					},
 																					"provisioned_iops": {
 																						Type:        schema.TypeInt,
@@ -1331,10 +1341,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																ForceNew:    true,
 															},
 															"disk_type": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																ForceNew:    true,
+																Type:             schema.TypeString,
+																Optional:         true,
+																DiffSuppressFunc: AttachedDiskTypeDiffSuppress,
+																Description:      `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:         true,
 															},
 															"provisioned_iops": {
 																Type:        schema.TypeInt,
@@ -1492,10 +1503,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																						ForceNew:    true,
 																					},
 																					"disk_type": {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																						ForceNew:    true,
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: AttachedDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
 																					},
 																					"provisioned_iops": {
 																						Type:        schema.TypeInt,
@@ -1665,10 +1677,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																ForceNew:    true,
 															},
 															"disk_type": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																ForceNew:    true,
+																Type:             schema.TypeString,
+																Optional:         true,
+																DiffSuppressFunc: AttachedDiskTypeDiffSuppress,
+																Description:      `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:         true,
 															},
 															"provisioned_iops": {
 																Type:        schema.TypeInt,
@@ -1794,10 +1807,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																						ForceNew:    true,
 																					},
 																					"disk_type": {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																						ForceNew:    true,
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: AttachedDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
 																					},
 																					"provisioned_iops": {
 																						Type:        schema.TypeInt,
@@ -4289,7 +4303,7 @@ func expandAttachedDiskConfig(l []interface{}) []*dataproc.AttachedDiskConfig {
 			c.DiskSizeGb = int64(v.(int))
 		}
 		if v, ok := rawMap["disk_type"]; ok {
-			c.DiskType = v.(string)
+			c.Type = normalizeAttachedDiskType(v.(string))
 		}
 		if v, ok := rawMap["provisioned_iops"]; ok && v.(int) > 0 {
 			c.ProvisionedIops = int64(v.(int))
@@ -4313,11 +4327,7 @@ func flattenAttachedDiskConfig(configs []*dataproc.AttachedDiskConfig) []map[str
 		}
 		m := make(map[string]interface{})
 		m["disk_size_gb"] = c.DiskSizeGb
-		diskType := c.DiskType
-		if diskType == "" && c.Type != "" {
-			diskType = strings.ToUpper(strings.ReplaceAll(c.Type, "-", "_"))
-		}
-		m["disk_type"] = diskType
+		m["disk_type"] = c.Type
 		if c.ProvisionedIops > 0 {
 			m["provisioned_iops"] = c.ProvisionedIops
 		}

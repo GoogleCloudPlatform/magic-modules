@@ -126,3 +126,33 @@ func TestDataprocDiffSuppress(t *testing.T) {
 		}
 	}
 }
+
+func TestAttachedDiskTypeDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	doSuppress := [][]string{
+		{"hyperdisk-balanced", "HYPERDISK_BALANCED"},
+		{"HYPERDISK_BALANCED", "hyperdisk-balanced"},
+		{"hyperdisk-balanced", "hyperdisk-balanced"},
+		{"HYPERDISK_BALANCED", "HYPERDISK_BALANCED"},
+		{"hyperdisk-throughput", "HYPERDISK_THROUGHPUT"},
+		{"pd-ssd", "PD_SSD"},
+	}
+
+	noSuppress := [][]string{
+		{"hyperdisk-balanced", "HYPERDISK_ML"},
+		{"hyperdisk-balanced", "hyperdisk-throughput"},
+		{"pd-ssd", "pd-standard"},
+	}
+
+	for _, tup := range doSuppress {
+		if !dataproc.AttachedDiskTypeDiffSuppress("", tup[0], tup[1], nil) {
+			t.Errorf("expected (old: %q, new: %q) to be suppressed", tup[0], tup[1])
+		}
+	}
+	for _, tup := range noSuppress {
+		if dataproc.AttachedDiskTypeDiffSuppress("", tup[0], tup[1], nil) {
+			t.Errorf("expected (old: %q, new: %q) to not be suppressed", tup[0], tup[1])
+		}
+	}
+}
