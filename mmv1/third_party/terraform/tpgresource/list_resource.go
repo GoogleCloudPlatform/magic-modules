@@ -232,6 +232,7 @@ func (listR *ListResourceMetadata) SetResult(ctx context.Context, includeResourc
 	identity, identityErr := rd.Identity()
 	if identityErr != nil || identity == nil {
 		identityRD = listR.SDKv2Resource.TestResourceData()
+		identityRD.SetId(rd.Id())
 		if err := listR.setResourceIdentityFrom(identityRD, rd); err != nil {
 			return err
 		}
