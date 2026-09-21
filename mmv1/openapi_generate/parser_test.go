@@ -208,3 +208,71 @@ func TestAttachStandardFunctionality(t *testing.T) {
 		t.Errorf("Expected step.Vars['resource_name'] to be 'test-resource', got: %q (present=%t)", val, ok)
 	}
 }
+
+func TestDeprecatedParameterSkip(t *testing.T) {
+	yamlData := []byte(`
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Test API
+paths:
+  /test:
+    get:
+      parameters:
+        - name: activeParam
+          in: query
+          description: Active parameter
+          schema:
+            type: string
+        - name: deprecatedParam
+          in: query
+          description: Deprecated. Use activeParam instead.
+          schema:
+            type: string
+        - name: optionalDeprecatedParam
+          in: query
+          description: Optional. Deprecated. Skip this too.
+          schema:
+            type: string
+      responses:
+        default:
+          description: OK
+`)
+	ctx := t.Context()
+	loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
+	doc, err := loader.LoadFromData(yamlData)
+	if err != nil {
+		t.Fatalf("Could not load data %s", err)
+	}
+	err = doc.Validate(ctx)
+	if err != nil {
+		t.Fatalf("Could not validate data %s", err)
+	}
+
+	op := doc.Paths.Map()["/test"].Get
+	resArray := parseOpenApi("/test", "Test", op)
+	parameters := resArray[0].([]*api.Type)
+
+	var activeFound, deprecatedFound, optionalDeprecatedFound bool
+	for _, p := range parameters {
+		if p.Name == "activeParam" {
+			activeFound = true
+		}
+		if p.Name == "deprecatedParam" {
+			deprecatedFound = true
+		}
+		if p.Name == "optionalDeprecatedParam" {
+			optionalDeprecatedFound = true
+		}
+	}
+
+	if !activeFound {
+		t.Error("Expected to find activeParam in parameters list")
+	}
+	if deprecatedFound {
+		t.Error("Expected deprecatedParam to be skipped, but it was found")
+	}
+	if optionalDeprecatedFound {
+		t.Error("Expected optionalDeprecatedParam to be skipped, but it was found")
+	}
+}

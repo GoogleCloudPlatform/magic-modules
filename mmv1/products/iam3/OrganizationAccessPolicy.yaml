@@ -18,9 +18,8 @@ description: |-
   defines rules that allow or deny access to resources within the specified organization based on principals and conditions.
   See the Cloud IAM documentation for more details on Access Policies.
 references:
-  api: https://cloud.google.com/iam/docs/reference/rest/v3beta/organizations.locations.accessPolicies
+  api: https://cloud.google.com/iam/docs/reference/rest/v3/organizations.locations.accessPolicies
 base_url: organizations/{{organization}}/locations/{{location}}/accessPolicies
-min_version: beta
 self_link: organizations/{{organization}}/locations/{{location}}/accessPolicies/{{access_policy_id}}
 create_url: organizations/{{organization}}/locations/{{location}}/accessPolicies?accessPolicyId={{access_policy_id}}
 update_verb: PATCH

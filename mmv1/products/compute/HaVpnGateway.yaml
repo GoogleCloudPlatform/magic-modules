@@ -53,9 +53,6 @@ samples:
         resource_id_vars:
           ha_vpn_gateway1_name: 'ha-vpn-1'
           network1_name: 'network1'
-        test_vars_overrides:
-          # for backward compatible
-          network1_name: '"network1" + randomSuffix'
   - name: 'ha_vpn_gateway_ipv6'
     primary_resource_id: 'ha_gateway1'
     steps:
@@ -63,9 +60,6 @@ samples:
         resource_id_vars:
           ha_vpn_gateway1_name: 'ha-vpn-1'
           network1_name: 'network1'
-        test_vars_overrides:
-          # for backward compatible
-          network1_name: '"network1" + randomSuffix'
   - name: 'ha_vpn_gateway_gcp_to_gcp'
     primary_resource_id: 'ha_gateway1'
     exclude_test: true
@@ -81,11 +75,6 @@ samples:
           ha_vpn_gateway2_name: 'ha-vpn-2'
           network2_name: 'network2'
           router2_name: 'ha-vpn-router2'
-        test_vars_overrides:
-          # for backward compatible
-          network1_name: '"network1" + randomSuffix'
-          # for backward compatible
-          network2_name: '"network2" + randomSuffix'
   - name: 'compute_ha_vpn_gateway_encrypted_interconnect'
     primary_resource_id: 'vpn-gateway'
     exclude_test: true

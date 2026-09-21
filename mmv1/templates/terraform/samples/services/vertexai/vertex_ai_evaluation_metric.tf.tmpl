@@ -1,0 +1,12 @@
+resource "google_vertex_ai_evaluation_metric" "{{$.PrimaryResourceId}}" {
+  evaluation_metric_id = "{{index $.ResourceIdVars "evaluation_metric_id"}}"
+  region               = "us-central1"
+  display_name         = "Test Evaluation Metric"
+  description          = "An evaluation metric for Terraform acceptance testing"
+
+  metric = jsonencode({
+    llmBasedMetricSpec = {
+      metricPromptTemplate = "Rate the quality of the following response on a scale of 1 to 5. Response: {response}"
+    }
+  })
+}

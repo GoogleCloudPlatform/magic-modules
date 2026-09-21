@@ -1,0 +1,68 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	if m, ok := v.(map[string]interface{}); ok {
+		transformed := make([]interface{}, 0, len(m))
+		for key, val := range m {
+			transformed = append(transformed, map[string]interface{}{
+				"key":   flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Key(key, d, config),
+				"value": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Value(val, d, config),
+			})
+		}
+		return transformed
+	}
+	if l, ok := v.([]interface{}); ok {
+		transformed := make([]interface{}, 0, len(l))
+		for _, raw := range l {
+			original, ok := raw.(map[string]interface{})
+			if !ok || len(original) < 1 {
+				continue
+			}
+			transformed = append(transformed, map[string]interface{}{
+				"key":   flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Key(original["key"], d, config),
+				"value": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Value(original["value"], d, config),
+			})
+		}
+		return transformed
+	}
+	return nil
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Key(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Value(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original, ok := v.(map[string]interface{})
+	if !ok || len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["metadata_struct"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ValueMetadataStruct(original["metadataStruct"], d, config)
+	transformed["extended_metadata_schema"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ValueExtendedMetadataSchema(original["extendedMetadataSchema"], d, config)
+	return []interface{}{transformed}
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ValueMetadataStruct(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	if s, ok := v.(string); ok {
+		return s
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ValueExtendedMetadataSchema(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}

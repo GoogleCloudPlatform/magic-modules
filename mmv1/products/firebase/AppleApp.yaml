@@ -40,6 +40,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
+collection_url_key: 'apps'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 async:

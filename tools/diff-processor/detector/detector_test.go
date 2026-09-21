@@ -234,6 +234,31 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 			},
 		},
 		{
+			// block_types_test.go declares block_types_resource as a managed
+			// resource, a data source, an ephemeral resource and a list
+			// resource. Only field_one, on the managed resource, is coverage
+			// for the managed resource's schema; the fields of the same-named
+			// blocks of other kinds belong to different schemas.
+			name: "other-block-kinds-are-not-managed-resource-coverage",
+			changedFields: map[string]ResourceChanges{
+				"block_types_resource": {
+					"field_one":   &Field{Added: true},
+					"field_two":   &Field{Added: true},
+					"field_three": &Field{Added: true},
+				},
+			},
+			expectedMissingTests: map[string]MissingTestInfo{
+				"block_types_resource": {
+					UntestedFields: []string{"field_three", "field_two"},
+					SuggestedTest: `resource "block_types_resource" "primary" {
+  field_three = # value needed
+  field_two   = # value needed
+}
+`,
+				},
+			},
+		},
+		{
 			name: "multiple-resources-missing-tests",
 			changedFields: map[string]ResourceChanges{
 				"no_test": {

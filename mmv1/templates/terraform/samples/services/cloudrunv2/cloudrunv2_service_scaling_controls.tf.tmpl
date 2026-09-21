@@ -1,0 +1,20 @@
+resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "cloud_run_service_name"}}"
+  location = "us-central1"
+  deletion_protection = false
+  ingress = "INGRESS_TRAFFIC_ALL"
+  launch_stage = "BETA"
+
+  template {
+    scaling {
+      min_instance_count      = 1
+      max_instance_count      = 5
+      cpu_utilization         = {{index $.Vars "cpu_util"}}
+      concurrency_utilization = {{index $.Vars "concurrency_util"}}
+    }
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}

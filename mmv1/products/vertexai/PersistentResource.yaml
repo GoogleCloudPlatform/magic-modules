@@ -35,6 +35,7 @@ async:
   result:
     resource_inside_response: true
 autogen_status: UGVyc2lzdGVudFJlc291cmNlQXV0b2dlblYyQWdlbnQ=
+generate_list_resource: true
 samples:
   - name: vertex_ai_persistent_resource
     primary_resource_id: persistent_resource
