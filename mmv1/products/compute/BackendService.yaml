@@ -201,6 +201,22 @@ samples:
         min_version: 'beta'
         resource_id_vars:
           backend_service_name: 'backend-service'
+  - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+  - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -1796,6 +1812,28 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            required: true
   - name: 'params'
     type: NestedObject
     ignore_read: true
