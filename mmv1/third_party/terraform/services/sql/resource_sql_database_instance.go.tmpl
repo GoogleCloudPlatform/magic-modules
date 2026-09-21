@@ -2099,6 +2099,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, userAgent); err != nil {
+			return err
+		}
+	}
+	{{- end }}
+
 	err = resourceSqlDatabaseInstanceRead(d, meta)
 	if err != nil {
 		return err
