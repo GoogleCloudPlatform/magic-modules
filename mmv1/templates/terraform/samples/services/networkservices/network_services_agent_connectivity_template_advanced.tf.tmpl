@@ -33,6 +33,7 @@ resource "google_dns_managed_zone" "default" {
 }
 
 resource "google_certificate_manager_trust_config" "default" {
+  name        = "{{index $.ResourceIdVars "trust_config_name"}}"
   location    = "us-central1"
 
   trust_stores {
