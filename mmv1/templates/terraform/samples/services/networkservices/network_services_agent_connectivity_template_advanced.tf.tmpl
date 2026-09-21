@@ -63,7 +63,7 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
     }
     tls_config {
       trust_config = google_certificate_manager_trust_config.default.id
-      additionalRoots = "NO_ADDITIONAL_ROOTS"
+      additional_roots = "NO_ADDITIONAL_ROOTS"
     }
   }
 }
