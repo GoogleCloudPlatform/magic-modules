@@ -1,12 +1,8 @@
 resource "google_agent_registry_binding" "{{$.PrimaryResourceId}}" {
   location     = "us-central1"
   binding_id   = "{{index $.ResourceIdVars "binding"}}"
-  display_name = "My Binding"
-  description  = "My GA agent registry binding"
-
-  source {
-    identifier = data.google_agent_registry_agent.default.urn
-  }
+  display_name = "Target Only Binding"
+  description  = "Agent registry binding without source"
 
   target {
     identifier = data.google_agent_registry_agent.default.urn

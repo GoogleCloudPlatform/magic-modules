@@ -44,6 +44,15 @@ samples:
           binding: ar-binding
         test_env_vars:
           project: PROJECT_NAME
+  - name: agent_registry_binding_target_only
+    primary_resource_id: default
+    skip_func: acctest.SkipTestUntil(t, "2026-09-30") # Wait for google_iam_connectors_connector to graduate from tpg-nightly
+    steps:
+      - name: agent_registry_binding_target_only
+        resource_id_vars:
+          binding: ar-binding
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -73,7 +82,6 @@ properties:
       The description of the Binding.
   - name: source
     type: NestedObject
-    required: true
     description: |
       The source of the Binding.
     properties:
