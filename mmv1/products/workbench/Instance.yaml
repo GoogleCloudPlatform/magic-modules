@@ -56,12 +56,15 @@ sweeper:
   url_substitutions:
     - region: "us-central1-a"
     - region: "us-west1-a"
+    - region: "us-east1-b"
+    - region: "us-east1-c"
+    - region: "us-east1-d"
 custom_diff:
   - 'workbenchMetadataCustomizeDiff'
 samples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_basic'
         resource_id_vars:
@@ -70,7 +73,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_basic_container'
         resource_id_vars:
@@ -79,7 +82,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_basic_gpu'
         resource_id_vars:
@@ -90,7 +93,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_labels_stopped'
         resource_id_vars:
@@ -103,7 +106,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_full'
         resource_id_vars:
@@ -116,7 +119,7 @@ samples:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
         test_vars_overrides:
-          'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+          'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name'
         ignore_read_extra:
           - 'gce_setup.0.vm_image'
           - 'gce_setup.0.boot_disk.0.disk_type'
@@ -124,7 +127,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_confidential_compute'
         resource_id_vars:
@@ -133,7 +136,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_euc'
     primary_resource_id: 'instance'
-    region_override: 'us-west1-a'
+    region_override: 'us-east1-b'
     steps:
       - name: 'workbench_instance_euc'
         resource_id_vars:

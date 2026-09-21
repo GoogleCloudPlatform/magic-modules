@@ -8,10 +8,10 @@ resource "google_service_account_iam_binding" "act_as_permission" {
 
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.ResourceIdVars "instance_name"}}"
-  location = "us-central1-a"
+  location = "us-east1-b"
 
   gce_setup {
-    machine_type = "e2-standard-4"
+    machine_type = "n4-standard-4"
     
     metadata = {
       terraform = "true"

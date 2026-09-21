@@ -6,7 +6,7 @@ resource "google_compute_network" "my_network" {
 resource "google_compute_subnetwork" "my_subnetwork" {
   name   = "{{index $.ResourceIdVars "network_name"}}"
   network = google_compute_network.my_network.id
-  region = "us-central1"
+  region = "us-east1"
   ip_cidr_range = "10.0.1.0/24"
 }
 
@@ -22,7 +22,7 @@ resource "google_service_account_iam_member" "act_as_permission" {
 
 resource "google_compute_reservation" "gpu_reservation" {
   name     = "{{index $.ResourceIdVars "reservation_name"}}"
-  zone     = "us-central1-a"
+  zone     = "us-east1-b"
 
   specific_reservation {
     count = 1
@@ -43,7 +43,7 @@ resource "google_compute_reservation" "gpu_reservation" {
 
 resource "google_compute_resource_policy" "my_policy" {
   name   = "{{index $.ResourceIdVars "resource_policy_name"}}"
-  region = "us-central1"
+  region = "us-east1"
   snapshot_schedule_policy {
     schedule {
       daily_schedule {
@@ -56,7 +56,7 @@ resource "google_compute_resource_policy" "my_policy" {
 
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.ResourceIdVars "instance_name"}}"
-  location = "us-central1-a"
+  location = "us-east1-b"
 
   enable_deletion_protection = false
 

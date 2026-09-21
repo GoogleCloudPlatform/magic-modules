@@ -1,4 +1,8 @@
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.ResourceIdVars "instance_name"}}"
-  location = "us-west1-a"
+  location = "us-east1-b"
+
+  gce_setup {
+    machine_type = "n4-standard-2"
+  }
 }
