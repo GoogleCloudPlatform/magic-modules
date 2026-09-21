@@ -80,16 +80,18 @@ func testSweepDataprocCluster(region string) error {
 		// Keep count of items that aren't sweepable for logging.
 		nonPrefixCount := 0
 		for _, ri := range rl {
-			obj := ri.(map[string]interface{})
-			var name string
-			// Id detected in the delete URL, attempt to use id.
-			if obj["id"] != nil {
-				name = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
-			} else if obj["name"] != nil {
-				name = tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
-			} else {
-				log.Printf("[INFO][SWEEPER_LOG] %s resource name and id were nil", resourceName)
-				return nil
+			obj, ok := ri.(map[string]interface{})
+			if !ok {
+				log.Printf("[INFO][SWEEPER_LOG] Item was not a map: %T", ri)
+				continue
+			}
+
+			// Clusters are identified by clusterName. The list response has no
+			// "name" or "id" field, so reading those matched nothing.
+			name, ok := obj["clusterName"].(string)
+			if !ok || name == "" {
+				log.Printf("[INFO][SWEEPER_LOG] %s resource clusterName was nil, skipping", resourceName)
+				continue
 			}
 			// Skip resources that shouldn't be sweeped
 			if !sweeper.IsSweepableTestResource(name) {
