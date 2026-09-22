@@ -65,6 +65,29 @@ samples:
           callouts_instance_group: 'l7-ilb-callouts-ins-group'
           callouts_hc_name: 'l7-ilb-callouts-hc'
           callouts_backend_name: 'l7-ilb-callouts-backend'
+  - name: 'network_services_lb_traffic_extension_observability'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_services_lb_traffic_extension_observability'
+        resource_id_vars:
+          ilb_network_name: 'l7-ilb-network'
+          proxy_subnet_name: 'l7-ilb-proxy-subnet'
+          backend_subnet_name: 'l7-ilb-subnet'
+          forwarding_rule_name: 'l7-ilb-forwarding-rule'
+          target_http_proxy_name: 'l7-ilb-target-http-proxy'
+          regional_url_map_name: 'l7-ilb-regional-url-map'
+          backend_service_name: 'l7-ilb-backend-subnet'
+          mig_template_name: 'l7-ilb-mig-template'
+          hc_name: 'l7-ilb-hc'
+          mig_name: 'l7-ilb-mig1'
+          fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
+          fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
+          vm_test_name: 'l7-ilb-test-vm'
+          lb_traffic_extension_name: 'l7-ilb-traffic-ext'
+          callouts_instance_name: 'l7-ilb-callouts-ins'
+          callouts_instance_group: 'l7-ilb-callouts-ins-group'
+          callouts_hc_name: 'l7-ilb-callouts-hc'
+          callouts_backend_name: 'l7-ilb-callouts-backend'
 parameters:
   - name: 'location'
     type: String
@@ -115,7 +138,7 @@ properties:
             The name for this extension chain. The name is logged as part of the HTTP request logs.
             The name must conform with RFC-1034, is restricted to lower-cased letters, numbers and hyphens,
             and can have a maximum length of 63 characters. Additionally, the first character must be a letter
-            and the last a letter or a number.
+            and the last character must be a letter or a number.
           required: true
         - name: 'matchCondition'
           type: NestedObject
@@ -134,7 +157,7 @@ properties:
             A set of extensions to execute for the matching request.
             At least one extension is required. Up to 3 extensions can be defined for each extension chain for
             LbTrafficExtension resource. LbRouteExtension chains are limited to 1 extension per extension chain.
-            Further documentation to be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain#Extension
+            Further documentation can be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain#Extension
           required: true
           item_type:
             type: NestedObject
@@ -210,6 +233,15 @@ properties:
                   Metadata associated with the extension. This field is used to pass metadata to the extension service.
                   You can set up key value pairs for metadata as you like and need.
                   f.e. {"key": "value", "key2": "value2"}.
+              - name: 'observabilityMode'
+                type: Boolean
+                description: |
+                  When set to `TRUE`, enables `observability_mode` on the `ext_proc` filter.
+                  This makes `ext_proc` calls asynchronous. Envoy doesn't check for the response from `ext_proc` calls.
+                  For more information about the filter, see: https://www.envoyproxy.io/docs/envoy/v1.32.3/api-v3/extensions/filters/http/ext_proc/v3/ext_proc.proto
+                  This field is helpful when you want to try out the extension in async log-only mode.
+                  Supported by regional `LbTrafficExtension` and `LbRouteExtension` resources.
+                  Only `STREAMED` (default) body processing mode is supported.
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
