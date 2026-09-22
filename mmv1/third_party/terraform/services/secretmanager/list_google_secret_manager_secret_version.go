@@ -99,22 +99,25 @@ func ListSecretManagerSecretVersions(config *transport_tpg.Config, project, secr
 
 	d := ResourceSecretManagerSecretVersion().Data(&terraform.InstanceState{})
 
-	if project != "" {
-		if err := d.Set("project", project); err != nil {
-			return fmt.Errorf("error setting project on temporary resource data: %w", err)
-		}
-	}
-
-	// Normalize secret to full resource name
+	// Normalize secret to full name. If the user passed a full name, its
+	// project takes precedence over the list config/ provider default.
 	fullSecret := secret
-	if matched, _ := regexp.MatchString(`^projects/[^/]+/secrets/[^/]+$`, secret); !matched {
+	if m := regexp.MustCompile(`^projects/[^/]+/secrets/[^/]+$`).FindStringSubmatch(secret); m != nil {
+		project = m[1]
+	} else {
+		if project == "" {
+			return fmt.Errorf("project must be specified when secret is not in full resource name format")
+		}
 		fullSecret = fmt.Sprintf("projects/%s/secrets/%s", project, secret)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("error setting project on temporary resource data: %w", err)
 	}
 	if err := d.Set("secret", fullSecret); err != nil {
 		return fmt.Errorf("error setting secret on temporary resource data: %w", err)
 	}
 
-	url := fmt.Sprintf("%sprojects/%s/secrets/%s/versions", transport_tpg.BaseUrl(Product, config), project, secret)
+	url := fmt.Sprintf("%s%s/versions", transport_tpg.BaseUrl(Product, config), fullSecret)
 
 	billingProject := project
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
@@ -126,7 +129,7 @@ func ListSecretManagerSecretVersions(config *transport_tpg.Config, project, secr
 		return err
 	}
 
-	secretRegex := regexp.MustCompile(`projects/(.+)/secrets/(.+)/versions/(.+)$`)
+	versionRegex := regexp.MustCompile(`/versions/([^/]+)$`)
 
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
@@ -142,19 +145,17 @@ func ListSecretManagerSecretVersions(config *transport_tpg.Config, project, secr
 				return fmt.Errorf("missing name in secret version list response")
 			}
 
-			matches := secretRegex.FindStringSubmatch(name)
+			matches := versionRegex.FindStringSubmatch(name)
 			if matches == nil {
 				return fmt.Errorf("secret version name %q does not match expected format", name)
 			}
-			// matches[1]=project, matches[2]=secret, matches[3]=version
-			versionProject := matches[1]
-			versionSecret := matches[2]
-			versionNum := matches[3]
+			// matches[1]=version
+			versionNum := matches[1]
 
-			if err := d.Set("project", versionProject); err != nil {
+			if err := d.Set("project", project); err != nil {
 				return err
 			}
-			if err := d.Set("secret", fmt.Sprintf("projects/%s/secrets/%s", versionProject, versionSecret)); err != nil {
+			if err := d.Set("secret", fullSecret); err != nil {
 				return err
 			}
 			if err := d.Set("version", versionNum); err != nil {
@@ -164,8 +165,8 @@ func ListSecretManagerSecretVersions(config *transport_tpg.Config, project, secr
 				return err
 			}
 			if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
-				"project": versionProject,
-				"secret":  fmt.Sprintf("projects/%s/secrets/%s", versionProject, versionSecret),
+				"project": project,
+				"secret":  fullSecret,
 				"version": versionNum,
 			}); err != nil {
 				return err
