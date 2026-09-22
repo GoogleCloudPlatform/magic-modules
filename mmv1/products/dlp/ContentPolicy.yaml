@@ -132,6 +132,20 @@ properties:
                   type: String
                   description: |
                     Version name for this InfoType.
+                - name: sensitivityScore
+                  type: NestedObject
+                  description: |
+                    Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                  properties:
+                    - name: score
+                      type: Enum
+                      description: |
+                        The sensitivity score applied to the resource.
+                      required: true
+                      enum_values:
+                        - SENSITIVITY_LOW
+                        - SENSITIVITY_MODERATE
+                        - SENSITIVITY_HIGH
             - name: minLikelihood
               type: Enum
               description: |
@@ -370,6 +384,7 @@ properties:
                           - MATCHING_TYPE_FULL_MATCH
                           - MATCHING_TYPE_PARTIAL_MATCH
                           - MATCHING_TYPE_INVERSE_MATCH
+                          - MATCHING_TYPE_RULE_SPECIFIC
                       - name: dictionary
                         type: NestedObject
                         description: Dictionary which defines the rule.
@@ -489,6 +504,213 @@ properties:
                                 type: Integer
                                 description: |
                                   Number of characters after the finding to consider.
+                      - name: excludeByImageFindings
+                        type: NestedObject
+                        description: |
+                          The rule to exclude image findings based on spatial relationships with other image findings.
+                        properties:
+                          - name: infoTypes
+                            type: Array
+                            description: |
+                              A list of image-supported infoTypes to be used as context for the exclusion rule.
+                            required: true
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: name
+                                  type: String
+                                  description: |
+                                    Name of the information type.
+                                  required: true
+                                - name: version
+                                  type: String
+                                  description: |
+                                    Version name for this InfoType.
+                                - name: sensitivityScore
+                                  type: NestedObject
+                                  description: |
+                                    Optional custom sensitivity for this InfoType.
+                                  properties:
+                                    - name: score
+                                      type: Enum
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      required: true
+                                      enum_values:
+                                        - SENSITIVITY_LOW
+                                        - SENSITIVITY_MODERATE
+                                        - SENSITIVITY_HIGH
+                          - name: imageContainmentType
+                            type: NestedObject
+                            description: |
+                              Specifies the required spatial relationship between the bounding boxes of the target finding and the context infoType findings.
+                            properties:
+                              - name: encloses
+                                type: NestedObject
+                                description: Defines a condition where one bounding box encloses another.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                              - name: fullyInside
+                                type: NestedObject
+                                description: Defines a condition where one bounding box is fully inside another.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                              - name: overlaps
+                                type: NestedObject
+                                description: Defines a condition for overlapping bounding boxes.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                  - name: adjustmentRule
+                    type: NestedObject
+                    description: |
+                      Rule that specifies conditions when a certain infoType's finding details should be adjusted.
+                    properties:
+                      - name: adjustByMatchingInfoTypes
+                        type: NestedObject
+                        description: |
+                          AdjustmentRule condition for matching infoTypes.
+                        properties:
+                          - name: infoTypes
+                            type: Array
+                            description: |
+                              Sensitive Data Protection adjusts the likelihood of a finding if that finding also matches one of these infoTypes.
+                            required: true
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: name
+                                  type: String
+                                  description: |
+                                    Name of the information type.
+                                  required: true
+                                - name: version
+                                  type: String
+                                  description: |
+                                    Version name for this InfoType.
+                                - name: sensitivityScore
+                                  type: NestedObject
+                                  description: |
+                                    Optional custom sensitivity for this InfoType.
+                                  properties:
+                                    - name: score
+                                      type: Enum
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      required: true
+                                      enum_values:
+                                        - SENSITIVITY_LOW
+                                        - SENSITIVITY_MODERATE
+                                        - SENSITIVITY_HIGH
+                          - name: minLikelihood
+                            type: Enum
+                            description: |
+                              Minimum likelihood of the adjustByMatchingInfoTypes infoTypes finding.
+                            required: true
+                            enum_values:
+                              - VERY_UNLIKELY
+                              - UNLIKELY
+                              - POSSIBLE
+                              - LIKELY
+                              - VERY_LIKELY
+                          - name: matchingType
+                            type: Enum
+                            description: |
+                              How the adjustment rule is applied.
+                            required: true
+                            enum_values:
+                              - MATCHING_TYPE_FULL_MATCH
+                              - MATCHING_TYPE_PARTIAL_MATCH
+                              - MATCHING_TYPE_INVERSE_MATCH
+                      - name: adjustByImageFindings
+                        type: NestedObject
+                        description: |
+                          AdjustmentRule condition for image findings.
+                        properties:
+                          - name: infoTypes
+                            type: Array
+                            description: |
+                              A list of image-supported infoTypes to be used as context for the adjustment rule.
+                            required: true
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: name
+                                  type: String
+                                  description: |
+                                    Name of the information type.
+                                  required: true
+                                - name: version
+                                  type: String
+                                  description: |
+                                    Version name for this InfoType.
+                                - name: sensitivityScore
+                                  type: NestedObject
+                                  description: |
+                                    Optional custom sensitivity for this InfoType.
+                                  properties:
+                                    - name: score
+                                      type: Enum
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      required: true
+                                      enum_values:
+                                        - SENSITIVITY_LOW
+                                        - SENSITIVITY_MODERATE
+                                        - SENSITIVITY_HIGH
+                          - name: minLikelihood
+                            type: Enum
+                            description: |
+                              Minimum likelihood of the adjustByImageFindings infoTypes finding.
+                            required: true
+                            enum_values:
+                              - VERY_UNLIKELY
+                              - UNLIKELY
+                              - POSSIBLE
+                              - LIKELY
+                              - VERY_LIKELY
+                          - name: imageContainmentType
+                            type: NestedObject
+                            description: |
+                              Specifies the required spatial relationship between the bounding boxes of the target finding and the context infoType findings.
+                            properties:
+                              - name: encloses
+                                type: NestedObject
+                                description: Defines a condition where one bounding box encloses another.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                              - name: fullyInside
+                                type: NestedObject
+                                description: Defines a condition where one bounding box is fully inside another.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                              - name: overlaps
+                                type: NestedObject
+                                description: Defines a condition for overlapping bounding boxes.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                      - name: likelihoodAdjustment
+                        type: NestedObject
+                        description: |
+                          Likelihood adjustment to apply to all matching findings.
+                        required: true
+                        properties:
+                          - name: fixedLikelihood
+                            type: Enum
+                            description: |
+                              Set the likelihood of a finding to a fixed value.
+                            required: true
+                            enum_values:
+                              - VERY_UNLIKELY
+                              - UNLIKELY
+                              - POSSIBLE
+                              - LIKELY
+                              - VERY_LIKELY
       - name: customInfoTypes
         type: Array
         description: |
@@ -622,6 +844,123 @@ properties:
                   description: |
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                     or `projects/project-id/storedInfoTypes/432452342`.
+                  required: true
+                - name: createTime
+                  type: String
+                  description: |
+                    Output only. Timestamp indicating when the version of the StoredInfoType used for inspection was created.
+                  output: true
+            - name: detectionRules
+              type: Array
+              description: |
+                Set of detection rules to apply to all findings of this CustomInfoType. Rules are applied in order
+                that they are specified. Only supported for the dictionary, regex, and storedType CustomInfoTypes.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: hotwordRule
+                    type: NestedObject
+                    description: Hotword-based detection rule.
+                    properties:
+                      - name: hotwordRegex
+                        type: NestedObject
+                        description: Regular expression pattern defining what qualifies as a hotword.
+                        required: true
+                        properties:
+                          - name: pattern
+                            type: String
+                            description: |
+                              Pattern defining the regular expression. Its syntax
+                              (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
+                            required: true
+                          - name: groupIndexes
+                            type: Array
+                            description: |
+                              The index of the submatch to extract as findings. When not specified,
+                              the entire match is returned. No more than 3 may be included.
+                            item_type:
+                              type: Integer
+                      - name: proximity
+                        type: NestedObject
+                        description: |
+                          Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
+                          exceed 1000 characters.
+                        required: true
+                        properties:
+                          - name: windowBefore
+                            type: Integer
+                            description: |
+                              Number of characters before the finding to consider.
+                          - name: windowAfter
+                            type: Integer
+                            description: |
+                              Number of characters after the finding to consider.
+                      - name: likelihoodAdjustment
+                        type: NestedObject
+                        description: |
+                          Likelihood adjustment to apply to all matching findings.
+                        required: true
+                        properties:
+                          - name: fixedLikelihood
+                            type: Enum
+                            description: |
+                              Set the likelihood of a finding to a fixed value. Either this or relative_likelihood can be set.
+                            enum_values:
+                              - VERY_UNLIKELY
+                              - UNLIKELY
+                              - POSSIBLE
+                              - LIKELY
+                              - VERY_LIKELY
+                          - name: relativeLikelihood
+                            type: Integer
+                            description: |
+                              Increase or decrease the likelihood by the specified number of levels.
+            - name: fileLabelInfoType
+              type: NestedObject
+              description: Configuration for a custom infoType that detects file labels.
+              properties:
+                - name: googleDriveLabel
+                  type: NestedObject
+                  description: Google Drive labels published by Google.
+                  properties:
+                    - name: labelId
+                      type: String
+                      description: The label ID of the Google Drive label.
+                      required: true
+                    - name: labelFieldsToMatch
+                      type: Array
+                      description: The field values of the Google Drive label to match.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: id
+                            type: String
+                            description: The identifier of the Label Field.
+                            required: true
+                          - name: value
+                            type: String
+                            description: The value of the Label Field to match.
+                            required: true
+                - name: sensitivityLabel
+                  type: NestedObject
+                  description: Sensitivity labels published by Microsoft.
+                  properties:
+                    - name: guid
+                      type: String
+                      description: The GUID of the sensitivity label.
+                      required: true
+            - name: metadataKeyValueExpression
+              type: NestedObject
+              description: |
+                Configuration for a custom infoType that detects key-value pairs in the metadata matching the specified regular expressions.
+              properties:
+                - name: keyRegex
+                  type: String
+                  description: The regular expression for the key.
+                  required: true
+                - name: valueRegex
+                  type: String
+                  description: The regular expression for the value.
                   required: true
   - name: rules
     type: Array
