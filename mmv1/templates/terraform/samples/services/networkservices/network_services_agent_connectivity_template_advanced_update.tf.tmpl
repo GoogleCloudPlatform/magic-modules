@@ -32,6 +32,20 @@ resource "google_dns_managed_zone" "default" {
   }
 }
 
+resource "google_certificate_manager_trust_config" "default" {
+  name        = "{{index $.ResourceIdVars "trust_config_name"}}"
+  location    = "us-central1"
+
+  trust_stores {
+    trust_anchors { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+    intermediate_cas { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+  }
+}
+
 resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
   agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
   location                       = "us-west2"
@@ -52,6 +66,10 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
       domain         = google_dns_managed_zone.default.dns_name
       domains        = ["sub.example.com."]
       target_network = google_compute_network.default.id
+    }
+    tls_config {
+      trust_config = "projects/${data.google_project.project.number}/locations/us-central1/trustConfigs/${google_certificate_manager_trust_config.default.name}"
+      additional_roots = "NO_ADDITIONAL_ROOTS"
     }
   }
 }

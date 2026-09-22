@@ -61,6 +61,7 @@ samples:
           subnetwork_name: my-subnetwork
           network_attachment_name: my-attachment
           dns_zone_name: my-zone
+          trust_config_name: my-trust-config
         test_env_vars:
           project: PROJECT_NAME
 parameters:
