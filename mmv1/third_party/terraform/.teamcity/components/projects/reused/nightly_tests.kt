@@ -81,19 +81,12 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     }
     // We still allow locks in the service sweeper build configuration for adhoc triggers of services
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
+
     serviceSweeperConfig.triggers {
         finishBuildTrigger {
             buildType = "${DslContext.projectId}_${compositeId}"
             branchFilter = "+:${cron.branch}"
             successfulOnly = false
-        }
-    }
-
-    // Add snapshot dependency on the composite config to run after tests finish
-    serviceSweeperConfig.dependencies {
-        snapshot(compositeConfig) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
         }
     }
 

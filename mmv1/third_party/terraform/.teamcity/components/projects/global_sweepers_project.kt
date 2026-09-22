@@ -17,7 +17,6 @@ import builds.*
 import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.AbsoluteId
 import jetbrains.buildServer.configs.kotlin.DslContext
-import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import replaceCharsId
@@ -38,11 +37,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     // Compute IDs of the service sweepers in the GA and Beta nightly test projects.
     // These IDs must mirror how googleSubProjectGa/Beta and nightlyTests() compute their project IDs.
     val gaProjectId = replaceCharsId("GOOGLE")
-    val betaProjectId = replaceCharsId("GOOGLE_BETA")
-    val gaAllTestsId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_ALL_TESTS")}")
-    val betaAllTestsId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_ALL_TESTS")}")
     val gaServiceSweeperId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_Service_Sweeper")}")
-    val betaServiceSweeperId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_Service_Sweeper")}")
 
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
@@ -54,25 +49,6 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
             successfulOnly = false
         }
     }
-    serviceSweeperConfig.dependencies {
-        snapshot(gaAllTestsId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-        snapshot(betaAllTestsId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-        snapshot(gaServiceSweeperId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-        snapshot(betaServiceSweeperId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-    }
-
     // Create build config for sweeping folder resources
     val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
     folderSweeperConfig.triggers {
@@ -82,25 +58,6 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
             successfulOnly = false
         }
     }
-    folderSweeperConfig.dependencies {
-        snapshot(gaAllTestsId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-        snapshot(betaAllTestsId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-        snapshot(gaServiceSweeperId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-        snapshot(betaServiceSweeperId) {
-            onDependencyFailure = FailureAction.IGNORE
-            onDependencyCancel = FailureAction.IGNORE
-        }
-    }
-
     return Project{
         id(sweeperId)
         name = GlobalSweepersProjectName

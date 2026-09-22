@@ -75,7 +75,7 @@ class NightlyTestProjectsTests {
             assertSnapshotDependencies(composite, packageBuilds, FailureAction.ADD_PROBLEM)
 
             val sweeper = getBuildFromProject(project, ServiceSweeperName)
-            assertSnapshotDependencies(sweeper, listOf(composite), FailureAction.IGNORE)
+            assertTrue("Service sweeper should not have snapshot dependencies", sweeper.dependencies.items.isEmpty())
         }
     }
 

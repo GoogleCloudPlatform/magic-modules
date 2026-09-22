@@ -16,7 +16,6 @@ import SharedResourceNameBeta
 import SharedResourceNameGa
 import SharedResourceNameVcr
 import jetbrains.buildServer.configs.kotlin.BuildType
-import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.SharedResources
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -139,19 +138,15 @@ class SweeperTests {
         listOf("TeamCityTests", "Experimental_NightlyTests").forEach { projectId ->
             val root = googleCloudRootProject(testContextParameters(projectId))
             val gaNightly = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
-            val betaNightly = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
             val gaComposite = getBuildFromProject(gaNightly, AllNightlyTestsName)
-            val betaComposite = getBuildFromProject(betaNightly, AllNightlyTestsName)
             val sweeperGa = getBuildFromProject(gaNightly, ServiceSweeperName)
-            val sweeperBeta = getBuildFromProject(betaNightly, ServiceSweeperName)
             assertFinishTrigger(sweeperGa, gaComposite, DefaultBranchName)
-            assertFinishTrigger(sweeperBeta, betaComposite, DefaultBranchName)
 
             val globalSweepers = getSubProject(root, globalSweepersProjectName)
             listOf("Project Sweeper", "Folder Sweeper").forEach { name ->
                 val sweeper = getBuildFromProject(globalSweepers, name)
                 assertFinishTrigger(sweeper, sweeperGa, DefaultBranchName)
-                assertSnapshotDependencies(sweeper, listOf(gaComposite, betaComposite, sweeperGa, sweeperBeta), FailureAction.IGNORE)
+                assertTrue("Global sweeper should not have snapshot dependencies", sweeper.dependencies.items.isEmpty())
                 assertSharedResourceLocks(sweeper, SharedResources {
                     lockAllValues(SharedResourceNameGa)
                     lockAllValues(SharedResourceNameBeta)
