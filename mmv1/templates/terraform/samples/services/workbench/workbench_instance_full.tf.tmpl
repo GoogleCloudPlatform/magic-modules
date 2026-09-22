@@ -11,7 +11,8 @@ resource "google_compute_subnetwork" "my_subnetwork" {
 }
 
 resource "google_compute_address" "static" {
-  name = "{{index $.ResourceIdVars "network_name"}}"
+  name   = "{{index $.ResourceIdVars "network_name"}}"
+  region = "us-east1"
 }
 
 resource "google_service_account_iam_member" "act_as_permission" {
