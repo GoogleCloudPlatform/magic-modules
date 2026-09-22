@@ -134,7 +134,7 @@ class SweeperTests {
     }
 
     @Test
-    fun globalSweepersDependOnAllNightlyTests() {
+    fun globalSweepersUseFinishTriggersWithoutDependencies() {
         listOf("TeamCityTests", "Experimental_NightlyTests").forEach { projectId ->
             val root = googleCloudRootProject(testContextParameters(projectId))
             val gaNightly = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)

@@ -129,7 +129,7 @@ The Service Sweeper builds in [`Google > Nightly Tests`](https://hashicorp.teamc
 
 Package builds retain per-service shared-resource locks. Each Service Sweeper locks all values of its provider's shared resource, preventing it from overlapping with package builds that acquire those locks, including ad hoc runs. GA and Beta service sweepers use separate provider locks.
 
-For an ad hoc cleanup of nightly-test resources, manually run the existing **Service Sweeper** in the corresponding Nightly Tests project. Its finish-build trigger is not invoked by a manual run, and it has no snapshot dependency, so the manual run does not start the acceptance-test composite.
+For ad hoc cleanup, manually run **Service Sweeper** in the corresponding Nightly Tests project; no separate manual build configuration is needed.
 
 ### Sweeping the VCR Project
 
@@ -143,4 +143,4 @@ The **Global Sweepers** project contains separate **Project Sweeper** and **Fold
 
 Both global sweepers acquire all values of the GA, Beta, and VCR shared resources. This prevents them from running concurrently with builds that acquire those locks, or with each other. Branch filters select the events that trigger cleanup; they do not restrict which GCP resources cleanup can affect.
 
-Snapshot dependencies are not passive waits for existing runs. TeamCity can reuse a suitable build or request a new dependency build if no suitable one exists. Failure/cancellation actions do not control build reuse; the DSL's default reuse policy is successful builds only. When investigating apparent duplicates, inspect the waiting build's identity, **Triggered by** information, and dependency build IDs. A lock message naming the Beta Service Sweeper identifies the lock holder, not the waiting build, and is not by itself evidence of a duplicate Beta sweeper.
+Sweepers intentionally have no snapshot dependencies: those dependencies can queue new test builds rather than just wait for existing ones. Shared-resource locks prevent overlapping execution, but do not wait for every queued test to finish.

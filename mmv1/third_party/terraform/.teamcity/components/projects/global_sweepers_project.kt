@@ -10,12 +10,12 @@ package projects
 import GlobalSweepersProjectName
 import DefaultBranchName
 import NightlyTestsProjectId
+import ServiceSweeperName
 import SharedResourceNameBeta
 import SharedResourceNameGa
 import SharedResourceNameVcr
 import builds.*
 import generated.SweepersListGa
-import jetbrains.buildServer.configs.kotlin.AbsoluteId
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
@@ -34,38 +34,33 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     // List of ALL shared resources; avoid clashing with any other running build
     val sharedResources: List<String> = listOf(SharedResourceNameGa, SharedResourceNameBeta, SharedResourceNameVcr)
 
-    // Compute IDs of the service sweepers in the GA and Beta nightly test projects.
-    // These IDs must mirror how googleSubProjectGa/Beta and nightlyTests() compute their project IDs.
+    // Match the GA service sweeper ID created by googleSubProjectGa() and nightlyTests().
     val gaProjectId = replaceCharsId("GOOGLE")
-    val gaServiceSweeperId = AbsoluteId("${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_Service_Sweeper")}")
+    val gaServiceSweeperId = "${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_${ServiceSweeperName}")}"
 
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
-    val serviceSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    serviceSweeperConfig.triggers {
-        finishBuildTrigger {
-            buildType = gaServiceSweeperId.value // Trigger project sweeper after the GA service sweeper
-            branchFilter = "+:$DefaultBranchName"
-            successfulOnly = false
-        }
-    }
+    val projectSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
     // Create build config for sweeping folder resources
     val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    folderSweeperConfig.triggers {
-        finishBuildTrigger {
-            buildType = gaServiceSweeperId.value // Trigger folder sweeper after the GA service sweeper
-            branchFilter = "+:$DefaultBranchName"
-            successfulOnly = false
+    val sweepers = listOf(projectSweeperConfig, folderSweeperConfig)
+    sweepers.forEach { sweeper ->
+        sweeper.triggers {
+            finishBuildTrigger {
+                buildType = gaServiceSweeperId
+                branchFilter = "+:$DefaultBranchName"
+                successfulOnly = false
+            }
         }
     }
+
     return Project{
         id(sweeperId)
         name = GlobalSweepersProjectName
         description = "Subproject containing build configurations for sweeping global resources like projects and folders"
 
         // Register build configs in the project
-        buildType(serviceSweeperConfig)
-        buildType(folderSweeperConfig)
+        sweepers.forEach { buildType(it) }
 
         params {
             readOnlySettings()
