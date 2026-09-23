@@ -333,9 +333,19 @@ func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr, funcDecls map[stri
 
 var subPattern = regexp.MustCompile("%({[^{}]*}|[vTtbcspqxXUeEfFgGdo])")
 
+// A substitution alone on its line injects whole HCL statements rather than a
+// value: most often a shared "setup" block, sometimes a conditionally present
+// attribute or nested block. Substituting a value there leaves a bare token
+// where HCL requires an argument or block definition.
+var wholeLineSubPattern = regexp.MustCompile("(?m)^[ \t]*(?:" + subPattern.String() + ")[ \t]*$")
+
 // Read the config string and return a test step.
 func readConfigStr(configStr string) (Step, error) {
 	// Remove fmt substitutions because they interfere with hcl parsing.
+	// Drop whole-line substitutions entirely; whatever they inject is not
+	// counted as covered, but the rest of the config still parses instead of
+	// the whole test step being discarded.
+	configStr = wholeLineSubPattern.ReplaceAllString(configStr, "")
 	// Replace with a value that can be parsed outside quotation marks.
 	configStr = subPattern.ReplaceAllString(configStr, "true")
 	parser := hclparse.NewParser()
