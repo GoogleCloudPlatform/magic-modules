@@ -1,6 +1,8 @@
 package reader
 
 import (
+	"go/ast"
+	"go/parser"
 	"os"
 	"reflect"
 	"testing"
@@ -288,10 +290,9 @@ func TestReadFormattingCallTestFile(t *testing.T) {
 	if len(tests) != 1 {
 		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
 	}
-	// A config is read the same way whether the formatting call is written
-	// inline in the step or wrapped in a config func, and whether the template
-	// is a literal or a shared base config concatenated onto one. A string
-	// passed to a config func is a value to interpolate, not a config.
+	// A config is read the same way wherever it is assembled: inline in the
+	// step or in a config func, from a literal, a shared base config, a
+	// concatenation of the two, or a call to another config func.
 	if expectedSteps := []Step{
 		{
 			ResourceBlock: {
@@ -305,12 +306,93 @@ func TestReadFormattingCallTestFile(t *testing.T) {
 			},
 		},
 		{
+			// The string passed to the nested config func is a value to
+			// interpolate, not a config.
 			ResourceBlock: {
 				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
 			},
 		},
+		{
+			ResourceBlock: {
+				"formatting_call_base":       {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_literal": {"literal": {"field_six": "\"value-six\""}},
+			},
+		},
 	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
 		t.Errorf("found unexpected steps: %#v, expected %#v", tests[0].Steps, expectedSteps)
+	}
+}
+
+func TestReadConfigCallExpr(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		expr     string
+		expected string
+		wantErr  bool
+	}{
+		{
+			name:     "sprintf-template",
+			expr:     "fmt.Sprintf(`resource \"a\" \"b\" {}`, name)",
+			expected: "resource \"a\" \"b\" {}",
+		},
+		{
+			name:     "nprintf-template",
+			expr:     "acctest.Nprintf(`resource \"a\" \"b\" {}`, context)",
+			expected: "resource \"a\" \"b\" {}",
+		},
+		{
+			// Sprint has no template: every argument is part of the config.
+			name:     "sprint-concatenation",
+			expr:     "fmt.Sprint(`resource \"a\" \"b\" {}`, `resource \"c\" \"d\" {}`)",
+			expected: "resource \"a\" \"b\" {}resource \"c\" \"d\" {}",
+		},
+		{
+			// Only a formatting function is known to return its first
+			// argument's config. Reading the first argument of anything else
+			// would report fields as covered that the test may never apply.
+			name:    "non-formatting-call",
+			expr:    "acctest.EchoResourceConfig(`resource \"a\" \"b\" {}`, \"echo\")",
+			wantErr: true,
+		},
+		{
+			name:    "undeclared-config-func",
+			expr:    "testAccUndeclared(\"name\")",
+			wantErr: true,
+		},
+		{
+			name:    "formatting-call-without-arguments",
+			expr:    "fmt.Sprintf()",
+			wantErr: true,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			expr, err := parser.ParseExpr(tc.expr)
+			if err != nil {
+				t.Fatalf("error parsing %s: %v", tc.expr, err)
+			}
+			callExpr, ok := expr.(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("%s is not a call expression", tc.expr)
+			}
+			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{})
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error reading %s, read %q", tc.expr, configStr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("error reading %s: %v", tc.expr, err)
+			}
+			if configStr != tc.expected {
+				t.Errorf("read %q from %s, expected %q", configStr, tc.expr, tc.expected)
+			}
+		})
 	}
 }
 

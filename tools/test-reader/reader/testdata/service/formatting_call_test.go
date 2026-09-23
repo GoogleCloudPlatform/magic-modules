@@ -35,9 +35,21 @@ func TestAccFormattingCall(t *testing.T) {
 				Config: testAccFormattingCallConcat("value-three"),
 			},
 			{
-				// A config func taking a string. The string is a value to
-				// interpolate, not a config.
-				Config: testAccFormattingCallStringArg("value-four"),
+				// A config func returning a call to another config func whose
+				// first argument is a value to interpolate, not a config.
+				Config: testAccFormattingCallNested(),
+			},
+			{
+				// A config assembled from two config funcs in the step itself.
+				Config: testAccFormattingCallStringArg("value-five") + testFormattingCallBase,
+			},
+			{
+				// A config written as a literal in the step itself.
+				Config: `
+resource "formatting_call_literal" "literal" {
+  field_six = "value-six"
+}
+`,
 			},
 		},
 	})
@@ -49,6 +61,10 @@ resource "formatting_call_concat" "concat" {
   field_three = "%s"
 }
 `, fieldThree)
+}
+
+func testAccFormattingCallNested() string {
+	return testAccFormattingCallStringArg("value-four")
 }
 
 func testAccFormattingCallStringArg(fieldFour string) string {

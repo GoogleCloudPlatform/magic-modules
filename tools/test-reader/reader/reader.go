@@ -245,15 +245,10 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
-						var configStr string
-						var err error
-						if configCallExpr, ok := keyValueExpr.Value.(*ast.CallExpr); ok {
-							configStr, err = readConfigCallExpr(configCallExpr, funcDecls, varDecls)
-						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
-							if configVar, ok := varDecls[ident.Name]; ok {
-								configStr, err = strconv.Unquote(configVar.Value)
-							}
-						}
+						// A config is any expression that evaluates to a config
+						// string, and reads the same way here as it does in a
+						// config func's return statement.
+						configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls)
 						if err != nil {
 							errs = append(errs, err)
 						}
@@ -275,24 +270,47 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 
 // Read a call expression that produces a config and return the config string.
 // The call is either to a config func declared in the same package, or to a
-// formatting function such as fmt.Sprintf or acctest.Nprintf whose first
-// argument is the config template.
+// formatting function that builds a config out of its arguments.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	// Dispatch on the callee rather than on the shape of the arguments: a
+	// config func can take a string as its first argument, and that string is a
+	// value to interpolate, not a config.
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
 			return readConfigFunc(configFunc, funcDecls, varDecls)
 		}
 		return "", fmt.Errorf("failed to find function declaration %s", ident.Name)
 	}
-	// Not a function declared in this package, so it can't be followed. Read
-	// the first argument as the config template instead. Dispatching on the
-	// callee rather than on the shape of the arguments matters: a config func
-	// can take a string as its first argument, and that string is a value to
-	// interpolate, not a config.
-	if len(configCallExpr.Args) > 0 {
-		return readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
+	selectorExpr, ok := configCallExpr.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return "", fmt.Errorf("failed to read config from call to %v (%T)", configCallExpr.Fun, configCallExpr.Fun)
 	}
-	return "", fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
+	// A function from another package can't be followed, so only the formatting
+	// functions below, whose result is known from their arguments, can be read.
+	// Reading the arguments of anything else would report fields as covered
+	// that the test may never apply.
+	switch selectorExpr.Sel.Name {
+	case "Sprintf", "Nprintf":
+		// The first argument is the config template and the rest are values
+		// interpolated into it.
+		if len(configCallExpr.Args) == 0 {
+			return "", fmt.Errorf("failed to find a config template in call to %s.%s", selectorExpr.X, selectorExpr.Sel.Name)
+		}
+		return readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
+	case "Sprint":
+		// Every argument is part of the config. This is used to join a shared
+		// setup config to the config under test.
+		var configStr strings.Builder
+		for _, arg := range configCallExpr.Args {
+			argConfigStr, err := readConfigFuncResult(arg, funcDecls, varDecls)
+			if err != nil {
+				return "", err
+			}
+			configStr.WriteString(argConfigStr)
+		}
+		return configStr.String(), nil
+	}
+	return "", fmt.Errorf("failed to read config from call to %s.%s, which is not a config formatting function", selectorExpr.X, selectorExpr.Sel.Name)
 }
 
 func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
