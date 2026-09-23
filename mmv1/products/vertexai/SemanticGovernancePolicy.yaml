@@ -159,6 +159,7 @@ properties:
     type: Array
     description: |
       The McpTools that are affected by this policy.
+    max_size: 1
     item_type:
       type: NestedObject
       properties:
@@ -170,9 +171,12 @@ properties:
           required: true
         - name: 'tools'
           type: Array
+          required: true
+          min_size: 1
+          is_set: true
           description: |
             The resource names of the McpTools used by the Agent that is affected by this policy.
-            If not specified, the policy applies to all McpTools in the McpServer.
+            At least one tool must be listed.
           item_type:
             type: String
   - name: 'agentIdentity'
