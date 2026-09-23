@@ -22,9 +22,9 @@ The solution we've implemented includes:
     * Renames the previous day's `nightly-test` branch to `UTC-nightly-test-YYYY-MM-DD`, where the date corresponds to when the base commit was made in UTC.
     * Creates a new `nightly-test` branch using the latest commit on the `main` branch
     * Sweeps up old `UTC-nightly-test-YYYY-MM-DD` branches [over 3 days old](https://github.com/hashicorp/terraform-provider-google/blob/5bce89216324fcf9165ef5fc8d1634e55465282b/.github/workflows/teamcity-nightly-workflow.yaml#L83)
-* The nightly cron at **4am UTC** triggers each provider's **All Nightly Tests** composite on `refs/heads/nightly-test`. Package builds are registered snapshot dependencies, not independently cron-triggered builds.
+* The nightly cron at **4am UTC** triggers the root **All Providers Nightly Tests** composite on `refs/heads/nightly-test`. It snapshot-depends directly on all GA and Beta package builds and both provider-level **All Nightly Tests** composites, so both providers' packages enter the queue together. Neither the provider composites nor the package builds have independent cron triggers.
 * Each Service Sweeper uses a finish-build trigger watching its composite on `refs/heads/nightly-test`, without requiring success. It has no snapshot dependencies, so manually running it does not start the test chain.
-* Global project and folder sweepers use finish-build triggers watching the GA Service Sweeper on `refs/heads/nightly-test`, also without snapshot dependencies. See [sweeper orchestration](./PERFORMING_TASKS_IN_TEAMCITY.md#sweepers) for the trigger and locking behavior.
+* The **Nightly Sweeper Gate** starts after the GA Service Sweeper and snapshot-depends on the Beta Service Sweeper. Global project and folder sweepers use unfiltered finish-build triggers watching this branchless gate, without snapshot dependencies of their own. Their dedicated VCS root defaults to `refs/heads/nightly-test`. See [sweeper orchestration](./PERFORMING_TASKS_IN_TEAMCITY.md#sweepers) for the trigger and locking behavior.
 
 <p align="center">
 <img src="./docs/images/clock-timings-of-branch-making-and-usage.png">

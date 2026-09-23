@@ -7,18 +7,32 @@
 
 package projects
 
+import AllProvidersNightlyTestsName
+import NightlyTestsProjectId
+import ProviderNameBeta
+import ProviderNameGa
 import SharedResourceNameBeta
 import SharedResourceNameGa
 import SharedResourceNameVcr
 import builds.AllContextParameters
+import builds.NightlyTriggerConfiguration
+import builds.addTrigger
 import builds.readOnlySettings
 import generated.PackagesListBeta
 import generated.PackagesListGa
 import generated.ServicesListBeta
 import generated.ServicesListGa
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.AbsoluteId
+import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
+import jetbrains.buildServer.configs.kotlin.DslContext
+import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.sharedResource
 import projects.feature_branches.featureBranchResourceIdentitySubProject
+import projects.reused.getAllPackageInProviderVersion
+import replaceCharsId
+import vcs_roots.HashiCorpVCSRootGaNightly
 
 // googleCloudRootProject returns a root project that contains a subprojects for the GA and Beta version of the
 // Google provider. There are also resources to help manage the test projects used for acceptance tests.
@@ -30,7 +44,9 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
 
         // Registering the VCS roots used by subprojects
         vcsRoot(vcs_roots.HashiCorpVCSRootGa)
+        vcsRoot(vcs_roots.HashiCorpVCSRootGaNightly)
         vcsRoot(vcs_roots.HashiCorpVCSRootBeta)
+        vcsRoot(vcs_roots.HashiCorpVCSRootBetaNightly)
         vcsRoot(vcs_roots.ModularMagicianVCSRootGa)
         vcsRoot(vcs_roots.ModularMagicianVCSRootBeta)
 
@@ -63,6 +79,39 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
         subProject(googleSubProjectBeta(allConfig))
         subProject(globalSweepersSubProject(allConfig))
         subProject(featureBranchResourceIdentitySubProject(allConfig))
+
+        buildType(BuildType {
+            id(replaceCharsId("ALL_PROVIDERS_NIGHTLY_TESTS"))
+            name = AllProvidersNightlyTestsName
+            type = BuildTypeSettings.Type.COMPOSITE
+            vcs {
+                root(HashiCorpVCSRootGaNightly)
+            }
+            dependencies {
+                listOf(
+                    "GOOGLE" to ProviderNameGa,
+                    "GOOGLE_BETA" to ProviderNameBeta
+                ).forEach { (providerProject, providerName) ->
+                    // Direct package dependencies let GA and Beta builds enter the queue together.
+                    getAllPackageInProviderVersion(providerName).keys.forEach { packageName ->
+                        val packageBuildId = replaceCharsId(
+                            "${providerProject}_${NightlyTestsProjectId}_${providerName}_PACKAGE_${packageName}"
+                        )
+                        snapshot(AbsoluteId("${DslContext.projectId}_$packageBuildId")) {
+                            onDependencyFailure = FailureAction.ADD_PROBLEM
+                            onDependencyCancel = FailureAction.ADD_PROBLEM
+                        }
+                    }
+                    val compositeId = replaceCharsId("${providerProject}_${NightlyTestsProjectId}_all_tests")
+                    snapshot(AbsoluteId("${DslContext.projectId}_$compositeId")) {
+                        onDependencyFailure = FailureAction.ADD_PROBLEM
+                        onDependencyCancel = FailureAction.ADD_PROBLEM
+                    }
+                }
+            }
+        }.also {
+            it.addTrigger(NightlyTriggerConfiguration())
+        })
 
         // Feature branch-testing projects - these will be added and removed as needed
 

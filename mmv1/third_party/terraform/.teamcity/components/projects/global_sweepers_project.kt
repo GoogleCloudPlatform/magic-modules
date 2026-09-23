@@ -16,11 +16,15 @@ import SharedResourceNameGa
 import SharedResourceNameVcr
 import builds.*
 import generated.SweepersListGa
+import jetbrains.buildServer.configs.kotlin.AbsoluteId
+import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
 import jetbrains.buildServer.configs.kotlin.DslContext
+import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import replaceCharsId
-import vcs_roots.HashiCorpVCSRootGa
+import vcs_roots.HashiCorpVCSRootGaNightly
 
 // globalSweepersSubProject returns a subproject that contains sweepers for global resources (projects, folders)
 // Sweeping projects is an edge case because it doesn't respect boundaries between different testing projects GA/Beta/PR
@@ -34,21 +38,43 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     // List of ALL shared resources; avoid clashing with any other running build
     val sharedResources: List<String> = listOf(SharedResourceNameGa, SharedResourceNameBeta, SharedResourceNameVcr)
 
-    // Match the GA service sweeper ID created by googleSubProjectGa() and nightlyTests().
+    // Match the service sweeper IDs created by the provider subprojects and nightlyTests().
     val gaProjectId = replaceCharsId("GOOGLE")
+    val betaProjectId = replaceCharsId("GOOGLE_BETA")
     val gaServiceSweeperId = "${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_${ServiceSweeperName}")}"
+    val betaServiceSweeperId = "${DslContext.projectId}_${replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_${ServiceSweeperName}")}"
+
+    // GA completion triggers the gate; depending on GA as well would queue a duplicate sweeper.
+    // Manual global sweeper runs remain independent of this gate.
+    val nightlySweeperGate = BuildType {
+        id(replaceCharsId("${sweeperId}_NIGHTLY_SWEEPER_GATE"))
+        name = "Nightly Sweeper Gate"
+        type = BuildTypeSettings.Type.COMPOSITE
+        triggers {
+            finishBuildTrigger {
+                buildType = gaServiceSweeperId
+                branchFilter = "+:$DefaultBranchName"
+                successfulOnly = false
+            }
+        }
+        dependencies {
+            snapshot(AbsoluteId(betaServiceSweeperId)) {
+                onDependencyFailure = FailureAction.IGNORE
+                onDependencyCancel = FailureAction.IGNORE
+            }
+        }
+    }
 
     // Create build config for sweeping project resources
-    // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
-    val projectSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
+    // Default to the nightly branch even for manual runs and branchless gate triggers.
+    val projectSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Project Sweeper", "GoogleProject", SweepersListGa, sweeperId, HashiCorpVCSRootGaNightly, sharedResources, gaConfig)
     // Create build config for sweeping folder resources
-    val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGa, sharedResources, gaConfig)
+    val folderSweeperConfig = BuildConfigurationForGlobalSweeper("N/A", "Folder Sweeper", "GoogleFolder", SweepersListGa, sweeperId, HashiCorpVCSRootGaNightly, sharedResources, gaConfig)
     val sweepers = listOf(projectSweeperConfig, folderSweeperConfig)
     sweepers.forEach { sweeper ->
         sweeper.triggers {
             finishBuildTrigger {
-                buildType = gaServiceSweeperId
-                branchFilter = "+:$DefaultBranchName"
+                buildType = nightlySweeperGate.id!!.value
                 successfulOnly = false
             }
         }
@@ -60,6 +86,7 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
         description = "Subproject containing build configurations for sweeping global resources like projects and folders"
 
         // Register build configs in the project
+        buildType(nightlySweeperGate)
         sweepers.forEach { buildType(it) }
 
         params {

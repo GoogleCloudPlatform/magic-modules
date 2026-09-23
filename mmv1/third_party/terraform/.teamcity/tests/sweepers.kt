@@ -16,7 +16,10 @@ import SharedResourceNameBeta
 import SharedResourceNameGa
 import SharedResourceNameVcr
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
+import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.SharedResources
+import jetbrains.buildServer.configs.kotlin.triggers.FinishBuildTrigger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -30,7 +33,9 @@ class SweeperTests {
         // Find Global sweepers project
         val globalSweepersProject = getSubProject(root, globalSweepersProjectName)
 
-        globalSweepersProject.buildTypes.forEach{bt ->
+        // The composite gate has no sweeper steps or environment parameters.
+        listOf("Project Sweeper", "Folder Sweeper").forEach { name ->
+            val bt = getBuildFromProject(globalSweepersProject, name)
             val skipProjectSweeper = bt.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
             assertTrue("env.SKIP_PROJECT_SWEEPER should be set to an empty value in the ${globalSweepersProject.name} project. Value = `${skipProjectSweeper}` ", skipProjectSweeper == "")
 
@@ -143,9 +148,18 @@ class SweeperTests {
             assertFinishTrigger(sweeperGa, gaComposite, DefaultBranchName)
 
             val globalSweepers = getSubProject(root, globalSweepersProjectName)
+            val gate = getBuildFromProject(globalSweepers, "Nightly Sweeper Gate")
+            assertEquals(BuildTypeSettings.Type.COMPOSITE, gate.type)
+            assertTrue("Gate should not execute sweeper steps", gate.steps.items.isEmpty())
+            assertTrue("Gate should not hold locks needed by service sweepers", gate.features.items.filterIsInstance<SharedResources>().isEmpty())
+            val betaNightly = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
+            val sweeperBeta = getBuildFromProject(betaNightly, ServiceSweeperName)
+            assertFinishTrigger(sweeperBeta, getBuildFromProject(betaNightly, AllNightlyTestsName), DefaultBranchName)
+            assertFinishTrigger(gate, sweeperGa, DefaultBranchName)
+            assertSnapshotDependencies(gate, listOf(sweeperBeta), FailureAction.IGNORE)
             listOf("Project Sweeper", "Folder Sweeper").forEach { name ->
                 val sweeper = getBuildFromProject(globalSweepers, name)
-                assertFinishTrigger(sweeper, sweeperGa, DefaultBranchName)
+                assertFinishTriggerWithoutBranchFilter(sweeper, gate)
                 assertTrue("Global sweeper should not have snapshot dependencies", sweeper.dependencies.items.isEmpty())
                 assertSharedResourceLocks(sweeper, SharedResources {
                     lockAllValues(SharedResourceNameGa)
@@ -153,6 +167,17 @@ class SweeperTests {
                     lockAllValues(SharedResourceNameVcr)
                 })
             }
+
         }
+    }
+
+    private fun assertFinishTriggerWithoutBranchFilter(build: BuildType, source: BuildType) {
+        assertEquals("${build.name} should have exactly one trigger", 1, build.triggers.items.size)
+        val trigger = build.triggers.items.single()
+        assertTrue("${build.name} should use a finish-build trigger", trigger is FinishBuildTrigger)
+        trigger as FinishBuildTrigger
+        assertEquals("${build.name} should watch the source build's resolved ID", source.id!!.value, trigger.buildType)
+        assertTrue("${build.name} should not filter the composite gate branch", trigger.branchFilter.isNullOrEmpty())
+        assertEquals("${build.name} should not require a successful source build", false, trigger.successfulOnly)
     }
 }

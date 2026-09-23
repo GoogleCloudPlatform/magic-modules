@@ -69,7 +69,9 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
             }
         }
     }
-    compositeConfig.addTrigger(cron)
+    if (cron.nightlyTestsEnabled) {
+        compositeConfig.addTrigger(cron)
+    }
 
     // Create build config for sweeping the nightly test project
     var sweepersList: Map<String,Map<String,String>>
