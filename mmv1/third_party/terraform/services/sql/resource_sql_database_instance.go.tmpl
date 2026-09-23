@@ -2880,6 +2880,16 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, userAgent); err != nil {
+			_ = resourceSqlDatabaseInstanceRead(d, meta)
+			return err
+		}
+		return resourceSqlDatabaseInstanceRead(d, meta)
+	}
+	{{- end }}
+
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 
@@ -3337,14 +3347,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
            return err
          }
       }
-
-	{{- if ne $.TargetVersionName "ga" }}
-	if d.HasChange("blue_green_deployment") {
-		if err := handleBlueGreenDeploymentUpdate(d, config, project, userAgent); err != nil {
-			return err
-		}
-	}
-	{{- end }}
 
       return resourceSqlDatabaseInstanceRead(d, meta)
 }
@@ -4387,6 +4389,25 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 				oldDbVer, newDbVer, oldName,
 			)
 		}
+
+		oldEnv, _ := oldMap["active_environment"].(string)
+		newEnv, _ := newMap["active_environment"].(string)
+		if oldEnv == "TARGET" && newEnv == "SOURCE" {
+			return fmt.Errorf(
+				"cannot change active_environment from %q back to %q on Blue-Green Deployment %q: switchover cannot be reversed",
+				oldEnv, newEnv, oldName,
+			)
+		}
+
+		if oldEnv == "SOURCE" && newEnv == "TARGET" && newDbVer != "" {
+			rootDbVer, _ := d.Get("database_version").(string)
+			if rootDbVer != newDbVer {
+				return fmt.Errorf(
+					"when switching over Blue-Green Deployment %q (active_environment = \"TARGET\"), database_version (%q) must be updated to match target_database_version (%q)",
+					oldName, rootDbVer, newDbVer,
+				)
+			}
+		}
 	}
 
 	return nil
@@ -4537,6 +4558,38 @@ func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_t
 				newName, oldName, instanceName,
 			)
 		}
+
+		oldEnv, _ := oldMap["active_environment"].(string)
+		newEnv, _ := newMap["active_environment"].(string)
+		if oldEnv == "SOURCE" && newEnv == "TARGET" {
+			return switchoverBlueGreenDeployment(d, config, project, instanceName, region, newName, userAgent)
+		}
+	}
+
+	return nil
+}
+
+func switchoverBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, userAgent string) error {
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Switchover(bgdName, &sqladmin.SwitchoverBlueGreenDeploymentRequest{}).Do()
+			return rerr
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error switching over Blue-Green Deployment %q on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	err = SqlAdminOperationWaitTime(
+		config, op, project, "Switching Over Blue-Green Deployment", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return fmt.Errorf("Error waiting for Blue-Green Deployment %q switchover on instance %q: %s", deploymentName, instanceName, err)
 	}
 
 	return nil
