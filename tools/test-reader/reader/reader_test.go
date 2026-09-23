@@ -280,6 +280,40 @@ func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
 	}
 }
 
+func TestReadFormattingCallTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/formatting_call_test.go"})
+	if err != nil {
+		t.Fatalf("error reading formatting call test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	// A config is read the same way whether the formatting call is written
+	// inline in the step or wrapped in a config func, and whether the template
+	// is a literal or a shared base config concatenated onto one. A string
+	// passed to a config func is a value to interpolate, not a config.
+	if expectedSteps := []Step{
+		{
+			ResourceBlock: {
+				"formatting_call_inline": {"inline": {"field_two": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_base":   {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_concat": {"concat": {"field_three": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
+			},
+		},
+	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
+		t.Errorf("found unexpected steps: %#v, expected %#v", tests[0].Steps, expectedSteps)
+	}
+}
+
 func TestFlattenBlock(t *testing.T) {
 	for _, tc := range []struct {
 		name        string

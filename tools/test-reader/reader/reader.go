@@ -273,13 +273,24 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
-// Read the call expression in the public test function that returns the config.
+// Read a call expression that produces a config and return the config string.
+// The call is either to a config func declared in the same package, or to a
+// formatting function such as fmt.Sprintf or acctest.Nprintf whose first
+// argument is the config template.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
 			return readConfigFunc(configFunc, funcDecls, varDecls)
 		}
 		return "", fmt.Errorf("failed to find function declaration %s", ident.Name)
+	}
+	// Not a function declared in this package, so it can't be followed. Read
+	// the first argument as the config template instead. Dispatching on the
+	// callee rather than on the shape of the arguments matters: a config func
+	// can take a string as its first argument, and that string is a value to
+	// interpolate, not a config.
+	if len(configCallExpr.Args) > 0 {
+		return readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
 	}
 	return "", fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
 }
@@ -300,8 +311,15 @@ func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl
 func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
 		return strconv.Unquote(basicLit.Value)
+	} else if ident, ok := result.(*ast.Ident); ok {
+		// A config declared as a package-level string, often a base config
+		// shared by several config funcs.
+		if configVar, ok := varDecls[ident.Name]; ok {
+			return strconv.Unquote(configVar.Value)
+		}
+		return "", fmt.Errorf("failed to find variable declaration %s", ident.Name)
 	} else if callExpr, ok := result.(*ast.CallExpr); ok {
-		return readConfigFuncCallExpr(callExpr, funcDecls, varDecls)
+		return readConfigCallExpr(callExpr, funcDecls, varDecls)
 	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
 		xConfigStr, err := readConfigFuncResult(binaryExpr.X, funcDecls, varDecls)
 		if err != nil {
@@ -314,21 +332,6 @@ func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, v
 		return xConfigStr + yConfigStr, nil
 	}
 	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
-}
-
-// Read the call expression in the config function that returns the config string.
-// The call expression can contain a nested call expression.
-// Return the config string.
-func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
-	if len(configFuncCallExpr.Args) > 0 {
-		if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-			return strconv.Unquote(basicLit.Value)
-		} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
-			return readConfigFuncCallExpr(nestedCallExpr, funcDecls, varDecls)
-		}
-	}
-	// Config string not readable from args, attempt to read call expression as a helper function.
-	return readConfigCallExpr(configFuncCallExpr, funcDecls, varDecls)
 }
 
 var subPattern = regexp.MustCompile("%({[^{}]*}|[vTtbcspqxXUeEfFgGdo])")
