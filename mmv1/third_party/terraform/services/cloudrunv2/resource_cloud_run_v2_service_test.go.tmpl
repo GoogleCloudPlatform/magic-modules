@@ -2370,3 +2370,43 @@ resource "google_cloud_run_v2_service" "default" {
 
 
 
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(context),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`expected template\.0\.containers\.0\.env\.\d+\.name to not be any of \[PORT\]`),
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name                = "tf-test-cloudrun-srv%{random_suffix}"
+  location            = "us-central1"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      env {
+        name  = "PORT"
+        value = "8080"
+      }
+    }
+  }
+}
+`, context)
+}
