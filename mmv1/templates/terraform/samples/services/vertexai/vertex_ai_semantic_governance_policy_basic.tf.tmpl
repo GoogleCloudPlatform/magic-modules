@@ -27,4 +27,6 @@ resource "google_vertex_ai_semantic_governance_policy" "{{$.PrimaryResourceId}}"
   region                        = "us-central1"
   natural_language_constraint   = "Do not access internal developer endpoints"
   agent                         = data.google_agent_registry_agent.agent.id
+
+  depends_on = [google_vertex_ai_semantic_governance_policy_engine.sgpe]
 }
