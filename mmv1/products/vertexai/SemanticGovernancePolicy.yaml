@@ -15,7 +15,9 @@
 name: 'SemanticGovernancePolicy'
 description: |
   A Semantic Governance Policy governs an AI agent's actions and tool execution
-  using natural language constraints.
+  using natural language constraints. A policy requires an active
+  SemanticGovernancePolicyEngine (`google_vertex_ai_semantic_governance_policy_engine`)
+  in the same project and region.
 references:
   guides:
     'Semantic governance overview': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview'
@@ -164,6 +166,7 @@ properties:
           type: String
           description: |
             The resource name of the McpServer in Agent Registry that is affected by this policy.
+            Format: `projects/{project}/locations/{location}/mcpServers/{mcpServer}`
           required: true
         - name: 'tools'
           type: Array
@@ -176,6 +179,8 @@ properties:
     type: String
     description: |
       Represents the principal of the agent, used by the Policy Decision Point (PDP) for governance checks.
+      For more information, see https://docs.cloud.google.com/agent-builder/agent-engine/agent-identity.
+      Format: `principal://TRUST_DOMAIN/NAMESPACE/AGENT_NAME`
     output: true
   - name: 'agentResponseCustomization'
     type: NestedObject
@@ -185,4 +190,7 @@ properties:
       - name: 'denialMessage'
         type: String
         description: |
-          Custom message shown to the end user when the policy check results in a denial.
+          Custom message shown to the end user when the policy check results in a denial. Use this
+          to explain the rationale to the user. Max 1000 characters.
+        validation:
+          function: validation.StringLenBetween(0, 1000)
