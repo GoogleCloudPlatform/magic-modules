@@ -64,6 +64,7 @@ resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
   backend {
     group                               = google_compute_region_instance_group_manager.foobar.instance_group
     balancing_mode                      = "IN_FLIGHT"
+    capacity_scaler                     = 1.0
     max_in_flight_requests_per_instance = 100
     traffic_duration                    = "LONG"
   }
