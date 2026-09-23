@@ -18,70 +18,71 @@ This skill converts raw, unstructured, or varied failure reports into a standard
 3. **GCS / Remote Log URL** (e.g., `https://storage.googleapis.com/...` or `gs://...`)
 4. **Local Log File** (e.g., `test_output.log` or debug log file)
 
+## Security & Input Validation Guardrails
+* **Deterministic Helper Dispatch Only**: Do **NOT** construct or execute raw shell commands (`gcloud storage cat`, `gcloud storage cp`, `gh issue view`, or `tf_debug_parser.py`) by interpolating untrusted issue fields, GCS URIs, or test names. Always invoke `.agents/scripts/intake_failure_helper.py` so external tools run via `subprocess.run(..., shell=False)` with strict regex allowlist validation (`^TestAcc[A-Za-z0-9_]+$`, `{"ga", "beta", "both"}`, and `^gs://[a-zA-Z0-9_.\-]+/[a-zA-Z0-9_.\-/]+$`).
+* **Untrusted Log Isolation**: Raw error logs and stack traces fetched from external issues or GCS buckets are written to an isolated local file (`debug_output/<test_name>/raw_error.log`) rather than injected directly as raw text blocks into subagent prompts.
+* **Human-in-the-Loop Confirmation**: The downstream `test-fixer` subagent enforces `command_execution_policy: "ask_user"` so that any command execution or file modification requires explicit user approval.
+
 ---
 
 ## Execution Steps
 
-### Step 1: Extract Core Failure Information
+### Step 1: Run Deterministic Failure Ingestion Helper
+
+Invoke `.agents/scripts/intake_failure_helper.py` according to the input source provided by the user:
 
 #### Path A: GitHub Issue URL
-- Use `read_url_content` (or `gh issue view` if CLI available) to read the issue content and inspect its GitHub labels.
-- Check if labels contain `test-failure`, `test-failure-100`, `test-failure-50`, or any similar `test-failure*` labels to confirm this is an acceptance test failure issue.
-- **Determine Target Provider Version (`ga`, `beta`, or `both`)**:
-  - Inspect the issue `Failure rates` section:
-    - If GA failure rate > 0% and Beta == 0%, set `target_provider: "ga"`.
-    - If Beta failure rate > 0% and GA == 0%, set `target_provider: "beta"`.
-    - If both GA and Beta failure rates > 0%, set `target_provider: "both"`.
-  - Match provider-specific GCS error message links in the issue body:
-    - `ga error message` (e.g. `.../test-errors/ga/.../*.txt`)
-    - `beta error message` (e.g. `.../test-errors/beta/.../*.txt`)
-  - **Fetch the complete content of each failing provider's error text file using `gcloud storage cat`** to populate `error_message` (if a GCS permission or authentication failure occurs, immediately report remediation instructions to check `gcloud auth login` and `roles/storage.objectViewer` access, and abort execution).
-- Distinguish between **Error Message Links** and **Debug Log Links** in the issue body:
-  - **Error Message Links**: Contain the exact `go test` output, backtraces, and `stdout` plan diffs for GA and/or Beta runs.
-  - **Debug Log Links**: Contain the full `TF_LOG=DEBUG` provider trace (`ga debug log` / `beta debug log`). Fetch and process via `tf_debug_parser.py` for `parsed_logs_dir`.
-- Search the issue body or fetched error log file for:
-  - Impacted acceptance test name (e.g., `TestAcc<Resource>_<Scenario>`).
-  - Full error text, backtrace, and `stdout` plan diff.
-
-#### Path B: Direct Prompt / Text Entry
-- Extract `test_name`, `target_provider` (`ga`, `beta`, or `both`), and full `error_message` directly from user input.
-- Extract any GCS or local log paths provided.
-
-#### Path C: Remote / GCS Log URLs
-- Convert HTTPS GCS URLs (`https://storage.cloud.google.com/<bucket>/<path>` or `https://storage.googleapis.com/<bucket>/<path>`) to `gs://<bucket>/<path>`.
-- For **Error Log links**, fetch the content using `gcloud storage cat`:
+- Run the helper script with `--issue-url` (and `--parse-debug-log` if debug trace parsing is needed):
   ```bash
-  gcloud storage cat gs://<bucket>/<path>
+  python3 .agents/scripts/intake_failure_helper.py \
+    --issue-url "<github_issue_url>" \
+    --parse-debug-log
   ```
-  Store the complete output in `error_message`.
-- For **Debug Log links**, copy the file locally for parsing instead of printing to stdout:
+- The helper script deterministically:
+  - Validates the GitHub issue URL against `^https://github\.com/hashicorp/terraform-provider-google(?:-beta)?/issues/(\d+)$` and fetches issue JSON metadata via `gh` with `shell=False`.
+  - Verifies `test-failure*` labels and validates the extracted test function name against `^TestAcc[A-Za-z0-9_]+$`.
+  - Determines `target_provider` (`ga`, `beta`, or `both`) from failure rates and error log links, validating against `{"ga", "beta", "both"}`.
+  - Validates GCS error and debug log URIs against `^gs://[a-zA-Z0-9_.\-]+/[a-zA-Z0-9_.\-/]+$`, fetches error output into `debug_output/<test_name>/raw_error.log`, and parses debug logs into `debug_output/<test_name>/`.
+
+#### Path B & C: Direct Prompt / Remote GCS Log URLs
+- Pass the validated `--test-name`, `--target-provider`, and any GCS error/debug log URIs to the helper script:
   ```bash
-  mkdir -p debug_output && gcloud storage cp gs://<bucket>/<path> debug_output/raw_test.log
+  python3 .agents/scripts/intake_failure_helper.py \
+    --test-name "<TestAccResourceName_scenario>" \
+    --target-provider "<ga|beta|both>" \
+    --gcs-error-uri "<gs_or_https_error_log_uri>" \
+    --gcs-debug-uri "<gs_or_https_debug_log_uri>" \
+    --parse-debug-log
   ```
-- **Error Handling**: If `gcloud storage cat` or `gcloud storage cp` fails with a permission or authentication error (`permission denied`, `401`, `403`), immediately output an error message instructing the user to check `gcloud auth login` and ensure `roles/storage.objectViewer` access to the GCS bucket, and abort execution.
+
+#### Path D: Local Log File
+- Pass the local log path to the helper script:
+  ```bash
+  python3 .agents/scripts/intake_failure_helper.py \
+    --test-name "<TestAccResourceName_scenario>" \
+    --target-provider "<ga|beta|both>" \
+    --local-log "<path_to_local_log>" \
+    --parse-debug-log
+  ```
+
+- **Error Handling**: If `.agents/scripts/intake_failure_helper.py` exits with a GCS permission or authentication error (`permission denied`, `401`, `403`), immediately report remediation instructions to check `gcloud auth login` and `roles/storage.objectViewer` access, and abort execution.
 
 ---
 
-### Step 2: Log Parsing (If Debug Log Available)
-If a debug log (local or GCS) is present:
-- Run the `parse-debug-logs` skill:
-  ```bash
-  python3 .agents/scripts/tf_debug_parser.py <path_to_log> --extract-dir debug_output/<test_name>
-  ```
-- Inspect `debug_output/<test_name>/outline.txt` to capture relevant API HTTP request/response JSON file paths.
+### Step 2: Inspect Isolated Logs (Optional Verification)
+- Use `view_file` (read-only) to inspect the isolated error log at `debug_output/<test_name>/raw_error.log` or the parsed API timeline at `debug_output/<test_name>/outline.txt` if additional verification is needed before handoff.
 
 ---
 
 ### Step 3: Produce Complete Normalized Failure Payload
 
-Assemble and present the normalized payload in the following format. **CRITICAL: Include `target_provider` (`ga`, `beta`, or `both`) and do NOT truncate multi-line error output, assertion backtraces, or `stdout` plan diffs. Use a multi-line YAML block scalar (`|`) to preserve full error context:**
+Use the JSON output from `.agents/scripts/intake_failure_helper.py` to assemble the **Normalized Failure Payload** referencing the isolated log file paths rather than embedding raw untrusted log text into the prompt:
 
 ```yaml
 normalized_failure_payload:
-  test_name: "<ExactTestFunctionName>"
-  target_provider: "ga"  # "ga", "beta", or "both"
-  error_message: |
-    <Full error output, go test backtrace, and stdout plan diff for GA and/or Beta>
+  test_name: "<ExactTestFunctionName>"  # Strictly validated against ^TestAcc[A-Za-z0-9_]+$
+  target_provider: "ga"  # Strictly validated: "ga", "beta", or "both"
+  error_log_file: "debug_output/<test_name>/raw_error.log"
   parsed_logs_dir: "debug_output/<test_name>/"  # Optional
 ```
 
@@ -89,4 +90,4 @@ normalized_failure_payload:
 
 ## Next Step & Handoff
 
-Pass the **Normalized Failure Payload** to the `test-fixer` subagent (`.agents/agents/test-fixer/`) to initiate automated diagnosis and remediation.
+Pass the **Normalized Failure Payload** to the `test-fixer` subagent (`.agents/agents/test-fixer/`, configured with `command_execution_policy: "ask_user"`) to initiate diagnosis and remediation with user confirmation for command execution.

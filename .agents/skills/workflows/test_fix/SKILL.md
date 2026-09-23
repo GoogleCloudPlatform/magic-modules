@@ -23,16 +23,14 @@ When diagnosing and fixing test failures, consult these core documentation guide
 ## Execution Steps
 
 ### 1. Failure Information Intake
-* Execute the `intake-test-failure` skill (`.agents/skills/utils/intake-test-failure/SKILL.md`) on the input provided by the user (GitHub issue URL, direct prompt text, GCS log link, or local log file).
-* Check for GitHub issue labels such as `test-failure`, `test-failure-100`, `test-failure-50`, or any `test-failure-*` label (e.g., `test-failure-0`, `test-failure-10`) to confirm test failure classification.
-* Inspect issue failure rates to determine `target_provider` (`ga`, `beta`, or `both`).
+* Execute the `intake-test-failure` skill (`.agents/skills/utils/intake-test-failure/SKILL.md`) via `.agents/scripts/intake_failure_helper.py` on the input provided by the user (GitHub issue URL, direct prompt text, GCS log link, or local log file).
+* Verify that `test_name` matches `^TestAcc[A-Za-z0-9_]+$`, `target_provider` is in `{"ga", "beta", "both"}`, and raw error output is isolated in `debug_output/<test_name>/raw_error.log`.
 * Produce the **Normalized Failure Payload**:
   ```yaml
   normalized_failure_payload:
     test_name: "<ExactTestFunctionName>"
     target_provider: "ga" # "ga", "beta", or "both"
-    error_message: |
-      <Full error output, go test backtrace, and stdout plan diff for GA and/or Beta>
+    error_log_file: "debug_output/<test_name>/raw_error.log"
     parsed_logs_dir: "debug_output/<test_name>/" # (Optional)
   ```
 
@@ -46,8 +44,8 @@ Consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md` for full symp
 
 #### Path A: Automated Subagent (Mandatory Default)
 * **Action:** Invoke the `test-fixer` subagent (`.agents/agents/test-fixer/`) using the `invoke_subagent` tool.
-* **Prompt:** Pass the **Normalized Failure Payload** to `test-fixer`.
-* **Wait:** The subagent will classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, perform remediation (including automatically running `gcloud services enable` for shared CI projects or editing `magic-modules` test configs for test-created secondary projects), run `make provider VERSION=<ga|beta>` and `make build`, and execute target acceptance tests for `ga`, `beta`, or `both` to verify `PASS`.
+* **Prompt:** Pass the **Normalized Failure Payload** (`test_name`, `target_provider`, `error_log_file`, `parsed_logs_dir`) to `test-fixer`.
+* **Wait:** The subagent (operating with `command_execution_policy: "ask_user"`) will inspect `error_log_file`, classify the failure scenario, consult `.agents/knowledge/index.md` for relevant design rules, perform remediation (with user confirmation for command execution), run `make provider VERSION=<ga|beta>` and `make build`, and execute target acceptance tests for `ga`, `beta`, or `both` to verify `PASS`.
 * **Handoff:**
   - If `test-fixer` reports success, present the fix summary to the user.
   - If `test-fixer` reports unresolved issues, switch to **Path B (Interactive Debugging)** and consult `.agents/skills/utils/test-failure-decision-tree/SKILL.md`.
