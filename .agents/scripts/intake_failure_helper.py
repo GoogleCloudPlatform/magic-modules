@@ -27,7 +27,7 @@ HTTPS_GCS_REGEX = re.compile(
     r"^https://storage\.(?:googleapis|cloud\.google)\.com/([a-zA-Z0-9_.\-]+)/([a-zA-Z0-9_.\-/]+)$"
 )
 GITHUB_ISSUE_URL_REGEX = re.compile(
-    r"^https://github\.com/hashicorp/terraform-provider-google(?:-beta)?/issues/(\d+)$"
+    r"^https://github\.com/hashicorp/terraform-provider-google/issues/(\d+)$"
 )
 
 
