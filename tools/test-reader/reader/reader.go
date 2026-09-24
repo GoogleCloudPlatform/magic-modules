@@ -164,7 +164,7 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				// For now, only allow single assignment variables for serial test maps.
 				// e.g. testCases := map[string]func(t *testing.T) {...
 				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
-					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok && isSerialTestMap(rhsCompLit) {
 						vars[ident.Name] = rhsCompLit
 					}
 				}
@@ -185,7 +185,20 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 	return tests, nil
 }
 
-// Reads a composite literal which is either a slice or a map of serialized test functions.
+// Report whether a composite literal is a serial test map: a map from test
+// names to test functions, e.g. map[string]func(t *testing.T){...}. Ranging
+// over a map is not enough to identify one, since table-driven tests range
+// over a map of test cases too.
+func isSerialTestMap(compLit *ast.CompositeLit) bool {
+	mapType, ok := compLit.Type.(*ast.MapType)
+	if !ok {
+		return false
+	}
+	_, ok = mapType.Value.(*ast.FuncType)
+	return ok
+}
+
+// Reads a composite literal which is a map of serialized test functions.
 func readSerialTestCompLit(varCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, []error) {
 	var tests []*Test
 	var errs []error
