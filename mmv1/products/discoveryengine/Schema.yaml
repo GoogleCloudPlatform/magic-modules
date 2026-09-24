@@ -23,6 +23,7 @@ references:
   api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.schemas
 docs:
 base_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas
+generate_list_resource: true
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}

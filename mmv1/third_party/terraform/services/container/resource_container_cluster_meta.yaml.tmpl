@@ -24,6 +24,7 @@ fields:
   - api_field: 'addonsConfig.gcpFilestoreCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.gcsFuseCsiDriverConfig.enabled'
   - api_field: 'addonsConfig.gkeBackupAgentConfig.enabled'
+  - api_field: 'addonsConfig.highScaleCheckpointingConfig.enabled'
   - api_field: 'addonsConfig.horizontalPodAutoscaling.disabled'
   - api_field: 'addonsConfig.httpLoadBalancing.disabled'
   - api_field: 'addonsConfig.podSnapshotConfig.enabled'
@@ -345,7 +346,12 @@ fields:
   - field: 'node_config.guest_accelerator.type'
     api_field: 'nodeConfig.accelerators.acceleratorType'
   - api_field: 'nodeConfig.gvnic.enabled'
+{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'nodeConfig.hostMaintenancePolicy.maintenanceInterval'
+  - api_field: 'nodeConfig.hostMaintenancePolicy.opportunisticMaintenanceStrategy.maintenanceAvailabilityWindow'
+  - api_field: 'nodeConfig.hostMaintenancePolicy.opportunisticMaintenanceStrategy.minNodesPerPool'
+  - api_field: 'nodeConfig.hostMaintenancePolicy.opportunisticMaintenanceStrategy.nodeIdleTimeWindow'
+{{- end }}
   - api_field: 'nodeConfig.imageType'
   - api_field: 'nodeConfig.kubeletConfig.allowedUnsafeSysctls'
   - api_field: 'nodeConfig.kubeletConfig.containerLogMaxFiles'
@@ -490,6 +496,10 @@ fields:
     api_field: 'nodePools.networkConfig.acceleratorNetworkProfile'
   - field: 'node_pool.network_config.additional_node_network_configs.network'
     api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.network'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'node_pool.network_config.additional_node_network_configs.stack_type'
+    api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.stackType'
+{{- end }}
   - field: 'node_pool.network_config.additional_node_network_configs.subnetwork'
     api_field: 'nodePools.networkConfig.additionalNodeNetworkConfigs.subnetwork'
   - field: 'node_pool.network_config.additional_pod_network_configs.max_pods_per_node'
@@ -600,8 +610,16 @@ fields:
     api_field: 'nodePools.config.accelerators.acceleratorType'
   - field: 'node_pool.node_config.gvnic.enabled'
     api_field: 'nodePools.config.gvnic.enabled'
+{{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.node_config.host_maintenance_policy.maintenance_interval'
     api_field: 'nodePools.config.hostMaintenancePolicy.maintenanceInterval'
+  - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.maintenance_availability_window'
+    api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.maintenanceAvailabilityWindow'
+  - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.min_nodes_per_pool'
+    api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.minNodesPerPool'
+  - field: 'node_pool.node_config.host_maintenance_policy.opportunistic_maintenance_strategy.node_idle_time_window'
+    api_field: 'nodePools.config.hostMaintenancePolicy.opportunisticMaintenanceStrategy.nodeIdleTimeWindow'
+{{- end }}
   - field: 'node_pool.node_config.image_type'
     api_field: 'nodePools.config.imageType'
   - field: 'node_pool.node_config.kubelet_config.allowed_unsafe_sysctls'

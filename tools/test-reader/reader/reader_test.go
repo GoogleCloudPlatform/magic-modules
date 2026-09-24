@@ -29,11 +29,11 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 	if len(tests[0].Steps) != 2 {
 		t.Fatalf("unexpected number of test steps: %d, expected 2", len(tests[0].Steps))
 	}
-	if coveredResources, ok := tests[0].Steps[0]["covered_resource"]; !ok {
+	if coveredResources, ok := tests[0].Steps[0][ResourceBlock]["covered_resource"]; !ok {
 		t.Errorf("did not find covered_resource in %v", tests[0].Steps[0])
 	} else if coveredResource, ok := coveredResources["resource"]; !ok {
 		t.Errorf("did not find a covered resource in %v", coveredResources)
-	} else if expectedResource := (Resource{
+	} else if expectedResource := (Block{
 		"field_four.field_five.field_six": "true",
 		"field_one":                       "\"value-one\"",
 		"field_seven":                     "true",
@@ -53,11 +53,11 @@ func TestReadConfigVariableTestFile(t *testing.T) {
 	if len(tests[0].Steps) != 1 {
 		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
 	}
-	if configVariableResources, ok := tests[0].Steps[0]["config_variable"]; !ok {
+	if configVariableResources, ok := tests[0].Steps[0][ResourceBlock]["config_variable"]; !ok {
 		t.Errorf("did not find config_variable in %v", tests[0].Steps[0])
 	} else if configVariableResource, ok := configVariableResources["basic"]; !ok {
 		t.Errorf("did not find a resource in %v", configVariableResources)
-	} else if expectedResource := (Resource{"field_one": "\"value-one\""}); !reflect.DeepEqual(configVariableResource, expectedResource) {
+	} else if expectedResource := (Block{"field_one": "\"value-one\""}); !reflect.DeepEqual(configVariableResource, expectedResource) {
 		t.Errorf("found wrong fields in config variable config: %#v, expected %#v", configVariableResource, expectedResource)
 	}
 }
@@ -72,23 +72,27 @@ func TestReadMultipleResourcesTestFile(t *testing.T) {
 	}
 	if expectedSteps := []Step{
 		{
-			"resource_one": {
-				"instace_two":  {"field_one": "\"value-one\""},
-				"instance_one": {"field_one": "\"value-one\""},
-			},
-			"resource_two": {
-				"instace_one": {"field_one": "\"value-one\""},
-				"instace_two": {"field_one": "\"value-one\""},
+			ResourceBlock: {
+				"resource_one": {
+					"instace_two":  {"field_one": "\"value-one\""},
+					"instance_one": {"field_one": "\"value-one\""},
+				},
+				"resource_two": {
+					"instace_one": {"field_one": "\"value-one\""},
+					"instace_two": {"field_one": "\"value-one\""},
+				},
 			},
 		},
 		{
-			"resource_one": {
-				"instace_two":  {"field_one": "\"value-two\""},
-				"instance_one": {"field_one": "\"value-two\""},
-			},
-			"resource_two": {
-				"instace_one": {"field_one": "\"value-two\""},
-				"instace_two": {"field_one": "\"value-two\""},
+			ResourceBlock: {
+				"resource_one": {
+					"instace_two":  {"field_one": "\"value-two\""},
+					"instance_one": {"field_one": "\"value-two\""},
+				},
+				"resource_two": {
+					"instace_one": {"field_one": "\"value-two\""},
+					"instace_two": {"field_one": "\"value-two\""},
+				},
 			},
 		},
 	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
@@ -109,8 +113,10 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 			Name: "testAccSerialResource1",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {"field_one": "\"value-one\""},
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {"field_one": "\"value-one\""},
+						},
 					},
 				},
 			},
@@ -119,9 +125,11 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 			Name: "testAccSerialResource2",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {
-							"field_two.field_three": "\"value-two\"",
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {
+								"field_two.field_three": "\"value-two\"",
+							},
 						},
 					},
 				},
@@ -144,8 +152,10 @@ func TestReadCrossFileTests(t *testing.T) {
 			Name: "testAccCrossFile1",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {"field_one": "\"value-one\""},
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {"field_one": "\"value-one\""},
+						},
 					},
 				},
 			},
@@ -154,9 +164,11 @@ func TestReadCrossFileTests(t *testing.T) {
 			Name: "testAccCrossFile2",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {
-							"field_two.field_three": "\"value-two\"",
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {
+								"field_two.field_three": "\"value-two\"",
+							},
 						},
 					},
 				},
@@ -186,14 +198,16 @@ func TestReadHelperFunctionCall(t *testing.T) {
 		Name: "TestAccFunctionCallResource",
 		Steps: []Step{
 			{
-				"helped_resource": Resources{
-					"primary": Resource{
-						"field_one": "\"value-one\"",
+				ResourceBlock: TypeLabels{
+					"helped_resource": Blocks{
+						"primary": Block{
+							"field_one": "\"value-one\"",
+						},
 					},
-				},
-				"helper_resource": Resources{
-					"default": Resource{
-						"field_one": "\"value-one\"",
+					"helper_resource": Blocks{
+						"default": Block{
+							"field_one": "\"value-one\"",
+						},
 					},
 				},
 			},
@@ -204,45 +218,107 @@ func TestReadHelperFunctionCall(t *testing.T) {
 	}
 }
 
-func TestFlattenResource(t *testing.T) {
+func TestReadBlockTypesTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/block_types_test.go"})
+	if err != nil {
+		t.Fatalf("error reading block types test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	// Blocks with a type and a name label are read regardless of the block
+	// type, blocks with any other number of labels are ignored, and each block
+	// type gets its own bucket even when they all share a type label.
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"block_types_resource": {"resource": {"field_one": "var.var_one"}},
+		},
+		DataBlock: {
+			"block_types_resource": {"data": {"field_two": "\"value-two\""}},
+		},
+		EphemeralBlock: {
+			"block_types_resource": {"ephemeral": {"field_three": "\"value-three\""}},
+		},
+		ListBlock: {
+			"block_types_resource": {"list_query": {"provider": "google"}},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/whole_line_substitution_test.go"})
+	if err != nil {
+		t.Fatalf("error reading whole line substitution test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	// A substitution alone on its line is dropped, so neither the setup block
+	// it would have injected at the top level nor the field it would have
+	// injected inside a block body is recorded. Everything else still is.
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"whole_line_substitution": {
+				"resource": {
+					"field_one":              "\"value-one\"",
+					"field_three.field_five": "\"value-five\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestFlattenBlock(t *testing.T) {
 	for _, tc := range []struct {
 		name        string
-		unflattened Resource
-		flattened   Resource
+		unflattened Block
+		flattened   Block
 	}{
 		{
 			name:        "empty-resource",
-			unflattened: Resource{},
-			flattened:   Resource{},
+			unflattened: Block{},
+			flattened:   Block{},
 		},
 		{
 			name: "no-nested-fields",
-			unflattened: Resource{
+			unflattened: Block{
 				"a": "b",
 				"c": "d",
 			},
-			flattened: Resource{
+			flattened: Block{
 				"a": "b",
 				"c": "d",
 			},
 		},
 		{
 			name: "nested-fields",
-			unflattened: Resource{
-				"a": Resource{
-					"b": Resource{
+			unflattened: Block{
+				"a": Block{
+					"b": Block{
 						"c": "d",
 					},
 				},
 				"e": "f",
 			},
-			flattened: Resource{
+			flattened: Block{
 				"a.b.c": "d",
 				"e":     "f",
 			},
 		},
 	} {
-		if got := flattenResource(tc.unflattened, ""); !reflect.DeepEqual(got, tc.flattened) {
+		if got := flattenBlock(tc.unflattened, ""); !reflect.DeepEqual(got, tc.flattened) {
 			t.Errorf("unexpected result of flattening in test %s, expected %v, got %v", tc.name, tc.flattened, got)
 		}
 	}

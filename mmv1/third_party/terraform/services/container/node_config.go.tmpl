@@ -263,6 +263,19 @@ func schemaTaintConfig() *schema.Schema {
 	}
 }
 
+func containerPerformanceMonitoringUnitDiffSuppress(_ string, old, new string, d *schema.ResourceData) bool {
+	// DiffSuppressFunc runs during planning, before IsNewResource is marked during apply.
+	// An empty ID identifies a resource that does not exist in state yet.
+	if d == nil || d.Id() == "" {
+		return false
+	}
+
+	// Existing resources may have recorded an empty value after the suppressor from
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/17887 omitted an
+	// explicitly configured STANDARD value during creation.
+	return (old == "" && new == "STANDARD") || (old == "STANDARD" && new == "")
+}
+
 func schemaNodeConfig() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -1321,11 +1334,11 @@ func schemaNodeConfig() *schema.Schema {
 								Description: `Whether the node should have nested virtualization enabled.`,
 							},
 							"performance_monitoring_unit": {
-								Type: schema.TypeString,
-								Optional: true,
-								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
-								ValidateFunc: verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
-								Description: `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
+								Type:             schema.TypeString,
+								Optional:         true,
+								ValidateFunc:     verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
+								DiffSuppressFunc: containerPerformanceMonitoringUnitDiffSuppress,
+								Description:      `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed. For existing node pools with no PMU, setting STANDARD may not produce a diff; recreate the node pool to apply it.`,
 							},
 						},
 					},
@@ -1376,6 +1389,7 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+{{ if ne $.TargetVersionName `ga` -}}
 				"host_maintenance_policy": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -1388,12 +1402,42 @@ func schemaNodeConfig() *schema.Schema {
 								Type: schema.TypeString,
 								Required:     true,
 								ForceNew:     true,
-								Description:  `.`,
+								Description:  `Specifies the frequency of planned maintenance events. One of: "MAINTENANCE_INTERVAL_UNSPECIFIED", "AS_NEEDED", "PERIODIC".`,
 								ValidateFunc: validation.StringInSlice([]string{"MAINTENANCE_INTERVAL_UNSPECIFIED", "AS_NEEDED", "PERIODIC"}, false),
+							},
+							"opportunistic_maintenance_strategy": {
+								Type:        schema.TypeList,
+								Optional:    true,
+								ForceNew:    true,
+								MaxItems:    1,
+								Description: `Strategy that will trigger maintenance on behalf of the customer.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"node_idle_time_window": {
+											Type:        schema.TypeString,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The amount of time that a node can remain idle (no customer owned workloads running), before triggering maintenance.`,
+										},
+										"maintenance_availability_window": {
+											Type:        schema.TypeString,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The window of time that opportunistic maintenance can run. Example: A setting of 14 days implies that opportunistic maintenance can only be ran in the 2 weeks leading up to the scheduled maintenance date. Setting 28 days allows opportunistic maintenance to run at any time in the scheduled maintenance window (all PERIODIC maintenance is set 28 days in advance).`,
+										},
+										"min_nodes_per_pool": {
+											Type:        schema.TypeInt,
+											Required:    true,
+											ForceNew:    true,
+											Description: `The minimum nodes required to be available in a pool. Blocks maintenance if it would cause the number of running nodes to dip below this value.`,
+										},
+									},
+								},
 							},
 						},
 					},
 				},
+{{- end }}
 				"confidential_nodes": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -2943,8 +2987,36 @@ func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy
 	if maintenanceInterval, ok := cfg["maintenance_interval"]; ok {
 		mPolicy.MaintenanceInterval = maintenanceInterval.(string)
 	}
+	if v, ok := cfg["opportunistic_maintenance_strategy"]; ok {
+		mPolicy.OpportunisticMaintenanceStrategy = expandOpportunisticMaintenanceStrategy(v)
+	}
 
 	return mPolicy
+}
+
+func expandOpportunisticMaintenanceStrategy(v interface{}) *container.OpportunisticMaintenanceStrategy {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	strategy := &container.OpportunisticMaintenanceStrategy{
+		ForceSendFields: []string{"MinNodesPerPool"},
+	}
+	if nodeIdleTimeWindow, ok := cfg["node_idle_time_window"]; ok {
+		strategy.NodeIdleTimeWindow = nodeIdleTimeWindow.(string)
+	}
+	if maintenanceAvailabilityWindow, ok := cfg["maintenance_availability_window"]; ok {
+		strategy.MaintenanceAvailabilityWindow = maintenanceAvailabilityWindow.(string)
+	}
+	if minNodesPerPool, ok := cfg["min_nodes_per_pool"]; ok {
+		strategy.MinNodesPerPool = int64(minNodesPerPool.(int))
+	}
+
+	return strategy
 }
 {{- end }}
 
@@ -3906,7 +3978,21 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"maintenance_interval": c.MaintenanceInterval,
+			"maintenance_interval":               c.MaintenanceInterval,
+			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(c.OpportunisticMaintenanceStrategy),
+		})
+	}
+
+	return result
+}
+
+func flattenOpportunisticMaintenanceStrategy(c *container.OpportunisticMaintenanceStrategy) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"node_idle_time_window":           c.NodeIdleTimeWindow,
+			"maintenance_availability_window": c.MaintenanceAvailabilityWindow,
+			"min_nodes_per_pool":              c.MinNodesPerPool,
 		})
 	}
 

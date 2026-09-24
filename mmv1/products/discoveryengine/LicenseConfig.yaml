@@ -18,6 +18,7 @@ description: |
 references:
   api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.licenseConfigs
 base_url: projects/{{project}}/locations/{{location}}/licenseConfigs
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/licenseConfigs/{{license_config_id}}
 create_url: projects/{{project}}/locations/{{location}}/licenseConfigs?licenseConfigId={{license_config_id}}
 update_mask: true
@@ -131,3 +132,7 @@ properties:
     type: Boolean
     description: |
       Whether the license config is for free trial.
+  - name: lastUserUpdateTime
+    type: Time
+    description: |
+      Timestamp of the most recent user-initiated update.

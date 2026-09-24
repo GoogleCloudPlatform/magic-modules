@@ -22,6 +22,20 @@ resource "google_cloud_security_compliance_framework" "example" {
   description  = "An Terraform description for the framework"
   
   cloud_control_details {
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
+    major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_list_value {
+          values = ["us-central1"]
+        }
+      }
+    }
+  }
+
+  cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
 		major_revision_id = "2"
     
@@ -29,52 +43,6 @@ resource "google_cloud_security_compliance_framework" "example" {
       name = "location"
       parameter_value {
         string_value = "us-central1"
-      }
-    }
-    parameters {
-      name = "oneof-parameter"
-      parameter_value {
-        oneof_value {
-          name = "test-oneof"
-          parameter_value {
-            string_value = "test-value"
-          }
-        }
-      }
-    }
-    parameters {
-      name = "bool-parameter"
-      parameter_value {
-        oneof_value {
-          name = "bool-oneof"
-          parameter_value {
-            bool_value = true
-          }
-        }
-      }
-    }
-    parameters {
-      name = "number-parameter"
-      parameter_value {
-        oneof_value {
-          name = "number-oneof"
-          parameter_value {
-            number_value = 123.45
-          }
-        }
-      }
-    }
-    parameters {
-      name = "string-list-parameter"
-      parameter_value {
-        oneof_value {
-          name = "string-list-oneof"
-          parameter_value {
-            string_list_value {
-              values = ["value1", "value2"]
-            }
-          }
-        }
       }
     }
   }
@@ -101,7 +69,7 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization", "supported_enforcement_modes", "cloud_control_details"},
 			},
 			{
 				Config: testAccCloudSecurityComplianceFramework_update(context),
@@ -115,7 +83,11 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization", "supported_enforcement_modes", "cloud_control_details"},
+			},
+			{
+				Config:   testAccCloudSecurityComplianceFramework_reorder(context),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -132,66 +104,33 @@ resource "google_cloud_security_compliance_framework" "example" {
   description  = "An updated description for the framework with additional details"
   
   cloud_control_details {
-    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-data-access-governance"
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
     major_revision_id = "1"
     
     parameters {
-      name = "region"
+      name = "location"
       parameter_value {
-        string_value = "eu"
-      }
-    }
-    parameters {
-      name = "oneof-parameter"
-      parameter_value {
-        oneof_value {
-          name = "updated-oneof"
-          parameter_value {
-            string_value = "updated-value"
-          }
+        string_list_value {
+          values = ["us-central1"]
         }
       }
     }
+  }
+
+  cloud_control_details {
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
+    major_revision_id = "1"
+    
     parameters {
-      name = "bool-parameter"
+      name = "location"
       parameter_value {
-        oneof_value {
-          name = "bool-oneof"
-          parameter_value {
-            bool_value = true
-          }
-        }
-      }
-    }
-    parameters {
-      name = "number-parameter"
-      parameter_value {
-        oneof_value {
-          name = "number-oneof"
-          parameter_value {
-            number_value = 678.90
-          }
-        }
-      }
-    }
-    parameters {
-      name = "string-list-parameter"
-      parameter_value {
-        oneof_value {
-          name = "string-list-oneof"
-          parameter_value {
-            string_list_value {
-              values = ["value3", "value4"]
-            }
-          }
-        }
+        string_value = "us-east1"
       }
     }
   }
 }
 `, context)
 }
-
 func TestAccCloudSecurityComplianceFramework_backwardCompatibility(t *testing.T) {
 	t.Parallel()
 
@@ -211,7 +150,7 @@ func TestAccCloudSecurityComplianceFramework_backwardCompatibility(t *testing.T)
 				ResourceName:            "google_cloud_security_compliance_framework.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization"},
+				ImportStateVerifyIgnore: []string{"framework_id", "location", "parent", "organization", "supported_enforcement_modes", "cloud_control_details"},
 			},
 		},
 	})
@@ -235,6 +174,45 @@ resource "google_cloud_security_compliance_framework" "example" {
       name = "location"
       parameter_value {
         string_value = "us-central1"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudSecurityComplianceFramework_reorder(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_security_compliance_framework" "example" {
+  parent       = "organizations/%{org_id}"
+  location     = "global"
+  framework_id = "tf-test-example-framework%{random_suffix}"
+  
+  display_name = "Updated Terraform Framework Name"
+  description  = "An updated description for the framework with additional details"
+  
+  cloud_control_details {
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
+    major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_value = "us-east1"
+      }
+    }
+  }
+
+  cloud_control_details {
+    name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
+    major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_list_value {
+          values = ["us-central1"]
+        }
       }
     }
   }

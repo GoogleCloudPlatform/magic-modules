@@ -1,7 +1,10 @@
 resource "google_container_cluster" "primary" {
   name               = "{{index $.ResourceIdVars "name"}}-cluster"
-  location           = "us-central1"
+  location           = "us-east1"
   initial_node_count = 1
+  node_config {
+    machine_type = "n4-standard-2"
+  }
   workload_identity_config {
     workload_pool = "{{index $.TestEnvVars "project"}}.svc.id.goog"
   }
@@ -18,7 +21,7 @@ resource "google_container_cluster" "primary" {
 resource "google_gke_backup_backup_plan" "basic" {
   name = "{{index $.ResourceIdVars "name"}}"
   cluster = google_container_cluster.primary.id
-  location = "us-central1"
+  location = "us-east1"
   backup_config {
     include_volume_data = true
     include_secrets = true
@@ -28,7 +31,7 @@ resource "google_gke_backup_backup_plan" "basic" {
 
 resource "google_gke_backup_restore_plan" "all_cluster_resources" {
   name = "{{index $.ResourceIdVars "name"}}-rp"
-  location = "us-central1"
+  location = "us-east1"
   backup_plan = google_gke_backup_backup_plan.basic.id
   cluster = google_container_cluster.primary.id
   restore_config {

@@ -105,6 +105,8 @@ samples:
     primary_resource_id: 'manual-bitbucket-trigger'
     steps:
       - name: 'cloudbuild_trigger_manual_bitbucket_server'
+        resource_id_vars:
+          cloudbuild_trigger_name: 'terraform-manual-bbs-trigger'
   - name: 'cloudbuild_trigger_repo'
     primary_resource_id: 'repo-trigger'
     steps:
@@ -125,6 +127,7 @@ samples:
       - name: 'cloudbuild_trigger_bitbucket_server_push'
         resource_id_vars:
           cloudbuild_trigger_name: 'bbs-push-trigger'
+          trigger_name: 'bbs-push-trigger'
   - name: 'cloudbuild_trigger_bitbucket_server_pull_request'
     primary_resource_id: 'bbs-pull-request-trigger'
     steps:

@@ -13,6 +13,8 @@
 
 ---
 name: WidgetConfig
+api_variant_patterns:
+  - projects/{project}/locations/{location}/collections/{collection}/engines/{engine}/widgetConfigs/{widgetConfig}
 description: Represents a WidgetConfig.
 references:
   api: https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1alpha/projects.locations.collections.engines.widgetConfigs
@@ -265,6 +267,42 @@ properties:
       - name: enableCreateAgentButton
         type: Boolean
         description: If set to true, the widget will enable the create agent button.
+      - name: sourceAdminDisplayNameEnabled
+        type: Boolean
+        send_empty_value: true
+        description: |
+          Whether to show the admin-configured display name for data connectors in
+          the widget sources UI (instead of the connector kind). Opt-in; defaults
+          to false.
+      - name: searchAddonSpec
+        type: NestedObject
+        diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
+        description: |
+          SearchAddonSpec is used to disable add-ons for search. By default, if this
+          field is not specified, add-ons are enabled wherever applicable.
+          This field is only supported for search requests.
+        properties:
+          - name: semanticAddOnDisabled
+            type: Boolean
+            description: |
+              If true, semantic add-on is disabled. Semantic add-on includes
+              embeddings and jetstream.
+            send_empty_value: true
+            diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+          - name: kpiPersonalizationAddOnDisabled
+            type: Boolean
+            description: |
+              If true, disables event re-ranking and personalization to optimize KPIs
+              & personalize results.
+            send_empty_value: true
+            diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
+          - name: generativeAnswerAddOnDisabled
+            type: Boolean
+            description: |
+              If true, generative answer add-on is disabled. Generative answer
+              add-on includes natural language to filters and simple answers.
+            send_empty_value: true
+            diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
   - name: uiBranding
     type: NestedObject
     description: |
