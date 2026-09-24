@@ -1,0 +1,61 @@
+package compute
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+// updateKmsKey only supports CMEK -> CMEK. It rejects non-CMEK resources and
+// key versions, clears kmsKeyServiceAccount, and rotates if kmsKeyName is empty.
+
+func kmsKeyChangeRequiresReplacement(oldKey, newKey string, newKeyKnown, serviceAccountSet bool) bool {
+	if oldKey == "" || serviceAccountSet {
+		return true
+	}
+	if !newKeyKnown {
+		// Checked at apply time by kmsKeyUpdateRequestBody.
+		return false
+	}
+	return newKey == "" || isCryptoKeyVersionName(newKey)
+}
+
+func isCryptoKeyVersionName(key string) bool {
+	return strings.Contains(key, "/cryptoKeyVersions/")
+}
+
+// forceNewOnUnsupportedKmsKeyChange forces replacement for key changes
+// updateKmsKey can't make. serviceAccountPath may be "".
+func forceNewOnUnsupportedKmsKeyChange(keyPath, serviceAccountPath string) schema.CustomizeDiffFunc {
+	return func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+		if d.Id() == "" || !d.HasChange(keyPath) {
+			return nil
+		}
+		oldKey, newKey := d.GetChange(keyPath)
+		serviceAccountSet := false
+		if serviceAccountPath != "" {
+			oldServiceAccount, newServiceAccount := d.GetChange(serviceAccountPath)
+			serviceAccountSet = oldServiceAccount.(string) != "" || newServiceAccount.(string) != ""
+		}
+		if kmsKeyChangeRequiresReplacement(oldKey.(string), newKey.(string), d.NewValueKnown(keyPath), serviceAccountSet) {
+			return d.ForceNew(keyPath)
+		}
+		return nil
+	}
+}
+
+func kmsKeyUpdateRequestBody(oldKey, newKey, serviceAccount string) (map[string]interface{}, error) {
+	switch {
+	case oldKey == "":
+		return nil, fmt.Errorf("adding a Cloud KMS key requires recreating the resource")
+	case newKey == "":
+		return nil, fmt.Errorf("removing the Cloud KMS key requires recreating the resource")
+	case isCryptoKeyVersionName(newKey):
+		return nil, fmt.Errorf("the Cloud KMS key must not include a crypto key version (%q)", newKey)
+	case serviceAccount != "":
+		return nil, fmt.Errorf("the Cloud KMS key can't be changed in place while kms_key_service_account is set")
+	}
+	return map[string]interface{}{"kmsKeyName": newKey}, nil
+}

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	neturl "net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -698,6 +700,201 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeDisk_encryptionKMSUpdate(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	key2 := kms.BootstrapKMSKey(t).CryptoKey.Name
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
+	var disk map[string]interface{}
+	var creationTimestamp string
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdate(diskName, "", ""),
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdate(diskName, key1, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(t, "google_compute_disk.foobar", pid, &disk),
+					testAccCheckComputeDiskKmsKey(&disk, key1, ""),
+					resource.TestCheckResourceAttrWith("google_compute_disk.foobar", "creation_timestamp", func(v string) error {
+						creationTimestamp = v
+						return nil
+					}),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdate(diskName, key2, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(t, "google_compute_disk.foobar", pid, &disk),
+					testAccCheckComputeDiskKmsKey(&disk, key2, ""),
+					resource.TestCheckResourceAttr("google_compute_disk.foobar", "disk_encryption_key.0.kms_key_self_link", key2),
+					resource.TestCheckResourceAttrPtr("google_compute_disk.foobar", "creation_timestamp", &creationTimestamp),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Out-of-band key change is reverted in place.
+				PreConfig: testAccComputeDiskUpdateKmsKeyOutOfBand(t, pid, "us-central1-a", diskName, key1),
+				Config:    testAccComputeDisk_encryptionKMSUpdate(diskName, key2, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(t, "google_compute_disk.foobar", pid, &disk),
+					testAccCheckComputeDiskKmsKey(&disk, key2, ""),
+					resource.TestCheckResourceAttrPtr("google_compute_disk.foobar", "creation_timestamp", &creationTimestamp),
+				),
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdate(diskName, "", ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(t, "google_compute_disk.foobar", pid, &disk),
+					testAccCheckComputeDiskKmsKey(&disk, "", ""),
+				),
+			},
+		},
+	})
+}
+
+// updateKmsKey clears kmsKeyServiceAccount, so this recreates the disk.
+func TestAccComputeDisk_encryptionKMSUpdateWithServiceAccount(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	key2 := kms.BootstrapKMSKey(t).CryptoKey.Name
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
+	var disk map[string]interface{}
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+		{
+			Member: "serviceAccount:{project_number}-compute@developer.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+	serviceAccount := fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectNumberFromEnv())
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdate(diskName, key1, serviceAccount),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(t, "google_compute_disk.foobar", pid, &disk),
+					testAccCheckComputeDiskKmsKey(&disk, key1, serviceAccount),
+				),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdate(diskName, key2, serviceAccount),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskExists(t, "google_compute_disk.foobar", pid, &disk),
+					testAccCheckComputeDiskKmsKey(&disk, key2, serviceAccount),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckComputeDiskKmsKey(disk *map[string]interface{}, wantKey, wantServiceAccount string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		var gotKey, gotServiceAccount string
+		if encryptionKey, ok := (*disk)["diskEncryptionKey"].(map[string]interface{}); ok {
+			gotKey, _ = encryptionKey["kmsKeyName"].(string)
+			gotServiceAccount, _ = encryptionKey["kmsKeyServiceAccount"].(string)
+		}
+		gotKey = strings.Split(gotKey, "/cryptoKeyVersions/")[0]
+		if gotKey != wantKey {
+			return fmt.Errorf("disk has Cloud KMS key %q, want %q", gotKey, wantKey)
+		}
+		if gotServiceAccount != wantServiceAccount {
+			return fmt.Errorf("disk has kmsKeyServiceAccount %q, want %q", gotServiceAccount, wantServiceAccount)
+		}
+		return nil
+	}
+}
+
+func testAccComputeDiskUpdateKmsKeyOutOfBand(t *testing.T, project, zone, diskName, kmsKey string) func() {
+	return func() {
+		config := acctest.GoogleProviderConfig(t)
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/updateKmsKey", transport_tpg.BaseUrl(tpgcompute.Product, config), project, zone, diskName)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      map[string]interface{}{"kmsKeyName": kmsKey},
+		})
+		if err != nil {
+			t.Fatalf("Error updating the KMS key of disk %s: %s", diskName, err)
+		}
+		if err := tpgcompute.ComputeOperationWaitTime(config, res, project, "Updating Disk KMS Key", config.UserAgent, 10*time.Minute); err != nil {
+			t.Fatalf("Error waiting for the KMS key update of disk %s: %s", diskName, err)
+		}
+	}
 }
 
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
@@ -1421,6 +1618,29 @@ resource "google_compute_disk" "foobar" {
   }
 }
 `, diskName, kmsKey)
+}
+
+func testAccComputeDisk_encryptionKMSUpdate(diskName, kmsKey, serviceAccount string) string {
+	encryptionKey := ""
+	if kmsKey != "" {
+		serviceAccountLine := ""
+		if serviceAccount != "" {
+			serviceAccountLine = fmt.Sprintf("\n    kms_key_service_account = %q", serviceAccount)
+		}
+		encryptionKey = fmt.Sprintf(`
+  disk_encryption_key {
+    kms_key_self_link = %q%s
+  }`, kmsKey, serviceAccountLine)
+	}
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+%s
+}
+`, diskName, encryptionKey)
 }
 
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
