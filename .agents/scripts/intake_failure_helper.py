@@ -239,7 +239,7 @@ def extract_gcs_links_from_issue(body: str) -> Tuple[Dict[str, str], Dict[str, s
     debug_links: Dict[str, str] = {}
 
     url_pattern = re.compile(
-        r"(?:gs://nightly-test-data/[a-zA-Z0-9_.\-/]+|https://storage\.(?:googleapis|cloud\.google)\.com/nightly-test-data/[a-zA-Z0-9_.\-/]+)"
+        r"(?:gs://(?:nightly-test-data|teamcity-logs)/[a-zA-Z0-9_.\-/]+|https://storage\.(?:googleapis|cloud\.google)\.com/(?:nightly-test-data|teamcity-logs)/[a-zA-Z0-9_.\-/]+)"
     )
 
     for raw_url in url_pattern.findall(body):
