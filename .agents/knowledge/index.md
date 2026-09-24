@@ -70,3 +70,7 @@ Read this index at decision points; open only the source the task needs. Format 
 ### Test (`test/`)
 
 - **unit-test-scope** — When to write unit tests vs acceptance tests, and avoiding test bloat. — [test/unit-test-scope.md](test/unit-test-scope.md)
+
+### Promotion (`promotion/`)
+
+- **ga-promotion-pitfalls** — Where beta->GA promotions break (CI blind spots, API drift, beta-only test deps, missed guards) and how to avoid it. — [promotion/ga-promotion-pitfalls.md](promotion/ga-promotion-pitfalls.md)

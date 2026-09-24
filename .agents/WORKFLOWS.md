@@ -18,6 +18,7 @@ specific one.
 | GitHub Label Pattern | Issue Category | Target Workflow Skill |
 | :--- | :--- | :--- |
 | `test-failure`, `test-failure-*` (e.g. `test-failure-0`, `test-failure-10`, `test-failure-50`, `test-failure-100`) | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
+| `promote-to-ga` (takes precedence over `new-resource` / `enhancement`) | Beta → GA Promotion | `.agents/skills/workflows/promote_to_ga/SKILL.md` |
 | `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
 | `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
 | `enhancement` (field additions) | New Field / Property Addition | `.agents/skills/workflows/add_fields/SKILL.md` |
@@ -38,6 +39,7 @@ specific one.
 *   **Bug Fix Workflow** (`.agents/skills/workflows/bug_fix/SKILL.md`): For triaging, planning, fixing, and verifying reported provider bugs.
 *   **Deprecate Resource or Field Workflow** (`.agents/skills/workflows/deprecate_resource_or_field/SKILL.md`): Specifically for deprecating existing resources or fields on `main` prior to a major release.
 *   **Major Release Removal Workflow** (`.agents/skills/workflows/major_release_removal/SKILL.md`): Specifically for executing resource and field removals on a major release feature branch.
+*   **Promote to GA Workflow** (`.agents/skills/workflows/promote_to_ga/SKILL.md`): For promoting beta-only resources, fields, data sources, or products to the GA provider, including verification CI doesn't perform.
 *   *(Future workflows can be added here)*
 
 ## Subagents:
