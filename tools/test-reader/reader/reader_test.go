@@ -145,6 +145,18 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 
 }
 
+func TestReadTableDrivenTestFile(t *testing.T) {
+	// A table-driven test ranges over a map of test cases, not test functions,
+	// so it must not be read as a serial test map.
+	tests, err := ReadTestFiles([]string{"testdata/service/table_driven_test.go"})
+	if err != nil {
+		t.Fatalf("error reading table driven test file: %v", err)
+	}
+	if len(tests) != 0 {
+		t.Errorf("unexpected tests read from table driven test file: %v", tests)
+	}
+}
+
 func TestReadCrossFileTests(t *testing.T) {
 	tests, err := ReadTestFiles([]string{"testdata/service/cross_file_1_test.go", "testdata/service/cross_file_2_test.go"})
 	if err != nil {
