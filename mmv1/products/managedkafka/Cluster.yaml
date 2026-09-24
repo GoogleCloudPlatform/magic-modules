@@ -196,6 +196,10 @@ properties:
     type: String
     description: "The bootstrap address of the Kafka cluster. Use port :9092 for SASL connection and :9192 for mTLS connection"
     output: true
+  - name: 'kafkaVersion'
+    type: String
+    default_from_api: true
+    description: "The Apache Kafka version of the cluster (for example, `3.7.x`, `4.3.x`). If not specified during cluster creation, defaults to `3.7.x`."
   - name: 'tlsConfig'
     type: NestedObject
     default_from_api: true
