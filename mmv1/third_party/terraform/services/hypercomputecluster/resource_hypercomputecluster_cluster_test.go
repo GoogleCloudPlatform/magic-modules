@@ -494,8 +494,9 @@ locals {
 }
 
 resource "google_compute_reservation" "gce_reservation" {
-  name = "tf-test-gce-reservation-%{random_suffix}"
-  zone = "us-central1-a"
+  name                          = "tf-test-gce-reservation-%{random_suffix}"
+  zone                          = "us-central1-a"
+  specific_reservation_required = true
   specific_reservation {
     count = 1
     instance_properties {
