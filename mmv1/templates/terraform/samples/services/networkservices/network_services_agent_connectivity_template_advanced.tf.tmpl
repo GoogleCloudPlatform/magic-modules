@@ -7,14 +7,14 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
-  region        = "us-central1"
+  region        = "us-west2"
   network       = google_compute_network.default.id
   ip_cidr_range = "10.0.0.0/16"
 }
 
 resource "google_compute_network_attachment" "default" {
   name                  = "{{index $.ResourceIdVars "network_attachment_name"}}"
-  region                = "us-central1"
+  region                = "us-west2"
   connection_preference = "ACCEPT_AUTOMATIC"
   subnetworks           = [google_compute_subnetwork.default.id]
 }
@@ -34,7 +34,7 @@ resource "google_dns_managed_zone" "default" {
 
 resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
   agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
-  location                       = "us-central1"
+  location                       = "us-west2"
   description                    = "An advanced configuration for Agent Connectivity Template"
 
   access_types = ["PRIVATE"]
