@@ -258,7 +258,7 @@ def extract_gcs_links_from_issue(body: str) -> Tuple[Dict[str, str], Dict[str, s
         ):
             error_links.setdefault("beta", normalized)
         elif "debug" in lower_url or lower_url.endswith(".log"):
-            if "/beta/" in lower_url:
+            if "/terraformproviders_googlecloud_google_beta_nightlytests/" in lower_url:
                 debug_links.setdefault("beta", normalized)
             else:
                 debug_links.setdefault("ga", normalized)
