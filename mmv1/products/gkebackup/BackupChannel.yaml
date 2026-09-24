@@ -39,6 +39,10 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
 custom_code:
 samples:
   - name: gkebackup_backupchannel_basic

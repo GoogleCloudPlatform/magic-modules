@@ -251,6 +251,35 @@ func TestReadBlockTypesTestFile(t *testing.T) {
 	}
 }
 
+func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/whole_line_substitution_test.go"})
+	if err != nil {
+		t.Fatalf("error reading whole line substitution test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	// A substitution alone on its line is dropped, so neither the setup block
+	// it would have injected at the top level nor the field it would have
+	// injected inside a block body is recorded. Everything else still is.
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"whole_line_substitution": {
+				"resource": {
+					"field_one":              "\"value-one\"",
+					"field_three.field_five": "\"value-five\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
 func TestFlattenBlock(t *testing.T) {
 	for _, tc := range []struct {
 		name        string

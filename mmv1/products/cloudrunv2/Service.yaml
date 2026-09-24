@@ -1581,3 +1581,7 @@ properties:
     type: Boolean
     description: |
       Used to enable/disable IAP for the cloud-run service.
+  - name: 'sshEnabled'
+    type: Boolean
+    description: |
+      Enables SSH access to the Service.
