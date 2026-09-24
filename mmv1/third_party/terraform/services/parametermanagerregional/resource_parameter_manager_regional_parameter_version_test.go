@@ -42,6 +42,8 @@ func TestAccParameterManagerRegionalRegionalParameterVersion_update(t *testing.T
 				ResourceName:            "google_parameter_manager_regional_parameter_version.regional-parameter-version-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// When disabled = true, the API omits the payload object on GET, so data_crc32c is not returned on import
+				// (parameter_data is also omitted, and is matched by the "parameter" prefix ignore).
 				ImportStateVerifyIgnore: []string{"parameter", "parameter_version_id", "data_crc32c"},
 			},
 			{

@@ -163,7 +163,7 @@ properties:
       - name: dataCrc32c
         type: String
         description: |
-          The integrity checksum of the payload.
+          The integrity checksum of the payload. If provided, the server will verify that the checksum matches the payload. If not provided, the server will generate the checksum.
         immutable: true
         default_from_api: true
   - name: kmsKeyVersion
