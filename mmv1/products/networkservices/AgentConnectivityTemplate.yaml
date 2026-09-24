@@ -145,14 +145,23 @@ properties:
         description: |
           DNS peering configuration for the AgentConnectivityTemplate.
           When set, the gateway will resolve queries for the configured
-          `domain` via Cloud DNS in the specified `targetNetwork`.
+          `domains` via Cloud DNS in the specified `targetNetwork`.
         properties:
           - name: domain
             type: String
-            required: true
+            deprecation_message: '`domain` is deprecated and will be removed in a future major release. Use `domains` instead.'
             description: |
               The domain name to peer for DNS resolution. Must be a fully
               qualified domain name ending with a dot (for example, `example.com.`).
+          - name: domains
+            type: Array
+            description: |
+              The list of domain names to peer for DNS resolution. Each entry
+              must be a fully qualified domain name ending with a dot
+              (for example, `example.com.`). At least one domain must be
+              specified between `domain` and `domains`.
+            item_type:
+              type: String
           - name: targetNetwork
             type: String
             required: true
