@@ -51,6 +51,12 @@ resource "formatting_call_literal" "literal" {
 }
 `,
 			},
+			{
+				// A config func that joins a shared setup config to the config
+				// under test with fmt.Sprint. Every argument is part of the
+				// config, not just the first.
+				Config: testAccFormattingCallSprint("value-seven"),
+			},
 		},
 	})
 }
@@ -73,4 +79,12 @@ resource "formatting_call_string_arg" "string_arg" {
   field_four = "%s"
 }
 `, fieldFour)
+}
+
+func testAccFormattingCallSprint(fieldSeven string) string {
+	return fmt.Sprint(testFormattingCallBase, fmt.Sprintf(`
+resource "formatting_call_sprint" "sprint" {
+  field_seven = "%s"
+}
+`, fieldSeven))
 }

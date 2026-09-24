@@ -4,7 +4,9 @@ import (
 	"go/ast"
 	"go/parser"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -323,8 +325,66 @@ func TestReadFormattingCallTestFile(t *testing.T) {
 				"formatting_call_literal": {"literal": {"field_six": "\"value-six\""}},
 			},
 		},
+		{
+			// fmt.Sprint has no template: every argument is part of the config,
+			// so both the shared base resource in Args[0] and the resource in
+			// Args[1] must be recorded.
+			ResourceBlock: {
+				"formatting_call_base":   {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_sprint": {"sprint": {"field_seven": "\"true\""}},
+			},
+		},
 	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
 		t.Errorf("found unexpected steps: %#v, expected %#v", tests[0].Steps, expectedSteps)
+	}
+}
+
+func TestReadNonFormattingCallTestFile(t *testing.T) {
+	// Only known formatting functions return their first argument's config;
+	// calling any other cross-package helper must return a "not a config
+	// formatting function" error rather than recording its first argument as
+	// coverage. This fixture is written to a temp dir because detector_test.go
+	// runs ReadAllTests over testdata/ and fails on any intentional read error.
+	testFile := filepath.Join(t.TempDir(), "non_formatting_call_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccNonFormattingCall(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: acctest.EchoResourceConfig(` + "`" + `
+resource "non_formatting_call_decoy" "decoy" {
+  field_one = "value-one"
+}
+` + "`" + `, "echo"),
+			},
+		},
+	})
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	tests, errs := ReadTestFiles([]string{testFile})
+	err, ok := errs["TestAccNonFormattingCall"]
+	if !ok {
+		t.Fatalf("expected an error for TestAccNonFormattingCall, got %v", errs)
+	}
+	if !strings.Contains(err.Error(), "is not a config formatting function") {
+		t.Errorf("unexpected error %q, expected it to contain %q", err.Error(), "is not a config formatting function")
+	}
+	if len(tests) != 1 || len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected tests %#v", tests)
+	}
+	if len(tests[0].Steps[0]) != 0 {
+		t.Errorf("expected empty step when config call is not a formatting function, got %#v", tests[0].Steps[0])
 	}
 }
 
@@ -333,7 +393,7 @@ func TestReadConfigCallExpr(t *testing.T) {
 		name     string
 		expr     string
 		expected string
-		wantErr  bool
+		wantErr  string
 	}{
 		{
 			name:     "sprintf-template",
@@ -357,17 +417,17 @@ func TestReadConfigCallExpr(t *testing.T) {
 			// would report fields as covered that the test may never apply.
 			name:    "non-formatting-call",
 			expr:    "acctest.EchoResourceConfig(`resource \"a\" \"b\" {}`, \"echo\")",
-			wantErr: true,
+			wantErr: "is not a config formatting function",
 		},
 		{
 			name:    "undeclared-config-func",
 			expr:    "testAccUndeclared(\"name\")",
-			wantErr: true,
+			wantErr: "failed to find function declaration testAccUndeclared",
 		},
 		{
 			name:    "formatting-call-without-arguments",
 			expr:    "fmt.Sprintf()",
-			wantErr: true,
+			wantErr: "failed to find a config template in call to fmt.Sprintf",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -380,9 +440,11 @@ func TestReadConfigCallExpr(t *testing.T) {
 				t.Fatalf("%s is not a call expression", tc.expr)
 			}
 			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{})
-			if tc.wantErr {
+			if tc.wantErr != "" {
 				if err == nil {
-					t.Errorf("expected an error reading %s, read %q", tc.expr, configStr)
+					t.Errorf("expected an error containing %q reading %s, read %q", tc.wantErr, tc.expr, configStr)
+				} else if !strings.Contains(err.Error(), tc.wantErr) {
+					t.Errorf("unexpected error %q reading %s, expected it to contain %q", err.Error(), tc.expr, tc.wantErr)
 				}
 				return
 			}
