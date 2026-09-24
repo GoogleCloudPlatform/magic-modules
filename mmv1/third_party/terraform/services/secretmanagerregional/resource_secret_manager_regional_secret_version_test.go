@@ -1,6 +1,8 @@
 package secretmanagerregional_test
 
 import (
+	"maps"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -76,6 +78,96 @@ func TestAccSecretManagerRegionalRegionalSecretVersion_cmekOutputOnly(t *testing
 			},
 		},
 	})
+}
+
+func TestAccSecretManagerRegionalRegionalSecretVersion_writeOnlyUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecretManagerRegionalRegionalSecretVersionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSecretManagerRegionalRegionalSecretVersion_writeOnly(context, "my-tf-test-secret", 1),
+			},
+			{
+				ResourceName:      "google_secret_manager_regional_secret_version.secret-version-write-only",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// write-only data is never stored in state, and its version is client-side only,
+				// so neither can be read back on import
+				ImportStateVerifyIgnore: []string{"secret_data_wo", "secret_data_wo_version"},
+			},
+			{
+				// bumping the version replaces the secret version with one holding the new data
+				Config: testAccSecretManagerRegionalRegionalSecretVersion_writeOnly(context, "my-tf-test-secret-updated", 2),
+			},
+			{
+				ResourceName:            "google_secret_manager_regional_secret_version.secret-version-write-only",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"secret_data_wo", "secret_data_wo_version"},
+			},
+		},
+	})
+}
+
+func TestAccSecretManagerRegionalRegionalSecretVersion_neitherSecretDataSet(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccSecretManagerRegionalRegionalSecretVersion_noSecretData(context),
+				ExpectError: regexp.MustCompile(`Invalid combination of arguments`),
+			},
+		},
+	})
+}
+
+func testAccSecretManagerRegionalRegionalSecretVersion_writeOnly(context map[string]interface{}, data string, version int) string {
+	context = maps.Clone(context)
+	context["secret_data_wo"] = data
+	context["secret_data_wo_version"] = version
+
+	return acctest.Nprintf(`
+resource "google_secret_manager_regional_secret" "secret-basic" {
+  secret_id = "tf-test-secret-version-%{random_suffix}"
+  location = "us-central1"
+}
+
+resource "google_secret_manager_regional_secret_version" "secret-version-write-only" {
+  secret = google_secret_manager_regional_secret.secret-basic.name
+  secret_data_wo = "%{secret_data_wo}%{random_suffix}"
+  secret_data_wo_version = %{secret_data_wo_version}
+}
+`, context)
+}
+
+func testAccSecretManagerRegionalRegionalSecretVersion_noSecretData(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_regional_secret" "secret-basic" {
+  secret_id = "tf-test-secret-version-%{random_suffix}"
+  location = "us-central1"
+}
+
+resource "google_secret_manager_regional_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_regional_secret.secret-basic.name
+  secret_data_wo_version = 3
+}
+`, context)
 }
 
 func testAccSecretManagerRegionalRegionalSecretVersion_basic(context map[string]interface{}) string {
