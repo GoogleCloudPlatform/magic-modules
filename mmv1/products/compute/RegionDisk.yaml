@@ -70,6 +70,7 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
+  - 'forceNewOnUnsupportedKmsKeyChange("disk_encryption_key.0.kms_key_name", "")'
 samples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
@@ -172,6 +173,9 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
+
+      ~>**NOTE** Only changing `kms_key_name` between Cloud KMS keys is done
+      in place; other changes to this block recreate the disk.
     immutable: true
     properties:
       - name: 'rawKey'
@@ -202,6 +206,9 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+        # Sent by custom_update; see forceNewOnUnsupportedKmsKeyChange.
+        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
+        update_verb: 'POST'
   - name: 'sourceImageEncryptionKey'
     type: NestedObject
     description: |
