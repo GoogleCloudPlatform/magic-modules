@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -781,6 +782,106 @@ func TestAccBigtableTable_familyUpdate(t *testing.T) {
 	})
 }
 
+func TestAccBigtableTable_tieredStorageConfig(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Creating a table with 30 days tiered storage config
+				Config: testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, "720h"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "tiered_storage_config.0.infrequent_access.0.include_if_older_than", "720h0m0s"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				// Update to 60 days
+				Config: testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, "1440h"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "tiered_storage_config.0.infrequent_access.0.include_if_older_than", "1440h0m0s"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				// Removing the tiered storage config
+				Config: testAccBigtableTable_family(instanceName, tableName, family),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_bigtable_table.table", "tiered_storage_config.#"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+		},
+	})
+}
+
+func TestAccBigtableTable_tieredStorageConfigIgnoreWarnings(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Creating a table without a tiered storage config
+				Config: testAccBigtableTable_family(instanceName, tableName, family),
+			},
+			{
+				// Enabling tiered storage on the existing table without ignore_warnings is rejected
+				Config:      testAccBigtableTable_tieredStorageConfigNoIgnoreWarnings(instanceName, tableName, family, "720h"),
+				ExpectError: regexp.MustCompile("ignore_warnings must be set to true when enabling tiered_storage_config"),
+			},
+			{
+				// Enabling tiered storage with ignore_warnings = true updates the table in place
+				Config: testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, "720h"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigtable_table.table", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_table.table", "tiered_storage_config.0.infrequent_access.0.include_if_older_than", "720h0m0s"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"}, // ignore_warnings is a request-only flag that the API does not return
+			},
+		},
+	})
+}
+
 func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		var ctx = context.Background()
@@ -1369,4 +1470,68 @@ resource "google_bigtable_instance" "instance" {
   deletion_protection = false
 }
 `, instanceName, instanceName)
+}
+
+func testAccBigtableTable_tieredStorageConfig(instanceName, tableName, family, includeIfOlderThan string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "%s"
+  }
+  
+  tiered_storage_config {
+    infrequent_access {
+      include_if_older_than = "%s"
+    }
+  }
+
+  ignore_warnings = true
+}
+`, instanceName, instanceName, tableName, family, includeIfOlderThan)
+}
+
+func testAccBigtableTable_tieredStorageConfigNoIgnoreWarnings(instanceName, tableName, family, includeIfOlderThan string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "%s"
+  }
+
+  tiered_storage_config {
+    infrequent_access {
+      include_if_older_than = "%s"
+    }
+  }
+}
+`, instanceName, instanceName, tableName, family, includeIfOlderThan)
 }

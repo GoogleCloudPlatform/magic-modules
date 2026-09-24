@@ -178,6 +178,43 @@ func ResourceBigtableTable() *schema.Resource {
 					The schema must be a valid JSON encoded string representing a Type's struct protobuf message. Note that for bytes sequence (like delimited_bytes.delimiter)
 					the delimiter must be base64 encoded. For example, if you want to set a delimiter to a single byte character "#", it should be set to "Iw==", which is the base64 encoding of the byte sequence "#".`,
 			},
+			"tiered_storage_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: `Config for tiered storage. A valid config must have a
+				valid TieredStorageRule. Otherwise the whole TieredStorageConfig must be
+				unset. By default all data is stored in the SSD tier (only SSD instances
+				can configure tiered storage).`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"infrequent_access": {
+							Type:     schema.TypeList,
+							Required: true,
+							MaxItems: 1,
+							Description: `Rule to specify what data is stored in the
+							infrequent access(IA) tier. The IA tier allows storing more data
+							per node with reduced performance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"include_if_older_than": {
+										Type:             schema.TypeString,
+										Required:         true,
+										ValidateFunc:     verify.ValidateDuration(),
+										DiffSuppressFunc: durationDiffSuppress,
+										Description:      `Include data older than the given age. Must be at least 30 days.`,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"ignore_warnings": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `A boolean flag to ignore warnings when enabling the tiered storage configuration.`,
+			},
 			//UDP schema start
 			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 			//UDP schema end
@@ -227,6 +264,21 @@ func abpDiffFunc(ctx context.Context, diff *schema.ResourceDiff, meta interface{
 	}
 
 	return nil
+}
+
+func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	oldDur, err := ParseDuration(old)
+	if err != nil {
+		return false
+	}
+	newDur, err := ParseDuration(new)
+	if err != nil {
+		return false
+	}
+	return oldDur == newDur
 }
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
@@ -344,6 +396,27 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 		tblConf.RowKeySchema = parsedSchema
+	}
+
+	// Set the tiered storage config if given
+	if tieredStorageField, ok := d.GetOk("tiered_storage_config"); ok {
+		tieredStorageList := tieredStorageField.([]any)
+		if len(tieredStorageList) > 0 && tieredStorageList[0] != nil {
+			tieredStorageConfig := tieredStorageList[0].(map[string]any)
+			iaField := tieredStorageConfig["infrequent_access"].([]any)
+			if len(iaField) > 0 && iaField[0] != nil {
+				iaDuration := iaField[0].(map[string]any)
+				dur, err := ParseDuration(iaDuration["include_if_older_than"].(string))
+				if err != nil {
+					return fmt.Errorf("error parsing include_if_older_than: %v", err)
+				}
+				tblConf.TieredStorageConfig = &bigtable.TieredStorageConfig{
+					InfrequentAccess: &bigtable.TieredStorageIncludeIfOlderThan{
+						Duration: dur,
+					},
+				}
+			}
+		}
 	}
 
 	// This method may return before the table's creation is complete - we may need to wait until
@@ -465,6 +538,26 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("row_key_schema", nil)
 	}
 
+	if table.TieredStorageConfig != nil {
+		tcs := table.TieredStorageConfig
+		if ia, ok := tcs.InfrequentAccess.(*bigtable.TieredStorageIncludeIfOlderThan); ok {
+			tieredStorageConfig := []any{
+				map[string]any{
+					"infrequent_access": []any{
+						map[string]any{
+							"include_if_older_than": fmt.Sprintf("%s", ia.Duration),
+						},
+					},
+				},
+			}
+			if err := d.Set("tiered_storage_config", tieredStorageConfig); err != nil {
+				return fmt.Errorf("error setting tiered_storage_config: %v", err)
+			}
+		}
+	} else {
+		d.Set("tiered_storage_config", nil)
+	}
+
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
 		return err
 	}
@@ -570,6 +663,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	// TODO: Shouldn't this timeout be schema.TimeoutUpdate?
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutCreate))
 	defer cancel()
 	if d.HasChange("deletion_protection") {
@@ -666,6 +760,69 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 			if err = c.UpdateTableWithRowKeySchema(ctxWithTimeout, name, *rks); err != nil {
 				return fmt.Errorf("failed to update row key schema for table %v: %v", name, err)
 			}
+		}
+	}
+
+	if d.HasChange("tiered_storage_config") {
+		var tscObj map[string]any
+		changedTscField := d.Get("tiered_storage_config").([]any)
+		if len(changedTscField) > 0 && changedTscField[0] != nil {
+			tsc := changedTscField[0].(map[string]any)
+			iaElements := tsc["infrequent_access"].([]any)
+			if len(iaElements) > 0 && iaElements[0] != nil {
+				ia := iaElements[0].(map[string]any)
+				dur, err := ParseDuration(ia["include_if_older_than"].(string))
+				if err != nil {
+					return fmt.Errorf("error parsing include_if_older_than: %v", err)
+				}
+				tscObj = map[string]any{
+					"infrequentAccess": map[string]any{
+						"includeIfOlderThan": fmt.Sprintf("%.0fs", dur.Seconds()),
+					},
+				}
+			}
+		}
+
+		oldTsc, _ := d.GetChange("tiered_storage_config")
+		isTieredStorageEnabled := len(oldTsc.([]any)) == 0 && tscObj != nil
+		ignoreWarnings := d.Get("ignore_warnings").(bool)
+
+		// Only check ignore_warnings when enabling tiered storage.
+		if isTieredStorageEnabled && !ignoreWarnings {
+			return fmt.Errorf("ignore_warnings must be set to true when enabling tiered_storage_config on table %s", name)
+		}
+
+		url := fmt.Sprintf("%sprojects/%s/instances/%s/tables/%s", transport_tpg.BaseUrl(Product, config), project, instanceName, name)
+		url, err := transport_tpg.AddQueryParams(url, map[string]string{
+			"updateMask":     "tieredStorageConfig",
+			"ignoreWarnings": fmt.Sprintf("%t", ignoreWarnings),
+		})
+		if err != nil {
+			return err
+		}
+
+		billingProject := project
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+
+		body := map[string]any{"tieredStorageConfig": tscObj}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "PATCH",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      body,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+		})
+		if err != nil {
+			return fmt.Errorf("error updating tiered_storage_config in table %s: %v", name, err)
+		}
+
+		if err := BigtableOperationWaitTime(config, res, project, "Updating Table tiered_storage_config", userAgent, d.Timeout(schema.TimeoutUpdate)); err != nil {
+			return fmt.Errorf("error waiting for tiered_storage_config update in table %s: %v", name, err)
 		}
 	}
 
