@@ -34,7 +34,7 @@ resource "google_dns_managed_zone" "default" {
 
 resource "google_certificate_manager_trust_config" "default" {
   name        = "{{index $.ResourceIdVars "trust_config_name"}}"
-  location    = "us-central1"
+  location    = "us-west2"
 
   trust_stores {
     trust_anchors { 
@@ -68,7 +68,7 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
       target_network = google_compute_network.default.id
     }
     tls_config {
-      trust_config = "projects/${data.google_project.project.number}/locations/us-central1/trustConfigs/${google_certificate_manager_trust_config.default.name}"
+      trust_config = "projects/${data.google_project.project.number}/locations/us-west2/trustConfigs/${google_certificate_manager_trust_config.default.name}"
       additional_roots = "NO_ADDITIONAL_ROOTS"
     }
   }
