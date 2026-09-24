@@ -47,6 +47,7 @@ class NightlyTestProjectsTests {
         assertTrue("Nightly schedule should start on the hour", schedule.minutes == null || schedule.minutes == "0")
         assertEquals("Composite should select the nightly branch", "+:$DefaultBranchName", trigger.branchFilter)
         assertEquals("Nightly runs should not require pending changes", false, trigger.withPendingChangesOnly)
+        assertEquals("Nightly runs should perform clean checkouts for dependencies", true, trigger.enforceCleanCheckoutForDependencies)
         assertTrue("Root composite should not hold locks needed by package builds", allProvidersComposite.features.items.filterIsInstance<SharedResources>().isEmpty())
 
         // Find GA nightly test project
