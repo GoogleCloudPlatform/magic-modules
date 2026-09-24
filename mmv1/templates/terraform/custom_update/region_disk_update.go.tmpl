@@ -190,5 +190,44 @@ if d.HasChange("access_mode") {
 	}
 }
 
+// 5. KMS Key Update (POST)
+if d.HasChange("disk_encryption_key") {
+	oldKey, newKey := d.GetChange("disk_encryption_key")
+	oldList := oldKey.([]interface{})
+	newList := newKey.([]interface{})
+
+	var oldKmsKey, newKmsKey string
+	if len(oldList) > 0 && oldList[0] != nil {
+		// Regional uses 'kms_key_name'
+		oldKmsKey = oldList[0].(map[string]interface{})["kms_key_name"].(string)
+	}
+	if len(newList) > 0 && newList[0] != nil {
+		newKmsKey = newList[0].(map[string]interface{})["kms_key_name"].(string)
+	}
+
+	// Converting a disk from CMEK to GMEK is not supported
+	if oldKmsKey != "" && newKmsKey == "" {
+		return fmt.Errorf("Removing 'disk_encryption_key' is not supported in-place. To remove the KMS key, please destroy and recreate the regional disk without a KMS key.")
+	}
+
+	if newKmsKey != "" {
+		obj := map[string]interface{}{
+			"kmsKeyName": newKmsKey,
+		}
+		
+		// Use d.Id() to handle the regional path automatically
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}" + d.Id() + "/updateKmsKey")
+		if err != nil { return err }
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config, Method: "POST", Project: billingProject, RawURL: url, UserAgent: userAgent, Body: obj, Timeout: d.Timeout(schema.TimeoutUpdate),
+		})
+		if err != nil { return fmt.Errorf("Error updating Region Disk %q KMS key: %s", d.Id(), err) }
+		
+		err = ComputeOperationWaitTime(config, res, project, "Updating Region Disk KMS Key", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil { return err }
+	}
+}
+
 d.Partial(false)
 return resourceComputeRegionDiskRead(d, meta)

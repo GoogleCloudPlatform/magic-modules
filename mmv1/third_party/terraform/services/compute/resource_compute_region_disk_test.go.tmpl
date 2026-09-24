@@ -4,6 +4,7 @@ package compute_test
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"testing"
 
@@ -1170,6 +1171,142 @@ resource "google_compute_region_disk" "kms_disk" {
   }
 }
 `, context)
+}
+
+func TestAccComputeRegionDisk_kmsKeyVersionBehaviors(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	kms1 := kms.BootstrapKMSKey(t)
+	kms2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tftest-shared-key-2")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionDisk_updateKmsKey_step2(diskName, kms1.CryptoKey.Name),
+			},
+			{
+				Config:             testAccComputeRegionDisk_updateKmsKey_step2(diskName, kms1.CryptoKey.Name+"/cryptoKeyVersions/1"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				Config:      testAccComputeRegionDisk_updateKmsKey_step2(diskName, kms2.CryptoKey.Name+"/cryptoKeyVersions/1"),
+				ExpectError: regexp.MustCompile("Changing the KMS key to a specific version is not supported\\."),
+			},
+		},
+	})
+}
+func TestAccComputeRegionDisk_updateKmsKey(t *testing.T) {
+	t.Parallel()
+
+	bootstrapped1 := kms.BootstrapKMSKey(t)
+	bootstrapped2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tftest-shared-key-2")
+	suffix := acctest.RandString(t, 10)
+	diskName := fmt.Sprintf("tf-test-kms-rdisk-%s", suffix)
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	var disk compute.Disk
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create regional disk with CMEK Key 1
+			{
+				Config: testAccComputeRegionDisk_updateKmsKey_step2(diskName, bootstrapped1.CryptoKey.Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionDiskExists(
+						t, "google_compute_region_disk.foobar", &disk),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_disk.foobar", "disk_encryption_key.0.kms_key_name", bootstrapped1.CryptoKey.Name),
+				),
+			},
+			// Step 2: Update in-place to change CMEK to Key 2
+			{
+				Config: testAccComputeRegionDisk_updateKmsKey_step2(diskName, bootstrapped2.CryptoKey.Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionDiskExists(
+						t, "google_compute_region_disk.foobar", &disk),
+					resource.TestCheckResourceAttr(
+						"google_compute_region_disk.foobar", "disk_encryption_key.0.kms_key_name", bootstrapped2.CryptoKey.Name),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionDisk_disallowCmekToGmek(t *testing.T) {
+	t.Parallel()
+
+	bootstrapped := kms.BootstrapKMSKey(t)
+	suffix := acctest.RandString(t, 10)
+	diskName := fmt.Sprintf("tf-test-kms-rdisk-%s", suffix)
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionDisk_updateKmsKey_step2(diskName, bootstrapped.CryptoKey.Name),
+			},
+			{
+				Config:      testAccComputeRegionDisk_updateKmsKey_step1(diskName),
+				ExpectError: regexp.MustCompile("Removing 'disk_encryption_key' is not supported in-place. To remove the KMS key, please destroy and recreate the regional disk without a KMS key."),
+			},
+		},
+	})
+}
+
+func testAccComputeRegionDisk_updateKmsKey_step1(diskName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_disk" "foobar" {
+  name          = "%s"
+  type          = "pd-ssd"
+  region        = "us-central1"
+  replica_zones = ["us-central1-a", "us-central1-f"]
+  size          = 50
+}
+`, diskName)
+}
+
+func testAccComputeRegionDisk_updateKmsKey_step2(diskName, kmsKey string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_disk" "foobar" {
+  name          = "%s"
+  type          = "pd-ssd"
+  region        = "us-central1"
+  replica_zones = ["us-central1-a", "us-central1-f"]
+  size          = 50
+
+  disk_encryption_key {
+    kms_key_name = "%s"
+  }
+}
+`, diskName, kmsKey)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}

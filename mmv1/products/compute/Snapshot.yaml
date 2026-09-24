@@ -60,6 +60,8 @@ custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/compute_snapshot.go.tmpl'
   decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/snapshot_update.go.tmpl'
+  constants: 'templates/terraform/constants/snapshot.go.tmpl'
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
@@ -123,7 +125,9 @@ parameters:
       If you do not provide an encryption key when creating the snapshot,
       then the snapshot will be encrypted using an automatically generated
       key and you do not need to provide a key to use the snapshot later.
-    immutable: true
+    immutable: false
+    update_url: 'projects/{{project}}/global/snapshots/{{name}}/updateKmsKey'
+    update_verb: 'POST'
     properties:
       - name: 'rawKey'
         type: String
@@ -132,6 +136,7 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
+        immutable: true
         custom_flatten: 'templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.tmpl'
       - name: 'rsaEncryptedKey'
         type: String
@@ -140,23 +145,31 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
+        immutable: true
       - name: 'sha256'
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
+        immutable: true
         # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+
+          Note: Specify the Cloud KMS CryptoKey resource path without a version suffix
+          (e.g. `projects/[PROJECT]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]`).
+          Rotating snapshot to a specific crypto key version is not supported via terraform.
         api_name: kmsKeyName
+        diff_suppress_func: 'SnapshotKmsKeyDiffSuppress'
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+        immutable: true
         # ignore_read in providers - this is only used in Create
   - name: 'sourceDiskEncryptionKey'
     type: NestedObject

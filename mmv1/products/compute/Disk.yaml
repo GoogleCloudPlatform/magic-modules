@@ -212,7 +212,9 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
+    immutable: false
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/updateKmsKey'
+    update_verb: 'POST'
     properties:
       - name: 'rawKey'
         type: String
@@ -222,6 +224,7 @@ properties:
         sensitive: true
         write_only: true
         is_missing_in_cai: true
+        immutable: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -231,12 +234,14 @@ properties:
         sensitive: true
         write_only: true
         is_missing_in_cai: true
+        immutable: true
       - name: 'sha256'
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
+        immutable: true
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -245,13 +250,18 @@ properties:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+
+          Note: Specify the Cloud KMS CryptoKey resource path without a version suffix
+          (e.g. `projects/[PROJECT]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]`).
+          Rotating disk to a specific crypto key version is not supported via terraform.
         api_name: kmsKeyName
-        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        diff_suppress_func: 'DiskKmsKeyDiffSuppress'
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+        immutable: true
   - name: 'sourceSnapshotEncryptionKey'
     type: NestedObject
     description: |
