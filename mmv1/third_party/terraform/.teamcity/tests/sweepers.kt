@@ -8,6 +8,7 @@
 package tests
 
 import AllNightlyTestsName
+import AllProvidersNightlyTestsName
 import DefaultBranchName
 import ServiceSweeperCronName
 import ServiceSweeperManualName
@@ -17,6 +18,7 @@ import SharedResourceNameGa
 import SharedResourceNameVcr
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
+import jetbrains.buildServer.configs.kotlin.ReuseBuilds
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.SharedResources
 import jetbrains.buildServer.configs.kotlin.triggers.FinishBuildTrigger
@@ -142,21 +144,21 @@ class SweeperTests {
     fun globalSweepersUseFinishTriggersWithoutDependencies() {
         listOf("TeamCityTests", "Experimental_NightlyTests").forEach { projectId ->
             val root = googleCloudRootProject(testContextParameters(projectId))
-            val gaNightly = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
-            val gaComposite = getBuildFromProject(gaNightly, AllNightlyTestsName)
-            val sweeperGa = getBuildFromProject(gaNightly, ServiceSweeperName)
-            assertFinishTrigger(sweeperGa, gaComposite, DefaultBranchName)
-
             val globalSweepers = getSubProject(root, globalSweepersProjectName)
             val gate = getBuildFromProject(globalSweepers, "Nightly Sweeper Gate")
             assertEquals(BuildTypeSettings.Type.COMPOSITE, gate.type)
             assertTrue("Gate should not execute sweeper steps", gate.steps.items.isEmpty())
             assertTrue("Gate should not hold locks needed by service sweepers", gate.features.items.filterIsInstance<SharedResources>().isEmpty())
             val betaNightly = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
+            val gaNightly = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
             val sweeperBeta = getBuildFromProject(betaNightly, ServiceSweeperName)
-            assertFinishTrigger(sweeperBeta, getBuildFromProject(betaNightly, AllNightlyTestsName), DefaultBranchName)
-            assertFinishTrigger(gate, sweeperGa, DefaultBranchName)
-            assertSnapshotDependencies(gate, listOf(sweeperBeta), FailureAction.IGNORE)
+            val sweeperGa = getBuildFromProject(gaNightly, ServiceSweeperName)
+            val allProvidersComposite = getBuildFromProject(root, AllProvidersNightlyTestsName)
+            assertFinishTrigger(gate, allProvidersComposite, DefaultBranchName)
+            assertSnapshotDependencies(gate, listOf(sweeperGa, sweeperBeta), FailureAction.IGNORE)
+            gate.dependencies.items.forEach { dependency ->
+                assertEquals("Gate service sweeper dependencies should always run a new build", ReuseBuilds.NO, dependency.snapshot!!.reuseBuilds)
+            }
             listOf("Project Sweeper", "Folder Sweeper").forEach { name ->
                 val sweeper = getBuildFromProject(globalSweepers, name)
                 assertFinishTriggerWithoutBranchFilter(sweeper, gate)

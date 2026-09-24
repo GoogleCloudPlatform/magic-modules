@@ -61,7 +61,6 @@ class NightlyTestProjectsTests {
             assertTrue("Provider composite should not have an independent schedule", composite.triggers.items.isEmpty())
 
             val sweeper = getBuildFromProject(project, ServiceSweeperName)
-            assertFinishTrigger(sweeper, composite, DefaultBranchName)
             project.buildTypes.filter { it != composite && it != sweeper }.forEach { build ->
                 assertTrue("Package build `${build.name}` should have no independent trigger", build.triggers.items.isEmpty())
             }
@@ -115,7 +114,7 @@ class NightlyTestProjectsTests {
         val project = nightlyTests("EXPERIMENTAL", ProviderNameGa, HashiCorpVCSRootGa, config, cron)
         val composite = getBuildFromProject(project, AllNightlyTestsName)
         assertTrue("Disabled nightly configuration should not create a schedule", composite.triggers.items.isEmpty())
-        assertFinishTrigger(getBuildFromProject(project, ServiceSweeperName), composite, cron.branch)
+        assertTrue("Service sweeper should not have independent triggers", getBuildFromProject(project, ServiceSweeperName).triggers.items.isEmpty())
     }
 
     @Test
@@ -128,7 +127,7 @@ class NightlyTestProjectsTests {
         assertEquals(true, schedule.enabled)
         assertEquals("+:${cron.branch}", schedule.branchFilter)
         assertEquals("7", (schedule.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron).hours)
-        assertFinishTrigger(getBuildFromProject(project, ServiceSweeperName), composite, cron.branch)
+        assertTrue("Service sweeper should not have independent triggers", getBuildFromProject(project, ServiceSweeperName).triggers.items.isEmpty())
     }
 
     @Test

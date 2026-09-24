@@ -8,6 +8,7 @@
 package projects
 
 import GlobalSweepersProjectName
+import AllProvidersNightlyTestsName
 import DefaultBranchName
 import NightlyTestsProjectId
 import ServiceSweeperName
@@ -22,6 +23,7 @@ import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.ReuseBuilds
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootGaNightly
@@ -43,22 +45,28 @@ fun globalSweepersSubProject(allConfig: AllContextParameters): Project {
     val betaProjectId = replaceCharsId("GOOGLE_BETA")
     val gaServiceSweeperId = "${DslContext.projectId}_${replaceCharsId("${gaProjectId}_${NightlyTestsProjectId}_${ServiceSweeperName}")}"
     val betaServiceSweeperId = "${DslContext.projectId}_${replaceCharsId("${betaProjectId}_${NightlyTestsProjectId}_${ServiceSweeperName}")}"
+    val allProvidersNightlyTestsId = "${DslContext.projectId}_${replaceCharsId(AllProvidersNightlyTestsName)}"
 
-    // GA completion triggers the gate; depending on GA as well would queue a duplicate sweeper.
-    // Manual global sweeper runs remain independent of this gate.
+    // The root nightly composite ensures both provider test suites have finished before sweepers run.
     val nightlySweeperGate = BuildType {
         id(replaceCharsId("${sweeperId}_NIGHTLY_SWEEPER_GATE"))
         name = "Nightly Sweeper Gate"
         type = BuildTypeSettings.Type.COMPOSITE
         triggers {
             finishBuildTrigger {
-                buildType = gaServiceSweeperId
+                buildType = allProvidersNightlyTestsId
                 branchFilter = "+:$DefaultBranchName"
                 successfulOnly = false
             }
         }
         dependencies {
+            snapshot(AbsoluteId(gaServiceSweeperId)) {
+                reuseBuilds = ReuseBuilds.NO
+                onDependencyFailure = FailureAction.IGNORE
+                onDependencyCancel = FailureAction.IGNORE
+            }
             snapshot(AbsoluteId(betaServiceSweeperId)) {
+                reuseBuilds = ReuseBuilds.NO
                 onDependencyFailure = FailureAction.IGNORE
                 onDependencyCancel = FailureAction.IGNORE
             }

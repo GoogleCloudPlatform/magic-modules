@@ -20,10 +20,8 @@ import generated.SweepersListBeta
 import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.BuildTypeSettings
-import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 import replaceCharsId
 
@@ -83,14 +81,6 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     }
     // We still allow locks in the service sweeper build configuration for adhoc triggers of services
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
-
-    serviceSweeperConfig.triggers {
-        finishBuildTrigger {
-            buildType = "${DslContext.projectId}_${compositeId}"
-            branchFilter = "+:${cron.branch}"
-            successfulOnly = false
-        }
-    }
 
     return Project {
         id(projectId)
