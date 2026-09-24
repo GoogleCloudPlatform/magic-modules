@@ -69,10 +69,7 @@ class NightlyTestProjectsTests {
             getBuildFromProject(gaNightlyTestProject, AllNightlyTestsName),
             getBuildFromProject(betaNightlyTestProject, AllNightlyTestsName)
         )
-        val packageBuilds = listOf(gaNightlyTestProject, betaNightlyTestProject).flatMap { project ->
-            project.buildTypes.filter { it.name != ServiceSweeperName && it.name != AllNightlyTestsName }
-        }
-        assertSnapshotDependencies(allProvidersComposite, providerComposites + packageBuilds, FailureAction.ADD_PROBLEM)
+        assertSnapshotDependencies(allProvidersComposite, providerComposites, FailureAction.ADD_PROBLEM)
     }
 
     @Test

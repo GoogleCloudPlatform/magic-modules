@@ -51,7 +51,7 @@ You can find the builds for nightly tests at:
 * [Google > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
 * [Google Beta > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS?branch=refs%2Fheads%2Fnightly-test&mode=builds#all-projects)
 
-These projects contain a build configuration per service package, plus a composite **All Nightly Tests** build. The root **All Providers Nightly Tests** composite is the nightly acceptance-test cron entry point at 4am UTC on `refs/heads/nightly-test`. It snapshot-depends directly on all GA and Beta package builds and both provider composites, allowing the package builds to enter the queue together with synchronized source revisions. The provider-level composites and package builds have no independent cron triggers. Each provider's Service Sweeper has a finish-build trigger watching its composite.
+These projects contain one build per service package and an **All Nightly Tests** composite. At 4am UTC, **All Providers Nightly Tests** starts both provider composites on `refs/heads/nightly-test`; those composites run their package builds. Service Sweepers run after the root composite.
 
 To view all the failed tests for a given commit:
 
@@ -125,7 +125,7 @@ In REPLAYING mode the build will download VCR cassettes from a GCS Bucket and ru
 
 ### Sweeping the Nightly Test Projects
 
-The Service Sweeper builds in [`Google > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects) and [`Google Beta > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects) use finish-build triggers watching their **All Nightly Tests** composite. They do not have snapshot dependencies, so manually dispatching a service sweeper does not start the acceptance-test composite. The composite records package failures and cancellations as build problems; the service sweeper is a downstream build, not part of the composite itself.
+The Service Sweepers in [`Google > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects) and [`Google Beta > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects) run from the global nightly sweeper gate after testing completes. They have no snapshot dependencies, so manual runs remain independent.
 
 Package builds retain per-service shared-resource locks. Each Service Sweeper locks all values of its provider's shared resource, preventing it from overlapping with package builds that acquire those locks, including ad hoc runs. GA and Beta service sweepers use separate provider locks.
 
@@ -139,8 +139,6 @@ The Service Sweeper builds in [`Google > Upstream MM Testing`](https://hashicorp
 
 When testing the GA and Beta providers we can run tests in parallel because those tests use separate GCP projects. This creates a boundary between the two test suites and ensures they don't clash. However if an acceptance test provisions `google_project` resources in the process then there is no longer a clear GA/Beta boundary based on which host project is in use. This makes sweeping up these resources tough, as there's potential to disrupt any other running build.
 
-The **Global Sweepers** project contains a **Nightly Sweeper Gate** plus separate **Project Sweeper** and **Folder Sweeper** builds. The gate starts after **All Providers Nightly Tests** finishes on `refs/heads/nightly-test`, and snapshot-depends on both the GA and Beta Service Sweepers with `reuseBuilds = NO`, ignoring dependency failures and cancellations. The service sweepers have no dependencies, so this does not queue provider test builds. Project and Folder Sweepers use unfiltered finish-build triggers watching the gate, which has no VCS branch. They use the GA nightly VCS root, so automatic and manual runs default to `refs/heads/nightly-test`. Neither global sweeper has a cron trigger or snapshot dependencies, so both can be manually dispatched without starting the nightly test chain.
+The **Global Sweepers** project contains a **Nightly Sweeper Gate**, a Project Sweeper, and a Folder Sweeper. The gate starts after **All Providers Nightly Tests**, runs fresh GA and Beta Service Sweepers, and then starts the Project and Folder Sweepers. Manual sweeper runs do not start the test chain.
 
-Both global sweepers acquire all values of the GA, Beta, and VCR shared resources. This prevents them from running concurrently with builds that acquire those locks, or with each other. Branch filters select the events that trigger cleanup; they do not restrict which GCP resources cleanup can affect.
-
-The service and global sweeper builds themselves intentionally have no snapshot dependencies: manually dispatching them must not queue test builds. Only the gate has sweeper dependencies, and `reuseBuilds = NO` ensures each nightly gate run performs fresh service-sweeper builds instead of reusing an older result. Shared-resource locks prevent overlapping execution, but do not wait for every queued test to finish.
+All sweepers use shared-resource locks to avoid running cleanup alongside tests or another sweeper.

@@ -8,7 +8,6 @@
 package projects
 
 import AllProvidersNightlyTestsName
-import NightlyTestsProjectId
 import ProviderNameBeta
 import ProviderNameGa
 import SharedResourceNameBeta
@@ -30,7 +29,6 @@ import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.sharedResource
 import projects.feature_branches.featureBranchResourceIdentitySubProject
-import projects.reused.getAllPackageInProviderVersion
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootGaNightly
 
@@ -88,21 +86,9 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
                 root(HashiCorpVCSRootGaNightly)
             }
             dependencies {
-                listOf(
-                    "GOOGLE" to ProviderNameGa,
-                    "GOOGLE_BETA" to ProviderNameBeta
-                ).forEach { (providerProject, providerName) ->
-                    // Direct package dependencies let GA and Beta builds enter the queue together.
-                    getAllPackageInProviderVersion(providerName).keys.forEach { packageName ->
-                        val packageBuildId = replaceCharsId(
-                            "${providerProject}_${NightlyTestsProjectId}_${providerName}_PACKAGE_${packageName}"
-                        )
-                        snapshot(AbsoluteId("${DslContext.projectId}_$packageBuildId")) {
-                            onDependencyFailure = FailureAction.ADD_PROBLEM
-                            onDependencyCancel = FailureAction.ADD_PROBLEM
-                        }
-                    }
-                    val compositeId = replaceCharsId("${providerProject}_${NightlyTestsProjectId}_all_tests")
+                listOf("GOOGLE", "GOOGLE_BETA").forEach { providerProject ->
+                    // Provider composites transitively include all package builds.
+                    val compositeId = replaceCharsId("${providerProject}_NightlyTests_all_tests")
                     snapshot(AbsoluteId("${DslContext.projectId}_$compositeId")) {
                         onDependencyFailure = FailureAction.ADD_PROBLEM
                         onDependencyCancel = FailureAction.ADD_PROBLEM
