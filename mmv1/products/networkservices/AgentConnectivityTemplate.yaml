@@ -180,6 +180,7 @@ properties:
           - PRIVATE_RANGES_ONLY
       - name: tlsConfig
         type: NestedObject
+        immutable: true
         description: |
           The TLS configuration for the egress traffic.
         properties:
