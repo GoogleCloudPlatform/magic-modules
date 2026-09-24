@@ -81,7 +81,7 @@ samples:
         resource_id_vars:
           project_id: tf-test-project
           service_id: bundled-service
-          bucket_name: tf-test-gae-bkt-bundled
+          bucket_name: gae-bkt-bundled
           sa_email: gae-sa
         ignore_read_extra:
           - delete_service_on_destroy
@@ -92,7 +92,7 @@ samples:
       - name: app_engine_standard_app_version_vpc_access
         resource_id_vars:
           service_id: vpc-service
-          bucket_name: tf-test-gae-bkt-vpc-access
+          bucket_name: gae-bkt-vpc-access
           sa_email: gae-sa
         ignore_read_extra:
           - delete_service_on_destroy

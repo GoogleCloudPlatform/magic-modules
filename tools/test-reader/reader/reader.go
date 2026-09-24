@@ -17,11 +17,40 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
-type Resource map[string]any // config of one resource in a test
+// Block is the flattened set of attributes in one block body, keyed by
+// attribute path, e.g. {"boot_disk.initialize_params.image": "..."}.
+type Block map[string]any
 
-type Resources map[string]Resource // map of resource names to resource configs
+// Blocks is a map of name labels to blocks. The name label is a block's second
+// label, e.g. "foobar" in `resource "google_compute_instance" "foobar"`.
+type Blocks map[string]Block
 
-type Step map[string]Resources // map of resource types to resources of that type
+// TypeLabels is a map of type labels to the blocks carrying that label. The
+// type label is a block's first label, e.g. "google_compute_instance" in
+// `resource "google_compute_instance" "foobar"`.
+type TypeLabels map[string]Blocks
+
+// BlockType is the type of a top-level block, in HCL's sense of the term:
+// "resource", "data", "list" or "ephemeral". Not to be confused with a block's
+// type label, which names the resource type (see TypeLabels).
+//
+// It holds the literal keyword from the config rather than a closed set, so
+// block types Terraform adds in the future are recorded under their own type
+// rather than being dropped or attributed to an existing one.
+type BlockType string
+
+const (
+	ResourceBlock  BlockType = "resource"
+	DataBlock      BlockType = "data"
+	ListBlock      BlockType = "list"
+	EphemeralBlock BlockType = "ephemeral"
+)
+
+// Step is a map of block types to the blocks declared with that type.
+// Block types are kept separate because a data, list or ephemeral block can
+// share a type label with a resource block without sharing its schema, so an
+// attribute set on one says nothing about the same-named attribute on another.
+type Step map[BlockType]TypeLabels
 
 type Test struct {
 	Name  string
@@ -216,15 +245,10 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
-						var configStr string
-						var err error
-						if configCallExpr, ok := keyValueExpr.Value.(*ast.CallExpr); ok {
-							configStr, err = readConfigCallExpr(configCallExpr, funcDecls, varDecls)
-						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
-							if configVar, ok := varDecls[ident.Name]; ok {
-								configStr, err = strconv.Unquote(configVar.Value)
-							}
-						}
+						// A config is any expression that evaluates to a config
+						// string, and reads the same way here as it does in a
+						// config func's return statement.
+						configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls)
 						if err != nil {
 							errs = append(errs, err)
 						}
@@ -244,15 +268,49 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
-// Read the call expression in the public test function that returns the config.
+// Read a call expression that produces a config and return the config string.
+// The call is either to a config func declared in the same package, or to a
+// formatting function that builds a config out of its arguments.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	// Dispatch on the callee rather than on the shape of the arguments: a
+	// config func can take a string as its first argument, and that string is a
+	// value to interpolate, not a config.
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
 			return readConfigFunc(configFunc, funcDecls, varDecls)
 		}
 		return "", fmt.Errorf("failed to find function declaration %s", ident.Name)
 	}
-	return "", fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
+	selectorExpr, ok := configCallExpr.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return "", fmt.Errorf("failed to read config from call to %v (%T)", configCallExpr.Fun, configCallExpr.Fun)
+	}
+	// A function from another package can't be followed, so only the formatting
+	// functions below, whose result is known from their arguments, can be read.
+	// Reading the arguments of anything else would report fields as covered
+	// that the test may never apply.
+	switch selectorExpr.Sel.Name {
+	case "Sprintf", "Nprintf":
+		// The first argument is the config template and the rest are values
+		// interpolated into it.
+		if len(configCallExpr.Args) == 0 {
+			return "", fmt.Errorf("failed to find a config template in call to %s.%s", selectorExpr.X, selectorExpr.Sel.Name)
+		}
+		return readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
+	case "Sprint":
+		// Every argument is part of the config. This is used to join a shared
+		// setup config to the config under test.
+		var configStr strings.Builder
+		for _, arg := range configCallExpr.Args {
+			argConfigStr, err := readConfigFuncResult(arg, funcDecls, varDecls)
+			if err != nil {
+				return "", err
+			}
+			configStr.WriteString(argConfigStr)
+		}
+		return configStr.String(), nil
+	}
+	return "", fmt.Errorf("failed to read config from call to %s.%s, which is not a config formatting function", selectorExpr.X, selectorExpr.Sel.Name)
 }
 
 func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
@@ -271,8 +329,15 @@ func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl
 func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
 		return strconv.Unquote(basicLit.Value)
+	} else if ident, ok := result.(*ast.Ident); ok {
+		// A config declared as a package-level string, often a base config
+		// shared by several config funcs.
+		if configVar, ok := varDecls[ident.Name]; ok {
+			return strconv.Unquote(configVar.Value)
+		}
+		return "", fmt.Errorf("failed to find variable declaration %s", ident.Name)
 	} else if callExpr, ok := result.(*ast.CallExpr); ok {
-		return readConfigFuncCallExpr(callExpr, funcDecls, varDecls)
+		return readConfigCallExpr(callExpr, funcDecls, varDecls)
 	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
 		xConfigStr, err := readConfigFuncResult(binaryExpr.X, funcDecls, varDecls)
 		if err != nil {
@@ -287,26 +352,21 @@ func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, v
 	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
 }
 
-// Read the call expression in the config function that returns the config string.
-// The call expression can contain a nested call expression.
-// Return the config string.
-func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
-	if len(configFuncCallExpr.Args) > 0 {
-		if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-			return strconv.Unquote(basicLit.Value)
-		} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
-			return readConfigFuncCallExpr(nestedCallExpr, funcDecls, varDecls)
-		}
-	}
-	// Config string not readable from args, attempt to read call expression as a helper function.
-	return readConfigCallExpr(configFuncCallExpr, funcDecls, varDecls)
-}
-
 var subPattern = regexp.MustCompile("%({[^{}]*}|[vTtbcspqxXUeEfFgGdo])")
+
+// A substitution alone on its line injects whole HCL statements rather than a
+// value: most often a shared "setup" block, sometimes a conditionally present
+// attribute or nested block. Substituting a value there leaves a bare token
+// where HCL requires an argument or block definition.
+var wholeLineSubPattern = regexp.MustCompile("(?m)^[ \t]*(?:" + subPattern.String() + ")[ \t]*$")
 
 // Read the config string and return a test step.
 func readConfigStr(configStr string) (Step, error) {
 	// Remove fmt substitutions because they interfere with hcl parsing.
+	// Drop whole-line substitutions entirely; whatever they inject is not
+	// counted as covered, but the rest of the config still parses instead of
+	// the whole test step being discarded.
+	configStr = wholeLineSubPattern.ReplaceAllString(configStr, "")
 	// Replace with a value that can be parsed outside quotation marks.
 	configStr = subPattern.ReplaceAllString(configStr, "true")
 	parser := hclparse.NewParser()
@@ -314,58 +374,50 @@ func readConfigStr(configStr string) (Step, error) {
 	if diagnostics.HasErrors() {
 		return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
 	}
-	content, diagnostics := file.Body.Content(&hcl.BodySchema{
-		Blocks: []hcl.BlockHeaderSchema{
-			{
-				Type:       "resource",
-				LabelNames: []string{"type", "name"},
-			},
-			{
-				Type:       "data",
-				LabelNames: []string{"type", "name"},
-			},
-			{
-				Type:       "output",
-				LabelNames: []string{"name"},
-			},
-			{
-				Type:       "provider",
-				LabelNames: []string{"name"},
-			},
-			{
-				Type: "locals",
-			},
-		},
-	})
-	if diagnostics.HasErrors() {
-		return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
+	// Iterate over the top-level blocks directly rather than validating the
+	// body against a schema of known block types. Only blocks with a type and
+	// a name label (resource, data, ephemeral, list, ...) are of interest, and
+	// every other block is skipped below. Enumerating block types here would
+	// mean a config using any block Terraform adds later fails to parse, which
+	// silently drops the whole test step.
+	body, ok := file.Body.(*hclsyntax.Body)
+	if !ok {
+		return nil, fmt.Errorf("couldn't get hclsyntax body from %v", file.Body)
 	}
-	m := make(map[string]Resources)
+	step := make(Step)
 	errs := make([]error, 0)
-	for _, block := range content.Blocks {
+	for _, block := range body.Blocks {
 		if len(block.Labels) != 2 {
+			// Not a type-and-name block: terraform, locals, variable, check,
+			// output, provider, module and moved blocks all have zero or one
+			// label and declare nothing whose attributes could be under test.
 			continue
 		}
-		if _, ok := m[block.Labels[0]]; !ok {
-			// Create an empty map for this resource type.
-			m[block.Labels[0]] = make(Resources)
+		blockType := BlockType(block.Type)
+		typeLabel, nameLabel := block.Labels[0], block.Labels[1]
+		if _, ok := step[blockType]; !ok {
+			// Create an empty map for this block type.
+			step[blockType] = make(TypeLabels)
 		}
-		// Use the resource name as a key.
-		resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
+		if _, ok := step[blockType][typeLabel]; !ok {
+			// Create an empty map for this type label.
+			step[blockType][typeLabel] = make(Blocks)
+		}
+		blockConfig, err := readHCLBlockBody(block.Body, file.Bytes)
 		if err != nil {
 			errs = append(errs, err)
 		}
-		resourceConfig = flattenResource(resourceConfig, "")
-		m[block.Labels[0]][block.Labels[1]] = resourceConfig
+		blockConfig = flattenBlock(blockConfig, "")
+		step[blockType][typeLabel][nameLabel] = blockConfig
 	}
 	if len(errs) > 0 {
-		return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
+		return step, fmt.Errorf("errors reading hcl blocks: %v", errs)
 	}
-	return m, nil
+	return step, nil
 }
 
-func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
-	var m Resource
+func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Block, error) {
+	var m Block
 	gohcl.DecodeBody(body, nil, &m)
 	for k, v := range m {
 		if attr, ok := v.(*hcl.Attribute); ok {
@@ -383,9 +435,9 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 			errs = append(errs, err)
 		}
 		if existing, ok := m[block.Type]; ok {
-			// Merge the fields from the current block into the existing resource config.
-			if existingResource, ok := existing.(Resource); ok {
-				mergeResources(existingResource, blockConfig)
+			// Merge the attributes from the current block into the existing one.
+			if existingBlock, ok := existing.(Block); ok {
+				mergeBlocks(existingBlock, blockConfig)
 			}
 		} else {
 			m[block.Type] = blockConfig
@@ -398,12 +450,12 @@ func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {
 }
 
 // Perform a recursive one-way merge of b into a.
-func mergeResources(a, b Resource) {
+func mergeBlocks(a, b Block) {
 	for k, bv := range b {
 		if av, ok := a[k]; ok {
-			if avr, ok := av.(Resource); ok {
-				if bvr, ok := bv.(Resource); ok {
-					mergeResources(avr, bvr)
+			if avr, ok := av.(Block); ok {
+				if bvr, ok := bv.(Block); ok {
+					mergeBlocks(avr, bvr)
 				}
 			}
 		} else {
@@ -412,18 +464,21 @@ func mergeResources(a, b Resource) {
 	}
 }
 
-func flattenResource(r Resource, parent string) Resource {
-	flattened := make(Resource)
+// Flatten nested blocks into dotted attribute paths, e.g. a boot_disk block
+// containing an initialize_params block containing an image attribute becomes
+// "boot_disk.initialize_params.image".
+func flattenBlock(b Block, parent string) Block {
+	flattened := make(Block)
 
 	if parent != "" {
 		parent += "."
 	}
 
-	for fieldName, fieldValue := range r {
+	for fieldName, fieldValue := range b {
 		key := parent + fieldName
-		nestedObject, _ := fieldValue.(Resource)
+		nestedObject, _ := fieldValue.(Block)
 		if nestedObject != nil {
-			for childKey, childField := range flattenResource(nestedObject, key) {
+			for childKey, childField := range flattenBlock(nestedObject, key) {
 				flattened[childKey] = childField
 			}
 		} else {

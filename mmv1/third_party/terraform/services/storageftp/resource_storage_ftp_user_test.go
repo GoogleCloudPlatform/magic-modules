@@ -28,13 +28,17 @@ func TestAccStorageFtpUser_updateMappingsAndCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageFtpUser_initial(bucketName, saName, serverId, userId),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_storage_ftp_user.user_ftp", "username"),
+					resource.TestCheckResourceAttrSet("google_storage_ftp_user.user_ftp", "state"),
+				),
 			},
 			{
 				ResourceName:      "google_storage_ftp_user.user_ftp",
 				ImportState:       true,
 				ImportStateVerify: true,
 				// Ignore location, server_id, and user_id as they are URL-only parameters not returned directly in the API GET response body.
-				ImportStateVerifyIgnore: []string{"location", "server_id", "user_id"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels", "user_id"},
 			},
 			{
 				Config: testAccStorageFtpUser_updated(bucketName, saName, serverId, userId),
@@ -49,7 +53,7 @@ func TestAccStorageFtpUser_updateMappingsAndCredentials(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				// Ignore location, server_id, and user_id as they are URL-only parameters not returned directly in the API GET response body.
-				ImportStateVerifyIgnore: []string{"location", "server_id", "user_id"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels", "user_id"},
 			},
 		},
 	})
@@ -78,7 +82,7 @@ func TestAccStorageFtpUser_forceNewOnUserIdChange(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				// Ignore location, server_id, and user_id as they are URL-only parameters not returned directly in the API GET response body.
-				ImportStateVerifyIgnore: []string{"location", "server_id", "user_id"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels", "user_id"},
 			},
 			{
 				Config: testAccStorageFtpUser_initial(bucketName, saName, serverId, userId2),
@@ -93,7 +97,7 @@ func TestAccStorageFtpUser_forceNewOnUserIdChange(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				// Ignore location, server_id, and user_id as they are URL-only parameters not returned directly in the API GET response body.
-				ImportStateVerifyIgnore: []string{"location", "server_id", "user_id"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "server_id", "terraform_labels", "user_id"},
 			},
 		},
 	})
@@ -143,6 +147,11 @@ resource "google_storage_ftp_user" "user_ftp" {
     credential_name     = "initial-cred"
     credential_type     = "PUBLIC_KEY"
     ssh_public_key_body = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPM4pxpbPpjuBocS6qlW0BHRYgH5xmv/yVrANZR9lc1N initial@example.com"
+  }
+
+  labels = {
+    env = "test"
+    foo = "bar"
   }
 }
 `, bucketName, saName, serverId, userId)
@@ -198,6 +207,11 @@ resource "google_storage_ftp_user" "user_ftp" {
     credential_name     = "updated-cred"
     credential_type     = "PUBLIC_KEY"
     ssh_public_key_body = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOmT+QzP+uQ+lS/1MhE9GfaU6KzC5l0hF1T5aH8l3g8v updated@example.com"
+  }
+
+  labels = {
+    env = "test-updated"
+    foo = "baz"
   }
 }
 `, bucketName, saName, serverId, userId)

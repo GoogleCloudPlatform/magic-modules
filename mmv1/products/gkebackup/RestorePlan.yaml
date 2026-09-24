@@ -45,6 +45,10 @@ async:
 autogen_async: true
 generate_list_resource: true
 include_in_tgc_next: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
 custom_code:
 samples:
   - name: gkebackup_restoreplan_all_namespaces
@@ -61,7 +65,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_rollback_namespace
@@ -78,7 +82,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_protected_application
@@ -95,7 +99,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_all_cluster_resources
@@ -112,7 +116,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_rename_namespace
@@ -129,7 +133,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_second_transformation
@@ -146,7 +150,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_gitops_mode
@@ -163,7 +167,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_restore_order
@@ -180,7 +184,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
   - name: gkebackup_restoreplan_volume_res
@@ -197,7 +201,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
         oics_vars_overrides:
           deletion_protection: "false"
 parameters:

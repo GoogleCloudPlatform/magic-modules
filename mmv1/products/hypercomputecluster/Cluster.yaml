@@ -47,7 +47,12 @@ samples:
           cluster_id: mycluster1
           network_id: cluster-net1
         test_vars_overrides:
-          cluster_id: fmt.Sprintf("tf%s", acctest.RandString(t, 8))
+          # cluster_id must be at most 10 characters and may only contain
+          # lowercase letters and numbers, so the automatic "tf-test-" prefix
+          # cannot be used here. "tfgen" is also recognized by the sweeper and
+          # fits the charset/length limits.
+          cluster_id: fmt.Sprintf("tfgen%s", acctest.RandString(t, 5))
+          # "cluster-" is already a sweeper-recognized prefix.
           network_id: fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))
 parameters:
   - name: location

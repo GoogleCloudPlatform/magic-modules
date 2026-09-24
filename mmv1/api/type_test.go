@@ -132,13 +132,6 @@ func TestTypeFieldType(t *testing.T) {
 			expected: []string{},
 		},
 		{
-			description: "WriteOnlyLegacy field",
-			obj: Type{
-				WriteOnlyLegacy: true,
-			},
-			expected: []string{"Optional", "Write-Only"},
-		},
-		{
 			description: "WriteOnly field",
 			obj: Type{
 				WriteOnly: true,

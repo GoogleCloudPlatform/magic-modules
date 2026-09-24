@@ -14,6 +14,8 @@
 ---
 name: IcebergTable
 api_resource_type_kind: Table
+api_variant_patterns:
+  - projects/{project}/catalogs/{catalog}/namespaces/{namespace}/tables/{table}
 description: |
   IcebergTables are the primary objects in an IcebergCatalog.
 base_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables

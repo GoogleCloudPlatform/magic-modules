@@ -1,8 +1,12 @@
 package reader
 
 import (
+	"go/ast"
+	"go/parser"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -29,11 +33,11 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 	if len(tests[0].Steps) != 2 {
 		t.Fatalf("unexpected number of test steps: %d, expected 2", len(tests[0].Steps))
 	}
-	if coveredResources, ok := tests[0].Steps[0]["covered_resource"]; !ok {
+	if coveredResources, ok := tests[0].Steps[0][ResourceBlock]["covered_resource"]; !ok {
 		t.Errorf("did not find covered_resource in %v", tests[0].Steps[0])
 	} else if coveredResource, ok := coveredResources["resource"]; !ok {
 		t.Errorf("did not find a covered resource in %v", coveredResources)
-	} else if expectedResource := (Resource{
+	} else if expectedResource := (Block{
 		"field_four.field_five.field_six": "true",
 		"field_one":                       "\"value-one\"",
 		"field_seven":                     "true",
@@ -53,11 +57,11 @@ func TestReadConfigVariableTestFile(t *testing.T) {
 	if len(tests[0].Steps) != 1 {
 		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
 	}
-	if configVariableResources, ok := tests[0].Steps[0]["config_variable"]; !ok {
+	if configVariableResources, ok := tests[0].Steps[0][ResourceBlock]["config_variable"]; !ok {
 		t.Errorf("did not find config_variable in %v", tests[0].Steps[0])
 	} else if configVariableResource, ok := configVariableResources["basic"]; !ok {
 		t.Errorf("did not find a resource in %v", configVariableResources)
-	} else if expectedResource := (Resource{"field_one": "\"value-one\""}); !reflect.DeepEqual(configVariableResource, expectedResource) {
+	} else if expectedResource := (Block{"field_one": "\"value-one\""}); !reflect.DeepEqual(configVariableResource, expectedResource) {
 		t.Errorf("found wrong fields in config variable config: %#v, expected %#v", configVariableResource, expectedResource)
 	}
 }
@@ -72,23 +76,27 @@ func TestReadMultipleResourcesTestFile(t *testing.T) {
 	}
 	if expectedSteps := []Step{
 		{
-			"resource_one": {
-				"instace_two":  {"field_one": "\"value-one\""},
-				"instance_one": {"field_one": "\"value-one\""},
-			},
-			"resource_two": {
-				"instace_one": {"field_one": "\"value-one\""},
-				"instace_two": {"field_one": "\"value-one\""},
+			ResourceBlock: {
+				"resource_one": {
+					"instace_two":  {"field_one": "\"value-one\""},
+					"instance_one": {"field_one": "\"value-one\""},
+				},
+				"resource_two": {
+					"instace_one": {"field_one": "\"value-one\""},
+					"instace_two": {"field_one": "\"value-one\""},
+				},
 			},
 		},
 		{
-			"resource_one": {
-				"instace_two":  {"field_one": "\"value-two\""},
-				"instance_one": {"field_one": "\"value-two\""},
-			},
-			"resource_two": {
-				"instace_one": {"field_one": "\"value-two\""},
-				"instace_two": {"field_one": "\"value-two\""},
+			ResourceBlock: {
+				"resource_one": {
+					"instace_two":  {"field_one": "\"value-two\""},
+					"instance_one": {"field_one": "\"value-two\""},
+				},
+				"resource_two": {
+					"instace_one": {"field_one": "\"value-two\""},
+					"instace_two": {"field_one": "\"value-two\""},
+				},
 			},
 		},
 	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
@@ -109,8 +117,10 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 			Name: "testAccSerialResource1",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {"field_one": "\"value-one\""},
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {"field_one": "\"value-one\""},
+						},
 					},
 				},
 			},
@@ -119,9 +129,11 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 			Name: "testAccSerialResource2",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {
-							"field_two.field_three": "\"value-two\"",
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {
+								"field_two.field_three": "\"value-two\"",
+							},
 						},
 					},
 				},
@@ -144,8 +156,10 @@ func TestReadCrossFileTests(t *testing.T) {
 			Name: "testAccCrossFile1",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {"field_one": "\"value-one\""},
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {"field_one": "\"value-one\""},
+						},
 					},
 				},
 			},
@@ -154,9 +168,11 @@ func TestReadCrossFileTests(t *testing.T) {
 			Name: "testAccCrossFile2",
 			Steps: []Step{
 				{
-					"serial_resource": {
-						"resource": {
-							"field_two.field_three": "\"value-two\"",
+					ResourceBlock: {
+						"serial_resource": {
+							"resource": {
+								"field_two.field_three": "\"value-two\"",
+							},
 						},
 					},
 				},
@@ -186,14 +202,16 @@ func TestReadHelperFunctionCall(t *testing.T) {
 		Name: "TestAccFunctionCallResource",
 		Steps: []Step{
 			{
-				"helped_resource": Resources{
-					"primary": Resource{
-						"field_one": "\"value-one\"",
+				ResourceBlock: TypeLabels{
+					"helped_resource": Blocks{
+						"primary": Block{
+							"field_one": "\"value-one\"",
+						},
 					},
-				},
-				"helper_resource": Resources{
-					"default": Resource{
-						"field_one": "\"value-one\"",
+					"helper_resource": Blocks{
+						"default": Block{
+							"field_one": "\"value-one\"",
+						},
 					},
 				},
 			},
@@ -204,45 +222,281 @@ func TestReadHelperFunctionCall(t *testing.T) {
 	}
 }
 
-func TestFlattenResource(t *testing.T) {
+func TestReadBlockTypesTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/block_types_test.go"})
+	if err != nil {
+		t.Fatalf("error reading block types test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	// Blocks with a type and a name label are read regardless of the block
+	// type, blocks with any other number of labels are ignored, and each block
+	// type gets its own bucket even when they all share a type label.
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"block_types_resource": {"resource": {"field_one": "var.var_one"}},
+		},
+		DataBlock: {
+			"block_types_resource": {"data": {"field_two": "\"value-two\""}},
+		},
+		EphemeralBlock: {
+			"block_types_resource": {"ephemeral": {"field_three": "\"value-three\""}},
+		},
+		ListBlock: {
+			"block_types_resource": {"list_query": {"provider": "google"}},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/whole_line_substitution_test.go"})
+	if err != nil {
+		t.Fatalf("error reading whole line substitution test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	// A substitution alone on its line is dropped, so neither the setup block
+	// it would have injected at the top level nor the field it would have
+	// injected inside a block body is recorded. Everything else still is.
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"whole_line_substitution": {
+				"resource": {
+					"field_one":              "\"value-one\"",
+					"field_three.field_five": "\"value-five\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestReadFormattingCallTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/formatting_call_test.go"})
+	if err != nil {
+		t.Fatalf("error reading formatting call test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	// A config is read the same way wherever it is assembled: inline in the
+	// step or in a config func, from a literal, a shared base config, a
+	// concatenation of the two, or a call to another config func.
+	if expectedSteps := []Step{
+		{
+			ResourceBlock: {
+				"formatting_call_inline": {"inline": {"field_two": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_base":   {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_concat": {"concat": {"field_three": "\"true\""}},
+			},
+		},
+		{
+			// The string passed to the nested config func is a value to
+			// interpolate, not a config.
+			ResourceBlock: {
+				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_base":       {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_literal": {"literal": {"field_six": "\"value-six\""}},
+			},
+		},
+		{
+			// fmt.Sprint has no template: every argument is part of the config,
+			// so both the shared base resource in Args[0] and the resource in
+			// Args[1] must be recorded.
+			ResourceBlock: {
+				"formatting_call_base":   {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_sprint": {"sprint": {"field_seven": "\"true\""}},
+			},
+		},
+	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
+		t.Errorf("found unexpected steps: %#v, expected %#v", tests[0].Steps, expectedSteps)
+	}
+}
+
+func TestReadNonFormattingCallTestFile(t *testing.T) {
+	// Only known formatting functions return their first argument's config;
+	// calling any other cross-package helper must return a "not a config
+	// formatting function" error rather than recording its first argument as
+	// coverage. This fixture is written to a temp dir because detector_test.go
+	// runs ReadAllTests over testdata/ and fails on any intentional read error.
+	testFile := filepath.Join(t.TempDir(), "non_formatting_call_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccNonFormattingCall(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: acctest.EchoResourceConfig(` + "`" + `
+resource "non_formatting_call_decoy" "decoy" {
+  field_one = "value-one"
+}
+` + "`" + `, "echo"),
+			},
+		},
+	})
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	tests, errs := ReadTestFiles([]string{testFile})
+	err, ok := errs["TestAccNonFormattingCall"]
+	if !ok {
+		t.Fatalf("expected an error for TestAccNonFormattingCall, got %v", errs)
+	}
+	if !strings.Contains(err.Error(), "is not a config formatting function") {
+		t.Errorf("unexpected error %q, expected it to contain %q", err.Error(), "is not a config formatting function")
+	}
+	if len(tests) != 1 || len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected tests %#v", tests)
+	}
+	if len(tests[0].Steps[0]) != 0 {
+		t.Errorf("expected empty step when config call is not a formatting function, got %#v", tests[0].Steps[0])
+	}
+}
+
+func TestReadConfigCallExpr(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		expr     string
+		expected string
+		wantErr  string
+	}{
+		{
+			name:     "sprintf-template",
+			expr:     "fmt.Sprintf(`resource \"a\" \"b\" {}`, name)",
+			expected: "resource \"a\" \"b\" {}",
+		},
+		{
+			name:     "nprintf-template",
+			expr:     "acctest.Nprintf(`resource \"a\" \"b\" {}`, context)",
+			expected: "resource \"a\" \"b\" {}",
+		},
+		{
+			// Sprint has no template: every argument is part of the config.
+			name:     "sprint-concatenation",
+			expr:     "fmt.Sprint(`resource \"a\" \"b\" {}`, `resource \"c\" \"d\" {}`)",
+			expected: "resource \"a\" \"b\" {}resource \"c\" \"d\" {}",
+		},
+		{
+			// Only a formatting function is known to return its first
+			// argument's config. Reading the first argument of anything else
+			// would report fields as covered that the test may never apply.
+			name:    "non-formatting-call",
+			expr:    "acctest.EchoResourceConfig(`resource \"a\" \"b\" {}`, \"echo\")",
+			wantErr: "is not a config formatting function",
+		},
+		{
+			name:    "undeclared-config-func",
+			expr:    "testAccUndeclared(\"name\")",
+			wantErr: "failed to find function declaration testAccUndeclared",
+		},
+		{
+			name:    "formatting-call-without-arguments",
+			expr:    "fmt.Sprintf()",
+			wantErr: "failed to find a config template in call to fmt.Sprintf",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			expr, err := parser.ParseExpr(tc.expr)
+			if err != nil {
+				t.Fatalf("error parsing %s: %v", tc.expr, err)
+			}
+			callExpr, ok := expr.(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("%s is not a call expression", tc.expr)
+			}
+			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{})
+			if tc.wantErr != "" {
+				if err == nil {
+					t.Errorf("expected an error containing %q reading %s, read %q", tc.wantErr, tc.expr, configStr)
+				} else if !strings.Contains(err.Error(), tc.wantErr) {
+					t.Errorf("unexpected error %q reading %s, expected it to contain %q", err.Error(), tc.expr, tc.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("error reading %s: %v", tc.expr, err)
+			}
+			if configStr != tc.expected {
+				t.Errorf("read %q from %s, expected %q", configStr, tc.expr, tc.expected)
+			}
+		})
+	}
+}
+
+func TestFlattenBlock(t *testing.T) {
 	for _, tc := range []struct {
 		name        string
-		unflattened Resource
-		flattened   Resource
+		unflattened Block
+		flattened   Block
 	}{
 		{
 			name:        "empty-resource",
-			unflattened: Resource{},
-			flattened:   Resource{},
+			unflattened: Block{},
+			flattened:   Block{},
 		},
 		{
 			name: "no-nested-fields",
-			unflattened: Resource{
+			unflattened: Block{
 				"a": "b",
 				"c": "d",
 			},
-			flattened: Resource{
+			flattened: Block{
 				"a": "b",
 				"c": "d",
 			},
 		},
 		{
 			name: "nested-fields",
-			unflattened: Resource{
-				"a": Resource{
-					"b": Resource{
+			unflattened: Block{
+				"a": Block{
+					"b": Block{
 						"c": "d",
 					},
 				},
 				"e": "f",
 			},
-			flattened: Resource{
+			flattened: Block{
 				"a.b.c": "d",
 				"e":     "f",
 			},
 		},
 	} {
-		if got := flattenResource(tc.unflattened, ""); !reflect.DeepEqual(got, tc.flattened) {
+		if got := flattenBlock(tc.unflattened, ""); !reflect.DeepEqual(got, tc.flattened) {
 			t.Errorf("unexpected result of flattening in test %s, expected %v, got %v", tc.name, tc.flattened, got)
 		}
 	}

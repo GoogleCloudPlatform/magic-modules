@@ -152,6 +152,10 @@ samples:
         resource_id_vars:
           backend_service_name: 'backend-service'
           health_check_name: 'health-check'
+          network_name: 'custom-vpc'
+          subnetwork_name: 'custom-subnet'
+          instance_template_name: 'instance-template'
+          igm_name: 'instance-group-manager'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     steps:
@@ -174,9 +178,6 @@ samples:
           default_neg_name: 'network-endpoint'
           health_check_name: 'health-check'
           network_name: 'network'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
     steps:
@@ -185,9 +186,6 @@ samples:
           backend_service_name: 'backend-service'
           health_check_name: 'health-check'
           authentication_name: 'authentication'
-        test_vars_overrides:
-          # for backward compatible
-          authentication_name: '"authentication" + randomSuffix'
   - name: 'backend_service_dynamic_backends'
     primary_resource_id: 'default'
     exclude_test: true

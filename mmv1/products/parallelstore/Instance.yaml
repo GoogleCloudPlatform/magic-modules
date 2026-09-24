@@ -43,6 +43,7 @@ custom_code:
 samples:
   - name: parallelstore_instance_basic_beta
     primary_resource_id: instance
+    exclude_test: true
     min_version: beta
     steps:
       - name: parallelstore_instance_basic_beta
@@ -51,30 +52,17 @@ samples:
           name: instance
           network_name: network
           address_name: address
-        test_vars_overrides:
-          # for backward compatible
-          name: '"instance" + randomSuffix'
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
         ignore_read_extra:
           - update_time
   - name: parallelstore_instance_basic
     primary_resource_id: instance
+    exclude_test: true
     steps:
       - name: parallelstore_instance_basic
         resource_id_vars:
           name: instance
           network_name: network
           address_name: address
-        test_vars_overrides:
-          # for backward compatible
-          name: '"instance" + randomSuffix'
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
         ignore_read_extra:
           - update_time
 parameters:

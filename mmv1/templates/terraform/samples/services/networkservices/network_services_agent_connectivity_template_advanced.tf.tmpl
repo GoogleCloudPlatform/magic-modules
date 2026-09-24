@@ -1,0 +1,69 @@
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  region        = "us-west2"
+  network       = google_compute_network.default.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "{{index $.ResourceIdVars "network_attachment_name"}}"
+  region                = "us-west2"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  subnetworks           = [google_compute_subnetwork.default.id]
+}
+
+resource "google_dns_managed_zone" "default" {
+  name        = "{{index $.ResourceIdVars "dns_zone_name"}}"
+  dns_name    = "example.com."
+  description = "Private zone used by AgentGateway DNS peering"
+  visibility  = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.default.id
+    }
+  }
+}
+
+resource "google_certificate_manager_trust_config" "default" {
+  name        = "{{index $.ResourceIdVars "trust_config_name"}}"
+  location    = "us-west2"
+
+  trust_stores {
+    trust_anchors { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+    intermediate_cas { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+  }
+}
+
+resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResourceId}}" {
+  agent_connectivity_template_id = "{{index $.ResourceIdVars "agent_connectivity_template_id"}}"
+  location                       = "us-west2"
+  description                    = "An advanced configuration for Agent Connectivity Template"
+
+  access_types = ["PRIVATE"]
+  access_path = "AGENT_TO_ANYWHERE"
+
+  egress_network_config {
+    vpc_egress = "ALL_TRAFFIC"
+    network_attachment = google_compute_network_attachment.default.id
+    dns_peering_config {
+      domains        = [google_dns_managed_zone.default.dns_name]
+      target_network = google_compute_network.default.id
+    }
+    tls_config {
+      trust_config = "projects/${data.google_project.project.number}/locations/us-west2/trustConfigs/${google_certificate_manager_trust_config.default.name}"
+      additional_roots = "NO_ADDITIONAL_ROOTS"
+    }
+  }
+}

@@ -50,9 +50,6 @@ samples:
           network: network
           tag_key: tag-key
           tag_value: tag-value
-        test_vars_overrides:
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: ORG_ID
           project_name: PROJECT_NAME
@@ -76,9 +73,6 @@ samples:
         resource_id_vars:
           fw_policy: fw-policy
           network: network
-        test_vars_overrides:
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           project_name: PROJECT_NAME
   - name: network_firewall_policy_rule_network_context_egress
@@ -96,9 +90,6 @@ samples:
         resource_id_vars:
           fw_policy: fw-policy
           network: network
-        test_vars_overrides:
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           project_name: PROJECT_NAME
   - name: 'network_firewall_policy_rule_target_type_internal_managed_lb'
@@ -117,11 +108,10 @@ samples:
           url_map: 'url-map'
           target_proxy: 'target-http-proxy'
           forwarding_rule: 'forwarding-rule'
+          global_assoc: 'global-policy-assoc'
         test_env_vars:
           org_id: 'ORG_ID'
           project_name: PROJECT_NAME
-        test_vars_overrides:
-          network: '"network" + randomSuffix'
 parameters:
   - name: firewallPolicy
     type: ResourceRef
