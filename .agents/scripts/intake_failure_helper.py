@@ -26,7 +26,7 @@ ALLOWED_PROVIDERS = frozenset({"ga", "beta", "both"})
 TEST_NAME_REGEX = re.compile(r"^TestAcc[A-Za-z0-9_]+$")
 GCS_URI_REGEX = re.compile(r"^gs://nightly-test-data/[a-zA-Z0-9_.\-/]+$")
 HTTPS_GCS_REGEX = re.compile(
-    r"^https://storage\.(?:googleapis|cloud\.google)\.com/(nightly-test-data)/([a-zA-Z0-9_.\-/]+)$"
+    r"^https://storage\.(?:googleapis|cloud\.google)\.com/(nightly-test-data|teamcity-logs)/([a-zA-Z0-9_.\-/]+)$"
 )
 GITHUB_ISSUE_URL_REGEX = re.compile(
     r"^https://github\.com/hashicorp/terraform-provider-google/issues/(\d+)$"
