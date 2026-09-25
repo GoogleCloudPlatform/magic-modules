@@ -1,0 +1,62 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// lustreInstanceTargetVersionDiffSuppress suppresses target_version when the
+// requested upgrade is a no-op. The API clears the field once the upgrade
+// finishes, so the prior state value carries no information; compare the
+// request against effective_version/available_version instead.
+func lustreInstanceTargetVersionDiffSuppress(_, _, new string, d *schema.ResourceData) bool {
+	// "latest" resolves server-side to available_version; nothing available
+	// means there is nothing to upgrade to.
+	if strings.EqualFold(new, "latest") {
+		availableVersion, _ := d.Get("available_version").(string)
+		return availableVersion == ""
+	}
+	// Same-or-older than what is running is a no-op or a downgrade, both of
+	// which the API rejects. Lexicographic, matching the service's ordering.
+	effectiveVersion, _ := d.Get("effective_version").(string)
+	return effectiveVersion != "" && new <= effectiveVersion
+}
+// lustreInstanceVersionUpgradeCustomDiff rejects at plan time what the API
+// rejects at apply time: UpdateInstance does not support target_version
+// alongside a changed capacity_gib or maintenance_policy.
+func lustreInstanceVersionUpgradeCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// Update-only restriction, and on create every field reads as changed.
+	if diff.Id() == "" {
+		return nil
+	}
+	// separate func to allow unit testing
+	return lustreInstanceVersionUpgradeCustomDiffFunc(diff)
+}
+func lustreInstanceVersionUpgradeCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	// HasChange is evaluated after diff suppression, so this is only true when
+	// an upgrade will actually be sent.
+	if !diff.HasChange("target_version") {
+		return nil
+	}
+	// The service only objects to capacity that actually moves; an unchanged
+	// capacity_gib in the same config is fine.
+	var conflicts []string
+	if diff.HasChange("capacity_gib") {
+		conflicts = append(conflicts, "capacity_gib")
+	}
+	if diff.HasChange("maintenance_policy") {
+		conflicts = append(conflicts, "maintenance_policy")
+	}
+	if len(conflicts) == 0 {
+		return nil
+	}
+	return fmt.Errorf("target_version cannot be changed in the same apply as %s: "+
+		"the Managed Lustre API does not support updating capacity or maintenance "+
+		"policy along with the version. Apply the version upgrade on its own first, "+
+		"then apply the other change", strings.Join(conflicts, " and "))
+}
