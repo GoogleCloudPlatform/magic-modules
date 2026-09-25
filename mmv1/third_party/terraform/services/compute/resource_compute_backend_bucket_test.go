@@ -254,9 +254,8 @@ resource "google_compute_backend_bucket" "foobar" {
 }
 
 resource "google_storage_bucket" "bucket_one" {
-  name                        = "%s"
-  location                    = "EU"
-  uniform_bucket_level_access = true
+  name     = "%s"
+  location = "EU"
 }
 `, backendName, storageName)
 }
@@ -388,9 +387,8 @@ resource "google_compute_backend_bucket" "foobar" {
 }
 
 resource "google_storage_bucket" "bucket_one" {
-  name                        = "%s"
-  location                    = "EU"
-  uniform_bucket_level_access = true
+  name     = "%s"
+  location = "EU"
 }
 `, backendName, enableCdn, compressionMode, storageName)
 }
