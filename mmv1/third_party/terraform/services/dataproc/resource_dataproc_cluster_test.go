@@ -4180,3 +4180,181 @@ resource "google_dataproc_cluster" "preemptible_disk_config" {
 }
 `, rnd)
 }
+
+func TestAccDataprocCluster_AuxiliaryNodeGroupsAttachedDiskConfig(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_auxiliaryNodeGroupsAttachedDiskConfig(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.auxiliary_attached_disk", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_attached_disk", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.attached_disk_config.0.disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_attached_disk", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_BALANCED"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_attached_disk", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.attached_disk_config.0.provisioned_iops", "3000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_attached_disk", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.attached_disk_config.0.provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_auxiliaryNodeGroupsAttachedDiskConfig(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "auxiliary_attached_disk" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      zone = "us-central1-b"
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    worker_config {
+      num_instances = 2
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    auxiliary_node_groups {
+      node_group_id = "node-group-id"
+      node_group {
+        roles = ["DRIVER"]
+        node_group_config {
+          num_instances = 2
+          machine_type  = "n4-standard-2"
+          disk_config {
+            boot_disk_size_gb = 100
+            boot_disk_type    = "hyperdisk-balanced"
+            attached_disk_config {
+              disk_size_gb           = 100
+              disk_type              = "hyperdisk-balanced"
+              provisioned_iops       = 3000
+              provisioned_throughput = 140
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, rnd)
+}
+
+func TestAccDataprocCluster_AuxiliaryNodeGroupsInstanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_auxiliaryNodeGroupsInstanceFlexibilityPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.auxiliary_flex", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_size_gb", "40"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.boot_disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.num_local_ssds", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.0.disk_config.0.local_ssd_interface", "nvme"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.machine_types.0", "n4-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.rank", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_iops", "3000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_throughput", "140"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_BALANCED"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.provisioned_iops", "3000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.auxiliary_flex", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.provisioned_throughput", "140"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_auxiliaryNodeGroupsInstanceFlexibilityPolicy(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "auxiliary_flex" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      zone = "us-central1-a"
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    worker_config {
+      num_instances = 2
+      machine_type  = "e2-medium"
+    }
+
+    auxiliary_node_groups {
+      node_group_id = "node-group-id"
+      node_group {
+        roles = ["DRIVER"]
+        node_group_config {
+          num_instances = 2
+          instance_flexibility_policy {
+            instance_selection_list {
+              machine_types = ["n2-standard-2"]
+              rank          = 1
+              disk_config {
+                boot_disk_size_gb   = 40
+                boot_disk_type      = "pd-standard"
+                num_local_ssds      = 1
+                local_ssd_interface = "nvme"
+              }
+            }
+            instance_selection_list {
+              machine_types = ["n4-standard-2"]
+              rank          = 2
+              disk_config {
+                boot_disk_size_gb                = 100
+                boot_disk_type                   = "hyperdisk-balanced"
+                boot_disk_provisioned_iops       = 3000
+                boot_disk_provisioned_throughput = 140
+                attached_disk_config {
+                  disk_size_gb           = 100
+                  disk_type              = "hyperdisk-balanced"
+                  provisioned_iops       = 3000
+                  provisioned_throughput = 140
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, rnd)
+}
