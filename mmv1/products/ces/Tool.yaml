@@ -853,6 +853,11 @@ properties:
                   type: Boolean
                   description: Whether snippets are enabled.
                   send_empty_value: true
+                - name: maxSnippets
+                  type: Integer
+                  description: |-
+                    Number of snippets to return per query.
+                    If unset, returns all snippets from the service by default.
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.
