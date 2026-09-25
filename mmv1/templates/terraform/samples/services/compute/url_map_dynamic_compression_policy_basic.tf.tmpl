@@ -1,0 +1,30 @@
+resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "url_map_name"}}"
+
+  default_service = google_compute_backend_service.default.id
+
+  default_route_action {
+    dynamic_compression_policy {
+      compression_mode = "AUTOMATIC"
+    }
+  }
+}
+
+resource "google_compute_backend_service" "default" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "backend_service_name"}}"
+
+  # dynamic_compression_policy requires a Global EXTERNAL_MANAGED load balancer.
+  protocol              = "HTTP"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  health_checks         = [google_compute_health_check.default.id]
+}
+
+resource "google_compute_health_check" "default" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "health_check_name"}}"
+  http_health_check {
+    port = 80
+  }
+}

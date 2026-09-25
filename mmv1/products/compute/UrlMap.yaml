@@ -40,6 +40,8 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeUrlMap_cachePolicyMultiLevelUpdate'
     skip: 'Index mismatch in path_matcher due to test framework limitation'
+  - name: 'TestAccComputeUrlMap_dynamicCompressionPolicyMultiLevelUpdate'
+    skip: 'Index mismatch in path_matcher due to test framework limitation'
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/compute_url_map.go.tmpl'
 samples:
@@ -139,6 +141,26 @@ samples:
     primary_resource_id: 'urlmap'
     steps:
       - name: 'url_map_cache_policy_multi_level'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
+  - name: 'url_map_dynamic_compression_policy_basic'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_dynamic_compression_policy_basic'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
+  - name: 'url_map_dynamic_compression_policy_multi_level'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_dynamic_compression_policy_multi_level'
+        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           backend_service_name: 'home'
@@ -1338,6 +1360,31 @@ properties:
                               be specified.
                             item_type:
                               type: String
+                  - name: 'dynamicCompressionPolicy'
+                    type: NestedObject
+                    min_version: 'beta'
+                    is_missing_in_cai: true
+                    description: |
+                      Specifies the dynamic compression policy for traffic matched by this route.
+                      When set, it overrides the compression mode configured on the target backend
+                      service or backend bucket. When not set, the backend's setting applies.
+                      Dynamic compression is configured independently of cachePolicy. Available
+                      only for Global EXTERNAL_MANAGED load balancer schemes.
+                    properties:
+                      - name: 'compressionMode'
+                        type: Enum
+                        required: true
+                        is_missing_in_cai: true
+                        description: |
+                          Specifies the dynamic compression mode for responses matched by this route.
+                          AUTOMATIC: the load balancer compresses eligible text responses using Brotli
+                          or gzip, choosing the best encoding supported by the client as indicated by
+                          the Accept-Encoding request header. DISABLED: disables dynamic compression
+                          for this route, even if it is enabled on the backend; compressed responses
+                          already cached by Cloud CDN are not served to clients.
+                        enum_values:
+                          - 'AUTOMATIC'
+                          - 'DISABLED'
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -2417,6 +2464,31 @@ properties:
                               be specified.
                             item_type:
                               type: String
+                  - name: 'dynamicCompressionPolicy'
+                    type: NestedObject
+                    min_version: 'beta'
+                    is_missing_in_cai: true
+                    description: |
+                      Specifies the dynamic compression policy for traffic matched by this route.
+                      When set, it overrides the compression mode configured on the target backend
+                      service or backend bucket. When not set, the backend's setting applies.
+                      Dynamic compression is configured independently of cachePolicy. Available
+                      only for Global EXTERNAL_MANAGED load balancer schemes.
+                    properties:
+                      - name: 'compressionMode'
+                        type: Enum
+                        required: true
+                        is_missing_in_cai: true
+                        description: |
+                          Specifies the dynamic compression mode for responses matched by this route.
+                          AUTOMATIC: the load balancer compresses eligible text responses using Brotli
+                          or gzip, choosing the best encoding supported by the client as indicated by
+                          the Accept-Encoding request header. DISABLED: disables dynamic compression
+                          for this route, even if it is enabled on the backend; compressed responses
+                          already cached by Cloud CDN are not served to clients.
+                        enum_values:
+                          - 'AUTOMATIC'
+                          - 'DISABLED'
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -3322,6 +3394,31 @@ properties:
                         be specified.
                       item_type:
                         type: String
+            - name: 'dynamicCompressionPolicy'
+              type: NestedObject
+              min_version: 'beta'
+              is_missing_in_cai: true
+              description: |
+                Specifies the dynamic compression policy for traffic matched by this route.
+                When set, it overrides the compression mode configured on the target backend
+                service or backend bucket. When not set, the backend's setting applies.
+                Dynamic compression is configured independently of cachePolicy. Available
+                only for Global EXTERNAL_MANAGED load balancer schemes.
+              properties:
+                - name: 'compressionMode'
+                  type: Enum
+                  required: true
+                  is_missing_in_cai: true
+                  description: |
+                    Specifies the dynamic compression mode for responses matched by this route.
+                    AUTOMATIC: the load balancer compresses eligible text responses using Brotli
+                    or gzip, choosing the best encoding supported by the client as indicated by
+                    the Accept-Encoding request header. DISABLED: disables dynamic compression
+                    for this route, even if it is enabled on the backend; compressed responses
+                    already cached by Cloud CDN are not served to clients.
+                  enum_values:
+                    - 'AUTOMATIC'
+                    - 'DISABLED'
   - name: 'defaultCustomErrorResponsePolicy'
     type: NestedObject
     description: |
@@ -3554,6 +3651,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         exactly_one_of:
           - 'default_service'
           - 'default_url_redirect'
@@ -3661,6 +3759,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'pathPrefixRewrite'
             type: String
@@ -3699,6 +3798,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'seconds'
             type: String
@@ -3750,6 +3850,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'retryConditions'
             type: Array
@@ -3830,6 +3931,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'backendService'
             type: ResourceRef
@@ -3862,6 +3964,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'allowOrigins'
             type: Array
@@ -4002,6 +4105,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'delay'
             type: NestedObject
@@ -4542,3 +4646,28 @@ properties:
                   - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
                 item_type:
                   type: String
+      - name: 'dynamicCompressionPolicy'
+        type: NestedObject
+        min_version: 'beta'
+        is_missing_in_cai: true
+        description: |
+          Specifies the dynamic compression policy for traffic matched by this route.
+          When set, it overrides the compression mode configured on the target backend
+          service or backend bucket. When not set, the backend's setting applies.
+          Dynamic compression is configured independently of cachePolicy. Available
+          only for Global EXTERNAL_MANAGED load balancer schemes.
+        properties:
+          - name: 'compressionMode'
+            type: Enum
+            required: true
+            is_missing_in_cai: true
+            description: |
+              Specifies the dynamic compression mode for responses matched by this route.
+              AUTOMATIC: the load balancer compresses eligible text responses using Brotli
+              or gzip, choosing the best encoding supported by the client as indicated by
+              the Accept-Encoding request header. DISABLED: disables dynamic compression
+              for this route, even if it is enabled on the backend; compressed responses
+              already cached by Cloud CDN are not served to clients.
+            enum_values:
+              - 'AUTOMATIC'
+              - 'DISABLED'
