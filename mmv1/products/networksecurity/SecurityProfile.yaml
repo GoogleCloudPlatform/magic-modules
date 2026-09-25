@@ -370,7 +370,6 @@ properties:
   - name: 'wildfireAnalysisProfile'
     type: NestedObject
     min_version: 'beta'
-    is_missing_in_cai: true
     description: |
       The wildfire analysis configuration for the security profile.
     conflicts:
@@ -381,14 +380,10 @@ properties:
     properties:
       - name: 'wildfireRealtimeLookup'
         type: Boolean
-        min_version: 'beta'
-        send_empty_value: true
         description: |
           Enables verdict lookup in real-time before advancing to inline-ml or cloud analysis.
       - name: 'wildfireSubmissionRules'
         type: Array
-        min_version: 'beta'
-        send_empty_value: true
         description: |
           The configuration for file submission to WildFire in cloud.
         item_type:
@@ -396,7 +391,6 @@ properties:
           properties:
             - name: 'fileSelectionMode'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Defines the file selection mode for a rule.
@@ -405,13 +399,11 @@ properties:
                 - 'CUSTOM_FILE_TYPES'
             - name: 'customFileTypes'
               type: NestedObject
-              min_version: 'beta'
               description: |
                 Defines the custom file types to match for a rule.
               properties:
                 - name: 'fileTypes'
                   type: Array
-                  min_version: 'beta'
                   is_set: true
                   required: true
                   description: |
@@ -431,7 +423,6 @@ properties:
                       - 'SCRIPT'
             - name: 'direction'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Direction of traffic to match for a rule.
@@ -441,8 +432,6 @@ properties:
                 - 'BOTH'
       - name: 'wildfireInlineCloudAnalysisRules'
         type: Array
-        min_version: 'beta'
-        send_empty_value: true
         description: |
           The configuration for inline cloud analysis of files.
         item_type:
@@ -450,7 +439,6 @@ properties:
           properties:
             - name: 'fileSelectionMode'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Defines the file selection mode for a rule.
@@ -459,13 +447,11 @@ properties:
                 - 'CUSTOM_FILE_TYPES'
             - name: 'customFileTypes'
               type: NestedObject
-              min_version: 'beta'
               description: |
                 Defines the custom file types to match for a rule.
               properties:
                 - name: 'fileTypes'
                   type: Array
-                  min_version: 'beta'
                   is_set: true
                   required: true
                   description: |
@@ -476,7 +462,6 @@ properties:
                       - 'PE'
             - name: 'direction'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Direction of traffic to match for a rule.
@@ -486,7 +471,6 @@ properties:
                 - 'BOTH'
             - name: 'action'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 The action to take when a rule is matched.
@@ -496,9 +480,7 @@ properties:
                 - 'ALERT'
       - name: 'wildfireOverrides'
         type: Array
-        min_version: 'beta'
         is_set: true
-        send_empty_value: true
         description: |
           Defines what action to take for WildFire threats per protocol.
         item_type:
@@ -506,7 +488,6 @@ properties:
           properties:
             - name: 'protocol'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Required protocol to match.
@@ -520,7 +501,6 @@ properties:
                 - 'WILDFIRE_FTP'
             - name: 'action'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Threat action override.
@@ -531,9 +511,7 @@ properties:
                 - 'WILDFIRE_DENY'
       - name: 'wildfireInlineMlOverrides'
         type: Array
-        min_version: 'beta'
         is_set: true
-        send_empty_value: true
         description: |
           Defines what action to take for WildFire inline ML threats per protocol.
         item_type:
@@ -541,7 +519,6 @@ properties:
           properties:
             - name: 'protocol'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Required protocol to match.
@@ -555,7 +532,6 @@ properties:
                 - 'WILDFIRE_FTP'
             - name: 'action'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Threat action override.
@@ -566,9 +542,7 @@ properties:
                 - 'WILDFIRE_DENY'
       - name: 'wildfireThreatOverrides'
         type: Array
-        min_version: 'beta'
         is_set: true
-        send_empty_value: true
         description: |
           The configuration for overriding threats actions by threat id match.
         item_type:
@@ -576,13 +550,11 @@ properties:
           properties:
             - name: 'threatId'
               type: String
-              min_version: 'beta'
               required: true
               description: |
                 Vendor-specific ID of a threat to override.
             - name: 'action'
               type: Enum
-              min_version: 'beta'
               required: true
               description: |
                 Threat action override.
@@ -593,15 +565,12 @@ properties:
                 - 'WILDFIRE_DENY'
       - name: 'wildfireInlineMlSetting'
         type: NestedObject
-        min_version: 'beta'
         description: |
           WildFire inline Machine Learning setting for the Security Profile.
         properties:
           - name: 'inlineMlConfigs'
             type: Array
-            min_version: 'beta'
             is_set: true
-            send_empty_value: true
             description: |
               Defines what action to take for a specific file type in WildFire inline ML.
             item_type:
@@ -609,7 +578,6 @@ properties:
               properties:
                 - name: 'fileType'
                   type: Enum
-                  min_version: 'beta'
                   required: true
                   description: |
                     The file type to match.
@@ -624,7 +592,6 @@ properties:
                     - 'MACHO'
                 - name: 'action'
                   type: Enum
-                  min_version: 'beta'
                   required: true
                   description: |
                     The action to take for a file type.
@@ -634,8 +601,6 @@ properties:
                     - 'ENABLE'
           - name: 'fileExceptions'
             type: Array
-            min_version: 'beta'
-            send_empty_value: true
             description: |
               File exceptions to exclude from WildFire inline ML.
             item_type:
@@ -643,13 +608,11 @@ properties:
               properties:
                 - name: 'partialHash'
                   type: String
-                  min_version: 'beta'
                   required: true
                   description: |
                     The partial SHA256 hash of the file to exclude.
                 - name: 'filename'
                   type: String
-                  min_version: 'beta'
                   description: |
                     The file name associated with the partial hash.
   - name: 'type'
