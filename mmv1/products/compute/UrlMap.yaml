@@ -107,10 +107,8 @@ samples:
           health_check_name: 'health-check'
   - name: 'url_map_default_mirror_percent'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     steps:
       - name: 'url_map_default_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
@@ -118,10 +116,8 @@ samples:
           health_check_name: 'health-check'
   - name: 'url_map_path_matcher_default_mirror_percent'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     steps:
       - name: 'url_map_path_matcher_default_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
@@ -145,10 +141,8 @@ samples:
           health_check_name: 'health-check'
   - name: 'url_map_path_rule_mirror_percent'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     steps:
       - name: 'url_map_path_rule_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
@@ -156,10 +150,8 @@ samples:
           health_check_name: 'health-check'
   - name: 'url_map_route_rule_mirror_percent'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     steps:
       - name: 'url_map_route_rule_mirror_percent'
-        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
@@ -813,7 +805,6 @@ properties:
                         resource: 'BackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
-                        min_version: beta
                         type: Double
                         description: |
                           The percentage of requests to be mirrored to backendService.
@@ -1874,7 +1865,6 @@ properties:
                         resource: 'BackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
-                        min_version: beta
                         type: Double
                         description: |
                           The percentage of requests to be mirrored to backendService.
@@ -2904,7 +2894,6 @@ properties:
                   resource: 'BackendService'
                   imports: 'selfLink'
                 - name: 'mirrorPercent'
-                  min_version: beta
                   type: Double
                   is_missing_in_cai: true
                   description: |
@@ -3840,7 +3829,6 @@ properties:
             resource: 'BackendService'
             imports: 'selfLink'
           - name: 'mirrorPercent'
-            min_version: beta
             is_missing_in_cai: true
             type: Double
             description: |
