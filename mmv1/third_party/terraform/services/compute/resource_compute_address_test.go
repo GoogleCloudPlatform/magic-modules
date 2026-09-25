@@ -22,6 +22,7 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "labels.%"),
 					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "effective_labels.%"),
+					resource.TestCheckNoResourceAttr("google_compute_address.foobar", "addressId"),
 				),
 			},
 		},
