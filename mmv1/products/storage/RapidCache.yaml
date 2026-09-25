@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,25 +12,25 @@
 # limitations under the License.
 
 ---
-name: AnywhereCache
-deprecation_message: '`google_storage_anywhere_cache` is deprecated and will be removed in a future major release. Use `google_storage_rapid_cache` instead.'
+name: RapidCache
 description: |
-  The Google Cloud Storage (GCS) Anywhere Cache feature allows users to
+  The Google Cloud Storage (GCS) Rapid Cache feature allows users to
   create SSD backed zonal read cache for their buckets. These zonal
   caches are co-located with the customers compute engines to provide
   cost efficiency.
 base_url: b/{{bucket}}/anywhereCaches
-self_link: b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}
+min_version: beta
+self_link: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}
 create_url: b/{{bucket}}/anywhereCaches/
-delete_url: b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}/disable
+delete_url: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}/disable
 update_verb: PATCH
 delete_verb: POST
 identity:
   - bucket
-  - anywhereCacheId
+  - rapidCacheId
 kind: storage#anywhereCache
-id_format: '{{bucket}}/{{anywhere_cache_id}}'
-import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
+id_format: '{{bucket}}/{{rapid_cache_id}}'
+import_format: ['b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}']
 timeouts:
   insert_minutes: 240
   update_minutes: 240
@@ -44,15 +44,16 @@ async:
     resource_inside_response: true
 autogen_async: false
 custom_code:
-  constants: templates/terraform/constants/storage_anywhere_cache.go.tmpl
-  custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
-  custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
+  custom_create: templates/terraform/custom_create/storage_rapid_cache.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_rapid_cache.go.tmpl
 samples:
-  - name: storage_anywhere_cache_basic
+  - name: storage_rapid_cache_basic
+    min_version: beta
     primary_resource_id: cache
     external_providers: [time]
     steps:
-      - name: storage_anywhere_cache_basic
+      - name: storage_rapid_cache_basic
+        min_version: beta
         resource_id_vars:
           bucket_name: bucket-name
         ignore_read_extra:
@@ -71,25 +72,15 @@ properties:
     required: true
     immutable: true
     description: The zone in which the cache instance needs to be created. For example, `us-central1-a.`
-  - name: admissionPolicy
-    type: Enum
-    default_value: admit-on-first-miss
-    deprecation_message: '`admit-on-second-miss` is deprecated and will be removed in a future major release. The backend will ignore this attribute and treat it as `admit-on-first-miss`.'
-    description: |
-      The cache admission policy dictates whether a block should be inserted upon a cache miss.
-      Note: "admit-on-second-miss" is deprecated and will fallback to "admit-on-first-miss".
-    enum_values:
-      - admit-on-first-miss
-      - admit-on-second-miss
-    diff_suppress_func: StorageAnywhereCacheAdmissionPolicyDiffSuppress
   - name: ttl
     type: String
     default_value: 86400s
     description: The TTL of all cache entries in whole seconds. e.g., "7200s". It defaults to `86400s`
-  - name: anywhereCacheId
+  - name: rapidCacheId
     type: String
+    api_name: anywhereCacheId
     output: true
-    description: The ID of the Anywhere cache instance.
+    description: The ID of the Rapid cache instance.
   - name: createTime
     type: Time
     output: true
@@ -109,3 +100,20 @@ properties:
   - name: ingestOnWrite
     type: Boolean
     description: Whether or not the cache ingests data as the data is written to the bucket.
+  - name: admissionPolicy
+    type: Enum
+    enum_values:
+      - admit-on-first-miss
+      - no-read-admission
+    default_value: admit-on-first-miss
+    description: The cache admission policy dictates whether a block should be inserted upon a cache miss.
+  - name: cacheType
+    type: String
+    immutable: true
+    ignore_read: true
+    validation:
+      function: 'validation.StringInSlice([]string{"rapid-cache", "rapid-cache-ultra"}, false)'
+    default_value: rapid-cache
+    description: |
+      The type of Rapid Cache this represents.
+      Changing this forces a new resource to be created.
