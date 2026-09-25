@@ -53,6 +53,9 @@ type (
 	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource
 	iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
 
+	// Decides whether writing after (the result of applying an iamPolicyModifyFunc to before) is allowed
+	iamPolicyWriteAllowedFunc func(before, after *cloudresourcemanager.Policy) error
+
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
 	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
 
@@ -83,8 +86,9 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 	return policy, nil
 }
 
-// Locking wrapper around read-modify-write cycle for IAM policy.
-func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc) error {
+// Locking wrapper around read-modify-write cycle for IAM policy. allowWrite may be nil; it runs on
+// every write attempt (including after a conflict), but not when confirming the write.
+func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc, allowWrite iamPolicyWriteAllowedFunc) error {
 	mutexKey := updater.GetMutexKey()
 	transport_tpg.MutexStore.Lock(mutexKey)
 	defer transport_tpg.MutexStore.Unlock(mutexKey)
@@ -102,9 +106,20 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		}
 		log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
 
+		var before *cloudresourcemanager.Policy
+		if allowWrite != nil {
+			if before, err = copyIamPolicy(p); err != nil {
+				return err
+			}
+		}
 		err = modify(p)
 		if err != nil {
 			return err
+		}
+		if allowWrite != nil {
+			if err := allowWrite(before, p); err != nil {
+				return err
+			}
 		}
 
 		log.Printf("[DEBUG]: Setting policy for %s to %+v\n", updater.DescribeResource(), p)
@@ -187,6 +202,30 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	}
 	log.Printf("[DEBUG]: Set policy for %s", updater.DescribeResource())
 	return nil
+}
+
+// An iamPolicyWriteAllowedFunc that only allows adding new role+condition bindings: it returns an
+// error if any binding present in before has different members in after.
+func iamPolicyNoExistingBindingChanged(before, after *cloudresourcemanager.Policy) error {
+	afterMap := createIamBindingsMap(after.Bindings)
+	for key, members := range createIamBindingsMap(before.Bindings) {
+		if !reflect.DeepEqual(members, afterMap[key]) {
+			if !key.Condition.Empty() {
+				return fmt.Errorf("IAM binding for role %q with condition %q already exists", key.Role, key.Condition.Title)
+			}
+			return fmt.Errorf("IAM binding for role %q already exists", key.Role)
+		}
+	}
+	return nil
+}
+
+// Returns a deep copy of p, e.g. to keep the policy as it was before a modify func changes it.
+func copyIamPolicy(p *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
+	c := &cloudresourcemanager.Policy{}
+	if err := tpgresource.Convert(p, c); err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 // Flattens a list of Bindings so each role+condition has a single Binding with combined members

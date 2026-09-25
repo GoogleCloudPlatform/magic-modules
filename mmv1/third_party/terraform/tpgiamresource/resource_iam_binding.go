@@ -62,6 +62,12 @@ var iamBindingSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
+	// No schema default: an unset value is resolved in iamBindingOverwriteOnCreate, so changing the
+	// default in a major release doesn't produce a diff for existing bindings.
+	"overwrite_on_create": {
+		Type:     schema.TypeBool,
+		Optional: true,
+	},
 }
 
 var IamBindingBaseIdentitySchema = map[string]*schema.Schema{
@@ -80,9 +86,9 @@ func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdat
 	createTimeOut := time.Duration(settings.CreateTimeOut) * time.Minute
 
 	resource := &schema.Resource{
-		Create: resourceIamBindingCreateUpdate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
+		Create: resourceIamBindingCreate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
 		Read:   resourceIamBindingRead(newUpdaterFunc, parentSpecificSchema, settings.ParentResourceIdentityParser),
-		Update: resourceIamBindingCreateUpdate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
+		Update: resourceIamBindingUpdate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
 		Delete: resourceIamBindingDelete(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
 
 		// if non-empty, this will be used to send a deprecation message when the
@@ -165,7 +171,38 @@ func setIamBindingResourceIdentity(identity *schema.IdentityData, d *schema.Reso
 	}
 }
 
-func resourceIamBindingCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) func(*schema.ResourceData, interface{}) error {
+// Unless overwrite_on_create is true, Create refuses to take over an existing binding for the same
+// role+condition with different members; it must be imported first, like any other existing object.
+func resourceIamBindingCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.CreateFunc {
+	return resourceIamBindingWrite(newUpdaterFunc, enableBatching, parentSpecificSchema, parentResourceIdentityParser, true)
+}
+
+func resourceIamBindingUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.UpdateFunc {
+	write := resourceIamBindingWrite(newUpdaterFunc, enableBatching, parentSpecificSchema, parentResourceIdentityParser, false)
+	return func(d *schema.ResourceData, meta interface{}) error {
+		// overwrite_on_create only affects creation, so changing only it doesn't need an IAM write.
+		if !d.HasChangeExcept("overwrite_on_create") {
+			return resourceIamBindingRead(newUpdaterFunc, parentSpecificSchema, parentResourceIdentityParser)(d, meta)
+		}
+		return write(d, meta)
+	}
+}
+
+// Whether Create may replace members already bound to the role+condition. Unset means true, the
+// historical behavior; the default is expected to become false in the next major release.
+func iamBindingOverwriteOnCreate(d *schema.ResourceData) bool {
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return true
+	}
+	v := rawConfig.GetAttr("overwrite_on_create")
+	if v.IsNull() || !v.IsKnown() {
+		return true
+	}
+	return v.True()
+}
+
+func resourceIamBindingWrite(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc, isCreate bool) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 		updater, err := newUpdaterFunc(d, config)
@@ -180,12 +217,23 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, en
 			ep.Version = IamPolicyVersion
 			return nil
 		}
+		// Unless overwriting is allowed, a create may only add a new binding. A binding identical to ours
+		// is unchanged by modifyF, so a create that already wrote it succeeds on retry.
+		var allowWrite iamPolicyWriteAllowedFunc
+		if isCreate && !iamBindingOverwriteOnCreate(d) {
+			allowWrite = func(before, after *cloudresourcemanager.Policy) error {
+				if err := iamPolicyNoExistingBindingChanged(before, after); err != nil {
+					return fmt.Errorf("%s on %s; import it before managing it with Terraform, or set overwrite_on_create = true to replace its members", err, updater.DescribeResource())
+				}
+				return nil
+			}
+		}
 
 		if enableBatching {
-			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, allowWrite, config, fmt.Sprintf(
 				"Set IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()))
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, allowWrite)
 		}
 		if err != nil {
 			return err
@@ -388,10 +436,10 @@ func resourceIamBindingDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBa
 		}
 
 		if enableBatching {
-			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, nil, config, fmt.Sprintf(
 				"Delete IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()))
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, nil)
 		}
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
