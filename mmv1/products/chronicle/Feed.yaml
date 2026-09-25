@@ -72,6 +72,7 @@ virtual_fields:
       Output only. The secret generated for the feed. This is only available when the feed source type is HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE.
     output: true
     sensitive: true
+    ignore_read: true
   - name: 'feed_service_account'
     type: String
     description: |
@@ -215,6 +216,7 @@ properties:
               - name: refreshUri
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Refresh URI. Used when using OAuth auth.
               - name: region
                 type: String
@@ -300,6 +302,7 @@ properties:
                     type: String
                     required: true
                     sensitive: true
+                    ignore_read: true
                     description: Secret Access Key for an AWS account (a 40-character string).
               - name: awsIamRoleAuth
                 type: NestedObject
@@ -352,6 +355,7 @@ properties:
                   - name: secretAccessKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Secret access key.
               - name: sqsAccessKeySecretAuth
                 type: NestedObject
@@ -363,6 +367,7 @@ properties:
                   - name: secretAccessKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Secret access key.
           - name: queue
             type: String
@@ -444,6 +449,7 @@ properties:
                   - name: secretAccessKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Secret access key to access the S3 bucket.
           - name: chronicleServiceAccount
             type: String
@@ -480,6 +486,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -499,6 +506,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -515,6 +523,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -531,6 +540,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -555,6 +565,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -577,6 +588,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: hostname
             type: String
@@ -602,6 +614,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: hostname
             type: String
@@ -633,6 +646,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: hostname
             type: String
@@ -652,10 +666,12 @@ properties:
               - name: sasToken
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: SAS Token.
               - name: sharedKey
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Shared Key.
           - name: azureUri
             type: String
@@ -689,6 +705,7 @@ properties:
                 type: String
                 required: true
                 sensitive: true
+                ignore_read: true
                 description: Access Key also known as shared key.
               - name: azureV2WorkloadIdentityFederation
                 type: NestedObject
@@ -711,6 +728,7 @@ properties:
                 type: String
                 required: true
                 sensitive: true
+                ignore_read: true
                 description: SAS Token.
           - name: azureUri
             type: String
@@ -739,6 +757,7 @@ properties:
           - name: azureSasToken
             type: String
             sensitive: true
+            ignore_read: true
             description: SAS token
           - name: azureStorageConnectionString
             type: String
@@ -780,6 +799,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: hostname
             type: String
@@ -799,6 +819,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -829,6 +850,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: endpoint
             type: String
@@ -852,6 +874,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
               - name: tokenEndpoint
                 type: String
@@ -882,6 +905,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
               - name: tokenEndpoint
                 type: String
@@ -920,6 +944,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
       - name: duoAuthSettings
         type: NestedObject
@@ -933,6 +958,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -952,6 +978,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -1016,6 +1043,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -1033,6 +1061,7 @@ properties:
               - name: encodedPrivateKey
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: |-
                   The encoded private key. The string should be a private key in PEM format,
                   and should include the begin header and end footer lines. It may also
@@ -1047,6 +1076,7 @@ properties:
               - name: sslCertificate
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: |-
                   The encoded SSL certificate. The string should be an SSL certificate in
                   PEM format, and should include the begin header and end footer lines. It
@@ -1137,6 +1167,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -1173,6 +1204,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -1274,6 +1306,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
       - name: labels
         type: KeyValuePairs
@@ -1308,6 +1341,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: startTime
             type: String
@@ -1330,6 +1364,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: hostname
             type: String
@@ -1355,6 +1390,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: hostname
             type: String
@@ -1386,6 +1422,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: hostname
             type: String
@@ -1407,6 +1444,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client Secret.
       - name: netskopeAlertSettings
         type: NestedObject
@@ -1429,6 +1467,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: contentType
             type: String
@@ -1460,6 +1499,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: contentCategory
             type: String
@@ -1490,6 +1530,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
           - name: contentType
             type: String
@@ -1528,6 +1569,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: hostname
             type: String
@@ -1553,6 +1595,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: hostname
             type: String
@@ -1581,6 +1624,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: feed
             type: String
@@ -1600,6 +1644,7 @@ properties:
               - name: password
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Password.
               - name: user
                 type: String
@@ -1619,6 +1664,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -1644,6 +1690,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: clusterId
             type: String
@@ -1676,6 +1723,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -1695,6 +1743,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -1723,6 +1772,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: endpoint
             type: String
@@ -1751,6 +1801,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
       - name: rhIsacIocSettings
         type: NestedObject
@@ -1767,6 +1818,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
               - name: tokenEndpoint
                 type: String
@@ -1803,6 +1855,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -1847,6 +1900,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: hostname
             type: String
@@ -1869,6 +1923,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -1891,10 +1946,12 @@ properties:
               - name: password
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Password. Used for username and password authentication.
               - name: privateKey
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Private key. Used for private key authentication.
               - name: privateKeyPassphrase
                 type: String
@@ -1943,6 +2000,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client secret.
               - name: refreshToken
                 type: String
@@ -1971,6 +2029,7 @@ properties:
                     - name: value
                       type: String
                       sensitive: true
+                      ignore_read: true
                       description: Value.
           - name: hostname
             type: String
@@ -1987,6 +2046,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -2011,6 +2071,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Secret of the account identified by user_name.
               - name: user
                 type: String
@@ -2059,6 +2120,7 @@ properties:
                   - name: password
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: |-
                       Password of the account identified by username.
                       There are no restrictions on the format of the password. It has no default,
@@ -2090,6 +2152,7 @@ properties:
                   - name: clientSecret
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: |-
                       Secret associated with the Client ID.
                       This is the secret generated in Trellix IAM for the Client ID. It has no
@@ -2139,6 +2202,7 @@ properties:
                   - name: password
                     type: String
                     sensitive: true
+                    ignore_read: true
                     required: true
                     description: |-
                       Password of the account identified by username.
@@ -2173,6 +2237,7 @@ properties:
                   - name: clientSecret
                     type: String
                     sensitive: true
+                    ignore_read: true
                     required: true
                     description: |-
                       Secret associated with the Client ID.
@@ -2225,6 +2290,7 @@ properties:
                   - name: password
                     type: String
                     sensitive: true
+                    ignore_read: true
                     required: true
                     description: |-
                       Password of the account identified by username.
@@ -2259,6 +2325,7 @@ properties:
                   - name: clientSecret
                     type: String
                     sensitive: true
+                    ignore_read: true
                     required: true
                     description: |-
                       Secret associated with the Client ID.
@@ -2305,6 +2372,7 @@ properties:
               - name: clientSecret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: Client Secret.
               - name: refreshToken
                 type: String
@@ -2312,6 +2380,7 @@ properties:
               - name: secret
                 type: String
                 sensitive: true
+                ignore_read: true
                 description: |-
                   The access token used to authenticate against Workday. This field is called
                   "secret" to maintain backwards compatibility. Workday was (only) configured
@@ -2367,6 +2436,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -2403,6 +2473,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -2439,6 +2510,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -2475,6 +2547,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -2511,6 +2584,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -2547,6 +2621,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
@@ -2583,6 +2658,7 @@ properties:
                   - name: privateKey
                     type: String
                     sensitive: true
+                    ignore_read: true
                     description: Private key in PEM format.
               - name: tokenEndpoint
                 type: String
