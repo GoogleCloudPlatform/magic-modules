@@ -242,4 +242,3 @@ properties:
             description: |
               Indicates whether logging is disabled when a WildFire inline cloud
               analysis submission times out.
-
