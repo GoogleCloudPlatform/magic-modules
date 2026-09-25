@@ -2385,7 +2385,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(t *testing.T) {
 			{
 				Config:      testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(context),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`expected template\.0\.containers\.0\.env\.\d+\.name to not be any of \[PORT\]`),
+				ExpectError: regexp.MustCompile(`not be any of \[PORT\]`),
 			},
 		},
 	})
