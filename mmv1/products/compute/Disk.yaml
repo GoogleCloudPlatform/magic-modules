@@ -71,6 +71,7 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
+  - 'forceNewOnUnsupportedKmsKeyChange("disk_encryption_key.0.kms_key_self_link", "disk_encryption_key.0.kms_key_service_account")'
 samples:
   - name: 'disk_basic'
     primary_resource_id: 'default'
@@ -212,6 +213,9 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
+
+      ~>**NOTE** Only changing `kms_key_self_link` between Cloud KMS keys is
+      done in place; other changes to this block recreate the disk.
     immutable: true
     properties:
       - name: 'rawKey'
@@ -247,6 +251,9 @@ properties:
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
         api_name: kmsKeyName
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        # Sent by custom_update; see forceNewOnUnsupportedKmsKeyChange.
+        update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/updateKmsKey'
+        update_verb: 'POST'
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
