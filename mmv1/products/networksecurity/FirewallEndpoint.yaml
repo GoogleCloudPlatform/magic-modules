@@ -152,3 +152,94 @@ properties:
         immutable: true
         description: |
           Indicates whether Jumbo Frames are enabled for the firewall endpoint.
+  - name: wildfireSettings
+    type: NestedObject
+    min_version: beta
+    is_missing_in_cai: true
+    description: |
+      Settings for WildFire analysis on the firewall endpoint.
+    update_mask_fields:
+      - 'wildfireSettings.enabled'
+      - 'wildfireSettings.wildfireRegion'
+      - 'wildfireSettings.wildfireRealtimeLookupDuration'
+      - 'wildfireSettings.wildfireRealtimeLookupTimeoutAction'
+      - 'wildfireSettings.wildfireInlineCloudAnalysisSettings.maxAnalysisDuration'
+      - 'wildfireSettings.wildfireInlineCloudAnalysisSettings.timeoutAction'
+      - 'wildfireSettings.wildfireInlineCloudAnalysisSettings.submissionTimeoutLoggingDisabled'
+    properties:
+      - name: enabled
+        type: Boolean
+        send_empty_value: true
+        description: |
+          Indicates whether WildFire is enabled for the firewall endpoint.
+      - name: wildfireRegion
+        type: Enum
+        default_from_api: true
+        description: |
+          The WildFire region for the firewall endpoint.
+        enum_values:
+          - 'CANADA'
+          - 'UNITED_STATES'
+          - 'JAPAN'
+          - 'SINGAPORE'
+          - 'UNITED_KINGDOM'
+          - 'AUSTRALIA'
+          - 'GERMANY'
+          - 'INDIA'
+          - 'SWITZERLAND'
+          - 'POLAND'
+          - 'INDONESIA'
+          - 'TAIWAN'
+          - 'FRANCE'
+          - 'QATAR'
+          - 'SOUTH_KOREA'
+          - 'ISRAEL'
+          - 'SAUDI_ARABIA'
+          - 'SPAIN'
+      - name: wildfireRealtimeLookupDuration
+        type: String
+        default_from_api: true
+        description: |
+          The duration for which the firewall endpoint waits for a real-time
+          signature lookup response from the WildFire cloud before taking the
+          configured timeout action (1ms to 5000ms, default 1000ms).
+          A duration in seconds with up to nine fractional digits, ending with 's'.
+          Example: "1s".
+      - name: wildfireRealtimeLookupTimeoutAction
+        type: Enum
+        default_from_api: true
+        description: |
+          The action to take when a WildFire real-time signature lookup times out.
+        enum_values:
+          - 'ALLOW'
+          - 'DENY'
+      - name: wildfireInlineCloudAnalysisSettings
+        type: NestedObject
+        default_from_api: true
+        description: |
+          Settings for WildFire inline cloud analysis.
+        properties:
+          - name: maxAnalysisDuration
+            type: String
+            default_from_api: true
+            description: |
+              The maximum duration for which the firewall endpoint holds a file
+              while waiting for an inline cloud analysis verdict before taking
+              the configured timeout action (1ms to 240000ms, default 30000ms).
+              A duration in seconds with up to nine fractional digits, ending with 's'.
+              Example: "30s".
+          - name: timeoutAction
+            type: Enum
+            default_from_api: true
+            description: |
+              The action to take when WildFire inline cloud analysis times out.
+            enum_values:
+              - 'ALLOW'
+              - 'DENY'
+          - name: submissionTimeoutLoggingDisabled
+            type: Boolean
+            send_empty_value: true
+            description: |
+              Indicates whether logging is disabled when a WildFire inline cloud
+              analysis submission times out.
+
