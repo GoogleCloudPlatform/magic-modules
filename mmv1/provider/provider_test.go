@@ -67,3 +67,43 @@ func TestTerraformVerboseLogging(t *testing.T) {
 		})
 	}
 }
+
+func TestExpectedOutputFolder(t *testing.T) {
+	testCases := []struct {
+		path     string
+		expected bool
+	}{
+		{"/Users/user/git/terraform-provider-google", true},
+		{"/Users/user/git/terraform-provider-google-beta", true},
+		{"/usr/local/google/home/user/.gemini/jetski/worktrees/terraform-provider-google-beta/my_branch", true},
+		{"/some/random/dir", false},
+	}
+
+	for _, tc := range testCases {
+		got := expectedOutputFolder(tc.path)
+		if got != tc.expected {
+			t.Errorf("expectedOutputFolder(%q) = %v; want %v", tc.path, got, tc.expected)
+		}
+	}
+}
+
+func TestIsHashicorpTarget(t *testing.T) {
+	testCases := []struct {
+		path     string
+		expected bool
+	}{
+		{"/Users/user/git/terraform-provider-google", true},
+		{"/Users/user/git/terraform-provider-google-beta", true},
+		{"/usr/local/google/home/user/.gemini/jetski/worktrees/terraform-provider-google-beta/my_branch", true},
+		{"/Users/user/git/terraform-google-conversion", false},
+		{"/usr/local/google/home/user/.gemini/jetski/worktrees/terraform-google-conversion/my_branch", false},
+		{"/some/random/dir", false},
+	}
+
+	for _, tc := range testCases {
+		got := isHashicorpTarget(tc.path)
+		if got != tc.expected {
+			t.Errorf("isHashicorpTarget(%q) = %v; want %v", tc.path, got, tc.expected)
+		}
+	}
+}
