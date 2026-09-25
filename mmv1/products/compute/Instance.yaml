@@ -658,6 +658,10 @@ properties:
           Defines whether the instance is preemptible. This can only be set
           during instance creation, it cannot be set or changed after the
           instance has been created.
+      - name: 'exposeHostTopology'
+        type: Boolean
+        description: |
+          Opt-in flag to expose the hashed physical host ID in the VM's ResourceStatus.
   - name: 'reservationAffinity'
     type: NestedObject
     description: |
