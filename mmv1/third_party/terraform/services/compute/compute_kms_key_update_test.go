@@ -52,11 +52,11 @@ func TestKmsKeyUpdateRequestBody(t *testing.T) {
 		oldKey, newKey, serviceAccount string
 		wantErr                        bool
 	}{
-		"key to key":                      {testKmsKeyA, testKmsKeyB, "", false},
-		"no key to key":                   {"", testKmsKeyB, "", true},
-		"key to no key":                   {testKmsKeyA, "", "", true},
-		"key to key version":              {testKmsKeyA, testKmsKeyB + "/cryptoKeyVersions/3", "", true},
-		"key to key with service account": {testKmsKeyA, testKmsKeyB, testKmsSA, true},
+		"key to key":    {testKmsKeyA, testKmsKeyB, "", false},
+		"no key to key": {"", testKmsKeyB, "", true},
+		"key to no key (e.g. unknown resolved to empty)": {testKmsKeyA, "", "", true},
+		"key to key version":                             {testKmsKeyA, testKmsKeyB + "/cryptoKeyVersions/3", "", true},
+		"key to key with service account":                {testKmsKeyA, testKmsKeyB, testKmsSA, true},
 	}
 	for name, tc := range cases {
 		tc := tc
