@@ -106,6 +106,23 @@ samples:
           endpoint_group_id: 'my-eg'
         test_env_vars:
           org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_wildfire'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    tgc_skip_test: The ENUM value WILDFIRE_ANALYSIS in type field is not supported in CAI yet.
+    steps:
+      - name: 'network_security_security_profile_wildfire'
+        min_version: 'beta'
+        resource_id_vars:
+          resource_name: 'my-security-profile'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+      - name: 'network_security_security_profile_wildfire_update'
+        min_version: 'beta'
+        resource_id_vars:
+          resource_name: 'my-security-profile'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
   - name: 'name'
     type: String
@@ -254,6 +271,7 @@ properties:
       - 'urlFilteringProfile'
       - 'customMirroringProfile'
       - 'customInterceptProfile'
+      - 'wildfireAnalysisProfile'
   - name: 'urlFilteringProfile'
     type: NestedObject
     is_missing_in_cai: true
@@ -295,6 +313,7 @@ properties:
       - 'threatPreventionProfile'
       - 'customMirroringProfile'
       - 'customInterceptProfile'
+      - 'wildfireAnalysisProfile'
   - name: 'customMirroringProfile'
     type: NestedObject
     description: |
@@ -331,6 +350,7 @@ properties:
       - 'threatPreventionProfile'
       - 'urlFilteringProfile'
       - 'customInterceptProfile'
+      - 'wildfireAnalysisProfile'
   - name: 'customInterceptProfile'
     type: NestedObject
     description: |
@@ -347,6 +367,292 @@ properties:
       - 'threatPreventionProfile'
       - 'urlFilteringProfile'
       - 'customMirroringProfile'
+      - 'wildfireAnalysisProfile'
+  - name: 'wildfireAnalysisProfile'
+    type: NestedObject
+    min_version: 'beta'
+    is_missing_in_cai: true
+    description: |
+      The wildfire analysis configuration for the security profile.
+    conflicts:
+      - 'threatPreventionProfile'
+      - 'urlFilteringProfile'
+      - 'customMirroringProfile'
+      - 'customInterceptProfile'
+    properties:
+      - name: 'wildfireRealtimeLookup'
+        type: Boolean
+        min_version: 'beta'
+        send_empty_value: true
+        description: |
+          Enables verdict lookup in real-time before advancing to inline-ml or cloud analysis.
+      - name: 'wildfireSubmissionRules'
+        type: Array
+        min_version: 'beta'
+        send_empty_value: true
+        description: |
+          The configuration for file submission to WildFire in cloud.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'fileSelectionMode'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Defines the file selection mode for a rule.
+              enum_values:
+                - 'ALL_FILE_TYPES'
+                - 'CUSTOM_FILE_TYPES'
+            - name: 'customFileTypes'
+              type: NestedObject
+              min_version: 'beta'
+              description: |
+                Defines the custom file types to match for a rule.
+              properties:
+                - name: 'fileTypes'
+                  type: Array
+                  min_version: 'beta'
+                  is_set: true
+                  required: true
+                  description: |
+                    The file types to match for a rule.
+                  item_type:
+                    type: Enum
+                    enum_values:
+                      - 'APK'
+                      - 'ARCHIVE'
+                      - 'EMAIL_LINK'
+                      - 'FLASH'
+                      - 'JAR'
+                      - 'LINUX'
+                      - 'MS_OFFICE'
+                      - 'PDF'
+                      - 'PE'
+                      - 'SCRIPT'
+            - name: 'direction'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Direction of traffic to match for a rule.
+              enum_values:
+                - 'UPLOAD'
+                - 'DOWNLOAD'
+                - 'BOTH'
+      - name: 'wildfireInlineCloudAnalysisRules'
+        type: Array
+        min_version: 'beta'
+        send_empty_value: true
+        description: |
+          The configuration for inline cloud analysis of files.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'fileSelectionMode'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Defines the file selection mode for a rule.
+              enum_values:
+                - 'ALL_FILE_TYPES'
+                - 'CUSTOM_FILE_TYPES'
+            - name: 'customFileTypes'
+              type: NestedObject
+              min_version: 'beta'
+              description: |
+                Defines the custom file types to match for a rule.
+              properties:
+                - name: 'fileTypes'
+                  type: Array
+                  min_version: 'beta'
+                  is_set: true
+                  required: true
+                  description: |
+                    The file types to match for a rule.
+                  item_type:
+                    type: Enum
+                    enum_values:
+                      - 'PE'
+            - name: 'direction'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Direction of traffic to match for a rule.
+              enum_values:
+                - 'UPLOAD'
+                - 'DOWNLOAD'
+                - 'BOTH'
+            - name: 'action'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                The action to take when a rule is matched.
+              enum_values:
+                - 'ALLOW'
+                - 'DENY'
+                - 'ALERT'
+      - name: 'wildfireOverrides'
+        type: Array
+        min_version: 'beta'
+        is_set: true
+        send_empty_value: true
+        description: |
+          Defines what action to take for WildFire threats per protocol.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'protocol'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Required protocol to match.
+              enum_values:
+                - 'WILDFIRE_SMTP'
+                - 'WILDFIRE_SMB'
+                - 'WILDFIRE_POP3'
+                - 'WILDFIRE_IMAP'
+                - 'WILDFIRE_HTTP2'
+                - 'WILDFIRE_HTTP'
+                - 'WILDFIRE_FTP'
+            - name: 'action'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Threat action override.
+              enum_values:
+                - 'WILDFIRE_DEFAULT_ACTION'
+                - 'WILDFIRE_ALLOW'
+                - 'WILDFIRE_ALERT'
+                - 'WILDFIRE_DENY'
+      - name: 'wildfireInlineMlOverrides'
+        type: Array
+        min_version: 'beta'
+        is_set: true
+        send_empty_value: true
+        description: |
+          Defines what action to take for WildFire inline ML threats per protocol.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'protocol'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Required protocol to match.
+              enum_values:
+                - 'WILDFIRE_SMTP'
+                - 'WILDFIRE_SMB'
+                - 'WILDFIRE_POP3'
+                - 'WILDFIRE_IMAP'
+                - 'WILDFIRE_HTTP2'
+                - 'WILDFIRE_HTTP'
+                - 'WILDFIRE_FTP'
+            - name: 'action'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Threat action override.
+              enum_values:
+                - 'WILDFIRE_DEFAULT_ACTION'
+                - 'WILDFIRE_ALLOW'
+                - 'WILDFIRE_ALERT'
+                - 'WILDFIRE_DENY'
+      - name: 'wildfireThreatOverrides'
+        type: Array
+        min_version: 'beta'
+        is_set: true
+        send_empty_value: true
+        description: |
+          The configuration for overriding threats actions by threat id match.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'threatId'
+              type: String
+              min_version: 'beta'
+              required: true
+              description: |
+                Vendor-specific ID of a threat to override.
+            - name: 'action'
+              type: Enum
+              min_version: 'beta'
+              required: true
+              description: |
+                Threat action override.
+              enum_values:
+                - 'WILDFIRE_DEFAULT_ACTION'
+                - 'WILDFIRE_ALLOW'
+                - 'WILDFIRE_ALERT'
+                - 'WILDFIRE_DENY'
+      - name: 'wildfireInlineMlSetting'
+        type: NestedObject
+        min_version: 'beta'
+        description: |
+          WildFire inline Machine Learning setting for the Security Profile.
+        properties:
+          - name: 'inlineMlConfigs'
+            type: Array
+            min_version: 'beta'
+            is_set: true
+            send_empty_value: true
+            description: |
+              Defines what action to take for a specific file type in WildFire inline ML.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'fileType'
+                  type: Enum
+                  min_version: 'beta'
+                  required: true
+                  description: |
+                    The file type to match.
+                  enum_values:
+                    - 'WINDOWS_EXECUTABLE'
+                    - 'POWERSHELL_SCRIPT1'
+                    - 'POWERSHELL_SCRIPT2'
+                    - 'ELF'
+                    - 'MS_OFFICE'
+                    - 'SHELL'
+                    - 'OOXML'
+                    - 'MACHO'
+                - name: 'action'
+                  type: Enum
+                  min_version: 'beta'
+                  required: true
+                  description: |
+                    The action to take for a file type.
+                  enum_values:
+                    - 'DISABLE'
+                    - 'ALERT'
+                    - 'ENABLE'
+          - name: 'fileExceptions'
+            type: Array
+            min_version: 'beta'
+            send_empty_value: true
+            description: |
+              File exceptions to exclude from WildFire inline ML.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'partialHash'
+                  type: String
+                  min_version: 'beta'
+                  required: true
+                  description: |
+                    The partial SHA256 hash of the file to exclude.
+                - name: 'filename'
+                  type: String
+                  min_version: 'beta'
+                  description: |
+                    The file name associated with the partial hash.
   - name: 'type'
     type: Enum
     description: The type of security profile.
@@ -357,3 +663,4 @@ properties:
       - 'URL_FILTERING'
       - 'CUSTOM_MIRRORING'
       - 'CUSTOM_INTERCEPT'
+      - 'WILDFIRE_ANALYSIS'
