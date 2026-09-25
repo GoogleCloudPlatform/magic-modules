@@ -26,7 +26,7 @@ func TestKmsKeyChangeRequiresReplacement(t *testing.T) {
 		want              bool
 	}{
 		"key to key":                              {testKmsKeyA, testKmsKeyB, true, false, false},
-		"key to unknown key":                      {testKmsKeyA, "", false, false, false},
+		"key to unknown key":                      {testKmsKeyA, "", false, false, true},
 		"no key to key":                           {"", testKmsKeyB, true, false, true},
 		"no key to unknown key":                   {"", "", false, false, true},
 		"key to no key":                           {testKmsKeyA, "", true, false, true},
@@ -52,11 +52,11 @@ func TestKmsKeyUpdateRequestBody(t *testing.T) {
 		oldKey, newKey, serviceAccount string
 		wantErr                        bool
 	}{
-		"key to key":    {testKmsKeyA, testKmsKeyB, "", false},
-		"no key to key": {"", testKmsKeyB, "", true},
-		"key to no key (e.g. unknown resolved to empty)": {testKmsKeyA, "", "", true},
-		"key to key version":                             {testKmsKeyA, testKmsKeyB + "/cryptoKeyVersions/3", "", true},
-		"key to key with service account":                {testKmsKeyA, testKmsKeyB, testKmsSA, true},
+		"key to key":                      {testKmsKeyA, testKmsKeyB, "", false},
+		"no key to key":                   {"", testKmsKeyB, "", true},
+		"key to no key":                   {testKmsKeyA, "", "", true},
+		"key to key version":              {testKmsKeyA, testKmsKeyB + "/cryptoKeyVersions/3", "", true},
+		"key to key with service account": {testKmsKeyA, testKmsKeyB, testKmsSA, true},
 	}
 	for name, tc := range cases {
 		tc := tc
@@ -152,10 +152,10 @@ func TestForceNewOnUnsupportedKmsKeyChange(t *testing.T) {
 			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
 			want:   update,
 		},
-		"key to unknown key updates in place": {
+		"key to unknown key replaces": {
 			state:  keyState(testKmsKeyA, ""),
 			config: keyConfig(map[string]interface{}{"kms_key_self_link": testUnknownValue}),
-			want:   update,
+			want:   replace,
 		},
 		"unchanged key": {
 			state:  keyState(testKmsKeyA, ""),

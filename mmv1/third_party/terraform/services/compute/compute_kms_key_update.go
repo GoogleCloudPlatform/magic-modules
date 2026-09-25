@@ -12,12 +12,10 @@ import (
 // key versions, clears kmsKeyServiceAccount, and rotates if kmsKeyName is empty.
 
 func kmsKeyChangeRequiresReplacement(oldKey, newKey string, newKeyKnown, serviceAccountSet bool) bool {
-	if oldKey == "" || serviceAccountSet {
+	// An unknown key could resolve to one that needs replacement, and an
+	// update can't become a replace at apply time.
+	if oldKey == "" || serviceAccountSet || !newKeyKnown {
 		return true
-	}
-	if !newKeyKnown {
-		// Checked at apply time by kmsKeyUpdateRequestBody.
-		return false
 	}
 	return newKey == "" || isCryptoKeyVersionName(newKey)
 }
