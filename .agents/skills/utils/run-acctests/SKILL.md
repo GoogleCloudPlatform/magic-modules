@@ -18,8 +18,11 @@ description: "Executes acceptance tests (testacc) for a specific resource or sui
 
 ```bash
 VERSION="beta" # or "ga"
-if [ "$VERSION" = "ga" ]; then REPO=terraform-provider-google; PKG_DIR=google
-else REPO=terraform-provider-google-beta; PKG_DIR=google-beta; fi
+if [ "$VERSION" = "ga" ]; then
+  REPO=terraform-provider-google; PKG_DIR=google
+else
+  REPO=terraform-provider-google-beta; PKG_DIR=google-beta
+fi
 cd "${GOPATH:-$HOME/go}/src/github.com/hashicorp/$REPO" && pwd
 ```
 

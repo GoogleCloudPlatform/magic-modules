@@ -7,60 +7,94 @@ description: "Workflow for promoting beta-only resources, fields, data sources, 
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your required task.
 
-The mechanics are in `docs/content/develop/promote-to-ga.md`, and past failures are in
-`.agents/knowledge/promotion/ga-promotion-pitfalls.md`. Read both before editing. Promotions vary widely
-(MMv1, handwritten, whole product, single nested field), so use judgment.
+Before editing, read two things:
+- `docs/content/develop/promote-to-ga.md`, the step-by-step procedure.
+- `.agents/knowledge/promotion/ga-promotion-pitfalls.md`, the common mistakes the procedure doesn't cover.
+
+Promotions vary widely: MMv1 or handwritten, a whole product or a single nested field. Treat this as
+guidance and use judgment for your case.
 
 ## Starting point
 
-You're told what to promote and that it is GA in the API.
-- "GA API" means whatever the product's `ga` version calls. That is often `v1`, but not always (e.g.
-  Cloud Run gates beta features by launch stage within one version).
-- If GA status isn't established, or live API behavior contradicts it (a field is rejected or omitted, or
-  a request returns 404), stop and report the evidence. Lagging public docs are not evidence either way.
+You should be told what to promote, and that it is generally available (GA) in the underlying API.
 
-## Done means
+- The "GA API" is whatever API version the product's `ga` entry in `product.yaml` points to. This is often
+  `v1` (versus `v1beta1` for beta), but not always. For example, Cloud Run serves beta features from the
+  same API version and gates them with a launch-stage setting. Work out what the `google` provider will
+  actually call before judging availability.
+- If nobody has established GA status, or the live API contradicts it, stop and report what you found.
+  Contradictions include the GA endpoint rejecting a field, leaving it out of responses, or returning 404
+  for the resource. Public documentation often lags the API, so missing docs don't prove anything either
+  way.
 
-1. Everything in scope generates into and works in `terraform-provider-google`. Everything out of scope
-   stays beta-only.
-2. Beta behavior is unchanged unless intended. In particular, beta must not silently switch API version.
-3. Every promoted field is covered by a test that runs in GA, and it passes live on GA and on beta.
-4. The PR has correct release notes and the GA test results.
+## What "done" means
+
+1. Everything in scope is generated into `terraform-provider-google` and works there. Anything out of
+   scope stays beta-only through `min_version: beta` or version guards.
+2. The `google-beta` provider behaves the same as before, unless you intended a change. In particular, it
+   must not silently switch to a different API version.
+3. Every promoted field is exercised by at least one test that runs in the `google` provider. Those tests
+   pass live against both `google` and `google-beta`.
+4. The PR has correct release notes and reports the GA test results.
 
 ## Approach
 
-- **Inventory first.** Search for the resource/field names and for nearby `TargetVersionName` /
-  `min_version`. Misses usually happen in files without the resource's name: shared test helpers,
-  sibling resources' schema helpers, sweepers, data sources, IAM, and other resources' test configs.
-- **Classify** each element as: promote, stays beta, or blocked. Blocked means a beta-only test dependency
-  or missing from the GA API. For blocked items, present the options rather than silently picking one.
-- **Cleanup scope:** fix pre-existing GA gaps in the promoted resource's own files. Report gaps elsewhere.
+- **Inventory before editing.** Search the repo for the resource and field names, and for
+  `TargetVersionName` version guards and `min_version` settings near them. Promotions most often miss
+  files that don't contain the resource's name:
+  - shared test helpers
+  - schema helpers shared with sibling resources
+  - sweepers
+  - data sources and IAM resources
+  - test configs of *other* resources that use this one
+
+  Build your edit list from this inventory rather than from the doc's checklist alone.
+- **Classify each item** as one of three:
+  - **Promote.**
+  - **Stays beta.** The item is intentionally left out of the promotion.
+  - **Blocked.** Its test depends on something that is still beta-only, or the GA API doesn't support it.
+
+  For blocked items, lay out the options to the user instead of silently picking one. The pitfalls entry
+  lists the usual options.
+- **Cleanup scope.** If you find existing GA problems in the promoted resource's own files, such as a test
+  still wrapped in a beta-only guard, fix them. Problems elsewhere should be reported, not fixed.
 
 ## Verification
 
-PR CI only acceptance-tests **beta**, and VCR may skip silently when the beta output didn't change. The
-GA tests are yours to run.
+PR CI runs acceptance tests (VCR) only against the beta provider. If the beta output didn't change, which
+is common for promotions, VCR may skip entirely without saying so. Nobody else will run the GA tests
+before merge, so you must.
 
-- Run [`run-pre-gen-checks`](../../utils/run-pre-gen-checks/SKILL.md). Then [`repo-sync`](../../operations/repo-sync/SKILL.md)
-  and [`generate-provider`](../../operations/generate-provider/SKILL.md) for **both** `ga` and `beta`, and
-  build both.
-- Check the diffs:
-  - GA should look like the promoted surface arriving.
-  - Beta should be empty or explainable.
-- In GA, run `make test-compile TEST=./google/services/<svc>`. `make build` skips test files.
-- Run every test touching the promoted surface on GA and on beta, with
-  [`run-acctests`](../../utils/run-acctests/SKILL.md) (`VERSION=ga|beta`), `qa-test-runner`, or
-  `test-fixer` (`target_provider: both`).
-- If a test can't run (credentials, org resources, quota), say so to the user and in the PR.
+- Run [`run-pre-gen-checks`](../../utils/run-pre-gen-checks/SKILL.md).
+- Use [`repo-sync`](../../operations/repo-sync/SKILL.md) to confirm both downstream repos are in sync.
+- Use [`generate-provider`](../../operations/generate-provider/SKILL.md) to generate **both** providers
+  (`VERSION=ga` and `VERSION=beta`), and build both.
+- Review both downstream diffs:
+  - The GA diff should look like the promoted resource or fields arriving: new resource files, schema
+    entries, tests and docs.
+  - The beta diff should be empty or easy to explain. An unexpected beta diff means you changed beta
+    behavior.
+- In the GA repo, run `make test-compile TEST=./google/services/<service>`. `make build` doesn't compile
+  test files, and problems in `.go.tmpl` sources only appear once they're generated.
+- Run every acceptance test that touches the promoted surface against GA, then against beta. You can use
+  [`run-acctests`](../../utils/run-acctests/SKILL.md) (`VERSION=ga` or `beta`), the `qa-test-runner`
+  subagent, or the `test-fixer` subagent with `target_provider: both`.
+- If a test can't run (missing credentials, org-level resources, quota), tell the user and say so in the
+  PR. Don't imply coverage you didn't get.
 
 ## PR
 
-- Release notes (`docs/content/code-review/release-notes.md`):
-  - resources and data sources: `new-resource` / `new-datasource` with `` `google_x` (ga) ``, one block
-    each, including each IAM resource
-  - fields: `enhancement` with `` product: added `field` field to `google_x` resource (ga) ``
-- Description: what was promoted, what stayed beta and why, and the GA/beta test results.
-- No internal tracker IDs, internal links or unannounced dates in commits, PR text, comments or release notes.
-- Push with [`prepare-pr-link`](../../operations/prepare-pr-link/SKILL.md).
+- Write release notes following `docs/content/code-review/release-notes.md`:
+  - For resources and data sources, add one `new-resource` or `new-datasource` block each, with the body
+    `` `google_x` (ga) ``. Each IAM resource gets its own block.
+  - For fields, use `enhancement` with `` product: added `field` field to `google_x` resource (ga) ``.
+- In the description, cover:
+  - what was promoted
+  - what intentionally stayed beta, and why
+  - the GA and beta test results
+- Don't put internal tracker IDs, internal links or unannounced launch dates in commits, the PR, code
+  comments or release notes.
+- Push the branch and create the PR link with [`prepare-pr-link`](../../operations/prepare-pr-link/SKILL.md).
 
-Report any pitfall you hit that isn't in the knowledge entry.
+If you hit a problem that isn't covered in the pitfalls entry, mention it in your final report so the
+entry can be updated.

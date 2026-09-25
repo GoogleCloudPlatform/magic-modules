@@ -10,81 +10,110 @@ last_verified: 2026-09-24
 
 # GA promotion pitfalls
 
-Covers what goes wrong beyond `docs/content/develop/promote-to-ga.md`. It is not a checklist: partial
-promotions deliberately keep beta references.
+These are mistakes that commonly slip past the procedure in `docs/content/develop/promote-to-ga.md`. This
+is not a checklist to apply blindly. Some items won't apply to your promotion, and partial promotions
+deliberately keep some beta references.
 
-## CI blind spots
-- **Presubmit VCR runs only against beta.** Beta's schema is a superset of GA's, so HCL that references
-  things missing from GA still passes.
-- **VCR may not run at all:** it skips silently when the beta diff has no Go changes, which is common for
-  promotions.
-- **Other checks are beta-only or non-blocking:** the missing-test and missing-doc detectors inspect beta
-  only, and the GA unit/compile job doesn't block merge.
-- So the first live GA run is the nightly after merge, which is where most promotion breakages surface.
-  Run the GA tests yourself.
+## CI won't catch GA problems
 
-## GA API ≠ beta API
-- **Check every promoted field, nested sub-field and enum value in the GA API**, not just the resource.
-  Sibling fields and enum values are often still beta-only.
-- **GA may rename fields.** Renaming the TF field is a breaking change, so map it with `api_name` or an
-  encoder/decoder instead.
-- **Don't promote before the GA API is publicly serving.** Early promotions have been reverted, and
-  reverting an unreleased resource still trips the breaking-change check.
-- **Lagging public docs don't prove non-GA.** Removing a field from GA is breaking for users.
+- **Presubmit acceptance tests (VCR) only run against `google-beta`.** The beta schema contains
+  everything GA has plus more. A test config that uses something missing from GA therefore still passes
+  in CI.
+- **VCR may not run at all.** It skips without comment when the generated beta code has no Go changes,
+  which is common for a promotion.
+- **The missing-test and missing-doc checks** only look at the beta diff.
+- **The GA build-and-unit-test job** doesn't block merging.
+- **Consequence:** the first real GA test run is the nightly test run after merge, which is where most
+  promotion breakages show up. Run the GA tests yourself before opening the PR.
 
-## product.yaml and API versions
-- **Add `ga`; never delete `beta`.** A missing version falls back to the closest one, so beta would
-  silently start calling the GA URL. Beta-only products don't generate into GA at all.
-- **Versioned URLs hide outside product.yaml:**
-  - resource `base_url`/`self_link`
-  - `/beta/` in custom code (use `transport_tpg.BaseUrl`)
-  - `references.api` links
+## The GA API can differ from the beta API
+
+- **Check every promoted field against the GA API version,** including nested sub-fields and enum values,
+  not just the top-level resource. Individual fields and enum values are often still beta-only even when
+  the resource is GA. A field that the GA API ignores causes a permanent diff. A field it rejects causes a
+  400 error.
+- **The GA API may rename a field.** Renaming the Terraform field to match is a breaking change for users.
+  Keep the Terraform name and map it to the new API name, using `api_name` or an encoder/decoder.
+- **Don't promote before the GA API is actually serving publicly.** Otherwise the promotion has to be
+  reverted. Reverting a resource that hasn't been released yet still trips the breaking-change check.
+- **Missing or outdated public docs don't prove a feature isn't GA.** Removing a field from the `google`
+  provider because of lagging docs is a breaking change for users.
+
+## product.yaml and hardcoded API versions
+
+- **Add a `ga` entry to `versions`, but never delete the `beta` entry.** When a provider version has no
+  entry of its own, it falls back to the closest one. Deleting `beta` would silently point `google-beta`
+  at the GA URL. It would also make future beta-only fields impossible. Products with only a `beta` entry
+  aren't generated into `google` at all.
+- **API versions also hide outside `product.yaml`.** Look for these and update them:
+  - a resource-level `base_url` or `self_link` that contains the beta version
+  - literal `/beta/` URLs in custom code (use `transport_tpg.BaseUrl` instead)
+  - `references.api` links to beta documentation
   - sample names containing "beta"
-  - `required_providers { source = "hashicorp/google-beta" }` in samples
-- **Whole-product promotions:** add the service to `.teamcity/components/inputs/services_ga.kt`. The PR
-  check only fires for new product.yaml files.
+  - `required_providers { google = { source = "hashicorp/google-beta" } }` blocks in sample configs
+- **Promoting a whole product also means adding the service to the GA TeamCity list**
+  (`.teamcity/components/inputs/services_ga.kt`). The PR check for this only runs when a `product.yaml` is
+  newly added, so it won't remind you.
 
 ## Test configs
-- **No beta-only dependencies anywhere in the config:** resources, fields on other resources, data
-  sources, provider arguments.
-  - `google_project_service_identity` is a common one.
-  - Options: promote the dependency first, restructure the test, or keep the sample `min_version: beta`
-    with a comment explaining why.
-  - Whichever you choose, make sure a GA test still covers the promoted fields.
-- **Delete `provider = google-beta`; don't swap it for `provider = google`.** This includes `data` blocks.
-- **Stale beta artifacts permadiff** once the API is GA:
-  - Cloud Run `launch_stage = "BETA"` / launch-stage annotations
-  - `compute/beta/` in test assertions
-- **Hardcoded names collide** once both nightlies run the test. Use `random_suffix`.
+
+- **A GA test can't use anything that is still beta-only.** Check the whole config, not just the
+  promoted resource. That covers other resources, fields on other resources, data sources and provider
+  arguments.
+  - `google_project_service_identity` is a frequent culprit.
+  - Your options are to promote the dependency first, restructure the test to avoid it, or keep that
+    sample beta-only (`min_version: beta`) with a comment explaining why.
+  - Whichever you choose, make sure some GA test still covers the promoted fields.
+- **Delete `provider = google-beta` lines; don't replace them with `provider = google`.** Resources use the
+  default provider when `provider` is absent, and reviewers ask for the line to be removed. Check `data`
+  blocks too.
+- **Leftover beta settings cause permanent diffs once the API is GA.** Examples:
+  - Cloud Run's `launch_stage = "BETA"` and its launch-stage annotation
+  - `compute/beta/` URLs hardcoded in test assertions
+- **Hardcoded resource names can collide** once the test runs in both the GA and beta nightly runs. Use
+  `random_suffix`.
 
 ## Handwritten code and templates
-- **Guards hide outside the resource's files:**
-  - whole-file test guards
-  - `services/<svc>/bootstrap_test_utils.go[.tmpl]`
+
+- **Version guards (`{{- if ne $.TargetVersionName "ga" }}`) also hide outside the resource's own files.**
+  Check:
+  - guards wrapping an entire test file, which keep every test in it out of GA
+  - shared test helpers in `services/<service>/bootstrap_test_utils.go` (or `.go.tmpl`)
   - sweepers
-  - handwritten resources and data sources: they self-register via `registry.Schema`, so a whole-file
-    guard is the registration guard
+  - handwritten resources and data sources. These register themselves through `registry.Schema` in
+    their own file, so a guard around the whole file also hides the registration.
   - handwritten data source docs
-  - TGC `mmv1/third_party/tgc/resource_converters.go.tmpl`
-  - allowlists such as `addonsConfigKeys` and ForceSendFields
-- **Delete `{{ else }}` GA-only branches**; don't just unwrap them.
-- **Shared schema helpers span sibling resources** (e.g. instance, instance_template, region template,
-  from_template). Promote the field in all of them.
-- **`d.Set` of a still-beta key compiles in GA but panics at runtime.** Watch for this in partial
-  promotions.
-- **A `.go.tmpl` with no guards left → rename it to `.go` and gofmt it.** Template sources hide formatting
-  and import issues. Also unescape `{{"{{"}}...{{"}}"}}` literals.
+  - TGC converters in `mmv1/third_party/tgc/resource_converters.go.tmpl`
+  - allowlists of field names, such as container's `addonsConfigKeys` or ForceSendFields
+- **Delete `{{ else }}` branches that only exist for GA.** Don't just remove the surrounding `if`, or the
+  GA-only code will also run in beta.
+- **Some schema helpers are shared by sibling resources.** For example, compute instance,
+  instance_template, region_instance_template and instance_from_template share code. Promote the field
+  in every resource that uses the helper, not just one.
+- **Setting a still-beta field in Read or a flattener (`d.Set`) compiles in GA but panics at runtime.**
+  Watch for this in partial promotions, where a parent block is promoted but a child field stays beta.
+- **Once a `.go.tmpl` file has no guards left, rename it to `.go` and run `gofmt`.** Template files
+  aren't checked for formatting or unused imports, so problems surface after the rename. Also convert
+  escaped template literals like `{{"{{"}}...{{"}}"}}` back to plain text.
 
-## Release notes and bots
-- Past PRs mix release-note formats. Follow the docs (see the workflow's PR section).
-- Promotions look "new" to the bots, so expect:
-  - missing service labels
-  - `override-multiple-resources`
-  - the "GA-only additions" manual-verification note, which you answer with your GA test results
+## Release notes and CI bots
 
-## Quick checks (use judgment)
+- Past promotion PRs use inconsistent release-note formats. Follow the format in the workflow's PR
+  section, which matches `docs/content/code-review/release-notes.md`.
+- To the CI bots a promotion looks like new code, so expect these notices:
+  - missing service labels on the newly-GA resources
+  - a request for the `override-multiple-resources` label when promoting several resources
+  - a "Manual Verification Required (GA-only additions)" note, which you answer with your GA test results
+
+## Quick checks
+
+These searches often help. Use judgment, since partial promotions legitimately keep some matches.
+
 ```bash
-git -C "$TPG" grep -nE 'provider\s*=\s*google-beta|ProtoV5ProviderBetaFactories|launch.stage.*BETA|/beta/' -- google/services/<svc>
-git grep -n 'TargetVersionName' -- mmv1/third_party/terraform/services/<svc>
-git -C "$TPG" diff | grep -E '^\+func TestAcc'   # new GA tests: run them live
+# Leftover beta references in the generated GA code for the service:
+git -C "$TPG" grep -nE 'provider\s*=\s*google-beta|ProtoV5ProviderBetaFactories|launch.stage.*BETA|/beta/' -- google/services/<service>
+# Version guards remaining in the handwritten sources:
+git grep -n 'TargetVersionName' -- mmv1/third_party/terraform/services/<service>
+# Tests that are new to GA (CI won't run these, so run them live):
+git -C "$TPG" diff | grep -E '^\+func TestAcc'
 ```
