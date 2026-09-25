@@ -176,7 +176,8 @@ The following arguments are supported:
 * `overwrite_on_create` - (Optional, only for `google_folder_iam_binding`) If `true`, creating the binding replaces
   any members already bound to the same role (and condition, if any), including members Google Cloud grants by default.
   If `false`, creation fails if that role already has different members; import the existing binding instead.
-  Defaults to `true`; the default will change to `false` in the next major release.
+  Defaults to `true`; the default is planned to change to `false` in the next major release.
+  Changing it after the binding is created has no effect.
 
 * `folder` - (Required) The resource name of the folder the policy is attached to. Its format is folders/{folder_id}.
 
