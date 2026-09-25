@@ -124,6 +124,96 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 `, randomSuffix, orgId, billingProjectId)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	projectId := envvar.GetTestProjectFromEnv()
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettings(projectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUpdate(projectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityFirewallEndpoints_wildfireSettings(projectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  name               = "tf-test-my-firewall-endpoint%[1]s"
+  parent             = "projects/%[2]s"
+  location           = "us-central1-a"
+  billing_project_id = "%[2]s"
+
+  wildfire_settings {
+    enabled                                 = false
+    wildfire_region                         = "UNITED_STATES"
+    wildfire_realtime_lookup_duration       = "1s"
+    wildfire_realtime_lookup_timeout_action = "ALLOW"
+    wildfire_inline_cloud_analysis_settings {
+      max_analysis_duration               = "30s"
+      timeout_action                      = "ALLOW"
+      submission_timeout_logging_disabled = true
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, randomSuffix, projectId)
+}
+
+func testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUpdate(projectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  name               = "tf-test-my-firewall-endpoint%[1]s"
+  parent             = "projects/%[2]s"
+  location           = "us-central1-a"
+  billing_project_id = "%[2]s"
+
+  wildfire_settings {
+    enabled                                 = false
+    wildfire_region                         = "CANADA"
+    wildfire_realtime_lookup_duration       = "2s"
+    wildfire_realtime_lookup_timeout_action = "DENY"
+    wildfire_inline_cloud_analysis_settings {
+      max_analysis_duration               = "60s"
+      timeout_action                      = "DENY"
+      submission_timeout_logging_disabled = false
+    }
+  }
+
+  labels = {
+    foo = "bar-updated"
+  }
+}
+`, randomSuffix, projectId)
+}
+{{- end }}
+
 func testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
