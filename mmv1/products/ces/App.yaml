@@ -151,6 +151,14 @@ properties:
                 The speaking rate/speed in the range [0.25, 2.0]. 1.0 is the normal native
                 speed supported by the specific voice. 2.0 is twice as fast, and 0.5 is
                 half as fast. Values outside of the range [0.25, 2.0] will return an error.
+            - name: model
+              type: String
+              description: |-
+                The model used to synthesize audio.
+            - name: instruction
+              type: String
+              description: |-
+                The instruction used to synthesize speech when using a generative model.
         key_name: language_code
   - name: createTime
     type: String
