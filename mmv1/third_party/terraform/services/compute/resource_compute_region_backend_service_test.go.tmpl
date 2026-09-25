@@ -1869,7 +1869,6 @@ resource "google_compute_region_health_check" "zero" {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionBackendService_withSecurityPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1919,6 +1918,7 @@ resource "google_compute_region_security_policy" "policy" {
 `, serviceName, polLink, polName)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionBackendService_withMaxInFlightRequests(
 	serviceName, igName, itName, checkName string, maxInFlight int64) string {
 	return fmt.Sprintf(`
