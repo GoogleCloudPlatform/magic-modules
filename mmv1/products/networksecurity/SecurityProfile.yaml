@@ -474,7 +474,7 @@ properties:
             - name: 'customFileTypes'
               type: NestedObject
               description: |
-                Defines the custom file types to match for a rule.
+                Defines the custom file types to match for a rule. The API will only accept this if `file_selection_mode` is set to `CUSTOM_FILE_TYPES`
               properties:
                 - name: 'fileTypes'
                   type: Array
@@ -627,6 +627,7 @@ properties:
                     - 'ENABLE'
           - name: 'fileExceptions'
             type: Array
+            is_set: true
             description: |
               File exceptions to exclude from WildFire inline ML.
             item_type:
