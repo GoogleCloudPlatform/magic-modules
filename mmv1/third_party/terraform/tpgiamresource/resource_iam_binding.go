@@ -188,10 +188,11 @@ func iamBindingOverwriteOnCreate(d *schema.ResourceData) bool {
 	if rawConfig.IsNull() || !rawConfig.IsKnown() {
 		return true
 	}
-	if v := rawConfig.GetAttr("overwrite_on_create"); v.IsNull() || !v.IsKnown() {
+	v := rawConfig.GetAttr("overwrite_on_create")
+	if v.IsNull() || !v.IsKnown() {
 		return true
 	}
-	return d.Get("overwrite_on_create").(bool)
+	return v.True()
 }
 
 func resourceIamBindingWrite(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc, isCreate bool) func(*schema.ResourceData, interface{}) error {
