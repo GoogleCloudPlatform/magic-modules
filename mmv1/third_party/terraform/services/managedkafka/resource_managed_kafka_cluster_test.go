@@ -5,10 +5,27 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/managedkafka"
+	"github.com/hashicorp/terraform-provider-google/google/services/managedkafka"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
+
+func TestUnitManagedKafkaCluster_kafkaVersionSchema(t *testing.T) {
+	t.Parallel()
+	s := managedkafka.ResourceManagedKafkaCluster().Schema["kafka_version"]
+	if s == nil {
+		t.Fatal("expected kafka_version in ResourceManagedKafkaCluster schema, got nil")
+	}
+	if !s.Optional {
+		t.Error("expected kafka_version to be Optional")
+	}
+	if !s.Computed {
+		t.Error("expected kafka_version to be Computed (default_from_api)")
+	}
+	if s.ForceNew {
+		t.Error("expected kafka_version not to be ForceNew")
+	}
+}
 
 func TestAccManagedKafkaCluster_update(t *testing.T) {
 	t.Parallel()
