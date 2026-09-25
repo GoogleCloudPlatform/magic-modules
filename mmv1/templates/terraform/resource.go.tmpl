@@ -1638,9 +1638,15 @@ if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName
     }
 }
 {{- else -}}
+{{- if $prop.WriteOnlyPaired }}
+    if _, ok := d.GetOkExists("{{ underscore $prop.Name }}"); ok {
+{{- end }}
     if err = d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
+{{- if $prop.WriteOnlyPaired }}
+    }
+{{- end }}
 {{- end}}
 {{- end}}
 {{if $.HasSelfLink -}}

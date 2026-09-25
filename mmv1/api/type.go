@@ -181,6 +181,14 @@ type Type struct {
 	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
 	WriteOnly bool `yaml:"write_only,omitempty"`
 
+	// Set internally by the generator when this field has had a `_wo` /
+	// `_wo_version` companion pair generated for it (see AddExtraFields /
+	// addWriteOnlyFields). Used to guard the generated Read logic so that
+	// the original field is only populated from the API response when it
+	// was actually configured, preventing a permadiff when the write-only
+	// companion is used instead.
+	WriteOnlyPaired bool
+
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
 	IgnoreRead bool `yaml:"ignore_read,omitempty"`
