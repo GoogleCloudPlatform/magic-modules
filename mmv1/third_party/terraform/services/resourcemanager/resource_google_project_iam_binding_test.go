@@ -398,3 +398,73 @@ resource "google_project_iam_binding" "acceptance" {
 }
 `, pid, pid, org, role, conditionTitle)
 }
+
+// Test that with overwrite_on_create = false, a binding is created normally for a role with no
+// members, but creating one for a role that already has other members fails instead of replacing them.
+func TestAccProjectIamBinding_overwriteOnCreateFalse(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	role := "roles/compute.instanceAdmin"
+	existingRole := "roles/compute.networkViewer"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProjectAssociateBindingOverwriteOnCreateFalse(pid, org, role, existingRole, false),
+			},
+			{
+				ResourceName:      "google_project_iam_binding.acceptance",
+				ImportStateId:     fmt.Sprintf("%s %s", pid, role),
+				ImportState:       true,
+				ImportStateVerify: true,
+				// overwrite_on_create only affects creation and isn't stored in the IAM policy, so an
+				// import can't read it back.
+				ImportStateVerifyIgnore: []string{"overwrite_on_create"},
+			},
+			{
+				Config:      testAccProjectAssociateBindingOverwriteOnCreateFalse(pid, org, role, existingRole, true),
+				ExpectError: regexp.MustCompile("already exists"),
+			},
+		},
+	})
+}
+
+func testAccProjectAssociateBindingOverwriteOnCreateFalse(pid, org, role, existingRole string, withConflictingBinding bool) string {
+	config := fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_iam_binding" "acceptance" {
+  project             = google_project.acceptance.project_id
+  members             = ["user:admin@hashicorptest.com"]
+  role                = "%s"
+  overwrite_on_create = false
+}
+
+resource "google_project_iam_member" "existing" {
+  project = google_project.acceptance.project_id
+  member  = "user:admin@hashicorptest.com"
+  role    = "%s"
+}
+`, pid, pid, org, role, existingRole)
+	if withConflictingBinding {
+		config += fmt.Sprintf(`
+resource "google_project_iam_binding" "conflicting" {
+  project             = google_project.acceptance.project_id
+  members             = ["user:gterraformtest1@gmail.com"]
+  role                = "%s"
+  overwrite_on_create = false
+
+  depends_on = [google_project_iam_member.existing]
+}
+`, existingRole)
+	}
+	return config
+}
