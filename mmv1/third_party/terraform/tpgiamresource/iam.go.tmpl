@@ -50,8 +50,7 @@ type (
 	// Factory for generating ResourceIamUpdater for given ResourceData resource
 	NewResourceIamUpdaterFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error)
 
-	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource.
-	// Must be idempotent: it is re-applied to fetched policies to confirm a write took effect.
+	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource
 	iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
 
 	// Decides whether writing after (the result of applying an iamPolicyModifyFunc to before) is allowed
@@ -129,7 +128,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			fetchBackoff := 1 * time.Second
 			for successfulFetches := 0; successfulFetches < 3; {
 				if fetchBackoff > maxBackoffSeconds*time.Second {
-					return fmt.Errorf("Error applying IAM policy to %s: the policy was written, but re-reading it did not show the change. It may not have propagated yet, or the policy may have been modified concurrently.\n", updater.DescribeResource())
+					return fmt.Errorf("Error applying IAM policy to %s: Waited too long for propagation.\n", updater.DescribeResource())
 				}
 				time.Sleep(fetchBackoff)
 				log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
@@ -142,23 +141,22 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 						return err
 					}
 				}
-				log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), new_p)
+				log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
 				if new_p == nil {
 					// https://github.com/hashicorp/terraform-provider-google/issues/2625
 					fetchBackoff = fetchBackoff * 2
 					continue
 				}
-				// Other changes might have happened between the call to set the policy and now, so
-				// only check that our change is present: since modify is idempotent, re-applying it
-				// to a copy of the fetched policy changes nothing once the change has taken effect.
-				modified_p, err := copyIamPolicy(new_p)
+				modified_p := new_p
+				// This relies on the fact that `modify` is idempotent: since other changes might have
+				// happened between the call to set the policy and now, we just need to make sure that
+				// our change has been made.  'modify(p) == p' is our check for whether this has been
+				// correctly applied.
+				err = modify(modified_p)
 				if err != nil {
 					return err
 				}
-				if err := modify(modified_p); err != nil {
-					return err
-				}
-				if CompareBindings(modified_p.Bindings, new_p.Bindings) && CompareAuditConfigs(modified_p.AuditConfigs, new_p.AuditConfigs) {
+				if modified_p == new_p {
 					successfulFetches += 1
 				} else {
 					fetchBackoff = fetchBackoff * 2
@@ -221,7 +219,7 @@ func iamPolicyNoExistingBindingChanged(before, after *cloudresourcemanager.Polic
 	return nil
 }
 
-// Returns a deep copy of p, so a modify func can be applied to it without affecting p.
+// Returns a deep copy of p, e.g. to keep the policy as it was before a modify func changes it.
 func copyIamPolicy(p *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
 	c := &cloudresourcemanager.Policy{}
 	if err := tpgresource.Convert(p, c); err != nil {
