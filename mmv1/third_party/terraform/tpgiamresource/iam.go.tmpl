@@ -61,26 +61,50 @@ type (
 	ParentResourceIdFromIdentityParserFunc func(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
 )
 
-// Locking wrapper around read-only operation with retries.
-func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
-	mutexKey := updater.GetMutexKey()
-	transport_tpg.MutexStore.Lock(mutexKey)
-	defer transport_tpg.MutexStore.Unlock(mutexKey)
+const batchKeyTmplIamPolicyRead = "%s getIamPolicy"
 
-	log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
-	var policy *cloudresourcemanager.Policy
-	err := transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (perr error) {
-			policy, perr = updater.GetResourceIamPolicy()
-			return perr
-		},
-		Timeout: 10 * time.Minute,
-	})
+// iamPolicyReadWithRetry reads a resource's IAM policy, with retries. Concurrent
+// calls for the same resource are batched into a single API call.
+func iamPolicyReadWithRetry(updater ResourceIamUpdater, config *transport_tpg.Config) (*cloudresourcemanager.Policy, error) {
+	batchKey := fmt.Sprintf(batchKeyTmplIamPolicyRead, updater.GetMutexKey())
+
+	req := &transport_tpg.BatchRequest{
+		ResourceName: updater.GetMutexKey(),
+		Body:         nil,
+		// Use empty CombineF since the request is exactly the same no matter how many callers ask for it.
+		CombineF: func(body interface{}, toAdd interface{}) (interface{}, error) { return nil, nil },
+		SendF:    sendIamPolicyRead(updater),
+		DebugId:  fmt.Sprintf("Read IAM policy for %s", updater.DescribeResource()),
+	}
+
+	result, err := config.RequestBatcherIam.SendRequestWithTimeout(batchKey, req, 10*time.Minute)
 	if err != nil {
 		return nil, err
 	}
-	log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v\n", updater.DescribeResource(), policy))
-	return policy, nil
+	return result.(*cloudresourcemanager.Policy), nil
+}
+
+func sendIamPolicyRead(updater ResourceIamUpdater) transport_tpg.BatcherSendFunc {
+	return func(_ string, _ interface{}) (interface{}, error) {
+		mutexKey := updater.GetMutexKey()
+		transport_tpg.MutexStore.Lock(mutexKey)
+		defer transport_tpg.MutexStore.Unlock(mutexKey)
+
+		log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
+		var policy *cloudresourcemanager.Policy
+		err := transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (perr error) {
+				policy, perr = updater.GetResourceIamPolicy()
+				return perr
+			},
+			Timeout: 10 * time.Minute,
+		})
+		if err != nil {
+			return nil, err
+		}
+		log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v\n", updater.DescribeResource(), policy))
+		return policy, nil
+	}
 }
 
 // Locking wrapper around read-modify-write cycle for IAM policy.
@@ -162,11 +186,10 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		// retry in the case that a service account is not found. This can happen when a service account is deleted
 		// out of band.
 		if isServiceAccountNotFoundError, _ := transport_tpg.IamServiceAccountNotFound(err); isServiceAccountNotFoundError {
-			// calling a retryable function within a retry loop is not
-			// strictly the _best_ idea, but this error only happens in
-			// high-traffic projects anyways
-			currentPolicy, rerr := iamPolicyReadWithRetry(updater)
-			if rerr != nil {
+			// We are already holding the mutex here, so must call the updater method directly instead
+			// of iamPolicyReadWithRetry.
+			currentPolicy, rerr := updater.GetResourceIamPolicy()
+			if rerr == nil {
 				if p.Etag != currentPolicy.Etag {
 					// not matching indicates that there is a new state to attempt to apply
 					log.Printf("current and old etag did not match for %s, retrying", updater.DescribeResource())
