@@ -60,6 +60,9 @@ custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/compute_snapshot.go.tmpl'
   decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
+  post_update: 'templates/terraform/post_update/compute_snapshot.go.tmpl'
+custom_diff:
+  - 'forceNewOnUnsupportedKmsKeyChange("snapshot_encryption_key.0.kms_key_self_link", "snapshot_encryption_key.0.kms_key_service_account")'
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
@@ -123,6 +126,9 @@ parameters:
       If you do not provide an encryption key when creating the snapshot,
       then the snapshot will be encrypted using an automatically generated
       key and you do not need to provide a key to use the snapshot later.
+
+      ~>**NOTE** Only changing `kms_key_self_link` between Cloud KMS keys is
+      done in place; other changes to this block recreate the snapshot.
     immutable: true
     properties:
       - name: 'rawKey'
@@ -152,6 +158,9 @@ parameters:
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
         api_name: kmsKeyName
+        # Sent by post_update; see forceNewOnUnsupportedKmsKeyChange.
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/updateKmsKey'
+        update_verb: 'POST'
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
