@@ -155,7 +155,6 @@ properties:
   - name: wildfireSettings
     type: NestedObject
     min_version: beta
-    is_missing_in_cai: true
     description: |
       Settings for WildFire analysis on the firewall endpoint.
     update_mask_fields:
