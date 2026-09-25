@@ -50,8 +50,12 @@ type (
 	// Factory for generating ResourceIamUpdater for given ResourceData resource
 	NewResourceIamUpdaterFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error)
 
-	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource
+	// Describes how to modify a policy for a given Terraform IAM (_policy/_member/_binding/_audit_config) resource.
+	// Must be idempotent: it is re-applied to fetched policies to confirm a write took effect.
 	iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
+
+	// Decides whether writing after (the result of applying an iamPolicyModifyFunc to before) is allowed
+	iamPolicyWriteAllowedFunc func(before, after *cloudresourcemanager.Policy) error
 
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
 	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
@@ -83,8 +87,9 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 	return policy, nil
 }
 
-// Locking wrapper around read-modify-write cycle for IAM policy.
-func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc) error {
+// Locking wrapper around read-modify-write cycle for IAM policy. allowWrite may be nil; it runs on
+// every write attempt (including after a conflict), but not when confirming the write.
+func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc, allowWrite iamPolicyWriteAllowedFunc) error {
 	mutexKey := updater.GetMutexKey()
 	transport_tpg.MutexStore.Lock(mutexKey)
 	defer transport_tpg.MutexStore.Unlock(mutexKey)
@@ -102,9 +107,20 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		}
 		log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
 
+		var before *cloudresourcemanager.Policy
+		if allowWrite != nil {
+			if before, err = copyIamPolicy(p); err != nil {
+				return err
+			}
+		}
 		err = modify(p)
 		if err != nil {
 			return err
+		}
+		if allowWrite != nil {
+			if err := allowWrite(before, p); err != nil {
+				return err
+			}
 		}
 
 		log.Printf("[DEBUG]: Setting policy for %s to %+v\n", updater.DescribeResource(), p)
@@ -113,7 +129,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			fetchBackoff := 1 * time.Second
 			for successfulFetches := 0; successfulFetches < 3; {
 				if fetchBackoff > maxBackoffSeconds*time.Second {
-					return fmt.Errorf("Error applying IAM policy to %s: Waited too long for propagation.\n", updater.DescribeResource())
+					return fmt.Errorf("Error applying IAM policy to %s: the policy was written, but re-reading it did not show the change. It may not have propagated yet, or the policy may have been modified concurrently.\n", updater.DescribeResource())
 				}
 				time.Sleep(fetchBackoff)
 				log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
@@ -126,22 +142,23 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 						return err
 					}
 				}
-				log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
+				log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), new_p)
 				if new_p == nil {
 					// https://github.com/hashicorp/terraform-provider-google/issues/2625
 					fetchBackoff = fetchBackoff * 2
 					continue
 				}
-				modified_p := new_p
-				// This relies on the fact that `modify` is idempotent: since other changes might have
-				// happened between the call to set the policy and now, we just need to make sure that
-				// our change has been made.  'modify(p) == p' is our check for whether this has been
-				// correctly applied.
-				err = modify(modified_p)
+				// Other changes might have happened between the call to set the policy and now, so
+				// only check that our change is present: since modify is idempotent, re-applying it
+				// to a copy of the fetched policy changes nothing once the change has taken effect.
+				modified_p, err := copyIamPolicy(new_p)
 				if err != nil {
 					return err
 				}
-				if modified_p == new_p {
+				if err := modify(modified_p); err != nil {
+					return err
+				}
+				if CompareBindings(modified_p.Bindings, new_p.Bindings) && CompareAuditConfigs(modified_p.AuditConfigs, new_p.AuditConfigs) {
 					successfulFetches += 1
 				} else {
 					fetchBackoff = fetchBackoff * 2
@@ -187,6 +204,30 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	}
 	log.Printf("[DEBUG]: Set policy for %s", updater.DescribeResource())
 	return nil
+}
+
+// An iamPolicyWriteAllowedFunc that only allows adding new role+condition bindings: it returns an
+// error if any binding present in before has different members in after.
+func iamPolicyNoExistingBindingChanged(before, after *cloudresourcemanager.Policy) error {
+	afterMap := createIamBindingsMap(after.Bindings)
+	for key, members := range createIamBindingsMap(before.Bindings) {
+		if !reflect.DeepEqual(members, afterMap[key]) {
+			if !key.Condition.Empty() {
+				return fmt.Errorf("IAM binding for role %q with condition %q already exists", key.Role, key.Condition.Title)
+			}
+			return fmt.Errorf("IAM binding for role %q already exists", key.Role)
+		}
+	}
+	return nil
+}
+
+// Returns a deep copy of p, so a modify func can be applied to it without affecting p.
+func copyIamPolicy(p *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
+	c := &cloudresourcemanager.Policy{}
+	if err := tpgresource.Convert(p, c); err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 // Flattens a list of Bindings so each role+condition has a single Binding with combined members
