@@ -32,10 +32,37 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
+			},
+			{
+				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+			},
+		},
+	})
+}
+
+func TestAccDiscoveryEngineDataConnector_params(t *testing.T) {
+	// Skips this test due to duration and flakiness.
+	t.Skip()
+
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDiscoveryEngineDataConnector_params(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -47,9 +74,8 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 	})
 }
 
-func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_basic(context map[string]interface{}) string {
+func testAccDiscoveryEngineDataConnector_params(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 resource "google_discovery_engine_data_connector" "servicenow-basic" {
   location                     = "global"
   collection_id                = "tf-test-collection-id%{random_suffix}"
@@ -107,7 +133,101 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
       host = "https://gcpconnector1.service-now.com/"
       port = 123
     }
-    params.                    = jsonencode({
+    params                     = jsonencode({
+      "destination_type": "private"
+    })
+  }
+  incremental_refresh_interval = "21600s"
+  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
+  sync_mode                    = "PERIODIC"
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
+  action_config {
+    action_params = {
+      instance_uri  = "https://example.atlassian.net"
+      instance_id   = "unused"
+      client_id     = "unused"
+      client_secret = "unused"
+      auth_type     = "OAUTH"
+    }
+    create_bap_connection = true
+  }
+  bap_config {
+    supported_connector_modes = ["ACTIONS"]
+    enabled_actions = [
+      "create_issue",
+      "update_issue",
+      "change_issue_status",
+      "create_comment",
+      "update_comment",
+      "upload_attachment",
+    ]
+  }
+}
+`, context)
+}
+
+func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_discovery_engine_data_connector" "servicenow-basic" {
+  location                     = "global"
+  collection_id                = "tf-test-collection-id%{random_suffix}"
+  collection_display_name      = "tf-test-dataconnector-servicenow"
+  data_source                  = "servicenow"
+  data_source_version          = 3
+  json_params = jsonencode({
+    auth_type                  = "OAUTH_PASSWORD_GRANT"
+    instance_uri               = "https://gcpconnector1.service-now.com/"
+    client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
+    client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
+    static_ip_enabled          = "false"
+    user_account               = "connectorsuserqa@google.com"
+    password                   = "SECRET_MANAGER_RESOURCE_NAME"
+  })
+  refresh_interval             = "86400s"
+  entities {
+    entity_name                = "catalog"
+    key_property_mappings = {
+      title       = "title"
+      description = "short_description"
+    }
+    params = jsonencode({
+      "inclusion_filters" : {
+        "knowledgeBaseSysId" : [
+          "123"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name = "incident"
+    params = jsonencode({
+      "inclusion_filters" : {
+        "knowledgeBaseSysId" : [
+          "123"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name = "knowledge_base"
+    params = jsonencode({
+      "inclusion_filters" : {
+        "knowledgeBaseSysId" : [
+          "123"
+        ]
+      }
+    })
+  }
+  static_ip_enabled            = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://gcpconnector1.service-now.com/"
+      port = 123
+    }
+    params                     = jsonencode({
       "destination_type": "private"
     })
   }
@@ -153,9 +273,9 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
-  params = {
+  json_params = jsonencode({
     max_qps                    = "100"
-  }
+  })
   refresh_interval             = "172800s"
   entities {
     entity_name                = "catalog"
