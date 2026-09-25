@@ -312,7 +312,9 @@ is desired, you will need to modify your state file manually using
 <a name="nested_initialize_params"></a>The `initialize_params` block supports:
 
 * `size` - (Optional) The size of the image in gigabytes. If not specified, it
-    will inherit the size of its base image.
+    will inherit the size of its base image. Increasing this value updates the disk
+    in place; decreasing it is not supported by the API and will force recreation
+    of the instance.
 
 * `type` - (Optional) The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
 
@@ -344,18 +346,16 @@ is desired, you will need to modify your state file manually using
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: Updating currently is only supported for hyperdisk skus via disk update
-    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
-    for an update of IOPS every 4 hours. To update your hyperdisk more frequently,
-    you'll need to manually delete and recreate it.
+    Note: This is only supported for hyperdisk skus, and can be updated in place.
+    Hyperdisk allows for an update of IOPS every 4 hours; to update more
+    frequently than that, you'll need to manually delete and recreate the disk.
 
 * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
     This sets the number of throughput mb per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: Updating currently is only supported for hyperdisk skus via disk update
-    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
-    for an update of throughput every 4 hours. To update your hyperdisk more
-    frequently, you'll need to manually delete and recreate it.
+    Note: This is only supported for hyperdisk skus, and can be updated in place.
+    Hyperdisk allows for an update of throughput every 4 hours; to update more
+    frequently than that, you'll need to manually delete and recreate the disk.
 
 * `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
     Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
