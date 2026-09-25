@@ -3454,6 +3454,18 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
 	}
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if bgdStateMap := getExistingBgdStateMap(d); bgdStateMap != nil {
+		deploymentName, _ := bgdStateMap["deployment_name"].(string)
+		activeEnv, _ := bgdStateMap["active_environment"].(string)
+		deleteOldSourceCfg, _ := bgdStateMap["delete_old_source_on_destroy"].(bool)
+		shouldDeleteOldSource := (activeEnv == "TARGET") && deleteOldSourceCfg
+		if err := deleteBlueGreenDeployment(d, config, project, d.Get("name").(string), d.Get("region").(string), deploymentName, shouldDeleteOldSource, d.Timeout(schema.TimeoutDelete), userAgent); err != nil {
+			return err
+		}
+	}
+	{{- end }}
+
 	// Lock on the master_instance_name just in case deleting a replica causes
 	// operations on the master.
 	if v, ok := d.GetOk("master_instance_name"); ok {
@@ -4424,12 +4436,24 @@ func getInstanceDeploymentId(config *transport_tpg.Config, project, instanceName
 	return "", nil
 }
 
+func getExistingBgdStateMap(d *schema.ResourceData) map[string]interface{} {
+	if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+		return v.([]interface{})[0].(map[string]interface{})
+	}
+	if oldVal, _ := d.GetChange("blue_green_deployment"); oldVal != nil {
+		if oldList, ok := oldVal.([]interface{}); ok && len(oldList) > 0 && oldList[0] != nil {
+			return oldList[0].(map[string]interface{})
+		}
+	}
+	return nil
+}
+
 func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, userAgent string) error {
+	bgdStateMap := getExistingBgdStateMap(d)
 	deploymentName := ""
 	if depId, err := getInstanceDeploymentId(config, project, instanceName, userAgent); err == nil && depId != "" {
 		deploymentName = depId
-	} else if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
-		bgdStateMap := v.([]interface{})[0].(map[string]interface{})
+	} else if bgdStateMap != nil {
 		if name, ok := bgdStateMap["deployment_name"].(string); ok {
 			deploymentName = name
 		}
@@ -4458,23 +4482,23 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 	if bgdRes.RequestedConfig != nil && bgdRes.RequestedConfig.DatabaseVersion != "" {
 		targetDbVersion = bgdRes.RequestedConfig.DatabaseVersion
 	}
-	if targetDbVersion == "" {
-		if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
-			bgdStateMap := v.([]interface{})[0].(map[string]interface{})
-			if dbVer, ok := bgdStateMap["target_database_version"].(string); ok {
-				targetDbVersion = dbVer
-			}
+	if targetDbVersion == "" && bgdStateMap != nil {
+		if dbVer, ok := bgdStateMap["target_database_version"].(string); ok {
+			targetDbVersion = dbVer
 		}
 	}
 
 	activeEnv := "SOURCE"
 	if bgdRes.State == "SWITCHOVER_COMPLETED" || bgdRes.State == "SWITCHOVER_IN_PROGRESS" {
 		activeEnv = "TARGET"
+	} else if bgdRes.State == "DELETING" && bgdStateMap != nil {
+		if prevEnv, ok := bgdStateMap["active_environment"].(string); ok && prevEnv != "" {
+			activeEnv = prevEnv
+		}
 	}
 
 	deleteOldSource := false
-	if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
-		bgdStateMap := v.([]interface{})[0].(map[string]interface{})
+	if bgdStateMap != nil {
 		if val, ok := bgdStateMap["delete_old_source_on_destroy"].(bool); ok {
 			deleteOldSource = val
 		}
@@ -4540,9 +4564,14 @@ func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_t
 	}
 
 	// Case 2: Removing an existing blue_green_deployment block (or deleting out-of-band BGD in Scenario A)
-	if len(oldList) > 0 && len(newList) == 0 {
-		// TODO: Implement delete Blue-Green Deployment logic in future PR
-		return nil
+	if len(oldList) > 0 && len(newList) == 0 && oldList[0] != nil {
+		oldMap := oldList[0].(map[string]interface{})
+		deploymentName, _ := oldMap["deployment_name"].(string)
+		oldEnv, _ := oldMap["active_environment"].(string)
+		deleteOldSourceCfg, _ := oldMap["delete_old_source_on_destroy"].(bool)
+		shouldDeleteOldSource := (oldEnv == "TARGET") && deleteOldSourceCfg
+
+		return deleteBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, shouldDeleteOldSource, d.Timeout(schema.TimeoutUpdate), userAgent)
 	}
 
 	// Case 3: Modifying an existing blue_green_deployment block
@@ -4624,6 +4653,42 @@ func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return fmt.Errorf("Error waiting for Blue-Green Deployment %q creation on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	return nil
+}
+
+func deleteBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName string, deleteOldSource bool, timeout time.Duration, userAgent string) error {
+	if deploymentName == "" {
+		return nil
+	}
+
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Delete(bgdName).DeleteOldSource(deleteOldSource).Do()
+			return rerr
+		},
+		Timeout:              timeout,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			log.Printf("[DEBUG] Blue-Green Deployment %q on instance %q already deleted, ignoring 404", deploymentName, instanceName)
+			return nil
+		}
+		return fmt.Errorf("Error deleting Blue-Green Deployment %q on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	if op != nil && op.Name != "" {
+		err = SqlAdminOperationWaitTime(
+			config, op, project, "Deleting Blue-Green Deployment", userAgent,
+			timeout)
+		if err != nil {
+			return fmt.Errorf("Error waiting for Blue-Green Deployment %q deletion on instance %q: %s", deploymentName, instanceName, err)
+		}
 	}
 
 	return nil
