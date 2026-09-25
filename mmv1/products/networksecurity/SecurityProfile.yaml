@@ -109,7 +109,6 @@ samples:
   - name: 'network_security_security_profile_wildfire'
     min_version: 'beta'
     primary_resource_id: 'default'
-    tgc_skip_test: The ENUM value WILDFIRE_ANALYSIS in type field is not supported in CAI yet.
     steps:
       - name: 'network_security_security_profile_wildfire'
         min_version: 'beta'
