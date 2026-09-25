@@ -939,7 +939,9 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		if v := data["network_ip"].(string); v != "" {
 			iface["networkIP"] = v
 		}
-		if v := nf.RelativeLink(); v != "" {
+		if network == "global/networks/default" {
+			iface["network"] = network
+		} else if v := nf.RelativeLink(); v != "" {
 			iface["network"] = v
 		}
 		if networkAttachment != "" {
