@@ -178,7 +178,14 @@ func resourceIamBindingCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBa
 }
 
 func resourceIamBindingUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.UpdateFunc {
-	return resourceIamBindingWrite(newUpdaterFunc, enableBatching, parentSpecificSchema, parentResourceIdentityParser, false)
+	write := resourceIamBindingWrite(newUpdaterFunc, enableBatching, parentSpecificSchema, parentResourceIdentityParser, false)
+	return func(d *schema.ResourceData, meta interface{}) error {
+		// overwrite_on_create only affects creation, so changing only it doesn't need an IAM write.
+		if !d.HasChangeExcept("overwrite_on_create") {
+			return resourceIamBindingRead(newUpdaterFunc, parentSpecificSchema, parentResourceIdentityParser)(d, meta)
+		}
+		return write(d, meta)
+	}
 }
 
 // Whether Create may replace members already bound to the role+condition. Unset means true, the
