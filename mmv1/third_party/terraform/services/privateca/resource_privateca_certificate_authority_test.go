@@ -392,7 +392,7 @@ resource "google_privateca_certificate_authority" "default" {
 func testAccPrivatecaCertificateAuthority_privatecaCertificateAuthoritySubordinateWithFirstPartyIssuer(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "root-pool" {
-	name     = "root-pool-%{random_suffix}"
+	name     = "tf-test-root-pool-%{random_suffix}"
 	location = "%{root_location}"
 	tier     = "ENTERPRISE"
 	publishing_options {
@@ -453,7 +453,7 @@ resource "google_privateca_certificate_authority" "root-1" {
 }
 
 resource "google_privateca_ca_pool" "sub-pool" {
-	name     = "sub-pool-%{random_suffix}"
+	name     = "tf-test-sub-pool-%{random_suffix}"
 	location = "%{sub_location}"
 	tier     = "ENTERPRISE"
 	publishing_options {
@@ -532,7 +532,7 @@ resource "google_privateca_certificate_authority" "sub-1" {
 func testAccPrivatecaCertificateAuthority_privatecaCertificateAuthoritySubordinateStagedWithFirstPartyIssuer(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "root-pool" {
-	name     = "root-pool-%{random_suffix}"
+	name     = "tf-test-root-pool-%{random_suffix}"
 	location = "%{root_location}"
 	tier     = "ENTERPRISE"
 	publishing_options {
@@ -593,7 +593,7 @@ resource "google_privateca_certificate_authority" "root-1" {
 }
 
 resource "google_privateca_ca_pool" "sub-pool" {
-	name     = "sub-pool-%{random_suffix}"
+	name     = "tf-test-sub-pool-%{random_suffix}"
 	location = "%{sub_location}"
 	tier     = "ENTERPRISE"
 	publishing_options {

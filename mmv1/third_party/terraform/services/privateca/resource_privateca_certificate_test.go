@@ -56,7 +56,7 @@ func testAccPrivatecaCertificate_privatecaCertificateStart(context map[string]in
 	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
-  name = "my-pool-%{random_suffix}"
+  name = "tf-test-my-pool-%{random_suffix}"
   tier = "ENTERPRISE"
 }
 
@@ -103,7 +103,7 @@ resource "google_privateca_certificate" "default" {
   	location = "us-central1"
 	certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id
 	lifetime = "860s"
-	name = "my-certificate-%{random_suffix}"
+	name = "tf-test-my-certificate-%{random_suffix}"
 	config {
 	  subject_config  {
 		subject {
@@ -141,7 +141,7 @@ func testAccPrivatecaCertificate_privatecaCertificateEnd(context map[string]inte
 	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
-  name = "my-pool-%{random_suffix}"
+  name = "tf-test-my-pool-%{random_suffix}"
   tier = "ENTERPRISE"
 }
 
@@ -191,7 +191,7 @@ resource "google_privateca_certificate" "default" {
 	pool = google_privateca_ca_pool.default.name
 	certificate_authority = google_privateca_certificate_authority.default.certificate_authority_id
 	lifetime = "860s"
-	name = "my-certificate-%{random_suffix}"
+	name = "tf-test-my-certificate-%{random_suffix}"
 	config {
 	  subject_config  {
 		subject {

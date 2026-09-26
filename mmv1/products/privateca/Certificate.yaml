@@ -42,6 +42,7 @@ samples:
       - name: privateca_certificate_config
         resource_id_vars:
           ca_pool_id: my-pool
+          certificate_authority_id: my-authority
           certificate_name: my-certificate
         test_env_vars:
           project: PROJECT_NAME
@@ -56,6 +57,7 @@ samples:
       - name: privateca_certificate_with_template
         resource_id_vars:
           ca_pool_id: my-pool
+          certificate_authority_id: my-authority
           certificate_name: my-certificate
           certificate_template_name: my-certificate-template
         test_env_vars:
@@ -67,6 +69,7 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
+          certificate_authority_id: my-authority
         test_env_vars:
           project: PROJECT_NAME
   - name: privateca_certificate_no_authority
@@ -76,6 +79,7 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
+          certificate_authority_id: my-authority
         test_env_vars:
           project: PROJECT_NAME
   - name: privateca_certificate_custom_ski
@@ -85,6 +89,7 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
+          certificate_authority_id: my-authority
         test_env_vars:
           project: PROJECT_NAME
   - name: privateca_certificate_subject_config_org_optional
@@ -94,6 +99,7 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
+          certificate_authority_id: my-authority
         test_env_vars:
           project: PROJECT_NAME
 parameters:
