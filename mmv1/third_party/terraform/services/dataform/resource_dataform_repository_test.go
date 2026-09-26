@@ -48,11 +48,11 @@ func TestAccDataformRepository_updated(t *testing.T) {
 func testAccDataformRepository_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sourcerepo_repository" "git_repository" {
-  name = "my/repository%{random_suffix}"
+  name = "tf-test-my-repository%{random_suffix}"
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret"
+  secret_id = "tf-test-secret%{random_suffix}"
 
   replication {
     auto {}
@@ -86,7 +86,7 @@ resource "google_dataform_repository" "dataform_repository" {
 func testAccDataformRepository_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sourcerepo_repository" "git_repository" {
-  name = "my/repository%{random_suffix}"
+  name = "tf-test-my-repository%{random_suffix}"
 }
 
 resource "google_secret_manager_secret" "secret" {
