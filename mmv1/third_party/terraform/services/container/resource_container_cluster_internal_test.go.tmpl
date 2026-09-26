@@ -867,6 +867,57 @@ func TestContainerClusterApiDictatedPrivateEndpointField(t *testing.T) {
 	}
 }
 
+func TestContainerClusterExpandControlPlaneEndpointsConfig_privateEndpointSubnetwork(t *testing.T) {
+	t.Parallel()
+
+	const subnetwork = "projects/p/regions/us-east1/subnetworks/endpoints"
+
+	cases := map[string]struct {
+		config  map[string]interface{}
+		enabled bool
+	}{
+		// With IP endpoints disabled the private endpoint still serves node traffic,
+		// so the subnetwork must reach the API instead of being dropped with the
+		// user-facing IP endpoint settings.
+		"ip endpoints disabled": {
+			config: map[string]interface{}{
+				"control_plane_endpoints_config": []interface{}{
+					map[string]interface{}{
+						"ip_endpoints_config": []interface{}{
+							map[string]interface{}{"enabled": false},
+						},
+					},
+				},
+				"private_cluster_config": []interface{}{
+					map[string]interface{}{"private_endpoint_subnetwork": subnetwork},
+				},
+			},
+			enabled: false,
+		},
+		"ip endpoints enabled": {
+			config: map[string]interface{}{
+				"private_cluster_config": []interface{}{
+					map[string]interface{}{"private_endpoint_subnetwork": subnetwork},
+				},
+			},
+			enabled: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, ResourceContainerCluster().Schema, tc.config)
+			got := expandControlPlaneEndpointsConfig(d)
+			if got.IpEndpointsConfig.Enabled != tc.enabled {
+				t.Errorf("%s: expected enabled %v, but was %v", tn, tc.enabled, got.IpEndpointsConfig.Enabled)
+			}
+			if got.IpEndpointsConfig.PrivateEndpointSubnetwork != subnetwork {
+				t.Errorf("%s: expected private_endpoint_subnetwork %q, but was %q", tn, subnetwork, got.IpEndpointsConfig.PrivateEndpointSubnetwork)
+			}
+		})
+	}
+}
+
 func TestContainerCluster_IsClusterUpdateRetryableError(t *testing.T) {
 	t.Parallel()
 

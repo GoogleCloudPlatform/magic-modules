@@ -17100,6 +17100,85 @@ resource "google_container_cluster" "primary" {
 `, clusterName, networkName, subnetworkName)
 }
 
+func TestAccContainerCluster_disableControlPlaneIPWithPrivateEndpointSubnetwork(t *testing.T) {
+	t.Parallel()
+
+	r := acctest.RandString(t, 10)
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", r)
+	networkName := fmt.Sprintf("tf-test-container-net-%s", r)
+	subnetworkName := fmt.Sprintf("tf-test-container-subnetwork-%s", r)
+	endpointSubnetworkName := fmt.Sprintf("tf-test-container-endpoints-%s", r)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// private_endpoint_subnetwork is creation-time only and must be sent
+				// even though IP endpoints are disabled; the API then omits it from
+				// reads, so the follow-up plan must stay empty instead of replacing
+				// the cluster.
+				Config: testAccContainerCluster_disableControlPlaneIPWithPrivateEndpointSubnetwork(clusterName, networkName, subnetworkName, endpointSubnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "private_cluster_config.0.private_endpoint_subnetwork"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_disableControlPlaneIPWithPrivateEndpointSubnetwork(clusterName, networkName, subnetworkName, endpointSubnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "container_network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = "%s"
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+  region                   = "us-east1"
+  private_ip_google_access = true
+}
+
+resource "google_compute_subnetwork" "endpoint_subnetwork" {
+  name                     = "%s"
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.9.26.0/24"
+  region                   = "us-east1"
+  private_ip_google_access = true
+}
+
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-east1-b"
+  initial_node_count = 1
+  network            = google_compute_network.container_network.name
+  subnetwork         = google_compute_subnetwork.container_subnetwork.name
+
+  deletion_protection = false
+
+  control_plane_endpoints_config {
+    ip_endpoints_config {
+      enabled = false
+    }
+    dns_endpoint_config {
+      allow_external_traffic = true
+    }
+  }
+
+  private_cluster_config {
+    private_endpoint_subnetwork = google_compute_subnetwork.endpoint_subnetwork.id
+  }
+}
+`, networkName, subnetworkName, endpointSubnetworkName, clusterName)
+}
+
 func TestAccContainerCluster_withAdvancedMachineFeaturesPMU_Standard(t *testing.T) {
 	t.Parallel()
 

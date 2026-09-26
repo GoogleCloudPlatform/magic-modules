@@ -6912,6 +6912,13 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 		Enabled:         true,
 		ForceSendFields: []string{"Enabled"},
 	}
+	// The private endpoint is provisioned for node-to-control-plane traffic even
+	// when IP access is disabled, so the subnetwork must be sent regardless of
+	// enabled; otherwise the API places the endpoint in the cluster subnetwork.
+	if v := d.Get("private_cluster_config.0.private_endpoint_subnetwork"); v != nil {
+		ip.PrivateEndpointSubnetwork = v.(string)
+		ip.ForceSendFields = append(ip.ForceSendFields, "PrivateEndpointSubnetwork")
+	}
 	if v := d.Get("control_plane_endpoints_config.0.ip_endpoints_config.#"); v != 0 {
 		ip.Enabled = d.Get("control_plane_endpoints_config.0.ip_endpoints_config.0.enabled").(bool)
 
@@ -6925,10 +6932,6 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 	if v := d.Get("private_cluster_config.0.enable_private_endpoint"); v != nil {
 		ip.EnablePublicEndpoint = !v.(bool)
 		ip.ForceSendFields = append(ip.ForceSendFields, "EnablePublicEndpoint")
-	}
-	if v := d.Get("private_cluster_config.0.private_endpoint_subnetwork"); v != nil {
-		ip.PrivateEndpointSubnetwork = v.(string)
-		ip.ForceSendFields = append(ip.ForceSendFields, "PrivateEndpointSubnetwork")
 	}
 	if v := d.Get("private_cluster_config.0.master_global_access_config.0.enabled"); v != nil {
 		ip.GlobalAccess = v.(bool)
@@ -8907,7 +8910,17 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 		//   && private_endpoint_subnetwork is unset in terraform (new value == "")
 		//   && private_endpoint_subnetwork is returned from resource (old value != "")
 		_, hasMasterCidr := d.GetOk("private_cluster_config.0.master_ipv4_cidr_block")
-		return (hasMasterCidr && new == "" && old != "") || tpgresource.CompareSelfLinkOrResourceName(k, old, new, d)
+		if hasMasterCidr && new == "" && old != "" {
+			return true
+		}
+		// With IP endpoints disabled the API omits ip_endpoints_config.private_endpoint_subnetwork
+		// from reads, so a configured value would otherwise diff against "" on every plan and,
+		// being ForceNew, replace the cluster. Only for existing clusters: suppressing on create
+		// would drop the value from the diff before expandControlPlaneEndpointsConfig reads it.
+		if d.Id() != "" && old == "" && new != "" && containerClusterIpEndpointsDisabled(d) {
+			return true
+		}
+		return tpgresource.CompareSelfLinkOrResourceName(k, old, new, d)
 	}
 	return false
 }
