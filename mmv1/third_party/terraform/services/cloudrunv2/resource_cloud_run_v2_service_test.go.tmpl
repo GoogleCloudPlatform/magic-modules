@@ -2374,16 +2374,12 @@ resource "google_cloud_run_v2_service" "default" {
 func TestAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(context),
+				Config:      testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`not be any of \[PORT\]`),
 			},
@@ -2391,10 +2387,10 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(t *testing.T) {
 	})
 }
 
-func testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+func testAccCloudRunV2Service_cloudrunv2ServiceReservedEnvPort() string {
+	return `
 resource "google_cloud_run_v2_service" "default" {
-  name                = "tf-test-cloudrun-srv%{random_suffix}"
+  name                = "tf-test-cloudrun-srv-reserved-port"
   location            = "us-central1"
   deletion_protection = false
 
@@ -2408,5 +2404,5 @@ resource "google_cloud_run_v2_service" "default" {
     }
   }
 }
-`, context)
+`
 }
