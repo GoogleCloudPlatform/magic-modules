@@ -1,0 +1,18 @@
+resource "google_cloud_run_v2_instance" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.ResourceIdVars "cloud_run_instance_name"}}"
+  location = "us-central1"
+  deletion_protection = false
+  ingress = "{{index $.Vars "ingress"}}"
+  restart_policy = "{{index $.Vars "restart_policy"}}"
+
+  labels = {
+    "env" = "{{index $.Vars "label_env"}}"
+  }
+
+  containers {
+    image = "us-docker.pkg.dev/cloudrun/container/hello"
+    ports {
+      container_port = 8080
+    }
+  }
+}
