@@ -1042,6 +1042,22 @@ func GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
 	return ""
 }
 
+// IsRawConfigAttributeSet reports whether the attribute at key is present in the raw config, so zero values can be told apart from unset ones.
+func IsRawConfigAttributeSet(d *schema.ResourceData, key string) bool {
+	parts := strings.Split(key, ".")
+	path := cty.GetAttrPath(parts[0])
+	for _, part := range parts[1:] {
+		if index, err := strconv.Atoi(part); err == nil {
+			path = path.IndexInt(index)
+		} else {
+			path = path.GetAttr(part)
+		}
+	}
+
+	v, diags := d.GetRawConfigAt(path)
+	return len(diags) == 0 && !v.IsNull() && v.IsKnown()
+}
+
 // IamPrincipalIsCaseSensitive returns true if the type of the IAM Principal is case sensitive
 func IamPrincipalIsCaseSensitive(principal string) bool {
 	// allAuthenticatedUsers and allUsers are special identifiers that are case sensitive. See:
