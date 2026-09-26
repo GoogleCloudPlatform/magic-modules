@@ -86,11 +86,10 @@ properties:
   - name: accessLevels
     type: Array
     description: |
-      Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+      Optional. Access levels that a user can satisfy to be granted access. Multiple access levels are logically ORed. Example: "accessPolicies/9522/accessLevels/device_trusted"
     item_type:
       type: String
     min_size: 1
-    max_size: 1
   - name: sessionSettings
     type: NestedObject
     description: |
@@ -162,7 +161,7 @@ properties:
               item_type:
                 type: String
               description: |
-                Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+                Optional. Access levels that a user can satisfy to be granted access. Multiple access levels are logically ORed. Example: "accessPolicies/9522/accessLevels/device_trusted"
             - name: sessionSettings
               type: NestedObject
               description: |
@@ -204,21 +203,19 @@ properties:
               item_type:
                 type: String
               description: |
-                Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+                Optional. Dry-run access levels that are evaluated but not enforced. Multiple access levels are logically ORed. Example: "accessPolicies/9522/accessLevels/device_trusted"
               min_size: 1
-              max_size: 1
 
   - name: dryRunAccessLevels
     type: Array
     description: |
-      Optional. Dry run access level that will be evaluated but will not be enforced. The
-      access denial based on dry run policy will be logged. Only one access
-      level is supported, not multiple. This list must have exactly one element.
+      Optional. Dry-run access levels that are evaluated but not enforced.
+      Access denials based on the dry-run policy are logged. Multiple access
+      levels are logically ORed.
       Example: "accessPolicies/9522/accessLevels/device_trusted"
     item_type:
       type: String
     min_size: 1
-    max_size: 1
 
   - name: principal
     type: NestedObject
