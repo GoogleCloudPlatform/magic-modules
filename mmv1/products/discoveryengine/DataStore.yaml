@@ -253,6 +253,7 @@ properties:
         description: |
           Whether chunking mode is enabled.
         required: false
+        ignore_read: true
         properties:
           - name: 'layoutBasedChunkingConfig'
             type: NestedObject
@@ -281,6 +282,7 @@ properties:
           will be configured to use a default DigitalParsingConfig, and the default parsing
           config will be applied to all file types for Document parsing.
         required: false
+        ignore_read: true
         properties:
           - name: 'digitalParsingConfig'
             type: NestedObject
