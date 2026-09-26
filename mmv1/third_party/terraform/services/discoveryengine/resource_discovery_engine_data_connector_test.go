@@ -256,3 +256,84 @@ func TestDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress(t 
 		}
 	}
 }
+
+func TestUnitDiscoveryEngineDataConnector_flattenImportAndReadHydration(t *testing.T) {
+	t.Run("Import hydration with empty prior state", func(t *testing.T) {
+		d := discoveryengine.ResourceDiscoveryEngineDataConnector().Data(nil)
+
+		res := map[string]interface{}{
+			"name":            "projects/test-project/locations/global/collections/test-coll/dataConnector",
+			"dataSource":      "jira",
+			"refreshInterval": "86400s",
+			"autoRunDisabled": true,
+			"actionConfig": map[string]interface{}{
+				"isActionConfigured": true,
+				"actionParams": map[string]interface{}{
+					"auth_type":    "OAUTH",
+					"instance_uri": "https://example.atlassian.net",
+				},
+				"createBapConnection": true,
+			},
+		}
+
+		err := discoveryengine.ResourceDiscoveryEngineDataConnectorFlatten(d, nil, res, nil, "test-project", "test-ua", "test-project", "test-url", nil)
+		if err != nil {
+			t.Fatalf("unexpected error from ResourceDiscoveryEngineDataConnectorFlatten: %v", err)
+		}
+
+		if got := d.Get("auto_run_disabled"); got != true {
+			t.Errorf("expected auto_run_disabled = true on import, got %v", got)
+		}
+		if got := d.Get("action_config.0.action_params.auth_type"); got != "OAUTH" {
+			t.Errorf("expected action_config.0.action_params.auth_type = OAUTH on import, got %v", got)
+		}
+		if got := d.Get("action_config.0.create_bap_connection"); got != true {
+			t.Errorf("expected action_config.0.create_bap_connection = true on import, got %v", got)
+		}
+	})
+
+	t.Run("Read hydration preserves state secrets in action_params", func(t *testing.T) {
+		d := discoveryengine.ResourceDiscoveryEngineDataConnector().Data(nil)
+		if err := d.Set("action_config", []interface{}{
+			map[string]interface{}{
+				"action_params": map[string]interface{}{
+					"auth_type":     "OAUTH",
+					"instance_uri":  "https://old.atlassian.net",
+					"client_secret": "SECRET_MANAGER_RESOURCE_NAME",
+				},
+				"create_bap_connection": true,
+			},
+		}); err != nil {
+			t.Fatalf("failed to seed prior state: %v", err)
+		}
+
+		res := map[string]interface{}{
+			"name":            "projects/test-project/locations/global/collections/test-coll/dataConnector",
+			"dataSource":      "jira",
+			"refreshInterval": "86400s",
+			"autoRunDisabled": true,
+			"actionConfig": map[string]interface{}{
+				"isActionConfigured": true,
+				"actionParams": map[string]interface{}{
+					"auth_type":    "OAUTH",
+					"instance_uri": "https://updated.atlassian.net",
+				},
+			},
+		}
+
+		err := discoveryengine.ResourceDiscoveryEngineDataConnectorFlatten(d, nil, res, nil, "test-project", "test-ua", "test-project", "test-url", nil)
+		if err != nil {
+			t.Fatalf("unexpected error from ResourceDiscoveryEngineDataConnectorFlatten: %v", err)
+		}
+
+		if got := d.Get("action_config.0.action_params.client_secret"); got != "SECRET_MANAGER_RESOURCE_NAME" {
+			t.Errorf("expected client_secret preserved in state, got %v", got)
+		}
+		if got := d.Get("action_config.0.action_params.instance_uri"); got != "https://updated.atlassian.net" {
+			t.Errorf("expected updated instance_uri from API, got %v", got)
+		}
+		if got := d.Get("action_config.0.create_bap_connection"); got != true {
+			t.Errorf("expected create_bap_connection preserved from state, got %v", got)
+		}
+	})
+}
