@@ -41,35 +41,25 @@ samples:
     steps:
       - name: region_target_tcp_proxy_basic
         vars:
-          region: us-central1
-        resource_id_vars:
-          health_check_name: health-check
-          region_backend_service_name: backend-service
-          region_target_tcp_proxy_name: test-proxy
-  - name: region_target_tcp_proxy_basic_beta
-    min_version: beta
-    primary_resource_id: default
-    steps:
-      - name: region_target_tcp_proxy_basic_beta
-        min_version: beta
+          region: europe-west4
         resource_id_vars:
           health_check_name: health-check
           region_backend_service_name: backend-service
           region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_backendless
-    min_version: beta
     primary_resource_id: default
     steps:
       - name: region_target_tcp_proxy_backendless
-        min_version: beta
+        vars:
+          region: europe-west4
         resource_id_vars:
           region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_tls_route
-    min_version: beta
     primary_resource_id: default
     steps:
       - name: region_target_tcp_proxy_tls_route
-        min_version: beta
+        vars:
+          region: europe-west4
         resource_id_vars:
           region_backend_service_name: 'backend-service'
           health_check_name: 'health-check'
@@ -127,7 +117,7 @@ properties:
     type: ResourceRef
     description: |
       A reference to the BackendService resource. This field is optional when
-      the loadBalancingScheme (available in beta) is specified.
+      the loadBalancingScheme is specified.
     at_least_one_of:
       - 'backend_service'
       - 'load_balancing_scheme'
@@ -141,7 +131,6 @@ properties:
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
   - name: loadBalancingScheme
-    min_version: beta
     type: Enum
     description: |
       Specifies the load balancer type. A target TCP proxy created for one type
