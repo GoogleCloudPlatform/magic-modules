@@ -1,4 +1,4 @@
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.config) (interface{}, error) {
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 // This method returns a full self link from whatever the input is.
   if v == nil || v.(string) == "" {
     return "", nil
