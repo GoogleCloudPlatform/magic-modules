@@ -77,7 +77,7 @@ The following arguments are supported:
 
     ~> **Note:** Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` can be set.
 
-  * `iap.oauth2_client_secret_wo_version` - (Optional) Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+  * `oauth2_client_secret_wo_version` - (Optional) Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 ## Attributes Reference
 
