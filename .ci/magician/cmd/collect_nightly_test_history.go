@@ -95,9 +95,12 @@ var collectNightlyTestHistoryCmd = &cobra.Command{
 	},
 }
 
+// GCS directory holding files produced solely for the nightly test history.
+const nightlyTestHistoryDir = "nightly-test-history"
+
 // nightlyTestHistoryObjectName is the fixed GCS object holding the latest rolling history.
 func nightlyTestHistoryObjectName(pVersion provider.Version) string {
-	return fmt.Sprintf("test-metadata/%s/nightly-test-history.json", pVersion.String())
+	return fmt.Sprintf("%s/%s/nightly-test-history.json", nightlyTestHistoryDir, pVersion.String())
 }
 
 // createNightlyTestHistory builds a rolling history of test outcomes from the daily
