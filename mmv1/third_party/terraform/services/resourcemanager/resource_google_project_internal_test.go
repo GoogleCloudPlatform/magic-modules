@@ -1,6 +1,7 @@
 package resourcemanager
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -12,35 +13,59 @@ import (
 )
 
 func TestRetryProjectDefaultNetworkDeletion_RetriesApiNotEnabled(t *testing.T) {
-	attempts := 0
-	err := retryProjectDefaultNetworkDeletion(func() error {
-		attempts++
-		if attempts < 3 {
-			return &googleapi.Error{Code: 403, Errors: []googleapi.ErrorItem{{Reason: "accessNotConfigured"}}}
-		}
-		return nil
-	}, 5*time.Second)
-
-	if err != nil {
-		t.Fatalf("retryProjectDefaultNetworkDeletion() returned error: %v", err)
+	tests := map[string]error{
+		"typed":      &googleapi.Error{Code: 403, Errors: []googleapi.ErrorItem{{Reason: "accessNotConfigured"}}},
+		"plain text": fmt.Errorf("googleapi: Error 403: Compute Engine API has not been used in project 123456789 before or it is disabled."),
+		"operation polling": fmt.Errorf("Error waiting for Deleting Firewall: error while retrieving operation: %s", &googleapi.Error{
+			Code:    403,
+			Message: "Compute Engine API has not been used in project 123456789 before or it is disabled.",
+		}),
 	}
-	if attempts != 3 {
-		t.Fatalf("expected 3 deletion attempts, got %d", attempts)
+	for name, apiErr := range tests {
+		t.Run(name, func(t *testing.T) {
+			attempts := 0
+			err := retryProjectDefaultNetworkDeletion(func() error {
+				attempts++
+				if attempts < 3 {
+					return apiErr
+				}
+				return nil
+			}, 5*time.Second)
+
+			if err != nil {
+				t.Fatalf("retryProjectDefaultNetworkDeletion() returned error: %v", err)
+			}
+			if attempts != 3 {
+				t.Fatalf("expected 3 deletion attempts, got %d", attempts)
+			}
+		})
 	}
 }
 
 func TestRetryProjectDefaultNetworkDeletion_DoesNotRetryOther403(t *testing.T) {
-	attempts := 0
-	err := retryProjectDefaultNetworkDeletion(func() error {
-		attempts++
-		return &googleapi.Error{Code: 403}
-	}, time.Second)
-
-	if err == nil {
-		t.Fatal("retryProjectDefaultNetworkDeletion() returned nil, want error")
+	tests := map[string]error{
+		"typed":      &googleapi.Error{Code: 403},
+		"plain text": fmt.Errorf("googleapi: Error 403: Required 'compute.networks.delete' permission"),
+		"operation polling": fmt.Errorf("Error waiting for Deleting Firewall: error while retrieving operation: %s", &googleapi.Error{
+			Code:    403,
+			Message: "Required 'compute.globalOperations.get' permission",
+		}),
 	}
-	if attempts != 1 {
-		t.Fatalf("expected 1 deletion attempt, got %d", attempts)
+	for name, apiErr := range tests {
+		t.Run(name, func(t *testing.T) {
+			attempts := 0
+			err := retryProjectDefaultNetworkDeletion(func() error {
+				attempts++
+				return apiErr
+			}, time.Second)
+
+			if err == nil {
+				t.Fatal("retryProjectDefaultNetworkDeletion() returned nil, want error")
+			}
+			if attempts != 1 {
+				t.Fatalf("expected 1 deletion attempt, got %d", attempts)
+			}
+		})
 	}
 }
 

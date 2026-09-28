@@ -284,7 +284,14 @@ func retryProjectDefaultNetworkDeletion(deleteNetwork func() error, timeout time
 		Timeout:   timeout,
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
 			func(err error) (bool, string) {
-				return transport_tpg.IsApiNotEnabledError(err), "Compute Engine API enablement is still propagating"
+				if transport_tpg.IsApiNotEnabledError(err) {
+					return true, "Compute Engine API enablement is still propagating"
+				}
+				// CommonRefreshFunc formats errors as strings, losing the googleapi.Error type.
+				if err != nil && strings.Contains(err.Error(), "has not been used in project") {
+					return true, "Compute Engine API enablement is still propagating"
+				}
+				return false, ""
 			},
 		},
 	})
