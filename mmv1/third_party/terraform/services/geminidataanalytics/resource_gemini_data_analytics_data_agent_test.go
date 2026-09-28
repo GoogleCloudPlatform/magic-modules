@@ -234,6 +234,7 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
       }
 
       options {
+        model = "LATEST_GA_MODEL"
         analysis {
           python {
             enabled = true
@@ -248,8 +249,9 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
         natural_language_question = "How many times does a word appear in Hamlet?"
         sql_query                 = "SELECT SUM(word_count) FROM samples.shakespeare WHERE corpus = 'hamlet' AND word = @word"
         parameters {
-          name      = "word"
-          data_type = "STRING"
+          name        = "word"
+          description = "The word to count."
+          data_type   = "STRING"
         }
       }
 
