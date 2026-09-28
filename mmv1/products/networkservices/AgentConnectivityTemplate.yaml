@@ -51,6 +51,7 @@ samples:
           subnetwork_name: my-subnetwork
           network_attachment_name: my-attachment
           dns_zone_name: my-zone
+          trust_config_name: my-trust-config
         test_env_vars:
           project: PROJECT_NAME
       - name: network_services_agent_connectivity_template_advanced_update
@@ -60,6 +61,7 @@ samples:
           subnetwork_name: my-subnetwork
           network_attachment_name: my-attachment
           dns_zone_name: my-zone
+          trust_config_name: my-trust-config
         test_env_vars:
           project: PROJECT_NAME
 parameters:
@@ -145,14 +147,23 @@ properties:
         description: |
           DNS peering configuration for the AgentConnectivityTemplate.
           When set, the gateway will resolve queries for the configured
-          `domain` via Cloud DNS in the specified `targetNetwork`.
+          `domains` via Cloud DNS in the specified `targetNetwork`.
         properties:
           - name: domain
             type: String
-            required: true
+            deprecation_message: '`domain` is deprecated and will be removed in a future major release. Use `domains` instead.'
             description: |
               The domain name to peer for DNS resolution. Must be a fully
               qualified domain name ending with a dot (for example, `example.com.`).
+          - name: domains
+            type: Array
+            description: |
+              The list of domain names to peer for DNS resolution. Each entry
+              must be a fully qualified domain name ending with a dot
+              (for example, `example.com.`). At least one domain must be
+              specified between `domain` and `domains`.
+            item_type:
+              type: String
           - name: targetNetwork
             type: String
             required: true
@@ -167,3 +178,24 @@ properties:
         enum_values:
           - ALL_TRAFFIC
           - PRIVATE_RANGES_ONLY
+      - name: tlsConfig
+        type: NestedObject
+        immutable: true
+        description: |
+          The TLS configuration for the egress traffic.
+        properties:
+          - name: trustConfig
+            type: String
+            immutable: true
+            description: |
+              The trust config resource name.
+              Format: projects/{project}/locations/{location}/trustConfigs/{trust_config}
+          - name: additionalRoots
+            type: Enum
+            required: true
+            immutable: true
+            description: |
+              Defines whether additional roots should be trusted.
+            enum_values:
+              - NO_ADDITIONAL_ROOTS
+              - PUBLICLY_TRUSTED_ROOTS

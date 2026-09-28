@@ -1,0 +1,200 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'SemanticGovernancePolicy'
+description: |
+  A Semantic Governance Policy governs an AI agent's actions and tool execution
+  using natural language constraints. A policy requires an active
+  SemanticGovernancePolicyEngine (`google_vertex_ai_semantic_governance_policy_engine`)
+  in the same project and region.
+references:
+  guides:
+    'Semantic governance overview': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview'
+  api: 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.semanticGovernancePolicies'
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies/{{semantic_governance_policy_id}}'
+base_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies'
+self_link: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies/{{semantic_governance_policy_id}}'
+create_url: 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies?semanticGovernancePolicyId={{semantic_governance_policy_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/semanticGovernancePolicies/{{semantic_governance_policy_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'update', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+samples:
+  - name: 'vertex_ai_semantic_governance_policy_basic'
+    primary_resource_id: 'policy'
+    # Simplified docs-only sample
+    exclude_test: true
+    external_providers: [time]
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_basic'
+  - name: 'vertex_ai_semantic_governance_policy_update'
+    primary_resource_id: 'policy'
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: 'vertex_ai_semantic_governance_policy_test_create'
+        resource_id_vars:
+          project_id: 'sgp'
+          semantic_governance_policy_id: 'sgp'
+          reasoning_engine_display_name: 'sgp-agent'
+          reasoning_engine_display_name_2: 'sgp-agent-2'
+          mcp_service_id: 'sgp-mcp'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        ignore_read_extra:
+          - 'etag'
+      - name: 'vertex_ai_semantic_governance_policy_test_update'
+        resource_id_vars:
+          project_id: 'sgp'
+          semantic_governance_policy_id: 'sgp'
+          reasoning_engine_display_name: 'sgp-agent'
+          reasoning_engine_display_name_2: 'sgp-agent-2'
+          mcp_service_id: 'sgp-mcp'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        vars:
+          display_name: 'updated-policy'
+          description: 'Updated description for semantic governance policy'
+          natural_language_constraint: 'Do not access restricted storage buckets'
+        ignore_read_extra:
+          - 'etag'
+      # Switches the policy to a different agent and removes every optional
+      # field, so that updating the mutable `agent` field and clearing
+      # previously set fields are both covered.
+      - name: 'vertex_ai_semantic_governance_policy_test_clear'
+        resource_id_vars:
+          project_id: 'sgp'
+          semantic_governance_policy_id: 'sgp'
+          reasoning_engine_display_name: 'sgp-agent'
+          reasoning_engine_display_name_2: 'sgp-agent-2'
+          mcp_service_id: 'sgp-mcp'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
+        vars:
+          natural_language_constraint: 'Do not access restricted storage buckets'
+        ignore_read_extra:
+          - 'etag'
+parameters:
+  - name: 'semanticGovernancePolicyId'
+    type: String
+    description: |
+      The ID of the SemanticGovernancePolicy, which will become the final component of the resource name.
+      This value may be up to 63 characters, and valid characters are [a-z0-9-]. The first character cannot be a number or hyphen. The last character must be a letter or a number.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: |
+      The region of the SemanticGovernancePolicy, e.g. 'us-central1'.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the SemanticGovernancePolicy, in the form
+      'projects/{project}/locations/{location}/semanticGovernancePolicies/{semantic_governance_policy}'.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The time the SemanticGovernancePolicy was created, in RFC3339 UTC "Zulu" format.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time the SemanticGovernancePolicy was last updated, in RFC3339 UTC "Zulu" format.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      Used to perform consistent read-modify-write transactions.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The user-defined name of the SemanticGovernancePolicy.
+  - name: 'description'
+    type: String
+    description: |
+      The description of the SemanticGovernancePolicy.
+  - name: 'naturalLanguageConstraint'
+    type: String
+    description: |
+      The natural language constraint of the SemanticGovernancePolicy.
+    required: true
+  - name: 'agent'
+    type: String
+    description: |
+      The name of the agent in Agent Registry that is affected by this policy.
+    required: true
+  - name: 'mcpTools'
+    type: Array
+    description: |
+      The McpTools that are affected by this policy.
+    max_size: 1
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'mcpServer'
+          type: String
+          description: |
+            The resource name of the McpServer in Agent Registry that is affected by this policy.
+            Format: `projects/{project}/locations/{location}/mcpServers/{mcpServer}`
+          required: true
+        - name: 'tools'
+          type: Array
+          required: true
+          min_size: 1
+          is_set: true
+          description: |
+            The resource names of the McpTools used by the Agent that is affected by this policy.
+            At least one tool must be listed.
+          item_type:
+            type: String
+  - name: 'agentIdentity'
+    type: String
+    description: |
+      Represents the principal of the agent, used by the Policy Decision Point (PDP) for governance checks.
+      For more information, see https://docs.cloud.google.com/agent-builder/agent-engine/agent-identity.
+      Format: `principal://TRUST_DOMAIN/NAMESPACE/AGENT_NAME`
+    output: true
+  - name: 'agentResponseCustomization'
+    type: NestedObject
+    description: |
+      Settings for customizing the agent's response to end users when this policy is evaluated.
+    properties:
+      - name: 'denialMessage'
+        type: String
+        description: |
+          Custom message shown to the end user when the policy check results in a denial. Use this
+          to explain the rationale to the user. Max 1000 characters.
+        validation:
+          function: validation.StringLenBetween(0, 1000)
