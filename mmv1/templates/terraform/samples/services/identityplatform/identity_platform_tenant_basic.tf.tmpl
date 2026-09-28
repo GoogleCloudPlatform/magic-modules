@@ -1,4 +1,4 @@
 resource "google_identity_platform_tenant" "{{$.PrimaryResourceId}}" {
-  display_name          = "tenant"
+  display_name          = "{{index $.Vars "display_name"}}"
   allow_password_signup = true
 }

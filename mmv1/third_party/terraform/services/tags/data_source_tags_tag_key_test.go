@@ -35,7 +35,7 @@ func TestAccDataSourceGoogleTagsTagKey_dot(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	shortName := "terraform.test." + acctest.RandString(t, 10)
+	shortName := "tf-test-terraform.test." + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -55,7 +55,7 @@ func TestAccDataSourceGoogleTagsTagKey_withRegex(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	shortName := "terraform.test." + acctest.RandString(t, 10)
+	shortName := "tf-test-terraform.test." + acctest.RandString(t, 10)
 	allowedValuesRegex := "^[a-z]+$"
 
 	acctest.VcrTest(t, resource.TestCase{

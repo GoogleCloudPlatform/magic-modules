@@ -1123,6 +1123,14 @@ properties:
                   CES service agent
                   `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
                 output: true
+              - name: scopes
+                type: Array
+                description: |-
+                  The OAuth scopes to grant. If not specified, the default scope
+                  `https://www.googleapis.com/auth/cloud-platform` is used.
+                output: true
+                item_type:
+                  type: String
           - name: serviceAgentIdTokenAuthConfig
             type: NestedObject
             description: |-
@@ -1298,6 +1306,14 @@ properties:
                   CES service agent
                   `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
                 output: true
+              - name: scopes
+                type: Array
+                description: |-
+                  The OAuth scopes to grant. If not specified, the default scope
+                  `https://www.googleapis.com/auth/cloud-platform` is used.
+                output: true
+                item_type:
+                  type: String
           - name: serviceAgentIdTokenAuthConfig
             type: NestedObject
             description: |-

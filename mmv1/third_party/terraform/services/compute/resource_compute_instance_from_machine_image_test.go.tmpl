@@ -1331,7 +1331,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 func testAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(instanceName, machineImageName, bootDiskID, serviceAccountEmail, keyRingSuffix, keyNameSuffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1470,7 +1470,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 func testAccComputeInstanceFromMachineImage_igmpQuery_v2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-11"
+	family  = "debian-13"
 	project = "debian-cloud"
 }
 
@@ -1498,13 +1498,13 @@ resource "google_compute_instance" "vm" {
         subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
   }
 
-  name         = "base-vm-%{suffix}"
+  name         = "tf-test-base-vm-%{suffix}"
   machine_type = "n1-standard-1"
 }
 
 
 resource "google_compute_machine_image" "foobar" {
-  name            = "image-%{suffix}"
+  name            = "tf-test-image-%{suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -1527,7 +1527,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 func testAccComputeInstanceFromMachineImage_workloadIdentity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-11"
+	family  = "debian-13"
 	project = "debian-cloud"
 }
 
@@ -1569,7 +1569,7 @@ resource "google_compute_instance" "vm" {
 }
 
 resource "google_compute_machine_image" "foobar" {
-  name            = "image-%{random_suffix}"
+  name            = "tf-test-image-%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 

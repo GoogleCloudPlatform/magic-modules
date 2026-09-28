@@ -801,7 +801,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy || p.WriteOnly
+		return p.WriteOnly
 	})
 }
 
@@ -1838,6 +1838,25 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
+// FirstRunnableTestConfig is FirstTestConfig plus skip_test. List-query tests
+// use this so they do not apply a skipped sample as setup.
+func (r Resource) FirstRunnableTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || sample.SkipTest != "" || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) SamplePrimaryResourceId() string {
 	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
@@ -2591,7 +2610,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide {
 			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}

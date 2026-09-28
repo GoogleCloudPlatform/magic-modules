@@ -27,6 +27,10 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
 timeouts:
   insert_minutes: 60
   update_minutes: 120
@@ -75,7 +79,7 @@ samples:
           kms_key_name: my-key
         test_vars_overrides:
           prevent_destroy: "false"
-          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-west1").CryptoKey.Name
         ignore_read_extra:
           - update_time
   - name: memorystore_instance_persistence_aof

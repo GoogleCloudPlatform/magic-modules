@@ -48,6 +48,8 @@ samples:
           additional_context: "Initial additional context"
           file_title: "financial_summary.txt"
           skill_description: "Skill for finance analysis"
+          math_rendering_mode: "MATH_RENDERING_MODE_LATEX"
+          excluded_domain: "example.com"
       - name: analyst_agent_persona_basic
         resource_id_vars:
           persona_id: basic
@@ -57,6 +59,8 @@ samples:
           additional_context: "Updated additional context"
           file_title: "financial_summary_updated.txt"
           skill_description: "Updated skill description for finance analysis"
+          math_rendering_mode: "MATH_RENDERING_MODE_PLAIN_TEXT"
+          excluded_domain: "updated-example.com"
   - name: analyst_agent_persona_full
     primary_resource_id: example
     steps:
@@ -72,6 +76,15 @@ samples:
           dataset_id: dataset_id
           table_id: table
           bucket_name: bucket
+  - name: analyst_agent_persona_methodology_export_options
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_methodology_export_options
+        resource_id_vars:
+          persona_id: methodology
+      - name: analyst_agent_persona_methodology_export_options_update
+        resource_id_vars:
+          persona_id: methodology
 
 parameters:
   - name: location
@@ -338,6 +351,24 @@ properties:
               PDF
               DOCX
               GOOGLE_DOCS
+      - name: methodologyExportOptions
+        type: NestedObject
+        description: Options for methodology export.
+        properties:
+          - name: appendMethodology
+            type: Boolean
+            description: If true, append the detailed methodology to the final response.
+          - name: exportFormat
+            type: String
+            description: |-
+              Format for methodology export.
+              Possible values:
+              MARKDOWN
+              HTML
+              PDF
+          - name: exportMethodologyArtifact
+            type: Boolean
+            description: If true, export the detailed methodology as a separate artifact.
       - name: slideGenerationOptions
         type: NestedObject
         description: Options for slide generation.
@@ -664,6 +695,13 @@ properties:
       persona.
       If not set, requests from GE will only be routed to this persona if its
       name ends in "/default".
+  - name: mathRenderingMode
+    type: String
+    description: |-
+      The math rendering mode selected for this persona.
+      Possible values:
+      MATH_RENDERING_MODE_LATEX
+      MATH_RENDERING_MODE_PLAIN_TEXT
   - name: mcpDataSources
     type: Array
     description: The MCP data source selections to be used by the agent.
@@ -937,3 +975,14 @@ properties:
     type: String
     description: Update time stamp.
     output: true
+  - name: webSearchConfig
+    type: NestedObject
+    description: Configuration for web search grounding for the analyst agent.
+    properties:
+      - name: excludedDomains
+        type: Array
+        description: |-
+          List of domains to be excluded from Google Search / Enterprise Web Search
+          grounding.
+        item_type:
+          type: String

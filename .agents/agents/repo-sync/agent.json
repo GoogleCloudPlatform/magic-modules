@@ -1,5 +1,6 @@
 {
   "name": "repo-sync",
+  "description": "Initializes and synchronizes downstream provider repositories with Magic Modules to establish a clean verification baseline.",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }

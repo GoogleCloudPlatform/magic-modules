@@ -189,4 +189,10 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       data_type   = "STRING"
     }
   }
+
+  math_rendering_mode = "MATH_RENDERING_MODE_LATEX"
+
+  web_search_config {
+    excluded_domains = ["example.com"]
+  }
 }

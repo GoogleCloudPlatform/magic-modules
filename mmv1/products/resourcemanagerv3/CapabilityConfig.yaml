@@ -1,0 +1,157 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CapabilityConfig
+api_variant_patterns:
+  - folders/{folder}/capabilityConfigs/{capabilityConfig}
+  - organizations/{organization}/capabilityConfigs/{capabilityConfig}
+  - projects/{project}/capabilityConfigs/{capabilityConfig}
+description: |-
+  Capability configs define the enabled capabilities and their scope of
+  enforcement for folders, organizations, or projects within the resource hierarchy.
+references:
+  guides:
+    Official Documentation: https://docs.cloud.google.com/resource-manager/docs/manage-applications
+  api: https://docs.cloud.google.com/resource-manager/reference/rest
+base_url: '{{parent}}/capabilityConfigs'
+self_link: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+create_url: '{{parent}}/capabilityConfigs?capabilityConfigId={{capability_config_id}}'
+update_url: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+delete_url: '{{parent}}/capabilityConfigs/{{capability_config_id}}'
+update_verb: PATCH
+update_mask: true
+import_format:
+  - '{{%parent}}/capabilityConfigs/{{capability_config_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, update, delete]
+autogen_async: true
+samples:
+  - name: resource_manager_capability_config_basic
+    primary_resource_id: capability_config
+    steps:
+      - name: resource_manager_capability_config_basic
+        resource_id_vars:
+          capability_config_id: capcfg
+          display_name: capdisp
+        test_env_vars:
+          org_id: ORG_ID
+      - name: resource_manager_capability_config_update
+        resource_id_vars:
+          capability_config_id: capcfg
+        test_env_vars:
+          org_id: ORG_ID
+      # Verifies that an optional field can be updated from a non-zero value to
+      # a zero value, i.e. that display_name can be removed once it is set.
+      - name: resource_manager_capability_config_no_display_name
+        resource_id_vars:
+          capability_config_id: capcfg
+        test_env_vars:
+          org_id: ORG_ID
+  - name: resource_manager_capability_config_folder
+    primary_resource_id: capability_config
+    external_providers: [time]
+    steps:
+      - name: resource_manager_capability_config_folder
+        resource_id_vars:
+          capability_config_id: capcfg
+          folder_name: capcfg-fldr
+          management_project_id: capcfg-mgmt
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: resource_manager_capability_config_project
+    primary_resource_id: capability_config
+    external_providers: [time]
+    steps:
+      - name: resource_manager_capability_config_project
+        resource_id_vars:
+          capability_config_id: capcfg
+          project_id: capcfg-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+parameters:
+  - name: parent
+    type: String
+    description: |-
+      The parent resource in which to create the capability config.
+      Format: `folders/{folder_id}`, `organizations/{organization_id}`, or `projects/{project_number}`.
+    required: true
+    url_param_only: true
+    immutable: true
+    validation:
+      regex: '^(?:folders|organizations|projects)/\d+$'
+  - name: capability_config_id
+    type: String
+    description: |-
+      User-specified identifier of the capability config. Must be 6 to 30 characters,
+      and contain only lowercase letters, numbers, and hyphens.
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      The identifier for the capability config.
+      Format: `{parent}/capabilityConfigs/{capability_config_id}`.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      User-defined name for the capability config. Must be between 4 and 30 characters.
+  - name: types
+    type: Array
+    description: |-
+      The capabilities enabled for the resource and its sub-tree.
+      Possible values: "AGENT_MANAGEMENT".
+    required: true
+    min_size: 1
+    is_set: true
+    item_type:
+      type: String
+  - name: managementProject
+    type: String
+    description: |-
+      The management project for the capability config. If unspecified, a project will be created automatically.
+      Must be specified for project-scoped capability config.
+      Format: `projects/{project_number}`.
+    immutable: true
+    default_from_api: true
+  - name: state
+    type: String
+    description: |-
+      The state of the capability config.
+    output: true
+  - name: etag
+    type: String
+    description: |-
+      An opaque tag indicating the current version of the capability config, used for concurrency control.
+    output: true
+  - name: createTime
+    type: Time
+    description: |-
+      The time when the capability config was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |-
+      The time when the capability config was last updated.
+    output: true
