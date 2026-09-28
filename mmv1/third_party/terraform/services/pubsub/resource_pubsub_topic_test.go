@@ -24,7 +24,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubTopic_update(topic, "foo", "bar"),
+				Config: testAccPubsubTopic_update(topic, "foo", "baz"),
 			},
 			{
 				ResourceName:            "google_pubsub_topic.foo",
