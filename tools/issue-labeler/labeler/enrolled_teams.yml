@@ -491,7 +491,12 @@ service/gce-rollout-plan:
   - google_compute_rollout_plan
 service/gemini:
   resources:
-  - google_gemini_.*
+  # Matches every google_gemini_* resource except google_gemini_data_analytics_*
+  # (owned by service/geminidataanalytics). RE2 has no negative lookahead.
+  - google_gemini_([^d]|d[^a]|da[^t]|dat[^a]|data[^_]|data_[^a]|data_a[^n]|data_an[^a]|data_ana[^l]|data_anal[^y]|data_analy[^t]|data_analyt[^i]|data_analyti[^c]|data_analytic[^s]|data_analytics[^_]).*
+service/geminidataanalytics:
+  resources:
+  - google_gemini_data_analytics_.*
 service/gkebackup:
   resources:
   - google_gke_backup_.*

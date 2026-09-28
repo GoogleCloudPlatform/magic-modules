@@ -1,0 +1,5 @@
+if deleteTime, ok := res["deleteTime"].(string); ok && deleteTime != "" {
+	return nil, nil
+}
+
+return res, nil
