@@ -40,6 +40,7 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+  decoder: 'templates/terraform/decoders/network_security_security_profile.go.tmpl'
 include_in_tgc_next: true
 sweeper:
   url_substitutions:
