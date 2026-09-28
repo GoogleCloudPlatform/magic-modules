@@ -433,20 +433,9 @@ properties:
                   is_set: true
                   required: true
                   description: |
-                    The file types to match for a rule.
+                    The file types to match for a rule. For allowed values, see [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.securityProfiles#wildfiresubmissionrule)
                   item_type:
-                    type: Enum
-                    enum_values:
-                      - 'APK'
-                      - 'ARCHIVE'
-                      - 'EMAIL_LINK'
-                      - 'FLASH'
-                      - 'JAR'
-                      - 'LINUX'
-                      - 'MS_OFFICE'
-                      - 'PDF'
-                      - 'PE'
-                      - 'SCRIPT'
+                    type: String
             - name: 'direction'
               type: Enum
               required: true
@@ -481,11 +470,9 @@ properties:
                   is_set: true
                   required: true
                   description: |
-                    The file types to match for a rule.
+                    The file types to match for a rule. For allowed values, see [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.securityProfiles#wildfireinlinecloudanalysisrule).
                   item_type:
-                    type: Enum
-                    enum_values:
-                      - 'PE'
+                    type: String
             - name: 'direction'
               type: Enum
               required: true
@@ -603,19 +590,10 @@ properties:
               type: NestedObject
               properties:
                 - name: 'fileType'
-                  type: Enum
+                  type: String
                   required: true
                   description: |
-                    The file type to match.
-                  enum_values:
-                    - 'WINDOWS_EXECUTABLE'
-                    - 'POWERSHELL_SCRIPT1'
-                    - 'POWERSHELL_SCRIPT2'
-                    - 'ELF'
-                    - 'MS_OFFICE'
-                    - 'SHELL'
-                    - 'OOXML'
-                    - 'MACHO'
+                    The file type to match. For allowed values, see [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.securityProfiles#inlinemlfiletype)
                 - name: 'action'
                   type: Enum
                   required: true
