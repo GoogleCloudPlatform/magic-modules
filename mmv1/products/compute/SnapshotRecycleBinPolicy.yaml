@@ -18,8 +18,8 @@ description: |
   configures the retention duration for snapshots in the recycle bin.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/snapshot-recycle-bin-policy#snapshot_recycle_bin_policy_how_to_update'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshotRecycleBinPolicy'
+    'Official Documentation': 'https://docs.cloud.google.com/compute/docs/disks/configure-recycle-bin'
+  api: 'https://docs.cloud.google.com/compute/docs/reference/rest/beta/snapshotRecycleBinPolicy'
 min_version: beta
 examples:
   - name: 'snapshot_recycle_bin_policy_basic'

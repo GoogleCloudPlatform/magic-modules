@@ -21,8 +21,8 @@ description: |
   and the snapshots in that project will use that policy.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/organization-snapshot-recycle-bin-policy#snapshot_recycle_bin_policy_how_to_update'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/OrganizationSnapshotRecycleBinPolicy'
+    'Official Documentation': 'https://docs.cloud.google.com/compute/docs/disks/configure-recycle-bin'
+  api: 'https://docs.cloud.google.com/compute/docs/reference/rest/beta/snapshotRecycleBinPolicy'
 min_version: beta
 examples:
   - name: 'organization_snapshot_recycle_bin_policy_basic'
