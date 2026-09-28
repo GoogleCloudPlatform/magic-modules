@@ -34,8 +34,6 @@ import (
 const (
 	nightlyDataBucket = "nightly-test-data"
 	tcTimeFormat      = "20060102T150405Z0700"
-	// Number of days of nightly history used to determine whether a test is flakey
-	nightlyHistoryDays = 30
 )
 
 var cntsRequiredEnvironmentVariables = [...]string{
@@ -200,14 +198,6 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 			continue
 		}
 
-		// Get nightly test history for checking flakey tests
-		nightlyHistory, err := getNightlyTestHistory(pVersion, tc, build.BuildTypeId, formattedStartCut, nightlyHistoryDays)
-		if err != nil {
-			return fmt.Errorf("failed to get nightly test history for %s: %w", build.BuildTypeId, err)
-		}
-		// TODO: compare against current results to flag flakey tests.
-		_ = nightlyHistory
-
 		for _, testResult := range serviceTestResults.TestResults {
 			var errorMessage string
 			var errorType string
@@ -267,62 +257,6 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	return nil
-}
-
-// NightlyTestHistory aggregates a test's outcomes across a window of nightly builds.
-type NightlyTestHistory struct {
-	Passes   int
-	Failures int
-	Skips    int
-}
-
-// Runs returns the number of nightly builds in which the test was executed.
-func (h NightlyTestHistory) Runs() int {
-	return h.Passes + h.Failures + h.Skips
-}
-
-// getNightlyTestHistory returns per-test outcome counts (keyed by test name) across all
-// finished cron-triggered nightly builds for buildTypeId queued within daysBack days before
-// the given cutoff. A single build isn't enough to judge flakiness since it may itself be flakey.
-func getNightlyTestHistory(pVersion provider.Version, tc TeamcityClient, buildTypeId, before string, daysBack int) (map[string]*NightlyTestHistory, error) {
-	history := make(map[string]*NightlyTestHistory)
-
-	beforeTime, err := time.Parse(time.RFC3339, before)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse cutoff %q: %w", before, err)
-	}
-	after := beforeTime.AddDate(0, 0, -daysBack).Format(time.RFC3339)
-
-	params := url.Values{}
-	params.Set("locator", fmt.Sprintf("count:%d,project:%s,buildType:(id:%s),branch:refs/heads/nightly-test,state:finished,tag:cron-trigger,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)", daysBack*2, pVersion.TeamCityNightlyProjectName(), buildTypeId, before, after))
-	params.Set("fields", "build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)")
-	builds, err := tc.GetBuilds(params)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get nightly builds: %w", err)
-	}
-
-	for _, b := range builds.Builds {
-		testResults, err := tc.GetTestResults(b)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get test results for build %d: %w", b.Id, err)
-		}
-		for _, tr := range testResults.TestResults {
-			h, ok := history[tr.Name]
-			if !ok {
-				h = &NightlyTestHistory{}
-				history[tr.Name] = h
-			}
-			switch tr.Status {
-			case "SUCCESS":
-				h.Passes++
-			case "FAILURE":
-				h.Failures++
-			case "UNKNOWN":
-				h.Skips++
-			}
-		}
-	}
-	return history, nil
 }
 
 // convertServiceName extracts service package name from teamcity build type id
