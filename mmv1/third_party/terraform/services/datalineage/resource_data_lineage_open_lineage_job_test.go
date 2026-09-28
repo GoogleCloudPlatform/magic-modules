@@ -113,9 +113,8 @@ func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.#", "1"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.column_lineage.0.dataset_input.#", "3"),
 					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "output.0.column_lineage.0.field.#", "3"),
-					resource.TestCheckResourceAttr("google_data_lineage_open_lineage_job.full_job", "knowledge_catalog.#", "1"),
-					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.full_job", "knowledge_catalog.0.process"),
-					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.full_job", "knowledge_catalog.0.run"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.full_job", "process"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.full_job", "run"),
 				),
 			},
 			{
@@ -358,7 +357,7 @@ resource "google_data_lineage_open_lineage_job" "update_test" {
 // TestAccDataLineageOpenLineageJob_CreateAndDelete validates the create-delete lifecycle.
 // Checks that:
 // - Resource creation via POST to processOpenLineageRunEvent succeeds
-// - Computed fields knowledge_catalog.process and knowledge_catalog.run are populated from response
+// - Computed fields process and run are populated from response
 // - Resource is properly destroyed when Terraform state is cleaned up
 // - Deletion via REST DELETE endpoint removes the remote process
 func TestAccDataLineageOpenLineageJob_CreateAndDelete(t *testing.T) {
@@ -381,8 +380,8 @@ func TestAccDataLineageOpenLineageJob_CreateAndDelete(t *testing.T) {
 			{
 				Config: testAccDataLineageOpenLineageJob_CreateAndDelete_Config(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.delete_test", "knowledge_catalog.0.process"),
-					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.delete_test", "knowledge_catalog.0.run"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.delete_test", "process"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.delete_test", "run"),
 				),
 			},
 		},
@@ -435,8 +434,8 @@ func TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon(t *testing.T) {
 			{
 				Config: testAccDataLineageOpenLineageJob_DeletionPolicyAbandon(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.abandon_test", "knowledge_catalog.0.process"),
-					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.abandon_test", "knowledge_catalog.0.run"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.abandon_test", "process"),
+					resource.TestCheckResourceAttrSet("google_data_lineage_open_lineage_job.abandon_test", "run"),
 				),
 			},
 			{
@@ -486,7 +485,7 @@ func testAccCheckDataLineageOpenLineageJobDestroyProducer(t *testing.T) func(s *
 			}
 
 			conf := acctest.GoogleProviderConfig(t)
-			n := rs.Primary.Attributes["knowledge_catalog.0.process"]
+			n := rs.Primary.Attributes["process"]
 			url := transport_tpg.BaseUrl(datalineage.Product, conf) + strings.TrimPrefix(n, "/")
 
 			billingProject := ""
@@ -533,9 +532,8 @@ func testAccCheckDataLineageOpenLineageJobDestroyProducer(t *testing.T) func(s *
 // Checks that:
 // - Resource is created and initial run ID is recorded in state
 // - External modification (new event to same process outside Terraform) is detected
-// - Plan phase detects run ID mismatch between state and remote
-// - Warning is logged indicating external modifications
-// - Apply phase syncs the latest run ID back to state
+// - Refresh updates run ID in state from the latest run returned by the API
+// - Plan phase remains empty after refresh because computed state is current
 func TestAccDataLineageOpenLineageJob_DriftDetection(t *testing.T) {
 	t.Parallel()
 

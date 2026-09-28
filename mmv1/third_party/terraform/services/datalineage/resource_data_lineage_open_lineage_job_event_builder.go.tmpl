@@ -7,11 +7,10 @@ import (
 )
 
 const (
-    {{/* TODO: make the url point to specific release, not the main branch if possible*/}}
 	{{- if ne $.TargetVersionName "ga" -}}
-	openLineageProducer          = "https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google/services/datalineage/resource_data_lineage_config.go"
+	openLineageProducer          = "https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google/services/datalineage/resource_data_lineage_open_lineage_job.go"
 	{{- else }}
-	openLineageProducer          = "https://github.com/hashicorp/terraform-provider-google/blob/main/google/services/datalineage/resource_data_lineage_config.go"
+	openLineageProducer          = "https://github.com/hashicorp/terraform-provider-google/blob/main/google/services/datalineage/resource_data_lineage_open_lineage_job.go"
 	{{- end }}
 	openLineageRunEventSchemaURL = "https://openlineage.io/spec/2-0-2/OpenLineage.json#/$defs/RunEvent"
 	openLineageJobFacetSchemaURL = "https://openlineage.io/spec/facets/2-0-4/JobTypeJobFacet.json"
@@ -235,13 +234,4 @@ func buildCllInputs(i []interface{}) []map[string]interface{} {
 	}
 
 	return in
-}
-
-func flattenKnowledgeCatalog(process, run string) []interface{} {
-	return []interface{}{
-		map[string]interface{}{
-			"process": process,
-			"run":     run,
-		},
-	}
 }

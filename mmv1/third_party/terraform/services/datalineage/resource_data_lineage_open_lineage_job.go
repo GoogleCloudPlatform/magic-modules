@@ -1,70 +1,20 @@
 package datalineage
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"reflect"
-	"regexp"
-	"slices"
-	"sort"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
-
-	"google.golang.org/api/googleapi"
-)
-
-var (
-	_ = bytes.Clone
-	_ = context.WithCancel
-	_ = base64.NewDecoder
-	_ = json.Marshal
-	_ = fmt.Sprintf
-	_ = log.Print
-	_ = http.Get
-	_ = reflect.ValueOf
-	_ = regexp.Match
-	_ = slices.Min([]int{1})
-	_ = sort.IntSlice{}
-	_ = strconv.Atoi
-	_ = strings.Trim
-	_ = time.Now
-	_ = errwrap.Wrap
-	_ = cty.BoolVal
-	_ = diag.Diagnostic{}
-	_ = customdiff.All
-	_ = id.UniqueId
-	_ = logging.LogLevel
-	_ = retry.Retry
-	_ = schema.Noop
-	_ = validation.All
-	_ = structure.ExpandJsonFromString
-	_ = terraform.State{}
-	_ = tpgresource.SetLabels
-	_ = transport_tpg.Config{}
-	_ = verify.ValidateEnum
-	_ = googleapi.Error{}
 )
 
 func init() {
@@ -76,6 +26,8 @@ func init() {
 	}.Register()
 }
 
+// This resource is intentionally non-declarative: Create and Update emit OpenLineage COMPLETE
+// events to processOpenLineageRunEvent, and state tracks the resulting process/run identifiers.
 func ResourceDataLineageOpenLineageJob() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDataLineageOpenLineageJobCreate,
@@ -360,24 +312,15 @@ func ResourceDataLineageOpenLineageJob() *schema.Resource {
 					},
 				},
 			},
-			"knowledge_catalog": {
-				Type:        schema.TypeList,
+			"process": {
+				Type:        schema.TypeString,
 				Computed:    true,
-				Description: `Knowledge Catalog entities generated for this lineage job.`,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"process": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `Knowledge Catalog process identifier.`,
-						},
-						"run": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `Knowledge Catalog run identifier.`,
-						},
-					},
-				},
+				Description: `Data Lineage process identifier created for this lineage job.`,
+			},
+			"run": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `Latest Data Lineage run identifier for this lineage job.`,
 			},
 
 			"deletion_policy": {
@@ -419,12 +362,6 @@ func resourceDataLineageOpenLineageJobCreate(ctx context.Context, d *schema.Reso
 	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
-	ownerProp, err := expandDataLineageOpenLineageJobOwner(d.Get("owner"), d, config)
-	if err != nil {
-		return diag.FromErr(err)
-	} else if v, ok := d.GetOkExists("owner"); !tpgresource.IsEmptyValue(reflect.ValueOf(ownerProp)) && (ok || !reflect.DeepEqual(v, ownerProp)) {
-		obj["owner"] = ownerProp
-	}
 	inputProp, err := expandDataLineageOpenLineageJobInput(d.Get("input"), d, config)
 	if err != nil {
 		return diag.FromErr(err)
@@ -461,8 +398,10 @@ func resourceDataLineageOpenLineageJobCreate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, run))
-	if err != nil {
+	if err = d.Set("process", process); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("run", run); err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(process)
@@ -483,12 +422,15 @@ func resourceDataLineageOpenLineageJobRead(ctx context.Context, d *schema.Resour
 	if diagnostics != nil {
 		return diagnostics
 	}
+	if d.Id() == "" {
+		return nil
+	}
 
-	if v, ok := d.GetOk("knowledge_catalog"); ok {
-		r := v.([]interface{})[0].(map[string]interface{})["run"].(string)
-		if run != r {
-			log.Printf("[WARN] Run ID has changed for OpenLineageJob %q: %s -> %s, this suggests external modifications. It will get updated during next apply", d.Id(), r, run)
-		}
+	if err = d.Set("process", d.Id()); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("run", run); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -529,12 +471,6 @@ func resourceDataLineageOpenLineageJobUpdate(ctx context.Context, d *schema.Reso
 	} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
-	ownerProp, err := expandDataLineageOpenLineageJobOwner(d.Get("owner"), d, config)
-	if err != nil {
-		return diag.FromErr(err)
-	} else if v, ok := d.GetOkExists("owner"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, ownerProp)) {
-		obj["owner"] = ownerProp
-	}
 	inputProp, err := expandDataLineageOpenLineageJobInput(d.Get("input"), d, config)
 	if err != nil {
 		return diag.FromErr(err)
@@ -571,9 +507,10 @@ func resourceDataLineageOpenLineageJobUpdate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("knowledge_catalog", flattenKnowledgeCatalog(process, run))
-
-	if err != nil {
+	if err = d.Set("process", process); err != nil {
+		return diag.Errorf("Error updating OpenLineageJob %q: %s", d.Id(), err)
+	}
+	if err = d.Set("run", run); err != nil {
 		return diag.Errorf("Error updating OpenLineageJob %q: %s", d.Id(), err)
 	} else {
 		log.Printf("[DEBUG] Finished updating OpenLineageJob %q: %#v", d.Id(), response)
@@ -611,12 +548,6 @@ func getResponseString(res map[string]interface{}, field string) (string, error)
 	if field == "process" {
 		if v, ok := res["process_name"].(string); ok && v != "" {
 			return v, nil
-		}
-	}
-
-	if v, ok := res["knowledge_catalog"].(map[string]interface{}); ok {
-		if out, ok := v[field].(string); ok && out != "" {
-			return out, nil
 		}
 	}
 
@@ -743,7 +674,7 @@ func getLatestRunForProcess(ctx context.Context, d *schema.ResourceData, config 
 
 	runs, ok := runsResponse["runs"].([]interface{})
 	if !ok || len(runs) == 0 {
-		return "", diag.Errorf("error retrieving latest run for process %s: no runs found", process)
+		return "", nil
 	}
 
 	firstRun, ok := runs[0].(map[string]interface{})
@@ -798,33 +729,6 @@ func flattenDataLineageOpenLineageJobName(v interface{}, d *schema.ResourceData,
 }
 
 func flattenDataLineageOpenLineageJobDescription(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenDataLineageOpenLineageJobOwner(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return v
-	}
-	l := v.([]interface{})
-	transformed := make([]interface{}, 0, len(l))
-	for _, raw := range l {
-		original := raw.(map[string]interface{})
-		if len(original) < 1 {
-			// Do not include empty json objects coming back from the api
-			continue
-		}
-		transformed = append(transformed, map[string]interface{}{
-			"name": flattenDataLineageOpenLineageJobOwnerName(original["name"], d, config),
-			"type": flattenDataLineageOpenLineageJobOwnerType(original["type"], d, config),
-		})
-	}
-	return transformed
-}
-func flattenDataLineageOpenLineageJobOwnerName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenDataLineageOpenLineageJobOwnerType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
@@ -1167,29 +1071,6 @@ func flattenDataLineageOpenLineageJobOutputColumnLineageDatasetInputTransformati
 	return v
 }
 
-func flattenDataLineageOpenLineageJobKnowledgeCatalog(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return nil
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["process"] =
-		flattenDataLineageOpenLineageJobKnowledgeCatalogProcess(original["process"], d, config)
-	transformed["run"] =
-		flattenDataLineageOpenLineageJobKnowledgeCatalogRun(original["run"], d, config)
-	return []interface{}{transformed}
-}
-func flattenDataLineageOpenLineageJobKnowledgeCatalogProcess(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenDataLineageOpenLineageJobKnowledgeCatalogRun(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
 func expandDataLineageOpenLineageJobNamespace(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
@@ -1199,46 +1080,6 @@ func expandDataLineageOpenLineageJobName(v interface{}, d tpgresource.TerraformR
 }
 
 func expandDataLineageOpenLineageJobDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandDataLineageOpenLineageJobOwner(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	if v == nil {
-		return nil, nil
-	}
-	l := v.([]interface{})
-	req := make([]interface{}, 0, len(l))
-	for _, raw := range l {
-		if raw == nil {
-			continue
-		}
-		original := raw.(map[string]interface{})
-		transformed := make(map[string]interface{})
-
-		transformedName, err := expandDataLineageOpenLineageJobOwnerName(original["name"], d, config)
-		if err != nil {
-			return nil, err
-		} else if val := reflect.ValueOf(transformedName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-			transformed["name"] = transformedName
-		}
-
-		transformedType, err := expandDataLineageOpenLineageJobOwnerType(original["type"], d, config)
-		if err != nil {
-			return nil, err
-		} else if val := reflect.ValueOf(transformedType); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-			transformed["type"] = transformedType
-		}
-
-		req = append(req, transformed)
-	}
-	return req, nil
-}
-
-func expandDataLineageOpenLineageJobOwnerName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandDataLineageOpenLineageJobOwnerType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
@@ -1814,32 +1655,4 @@ func expandDataLineageOpenLineageJobOutputColumnLineageDatasetInputTransformatio
 
 func expandDataLineageOpenLineageJobOutputColumnLineageDatasetInputTransformationSubtype(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
-}
-
-func ResourceDataLineageOpenLineageJobFlatten(d *schema.ResourceData, meta interface{}, res map[string]interface{}, config *transport_tpg.Config, userAgent string, billingProject string, url string, headers http.Header) error {
-	var err error
-
-	if err = d.Set("namespace", flattenDataLineageOpenLineageJobNamespace(res["namespace"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-	if err = d.Set("name", flattenDataLineageOpenLineageJobName(res["name"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-	if err = d.Set("description", flattenDataLineageOpenLineageJobDescription(res["description"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-	if err = d.Set("owner", flattenDataLineageOpenLineageJobOwner(res["owner"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-	if err = d.Set("input", flattenDataLineageOpenLineageJobInput(res["input"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-	if err = d.Set("output", flattenDataLineageOpenLineageJobOutput(res["output"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-	if err = d.Set("knowledge_catalog", flattenDataLineageOpenLineageJobKnowledgeCatalog(res["knowledge_catalog"], d, config)); err != nil {
-		return fmt.Errorf("Error reading OpenLineageJob: %s", err)
-	}
-
-	return nil
 }

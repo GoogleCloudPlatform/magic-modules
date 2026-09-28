@@ -1,8 +1,7 @@
 # Copyright IBM Corp. 2014, 2026
 # SPDX-License-Identifier: MPL-2.0
 resource: google_data_lineage_open_lineage_job
-generation_type: mmv1
-source_file: products/datalineage/OpenLineageJob.yaml
+generation_type: handwritten
 api_service_name: datalineage.googleapis.com
 api_version: v1
 api_resource_type_kind: OpenLineageJob
@@ -15,10 +14,12 @@ fields:
     - field: input.symlink.name
     - field: input.symlink.namespace
     - field: input.symlink.type
-    - field: knowledge_catalog.process
-    - field: knowledge_catalog.run
     - field: name
     - field: namespace
+    - field: process
+      provider_only: true
+    - field: run
+      provider_only: true
     - field: output.catalog.framework
     - field: output.catalog.name
     - field: output.catalog.type

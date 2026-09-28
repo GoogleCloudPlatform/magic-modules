@@ -8,15 +8,16 @@ description: |-
 
 Static lineage represented in OpenLineage format.
 
-Defines lineage between datasets in OpenLineage format and publishes it to Knowledge Catalog.
+Defines lineage between datasets in OpenLineage format and publishes it through the Data Lineage API.
 
 This resource is a stop-gap until static lineage endpoints are available in Knowledge Catalog. It can be used to version control declared lineage alongside the environment managed by Terraform.
 
 This resource emits OpenLineage `RunEvent` payloads directly to the Data Lineage API. It does not rely on OpenLineage client libraries.
+Each create/update emits a `COMPLETE` event and does not emit a preceding `START` event.
 
 This resource is **not importable** because there is no 1:1 mapping between the OpenLineage representation and the Knowledge Catalog process and run resources created by the API.
 
-During refresh, Terraform reads the latest run for the tracked process. If external systems emit additional runs for that process, the provider logs that drift, but does not attempt to reconcile it in state beyond reporting it. The update path emits a new event from the current configuration, so the next `terraform apply` is expected to overwrite the observed drift.
+During refresh, Terraform reads the latest run for the tracked process and stores it in state. If external systems emit additional runs for that process, this field may change accordingly. The update path emits a new event from the current configuration, which appends a new run to the process.
 
 
 To get more information about OpenLineageJob, see:
@@ -456,20 +457,13 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `id` - an identifier for the resource with format `{{parent}}/locations/{{location}}/{{process}}`
 
-* `knowledge_catalog` -
-  Knowledge Catalog entities generated for this lineage job.
-  Structure is [documented below](#nested_knowledge_catalog).
-
-
-<a name="nested_knowledge_catalog"></a>The `knowledge_catalog` block contains:
-
 * `process` -
   (Output)
-  Knowledge Catalog process identifier.
+  Data Lineage process identifier.
 
 * `run` -
   (Output)
-  Knowledge Catalog run identifier.
+  Latest Data Lineage run identifier.
 
 ## Timeouts
 
