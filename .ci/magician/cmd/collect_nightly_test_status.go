@@ -198,6 +198,14 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 			continue
 		}
 
+		// Get latest nightly test build for checking flakey tests
+		previousNightlyResults, err := getLatestNightlyTestResults(pVersion, tc, build.BuildTypeId, formattedStartCut)
+		if err != nil {
+			return fmt.Errorf("failed to get latest nightly test results for %s: %w", build.BuildTypeId, err)
+		}
+		// TODO: compare against current results to flag flakey tests.
+		_ = previousNightlyResults
+
 		for _, testResult := range serviceTestResults.TestResults {
 			var errorMessage string
 			var errorType string
@@ -257,6 +265,33 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	return nil
+}
+
+// getLatestNightlyTestResults returns the test results (keyed by test name) of the most
+// recent finished cron-triggered nightly build for buildTypeId queued before the given cutoff.
+// Returns an empty map if no such build exists.
+func getLatestNightlyTestResults(pVersion provider.Version, tc TeamcityClient, buildTypeId, before string) (map[string]teamcity.TestResult, error) {
+	results := make(map[string]teamcity.TestResult)
+
+	params := url.Values{}
+	params.Set("locator", fmt.Sprintf("count:1,project:%s,buildType:(id:%s),branch:refs/heads/nightly-test,state:finished,tag:cron-trigger,queuedDate:(date:%s,condition:before)", pVersion.TeamCityNightlyProjectName(), buildTypeId, before))
+	params.Set("fields", "build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)")
+	builds, err := tc.GetBuilds(params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get latest nightly build: %w", err)
+	}
+	if len(builds.Builds) == 0 {
+		return results, nil
+	}
+
+	testResults, err := tc.GetTestResults(builds.Builds[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to get latest nightly test results: %w", err)
+	}
+	for _, tr := range testResults.TestResults {
+		results[tr.Name] = tr
+	}
+	return results, nil
 }
 
 // convertServiceName extracts service package name from teamcity build type id
