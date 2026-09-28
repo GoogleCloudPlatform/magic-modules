@@ -15,6 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"magician/cloudstorage"
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
@@ -82,6 +83,8 @@ type VCRTestTableRow struct {
 	RecordingLogUrl                 string
 	ReplayingAfterRecordingErrorUrl string
 	ReplayingAfterRecordingLogUrl   string
+	// NightlyStatus is set for tests that failed in recording when nightly history is available.
+	NightlyStatus string
 }
 
 type recordReplay struct {
@@ -100,6 +103,8 @@ type recordReplay struct {
 	BrowseLogBaseUrl              string
 	NotRunBetaTests               []string
 	NotRunGATests                 []string
+	HasNightlyHistory             bool
+	NightlyKnownFailures          int
 }
 
 var testTerraformVCRCmd = &cobra.Command{
@@ -168,7 +173,9 @@ The following environment variables are required:
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
 
-		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, "/workspace", gh, rnr, ctlr, vt)
+		gcs := cloudstorage.NewClient()
+
+		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, "/workspace", gh, rnr, ctlr, vt, gcs)
 	},
 }
 
@@ -180,7 +187,7 @@ func listTTVRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester, gcs CloudstorageClient) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
 
@@ -375,9 +382,23 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 
-		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl)
+		// Nightly history is optional context; a failure to load it must not fail the VCR check.
+		nightlyHistory, err := loadNightlyTestHistory(provider.Beta, gcs)
+		if err != nil {
+			fmt.Printf("🟡 Skipping nightly test history comparison: %v\n", err)
+		}
+
+		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl, nightlyHistory)
+		nightlyKnownFailures := 0
+		for _, row := range testRows {
+			if row.NightlyStatus == NightlyStatusFailing || row.NightlyStatus == NightlyStatusFlaky {
+				nightlyKnownFailures++
+			}
+		}
 
 		recordReplayData := recordReplay{
+			HasNightlyHistory:             nightlyHistory != nil,
+			NightlyKnownFailures:          nightlyKnownFailures,
 			TestRows:                      testRows,
 			RecordingResult:               expandedRecordingResult,
 			ReplayingAfterRecordingResult: expandedReplayingAfterRecordingResult,
@@ -695,6 +716,7 @@ func parseTemplate(filename string, tmplText string) *template.Template {
 		"replace":      strings.ReplaceAll,
 		"symbol":       symbol,
 		"contains":     contains,
+		"nightly":      nightlySymbol,
 	}
 	tmpl, err := template.New(filename).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -780,7 +802,9 @@ func createTableRow(t string, logBaseUrl string, recordingResult, replayingResul
 	return row
 }
 
-func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult vcr.Result, logBaseUrl string) []VCRTestTableRow {
+// buildVCRTestRows builds the recording table rows. If nightlyHistory is non-nil, tests that
+// failed in recording are annotated with their nightly status.
+func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult vcr.Result, logBaseUrl string, nightlyHistory map[string]*NightlyTestHistory) []VCRTestTableRow {
 	// Expand compound tests to subtests for accurate status matching
 	expandedRecordingResult := subtestResult(recordingResult)
 	expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
@@ -838,7 +862,11 @@ func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingR
 		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
 	}
 	for _, t := range failingInRecording {
-		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
+		row := createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult)
+		if nightlyHistory != nil {
+			row.NightlyStatus = classifyNightlyStatus(t, nightlyHistory)
+		}
+		testRows = append(testRows, row)
 	}
 	for _, t := range terminated {
 		testRows = append(testRows, createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult))
