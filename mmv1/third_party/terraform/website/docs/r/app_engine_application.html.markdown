@@ -71,7 +71,7 @@ The following arguments are supported:
     The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
     Exactly one of `oauth2_client_secret` or `oauth2_client_secret_wo` can be set.
 
-  * `iap.oauth2_client_secret_wo` - (Optional, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) OAuth2 client secret to use for the authentication flow.
+  * `oauth2_client_secret_wo` - (Optional, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) OAuth2 client secret to use for the authentication flow.
     The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field.
     **Note**: This property is write-only and will not be read from the API.
 
