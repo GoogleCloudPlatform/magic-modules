@@ -647,7 +647,14 @@ func TestAccStorageObject_dynamicJsonContent(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketObjectDynamicJsonContent(bucketName),
+				Config: testGoogleStorageBucketObjectDynamicJsonContent(bucketName, "upstream content"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_storage_bucket_object.dynamic_content", "crc32c"),
+					resource.TestCheckResourceAttrSet("google_storage_bucket_object.dynamic_content", "md5hash"),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketObjectDynamicJsonContent(bucketName, "updated upstream content"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_storage_bucket_object.dynamic_content", "crc32c"),
 					resource.TestCheckResourceAttrSet("google_storage_bucket_object.dynamic_content", "md5hash"),
@@ -1246,7 +1253,7 @@ resource "google_storage_bucket_object" "object" {
 `, bucketName, objectName, content)
 }
 
-func testGoogleStorageBucketObjectDynamicJsonContent(bucketName string) string {
+func testGoogleStorageBucketObjectDynamicJsonContent(bucketName, upstreamContent string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
@@ -1254,17 +1261,17 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_bucket_object" "upstream" {
-  name    = "upstream-object"
+  name    = "tf-test-upstream-object"
   bucket  = google_storage_bucket.bucket.name
-  content = "upstream content"
+  content = "%s"
 }
 
 resource "google_storage_bucket_object" "dynamic_content" {
-  name   = "test-object.json"
+  name   = "tf-test-object.json"
   bucket = google_storage_bucket.bucket.name
   content = jsonencode({
     upstream_generation = google_storage_bucket_object.upstream.generation
   })
 }
-`, bucketName)
+`, bucketName, upstreamContent)
 }
