@@ -13,17 +13,11 @@
 	See the License for the specific language governing permissions and
 	limitations under the License. */ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	// When the user supplies the certificate through the `certificate_wo` write-only
-	// argument, `certificate` is absent from the configuration and must stay empty in
-	// state. Adopting the API's value would otherwise produce a permanent diff, and
-	// because `certificate` is immutable that diff forces resource replacement.
-	//
-	// The raw configuration is consulted rather than state because write-only values are
-	// never persisted, and because this flatten runs for the resource, its data sources,
-	// and import alike. In the latter two `certificate_wo` is absent for reasons entirely
-	// unrelated to write-only usage, so a state-based check would wrongly suppress the
-	// value there.
-	if tpgresource.GetRawConfigAttributeAsString(d, "certificate_wo") != "" {
+	// Keep `certificate` empty in state when the value came from the `certificate_wo`
+	// write-only argument, otherwise the API value permadiffs against a null config.
+	// `certificate_wo_version` is checked because write-only values are never stored in
+	// state, and it is absent for data sources and import, which need the API value.
+	if woVersion, ok := d.GetOk("certificate_wo_version"); ok && woVersion != "" {
 		return d.Get("certificate")
 	}
 	return v

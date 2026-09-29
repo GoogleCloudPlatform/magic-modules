@@ -67,8 +67,7 @@ samples:
       - name: 'region_ssl_certificate_basic_writeonly'
         resource_id_vars:
           cert_name: 'my-certificate'
-        # The API returns `certificate`, so import populates it even though the
-        # config supplies the value through `certificate_wo` instead.
+        # The API returns `certificate`, which the config supplies via `certificate_wo`.
         ignore_read_extra:
           - 'certificate'
   - name: 'region_ssl_certificate_random_provider'
