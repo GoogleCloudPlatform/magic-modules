@@ -87,6 +87,8 @@ type VCRTestTableRow struct {
 	NightlyStatus string
 	// NightlyDetail is the short parenthetical shown next to NightlyStatus in the table.
 	NightlyDetail string
+	// NightlyTestUrl links the test name to its nightly history page in TeamCity.
+	NightlyTestUrl string
 }
 
 type recordReplay struct {
@@ -896,6 +898,9 @@ func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingR
 			h := lookupNightlyHistory(t, nightlyHistory.Tests)
 			row.NightlyStatus = classifyNightlyStatus(h, nightlyHistory.EndDate)
 			row.NightlyDetail = nightlyDetail(h, row.NightlyStatus)
+			if h != nil {
+				row.NightlyTestUrl = nightlyTestUrl(h.TestNameId, provider.Beta)
+			}
 		}
 		testRows = append(testRows, row)
 	}
