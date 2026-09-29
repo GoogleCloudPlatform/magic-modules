@@ -41,6 +41,9 @@ type NightlyTestHistory struct {
 	Skips           int    `json:"skips"`
 	LastStatus      string `json:"last_status"`
 	LastFailureDate string `json:"last_failure_date,omitempty"`
+	// TestNameId is TeamCity's stable cross-build identifier, used to link to the test's
+	// nightly history page.
+	TestNameId string `json:"test_name_id,omitempty"`
 }
 
 // NightlyTestHistoryReport is the rolling history consumed by PR CI runs to detect flakey tests.
@@ -149,6 +152,10 @@ func createNightlyTestHistory(pVersion provider.Version, tc TeamcityClient, gcs 
 				h.Skips++
 			}
 			h.LastStatus = t.Status
+			// Days are processed oldest to newest, so this keeps the most recently seen id.
+			if t.TestNameId != "" {
+				h.TestNameId = t.TestNameId
+			}
 		}
 	}
 
