@@ -236,6 +236,73 @@ func resourceComputeSubnetworkSecondaryIpRangeCustomDiffFunc(diff tpgresource.Te
 {{ end -}}
 }
 
+// Fields that are immutable except during the in-place upgrade of a subnetwork's stack_type from
+// IPV4_ONLY to IPV4_IPV6 (dual stack). Changing them at any other time requires recreating the subnetwork.
+var subnetworkIpv6ConditionallyImmutableFields = []string{
+	"ipv6_access_type",
+	"ip_collection",
+	"external_ipv6_prefix",
+}
+
+// CustomDiff function that forces recreation of the subnetwork when ipv6_access_type, ip_collection,
+// or external_ipv6_prefix change, unless the change is part of upgrading stack_type from IPV4_ONLY to
+// IPV4_IPV6.
+func resourceComputeSubnetworkIpv6ConditionalForceNew(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// Nothing to force on create.
+	if diff.Id() == "" {
+		return nil
+	}
+	return resourceComputeSubnetworkIpv6ConditionalForceNewFunc(diff)
+}
+
+func resourceComputeSubnetworkIpv6ConditionalForceNewFunc(diff tpgresource.TerraformResourceDiff) error {
+{{ if and (ne $.ProductMetadata.Compiler `terraformgoogleconversion-codegen`) (ne $.ProductMetadata.Compiler `terraformgoogleconversionnext-codegen`) -}}
+	oldStackType, newStackType := diff.GetChange("stack_type")
+	if oldStackType == "IPV4_ONLY" && newStackType == "IPV4_IPV6" {
+		// These fields can be set in-place as part of the dual-stack upgrade.
+		return nil
+	}
+
+	for _, field := range subnetworkIpv6ConditionallyImmutableFields {
+		if !diff.HasChange(field) {
+			continue
+		}
+		// Removing the field from configuration (for example, when converting a dual-stack subnetwork
+		// back to IPV4_ONLY) doesn't send a new value to the API, so it shouldn't force recreation.
+		if !subnetworkFieldIsSetInConfig(diff, field) {
+			continue
+		}
+		log.Printf("[DEBUG] %s changed outside of an IPV4_ONLY -> IPV4_IPV6 stack_type upgrade; forcing recreation", field)
+		if err := diff.ForceNew(field); err != nil {
+			return err
+		}
+	}
+
+	return nil
+{{ else -}}
+	return nil
+{{ end -}}
+}
+
+{{ if and (ne $.ProductMetadata.Compiler `terraformgoogleconversion-codegen`) (ne $.ProductMetadata.Compiler `terraformgoogleconversionnext-codegen`) -}}
+// Reports whether the given top-level string field is set to a non-empty value, or to a value that is
+// not yet known, in the raw configuration.
+func subnetworkFieldIsSetInConfig(diff tpgresource.TerraformResourceDiff, field string) bool {
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() || !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute(field) {
+		return false
+	}
+	v := rawConfig.GetAttr(field)
+	if v.IsNull() {
+		return false
+	}
+	if !v.IsKnown() {
+		return true
+	}
+	return v.AsString() != ""
+}
+{{ end -}}
+
 func ipEqual(old, new string) bool {
 	if old == "" || new == "" {
 		return old == new

@@ -651,6 +651,11 @@ func TestAccComputeSubnetwork_ipv6(t *testing.T) {
 			},
 			{
 				Config: testAccComputeSubnetwork_ipv6(cnName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_subnetwork.subnetwork", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_subnetwork.subnetwork",
@@ -768,6 +773,11 @@ func TestAccComputeSubnetwork_ipv6UpdateWithPdp(t *testing.T) {
 			// Step 2: Update Subnetwork to Dual Stack with IP Collection
 			{
 				Config: testAccComputeSubnetwork_ipv6PdpUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(subnetResName, plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, subnetResName, new(map[string]interface{})),
 					resource.TestCheckResourceAttr(subnetResName, "stack_type", "IPV4_IPV6"),
