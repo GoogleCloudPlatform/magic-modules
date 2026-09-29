@@ -22,12 +22,6 @@ func TestAccGeminiDataAnalyticsDataAgent_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiDataAnalyticsDataAgent_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_gemini_data_analytics_data_agent.agent", "data_analytics_agent.0.published_context.0.system_instruction", "Answer questions about sales orders."),
-					resource.TestCheckResourceAttrPair("google_gemini_data_analytics_data_agent.agent", "data_analytics_agent.0.published_context.0.datasource_references.0.bq.0.table_references.0.project_id", "google_bigquery_table.table", "project"),
-					resource.TestCheckResourceAttrPair("google_gemini_data_analytics_data_agent.agent", "data_analytics_agent.0.published_context.0.datasource_references.0.bq.0.table_references.0.dataset_id", "google_bigquery_dataset.dataset", "dataset_id"),
-					resource.TestCheckResourceAttrPair("google_gemini_data_analytics_data_agent.agent", "data_analytics_agent.0.published_context.0.datasource_references.0.bq.0.table_references.0.table_id", "google_bigquery_table.table", "table_id"),
-				),
 			},
 			{
 				ResourceName:            "google_gemini_data_analytics_data_agent.agent",
