@@ -58,7 +58,7 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 	templateId := fmt.Sprintf("modelarmor-test-update-%s", acctest.RandString(t, 5))
 
 	context := map[string]interface{}{
-		"location":   "us-central1",
+		"location":   "us",
 		"templateId": templateId,
 	}
 
@@ -111,8 +111,8 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
           }
           sdp_settings {
             advanced_config {
-              inspect_template     = "projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t2"
-              deidentify_template  = "projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t3"
+              inspect_template     = "projects/llm-firewall-demo/locations/us/inspectTemplates/t2"
+              deidentify_template  = "projects/llm-firewall-demo/locations/us/deidentifyTemplates/t3"
             }
           }
           pi_and_jailbreak_filter_settings {
@@ -243,7 +243,7 @@ resource "google_model_armor_template" "test-no-metadata" {
 func testAccModelArmorTemplate_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
       resource "google_model_armor_template" "test-resource" {
-        location    = "us-central1"
+        location    = "us"
         template_id = "%{templateId}"
         labels = {
             "test-label" = "env-testing-updated"
