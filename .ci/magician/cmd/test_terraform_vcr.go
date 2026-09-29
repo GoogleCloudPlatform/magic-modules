@@ -85,8 +85,8 @@ type VCRTestTableRow struct {
 	ReplayingAfterRecordingLogUrl   string
 	// NightlyStatus is set for tests that failed in recording when nightly history is available.
 	NightlyStatus string
-	// NightlyFailureRate is how often the test failed in the nightly history window.
-	NightlyFailureRate string
+	// NightlyDetail is the short parenthetical shown next to NightlyStatus in the table.
+	NightlyDetail string
 }
 
 type recordReplay struct {
@@ -868,7 +868,7 @@ func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingR
 		if nightlyHistory != nil {
 			h := lookupNightlyHistory(t, nightlyHistory.Tests)
 			row.NightlyStatus = classifyNightlyStatus(h, nightlyHistory.EndDate)
-			row.NightlyFailureRate = nightlyFailureRate(h)
+			row.NightlyDetail = nightlyDetail(h, row.NightlyStatus)
 		}
 		testRows = append(testRows, row)
 	}

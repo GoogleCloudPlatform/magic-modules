@@ -161,7 +161,7 @@ func TestBuildVCRTestRowsNightlyStatus(t *testing.T) {
 	}
 }
 
-func TestNightlyFailureRate(t *testing.T) {
+func TestNightlyDetail(t *testing.T) {
 	history := map[string]*NightlyTestHistory{
 		"TestAccAlways":  {Failures: 30},
 		"TestAccNever":   {Passes: 30},
@@ -172,38 +172,41 @@ func TestNightlyFailureRate(t *testing.T) {
 		"TestAccOnlySkips": {Skips: 30},
 		"TestAccNoRuns":    {},
 		"TestAccParent":    {Passes: 27, Failures: 3},
-		// A last failure date is appended so a high rate is not misread as the current state.
-		"TestAccDated": {Passes: 10, Failures: 20, LastFailureDate: "2026-09-27"},
-		// A clean test has no failure to date, so no suffix.
-		"TestAccCleanDated": {Passes: 30, LastFailureDate: "2026-09-27"},
 	}
 
 	cases := map[string]string{
-		"TestAccAlways":       "30/30 nightly runs failed (100%)",
-		"TestAccNever":        "0/30 nightly runs failed (0%)",
-		"TestAccFlaky":        "12/30 nightly runs failed (40%)",
-		"TestAccRounded":      "1/3 nightly runs failed (33%)",
-		"TestAccSkips":        "1/10 nightly runs failed (10%)",
+		"TestAccAlways":       "100% of 30 nightly runs",
+		"TestAccNever":        "0% of 30 nightly runs",
+		"TestAccFlaky":        "40% of 30 nightly runs",
+		"TestAccRounded":      "33% of 3 nightly runs",
+		"TestAccSkips":        "10% of 10 nightly runs",
 		"TestAccOnlySkips":    "",
 		"TestAccNoRuns":       "",
 		"TestAccMissing":      "",
-		"TestAccParent__sub1": "3/30 nightly runs failed (10%)",
-		"TestAccDated":        "20/30 nightly runs failed (67%), last failed 2026-09-27",
-		"TestAccCleanDated":   "0/30 nightly runs failed (0%)",
+		"TestAccParent__sub1": "10% of 30 nightly runs",
 	}
 	for name, want := range cases {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, want, nightlyFailureRate(lookupNightlyHistory(name, history)))
+			h := lookupNightlyHistory(name, history)
+			assert.Equal(t, want, nightlyDetail(h, classifyNightlyStatus(h, "")))
 		})
 	}
+
+	// A recently fixed test shows when it last failed; its rate describes the period before the
+	// fix and would contradict the label.
+	fixed := &NightlyTestHistory{Passes: 10, Failures: 20, LastStatus: "SUCCESS", LastFailureDate: "2026-09-27"}
+	assert.Equal(t, "last failed 2026-09-27", nightlyDetail(fixed, NightlyStatusRecentlyFixed))
+	// Without a date there is nothing better to show, so fall back to the rate.
+	noDate := &NightlyTestHistory{Passes: 10, Failures: 20, LastStatus: "SUCCESS"}
+	assert.Equal(t, "67% of 30 nightly runs", nightlyDetail(noDate, NightlyStatusRecentlyFixed))
 }
 
 func TestRecordReplayNightlyColumn(t *testing.T) {
 	data := recordReplay{
 		TestRows: []VCRTestTableRow{
-			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyFailureRate: "27/30 nightly runs failed (90%)"},
-			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyFailureRate: "0/30 nightly runs failed (0%)"},
-			{DisplayName: "TestAcc_c", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusRecentlyFixed, NightlyFailureRate: "20/30 nightly runs failed (67%), last failed 2026-09-27"},
+			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyDetail: "100% of 25 nightly runs"},
+			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyDetail: "0% of 30 nightly runs"},
+			{DisplayName: "TestAcc_c", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusRecentlyFixed, NightlyDetail: "last failed 2026-09-27"},
 		},
 		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b", "TestAcc_c"}},
 		HasNightlyHistory:    true,
@@ -215,10 +218,11 @@ func TestRecordReplayNightlyColumn(t *testing.T) {
 	got, err := formatRecordReplay(data, new(strings.Builder))
 	assert.NoError(t, err)
 	assert.Contains(t, got, "| Recording Mode | Replaying Rerun | Nightly | Test Name |")
-	assert.Contains(t, got, "| ❌ | - | 🔴 Failing in nightly<br>27/30 nightly runs failed (90%) | TestAcc_a |")
-	assert.Contains(t, got, "| ❌ | - | 🟢 Passing in nightly<br>0/30 nightly runs failed (0%) | TestAcc_b |")
-	// The date keeps the high rate from contradicting the "recently fixed" label.
-	assert.Contains(t, got, "| ❌ | - | 🟢 Recently fixed in nightly<br>20/30 nightly runs failed (67%), last failed 2026-09-27 | TestAcc_c |")
+	// Each cell stays on one line so rows do not grow tall when many tests fail.
+	assert.Contains(t, got, "| ❌ | - | ⚪ Fails in nightly · 100% of 25 nightly runs | TestAcc_a |")
+	// Healthy in nightly, so this failure most likely belongs to the PR.
+	assert.Contains(t, got, "| ❌ | - | 🔴 Passes in nightly · 0% of 30 nightly runs | TestAcc_b |")
+	assert.Contains(t, got, "| ❌ | - | 🔴 Fixed in nightly · last failed 2026-09-27 | TestAcc_c |")
 	assert.Contains(t, got, "**Known Nightly Failures**: 1 of the tests")
 
 	data.HasNightlyHistory = false

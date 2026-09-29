@@ -138,51 +138,56 @@ func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistor
 }
 
 // nightlySymbol renders a nightly status for the PR comment table.
+//
+// The Nightly column only appears for tests that failed in this PR's recording, so the question it
+// answers is "is this failure mine?". The emoji therefore signals how much the author needs to look
+// at the row, not how healthy the test is in nightly: a test that always fails in nightly is very
+// likely pre-existing (low alarm), while one that passes cleanly in nightly points at this PR.
 func nightlySymbol(status string) string {
 	switch status {
 	case NightlyStatusFailing:
-		return "🔴 Failing in nightly"
+		return "⚪ Fails in nightly"
 	case NightlyStatusFlaky:
 		return "🟡 Flaky in nightly"
 	case NightlyStatusRecentlyFixed:
-		return "🟢 Recently fixed in nightly"
+		return "🔴 Fixed in nightly"
 	case NightlyStatusPassing:
-		return "🟢 Passing in nightly"
+		return "🔴 Passes in nightly"
 	case NightlyStatusNotFound:
-		return "Not run in nightly"
+		return "⚪ Not run in nightly"
 	default:
 		return "-"
 	}
 }
 
-// nightlyFailureRate summarizes how often a test failed in the history window, e.g.
-// "12/30 nightly runs failed (40%), last failed 2026-09-27". Skipped runs are excluded since they
-// neither pass nor fail. The last failure date keeps a high rate from reading as a contradiction
-// when the test has since been fixed. Returns "" when the test has no recorded runs.
-func nightlyFailureRate(h *NightlyTestHistory) string {
+// nightlyDetail is the short parenthetical shown next to a nightly status, kept to a single line so
+// rows stay compact when a PR has many failures. The fuller explanation lives below the table.
+//
+// A recently fixed test shows when it last failed rather than its rate, since its rate describes
+// the period before the fix and would otherwise contradict the label.
+func nightlyDetail(h *NightlyTestHistory, status string) string {
 	if h == nil {
 		return ""
+	}
+	if status == NightlyStatusRecentlyFixed && h.LastFailureDate != "" {
+		return "last failed " + h.LastFailureDate
 	}
 	runs := h.Passes + h.Failures
 	if runs == 0 {
 		return ""
 	}
 	percent := int(math.Round(float64(h.Failures) / float64(runs) * 100))
-	rate := fmt.Sprintf("%d/%d nightly runs failed (%d%%)", h.Failures, runs, percent)
-	if h.Failures > 0 && h.LastFailureDate != "" {
-		rate += fmt.Sprintf(", last failed %s", h.LastFailureDate)
-	}
-	return rate
+	return fmt.Sprintf("%d%% of %d nightly runs", percent, runs)
 }
 
-// nightlyCell renders the nightly column: a status label over the failure rate that backs it.
+// nightlyCell renders the nightly column as a single line: a status label and the detail backing it.
 func nightlyCell(row VCRTestTableRow) string {
 	if row.NightlyStatus == "" {
 		return ""
 	}
 	label := nightlySymbol(row.NightlyStatus)
-	if row.NightlyFailureRate == "" {
+	if row.NightlyDetail == "" {
 		return label
 	}
-	return fmt.Sprintf("%s<br>%s", label, row.NightlyFailureRate)
+	return fmt.Sprintf("%s · %s", label, row.NightlyDetail)
 }
