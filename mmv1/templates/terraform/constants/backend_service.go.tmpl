@@ -30,10 +30,10 @@ func suppressIapDiffWhenUnset(_ string, _, _ string, d *schema.ResourceData) boo
 
 // suppress changes on authentication_config if identity is set.
 func suppressAuthenticationConfigWhenIdentitySet(k, old, new string, d *schema.ResourceData) bool {
-    if v, ok := d.GetOk("tls_settings.0.identity"); ok && v.(string) != "" {
-        return true
-    }
-    return false
+	if v, ok := d.GetOk("tls_settings.0.identity"); ok && v.(string) != "" {
+		return true
+	}
+	return false
 }
 
 // Whether the backend is a global or regional NEG
