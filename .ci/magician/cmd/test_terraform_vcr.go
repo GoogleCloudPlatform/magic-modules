@@ -866,8 +866,9 @@ func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingR
 	for _, t := range failingInRecording {
 		row := createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult)
 		if nightlyHistory != nil {
-			row.NightlyStatus = classifyNightlyStatus(t, nightlyHistory)
-			row.NightlyFailureRate = nightlyFailureRate(t, nightlyHistory)
+			h := lookupNightlyHistory(t, nightlyHistory)
+			row.NightlyStatus = classifyNightlyStatus(h)
+			row.NightlyFailureRate = nightlyFailureRate(h)
 		}
 		testRows = append(testRows, row)
 	}

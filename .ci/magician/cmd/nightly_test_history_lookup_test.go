@@ -60,7 +60,7 @@ func TestClassifyNightlyStatus(t *testing.T) {
 	}
 	for name, want := range cases {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, want, classifyNightlyStatus(name, history))
+			assert.Equal(t, want, classifyNightlyStatus(lookupNightlyHistory(name, history)))
 		})
 	}
 }
@@ -140,7 +140,7 @@ func TestNightlyFailureRate(t *testing.T) {
 	}
 	for name, want := range cases {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, want, nightlyFailureRate(name, history))
+			assert.Equal(t, want, nightlyFailureRate(lookupNightlyHistory(name, history)))
 		})
 	}
 }

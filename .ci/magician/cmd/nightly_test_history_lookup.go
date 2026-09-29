@@ -66,8 +66,8 @@ func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistor
 }
 
 // classifyNightlyStatus returns how the given test behaves in recent nightly runs.
-func classifyNightlyStatus(testName string, history map[string]*NightlyTestHistory) string {
-	h := lookupNightlyHistory(testName, history)
+// A nil entry means the test was never seen in the history window.
+func classifyNightlyStatus(h *NightlyTestHistory) string {
 	if h == nil {
 		return NightlyStatusNotFound
 	}
@@ -102,8 +102,7 @@ func nightlySymbol(status string) string {
 // nightlyFailureRate summarizes how often a test failed in the history window, e.g.
 // "12/30 nightly runs failed (40%)". Skipped runs are excluded since they neither pass nor fail.
 // Returns "" when the test has no recorded runs.
-func nightlyFailureRate(testName string, history map[string]*NightlyTestHistory) string {
-	h := lookupNightlyHistory(testName, history)
+func nightlyFailureRate(h *NightlyTestHistory) string {
 	if h == nil {
 		return ""
 	}
