@@ -65,6 +65,10 @@ samples:
       - name: 'ssl_certificate_basic_writeonly'
         resource_id_vars:
           cert_name: 'my-certificate'
+        # The API returns `certificate`, so import populates it even though the
+        # config supplies the value through `certificate_wo` instead.
+        ignore_read_extra:
+          - 'certificate'
   - name: 'ssl_certificate_random_provider'
     primary_resource_id: 'default'
     external_providers: ["random", "time"]
@@ -96,6 +100,7 @@ properties:
     required: true
     sensitive: true
     write_only: true
+    custom_flatten: 'templates/terraform/custom_flatten/write_only_paired_certificate.go.tmpl'
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
