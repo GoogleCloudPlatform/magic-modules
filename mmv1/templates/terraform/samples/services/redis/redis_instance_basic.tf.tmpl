@@ -1,6 +1,7 @@
 resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
   name           = "{{index $.ResourceIdVars "instance_name"}}"
   memory_size_gb = 1
+  region         = "us-west1"
   deletion_protection = false
 
   lifecycle {

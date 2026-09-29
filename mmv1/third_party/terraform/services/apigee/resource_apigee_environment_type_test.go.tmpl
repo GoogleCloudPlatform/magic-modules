@@ -184,7 +184,7 @@ resource "google_apigee_environment" "apigee_environment" {
   name         = "tf-test%{random_suffix}"
   description  = "Apigee Environment"
   display_name = "tf-test%{random_suffix}"
-  type         = "INTERMEDIATE"
+  type         = "COMPREHENSIVE"
   forward_proxy_uri = "http://test:456"
 }
 `, context)

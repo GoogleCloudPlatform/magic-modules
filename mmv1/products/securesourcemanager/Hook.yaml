@@ -123,6 +123,7 @@ properties:
       enum_values:
         - PUSH
         - PULL_REQUEST
+        - PULL_REQUEST_COMMENT
     default_from_api: true
   - name: createTime
     type: Time

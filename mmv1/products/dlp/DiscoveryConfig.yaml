@@ -469,6 +469,13 @@ properties:
                         - UPDATE_FREQUENCY_NEVER
                         - UPDATE_FREQUENCY_DAILY
                         - UPDATE_FREQUENCY_MONTHLY
+                - name: refreshFrequency
+                  type: Enum
+                  description: Frequency at which profiles should be updated, regardless of whether the underlying resource has changed. Defaults to never.
+                  enum_values:
+                    - UPDATE_FREQUENCY_NEVER
+                    - UPDATE_FREQUENCY_DAILY
+                    - UPDATE_FREQUENCY_MONTHLY
                 - name: inspectTemplateModifiedCadence
                   type: NestedObject
                   description: Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If not set, changing the template will not cause a data profile to update.

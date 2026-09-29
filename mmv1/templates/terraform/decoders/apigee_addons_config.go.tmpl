@@ -1,0 +1,9 @@
+// The list response returns organization objects where the org name is in "organization".
+// Extract the org name and set it on the resource data so the
+// identity and id can be constructed correctly.
+if orgName, ok := res["organization"].(string); ok && orgName != "" {
+	if err := d.Set("org", orgName); err != nil {
+		return nil, fmt.Errorf("error setting org from list response: %w", err)
+	}
+}
+return res, nil

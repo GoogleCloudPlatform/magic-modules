@@ -93,6 +93,7 @@
           "datasetId": "my_dataset"
         },
         "friendlyName": "",
+        "defaultCollation": "",
         "labels": {
             "goog-terraform-provisioned": "true"
         },

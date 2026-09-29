@@ -181,10 +181,6 @@ type Type struct {
 	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
 	WriteOnly bool `yaml:"write_only,omitempty"`
 
-	// TODO: remove this field after all references are migrated
-	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
-	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
-
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
 	IgnoreRead bool `yaml:"ignore_read,omitempty"`
@@ -516,11 +512,11 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}
 
-	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
+	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and default_from_api or output at the same time in resource %s", fullFieldPath, rName))
 	}
 
-	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
+	if t.WriteOnly && t.Sensitive {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
@@ -838,7 +834,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		}
 	case t.IsA("NestedObject"):
 		props = google.Select(t.UserProperties(), func(p *Type) bool {
-			return p.WriteOnlyLegacy || p.WriteOnly
+			return p.WriteOnly
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
@@ -894,7 +890,7 @@ func (t *Type) FieldType() []string {
 		ret = append(ret, "Output")
 	}
 
-	if t.WriteOnlyLegacy || t.WriteOnly {
+	if t.WriteOnly {
 		ret = append(ret, "Write-Only")
 	}
 
@@ -1409,8 +1405,8 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
-	// WriteOnlyLegacy fields are never immutable
-	if t.WriteOnlyLegacy || t.WriteOnly {
+	// WriteOnly fields are never immutable
+	if t.WriteOnly {
 		return false
 	}
 
@@ -1480,25 +1476,29 @@ func (t *Type) ProviderOnly() bool {
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	nestedProps := t.ResourceMetadata.UserProperites()
 
+	pathSegments := strings.Split(schemaPath, ".0.")
 	var pathTkns []string
-	for _, pname := range strings.Split(schemaPath, ".0.") {
+	for i, pname := range pathSegments {
 		camelPname := google.Camelize(pname, "lower")
-		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
-			return p.Name == camelPname
-		})
+		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
 
 		// if we couldn't find it, see if it was renamed at the top level
-		if index == -1 {
-			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
-				return p.Name == schemaPath
-			})
+		if prop == nil {
+			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
 		}
 
-		if index == -1 {
+		if prop == nil {
 			return ""
 		}
 
-		prop := nestedProps[index]
+		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
+		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
+		// intermediate segment. The terminal segment itself may be any type, so
+		// only apply this guard to non-final path tokens.
+		isIntermediate := i < len(pathSegments)-1
+		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			return ""
+		}
 
 		nestedProps = prop.NestedProperties()
 		if !prop.FlattenObject {
@@ -1511,6 +1511,23 @@ func (t *Type) GetPropertySchemaPath(schemaPath string) string {
 	}
 
 	return strings.Join(pathTkns[:], ".0.")
+}
+
+// findPropByNameInFlattenedList searches for a property by camelCase name in a
+// list of properties. It also searches recursively inside any FlattenObject
+// nested objects, since those appear as top-level fields in the Terraform schema.
+func findPropByNameInFlattenedList(props []*Type, name string) *Type {
+	for _, p := range props {
+		if p.Name == name {
+			return p
+		}
+		if p.FlattenObject {
+			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {

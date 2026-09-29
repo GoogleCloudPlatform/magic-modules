@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
 
@@ -65,7 +66,7 @@ func (cai2hcl CaiToTerraformConversion) CopyCommonFiles(outputFolder string, gen
 	if !generateCode {
 		return
 	}
-	log.Print("Copying cai2hcl common files")
+	google.LogVerbose("Copying cai2hcl common files")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))

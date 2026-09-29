@@ -4,6 +4,7 @@ go_library(
     name = "google",
     srcs = [
         "fs.go",
+        "log_utils.go",
         "slice_utils.go",
         "string_utils.go",
         "template_utils.go",

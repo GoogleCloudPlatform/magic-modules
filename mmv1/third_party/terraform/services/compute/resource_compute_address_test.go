@@ -745,7 +745,7 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_compute_subnetwork" "foo" {
-  name          = "subnetwork-test-%s"
+  name          = "tf-test-subnetwork-%s"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-east1"
   network       = google_compute_network.default.self_link
@@ -815,7 +815,7 @@ resource "google_compute_network" "default" {
   auto_create_subnetworks  = false
 }
 resource "google_compute_subnetwork" "foo" {
-  name             = "subnetwork-test-%s"
+  name             = "tf-test-subnetwork-%s"
   ip_cidr_range    = "10.0.0.0/16"
   region           = "us-east1"
   network          = google_compute_network.default.self_link

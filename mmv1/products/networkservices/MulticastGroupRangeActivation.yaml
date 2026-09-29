@@ -46,6 +46,7 @@ async:
   include_project: false
 autogen_status: TXVsdGljYXN0R3JvdXBSYW5nZUFjdGl2YXRpb24=
 autogen_async: true
+generate_list_resource: true
 samples:
   - name: network_services_multicast_group_range_activation_basic
     primary_resource_id: mgra_test

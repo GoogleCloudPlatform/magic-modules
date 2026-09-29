@@ -1,0 +1,6 @@
+name, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{`{{project}}`}}/locations/{{`{{location}}`}}/analystAgentPersonas/{{`{{analyst_agent_persona_id}}`}}")
+if err != nil {
+	return nil, err
+}
+obj["name"] = name
+return obj, nil

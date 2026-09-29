@@ -436,6 +436,10 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 		}
 		paramObj.Description = trimDescription(description)
 
+		if strings.HasPrefix(paramObj.Description, "Deprecated.") {
+			continue
+		}
+
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" || paramObj.Name == "updateMask" {
 			continue
 		}
@@ -684,5 +688,6 @@ func trimDescription(description string) string {
 	for _, line := range lines {
 		trimmedDescription = append(trimmedDescription, strings.Trim(line, " "))
 	}
+
 	return strings.Join(trimmedDescription, "\n")
 }

@@ -43,6 +43,16 @@ samples:
           app_version_display_name: my-app-version
           app_version_id: app-version-id
           deployment_display_name: my-deployment
+  - name: ces_deployment_whatsapp
+    primary_resource_id: my-deployment
+    steps:
+      - name: ces_deployment_whatsapp
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
+          deployment_display_name: my-deployment
 parameters:
   - name: location
     type: String
@@ -85,6 +95,8 @@ properties:
           CONTACT_CENTER_AS_A_SERVICE
           FIVE9
           CONTACT_CENTER_INTEGRATION
+          WHATSAPP
+          INSTAGRAM
       - name: disableBargeInControl
         type: Boolean
         description: |-
@@ -160,6 +172,33 @@ properties:
                 description: |-
                   Indicates whether reCAPTCHA verification for the web widget is enabled.
                 send_empty_value: true
+      - name: whatsappConfig
+        type: NestedObject
+        description: Configuration specific to WhatsApp deployments.
+        properties:
+          - name: description
+            type: String
+            description: Output only. The description of the Meta business page or profile.
+            output: true
+          - name: displayName
+            type: String
+            description: Output only. The fetched Meta business page name.
+            output: true
+          - name: phoneNumber
+            type: String
+            description: Optional. The phone number in E.164 format.
+          - name: phoneNumberId
+            type: String
+            required: true
+            description: Required. The Meta phone number ID.
+          - name: thumbnailUrl
+            type: String
+            description: Output only. The fetched Meta business profile thumbnail URL.
+            output: true
+          - name: wabaId
+            type: String
+            required: true
+            description: Required. The WhatsApp Business Account ID.
   - name: createTime
     type: String
     description: Timestamp when this deployment was created.
@@ -175,6 +214,20 @@ properties:
       operation. If the etag is empty, the update will overwrite any concurrent
       changes.
     output: true
+  - name: instagramCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring an Instagram channel profile.
+    ignore_read: true
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+        write_only: true
+      - name: conversationProfileId
+        type: String
+        description: The Conversation Profile ID to use for the deployment.
   - name: name
     type: String
     description: |-
@@ -187,3 +240,34 @@ properties:
     type: String
     description: Timestamp when this deployment was last updated.
     output: true
+  - name: whatsappCredentials
+    type: NestedObject
+    description: |-
+      Ephemeral Meta credentials required when configuring a WhatsApp channel profile.
+    ignore_read: true
+    properties:
+      - name: authCode
+        type: String
+        required: true
+        description: The Meta auth code provided by the embedded signup flow.
+        write_only: true
+      - name: businessAccountId
+        type: String
+        required: true
+        description: The Business Account ID to use for the phone number.
+      - name: conversationProfileId
+        type: String
+        description: The Conversation Profile ID to use for the deployment.
+      - name: phoneNumber
+        type: String
+        required: true
+        description: The phone number to register with WhatsApp.
+      - name: pin
+        type: String
+        required: true
+        description: The 6-digit PIN created by the user for two-step verification.
+        write_only: true
+      - name: wabaId
+        type: String
+        required: true
+        description: The WhatsApp Business Account ID.

@@ -388,6 +388,9 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
                 grounding_level = 3
                 disabled = false
             }
+            snippets_config {
+                enable_snippets = true
+            }
         }
 
         engine_source {
@@ -482,6 +485,9 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             grounding_config {
                 grounding_level = 3
                 disabled = false
+            }
+            snippets_config {
+                enable_snippets = false
             }
         }
 
@@ -664,6 +670,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
+        service_directory_config {
+            service = "projects/example/locations/us/namespaces/namespace/services/service"
+        }
     }
 }
 `, context)
@@ -695,6 +704,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
+        service_directory_config {
+            service = "projects/example/locations/us/namespaces/namespace/services/service-updated"
+        }
     }
 }
 `, context)

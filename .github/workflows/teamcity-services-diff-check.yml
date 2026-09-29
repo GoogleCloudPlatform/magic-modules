@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: "Check for New Services"
         id: services
         run: |
@@ -50,6 +51,8 @@ jobs:
       - name: Checkout Repository
         if: steps.generate.outcome == 'success'
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Check that new services have been added to the TeamCity configuration code
         if: steps.generate.outcome == 'success'
         run: |

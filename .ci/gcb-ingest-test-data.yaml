@@ -7,6 +7,14 @@ steps:
       args:
         - 'collect-nightly-test-status'
         - $_CUSTOM_DATE
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: collect-nightly-test-history
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["TEAMCITY_TOKEN"]
+      waitFor: ["collect-nightly-test-status"]
+      args:
+        - 'collect-nightly-test-history'
+        - $_CUSTOM_DATE
 
 timeout: 3600s
 options:

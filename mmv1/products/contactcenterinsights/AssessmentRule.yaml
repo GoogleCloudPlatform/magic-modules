@@ -23,6 +23,7 @@ references:
     Configure assessment rules using the API: https://cloud.google.com/contact-center/insights/docs/assessment-rule
   api: https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.assessmentRules
 base_url: projects/{{project}}/locations/{{location}}/assessmentRules
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/assessmentRules/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/assessmentRules?assessmentRuleId={{assessment_rule_id}}
 update_mask: true

@@ -129,7 +129,7 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
 {{- if not $prop.SendEmptyValue }}
     } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
 {{- else }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || (v != nil && !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
 {{- end }}
         obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
     }
