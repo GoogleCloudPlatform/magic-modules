@@ -2,6 +2,6 @@
 | Recording Mode | Replaying Rerun |{{if .HasNightlyHistory}} Nightly |{{end}} Test Name |
 | :--- | :--- |{{if .HasNightlyHistory}} :--- |{{end}} :--- |
 {{range .TestRows -}}
-| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingAfterRecordingStatus}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;[Error]({{.ReplayingAfterRecordingErrorUrl}}){{end}}{{if .ReplayingAfterRecordingLogUrl}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingAfterRecordingLogUrl}}){{end}} |{{if $.HasNightlyHistory}} {{nightly .NightlyStatus}} |{{end}} {{.DisplayName}} |
+| {{symbol .RecordingStatus}}{{if .RecordingErrorUrl}}&nbsp;[Error]({{.RecordingErrorUrl}}){{end}}{{if .RecordingLogUrl}}{{if .RecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.RecordingLogUrl}}){{end}} | {{symbol .ReplayingAfterRecordingStatus}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;[Error]({{.ReplayingAfterRecordingErrorUrl}}){{end}}{{if .ReplayingAfterRecordingLogUrl}}{{if .ReplayingAfterRecordingErrorUrl}}&nbsp;·&nbsp;{{else}}&nbsp;{{end}}[Log]({{.ReplayingAfterRecordingLogUrl}}){{end}} |{{if $.HasNightlyHistory}} {{nightly .}} |{{end}} {{.DisplayName}} |
 {{end}}
 {{- end -}}

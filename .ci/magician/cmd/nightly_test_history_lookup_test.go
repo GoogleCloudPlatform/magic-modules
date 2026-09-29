@@ -114,11 +114,42 @@ func TestBuildVCRTestRowsNightlyStatus(t *testing.T) {
 	}
 }
 
+func TestNightlyFailureRate(t *testing.T) {
+	history := map[string]*NightlyTestHistory{
+		"TestAccAlways":  {Failures: 30},
+		"TestAccNever":   {Passes: 30},
+		"TestAccFlaky":   {Passes: 18, Failures: 12},
+		"TestAccRounded": {Passes: 2, Failures: 1},
+		// Skipped runs neither pass nor fail, so they are excluded from the rate.
+		"TestAccSkips":     {Passes: 9, Failures: 1, Skips: 20},
+		"TestAccOnlySkips": {Skips: 30},
+		"TestAccNoRuns":    {},
+		"TestAccParent":    {Passes: 27, Failures: 3},
+	}
+
+	cases := map[string]string{
+		"TestAccAlways":       "30/30 nightly runs failed (100%)",
+		"TestAccNever":        "0/30 nightly runs failed (0%)",
+		"TestAccFlaky":        "12/30 nightly runs failed (40%)",
+		"TestAccRounded":      "1/3 nightly runs failed (33%)",
+		"TestAccSkips":        "1/10 nightly runs failed (10%)",
+		"TestAccOnlySkips":    "",
+		"TestAccNoRuns":       "",
+		"TestAccMissing":      "",
+		"TestAccParent__sub1": "3/30 nightly runs failed (10%)",
+	}
+	for name, want := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, want, nightlyFailureRate(name, history))
+		})
+	}
+}
+
 func TestRecordReplayNightlyColumn(t *testing.T) {
 	data := recordReplay{
 		TestRows: []VCRTestTableRow{
-			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing},
-			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing},
+			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyFailureRate: "27/30 nightly runs failed (90%)"},
+			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyFailureRate: "0/30 nightly runs failed (0%)"},
 		},
 		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b"}},
 		HasNightlyHistory:    true,
@@ -130,8 +161,8 @@ func TestRecordReplayNightlyColumn(t *testing.T) {
 	got, err := formatRecordReplay(data, new(strings.Builder))
 	assert.NoError(t, err)
 	assert.Contains(t, got, "| Recording Mode | Replaying Rerun | Nightly | Test Name |")
-	assert.Contains(t, got, "| ❌ | - | 🔴 Failing in nightly | TestAcc_a |")
-	assert.Contains(t, got, "| ❌ | - | 🟢 Passing in nightly | TestAcc_b |")
+	assert.Contains(t, got, "| ❌ | - | 🔴 Failing in nightly<br>27/30 nightly runs failed (90%) | TestAcc_a |")
+	assert.Contains(t, got, "| ❌ | - | 🟢 Passing in nightly<br>0/30 nightly runs failed (0%) | TestAcc_b |")
 	assert.Contains(t, got, "**Known Nightly Failures**: 1 of the tests")
 
 	data.HasNightlyHistory = false

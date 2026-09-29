@@ -85,6 +85,8 @@ type VCRTestTableRow struct {
 	ReplayingAfterRecordingLogUrl   string
 	// NightlyStatus is set for tests that failed in recording when nightly history is available.
 	NightlyStatus string
+	// NightlyFailureRate is how often the test failed in the nightly history window.
+	NightlyFailureRate string
 }
 
 type recordReplay struct {
@@ -716,7 +718,7 @@ func parseTemplate(filename string, tmplText string) *template.Template {
 		"replace":      strings.ReplaceAll,
 		"symbol":       symbol,
 		"contains":     contains,
-		"nightly":      nightlySymbol,
+		"nightly":      nightlyCell,
 	}
 	tmpl, err := template.New(filename).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -865,6 +867,7 @@ func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingR
 		row := createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult)
 		if nightlyHistory != nil {
 			row.NightlyStatus = classifyNightlyStatus(t, nightlyHistory)
+			row.NightlyFailureRate = nightlyFailureRate(t, nightlyHistory)
 		}
 		testRows = append(testRows, row)
 	}

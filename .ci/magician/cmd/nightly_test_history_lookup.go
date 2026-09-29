@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"magician/provider"
 	utils "magician/utility"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,14 +56,19 @@ func loadNightlyTestHistory(pVersion provider.Version, gcs CloudstorageClient) (
 	return report.Tests, nil
 }
 
-// classifyNightlyStatus returns how the given test behaves in recent nightly runs.
-// The test name may be a VCR subtest name (Parent__sub); the parent test is used as a fallback.
-func classifyNightlyStatus(testName string, history map[string]*NightlyTestHistory) string {
-	h, ok := history[strings.ReplaceAll(testName, "__", "/")]
-	if !ok {
-		h, ok = history[compoundTest(testName)]
+// lookupNightlyHistory finds the history entry for a test name. The name may be a VCR
+// subtest name (Parent__sub); the parent test is used as a fallback.
+func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistory) *NightlyTestHistory {
+	if h, ok := history[strings.ReplaceAll(testName, "__", "/")]; ok {
+		return h
 	}
-	if !ok || h == nil {
+	return history[compoundTest(testName)]
+}
+
+// classifyNightlyStatus returns how the given test behaves in recent nightly runs.
+func classifyNightlyStatus(testName string, history map[string]*NightlyTestHistory) string {
+	h := lookupNightlyHistory(testName, history)
+	if h == nil {
 		return NightlyStatusNotFound
 	}
 	if h.Failures > 0 && h.LastStatus == "FAILURE" && (h.Failures >= nightlyFailingThreshold || h.Passes == 0) {
@@ -91,4 +97,32 @@ func nightlySymbol(status string) string {
 	default:
 		return "-"
 	}
+}
+
+// nightlyFailureRate summarizes how often a test failed in the history window, e.g.
+// "12/30 nightly runs failed (40%)". Skipped runs are excluded since they neither pass nor fail.
+// Returns "" when the test has no recorded runs.
+func nightlyFailureRate(testName string, history map[string]*NightlyTestHistory) string {
+	h := lookupNightlyHistory(testName, history)
+	if h == nil {
+		return ""
+	}
+	runs := h.Passes + h.Failures
+	if runs == 0 {
+		return ""
+	}
+	percent := int(math.Round(float64(h.Failures) / float64(runs) * 100))
+	return fmt.Sprintf("%d/%d nightly runs failed (%d%%)", h.Failures, runs, percent)
+}
+
+// nightlyCell renders the nightly column: a status label over the failure rate that backs it.
+func nightlyCell(row VCRTestTableRow) string {
+	if row.NightlyStatus == "" {
+		return ""
+	}
+	label := nightlySymbol(row.NightlyStatus)
+	if row.NightlyFailureRate == "" {
+		return label
+	}
+	return fmt.Sprintf("%s<br>%s", label, row.NightlyFailureRate)
 }
