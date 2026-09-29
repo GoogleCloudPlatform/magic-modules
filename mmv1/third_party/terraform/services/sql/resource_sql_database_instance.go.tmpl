@@ -1723,9 +1723,10 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"deployment_name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: `A unique identifier for the blue-green deployment within the project and region.`,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringIsNotEmpty,
+							Description:  `A unique identifier for the blue-green deployment within the project and region.`,
 						},
 						"target_database_version": {
 							Type:        schema.TypeString,
@@ -3457,10 +3458,8 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	{{- if ne $.TargetVersionName "ga" }}
 	if bgdStateMap := getExistingBgdStateMap(d); bgdStateMap != nil {
 		deploymentName, _ := bgdStateMap["deployment_name"].(string)
-		activeEnv, _ := bgdStateMap["active_environment"].(string)
 		deleteOldSourceCfg, _ := bgdStateMap["delete_old_source_on_destroy"].(bool)
-		shouldDeleteOldSource := (activeEnv == "TARGET") && deleteOldSourceCfg
-		if err := deleteBlueGreenDeployment(d, config, project, d.Get("name").(string), d.Get("region").(string), deploymentName, shouldDeleteOldSource, d.Timeout(schema.TimeoutDelete), userAgent); err != nil {
+		if err := deleteBlueGreenDeployment(d, config, project, d.Get("name").(string), d.Get("region").(string), deploymentName, deleteOldSourceCfg, d.Timeout(schema.TimeoutDelete), userAgent); err != nil {
 			return err
 		}
 	}
@@ -4368,6 +4367,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 	oldList := oldVal.([]interface{})
 	newList := newVal.([]interface{})
 
+	// Ensure active_environment is only "SOURCE" during creation of a new Blue-Green Deployment.
 	if len(oldList) == 0 && len(newList) > 0 && newList[0] != nil {
 		newMap := newList[0].(map[string]interface{})
 		newName, _ := newMap["deployment_name"].(string)
@@ -4380,10 +4380,12 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 		}
 	}
 
+	// Validate changes to an existing Blue-Green Deployment.
 	if len(oldList) > 0 && len(newList) > 0 && oldList[0] != nil && newList[0] != nil {
 		oldMap := oldList[0].(map[string]interface{})
 		newMap := newList[0].(map[string]interface{})
 
+		// deployment_name cannot be changed for an existing Blue-Green Deployment; only one deployment can exist at a time.
 		oldName, _ := oldMap["deployment_name"].(string)
 		newName, _ := newMap["deployment_name"].(string)
 		if oldName != "" && newName != "" && oldName != newName {
@@ -4393,6 +4395,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 			)
 		}
 
+		// target_database_version is immutable and cannot be changed after the Blue-Green Deployment is created.
 		oldDbVer, _ := oldMap["target_database_version"].(string)
 		newDbVer, _ := newMap["target_database_version"].(string)
 		if oldDbVer != newDbVer {
@@ -4402,6 +4405,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 			)
 		}
 
+		// active_environment cannot be reverted from "TARGET" back to "SOURCE" once switchover has occurred.
 		oldEnv, _ := oldMap["active_environment"].(string)
 		newEnv, _ := newMap["active_environment"].(string)
 		if oldEnv == "TARGET" && newEnv == "SOURCE" {
@@ -4411,6 +4415,8 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 			)
 		}
 
+		// When switching over (active_environment changing from "SOURCE" to "TARGET") with a target_database_version,
+		// the instance's root database_version must be updated simultaneously to match target_database_version.
 		if oldEnv == "SOURCE" && newEnv == "TARGET" && newDbVer != "" {
 			rootDbVer, _ := d.Get("database_version").(string)
 			if rootDbVer != newDbVer {
@@ -4489,7 +4495,7 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 	}
 
 	activeEnv := "SOURCE"
-	if bgdRes.State == "SWITCHOVER_COMPLETED" || bgdRes.State == "SWITCHOVER_IN_PROGRESS" {
+	if bgdRes.State == "SWITCHOVER_COMPLETED" {
 		activeEnv = "TARGET"
 	} else if bgdRes.State == "DELETING" && bgdStateMap != nil {
 		if prevEnv, ok := bgdStateMap["active_environment"].(string); ok && prevEnv != "" {
@@ -4567,26 +4573,16 @@ func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_t
 	if len(oldList) > 0 && len(newList) == 0 && oldList[0] != nil {
 		oldMap := oldList[0].(map[string]interface{})
 		deploymentName, _ := oldMap["deployment_name"].(string)
-		oldEnv, _ := oldMap["active_environment"].(string)
 		deleteOldSourceCfg, _ := oldMap["delete_old_source_on_destroy"].(bool)
-		shouldDeleteOldSource := (oldEnv == "TARGET") && deleteOldSourceCfg
 
-		return deleteBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, shouldDeleteOldSource, d.Timeout(schema.TimeoutUpdate), userAgent)
+		return deleteBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, deleteOldSourceCfg, d.Timeout(schema.TimeoutUpdate), userAgent)
 	}
 
 	// Case 3: Modifying an existing blue_green_deployment block
 	if len(oldList) > 0 && len(newList) > 0 && oldList[0] != nil && newList[0] != nil {
 		oldMap := oldList[0].(map[string]interface{})
 		newMap := newList[0].(map[string]interface{})
-		oldName, _ := oldMap["deployment_name"].(string)
 		newName, _ := newMap["deployment_name"].(string)
-
-		if oldName != "" && newName != "" && oldName != newName {
-			return fmt.Errorf(
-				"cannot create new Blue-Green Deployment %q: Blue-Green Deployment %q already exists on instance %q. No new Blue-Green Deployment can be created when one already exists",
-				newName, oldName, instanceName,
-			)
-		}
 
 		oldEnv, _ := oldMap["active_environment"].(string)
 		newEnv, _ := newMap["active_environment"].(string)
