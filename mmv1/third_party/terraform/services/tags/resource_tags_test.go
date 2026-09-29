@@ -104,6 +104,15 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 			{
 				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context),
 			},
+			// Regression test for https://github.com/hashicorp/terraform-provider-google/issues/20073:
+			// purpose_data was ignore_read, so importing left it empty and the (immutable) field
+			// forced a replacement on the next plan.
+			{
+				ResourceName:            "google_tags_tag_key.key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
 		},
 	})
 }
@@ -120,8 +129,8 @@ resource "google_tags_tag_key" "key" {
 	  short_name = "tf-test-foo%{random_suffix}"
 	  description = "For foo%{random_suffix} resources."
 	  purpose = "GCE_FIREWALL"
-	  # purpose_data expects either a selfLinkWithId (not a property of google_compute_network) or the format <project-name>/<vpc-name>.
-	  # selfLink is not sufficient and will result in an error, so we build a string to match the second option.
+	  # The API accepts the short "{project}/{network_name}" form and the provider canonicalizes it to
+	  # the self link the API returns, so config and state agree either way.
 	  purpose_data = {network = "${google_compute_network.tag_network.project}/${google_compute_network.tag_network.name}"}
 	}
 

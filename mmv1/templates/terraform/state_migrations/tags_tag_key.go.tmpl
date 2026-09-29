@@ -1,0 +1,140 @@
+// resourceTagsTagKeyResourceV0 describes the schema as it was at version 0.
+//
+// This is an explicit copy rather than a derivation from ResourceTagsTagKey: the live resource
+// references resourceTagsTagKeyResourceV0 in its StateUpgraders block, so delegating to it here
+// would recurse infinitely. The purpose_data change alters how the field is read and expanded, not
+// the schema shape, so the two schemas currently describe the same fields - but this copy must stay
+// frozen at version 0 and must NOT be updated when the live schema changes.
+func resourceTagsTagKeyResourceV0() *schema.Resource {
+	return &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"parent": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"short_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"namespaced_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"create_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"update_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"purpose": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"purpose_data": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"allowed_values_regex": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// ResourceTagsTagKeyUpgradeV0 rewrites `purpose_data.network` from the short form
+// ("{project}/{network_name}") to the self-link-with-id form the API returns
+// ("https://www.googleapis.com/compute/{compute_version}/projects/{projectId}/global/networks/{networkId}").
+//
+// The migration is best-effort and never fails. Resolving the short form needs a Compute networks
+// lookup, which can fail for reasons unrelated to this change (the network was deleted, or the
+// caller lacks compute.networks.get). Returning an error from a state upgrader would block every
+// subsequent plan on the resource, so on any failure the value is left as-is.
+//
+// NOTE: on failure this is silent. These log lines only reach the user when TF_LOG is set, because
+// provider output is filtered by level by default. A caller lacking compute.networks.get therefore
+// sees the short form left in state, which surfaces as the same replacement diff this migration
+// exists to remove. That trade is deliberate: principals that manage a GCE_FIREWALL tag key are
+// expected to be able to read the network it points at. Granting compute.networks.get resolves it.
+func ResourceTagsTagKeyUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
+
+	purposeData, ok := rawState["purpose_data"].(map[string]interface{})
+	if !ok || purposeData == nil {
+		return rawState, nil
+	}
+
+	transformed := make(map[string]interface{}, len(purposeData))
+	for k, v := range purposeData {
+		transformed[k] = v
+	}
+
+	network, ok := transformed["network"].(string)
+	if !ok {
+		return rawState, nil
+	}
+
+	parts := strings.Split(network, "/")
+	if len(parts) != 2 {
+		return rawState, nil
+	}
+
+	project, name := parts[0], parts[1]
+	if project == "" || name == "" {
+		log.Printf("[WARN] could not parse purpose_data.network %q while upgrading state to schema version 1; leaving it unchanged", network)
+		return rawState, nil
+	}
+
+	config := meta.(*transport_tpg.Config)
+	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", project, name)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		log.Printf("[WARN] could not resolve purpose_data.network %q while upgrading state to schema version 1: %s; leaving it unchanged", network, err)
+		return rawState, nil
+	}
+
+	selfLink, hasSelfLink := res["selfLink"].(string)
+	if !hasSelfLink || selfLink == "" {
+		log.Printf("[WARN] network %q returned no selfLink while upgrading state to schema version 1; leaving purpose_data.network unchanged", network)
+		return rawState, nil
+	}
+
+	transformed["network"] = selfLink
+	rawState["purpose_data"] = transformed
+
+	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+
+	return rawState, nil
+}

@@ -47,6 +47,8 @@ async:
     resource_inside_response: true
 autogen_async: true
 exclude_tgc: true
+schema_version: 1
+state_upgraders: true
 custom_code:
 samples:
   - name: tag_key_basic
@@ -125,9 +127,11 @@ properties:
     description: |
       Optional. Purpose data cannot be changed once set.
 
-      Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose expects data in the following format: `network = "<project-name>/<vpc-name>"`.
+      Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose requires the network the tag is intended for, keyed by `network`. Either a Compute network self link containing the numeric network id (`https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network_id}`) or the shorter `{project}/{network_name}` form is accepted; both are sent to the API as the self link, which is the form the API returns and the provider stores.
+
+      ~> **Note:** The short form is a Compute network name, not an id, so resolving it requires `compute.networks.get`. This applies on create and update, and also once when upgrading existing state that was written using the short form. If the caller cannot read the network, the short form is left in state and the next plan reports a diff on this field.
     immutable: true
-    ignore_read: true
+    custom_expand: templates/terraform/custom_expand/tags_tag_key_purpose_data.go.tmpl
   - name: allowedValuesRegex
     type: String
     description: |
