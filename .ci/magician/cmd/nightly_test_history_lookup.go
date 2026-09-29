@@ -23,23 +23,34 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // Classification of a PR test failure against the nightly test history.
 const (
-	NightlyStatusFailing  = "Failing"
-	NightlyStatusFlaky    = "Flaky"
-	NightlyStatusPassing  = "Passing"
-	NightlyStatusNotFound = "Not found"
+	NightlyStatusFailing       = "Failing"
+	NightlyStatusFlaky         = "Flaky"
+	NightlyStatusRecentlyFixed = "Recently fixed"
+	NightlyStatusPassing       = "Passing"
+	NightlyStatusNotFound      = "Not found"
 )
 
 // Minimum nightly failures within the history window for a test to be considered
 // consistently failing in nightly.
 const nightlyFailingThreshold = 3
 
+// Consecutive most-recent nights without a failure after which a test with failures earlier in
+// the window is treated as fixed rather than flakey. A fix merged to main mid-window leaves stale
+// failures behind, so a run of green nights is better evidence than the window as a whole.
+const nightlyRecentlyFixedNights = 3
+
+// Minimum share of nightly runs that must fail for a test to be called flakey. Below this a
+// single stale failure in a 30-night window would otherwise permanently label a healthy test.
+const nightlyMinFlakyRate = 0.1
+
 // loadNightlyTestHistory downloads the rolling nightly test history for pVersion.
 // It returns nil (without error) when gcs is nil so callers can treat the history as optional.
-func loadNightlyTestHistory(pVersion provider.Version, gcs CloudstorageClient) (map[string]*NightlyTestHistory, error) {
+func loadNightlyTestHistory(pVersion provider.Version, gcs CloudstorageClient) (*NightlyTestHistoryReport, error) {
 	if gcs == nil {
 		return nil, nil
 	}
@@ -53,7 +64,68 @@ func loadNightlyTestHistory(pVersion provider.Version, gcs CloudstorageClient) (
 	if err := utils.ReadFromJson(&report, localPath); err != nil {
 		return nil, fmt.Errorf("failed to read nightly test history: %w", err)
 	}
-	return report.Tests, nil
+	return &report, nil
+}
+
+// nightsSinceLastFailure returns how many nights have passed between a test's last nightly failure
+// and the end of the history window. It returns -1 when this cannot be determined, either because
+// the history predates last_failure_date or because a date failed to parse.
+//
+// This counts calendar days, which overstates the number of nightly runs on days where no nightly
+// finished. That only ever makes the "recently fixed" check more conservative in the sense of
+// needing more elapsed time, so it is acceptable for a reviewer-facing hint.
+func nightsSinceLastFailure(h *NightlyTestHistory, historyEndDate string) int {
+	if h.LastFailureDate == "" || historyEndDate == "" {
+		return -1
+	}
+	const layout = "2006-01-02"
+	last, err := time.Parse(layout, h.LastFailureDate)
+	if err != nil {
+		return -1
+	}
+	end, err := time.Parse(layout, historyEndDate)
+	if err != nil {
+		return -1
+	}
+	return int(end.Sub(last).Hours() / 24)
+}
+
+// classifyNightlyStatus returns how the given test behaves in recent nightly runs.
+// A nil entry means the test was never seen in the history window. historyEndDate is the last
+// night covered by the history and may be empty, which disables the recently-fixed check.
+func classifyNightlyStatus(h *NightlyTestHistory, historyEndDate string) string {
+	if h == nil {
+		return NightlyStatusNotFound
+	}
+	// Skipped runs neither pass nor fail, so a test that only ever skipped was effectively not run.
+	runs := h.Passes + h.Failures
+	if runs == 0 {
+		return NightlyStatusNotFound
+	}
+	if h.Failures == 0 {
+		return NightlyStatusPassing
+	}
+
+	// A fix merged to main partway through the window leaves failures that no longer describe the
+	// current state. Trust a streak of green nights over the window totals.
+	if h.LastStatus != "FAILURE" {
+		if n := nightsSinceLastFailure(h, historyEndDate); n >= nightlyRecentlyFixedNights {
+			return NightlyStatusRecentlyFixed
+		}
+	}
+
+	if h.LastStatus == "FAILURE" && (h.Failures >= nightlyFailingThreshold || h.Passes == 0) {
+		return NightlyStatusFailing
+	}
+	if h.Passes == 0 {
+		return NightlyStatusFailing
+	}
+	// Rare stale failures are not a useful signal that a PR failure is pre-existing, but a failure
+	// on the most recent night is, regardless of rate.
+	if float64(h.Failures)/float64(runs) >= nightlyMinFlakyRate || h.LastStatus == "FAILURE" {
+		return NightlyStatusFlaky
+	}
+	return NightlyStatusPassing
 }
 
 // lookupNightlyHistory finds the history entry for a test name. The name may be a VCR
@@ -65,24 +137,6 @@ func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistor
 	return history[compoundTest(testName)]
 }
 
-// classifyNightlyStatus returns how the given test behaves in recent nightly runs.
-// A nil entry means the test was never seen in the history window.
-func classifyNightlyStatus(h *NightlyTestHistory) string {
-	if h == nil {
-		return NightlyStatusNotFound
-	}
-	if h.Failures > 0 && h.LastStatus == "FAILURE" && (h.Failures >= nightlyFailingThreshold || h.Passes == 0) {
-		return NightlyStatusFailing
-	}
-	if h.Failures > 0 && h.Passes > 0 {
-		return NightlyStatusFlaky
-	}
-	if h.Passes > 0 {
-		return NightlyStatusPassing
-	}
-	return NightlyStatusNotFound
-}
-
 // nightlySymbol renders a nightly status for the PR comment table.
 func nightlySymbol(status string) string {
 	switch status {
@@ -90,6 +144,8 @@ func nightlySymbol(status string) string {
 		return "🔴 Failing in nightly"
 	case NightlyStatusFlaky:
 		return "🟡 Flaky in nightly"
+	case NightlyStatusRecentlyFixed:
+		return "🟢 Recently fixed in nightly"
 	case NightlyStatusPassing:
 		return "🟢 Passing in nightly"
 	case NightlyStatusNotFound:
@@ -100,8 +156,9 @@ func nightlySymbol(status string) string {
 }
 
 // nightlyFailureRate summarizes how often a test failed in the history window, e.g.
-// "12/30 nightly runs failed (40%)". Skipped runs are excluded since they neither pass nor fail.
-// Returns "" when the test has no recorded runs.
+// "12/30 nightly runs failed (40%), last failed 2026-09-27". Skipped runs are excluded since they
+// neither pass nor fail. The last failure date keeps a high rate from reading as a contradiction
+// when the test has since been fixed. Returns "" when the test has no recorded runs.
 func nightlyFailureRate(h *NightlyTestHistory) string {
 	if h == nil {
 		return ""
@@ -111,7 +168,11 @@ func nightlyFailureRate(h *NightlyTestHistory) string {
 		return ""
 	}
 	percent := int(math.Round(float64(h.Failures) / float64(runs) * 100))
-	return fmt.Sprintf("%d/%d nightly runs failed (%d%%)", h.Failures, runs, percent)
+	rate := fmt.Sprintf("%d/%d nightly runs failed (%d%%)", h.Failures, runs, percent)
+	if h.Failures > 0 && h.LastFailureDate != "" {
+		rate += fmt.Sprintf(", last failed %s", h.LastFailureDate)
+	}
+	return rate
 }
 
 // nightlyCell renders the nightly column: a status label over the failure rate that backs it.

@@ -806,7 +806,7 @@ func createTableRow(t string, logBaseUrl string, recordingResult, replayingResul
 
 // buildVCRTestRows builds the recording table rows. If nightlyHistory is non-nil, tests that
 // failed in recording are annotated with their nightly status.
-func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult vcr.Result, logBaseUrl string, nightlyHistory map[string]*NightlyTestHistory) []VCRTestTableRow {
+func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult vcr.Result, logBaseUrl string, nightlyHistory *NightlyTestHistoryReport) []VCRTestTableRow {
 	// Expand compound tests to subtests for accurate status matching
 	expandedRecordingResult := subtestResult(recordingResult)
 	expandedReplayingAfterRecordingResult := subtestResult(replayingAfterRecordingResult)
@@ -866,8 +866,8 @@ func buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingR
 	for _, t := range failingInRecording {
 		row := createTableRow(t, logBaseUrl, expandedRecordingResult, expandedReplayingAfterRecordingResult)
 		if nightlyHistory != nil {
-			h := lookupNightlyHistory(t, nightlyHistory)
-			row.NightlyStatus = classifyNightlyStatus(h)
+			h := lookupNightlyHistory(t, nightlyHistory.Tests)
+			row.NightlyStatus = classifyNightlyStatus(h, nightlyHistory.EndDate)
 			row.NightlyFailureRate = nightlyFailureRate(h)
 		}
 		testRows = append(testRows, row)

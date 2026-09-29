@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"magician/provider"
 	"magician/vcr"
@@ -35,16 +36,26 @@ func (f *fakeGCS) DownloadFile(bucket, object, filePath string) error {
 }
 
 func TestClassifyNightlyStatus(t *testing.T) {
+	const end = "2026-09-30"
 	history := map[string]*NightlyTestHistory{
-		"TestAccFailing":           {Failures: 10, LastStatus: "FAILURE"},
-		"TestAccRecentlyFailing":   {Passes: 25, Failures: 3, LastStatus: "FAILURE"},
-		"TestAccFlaky":             {Passes: 20, Failures: 2, LastStatus: "SUCCESS"},
-		"TestAccFlakyLastFailed":   {Passes: 20, Failures: 1, LastStatus: "FAILURE"},
-		"TestAccNewFailure":        {Failures: 1, LastStatus: "FAILURE"},
+		"TestAccFailing":           {Failures: 10, LastStatus: "FAILURE", LastFailureDate: end},
+		"TestAccRecentlyFailing":   {Passes: 25, Failures: 3, LastStatus: "FAILURE", LastFailureDate: end},
+		"TestAccFlaky":             {Passes: 20, Failures: 4, LastStatus: "SUCCESS", LastFailureDate: "2026-09-29"},
+		"TestAccFlakyLastFailed":   {Passes: 20, Failures: 1, LastStatus: "FAILURE", LastFailureDate: end},
+		"TestAccNewFailure":        {Failures: 1, LastStatus: "FAILURE", LastFailureDate: end},
 		"TestAccPassing":           {Passes: 30, LastStatus: "SUCCESS"},
 		"TestAccSkipped":           {Skips: 30, LastStatus: "UNKNOWN"},
-		"TestAccParent":            {Passes: 30, Failures: 5, LastStatus: "SUCCESS"},
-		"TestAccWithSub/sub_fails": {Failures: 30, LastStatus: "FAILURE"},
+		"TestAccParent":            {Passes: 20, Failures: 5, LastStatus: "SUCCESS", LastFailureDate: "2026-09-29"},
+		"TestAccWithSub/sub_fails": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: end},
+
+		// Fixed in main partway through the window: many stale failures, but green ever since.
+		"TestAccFixed": {Passes: 10, Failures: 20, LastStatus: "SUCCESS", LastFailureDate: "2026-09-27"},
+		// Only two green nights so far, which is too short a streak to call it fixed.
+		"TestAccJustFixed": {Passes: 2, Failures: 20, LastStatus: "SUCCESS", LastFailureDate: "2026-09-28"},
+		// A single stale failure in a long window is not a useful flakiness signal.
+		"TestAccRareStale": {Passes: 29, Failures: 1, LastStatus: "SUCCESS", LastFailureDate: "2026-09-29"},
+		// Without a last_failure_date the recently-fixed check cannot run, so fall back to rate.
+		"TestAccNoFailureDate": {Passes: 10, Failures: 20, LastStatus: "SUCCESS"},
 	}
 	cases := map[string]string{
 		"TestAccFailing":            NightlyStatusFailing,
@@ -57,12 +68,45 @@ func TestClassifyNightlyStatus(t *testing.T) {
 		"TestAccMissing":            NightlyStatusNotFound,
 		"TestAccParent__sub":        NightlyStatusFlaky,
 		"TestAccWithSub__sub_fails": NightlyStatusFailing,
+		"TestAccFixed":              NightlyStatusRecentlyFixed,
+		"TestAccJustFixed":          NightlyStatusFlaky,
+		"TestAccRareStale":          NightlyStatusPassing,
+		"TestAccNoFailureDate":      NightlyStatusFlaky,
 	}
 	for name, want := range cases {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, want, classifyNightlyStatus(lookupNightlyHistory(name, history)))
+			assert.Equal(t, want, classifyNightlyStatus(lookupNightlyHistory(name, history), end))
 		})
 	}
+}
+
+// A test fixed in main mid-window must not stay labelled flakey forever just because the window
+// still contains its pre-fix failures.
+func TestClassifyNightlyStatusRecentlyFixedStreak(t *testing.T) {
+	const end = "2026-09-30"
+	for nights, want := range map[int]string{
+		0: NightlyStatusFailing, // still failing on the most recent night
+		1: NightlyStatusFlaky,
+		2: NightlyStatusFlaky,
+		3: NightlyStatusRecentlyFixed,
+		9: NightlyStatusRecentlyFixed,
+	} {
+		lastFailure := time.Date(2026, 9, 30, 0, 0, 0, 0, time.UTC).AddDate(0, 0, -nights)
+		h := &NightlyTestHistory{
+			Passes:          nights,
+			Failures:        20,
+			LastStatus:      "SUCCESS",
+			LastFailureDate: lastFailure.Format("2006-01-02"),
+		}
+		if nights == 0 {
+			h.LastStatus = "FAILURE"
+		}
+		assert.Equal(t, want, classifyNightlyStatus(h, end), "%d nights since last failure", nights)
+	}
+
+	// A missing history end date disables the check rather than misreporting.
+	assert.Equal(t, NightlyStatusFlaky, classifyNightlyStatus(
+		&NightlyTestHistory{Passes: 10, Failures: 20, LastStatus: "SUCCESS", LastFailureDate: "2026-09-01"}, ""))
 }
 
 func TestLoadNightlyTestHistory(t *testing.T) {
@@ -79,7 +123,7 @@ func TestLoadNightlyTestHistory(t *testing.T) {
 
 	got, err := loadNightlyTestHistory(provider.Beta, gcs)
 	assert.NoError(t, err)
-	assert.Equal(t, report.Tests, got)
+	assert.Equal(t, report.Tests, got.Tests)
 
 	_, err = loadNightlyTestHistory(provider.GA, gcs)
 	assert.Error(t, err)
@@ -93,9 +137,12 @@ func TestBuildVCRTestRowsNightlyStatus(t *testing.T) {
 	replaying := vcr.Result{FailedTests: []string{"TestAccA", "TestAccB", "TestAccC"}}
 	recording := vcr.Result{PassedTests: []string{"TestAccA"}, FailedTests: []string{"TestAccB", "TestAccC"}}
 	replayingAfter := vcr.Result{PassedTests: []string{"TestAccA"}}
-	history := map[string]*NightlyTestHistory{
-		"TestAccA": {Failures: 30, LastStatus: "FAILURE"},
-		"TestAccB": {Failures: 30, LastStatus: "FAILURE"},
+	history := &NightlyTestHistoryReport{
+		EndDate: "2026-09-30",
+		Tests: map[string]*NightlyTestHistory{
+			"TestAccA": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: "2026-09-30"},
+			"TestAccB": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: "2026-09-30"},
+		},
 	}
 
 	rows := buildVCRTestRows(replaying, recording, replayingAfter, "https://logs", history)
@@ -125,6 +172,10 @@ func TestNightlyFailureRate(t *testing.T) {
 		"TestAccOnlySkips": {Skips: 30},
 		"TestAccNoRuns":    {},
 		"TestAccParent":    {Passes: 27, Failures: 3},
+		// A last failure date is appended so a high rate is not misread as the current state.
+		"TestAccDated": {Passes: 10, Failures: 20, LastFailureDate: "2026-09-27"},
+		// A clean test has no failure to date, so no suffix.
+		"TestAccCleanDated": {Passes: 30, LastFailureDate: "2026-09-27"},
 	}
 
 	cases := map[string]string{
@@ -137,6 +188,8 @@ func TestNightlyFailureRate(t *testing.T) {
 		"TestAccNoRuns":       "",
 		"TestAccMissing":      "",
 		"TestAccParent__sub1": "3/30 nightly runs failed (10%)",
+		"TestAccDated":        "20/30 nightly runs failed (67%), last failed 2026-09-27",
+		"TestAccCleanDated":   "0/30 nightly runs failed (0%)",
 	}
 	for name, want := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -150,8 +203,9 @@ func TestRecordReplayNightlyColumn(t *testing.T) {
 		TestRows: []VCRTestTableRow{
 			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyFailureRate: "27/30 nightly runs failed (90%)"},
 			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyFailureRate: "0/30 nightly runs failed (0%)"},
+			{DisplayName: "TestAcc_c", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusRecentlyFixed, NightlyFailureRate: "20/30 nightly runs failed (67%), last failed 2026-09-27"},
 		},
-		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b"}},
+		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b", "TestAcc_c"}},
 		HasNightlyHistory:    true,
 		NightlyKnownFailures: 1,
 		Version:              provider.Beta.String(),
@@ -163,6 +217,8 @@ func TestRecordReplayNightlyColumn(t *testing.T) {
 	assert.Contains(t, got, "| Recording Mode | Replaying Rerun | Nightly | Test Name |")
 	assert.Contains(t, got, "| ❌ | - | 🔴 Failing in nightly<br>27/30 nightly runs failed (90%) | TestAcc_a |")
 	assert.Contains(t, got, "| ❌ | - | 🟢 Passing in nightly<br>0/30 nightly runs failed (0%) | TestAcc_b |")
+	// The date keeps the high rate from contradicting the "recently fixed" label.
+	assert.Contains(t, got, "| ❌ | - | 🟢 Recently fixed in nightly<br>20/30 nightly runs failed (67%), last failed 2026-09-27 | TestAcc_c |")
 	assert.Contains(t, got, "**Known Nightly Failures**: 1 of the tests")
 
 	data.HasNightlyHistory = false
