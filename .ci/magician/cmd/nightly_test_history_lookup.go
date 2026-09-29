@@ -143,25 +143,30 @@ func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistor
 // answers is "is this failure mine?". The emoji therefore signals how much the author needs to look
 // at the row, not how healthy the test is in nightly: a test that always fails in nightly is very
 // likely pre-existing (low alarm), while one that passes cleanly in nightly points at this PR.
+//
+// Labels omit "in nightly" because the column header already says it.
 func nightlySymbol(status string) string {
 	switch status {
 	case NightlyStatusFailing:
-		return "⚪ Fails in nightly"
+		return "⚪ Fails"
 	case NightlyStatusFlaky:
-		return "🟡 Flaky in nightly"
+		return "🟡 Flaky"
 	case NightlyStatusRecentlyFixed:
-		return "🔴 Fixed in nightly"
+		return "🔴 Fixed"
 	case NightlyStatusPassing:
-		return "🔴 Passes in nightly"
+		return "🔴 Passes"
 	case NightlyStatusNotFound:
-		return "⚪ Not run in nightly"
+		return "⚪ Not run"
 	default:
 		return "-"
 	}
 }
 
-// nightlyDetail is the short parenthetical shown next to a nightly status, kept to a single line so
-// rows stay compact when a PR has many failures. The fuller explanation lives below the table.
+// nightlyDetail is the short qualifier shown next to a nightly status, kept terse so rows stay
+// compact when a PR has many failures. The fuller explanation lives below the table.
+//
+// The denominator is kept because it carries the confidence of the rate: 100% of 26 runs is far
+// stronger evidence than 100% of 2.
 //
 // A recently fixed test shows when it last failed rather than its rate, since its rate describes
 // the period before the fix and would otherwise contradict the label.
@@ -177,7 +182,7 @@ func nightlyDetail(h *NightlyTestHistory, status string) string {
 		return ""
 	}
 	percent := int(math.Round(float64(h.Failures) / float64(runs) * 100))
-	return fmt.Sprintf("%d%% of %d nightly runs", percent, runs)
+	return fmt.Sprintf("%d%% of %d", percent, runs)
 }
 
 // nightlyCell renders the nightly column as a single line: a status label and the detail backing it.
