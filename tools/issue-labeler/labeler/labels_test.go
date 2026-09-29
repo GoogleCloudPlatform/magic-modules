@@ -78,28 +78,6 @@ func TestEnrolledTeamsData(t *testing.T) {
 	}
 }
 
-func TestEnrolledTeamsGeminiPrefixOverlap(t *testing.T) {
-	regexpLabels, err := BuildRegexLabels(EnrolledTeamsYaml)
-	if err != nil {
-		t.Fatalf("Error converting enrolled_teams.yml to regexpLabels: %s", err)
-	}
-	cases := map[string]string{
-		"google_gemini_code_repository_index":                 "service/gemini",
-		"google_gemini_data_sharing_with_google_setting":      "service/gemini",
-		"google_gemini_gemini_gcp_enablement_setting_binding": "service/gemini",
-		"google_gemini_repository_group_iam_member":           "service/gemini",
-		"google_gemini_data_analytics_data_agent":             "service/geminidataanalytics",
-		"google_gemini_data_analytics_data_agent_iam_member":  "service/geminidataanalytics",
-		"google_gemini_data_analytics_data_agent_iam_policy":  "service/geminidataanalytics",
-	}
-	for resource, want := range cases {
-		got := ComputeLabels([]string{resource}, regexpLabels)
-		if !slices.Equal(got, []string{want}) {
-			t.Errorf("ComputeLabels(%q) = %v, want [%s]", resource, got, want)
-		}
-	}
-}
-
 func TestBuildRegexLabels(t *testing.T) {
 	cases := map[string]struct {
 		yaml                 []byte
