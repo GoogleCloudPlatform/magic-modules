@@ -32,6 +32,7 @@ examples:
     exclude_test: true
 base_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 update_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
+self_link: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 immutable: false
 import_format:
   - 'projects/{{project}}/global/snapshotRecycleBinPolicy'
