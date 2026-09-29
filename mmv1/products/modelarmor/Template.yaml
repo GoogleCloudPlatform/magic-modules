@@ -332,6 +332,18 @@ properties:
           Possible values:
           INSPECT_ONLY
           INSPECT_AND_BLOCK
+      - name: modalities
+        type: Array
+        description: |-
+          Specifies the modalities to scan. If empty, only text modality will be
+          scanned. Image screening is in Preview and is only supported in the `us`
+          and `eu` multi-regions; regional endpoints such as `us-central1` do not
+          support it.
+          Possible values:
+          MODALITY_TEXT
+          MODALITY_IMAGE
+        item_type:
+          type: String
       - name: filterVersionSelector
         type: NestedObject
         description: |-

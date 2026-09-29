@@ -135,6 +135,7 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
           custom_prompt_safety_error_message       = "This is a custom error message for prompt"
           custom_llm_response_safety_error_code    = 401
           enforcement_type                         = "INSPECT_ONLY"
+          modalities                               = ["MODALITY_TEXT", "MODALITY_IMAGE"]
         }
       }
     `, context)
@@ -279,6 +280,7 @@ func testAccModelArmorTemplate_update(context map[string]interface{}) string {
           custom_prompt_safety_error_message       = "Updated prompt error message"
           custom_llm_response_safety_error_code    = 500
           enforcement_type                         = "INSPECT_AND_BLOCK"
+          modalities                               = ["MODALITY_TEXT"]
         }
       }
     `, context)
