@@ -8,6 +8,7 @@ resource "google_database_migration_service_private_connection" "{{$.PrimaryReso
 	}
 
 	reserved_public_ip_config {
+		nat_ips_count = 1
 	}
 
 	create_without_validation = false

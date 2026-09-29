@@ -67,11 +67,6 @@ samples:
       - name: database_migration_service_private_connection_reserved_public_ip
         resource_id_vars:
           private_connection_id: my-connection
-          create_without_validation: "false"
-        test_vars_overrides:
-          # for backward compatible
-          create_without_validation: '"false" + randomSuffix'
-          private_connection_id: '"my-connection" + randomSuffix'
 parameters:
   - name: privateConnectionId
     type: String
