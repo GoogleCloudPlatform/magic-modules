@@ -36,6 +36,10 @@ timeouts:
 sweeper:
   url_substitutions:
     - region: global
+    - region: us-central1
+  dependencies:
+    - google_compute_backend_service
+    - google_compute_region_backend_service
 async:
   type: OpAsync
   operation:
@@ -72,6 +76,15 @@ samples:
         resource_id_vars:
           resource_name: my-lb-policy
           backend_name: my-lb-backend
+  - name: network_services_service_lb_policies_regional
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: network_services_service_lb_policies_regional
+        min_version: beta
+        resource_id_vars:
+          resource_name: my-regional-lb-policy
+          backend_name: my-regional-lb-backend
 parameters:
   - name: name
     type: String
@@ -83,7 +96,7 @@ parameters:
   - name: location
     type: String
     description: |
-      The location of the service lb policy.
+      The location of the service lb policy. Supported values are `global` and regional locations (e.g. `us-central1`).
     min_version: beta
     url_param_only: true
     required: true
@@ -113,6 +126,7 @@ properties:
     type: Enum
     description: |
       The type of load balancing algorithm to be used. The default behavior is WATERFALL_BY_REGION.
+      Note that `SPRAY_TO_WORLD` is only supported for global ServiceLbPolicy.
     min_version: beta
     enum_values:
       - SPRAY_TO_REGION
@@ -145,6 +159,7 @@ properties:
     type: NestedObject
     description: |
       Configuration to provide isolation support for the associated Backend Service.
+      Note that `isolation_config` is only supported for global ServiceLbPolicy.
     min_version: beta
     properties:
       - name: isolationGranularity
