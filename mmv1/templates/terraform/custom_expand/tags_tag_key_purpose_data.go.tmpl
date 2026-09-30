@@ -27,7 +27,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	// The API accepts the short "{project}/{network_name}" form here too, but only ever returns the
 	// self link. Restricting the input to the form the API returns keeps state and config identical,
 	// so a value is never rewritten to something the config does not match.
-	re := regexp.MustCompile(`^https://www\.googleapis\.com/compute/v1/projects/[^/]+/global/networks/[0-9]+$`)
+	re := regexp.MustCompile(`^https://[^/]+/compute/v1/projects/[^/]+/global/networks/[0-9]+$`)
 	if !re.MatchString(network) {
 		return nil, fmt.Errorf("purpose_data.network %q must be a Compute network self link of the form \"https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network_id}\", where {network_id} is the numeric network id", network)
 	}

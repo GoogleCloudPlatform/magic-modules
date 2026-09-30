@@ -116,11 +116,18 @@ func ResourceTagsTagKeyUpgradeV0(ctx context.Context, rawState map[string]interf
 	}
 
 	config := meta.(*transport_tpg.Config)
-	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", project, name)
+
+	// Resolve the endpoint the same way the generated read does: BaseUrl honours
+	// compute_custom_endpoint rather than assuming the public API. The billing project is taken from
+	// the provider config, which is what GetBillingProject falls back to for this resource (it has no
+	// billing_project field of its own). The user agent cannot be refined here because
+	// GenerateUserAgentString needs a ResourceData to read provider meta, which a state upgrader
+	// does not have.
+	url := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, name)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
-		Project:   project,
+		Project:   config.BillingProject,
 		RawURL:    url,
 		UserAgent: config.UserAgent,
 	})
@@ -133,7 +140,6 @@ func ResourceTagsTagKeyUpgradeV0(ctx context.Context, rawState map[string]interf
 		log.Printf("[WARN] network %q returned no selfLink while upgrading state to schema version 1; leaving purpose_data.network unchanged", network)
 		return rawState, nil
 	}
-
 	transformed["network"] = selfLink
 	rawState["purpose_data"] = transformed
 

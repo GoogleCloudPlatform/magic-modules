@@ -134,7 +134,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tf-tag-key%{random_suffix}"
   purpose_data = {
-    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.id}"
+    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
@@ -228,7 +228,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tf-tag-key%{random_suffix}"
   purpose_data = {
-    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.id}"
+    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 

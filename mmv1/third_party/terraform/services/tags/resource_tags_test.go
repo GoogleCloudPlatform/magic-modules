@@ -133,7 +133,7 @@ resource "google_tags_tag_key" "key" {
 	  # which is the form the API returns. google_compute_network.self_link is
 	  # "{version}/projects/{project}/global/networks/{network_name}", so the id-bearing self link is
 	  # built from its parts.
-	  purpose_data = {network = "https://www.googleapis.com/compute/v1/projects/${google_compute_network.tag_network.project}/global/networks/${google_compute_network.tag_network.id}"}
+	  purpose_data = {network = "https://www.googleapis.com/compute/v1/projects/${google_compute_network.tag_network.project}/global/networks/${google_compute_network.tag_network.network_id}"}
 	}
 
 `, context)

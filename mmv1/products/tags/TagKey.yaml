@@ -50,6 +50,7 @@ exclude_tgc: true
 schema_version: 1
 state_upgraders: true
 custom_code:
+  constants: templates/terraform/constants/tags_tag_key.go.tmpl
 samples:
   - name: tag_key_basic
     primary_resource_id: key

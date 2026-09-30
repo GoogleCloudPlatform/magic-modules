@@ -84,7 +84,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "{{index $.ResourceIdVars "tag_key"}}"
   purpose_data = {
-    network = "https://www.googleapis.com/compute/v1/projects/{{index $.TestEnvVars "project_name"}}/global/networks/${data.google_compute_network.tag_network.id}"
+    network = "https://www.googleapis.com/compute/v1/projects/{{index $.TestEnvVars "project_name"}}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
