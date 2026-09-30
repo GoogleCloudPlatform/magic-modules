@@ -2014,6 +2014,24 @@ properties:
 
                           Only one of pathPrefixRewrite and pathTemplateRewrite may be
                           specified.
+                      - name: 'regexRewrite'
+                        type: NestedObject
+                        description: |
+                          The regex rewrite to be applied to the URL. Only one of
+                          pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be
+                          specified.
+                        properties:
+                          - name: 'pathPattern'
+                            type: String
+                            required: true
+                            description: |
+                              The regular expression used to match against the URL path.
+                          - name: 'pathSubstitution'
+                            type: String
+                            required: true
+                            description: |
+                              Required when path pattern is specified. Used to rewrite matching
+                              parts of the path.
                   - name: 'weightedBackendServices'
                     type: Array
                     description: |
