@@ -43,6 +43,15 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
+			{
+				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context),
+			},
+			{
+				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+			},
 		},
 	})
 }
@@ -156,6 +165,93 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   params = {
     max_qps                    = "100"
   }
+  refresh_interval             = "172800s"
+  entities {
+    entity_name                = "catalog"
+    params                     = jsonencode({
+      "inclusion_filters": {
+        "knowledgeBaseSysId": [
+          "456"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name                = "incident"
+    params                     = jsonencode({
+      "inclusion_filters": {
+        "knowledgeBaseSysId": [
+          "456"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name                = "knowledge_base"
+    params                     = jsonencode({
+      "inclusion_filters": {
+        "knowledgeBaseSysId": [
+          "456"
+        ]
+      }
+    })
+  }
+  static_ip_enabled            = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://gcpconnector1.service-now.com/"
+      port = 123
+    }
+    params                     = jsonencode({
+      "destination_type": "private"
+    })
+  }
+  incremental_refresh_interval = "21600s"
+  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
+  sync_mode                    = "PERIODIC"
+  auto_run_disabled            = false
+  incremental_sync_disabled    = false
+  action_config {
+    action_params = {
+      instance_uri  = "https://example.atlassian.net"
+      instance_id   = "unused"
+      client_id     = "unused"
+      client_secret = "unused"
+      auth_type     = "OAUTH"
+    }
+    create_bap_connection = true
+  }
+  bap_config {
+    supported_connector_modes = ["ACTIONS"]
+    enabled_actions = [
+      "create_issue",
+      "update_issue",
+      "change_issue_status",
+      "create_comment",
+      "update_comment",
+      "upload_attachment",
+    ]
+  }
+}
+`, context)
+}
+
+func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "time_sleep" "wait_1_hour" {
+  create_duration = "3s"
+}
+
+resource "google_discovery_engine_data_connector" "servicenow-basic" {
+  depends_on                   = [time_sleep.wait_1_hour]
+  location                     = "global"
+  collection_id                = "tf-test-collection-id%{random_suffix}"
+  collection_display_name      = "tf-test-dataconnector-servicenow"
+  data_source                  = "servicenow"
+  json_params = jsonencode({
+    max_qps                    = "200"
+  })
   refresh_interval             = "172800s"
   entities {
     entity_name                = "catalog"
