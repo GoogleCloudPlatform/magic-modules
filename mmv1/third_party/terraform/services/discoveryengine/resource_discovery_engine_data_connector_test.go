@@ -4,13 +4,17 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(t *testing.T) {
+	// TODO(b/560162779): DO NOT SUBMIT - Uncomment t.Skip() before marking PR ready for review!
 	// Skips this update test due to duration and flakiness.
-	t.Skip()
+	// t.Skip()
 
 	t.Parallel()
 
@@ -36,6 +40,33 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_data_connector.servicenow-basic", plancheck.ResourceActionUpdate),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("params"),
+							knownvalue.MapExact(map[string]knownvalue.Check{
+								"max_qps": knownvalue.StringExact("100"),
+							}),
+						),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("refresh_interval"),
+							knownvalue.StringExact("172800s"),
+						),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("auto_run_disabled"),
+							knownvalue.Bool(false),
+						),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("incremental_sync_disabled"),
+							knownvalue.Bool(false),
+						),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -44,7 +75,41 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 			{
-				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context),
+				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context, "200"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_data_connector.servicenow-basic", plancheck.ResourceActionUpdate),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("json_params"),
+							knownvalue.StringExact(`{"max_qps":"200"}`),
+						),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("params"),
+							knownvalue.Null(),
+						),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+			},
+			{
+				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context, "300"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_data_connector.servicenow-basic", plancheck.ResourceActionUpdate),
+						plancheck.ExpectKnownValue(
+							"google_discovery_engine_data_connector.servicenow-basic",
+							tfjsonpath.New("json_params"),
+							knownvalue.StringExact(`{"max_qps":"300"}`),
+						),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -237,7 +302,8 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
 `, context)
 }
 
-func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context map[string]interface{}) string {
+func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context map[string]interface{}, maxQps string) string {
+	context["max_qps"] = maxQps
 	return acctest.Nprintf(`
 resource "time_sleep" "wait_1_hour" {
   create_duration = "3s"
@@ -250,7 +316,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
   json_params = jsonencode({
-    max_qps                    = "200"
+    max_qps                    = "%{max_qps}"
   })
   refresh_interval             = "172800s"
   entities {
