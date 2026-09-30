@@ -37,25 +37,17 @@ delete_url: 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent
 id_format: 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}'
-# NOTE: DataAgent create/update/delete use the API's `*Sync` RPC variants
-# (createSync/updateSync/deleteSync), which block until the operation
-# completes and return the resource directly rather than a
-# google.longrunning.Operation. So this resource has NO `async:` block and
-# `autogen_async` is set to `false`.
+# Uses the *Sync RPCs (createSync/updateSync/deleteSync), which return the resource
+# directly rather than a long-running operation, so there's no async block.
 autogen_async: false
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-# The generated sweeper builds its delete URL by appending the resource ID to
-# delete_url with the ID stripped, which assumes the URL ends in the ID. Here
-# it ends in `:deleteSync`, so it would produce `.../dataAgents/:deleteSync<id>`
-# and every delete would fail. Re-enable once the sweeper template supports a
-# trailing custom-method suffix (sweep location must then be 'global').
+# The generated sweeper assumes delete_url ends in the ID, so the :deleteSync suffix
+# yields `.../dataAgents/:deleteSync<id>`. Re-enable once the template handles it.
 exclude_sweeper: true
 custom_code:
-  # deleteSync soft-deletes: GET keeps returning the agent with `deleteTime`
-  # set until `purgeTime`, so treat soft-deleted agents as gone.
   decoder: 'templates/terraform/decoders/gemini_data_analytics_data_agent.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/gemini_data_analytics_data_agent_soft_delete.go.tmpl'
 iam_policy:
@@ -183,60 +175,6 @@ properties:
                           description: |-
                             Required. The table ID.
                           required: true
-                        - name: 'schema'
-                          type: NestedObject
-                          description: |-
-                            Optional. Additional metadata about the table, such as a description,
-                            synonyms, tags, and field-level descriptions. Only the BigQuery-relevant
-                            subset of the API's `Schema` message is supported.
-                          properties:
-                            - name: 'description'
-                              type: String
-                              description: |-
-                                Optional. A textual description of the table's content and purpose.
-                            - name: 'synonyms'
-                              type: Array
-                              description: |-
-                                Optional. A list of alternative names or synonyms that can be used to
-                                refer to the table.
-                              item_type:
-                                type: String
-                            - name: 'tags'
-                              type: Array
-                              description: |-
-                                Optional. A list of tags or keywords associated with the table, used
-                                for categorization.
-                              item_type:
-                                type: String
-                            - name: 'fields'
-                              type: Array
-                              description: |-
-                                Optional. Metadata for fields (columns) in the table.
-                              item_type:
-                                type: NestedObject
-                                properties:
-                                  - name: 'name'
-                                    type: String
-                                    description: |-
-                                      Optional. The name of the field.
-                                  - name: 'description'
-                                    type: String
-                                    description: |-
-                                      Optional. A brief description of the field.
-                                  - name: 'synonyms'
-                                    type: Array
-                                    description: |-
-                                      Optional. A list of alternative names or synonyms that can be
-                                      used to refer to this field.
-                                    item_type:
-                                      type: String
-                                  - name: 'tags'
-                                    type: Array
-                                    description: |-
-                                      Optional. A list of tags or keywords associated with the field,
-                                      used for categorization.
-                                    item_type:
-                                      type: String
           - name: 'options'
             type: NestedObject
             description: |-
@@ -265,16 +203,6 @@ properties:
                     type: Integer
                     description: |-
                       Optional. Limits the bytes billed for each BigQuery query job.
-              - name: 'model'
-                type: String
-                description: |-
-                  Optional. The model to use for the conversation. Possible values:
-                  `LATEST_GA_MODEL`. See the
-                  [API reference](https://cloud.google.com/gemini/docs/conversational-analytics-api/reference/rest/v1/ConversationOptions)
-                  for the full list of values.
-                # After an update that clears this field, the API returns
-                # MODEL_UNSPECIFIED instead of omitting it.
-                diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("MODEL_UNSPECIFIED")'
           - name: 'exampleQueries'
             type: Array
             description: |-
@@ -291,27 +219,6 @@ properties:
                   description: |-
                     Optional. The SQL query that should be generated to answer
                     the natural language question.
-                - name: 'parameters'
-                  type: Array
-                  description: |-
-                    Optional. Parameters referenced by the SQL query, for example `@name`.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: 'name'
-                        type: String
-                        description: |-
-                          Required. The name of the parameter, as referenced in the SQL query.
-                        required: true
-                      - name: 'description'
-                        type: String
-                        description: |-
-                          Optional. A description of the parameter.
-                      - name: 'dataType'
-                        type: String
-                        description: |-
-                          Required. The BigQuery data type of the parameter, for example `STRING`.
-                        required: true
           - name: 'glossaryTerms'
             type: Array
             description: |-
@@ -390,43 +297,6 @@ properties:
                   type: Double
                   description: |-
                     Optional. A confidence score for the suggested relationship.
-          - name: 'userFunctions'
-            type: NestedObject
-            description: |-
-              Optional. User-defined functions that the agent can use.
-            properties:
-              - name: 'bqRoutines'
-                type: Array
-                description: |-
-                  Optional. BigQuery routines (user-defined functions) available to the agent.
-                item_type:
-                  type: NestedObject
-                  properties:
-                    - name: 'routineReference'
-                      type: NestedObject
-                      description: |-
-                        Required. Reference to the BigQuery routine.
-                      required: true
-                      properties:
-                        - name: 'projectId'
-                          type: String
-                          description: |-
-                            Required. The project that the routine belongs to.
-                          required: true
-                        - name: 'datasetId'
-                          type: String
-                          description: |-
-                            Required. The dataset that the routine belongs to.
-                          required: true
-                        - name: 'routineId'
-                          type: String
-                          description: |-
-                            Required. The routine ID.
-                          required: true
-                    - name: 'description'
-                      type: String
-                      description: |-
-                        Optional. A description of the routine.
       - name: 'publishedContext'
         type: NestedObject
         description: |-
@@ -473,60 +343,6 @@ properties:
                           description: |-
                             Required. The table ID.
                           required: true
-                        - name: 'schema'
-                          type: NestedObject
-                          description: |-
-                            Optional. Additional metadata about the table, such as a description,
-                            synonyms, tags, and field-level descriptions. Only the BigQuery-relevant
-                            subset of the API's `Schema` message is supported.
-                          properties:
-                            - name: 'description'
-                              type: String
-                              description: |-
-                                Optional. A textual description of the table's content and purpose.
-                            - name: 'synonyms'
-                              type: Array
-                              description: |-
-                                Optional. A list of alternative names or synonyms that can be used to
-                                refer to the table.
-                              item_type:
-                                type: String
-                            - name: 'tags'
-                              type: Array
-                              description: |-
-                                Optional. A list of tags or keywords associated with the table, used
-                                for categorization.
-                              item_type:
-                                type: String
-                            - name: 'fields'
-                              type: Array
-                              description: |-
-                                Optional. Metadata for fields (columns) in the table.
-                              item_type:
-                                type: NestedObject
-                                properties:
-                                  - name: 'name'
-                                    type: String
-                                    description: |-
-                                      Optional. The name of the field.
-                                  - name: 'description'
-                                    type: String
-                                    description: |-
-                                      Optional. A brief description of the field.
-                                  - name: 'synonyms'
-                                    type: Array
-                                    description: |-
-                                      Optional. A list of alternative names or synonyms that can be
-                                      used to refer to this field.
-                                    item_type:
-                                      type: String
-                                  - name: 'tags'
-                                    type: Array
-                                    description: |-
-                                      Optional. A list of tags or keywords associated with the field,
-                                      used for categorization.
-                                    item_type:
-                                      type: String
           - name: 'options'
             type: NestedObject
             description: |-
@@ -555,16 +371,6 @@ properties:
                     type: Integer
                     description: |-
                       Optional. Limits the bytes billed for each BigQuery query job.
-              - name: 'model'
-                type: String
-                description: |-
-                  Optional. The model to use for the conversation. Possible values:
-                  `LATEST_GA_MODEL`. See the
-                  [API reference](https://cloud.google.com/gemini/docs/conversational-analytics-api/reference/rest/v1/ConversationOptions)
-                  for the full list of values.
-                # After an update that clears this field, the API returns
-                # MODEL_UNSPECIFIED instead of omitting it.
-                diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("MODEL_UNSPECIFIED")'
           - name: 'exampleQueries'
             type: Array
             description: |-
@@ -581,27 +387,6 @@ properties:
                   description: |-
                     Optional. The SQL query that should be generated to answer
                     the natural language question.
-                - name: 'parameters'
-                  type: Array
-                  description: |-
-                    Optional. Parameters referenced by the SQL query, for example `@name`.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: 'name'
-                        type: String
-                        description: |-
-                          Required. The name of the parameter, as referenced in the SQL query.
-                        required: true
-                      - name: 'description'
-                        type: String
-                        description: |-
-                          Optional. A description of the parameter.
-                      - name: 'dataType'
-                        type: String
-                        description: |-
-                          Required. The BigQuery data type of the parameter, for example `STRING`.
-                        required: true
           - name: 'glossaryTerms'
             type: Array
             description: |-
@@ -680,43 +465,6 @@ properties:
                   type: Double
                   description: |-
                     Optional. A confidence score for the suggested relationship.
-          - name: 'userFunctions'
-            type: NestedObject
-            description: |-
-              Optional. User-defined functions that the agent can use.
-            properties:
-              - name: 'bqRoutines'
-                type: Array
-                description: |-
-                  Optional. BigQuery routines (user-defined functions) available to the agent.
-                item_type:
-                  type: NestedObject
-                  properties:
-                    - name: 'routineReference'
-                      type: NestedObject
-                      description: |-
-                        Required. Reference to the BigQuery routine.
-                      required: true
-                      properties:
-                        - name: 'projectId'
-                          type: String
-                          description: |-
-                            Required. The project that the routine belongs to.
-                          required: true
-                        - name: 'datasetId'
-                          type: String
-                          description: |-
-                            Required. The dataset that the routine belongs to.
-                          required: true
-                        - name: 'routineId'
-                          type: String
-                          description: |-
-                            Required. The routine ID.
-                          required: true
-                    - name: 'description'
-                      type: String
-                      description: |-
-                        Optional. A description of the routine.
       - name: 'lastPublishedContext'
         type: NestedObject
         description: |-
@@ -728,24 +476,20 @@ properties:
             description: |-
               Output only. The basic entry point for data owners creating domain
               knowledge for the agent.
-            output: true
           - name: 'datasourceReferences'
             type: NestedObject
             description: |-
               Output only. Data sources that are available for answering questions.
-            output: true
             properties:
               - name: 'bq'
                 type: NestedObject
                 description: |-
                   References to BigQuery tables.
-                output: true
                 properties:
                   - name: 'tableReferences'
                     type: Array
                     description: |-
                       References to BigQuery tables.
-                    output: true
                     item_type:
                       type: NestedObject
                       properties:
@@ -753,286 +497,14 @@ properties:
                           type: String
                           description: |-
                             The project that the table belongs to.
-                          output: true
                         - name: 'datasetId'
                           type: String
                           description: |-
                             The dataset that the table belongs to.
-                          output: true
                         - name: 'tableId'
                           type: String
                           description: |-
                             The table ID.
-                          output: true
-                        - name: 'schema'
-                          type: NestedObject
-                          output: true
-                          description: |-
-                            Output only. Additional metadata about the table, such as a description,
-                            synonyms, tags, and field-level descriptions. Only the BigQuery-relevant
-                            subset of the API's `Schema` message is supported.
-                          properties:
-                            - name: 'description'
-                              type: String
-                              output: true
-                              description: |-
-                                Output only. A textual description of the table's content and purpose.
-                            - name: 'synonyms'
-                              type: Array
-                              output: true
-                              description: |-
-                                Output only. A list of alternative names or synonyms that can be used to
-                                refer to the table.
-                              item_type:
-                                type: String
-                            - name: 'tags'
-                              type: Array
-                              output: true
-                              description: |-
-                                Output only. A list of tags or keywords associated with the table, used
-                                for categorization.
-                              item_type:
-                                type: String
-                            - name: 'fields'
-                              type: Array
-                              output: true
-                              description: |-
-                                Output only. Metadata for fields (columns) in the table.
-                              item_type:
-                                type: NestedObject
-                                properties:
-                                  - name: 'name'
-                                    type: String
-                                    output: true
-                                    description: |-
-                                      Output only. The name of the field.
-                                  - name: 'description'
-                                    type: String
-                                    output: true
-                                    description: |-
-                                      Output only. A brief description of the field.
-                                  - name: 'synonyms'
-                                    type: Array
-                                    output: true
-                                    description: |-
-                                      Output only. A list of alternative names or synonyms that can be
-                                      used to refer to this field.
-                                    item_type:
-                                      type: String
-                                  - name: 'tags'
-                                    type: Array
-                                    output: true
-                                    description: |-
-                                      Output only. A list of tags or keywords associated with the field,
-                                      used for categorization.
-                                    item_type:
-                                      type: String
-          - name: 'options'
-            type: NestedObject
-            description: |-
-              Output only. Additional options for the conversation.
-            output: true
-            properties:
-              - name: 'analysis'
-                type: NestedObject
-                description: |-
-                  Output only. Options for analysis.
-                output: true
-                properties:
-                  - name: 'python'
-                    type: NestedObject
-                    description: |-
-                      Output only. Options for Python analysis.
-                    output: true
-                    properties:
-                      - name: 'enabled'
-                        type: Boolean
-                        description: |-
-                          Output only. Whether Python analysis is enabled.
-                        output: true
-              - name: 'datasource'
-                type: NestedObject
-                description: |-
-                  Output only. Options for datasource configuration.
-                output: true
-                properties:
-                  - name: 'bigQueryMaxBilledBytes'
-                    type: Integer
-                    description: |-
-                      Output only. Limits the bytes billed for each BigQuery query job.
-                    output: true
-              - name: 'model'
-                type: String
-                output: true
-                description: |-
-                  Output only. The model to use for the conversation. Possible values:
-                  `LATEST_GA_MODEL`. See the
-                  [API reference](https://cloud.google.com/gemini/docs/conversational-analytics-api/reference/rest/v1/ConversationOptions)
-                  for the full list of values.
-          - name: 'exampleQueries'
-            type: Array
-            description: |-
-              Output only. A list of example queries for BigQuery data sources.
-            output: true
-            item_type:
-              type: NestedObject
-              properties:
-                - name: 'naturalLanguageQuestion'
-                  type: String
-                  description: |-
-                    Output only. A natural language question that a user might ask.
-                  output: true
-                - name: 'sqlQuery'
-                  type: String
-                  description: |-
-                    Output only. The SQL query that should be generated to answer
-                    the natural language question.
-                  output: true
-                - name: 'parameters'
-                  type: Array
-                  output: true
-                  description: |-
-                    Output only. Parameters referenced by the SQL query, for example `@name`.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: 'name'
-                        type: String
-                        output: true
-                        description: |-
-                          Output only. The name of the parameter, as referenced in the SQL query.
-                      - name: 'description'
-                        type: String
-                        output: true
-                        description: |-
-                          Output only. A description of the parameter.
-                      - name: 'dataType'
-                        type: String
-                        output: true
-                        description: |-
-                          Output only. The BigQuery data type of the parameter, for example `STRING`.
-          - name: 'glossaryTerms'
-            type: Array
-            description: |-
-              Output only. Term definitions for the agent's domain.
-            output: true
-            item_type:
-              type: NestedObject
-              properties:
-                - name: 'displayName'
-                  type: String
-                  description: |-
-                    Output only. User friendly display name of the glossary term.
-                  output: true
-                - name: 'description'
-                  type: String
-                  description: |-
-                    Output only. The description or meaning of the term.
-                  output: true
-                - name: 'labels'
-                  type: Array
-                  description: |-
-                    Output only. A list of general purpose labels associated with this term.
-                  output: true
-                  item_type:
-                    type: String
-          - name: 'schemaRelationships'
-            type: Array
-            description: |-
-              Output only. Relationships between table schemas, including referencing
-              and referenced columns.
-            output: true
-            item_type:
-              type: NestedObject
-              properties:
-                - name: 'leftSchemaPaths'
-                  type: NestedObject
-                  description: |-
-                    Output only. An ordered list of fields for the left side of the join.
-                  output: true
-                  properties:
-                    - name: 'tableFqn'
-                      type: String
-                      description: |-
-                        Output only. The service-qualified full resource name of the table.
-                      output: true
-                    - name: 'paths'
-                      type: Array
-                      description: |-
-                        Output only. The ordered list of paths within the table schema.
-                      output: true
-                      item_type:
-                        type: String
-                - name: 'rightSchemaPaths'
-                  type: NestedObject
-                  description: |-
-                    Output only. An ordered list of fields for the right side of the join.
-                  output: true
-                  properties:
-                    - name: 'tableFqn'
-                      type: String
-                      description: |-
-                        Output only. The service-qualified full resource name of the table.
-                      output: true
-                    - name: 'paths'
-                      type: Array
-                      description: |-
-                        Output only. The ordered list of paths within the table schema.
-                      output: true
-                      item_type:
-                        type: String
-                - name: 'sources'
-                  type: Array
-                  description: |-
-                    Output only. Sources which generated the schema relation edge.
-                  output: true
-                  item_type:
-                    type: String
-                - name: 'confidenceScore'
-                  type: Double
-                  description: |-
-                    Output only. A confidence score for the suggested relationship.
-                  output: true
-          - name: 'userFunctions'
-            type: NestedObject
-            output: true
-            description: |-
-              Output only. User-defined functions that the agent can use.
-            properties:
-              - name: 'bqRoutines'
-                type: Array
-                output: true
-                description: |-
-                  Output only. BigQuery routines (user-defined functions) available to the agent.
-                item_type:
-                  type: NestedObject
-                  properties:
-                    - name: 'routineReference'
-                      type: NestedObject
-                      output: true
-                      description: |-
-                        Output only. Reference to the BigQuery routine.
-                      properties:
-                        - name: 'projectId'
-                          type: String
-                          output: true
-                          description: |-
-                            Output only. The project that the routine belongs to.
-                        - name: 'datasetId'
-                          type: String
-                          output: true
-                          description: |-
-                            Output only. The dataset that the routine belongs to.
-                        - name: 'routineId'
-                          type: String
-                          output: true
-                          description: |-
-                            Output only. The routine ID.
-                    - name: 'description'
-                      type: String
-                      output: true
-                      description: |-
-                        Output only. A description of the routine.
   - name: 'kmsKey'
     type: String
     description: |-

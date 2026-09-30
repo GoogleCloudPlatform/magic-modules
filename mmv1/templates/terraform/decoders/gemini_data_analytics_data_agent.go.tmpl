@@ -1,3 +1,5 @@
+// deleteSync soft-deletes: GET keeps returning the agent with deleteTime set for 30 days.
+// Treat it as gone so out-of-band deletes show as drift instead of a live resource.
 if deleteTime, ok := res["deleteTime"].(string); ok && deleteTime != "" {
 	return nil, nil
 }

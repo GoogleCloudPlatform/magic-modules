@@ -68,21 +68,6 @@ resource "google_bigquery_table" "table" {
     }
   ])
 }
-
-resource "google_bigquery_routine" "routine" {
-  dataset_id      = google_bigquery_dataset.dataset.dataset_id
-  routine_id      = "tf_test_add_tax_%{random_suffix}"
-  routine_type    = "SCALAR_FUNCTION"
-  language        = "SQL"
-  definition_body = "amount * 1.1"
-
-  arguments {
-    name      = "amount"
-    data_type = jsonencode({ "typeKind" : "FLOAT64" })
-  }
-
-  return_type = jsonencode({ "typeKind" : "FLOAT64" })
-}
 `, context)
 }
 
@@ -108,25 +93,11 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
             project_id = google_bigquery_dataset.dataset.project
             dataset_id = google_bigquery_dataset.dataset.dataset_id
             table_id   = google_bigquery_table.table.table_id
-
-            schema {
-              description = "Customer sales orders."
-              synonyms    = ["orders", "purchases"]
-              tags        = ["sales"]
-
-              fields {
-                name        = "order_total"
-                description = "Total order value in USD."
-                synonyms    = ["amount"]
-                tags        = ["currency"]
-              }
-            }
           }
         }
       }
 
       options {
-        model = "LATEST_GA_MODEL"
         analysis {
           python {
             enabled = true
@@ -140,16 +111,6 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
       example_queries {
         natural_language_question = "What is the total order value?"
         sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM tf_test_sales_%{random_suffix}"
-      }
-
-      example_queries {
-        natural_language_question = "What is the total for an order?"
-        sql_query                 = "SELECT order_total FROM tf_test_sales_%{random_suffix} WHERE order_id = @order_id"
-        parameters {
-          name        = "order_id"
-          description = "The order ID."
-          data_type   = "STRING"
-        }
       }
 
       glossary_terms {
@@ -169,17 +130,6 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
         }
         sources          = ["LLM_SUGGESTED"]
         confidence_score = 0.9
-      }
-
-      user_functions {
-        bq_routines {
-          routine_reference {
-            project_id = google_bigquery_routine.routine.project
-            dataset_id = google_bigquery_routine.routine.dataset_id
-            routine_id = google_bigquery_routine.routine.routine_id
-          }
-          description = "Adds 10% tax to an amount."
-        }
       }
     }
   }
@@ -210,25 +160,11 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
             project_id = "bigquery-public-data"
             dataset_id = "samples"
             table_id   = "shakespeare"
-
-            schema {
-              description = "Word counts in Shakespeare's works."
-              synonyms    = ["plays"]
-              tags        = ["literature"]
-
-              fields {
-                name        = "word_count"
-                description = "Number of times the word appears in the corpus."
-                synonyms    = ["count"]
-                tags        = ["metric"]
-              }
-            }
           }
         }
       }
 
       options {
-        model = "LATEST_GA_MODEL"
         analysis {
           python {
             enabled = true
@@ -240,13 +176,8 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
       }
 
       example_queries {
-        natural_language_question = "How many times does a word appear in Hamlet?"
-        sql_query                 = "SELECT SUM(word_count) FROM samples.shakespeare WHERE corpus = 'hamlet' AND word = @word"
-        parameters {
-          name        = "word"
-          description = "The word to count."
-          data_type   = "STRING"
-        }
+        natural_language_question = "How many words does Hamlet have?"
+        sql_query                 = "SELECT SUM(word_count) FROM samples.shakespeare WHERE corpus = 'hamlet'"
       }
 
       glossary_terms {
@@ -266,17 +197,6 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
         }
         sources          = ["LLM_SUGGESTED"]
         confidence_score = 0.9
-      }
-
-      user_functions {
-        bq_routines {
-          routine_reference {
-            project_id = google_bigquery_routine.routine.project
-            dataset_id = google_bigquery_routine.routine.dataset_id
-            routine_id = google_bigquery_routine.routine.routine_id
-          }
-          description = "Adds tax to an amount."
-        }
       }
     }
   }

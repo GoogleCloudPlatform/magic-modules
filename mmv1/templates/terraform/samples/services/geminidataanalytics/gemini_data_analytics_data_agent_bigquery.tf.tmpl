@@ -43,24 +43,11 @@ resource "google_gemini_data_analytics_data_agent" "{{$.PrimaryResourceId}}" {
             project_id = google_bigquery_dataset.dataset.project
             dataset_id = google_bigquery_dataset.dataset.dataset_id
             table_id   = google_bigquery_table.table.table_id
-
-            schema {
-              description = "Customer sales orders."
-              synonyms    = ["orders"]
-              tags        = ["sales"]
-
-              fields {
-                name        = "order_total"
-                description = "Total order value in USD."
-                synonyms    = ["amount"]
-              }
-            }
           }
         }
       }
 
       options {
-        model = "LATEST_GA_MODEL"
         analysis {
           python {
             enabled = true
@@ -74,16 +61,6 @@ resource "google_gemini_data_analytics_data_agent" "{{$.PrimaryResourceId}}" {
       example_queries {
         natural_language_question = "What is the total order value?"
         sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM sales"
-      }
-
-      example_queries {
-        natural_language_question = "What is the total for an order?"
-        sql_query                 = "SELECT order_total FROM sales WHERE order_id = @order_id"
-        parameters {
-          name        = "order_id"
-          description = "The order ID."
-          data_type   = "STRING"
-        }
       }
 
       glossary_terms {
