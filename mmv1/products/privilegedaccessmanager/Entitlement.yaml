@@ -274,7 +274,7 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         conflicts:
-          - unstructured
+          - requester_justification_config.0.unstructured
         properties: []
       - name: unstructured
         type: NestedObject
@@ -283,7 +283,7 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         conflicts:
-          - not_mandatory
+          - requester_justification_config.0.not_mandatory
         properties: []
   - name: additionalNotificationTargets
     type: NestedObject

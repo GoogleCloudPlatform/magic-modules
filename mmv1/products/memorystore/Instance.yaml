@@ -151,7 +151,7 @@ virtual_fields:
     type: Array
     immutable: true
     conflicts:
-      - desiredAutoCreatedEndpoints
+      - desired_auto_created_endpoints
     item_type:
       type: NestedObject
       properties:
@@ -169,7 +169,7 @@ virtual_fields:
     immutable: true
     diff_suppress_func: memorystoreInstancedDesiredAutoConnectionsDiffSuppress
     conflicts:
-      - desiredPscAutoConnections
+      - desired_psc_auto_connections
     item_type:
       type: NestedObject
       properties:

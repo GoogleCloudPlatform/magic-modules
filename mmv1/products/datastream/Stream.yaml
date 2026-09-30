@@ -564,7 +564,7 @@ properties:
             send_empty_value: true
             default_from_api: true
             conflicts:
-              - source_config.0.mysql_source_config.gtid
+              - source_config.0.mysql_source_config.0.gtid
             description: |
               CDC reader reads from binary logs replication cdc method.
             properties: []
@@ -573,7 +573,7 @@ properties:
             allow_empty_object: true
             send_empty_value: true
             conflicts:
-              - source_config.0.mysql_source_config.binaryLogPosition
+              - source_config.0.mysql_source_config.0.binary_log_position
             description: |
               CDC reader reads from gtid based replication.
             properties: []

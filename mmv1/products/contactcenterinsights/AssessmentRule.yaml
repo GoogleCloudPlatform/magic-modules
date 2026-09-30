@@ -119,12 +119,12 @@ properties:
           Percentage of conversations that we should sample  based on the dimension
           between [0, 100].
         conflicts:
-          - sample_row
+          - sample_rule.0.sample_row
       - name: sampleRow
         type: Integer
         description: Number of the conversations that we should sample based on the dimension.
         conflicts:
-          - sample_percentage
+          - sample_rule.0.sample_percentage
   - name: scheduleInfo
     type: NestedObject
     description: Message for schedule info.

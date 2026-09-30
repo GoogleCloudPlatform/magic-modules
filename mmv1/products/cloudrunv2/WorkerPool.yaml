@@ -294,13 +294,13 @@ properties:
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
         conflicts:
-          - policy
+          - binary_authorization.0.policy
       - name: 'policy'
         type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
         conflicts:
-          - use_default
+          - binary_authorization.0.use_default
   - name: 'scaling'
     type: NestedObject
     description: |

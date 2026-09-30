@@ -221,7 +221,7 @@ properties:
         description: |
           Network context of the traffic destination.
         conflicts:
-          - match.0.src_network_scope
+          - match.0.dest_network_scope
         enum_values:
           - UNSPECIFIED
           - INTERNET
