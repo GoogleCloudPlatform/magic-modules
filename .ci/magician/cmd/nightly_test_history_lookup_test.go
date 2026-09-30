@@ -176,14 +176,14 @@ func TestNightlyDetail(t *testing.T) {
 
 	cases := map[string]string{
 		"TestAccAlways":       "100% of 30",
-		"TestAccNever":        "0% of 30",
-		"TestAccFlaky":        "40% of 30",
-		"TestAccRounded":      "33% of 3",
-		"TestAccSkips":        "10% of 10",
+		"TestAccNever":        "100% of 30",
+		"TestAccFlaky":        "fails 40% of 30",
+		"TestAccRounded":      "fails 33% of 3",
+		"TestAccSkips":        "fails 10% of 10",
 		"TestAccOnlySkips":    "",
 		"TestAccNoRuns":       "",
 		"TestAccMissing":      "",
-		"TestAccParent__sub1": "10% of 30",
+		"TestAccParent__sub1": "fails 10% of 30",
 	}
 	for name, want := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -205,12 +205,12 @@ func TestRecordReplayFindingsColumn(t *testing.T) {
 	data := recordReplay{
 		TestRows: []VCRTestTableRow{
 			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyDetail: "100% of 25"},
-			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyDetail: "0% of 30"},
+			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyDetail: "100% of 30"},
 			{DisplayName: "TestAcc_c", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusRecentlyFixed, NightlyDetail: "last failed 2026-09-27"},
 			// No nightly baseline to compare against, so no finding.
 			{DisplayName: "TestAcc_d", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusNotFound},
 			// Multiple findings stack in the same cell.
-			{DisplayName: "TestAcc_e", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "Failed", ReplayingAfterRecordingErrorUrl: "https://err", ReplayingAfterRecordingLogUrl: "https://log", NightlyStatus: NightlyStatusFlaky, NightlyDetail: "40% of 30"},
+			{DisplayName: "TestAcc_e", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "Failed", ReplayingAfterRecordingErrorUrl: "https://err", ReplayingAfterRecordingLogUrl: "https://log", NightlyStatus: NightlyStatusFlaky, NightlyDetail: "fails 40% of 30"},
 			{DisplayName: "TestAcc_f", RecordingStatus: "Passed", ReplayingAfterRecordingStatus: "Passed"},
 		},
 		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b", "TestAcc_c", "TestAcc_d", "TestAcc_e"}},
@@ -224,10 +224,10 @@ func TestRecordReplayFindingsColumn(t *testing.T) {
 	assert.Contains(t, got, "| Recording Mode | Findings | Test Name |")
 	assert.Contains(t, got, "| ❌ | ⚪ Nightly fails 100% of 25 | TestAcc_a |")
 	// Healthy in nightly, so this failure most likely belongs to the PR.
-	assert.Contains(t, got, "| ❌ | 🔴 Nightly passes 0% of 30 | TestAcc_b |")
+	assert.Contains(t, got, "| ❌ | 🔴 Nightly passes 100% of 30 | TestAcc_b |")
 	assert.Contains(t, got, "| ❌ | 🔴 Nightly fixed last failed 2026-09-27 | TestAcc_c |")
 	assert.Contains(t, got, "| ❌ | - | TestAcc_d |")
-	assert.Contains(t, got, "| ❌ | ❌ Replay rerun failed&nbsp;[Error](https://err)&nbsp;·&nbsp;[Log](https://log)<br>🟡 Nightly flaky 40% of 30 | TestAcc_e |")
+	assert.Contains(t, got, "| ❌ | ❌ Replay rerun failed&nbsp;[Error](https://err)&nbsp;·&nbsp;[Log](https://log)<br>🟡 Nightly flaky fails 40% of 30 | TestAcc_e |")
 	assert.Contains(t, got, "| ✅ | - | TestAcc_f |")
 	assert.Contains(t, got, "**Known Nightly Failures**: 2 of the tests")
 

@@ -163,6 +163,9 @@ func nightlySymbol(status string) string {
 // nightlyDetail is the short qualifier shown next to a nightly status, kept terse so rows stay
 // compact when a PR has many failures. The fuller explanation lives below the table.
 //
+// The rate always describes the verb it sits next to, so "passes 100% of 30" and "fails 100% of 26"
+// read naturally. Flaky has no verb of its own, so it says "fails" explicitly.
+//
 // The denominator is kept because it carries the confidence of the rate: 100% of 26 runs is far
 // stronger evidence than 100% of 2.
 //
@@ -179,8 +182,17 @@ func nightlyDetail(h *NightlyTestHistory, status string) string {
 	if runs == 0 {
 		return ""
 	}
-	percent := int(math.Round(float64(h.Failures) / float64(runs) * 100))
-	return fmt.Sprintf("%d%% of %d", percent, runs)
+	percentOf := func(n int) string {
+		return fmt.Sprintf("%d%% of %d", int(math.Round(float64(n)/float64(runs)*100)), runs)
+	}
+	switch status {
+	case NightlyStatusPassing:
+		return percentOf(h.Passes)
+	case NightlyStatusFlaky:
+		return "fails " + percentOf(h.Failures)
+	default:
+		return percentOf(h.Failures)
+	}
 }
 
 // nightlyFinding renders a nightly status and the detail backing it, e.g. "⚪ Nightly fails 100% of 26".

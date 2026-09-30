@@ -18,7 +18,7 @@ More than 100 tests ran in recording mode; this is too many to display on GitHub
 {{ if gt (len .RecordingResult.FailedTests) 0 }}> {{color "red" "**Initial Recording Failed**: Some tests failed during the recording step. See the table above for details."}}
 >
 {{ end -}}
-{{ if gt .NightlyKnownFailures 0 }}> {{color "yellow" (printf "**Known Nightly Failures**: %d of the tests that failed in recording also fail or are flaky in the last 30 days of nightly runs, so they may be unrelated to this PR. Nightly findings show the share of nightly runs that failed: ⚪ means the test already fails in nightly, 🟡 that it is flaky there, and 🔴 that it is healthy in nightly and so more likely broken by this PR." .NightlyKnownFailures)}}
+{{ if gt .NightlyKnownFailures 0 }}> {{color "yellow" (printf "**Known Nightly Failures**: %d of the tests that failed in recording also fail or are flaky in the last 30 days of nightly runs, so they may be unrelated to this PR. In nightly findings, ⚪ means the test already fails in nightly, 🟡 that it is flaky there, and 🔴 that it is healthy in nightly and so more likely broken by this PR." .NightlyKnownFailures)}}
 >
 {{ end -}}
 {{ if gt (len .ReplayingAfterRecordingResult.FailedTests) 0 }}> {{color "red" "**Replaying Rerun Failed**: Some tests failed due to non-determinism when VCR replayed the response. See the table above for details."}}
