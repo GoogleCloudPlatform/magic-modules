@@ -201,34 +201,38 @@ func TestNightlyDetail(t *testing.T) {
 	assert.Equal(t, "67% of 30", nightlyDetail(noDate, NightlyStatusRecentlyFixed))
 }
 
-func TestRecordReplayNightlyColumn(t *testing.T) {
+func TestRecordReplayFindingsColumn(t *testing.T) {
 	data := recordReplay{
 		TestRows: []VCRTestTableRow{
 			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyDetail: "100% of 25"},
 			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyDetail: "0% of 30"},
 			{DisplayName: "TestAcc_c", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusRecentlyFixed, NightlyDetail: "last failed 2026-09-27"},
+			// No nightly baseline to compare against, so no finding.
+			{DisplayName: "TestAcc_d", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusNotFound},
+			// Multiple findings stack in the same cell.
+			{DisplayName: "TestAcc_e", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "Failed", ReplayingAfterRecordingErrorUrl: "https://err", ReplayingAfterRecordingLogUrl: "https://log", NightlyStatus: NightlyStatusFlaky, NightlyDetail: "40% of 30"},
+			{DisplayName: "TestAcc_f", RecordingStatus: "Passed", ReplayingAfterRecordingStatus: "Passed"},
 		},
-		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b", "TestAcc_c"}},
-		HasNightlyHistory:    true,
-		NightlyKnownFailures: 1,
+		RecordingResult:      vcr.Result{FailedTests: []string{"TestAcc_a", "TestAcc_b", "TestAcc_c", "TestAcc_d", "TestAcc_e"}},
+		NightlyKnownFailures: 2,
 		Version:              provider.Beta.String(),
 		Head:                 "auto-pr-123",
 		LogBucket:            "ci-vcr-logs",
 	}
 	got, err := formatRecordReplay(data, new(strings.Builder))
 	assert.NoError(t, err)
-	assert.Contains(t, got, "| Recording Mode | Replaying Rerun | Nightly | Test Name |")
-	// Each cell stays on one line so rows do not grow tall when many tests fail.
-	assert.Contains(t, got, "| ❌ | - | ⚪ Fails · 100% of 25 | TestAcc_a |")
+	assert.Contains(t, got, "| Recording Mode | Findings | Test Name |")
+	assert.Contains(t, got, "| ❌ | ⚪ Nightly fails 100% of 25 | TestAcc_a |")
 	// Healthy in nightly, so this failure most likely belongs to the PR.
-	assert.Contains(t, got, "| ❌ | - | 🔴 Passes · 0% of 30 | TestAcc_b |")
-	assert.Contains(t, got, "| ❌ | - | 🔴 Fixed · last failed 2026-09-27 | TestAcc_c |")
-	assert.Contains(t, got, "**Known Nightly Failures**: 1 of the tests")
+	assert.Contains(t, got, "| ❌ | 🔴 Nightly passes 0% of 30 | TestAcc_b |")
+	assert.Contains(t, got, "| ❌ | 🔴 Nightly fixed last failed 2026-09-27 | TestAcc_c |")
+	assert.Contains(t, got, "| ❌ | - | TestAcc_d |")
+	assert.Contains(t, got, "| ❌ | ❌ Replay rerun failed&nbsp;[Error](https://err)&nbsp;·&nbsp;[Log](https://log)<br>🟡 Nightly flaky 40% of 30 | TestAcc_e |")
+	assert.Contains(t, got, "| ✅ | - | TestAcc_f |")
+	assert.Contains(t, got, "**Known Nightly Failures**: 2 of the tests")
 
-	data.HasNightlyHistory = false
 	data.NightlyKnownFailures = 0
 	got, err = formatRecordReplay(data, new(strings.Builder))
 	assert.NoError(t, err)
-	assert.Contains(t, got, "| Recording Mode | Replaying Rerun | Test Name |")
-	assert.NotContains(t, got, "Nightly")
+	assert.NotContains(t, got, "Known Nightly Failures")
 }

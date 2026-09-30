@@ -105,7 +105,6 @@ type recordReplay struct {
 	BrowseLogBaseUrl              string
 	NotRunBetaTests               []string
 	NotRunGATests                 []string
-	HasNightlyHistory             bool
 	NightlyKnownFailures          int
 }
 
@@ -399,7 +398,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 
 		recordReplayData := recordReplay{
-			HasNightlyHistory:             nightlyHistory != nil,
 			NightlyKnownFailures:          nightlyKnownFailures,
 			TestRows:                      testRows,
 			RecordingResult:               expandedRecordingResult,
@@ -718,7 +716,7 @@ func parseTemplate(filename string, tmplText string) *template.Template {
 		"replace":      strings.ReplaceAll,
 		"symbol":       symbol,
 		"contains":     contains,
-		"nightly":      nightlyCell,
+		"findings":     findingsCell,
 	}
 	tmpl, err := template.New(filename).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -773,6 +771,34 @@ func contains(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+// findingsCell collects the extra signals that help decide whether a test result needs addressing,
+// one per line. Only notable signals are shown, so most passing rows render as "-" and new sources
+// can be added later without widening the table.
+func findingsCell(row VCRTestTableRow) string {
+	var findings []string
+	if row.ReplayingAfterRecordingStatus == "Failed" {
+		f := "❌ Replay rerun failed"
+		var links []string
+		if row.ReplayingAfterRecordingErrorUrl != "" {
+			links = append(links, fmt.Sprintf("[Error](%s)", row.ReplayingAfterRecordingErrorUrl))
+		}
+		if row.ReplayingAfterRecordingLogUrl != "" {
+			links = append(links, fmt.Sprintf("[Log](%s)", row.ReplayingAfterRecordingLogUrl))
+		}
+		if len(links) > 0 {
+			f += "&nbsp;" + strings.Join(links, "&nbsp;·&nbsp;")
+		}
+		findings = append(findings, f)
+	}
+	if f := nightlyFinding(row); f != "" {
+		findings = append(findings, f)
+	}
+	if len(findings) == 0 {
+		return "-"
+	}
+	return strings.Join(findings, "<br>")
 }
 
 func createTableRow(t string, logBaseUrl string, recordingResult, replayingResult vcr.Result) VCRTestTableRow {

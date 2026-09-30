@@ -137,28 +137,26 @@ func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistor
 	return history[compoundTest(testName)]
 }
 
-// nightlySymbol renders a nightly status for the PR comment table.
+// nightlySymbol renders a nightly status as a finding for the PR comment table.
 //
-// The Nightly column only appears for tests that failed in this PR's recording, so the question it
-// answers is "is this failure mine?". The emoji therefore signals how much the author needs to look
+// Nightly findings only appear for tests that failed in this PR's recording, so the question they
+// answer is "is this failure mine?". The emoji therefore signals how much the author needs to look
 // at the row, not how healthy the test is in nightly: a test that always fails in nightly is very
 // likely pre-existing (low alarm), while one that passes cleanly in nightly points at this PR.
 //
-// Labels omit "in nightly" because the column header already says it.
+// A test with no nightly runs yields no finding, since there is nothing to compare against.
 func nightlySymbol(status string) string {
 	switch status {
 	case NightlyStatusFailing:
-		return "⚪ Fails"
+		return "⚪ Nightly fails"
 	case NightlyStatusFlaky:
-		return "🟡 Flaky"
+		return "🟡 Nightly flaky"
 	case NightlyStatusRecentlyFixed:
-		return "🔴 Fixed"
+		return "🔴 Nightly fixed"
 	case NightlyStatusPassing:
-		return "🔴 Passes"
-	case NightlyStatusNotFound:
-		return "⚪ Not run"
+		return "🔴 Nightly passes"
 	default:
-		return "-"
+		return ""
 	}
 }
 
@@ -185,14 +183,11 @@ func nightlyDetail(h *NightlyTestHistory, status string) string {
 	return fmt.Sprintf("%d%% of %d", percent, runs)
 }
 
-// nightlyCell renders the nightly column as a single line: a status label and the detail backing it.
-func nightlyCell(row VCRTestTableRow) string {
-	if row.NightlyStatus == "" {
-		return ""
-	}
+// nightlyFinding renders a nightly status and the detail backing it, e.g. "⚪ Nightly fails 100% of 26".
+func nightlyFinding(row VCRTestTableRow) string {
 	label := nightlySymbol(row.NightlyStatus)
-	if row.NightlyDetail == "" {
+	if label == "" || row.NightlyDetail == "" {
 		return label
 	}
-	return fmt.Sprintf("%s · %s", label, row.NightlyDetail)
+	return label + " " + row.NightlyDetail
 }
