@@ -16,7 +16,6 @@ import (
 )
 
 func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	billingProjectId := envvar.GetTestProjectFromEnv()
@@ -81,7 +80,6 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 }
 
 func TestAccNetworkSecurityFirewallEndpoints_enableJumboFrames(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	billingProjectId := envvar.GetTestProjectFromEnv()
@@ -126,7 +124,6 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 
 {{- if ne $.TargetVersionName "ga" }}
 func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
@@ -134,9 +131,20 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				// No wildfire_settings block: verifies that server-side defaults
+				// don't cause a permadiff for configs that don't use WildFire.
+				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUnset(projectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 			{
 				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettings(projectId, randomSuffix),
 			},
@@ -155,20 +163,47 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+			{
+				// Removing the wildfire_settings block should not produce a diff or error.
+				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUnset(projectId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 		},
 	})
+}
+
+func testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUnset(projectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  provider           = google-beta
+  name               = "tf-test-my-firewall-endpoint%[1]s"
+  parent             = "projects/%[2]s"
+  location           = "us-central1-a"
+  billing_project_id = "%[2]s"
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, randomSuffix, projectId)
 }
 
 func testAccNetworkSecurityFirewallEndpoints_wildfireSettings(projectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_network_security_firewall_endpoint" "foobar" {
+  provider           = google-beta
   name               = "tf-test-my-firewall-endpoint%[1]s"
   parent             = "projects/%[2]s"
   location           = "us-central1-a"
   billing_project_id = "%[2]s"
 
   wildfire_settings {
-    enabled                                 = false
+    enabled                                 = true
     wildfire_region                         = "UNITED_STATES"
     wildfire_realtime_lookup_duration       = "1s"
     wildfire_realtime_lookup_timeout_action = "ALLOW"
@@ -189,6 +224,7 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 func testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUpdate(projectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_network_security_firewall_endpoint" "foobar" {
+  provider           = google-beta
   name               = "tf-test-my-firewall-endpoint%[1]s"
   parent             = "projects/%[2]s"
   location           = "us-central1-a"
