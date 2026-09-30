@@ -401,6 +401,47 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
+			"instance_flexibility_policy": {
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: emptyOrUnsetBlockDiffSuppress,
+				Description:      `The flexibility policy for this managed instance group. Instance flexibility allowing MIG to create VMs from multiple types of machines. Instance flexibility configuration on MIG overrides instance template configuration.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_selections": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: `Named instance selections configuring properties that the group will use when creating new VMs.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `Instance selection name.`,
+									},
+
+									"rank": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `Preference of this instance selection. Lower number means higher preference. MIG will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.`,
+									},
+
+									"machine_types": {
+										Type:     schema.TypeSet,
+										Required: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: `Full machine-type names, e.g. "n1-standard-16"`,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
 			"all_instances_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -798,6 +839,11 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
+	flexibilityPolicy, err := expandInstanceGroupManagerFlexibilityPolicy(d)
+	if err != nil {
+		return err
+	}
+
 	insertBody := map[string]interface{}{
 		"name":                        d.Get("name").(string),
 		"description":                 d.Get("description").(string),
@@ -812,6 +858,9 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		"resourcePolicies":            expandResourcePoliciesV2(d.Get("resource_policies").([]interface{})),
 	}
 
+	if flexibilityPolicy != nil {
+		insertBody["instanceFlexibilityPolicy"] = flexibilityPolicy
+	}
 	if namedPorts := getNamedPortsBetaV2(d.Get("named_port").(*schema.Set).List()); len(namedPorts) > 0 {
 		insertBody["namedPorts"] = namedPorts
 	}
@@ -1116,6 +1165,9 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err := d.Set("target_stopped_size", int64FromInterface(manager["targetStoppedSize"])); err != nil {
 		return fmt.Errorf("Error setting target_stopped_size: %s", err)
 	}
+	if err := d.Set("instance_flexibility_policy", flattenInstanceGroupManagerFlexibilityPolicy(manager["instanceFlexibilityPolicy"])); err != nil {
+		return err
+	}
 	if err = d.Set("update_policy", flattenUpdatePolicy(manager["updatePolicy"])); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
@@ -1169,6 +1221,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		"fingerprint": d.Get("fingerprint").(string),
 	}
 	var change bool
+	var targetSizePatchUpdate bool
 
 	if d.HasChange("description") {
 		patchBody["description"] = d.Get("description").(string)
@@ -1240,6 +1293,22 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		change = true
 	}
 
+	if d.HasChange("instance_flexibility_policy") {
+		flexibilityPolicy, err := expandInstanceGroupManagerFlexibilityPolicy(d)
+		if err != nil {
+			return err
+		}
+
+		patchBody["instanceFlexibilityPolicy"] = flexibilityPolicy
+		change = true
+
+		// target size update should be done by patch instead of using resize
+		if d.HasChange("target_size") {
+			patchBody["targetSize"] = int64(d.Get("target_size").(int))
+			targetSizePatchUpdate = true
+		}
+	}
+
 	if change {
 		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}name{{"}}"}}")
 		if err != nil {
@@ -1302,7 +1371,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 
 	// target_size should be updated through resize
-	if d.HasChange("target_size") {
+	if d.HasChange("target_size") && !targetSizePatchUpdate {
 		d.Partial(true)
 
 		targetSize := int64(d.Get("target_size").(int))
@@ -1776,6 +1845,56 @@ func expandResourcePoliciesV2(configured []interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"workloadPolicy": data["workload_policy"].(string),
 	}
+}
+
+func expandInstanceGroupManagerFlexibilityPolicy(d *schema.ResourceData) (map[string]interface{}, error) {
+	oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
+
+	instanceSelections := map[string]interface{}{}
+	for _, flexibilityPolicy := range newFlexibilityPolicy.([]any) {
+		flexibilityPolicyData := flexibilityPolicy.(map[string]any)
+		selections, err := expandInstanceGroupManagerSelections(flexibilityPolicyData["instance_selections"].(*schema.Set).List())
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range selections {
+			instanceSelections[k] = v
+		}
+	}
+
+	for _, flexibilityPolicy := range oldFlexibilityPolicy.([]any) {
+		flexibilityPolicyData := flexibilityPolicy.(map[string]any)
+		for _, instanceSelection := range flexibilityPolicyData["instance_selections"].(*schema.Set).List() {
+			instanceSelectionData := instanceSelection.(map[string]any)
+			name := instanceSelectionData["name"].(string)
+			if _, exist := instanceSelections[name]; !exist {
+				instanceSelections[name] = nil
+			}
+		}
+	}
+
+	if len(instanceSelections) == 0 {
+		return map[string]interface{}{}, nil
+	}
+	return map[string]interface{}{
+		"instanceSelections": instanceSelections,
+	}, nil
+}
+
+func expandInstanceGroupManagerSelections(instanceSelections []any) (map[string]interface{}, error) {
+	instanceSelectionsMap := make(map[string]interface{})
+	for _, instanceSelectionRaw := range instanceSelections {
+		instanceSelectionData := instanceSelectionRaw.(map[string]any)
+
+		instanceSelection := map[string]interface{}{
+			"machineTypes": tpgresource.ConvertStringSet(instanceSelectionData["machine_types"].(*schema.Set)),
+		}
+		if rank := int64(instanceSelectionData["rank"].(int)); rank != 0 {
+			instanceSelection["rank"] = rank
+		}
+		instanceSelectionsMap[instanceSelectionData["name"].(string)] = instanceSelection
+	}
+	return instanceSelectionsMap, nil
 }
 
 func expandFixedOrPercent(configured []interface{}) *compute.FixedOrPercent {
@@ -2449,6 +2568,38 @@ func flattenResourcePoliciesV2(raw interface{}) []map[string]interface{} {
 		results = append(results, data)
 	}
 	return results
+}
+
+func flattenInstanceGroupManagerFlexibilityPolicy(instanceFlexibilityPolicyRaw interface{}) []any {
+	flattenedInstanceFlexibilityPolicy := []any{}
+	instanceFlexibilityPolicy, ok := instanceFlexibilityPolicyRaw.(map[string]interface{})
+	if !ok || instanceFlexibilityPolicy == nil {
+		return flattenedInstanceFlexibilityPolicy
+	}
+	instanceSelectionsMap := map[string]any{}
+	instanceSelectionsMap["instance_selections"] = flattenInstanceGroupManagerSelections(instanceFlexibilityPolicy["instanceSelections"])
+	flattenedInstanceFlexibilityPolicy = append(flattenedInstanceFlexibilityPolicy, instanceSelectionsMap)
+	return flattenedInstanceFlexibilityPolicy
+}
+
+func flattenInstanceGroupManagerSelections(instanceSelectionsRaw interface{}) []map[string]any {
+	instanceSelectionsMap := make([]map[string]any, 0)
+	instanceSelections, ok := instanceSelectionsRaw.(map[string]interface{})
+	if !ok || instanceSelections == nil {
+		return instanceSelectionsMap
+	}
+	for instanceSelectionName, instanceSelectionRaw := range instanceSelections {
+		instanceSelection, ok := instanceSelectionRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		instanceSelectionData := make(map[string]any)
+		instanceSelectionData["name"] = instanceSelectionName
+		instanceSelectionData["rank"] = getInt(instanceSelection["rank"])
+		instanceSelectionData["machine_types"] = instanceSelection["machineTypes"]
+		instanceSelectionsMap = append(instanceSelectionsMap, instanceSelectionData)
+	}
+	return instanceSelectionsMap
 }
 
 func resourceInstanceGroupManagerStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

@@ -256,6 +256,8 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `resource_policies` - (Optional) Resource policies for this managed instance group. Structure is [documented below](#nested_resource_policies).
 
+* `instance_flexibility_policy` - (Optional) The flexibility policy for this managed instance group. Instance flexibility allows the group to create VMs from multiple types of machines, which overrides the instance template configuration. Structure is [documented below](#nested_instance_flexibility_policy).
+
 * `target_size_policy` - (Optional) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
 
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
@@ -334,6 +336,35 @@ on_repair {
 ```
 
 * `allow_changing_zone` - (Optional), Specifies whether the MIG can change a VM's zone during a repair. If "YES", MIG can select a different zone for the VM during a repair. Else if "NO", MIG cannot change a VM's zone during a repair. The default value of allow_changing_zone is "NO".
+
+- - -
+<a name="nested_instance_flexibility_policy"></a>The `instance_flexibility_policy` block supports:
+
+```hcl
+instance_flexibility_policy {
+  instance_selections {
+    name = "instance_selection_name"
+    rank = 1
+    machine_types = ["n1-standard-16"]
+  }
+}
+```
+
+* `instance_selections` - (Optional), Named instance selections configuring properties that the group will use when creating new VMs. One can specify multiple instance selection to allow managed instance group to create VMs from multiple types of machines, based on preference and availability. Structure is [documented below](#nested_instance_selections).
+- - -
+<a name="nested_instance_selections"></a>The `instance_selections` block supports:
+
+```hcl
+instance_selections {
+  name = "instance_selection_name"
+  rank = 1
+  machine_types = ["n1-standard-1", "n1-standard-16"]
+}
+```
+
+* `name` - (Required), Name of the instance selection, e.g. instance_selection_with_n1_machines_types. Instance selection names must be unique within the flexibility policy.
+* `rank` - (Optional), Preference of this instance selection. Lower number means higher preference. Managed instance group will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.
+* `machine_types` - (Required), A list of full machine-type names, e.g. "n1-standard-16".
 
 - - -
 

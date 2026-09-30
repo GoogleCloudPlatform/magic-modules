@@ -619,6 +619,57 @@ func TestAccInstanceGroupManager_resourceManagerTags(t *testing.T) {
 }
 {{- end }}
 
+func TestAccInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	template := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+	igm := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceGroupManager_instanceFlexibilityPolicy(template, igm),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccInstanceGroupManager_instanceFlexibilityPolicyUpdate(template, igm),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccInstanceGroupManager_instanceFlexibilityPolicyUpdateToEmptyBlock(template, igm),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccInstanceGroupManager_instanceFlexibilityPolicyRemove(template, igm),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+		},
+	})
+}
+
 func testAccCheckInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -2430,6 +2481,185 @@ resource "google_compute_instance_group_manager" "igm-tsp" {
 
   target_size_policy {
     mode = "BULK"
+  }
+}
+`, template, igm)
+}
+
+func testAccInstanceGroupManager_instanceFlexibilityPolicy(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-basic" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-basic"
+  zone               = "us-central1-a"
+  target_size        = 1
+
+  version {
+    instance_template = google_compute_instance_template.igm-basic.self_link
+    name              = "primary"
+  }
+
+  instance_flexibility_policy {
+    instance_selections {
+      name          = "instance_selection_name_1"
+      rank          = 2
+      machine_types = ["n1-standard-16"]
+    }
+    instance_selections {
+      name          = "instance_selection_name_2"
+      rank          = 1
+      machine_types = ["n1-standard-1", "n4-standard-2"]
+    }
+  }
+}
+`, template, igm)
+}
+
+func testAccInstanceGroupManager_instanceFlexibilityPolicyUpdate(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-basic" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-basic"
+  zone               = "us-central1-a"
+  target_size        = 1
+
+  version {
+    instance_template = google_compute_instance_template.igm-basic.self_link
+    name              = "primary"
+  }
+
+  instance_flexibility_policy {
+    instance_selections {
+      name          = "instance_selection_name_1"
+      machine_types = ["n1-standard-1"]
+    }
+    instance_selections {
+      name          = "instance_selection_name_2_version_2"
+      machine_types = ["n1-standard-2", "n1-standard-4"]
+    }
+  }
+}
+`, template, igm)
+}
+
+func testAccInstanceGroupManager_instanceFlexibilityPolicyUpdateToEmptyBlock(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-basic" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-basic"
+  zone               = "us-central1-a"
+  target_size        = 1
+
+  version {
+    instance_template = google_compute_instance_template.igm-basic.self_link
+    name              = "primary"
+  }
+
+  instance_flexibility_policy {
+  }
+}
+`, template, igm)
+}
+
+func testAccInstanceGroupManager_instanceFlexibilityPolicyRemove(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-basic" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-basic"
+  zone               = "us-central1-a"
+  target_size        = 1
+
+  version {
+    instance_template = google_compute_instance_template.igm-basic.self_link
+    name              = "primary"
   }
 }
 `, template, igm)
