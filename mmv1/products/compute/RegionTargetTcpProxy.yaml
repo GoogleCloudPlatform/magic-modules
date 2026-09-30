@@ -41,7 +41,7 @@ samples:
     steps:
       - name: region_target_tcp_proxy_basic
         vars:
-          region: europe-west4
+          region: us-central1
         resource_id_vars:
           health_check_name: health-check
           region_backend_service_name: backend-service
@@ -50,16 +50,12 @@ samples:
     primary_resource_id: default
     steps:
       - name: region_target_tcp_proxy_backendless
-        vars:
-          region: europe-west4
         resource_id_vars:
           region_target_tcp_proxy_name: test-proxy
   - name: region_target_tcp_proxy_tls_route
     primary_resource_id: default
     steps:
       - name: region_target_tcp_proxy_tls_route
-        vars:
-          region: europe-west4
         resource_id_vars:
           region_backend_service_name: 'backend-service'
           health_check_name: 'health-check'
