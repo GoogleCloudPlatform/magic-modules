@@ -335,6 +335,7 @@ properties:
           VM_FILE_SYSTEM_STORAGE_TYPE_UNSPECIFIED
           VM_FILE_SYSTEM_STORAGE_TYPE_LOCAL
           VM_FILE_SYSTEM_STORAGE_TYPE_EXASCALE
+        default_from_api: true
       - name: vmBackupStorageType
         type: String
         description: |-
@@ -343,6 +344,7 @@ properties:
           VM_BACKUP_STORAGE_TYPE_UNSPECIFIED
           VM_BACKUP_STORAGE_TYPE_LOCAL
           VM_BACKUP_STORAGE_TYPE_EXASCALE
+        default_from_api: true
   - name: labels
     type: KeyValueLabels
     description: 'Labels or tags associated with the VM Cluster. '
