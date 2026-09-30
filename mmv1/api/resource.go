@@ -379,6 +379,10 @@ type Resource struct {
 	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
 	constraintGroupsInitialized bool                 `yaml:"-"`
 
+	// Shallow copy of the resource schema at the maximum version
+	// rather than the run version, used for cross-version validations.
+	maxVersionSchema *Resource `yaml:"-"`
+
 	// ====================
 	// TGC
 	// ====================
@@ -567,21 +571,21 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("`is_list_of_ids: true` implies resource has exactly one `identity` property"))
 	}
 
-	// Ensures we have all properties defined
-	for _, i := range r.Identity {
-		hasIdentify := slices.ContainsFunc(r.AllUserProperties(), func(p *Type) bool {
-			return p.Name == i
-		})
-		if !hasIdentify {
-			es = append(es, fmt.Errorf("missing property/parameter for identity %s", i))
-		}
-	}
-
 	if r.Description == "" {
 		es = append(es, fmt.Errorf("missing `description` for resource %s", r.Name))
 	}
 
 	if !r.Exclude {
+		// Ensures we have all properties defined
+		for _, i := range r.Identity {
+			hasIdentify := slices.ContainsFunc(r.AllUserProperties(), func(p *Type) bool {
+				return p.Name == i
+			})
+			if !hasIdentify {
+				es = append(es, fmt.Errorf("missing property/parameter for identity %s", i))
+			}
+		}
+
 		if len(r.Properties) == 0 {
 			es = append(es, fmt.Errorf("missing `properties` for resource %s", r.Name))
 		}
@@ -607,7 +611,7 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("value on `update_verb` should be one of %#v", allowed))
 	}
 
-	for _, property := range r.AllProperties() {
+	for _, property := range google.Concat(r.AllProperties(), r.VirtualFields) {
 		es = append(es, property.Validate(r.Name)...)
 	}
 
@@ -711,6 +715,82 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	}
 
 	return nested
+}
+
+// resolvePropertySchemaPath resolves a Terraform field path (e.g. 'a_field',
+// 'parent_field.0.child_name') against the resource's user-facing properties,
+// returning the terminal *Type and the updated Terraform schema path with
+// flattened object segments removed. It returns (nil, "") if the property is
+// not included in the resource's properties or if an intermediate segment is an
+// unbounded Array.
+//
+// FYI: Fields that have been renamed should use the new name, however, flattened
+// fields still need to be included, ie:
+// flattenedField > newParent > renameMe should be passed to this function as
+// flattened_field.0.new_parent.0.im_renamed
+// TODO: Change format of input for
+// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+// convert to snake in this method
+func (r *Resource) resolvePropertySchemaPath(schemaPath string) (*Type, string) {
+	if r == nil {
+		return nil, ""
+	}
+	nestedProps := google.Concat(r.AllUserProperties(), r.UserVirtualFields())
+
+	pathSegments := strings.Split(schemaPath, ".0.")
+	var pathTkns []string
+	var lastProp *Type
+	for i, pname := range pathSegments {
+		camelPname := google.Camelize(pname, "lower")
+		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
+
+		// if we couldn't find it, see if it was renamed at the top level
+		if prop == nil {
+			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
+		}
+
+		if prop == nil {
+			return nil, ""
+		}
+
+		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
+		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
+		// intermediate segment. The terminal segment itself may be any type, so
+		// only apply this guard to non-final path tokens.
+		isIntermediate := i < len(pathSegments)-1
+		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			return nil, ""
+		}
+
+		lastProp = prop
+		nestedProps = prop.NestedProperties()
+		if !prop.FlattenObject {
+			pathTkns = append(pathTkns, google.Underscore(pname))
+		}
+	}
+
+	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
+		return nil, ""
+	}
+
+	return lastProp, strings.Join(pathTkns[:], ".0.")
+}
+
+// findPropByNameInFlattenedList searches for a property by camelCase name in a
+// list of properties. It also searches recursively inside any FlattenObject
+// nested objects, since those appear as top-level fields in the Terraform schema.
+func findPropByNameInFlattenedList(props []*Type, name string) *Type {
+	for _, p := range props {
+		if p.Name == name {
+			return p
+		}
+		if p.FlattenObject {
+			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
 }
 
 // appendSynthesizedProviderDefaultFields appends synthesized Type entries for "project", "zone", and "region"
@@ -1225,6 +1305,8 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 // 'exclude' instance variable if the property is at a version below the
 // one that is passed in.
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
+	r.populateMaxVersionSchema() // set before filtering exclusions out of schema
+
 	if !r.Exclude {
 		r.Exclude = r.NotInVersion(version)
 	}
@@ -1240,6 +1322,35 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 			p.ExcludeIfNotInVersion(version)
 		}
 	}
+}
+
+func (r *Resource) populateMaxVersionSchema() {
+	maxSchemaResource := &Resource{
+		Name:            r.Name,
+		MinVersion:      r.MinVersion,
+		Exclude:         r.Exclude,
+		ProductMetadata: r.ProductMetadata,
+	}
+	if r.Properties != nil {
+		maxSchemaResource.Properties = make([]*Type, len(r.Properties))
+		for i, p := range r.Properties {
+			maxSchemaResource.Properties[i] = p.cloneForMaxSchema(maxSchemaResource, nil)
+		}
+	}
+	if r.Parameters != nil {
+		maxSchemaResource.Parameters = make([]*Type, len(r.Parameters))
+		for i, p := range r.Parameters {
+			maxSchemaResource.Parameters[i] = p.cloneForMaxSchema(maxSchemaResource, nil)
+		}
+	}
+	if r.VirtualFields != nil {
+		maxSchemaResource.VirtualFields = make([]*Type, len(r.VirtualFields))
+		for i, p := range r.VirtualFields {
+			maxSchemaResource.VirtualFields[i] = p.cloneForMaxSchema(maxSchemaResource, nil)
+		}
+	}
+
+	r.maxVersionSchema = maxSchemaResource
 }
 
 // ====================
