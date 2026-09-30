@@ -222,12 +222,12 @@ func TestRecordReplayFindingsColumn(t *testing.T) {
 	got, err := formatRecordReplay(data, new(strings.Builder))
 	assert.NoError(t, err)
 	assert.Contains(t, got, "| Recording Mode | Findings | Test Name |")
-	assert.Contains(t, got, "| ❌ | ⚪ Nightly fails 100% of 25 | TestAcc_a |")
+	assert.Contains(t, got, "| ❌ | `⚪ Nightly fails 100% of 25` | TestAcc_a |")
 	// Healthy in nightly, so this failure most likely belongs to the PR.
-	assert.Contains(t, got, "| ❌ | 🔴 Nightly passes 100% of 30 | TestAcc_b |")
-	assert.Contains(t, got, "| ❌ | 🔴 Nightly fixed last failed 2026-09-27 | TestAcc_c |")
+	assert.Contains(t, got, "| ❌ | `🔴 Nightly passes 100% of 30` | TestAcc_b |")
+	assert.Contains(t, got, "| ❌ | `🔴 Nightly fixed last failed 2026-09-27` | TestAcc_c |")
 	assert.Contains(t, got, "| ❌ | - | TestAcc_d |")
-	assert.Contains(t, got, "| ❌ | ❌ Replay rerun failed&nbsp;[Error](https://err)&nbsp;·&nbsp;[Log](https://log)<br>🟡 Nightly flaky fails 40% of 30 | TestAcc_e |")
+	assert.Contains(t, got, "| ❌ | `❌ Replay rerun failed`&nbsp;[Error](https://err)&nbsp;·&nbsp;[Log](https://log)<br>`🟡 Nightly flaky fails 40% of 30` | TestAcc_e |")
 	assert.Contains(t, got, "| ✅ | - | TestAcc_f |")
 	assert.Contains(t, got, "**Known Nightly Failures**: 2 of the tests")
 

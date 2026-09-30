@@ -779,7 +779,8 @@ func contains(slice []string, item string) bool {
 func findingsCell(row VCRTestTableRow) string {
 	var findings []string
 	if row.ReplayingAfterRecordingStatus == "Failed" {
-		f := "❌ Replay rerun failed"
+		// Only the label is code-styled; links inside backticks would not render.
+		f := "`❌ Replay rerun failed`"
 		var links []string
 		if row.ReplayingAfterRecordingErrorUrl != "" {
 			links = append(links, fmt.Sprintf("[Error](%s)", row.ReplayingAfterRecordingErrorUrl))

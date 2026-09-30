@@ -195,11 +195,15 @@ func nightlyDetail(h *NightlyTestHistory, status string) string {
 	}
 }
 
-// nightlyFinding renders a nightly status and the detail backing it, e.g. "⚪ Nightly fails 100% of 26".
+// nightlyFinding renders a nightly status and the detail backing it as a code-styled chip, e.g.
+// "`⚪ Nightly fails 100% of 26`".
 func nightlyFinding(row VCRTestTableRow) string {
 	label := nightlySymbol(row.NightlyStatus)
-	if label == "" || row.NightlyDetail == "" {
-		return label
+	if label == "" {
+		return ""
 	}
-	return label + " " + row.NightlyDetail
+	if row.NightlyDetail != "" {
+		label += " " + row.NightlyDetail
+	}
+	return "`" + label + "`"
 }
