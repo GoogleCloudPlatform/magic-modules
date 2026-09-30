@@ -89,6 +89,27 @@ samples:
           security_profile_name: 'sec-profile'
         test_env_vars:
           org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_wildfire'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_security_security_profile_group_wildfire'
+        min_version: 'beta'
+        resource_id_vars:
+          security_profile_group_name: 'sec-profile-group'
+          threat_prevention_profile_name: 'tp-sec-profile'
+          wildfire_profile_name: 'wf-sec-profile'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+      - name: 'network_security_security_profile_group_wildfire_update'
+        min_version: 'beta'
+        resource_id_vars:
+          security_profile_group_name: 'sec-profile-group'
+          threat_prevention_profile_name: 'tp-sec-profile'
+          wildfire_profile_name: 'wf-sec-profile'
+          wildfire_profile_updated_name: 'wf-sec-profile-updated'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
   - name: 'name'
     type: String
@@ -153,3 +174,8 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the CustomIntercept configuration.
+  - name: 'wildfireAnalysisProfile'
+    type: String
+    min_version: 'beta'
+    description: |
+      Reference to a SecurityProfile with the WildFire configuration for the SecurityProfileGroup.
