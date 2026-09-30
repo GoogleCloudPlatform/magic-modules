@@ -427,7 +427,7 @@ properties:
             - name: 'customFileTypes'
               type: NestedObject
               description: |
-                Defines the custom file types to match for a rule.
+                Defines the custom file types to match for a rule. The API will only accept this if `file_selection_mode` is set to `CUSTOM_FILE_TYPES`
               properties:
                 - name: 'fileTypes'
                   type: Array
@@ -575,8 +575,6 @@ properties:
               enum_values:
                 - 'WILDFIRE_DEFAULT_ACTION'
                 - 'WILDFIRE_ALLOW'
-                - 'WILDFIRE_ALERT'
-                - 'WILDFIRE_DENY'
       - name: 'wildfireInlineMlSetting'
         type: NestedObject
         description: |
