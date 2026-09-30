@@ -1685,8 +1685,18 @@ func TestTagsTagKeyPurposeDataValidate(t *testing.T) {
 		"empty network is valid": {
 			purposeData: map[string]interface{}{"network": ""},
 		},
+		"organization auto is valid": {
+			purposeData: map[string]interface{}{"organization": "auto"},
+		},
+		"empty organization is valid": {
+			purposeData: map[string]interface{}{"organization": ""},
+		},
 		"short form is rejected": {
 			purposeData: map[string]interface{}{"network": "my-project/vpc-us-west1"},
+			expectErr:   true,
+		},
+		"organization other than auto is rejected": {
+			purposeData: map[string]interface{}{"organization": "123456789012"},
 			expectErr:   true,
 		},
 		"self link with a network name is rejected": {
@@ -1717,6 +1727,47 @@ func TestTagsTagKeyPurposeDataValidate(t *testing.T) {
 			}
 			if !tc.expectErr && len(errs) > 0 {
 				t.Fatalf("expected no error for %#v, got %v", tc.purposeData, errs)
+			}
+		})
+	}
+}
+
+func TestTagsTagKeyPurposeDataDiffSuppress(t *testing.T) {
+	const (
+		orgID    = "123456789012"
+		selfLink = "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/123456789"
+	)
+
+	cases := map[string]struct {
+		k        string
+		oldValue string
+		newValue string
+		want     bool
+	}{
+		// The API replaces "auto" (the config value) with the organization id it stores, so the
+		// config side is what has to be suppressed.
+		"config auto against the resolved organization id is suppressed": {
+			k: "purpose_data.organization", oldValue: orgID, newValue: "auto", want: true,
+		},
+		// State never holds "auto", so this direction is not expected; suppress nothing.
+		"state auto against a resolved id is not suppressed": {
+			k: "purpose_data.organization", oldValue: "auto", newValue: orgID, want: false,
+		},
+		// network is validated to a single form, so it is compared normally.
+		"identical network values are not suppressed here": {
+			k: "purpose_data.network", oldValue: selfLink, newValue: selfLink, want: false,
+		},
+		// Any other key falls through.
+		"other key is not suppressed": {
+			k: "purpose_data.something_else", oldValue: "auto", newValue: orgID, want: false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got := tags.TagsTagKeyPurposeDataDiffSuppress(tc.k, tc.oldValue, tc.newValue, nil)
+			if got != tc.want {
+				t.Errorf("want suppress=%t, got %t for k=%q old=%q new=%q", tc.want, got, tc.k, tc.oldValue, tc.newValue)
 			}
 		})
 	}

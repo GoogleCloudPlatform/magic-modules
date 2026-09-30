@@ -128,12 +128,14 @@ properties:
     description: |
       Optional. Purpose data cannot be changed once set.
 
-      Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose requires the network the tag is intended for, keyed by `network`, whose value must be a Compute network self link containing the numeric network id: `network = "https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network_id}"`.
+      Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose takes either `network` or `organization`:
 
-      ~> **Note:** The network must be referenced by its self link, not by name. The API also accepts a shorter `{project}/{network_name}` form, but it always returns the self link, so accepting the short form would diff against state. Configs using the short form will need updating.
+      * `network` must be a Compute network self link containing the numeric network id: `network = "https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network_id}"`. The API also accepts a shorter `{project}/{network_name}` form, but it always returns the self link, so accepting the short form would diff against state. States using the short form are migrated automatically.
+      * `organization` must be `"auto"`, which the API replaces with the organization id. This scopes the tag key to any VPC network in the organization.
     immutable: true
     validation:
       function: TagsTagKeyPurposeDataValidate
+    diff_suppress_func: TagsTagKeyPurposeDataDiffSuppress
   - name: allowedValuesRegex
     type: String
     description: |

@@ -19,28 +19,50 @@ import (
 
 // TagsTagKeyPurposeDataValidate validates the purpose_data map values.
 //
-// The network must be given as a Compute network self link with the numeric network id. The API
-// accepts a shorter "{project}/{network_name}" form too, but it always returns the self link, so a
-// config using the short form would diff against what the read stores and force a replacement of
-// the immutable purpose_data field.
+// Two keys are accepted for the GCE_FIREWALL purpose:
 //
-// A ValidateFunc on a map field is invoked with the whole map, so the "network" entry is checked
-// here. fmt and regexp come from the generated file's import block.
+//   - "network", which must be a Compute network self link with the numeric network id. The API
+//     accepts a shorter "{project}/{network_name}" form too, but it always returns the self link, so
+//     a config using the short form would diff against what the read stores and force a replacement
+//     of the immutable purpose_data field.
+//   - "organization", which must be the literal "auto". The API replaces this with the numeric
+//     organization id, and TagsTagKeyPurposeDataDiffSuppress keeps that from diffing.
+//
+// A ValidateFunc on a map field is invoked with the whole map, so the entries are checked here.
+// fmt and regexp come from the generated file's import block.
 func TagsTagKeyPurposeDataValidate(i interface{}, k string) ([]string, []error) {
 	m, ok := i.(map[string]interface{})
 	if !ok {
 		return nil, nil
 	}
 
-	network, ok := m["network"].(string)
-	if !ok || network == "" {
-		return nil, nil
+	var errs []error
+
+	if network, ok := m["network"].(string); ok && network != "" {
+		re := regexp.MustCompile(`^https://[^/]+/compute/v1/projects/[^/]+/global/networks/[0-9]+$`)
+		if !re.MatchString(network) {
+			errs = append(errs, fmt.Errorf("%s.network %q must match %q", k, network, re.String()))
+		}
 	}
 
-	re := regexp.MustCompile(`^https://[^/]+/compute/v1/projects/[^/]+/global/networks/[0-9]+$`)
-	if !re.MatchString(network) {
-		return nil, []error{fmt.Errorf("%s.network %q must match %q", k, network, re.String())}
+	if org, ok := m["organization"].(string); ok && org != "" && org != "auto" {
+		errs = append(errs, fmt.Errorf("%s.organization %q must be \"auto\"; the API resolves it to the organization id", k, org))
 	}
 
-	return nil, nil
+	return nil, errs
+}
+
+// TagsTagKeyPurposeDataDiffSuppress suppresses representation differences in purpose_data.
+//
+// The API resolves "organization = auto" to the numeric organization id and returns that, so a
+// config using "auto" would otherwise diff against state forever and force a replacement of the
+// immutable purpose_data field.
+//
+// Only the config side is checked: organization is immutable and the API always resolves the value
+// it stores, so state never holds the literal "auto".
+//
+// A DiffSuppressFunc on a map is invoked once per element with k set to "purpose_data.<key>", so
+// any other key must fall through to false.
+func TagsTagKeyPurposeDataDiffSuppress(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	return k == "purpose_data.organization" && newValue == "auto"
 }
