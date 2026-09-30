@@ -85,7 +85,6 @@ are marked [Attributes as Blocks](/docs/configuration/attr-as-blocks.html):
 * `network_interface.alias_ip_range`
 * `network_interface.alias_ipv6_range` [Beta]
 * `network_interface.access_config`
-* `network_interface.enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
 
 ## Attributes Reference
 
