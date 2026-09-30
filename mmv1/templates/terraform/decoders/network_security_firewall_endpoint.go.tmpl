@@ -1,0 +1,50 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// The API can return endpointSettings containing only default values
+// (e.g. {"jumboFramesEnabled": false}) even when it was never configured.
+// If it carries no data and the user hasn't configured the block, drop it so
+// it doesn't cause a permadiff.
+var isEmptyValue func(v interface{}) bool
+isEmptyValue = func(v interface{}) bool {
+	switch t := v.(type) {
+	case nil:
+		return true
+	case bool:
+		return !t
+	case string:
+		return t == ""
+	case float64:
+		return t == 0
+	case []interface{}:
+		for _, e := range t {
+			if !isEmptyValue(e) {
+				return false
+			}
+		}
+		return true
+	case map[string]interface{}:
+		for _, e := range t {
+			if !isEmptyValue(e) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+if settings, ok := res["endpointSettings"]; ok {
+	if _, configured := d.GetOk("endpoint_settings"); !configured && isEmptyValue(settings) {
+		delete(res, "endpointSettings")
+	}
+}
+return res, nil

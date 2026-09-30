@@ -248,6 +248,60 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 }
 `, randomSuffix, projectId)
 }
+
+func TestAccNetworkSecurityFirewallEndpoints_endpointSettings(t *testing.T) {
+	t.Parallel()
+
+	projectId := envvar.GetTestProjectFromEnv()
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix, "US_CENTRAL", true),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix, "CANADA", false),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix, contentCloudRegion string, httpPartialResponseBlocked bool) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  provider           = google-beta
+  name               = "tf-test-my-firewall-endpoint%[1]s"
+  parent             = "projects/%[2]s"
+  location           = "us-central1-a"
+  billing_project_id = "%[2]s"
+
+  endpoint_settings {
+    content_cloud_region          = "%[3]s"
+    http_partial_response_blocked = %[4]t
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, randomSuffix, projectId, contentCloudRegion, httpPartialResponseBlocked)
+}
 {{- end }}
 
 func testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t *testing.T) func(s *terraform.State) error {
