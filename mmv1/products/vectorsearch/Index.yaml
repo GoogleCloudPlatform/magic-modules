@@ -57,6 +57,32 @@ samples:
         resource_id_vars:
           index_id: example-dedicated-index
           collection_id: example-dedicated-collection
+  - name: vectorsearch_index_skip_wait
+    primary_resource_id: example-skip-wait-index
+    steps:
+      - name: vectorsearch_index_skip_wait
+        resource_id_vars:
+          index_id: example-skip-wait-index
+          collection_id: example-skip-wait-collection
+        ignore_read_extra:
+          - skip_wait
+custom_code:
+  custom_create: templates/terraform/custom_create/vector_search_index.go.tmpl
+virtual_fields:
+  - name: skip_wait
+    type: Boolean
+    default_value: false
+    description: |-
+      If set to `true`, the resource create call returns as soon as the underlying
+      long-running operation (LRO) has been accepted by the API, rather than
+      blocking until the index build finishes. Building an ANN index over a
+      Vector Search 2.0 (Agent Retrieval) collection can take many hours, and the
+      backend aborts the LRO once its ~24-25 hour deadline is reached, so waiting
+      inline is often impractical for large indexes (and can outlive credentials
+      minted for the Terraform run). When set, subsequent `terraform apply`
+      invocations refresh state from the API and no-op once the build completes.
+      Defaults to `false`.
+    ignore_read: true
 parameters:
   - name: location
     type: String

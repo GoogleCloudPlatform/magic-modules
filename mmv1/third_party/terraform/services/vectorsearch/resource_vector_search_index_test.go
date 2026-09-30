@@ -110,6 +110,96 @@ resource "google_vector_search_index" "example-index" {
 `, context)
 }
 
+// TestAccVectorSearchIndex_skipWait verifies that setting `skip_wait = true`
+// on create succeeds without blocking on the multi-hour index build LRO, and
+// that toggling `skip_wait` between states produces no diff (it is a virtual
+// field that never round-trips through the API).
+func TestAccVectorSearchIndex_skipWait(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVectorSearchIndex_skipWait(context, true),
+			},
+			{
+				ResourceName:            "google_vector_search_index.example-index",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"collection_id", "index_id", "labels", "location", "skip_wait", "terraform_labels"},
+			},
+			{
+				// Flipping skip_wait to false is a no-op (virtual field is not
+				// persisted server-side, and the resource already exists).
+				Config: testAccVectorSearchIndex_skipWait(context, false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vector_search_index.example-index", plancheck.ResourceActionNoop),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccVectorSearchIndex_skipWait(context map[string]interface{}, skipWait bool) string {
+	context["skip_wait"] = skipWait
+	return acctest.Nprintf(`
+resource "google_vector_search_collection" "parent" {
+  location      = "us-central1"
+  collection_id = "tf-test-skip-wait-collection-id%{random_suffix}"
+
+  display_name = "My Awesome Collection"
+
+  data_schema = <<EOF
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    }
+  }
+}
+EOF
+
+  vector_schema {
+    field_name = "text_embedding"
+    dense_vector {
+      dimensions = 768
+      vertex_embedding_config {
+        model_id      = "textembedding-gecko@003"
+        task_type     = "RETRIEVAL_DOCUMENT"
+        text_template = "Title: {title}"
+      }
+    }
+  }
+}
+
+resource "google_vector_search_index" "example-index" {
+  location      = "us-central1"
+  collection_id = google_vector_search_collection.parent.collection_id
+  index_id      = "tf-test-skip-wait-index-id%{random_suffix}"
+
+  display_name    = "Skip-wait index"
+  description     = "Created without waiting for the LRO."
+  index_field     = "text_embedding"
+  distance_metric = "DOT_PRODUCT"
+
+  dense_scann {
+    feature_norm_type = "UNIT_L2_NORM"
+  }
+
+  skip_wait = %{skip_wait}
+}
+`, context)
+}
+
 func testAccVectorSearchIndex_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vector_search_collection" "parent" {
