@@ -272,6 +272,16 @@ func resourceComputeSubnetworkIpv6ConditionalForceNewFunc(diff tpgresource.Terra
 		if !subnetworkFieldIsSetInConfig(diff, field) {
 			continue
 		}
+		// ResourceDiff.HasChange compares the prior state against the raw config value and doesn't take
+		// the field's DiffSuppressFunc into account, so equivalent values (for example, a partial
+		// ip_collection URL in config vs. the full self link returned by the API) would otherwise be
+		// reported as changes.
+		old, new := diff.GetChange(field)
+		oldStr, _ := old.(string)
+		newStr, _ := new.(string)
+		if subnetworkIpv6FieldValuesEquivalent(field, oldStr, newStr) {
+			continue
+		}
 		log.Printf("[DEBUG] %s changed outside of an IPV4_ONLY -> IPV4_IPV6 stack_type upgrade; forcing recreation", field)
 		if err := diff.ForceNew(field); err != nil {
 			return err
@@ -300,6 +310,19 @@ func subnetworkFieldIsSetInConfig(diff tpgresource.TerraformResourceDiff, field 
 		return true
 	}
 	return v.AsString() != ""
+}
+
+// Reports whether old and new values of a conditionally-immutable field are equivalent, mirroring the
+// diff_suppress_func configured for the field in Subnetwork.yaml.
+func subnetworkIpv6FieldValuesEquivalent(field, old, new string) bool {
+	switch field {
+	case "ip_collection":
+		return tpgresource.CompareSelfLinkOrResourceName("", old, new, nil)
+	case "external_ipv6_prefix":
+		return ipEqual(old, new)
+	default:
+		return old == new
+	}
 }
 {{ end -}}
 

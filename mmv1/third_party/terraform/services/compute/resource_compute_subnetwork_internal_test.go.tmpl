@@ -107,6 +107,18 @@ func TestUnitComputeSubnetworkIpv6ConditionalForceNew(t *testing.T) {
 			Config:         withConfig(dualStackExternalConfig, map[string]cty.Value{"ip_collection": cty.UnknownVal(cty.String)}),
 			ExpectForceNew: true,
 		},
+		"ip_collection full self link in state and partial URL in config": {
+			Before:         withValues(dualStackExternal, map[string]interface{}{"ip_collection": "https://www.googleapis.com/compute/v1/projects/my-proj/regions/us-east1/publicDelegatedPrefixes/sub-pdp-1"}),
+			After:          dualStackExternal,
+			Config:         dualStackExternalConfig,
+			ExpectForceNew: false,
+		},
+		"external_ipv6_prefix non-canonical representation in config": {
+			Before:         dualStackExternal,
+			After:          withValues(dualStackExternal, map[string]interface{}{"external_ipv6_prefix": "2600:1901:4464:0001::/64"}),
+			Config:         withConfig(dualStackExternalConfig, map[string]cty.Value{"external_ipv6_prefix": cty.StringVal("2600:1901:4464:0001::/64")}),
+			ExpectForceNew: false,
+		},
 		"change ipv6_access_type on IPV6_ONLY subnetwork": {
 			Before: map[string]interface{}{
 				"stack_type":           "IPV6_ONLY",
