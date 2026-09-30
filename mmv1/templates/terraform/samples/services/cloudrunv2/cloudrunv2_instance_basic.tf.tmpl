@@ -1,0 +1,8 @@
+resource "google_cloud_run_v2_instance" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.ResourceIdVars "cloud_run_instance_name"}}"
+  location = "us-east4"
+
+  containers {
+    image = "us-docker.pkg.dev/cloudrun/container/hello"
+  }
+}
