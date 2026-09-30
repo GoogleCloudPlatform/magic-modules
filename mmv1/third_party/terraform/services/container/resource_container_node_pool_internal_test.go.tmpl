@@ -256,3 +256,43 @@ func TestUnitFlattenNodePool(t *testing.T) {
 		})
 	}
 }
+
+func TestUnitExpandSecondaryBootDisks(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		input []interface{}
+		want  []*container.SecondaryBootDisk
+	}{
+		"none": {
+			input: []interface{}{},
+			want:  nil,
+		},
+		"empty block": {
+			input: []interface{}{nil},
+			want:  []*container.SecondaryBootDisk{&container.SecondaryBootDisk{DiskImage: ""}},
+		},
+		"one disk without mode": {
+			input: []interface{}{map[string]interface{}{"disk_image": "global/images/data"}},
+			want:  []*container.SecondaryBootDisk{&container.SecondaryBootDisk{DiskImage: "global/images/data"}},
+		},
+		"multiple disks": {
+			input: []interface{}{
+				map[string]interface{}{"disk_image": "global/images/image-cache", "mode": "CONTAINER_IMAGE_CACHE"},
+				map[string]interface{}{"disk_image": "global/images/data", "mode": ""},
+			},
+			want: []*container.SecondaryBootDisk{
+				{DiskImage: "global/images/image-cache", Mode: "CONTAINER_IMAGE_CACHE"},
+				{DiskImage: "global/images/data"},
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if diff := cmp.Diff(tc.want, expandSecondaryBootDisks(tc.input)); diff != "" {
+				t.Fatalf("unexpected secondary boot disks (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
