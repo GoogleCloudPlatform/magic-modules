@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccComputeRegionUrlMap_headerAction(t *testing.T) {
@@ -1387,6 +1388,11 @@ func TestAccComputeRegionUrlMap_regexRewrite(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionUrlMap_regexRewriteUpdate(randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_url_map.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_url_map.foobar",
@@ -1395,6 +1401,11 @@ func TestAccComputeRegionUrlMap_regexRewrite(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionUrlMap_regexRewriteRemoved(randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_url_map.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_url_map.foobar",
