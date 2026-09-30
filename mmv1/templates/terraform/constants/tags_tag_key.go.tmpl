@@ -16,3 +16,31 @@ import (
 	tpgcompute "{{ $.ImportPath }}/services/compute"
 )
 {{- end }}
+
+// TagsTagKeyPurposeDataValidate validates the purpose_data map values.
+//
+// The network must be given as a Compute network self link with the numeric network id. The API
+// accepts a shorter "{project}/{network_name}" form too, but it always returns the self link, so a
+// config using the short form would diff against what the read stores and force a replacement of
+// the immutable purpose_data field.
+//
+// A ValidateFunc on a map field is invoked with the whole map, so the "network" entry is checked
+// here. fmt and regexp come from the generated file's import block.
+func TagsTagKeyPurposeDataValidate(i interface{}, k string) ([]string, []error) {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil, nil
+	}
+
+	network, ok := m["network"].(string)
+	if !ok || network == "" {
+		return nil, nil
+	}
+
+	re := regexp.MustCompile(`^https://[^/]+/compute/v1/projects/[^/]+/global/networks/[0-9]+$`)
+	if !re.MatchString(network) {
+		return nil, []error{fmt.Errorf("%s.network %q must match %q", k, network, re.String())}
+	}
+
+	return nil, nil
+}

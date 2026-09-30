@@ -132,7 +132,8 @@ properties:
 
       ~> **Note:** The network must be referenced by its self link, not by name. The API also accepts a shorter `{project}/{network_name}` form, but it always returns the self link, so accepting the short form would diff against state. Configs using the short form will need updating.
     immutable: true
-    custom_expand: templates/terraform/custom_expand/tags_tag_key_purpose_data.go.tmpl
+    validation:
+      function: TagsTagKeyPurposeDataValidate
   - name: allowedValuesRegex
     type: String
     description: |

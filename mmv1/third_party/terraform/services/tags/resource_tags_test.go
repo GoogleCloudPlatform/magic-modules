@@ -1663,3 +1663,61 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 		return nil
 	}
 }
+
+func TestTagsTagKeyPurposeDataValidate(t *testing.T) {
+	cases := map[string]struct {
+		purposeData map[string]interface{}
+		expectErr   bool
+	}{
+		"self link with a numeric id is valid": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/123456789",
+			},
+		},
+		"a custom compute endpoint host is valid": {
+			purposeData: map[string]interface{}{
+				"network": "https://compute.mirror.example.com/compute/v1/projects/my-project/global/networks/123456789",
+			},
+		},
+		"no network key is valid": {
+			purposeData: map[string]interface{}{"organization": "auto"},
+		},
+		"empty network is valid": {
+			purposeData: map[string]interface{}{"network": ""},
+		},
+		"short form is rejected": {
+			purposeData: map[string]interface{}{"network": "my-project/vpc-us-west1"},
+			expectErr:   true,
+		},
+		"self link with a network name is rejected": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/vpc-us-west1",
+			},
+			expectErr: true,
+		},
+		"missing numeric id is rejected": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/",
+			},
+			expectErr: true,
+		},
+		"regional network path is rejected": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-west1/networks/123456789",
+			},
+			expectErr: true,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, errs := tags.TagsTagKeyPurposeDataValidate(tc.purposeData, "purpose_data")
+			if tc.expectErr && len(errs) == 0 {
+				t.Fatalf("expected an error for %#v, got none", tc.purposeData)
+			}
+			if !tc.expectErr && len(errs) > 0 {
+				t.Fatalf("expected no error for %#v, got %v", tc.purposeData, errs)
+			}
+		})
+	}
+}
