@@ -226,15 +226,11 @@ properties:
         description: |
           When true, use the topic's schema as the columns to write to in BigQuery, if it exists.
           Only one of use_topic_schema and use_table_schema can be set.
-        conflicts:
-          - bigquery_config.0.use_table_schema
       - name: useTableSchema
         type: Boolean
         description: |
           When true, use the BigQuery table's schema as the columns to write to in BigQuery. Messages
           must be published in JSON format. Only one of use_topic_schema and use_table_schema can be set.
-        conflicts:
-          - bigquery_config.0.use_topic_schema
         is_missing_in_cai: true
       - name: writeMetadata
         type: Boolean

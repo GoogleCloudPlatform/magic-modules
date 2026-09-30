@@ -150,13 +150,9 @@ properties:
         properties:
           - name: accountId
             type: String
-            conflicts:
-              - other_cloud_starting_location.0.aws_location.0.all_asset_inventory_assets
             description: 'The AWS account ID that this discovery config applies to. Within an organization, you can find the AWS account ID inside an AWS account ARN. Example: arn:<partition>:organizations::<management-account-id>:account/<organization-id>/<account-id>'
           - name: allAssetInventoryAssets
             type: Boolean
-            conflicts:
-              - other_cloud_starting_location.0.aws_location.0.account_id
             description: All AWS assets stored in Asset Inventory that didn't match other AWS discovery configs.
   - name: inspectTemplates
     type: Array

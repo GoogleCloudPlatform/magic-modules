@@ -273,8 +273,6 @@ properties:
           The justification is not mandatory but can be provided in any of the supported formats.
         send_empty_value: true
         allow_empty_object: true
-        conflicts:
-          - requester_justification_config.0.unstructured
         properties: []
       - name: unstructured
         type: NestedObject
@@ -282,8 +280,6 @@ properties:
           The requester has to provide a justification in the form of free flowing text.
         send_empty_value: true
         allow_empty_object: true
-        conflicts:
-          - requester_justification_config.0.not_mandatory
         properties: []
   - name: additionalNotificationTargets
     type: NestedObject

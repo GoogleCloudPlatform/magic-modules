@@ -257,11 +257,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Kinesis Data Streams.
-        conflicts:
-          - ingestion_data_source_settings.0.cloud_storage
-          - ingestion_data_source_settings.0.azure_event_hubs
-          - ingestion_data_source_settings.0.aws_msk
-          - ingestion_data_source_settings.0.confluent_cloud
         properties:
           - name: streamArn
             type: String
@@ -293,11 +288,6 @@ properties:
       - name: cloudStorage
         type: NestedObject
         description: Settings for ingestion from Cloud Storage.
-        conflicts:
-          - ingestion_data_source_settings.0.aws_kinesis
-          - ingestion_data_source_settings.0.azure_event_hubs
-          - ingestion_data_source_settings.0.aws_msk
-          - ingestion_data_source_settings.0.confluent_cloud
         properties:
           - name: bucket
             type: String
@@ -391,11 +381,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Azure Event Hubs.
-        conflicts:
-          - ingestion_data_source_settings.0.aws_kinesis
-          - ingestion_data_source_settings.0.cloud_storage
-          - ingestion_data_source_settings.0.aws_msk
-          - ingestion_data_source_settings.0.confluent_cloud
         properties:
           - name: resourceGroup
             type: String
@@ -431,11 +416,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Managed Streaming for Apache Kafka.
-        conflicts:
-          - ingestion_data_source_settings.0.aws_kinesis
-          - ingestion_data_source_settings.0.cloud_storage
-          - ingestion_data_source_settings.0.azure_event_hubs
-          - ingestion_data_source_settings.0.confluent_cloud
         properties:
           - name: clusterArn
             type: String
@@ -466,11 +446,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Confluent Cloud.
-        conflicts:
-          - ingestion_data_source_settings.0.aws_kinesis
-          - ingestion_data_source_settings.0.cloud_storage
-          - ingestion_data_source_settings.0.azure_event_hubs
-          - ingestion_data_source_settings.0.aws_msk
         properties:
           - name: bootstrapServer
             type: String
