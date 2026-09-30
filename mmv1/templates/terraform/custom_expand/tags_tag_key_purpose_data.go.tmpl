@@ -24,40 +24,13 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 		return m, nil
 	}
 
-	// Anything that is already a self link is left as-is.
-	if strings.HasPrefix(network, "https://www.googleapis.com/compute/v1/projects/") {
-		return m, nil
+	// The API accepts the short "{project}/{network_name}" form here too, but only ever returns the
+	// self link. Restricting the input to the form the API returns keeps state and config identical,
+	// so a value is never rewritten to something the config does not match.
+	re := regexp.MustCompile(`^https://www\.googleapis\.com/compute/v1/projects/[^/]+/global/networks/[0-9]+$`)
+	if !re.MatchString(network) {
+		return nil, fmt.Errorf("purpose_data.network %q must be a Compute network self link of the form \"https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network_id}\", where {network_id} is the numeric network id", network)
 	}
-
-	parts := strings.Split(network, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("could not interpret purpose_data.network %q; expected either a Compute network self link or the form \"{project}/{network_name}\"", network)
-	}
-	project, name := parts[0], parts[1]
-
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", project, name)
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   project,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("could not resolve purpose_data.network %q to a Compute network self link: %w", network, err)
-	}
-
-	selfLink, ok := res["selfLink"].(string)
-	if !ok || selfLink == "" {
-		return nil, fmt.Errorf("network %q returned no selfLink", network)
-	}
-
-	m["network"] = selfLink
 
 	return m, nil
 }

@@ -72,6 +72,11 @@ resource "google_network_security_security_profile_group" "security_profile_grou
   custom_mirroring_profile = google_network_security_security_profile.default.id
 }
 
+data "google_compute_network" "tag_network" {
+  name    = google_compute_network.default.name
+  project = "{{index $.TestEnvVars "project_name"}}"
+}
+
 resource "google_tags_tag_key" "secure_tag_key_1" {
   provider    = google-beta
   description = "Test tag key description"
@@ -79,7 +84,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "{{index $.ResourceIdVars "tag_key"}}"
   purpose_data = {
-    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.default.name}"
+    network = "https://www.googleapis.com/compute/v1/projects/{{index $.TestEnvVars "project_name"}}/global/networks/${data.google_compute_network.tag_network.id}"
   }
 }
 

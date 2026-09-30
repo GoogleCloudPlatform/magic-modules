@@ -330,6 +330,10 @@ func TestAccComputeNetworkFirewallPolicyRule_disable_enable(t *testing.T) {
 
 func testAccComputeNetworkFirewallPolicyRule_secureTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_network" "tag_network" {
+  name    = google_compute_network.basic_network.name
+  project = "%{project_name}"
+}
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
   name        = "tf-test-address-%{random_suffix}"
   parent      = "projects/%{project_name}"
@@ -387,7 +391,7 @@ resource "google_tags_tag_key" "basic_key" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tagkey-%{random_suffix}"
   purpose_data = {
-    network = "%{project_name}/${google_compute_network.basic_network.name}"
+    network = "https://www.googleapis.com/compute/v1/projects/%{project_name}/global/networks/${data.google_compute_network.tag_network.id}"
   }
 }
 
@@ -401,6 +405,10 @@ resource "google_tags_tag_value" "basic_value" {
 
 func testAccComputeNetworkFirewallPolicyRule_secureTagsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_network" "tag_network" {
+  name    = google_compute_network.basic_network.name
+  project = "%{project_name}"
+}
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
   name        = "tf-test-address-%{random_suffix}"
   parent      = "projects/%{project_name}"
@@ -458,7 +466,7 @@ resource "google_tags_tag_key" "basic_key" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tagkey-%{random_suffix}"
   purpose_data = {
-    network = "%{project_name}/${google_compute_network.basic_network.name}"
+    network = "https://www.googleapis.com/compute/v1/projects/%{project_name}/global/networks/${data.google_compute_network.tag_network.id}"
   }
 }
 

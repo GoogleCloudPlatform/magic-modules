@@ -129,9 +129,11 @@ resource "google_tags_tag_key" "key" {
 	  short_name = "tf-test-foo%{random_suffix}"
 	  description = "For foo%{random_suffix} resources."
 	  purpose = "GCE_FIREWALL"
-	  # The API accepts the short "{project}/{network_name}" form and the provider canonicalizes it to
-	  # the self link the API returns, so config and state agree either way.
-	  purpose_data = {network = "${google_compute_network.tag_network.project}/${google_compute_network.tag_network.name}"}
+	  # purpose_data.network must be a Compute network self link containing the numeric network id,
+	  # which is the form the API returns. google_compute_network.self_link is
+	  # "{version}/projects/{project}/global/networks/{network_name}", so the id-bearing self link is
+	  # built from its parts.
+	  purpose_data = {network = "https://www.googleapis.com/compute/v1/projects/${google_compute_network.tag_network.project}/global/networks/${google_compute_network.tag_network.id}"}
 	}
 
 `, context)

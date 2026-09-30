@@ -72,6 +72,11 @@ func resourceTagsTagKeyResourceV0() *schema.Resource {
 // ("{project}/{network_name}") to the self-link-with-id form the API returns
 // ("https://www.googleapis.com/compute/{compute_version}/projects/{projectId}/global/networks/{networkId}").
 //
+// The expander rejects the short form, and purpose_data is immutable, so without this migration any
+// existing state written in the short form would force a destroy-and-recreate of the tag key - which
+// orphans every tag binding using it. This migration rewrites the value in place so the user only
+// has to update their config.
+//
 // The migration is best-effort and never fails. Resolving the short form needs a Compute networks
 // lookup, which can fail for reasons unrelated to this change (the network was deleted, or the
 // caller lacks compute.networks.get). Returning an error from a state upgrader would block every
@@ -79,9 +84,8 @@ func resourceTagsTagKeyResourceV0() *schema.Resource {
 //
 // NOTE: on failure this is silent. These log lines only reach the user when TF_LOG is set, because
 // provider output is filtered by level by default. A caller lacking compute.networks.get therefore
-// sees the short form left in state, which surfaces as the same replacement diff this migration
-// exists to remove. That trade is deliberate: principals that manage a GCE_FIREWALL tag key are
-// expected to be able to read the network it points at. Granting compute.networks.get resolves it.
+// sees the short form left in state, which surfaces as a replacement diff. Granting
+// compute.networks.get resolves it.
 func ResourceTagsTagKeyUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
@@ -89,17 +93,17 @@ func ResourceTagsTagKeyUpgradeV0(ctx context.Context, rawState map[string]interf
 	if !ok || purposeData == nil {
 		return rawState, nil
 	}
-
 	transformed := make(map[string]interface{}, len(purposeData))
 	for k, v := range purposeData {
 		transformed[k] = v
 	}
-
 	network, ok := transformed["network"].(string)
 	if !ok {
 		return rawState, nil
 	}
 
+	// Only the two-segment "{project}/{network_name}" short form needs resolving; anything else
+	// (including the canonical self link) is already in the form the API returns.
 	parts := strings.Split(network, "/")
 	if len(parts) != 2 {
 		return rawState, nil
@@ -124,7 +128,6 @@ func ResourceTagsTagKeyUpgradeV0(ctx context.Context, rawState map[string]interf
 		log.Printf("[WARN] could not resolve purpose_data.network %q while upgrading state to schema version 1: %s; leaving it unchanged", network, err)
 		return rawState, nil
 	}
-
 	selfLink, hasSelfLink := res["selfLink"].(string)
 	if !hasSelfLink || selfLink == "" {
 		log.Printf("[WARN] network %q returned no selfLink while upgrading state to schema version 1; leaving purpose_data.network unchanged", network)
