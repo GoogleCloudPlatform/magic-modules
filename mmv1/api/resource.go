@@ -381,6 +381,9 @@ type Resource struct {
 
 	// Shallow copy of the resource schema at the maximum version
 	// rather than the run version, used for cross-version validations.
+	// This will only account for the highest loaded overrides for the
+	// run; a run at nightly will not have loaded internal overrides
+	// so we can only reason about the merged public+nightly schemas.
 	maxVersionSchema *Resource `yaml:"-"`
 
 	// ====================
