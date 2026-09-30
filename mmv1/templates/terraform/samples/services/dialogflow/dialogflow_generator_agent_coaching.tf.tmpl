@@ -1,0 +1,8 @@
+resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
+  location = "global"
+  description = "An agent coaching generator."
+  agent_coaching_context {
+    version = "1.0"
+    overarching_guidance = "Be helpful."
+  }
+}

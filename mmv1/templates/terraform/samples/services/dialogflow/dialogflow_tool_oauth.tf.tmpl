@@ -1,0 +1,32 @@
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location     = "{{index $.ResourceIdVars "location"}}"
+  tool_key     = "{{index $.ResourceIdVars "tool_key"}}"
+  display_name = "oauth-tool"
+  description  = "A tool with OpenAPI spec and OAuth Config"
+
+  open_api_spec {
+    text_schema = <<EOF
+openapi: 3.0.0
+info:
+  title: Test Tool
+  version: 1.0.0
+paths:
+  /search:
+    get:
+      summary: Search function
+      operationId: searchAction
+      responses:
+        '200':
+          description: OK
+EOF
+    authentication {
+      oauth_config {
+        client_id        = "client-id"
+        client_secret    = "client-secret"
+        oauth_grant_type = "CLIENT_CREDENTIALS"
+        token_endpoint   = "https://example.com/oauth/token"
+        scopes           = ["scope1", "scope2"]
+      }
+    }
+  }
+}
