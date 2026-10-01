@@ -261,7 +261,7 @@ func TestAccNetworkSecurityFirewallEndpoints_endpointSettings(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix, "US_CENTRAL", true),
+				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix),
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -270,7 +270,7 @@ func TestAccNetworkSecurityFirewallEndpoints_endpointSettings(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix, "CANADA", false),
+				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettingsUpdate(projectId, randomSuffix),
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -282,7 +282,7 @@ func TestAccNetworkSecurityFirewallEndpoints_endpointSettings(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId, randomSuffix, contentCloudRegion string, httpPartialResponseBlocked bool) string {
+func testAccNetworkSecurityFirewallEndpoints_endpointSettings(projectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_network_security_firewall_endpoint" "foobar" {
   provider           = google-beta
@@ -292,15 +292,36 @@ resource "google_network_security_firewall_endpoint" "foobar" {
   billing_project_id = "%[2]s"
 
   endpoint_settings {
-    content_cloud_region          = "%[3]s"
-    http_partial_response_blocked = %[4]t
+    content_cloud_region          = "US_CENTRAL"
+    http_partial_response_blocked = true
   }
 
   labels = {
     foo = "bar"
   }
 }
-`, randomSuffix, projectId, contentCloudRegion, httpPartialResponseBlocked)
+`, randomSuffix, projectId)
+}
+
+func testAccNetworkSecurityFirewallEndpoints_endpointSettingsUpdate(projectId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+  provider           = google-beta
+  name               = "tf-test-my-firewall-endpoint%[1]s"
+  parent             = "projects/%[2]s"
+  location           = "us-central1-a"
+  billing_project_id = "%[2]s"
+
+  endpoint_settings {
+    content_cloud_region          = "CANADA"
+    http_partial_response_blocked = false
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, randomSuffix, projectId)
 }
 {{- end }}
 
