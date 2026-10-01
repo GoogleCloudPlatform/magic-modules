@@ -1309,6 +1309,11 @@ func TestShouldGenerateEphemeralResourceTests(t *testing.T) {
 		expected    bool
 	}{
 		{
+			description: "generate false does not emit orphan tests",
+			resource:    api.Resource{Ephemeral: &resource.Ephemeral{Generate: false}},
+			expected:    false,
+		},
+		{
 			description: "no ephemeral_experimental block returns false",
 			resource:    api.Resource{},
 			expected:    false,

@@ -129,14 +129,7 @@ map[string]attr.Type{
     Computed-only here since it's not a URL var, and publicca's
     `location`/`project` (not `required` in the base resource, but URL vars)
     are Optional+Computed here. */}}
-  {{- $propName := .Name -}}
-  {{- $url := .ResourceMetadata.SelfLinkUri -}}
-  {{- if .ResourceMetadata.ExcludeRead -}}{{- $url = .ResourceMetadata.CreateUrl -}}{{- end -}}
-  {{- $isUrlVar := false -}}
-  {{- range $id := .ResourceMetadata.ExtractIdentifiers $url -}}
-    {{- if eq $id $propName -}}{{- $isUrlVar = true -}}{{- end -}}
-  {{- end -}}
-  {{- if $isUrlVar }}
+  {{- if .IsEphemeralInput }}
     {{- if .Required }}
   Required: true,
     {{- else }}

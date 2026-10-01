@@ -629,6 +629,24 @@ func (r *Resource) Validate() (es []error) {
 	for _, sample := range r.Samples {
 		es = append(es, sample.Validate(r.Name)...)
 	}
+	if r.ShouldGenerateEphemeralResource() {
+		if !r.Ephemeral.ExcludeTest && len(r.Ephemeral.Samples) == 0 {
+			es = append(es, fmt.Errorf("resource %s requires ephemeral_experimental.samples when ephemeral tests are enabled", r.Name))
+		}
+		for _, sample := range r.Ephemeral.Samples {
+			es = append(es, sample.Validate(r.Name)...)
+			if len(sample.Steps) == 0 {
+				es = append(es, fmt.Errorf("ephemeral sample %s in resource %s requires at least one step", sample.Name, r.Name))
+			}
+			if !r.Ephemeral.ExcludeTest && !sample.ExcludeTest {
+				for _, step := range sample.Steps {
+					if len(step.EphemeralAssertions) == 0 {
+						es = append(es, fmt.Errorf("ephemeral sample %s step %s requires ephemeral_assertions", sample.Name, step.Name))
+					}
+				}
+			}
+		}
+	}
 
 	return es
 }
@@ -2148,8 +2166,15 @@ func (r Resource) TestSamples() []*resource.Sample {
 }
 
 func (r Resource) TestSampleSetUp(sysfs fs.FS) {
+	r.setUpSamples(sysfs, r.Samples)
+	if r.ShouldGenerateEphemeralResource() {
+		r.setUpSamples(sysfs, r.Ephemeral.Samples)
+	}
+}
+
+func (r Resource) setUpSamples(sysfs fs.FS, samples []*resource.Sample) {
 	res := make(map[string]string)
-	for _, sample := range r.Samples {
+	for _, sample := range samples {
 		sample.TargetVersionName = r.TargetVersionName
 		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
 			continue
@@ -2516,10 +2541,29 @@ func (r *Resource) ShouldGenerateEphemeralResource() bool {
 }
 
 func (r *Resource) ShouldGenerateEphemeralResourceTests() bool {
+	return r.ShouldGenerateEphemeralResource() && !r.Ephemeral.ExcludeTest
+}
+
+func (r Resource) EphemeralSamples() []*resource.Sample {
 	if r.Ephemeral == nil {
-		return false
+		return nil
 	}
-	return !r.Ephemeral.ExcludeTest
+	return google.Reject(r.Ephemeral.Samples, func(s *resource.Sample) bool {
+		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	})
+}
+
+func (r Resource) EphemeralTestSamples() []*resource.Sample {
+	return google.Reject(r.EphemeralSamples(), func(s *resource.Sample) bool {
+		return s.ExcludeTest || len(s.TestSteps()) == 0
+	})
+}
+
+func (r Resource) EphemeralTestDependencies() map[string]string {
+	// Reuse the existing dependency resolver without adding ephemeral examples
+	// to the managed resource's tests or documentation.
+	r.Samples = r.EphemeralTestSamples()
+	return r.TestDependencies()
 }
 
 func (r Resource) EphemeralBodyProperties() []*Type {

@@ -18,4 +18,7 @@ type Ephemeral struct {
 	Generate bool `yaml:"generate"`
 	// boolean to determine whether tests should be generated for an ephemeral resource
 	ExcludeTest bool `yaml:"exclude_test"`
+	// Samples use the same HCL template and version handling as managed-resource
+	// samples, but generate ephemeral tests and documentation independently.
+	Samples []*Sample `yaml:"samples,omitempty"`
 }
