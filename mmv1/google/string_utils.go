@@ -21,12 +21,26 @@ import (
 	"unicode"
 )
 
+// Regular expressions used by the string helpers below. These are compiled once
+// at package init: several of these helpers (notably Underscore) are called
+// millions of times during a full generation run, and compiling a regex on
+// every call dominated the generator's CPU profile.
+var (
+	acronymBoundaryRegexp = regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`)
+	wordBoundaryRegexp    = regexp.MustCompile(`([a-z\d])([A-Z])`)
+	firstSentenceRegexp   = regexp.MustCompile(`[.?!]`)
+	camelizeFirstRegexp   = regexp.MustCompile(`^[a-z\d]*`)
+	camelizeSnakeRegexp   = regexp.MustCompile(`(?:_)([a-z\d]*)`)
+	format2RegexPercent   = regexp.MustCompile(`\{\{%([[:word:]]+)\}\}`)
+	format2RegexPlain     = regexp.MustCompile(`\{\{([[:word:]]+)\}\}`)
+)
+
 // // Helper class to process and mutate strings.
 // class StringUtils
 // Converts string from camel case to underscore
 func Underscore(source string) string {
-	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1}_${2}")
-	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1}_${2}")
+	tmp := acronymBoundaryRegexp.ReplaceAllString(source, "${1}_${2}")
+	tmp = wordBoundaryRegexp.ReplaceAllString(tmp, "${1}_${2}")
 	tmp = strings.ReplaceAll(tmp, "-", "_")
 	tmp = strings.ReplaceAll(tmp, ".", "_")
 	tmp = strings.ToLower(tmp)
@@ -36,8 +50,8 @@ func Underscore(source string) string {
 // Converts from PascalCase to Space Separated
 // For example, converts "AccessApproval" to "Access approval"
 func SpaceSeparated(source string) string {
-	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1} ${2}")
-	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1} ${2}")
+	tmp := acronymBoundaryRegexp.ReplaceAllString(source, "${1} ${2}")
+	tmp = wordBoundaryRegexp.ReplaceAllString(tmp, "${1} ${2}")
 	tmp = strings.ToLower(tmp)
 
 	// Capitalize the first letter
@@ -58,8 +72,7 @@ func SpaceSeparatedTitle(source string) string {
 // Returns all the characters up until the period (.) or returns text
 // unchanged if there is no period.
 func FirstSentence(text string) string {
-	re := regexp.MustCompile(`[.?!]`)
-	periodPos := re.FindStringIndex(text)
+	periodPos := firstSentenceRegexp.FindStringIndex(text)
 	if periodPos == nil {
 		return text
 	}
@@ -77,9 +90,7 @@ func Plural(source string) string {
 
 	// index -> indices
 	if strings.HasSuffix(source, "ex") {
-		re := regexp.MustCompile("ex$")
-		result := re.ReplaceAllString(source, "")
-		return fmt.Sprintf("%sices", result)
+		return fmt.Sprintf("%sices", strings.TrimSuffix(source, "ex"))
 	}
 
 	// mesh -> meshes
@@ -96,9 +107,7 @@ func Plural(source string) string {
 
 	// policy -> policies
 	if strings.HasSuffix(source, "y") {
-		re := regexp.MustCompile("y$")
-		result := re.ReplaceAllString(source, "")
-		return fmt.Sprintf("%sies", result)
+		return fmt.Sprintf("%sies", strings.TrimSuffix(source, "y"))
 	}
 
 	return fmt.Sprintf("%ss", source)
@@ -111,7 +120,7 @@ func Camelize(term string, firstLetter string) string {
 
 	res := term
 	if firstLetter == "upper" {
-		res = regexp.MustCompile(`^[a-z\d]*`).ReplaceAllStringFunc(res, func(match string) string {
+		res = camelizeFirstRegexp.ReplaceAllStringFunc(res, func(match string) string {
 			return strings.Title(match)
 		})
 	} else {
@@ -122,8 +131,7 @@ func Camelize(term string, firstLetter string) string {
 		}
 	}
 	// handle snake case
-	re := regexp.MustCompile(`(?:_)([a-z\d]*)`)
-	res = re.ReplaceAllStringFunc(res, func(match string) string {
+	res = camelizeSnakeRegexp.ReplaceAllStringFunc(res, func(match string) string {
 		word := match[1:]
 		word = strings.Title(word)
 		return word
@@ -146,16 +154,14 @@ Note: ?P indicates a Python-compatible named capture group. Named groups
 aren't common in JS-based regex flavours, but are in Perl-based ones
 */
 func Format2Regex(format string) string {
-	re := regexp.MustCompile(`\{\{%([[:word:]]+)\}\}`)
-	result := re.ReplaceAllStringFunc(format, func(match string) string {
+	result := format2RegexPercent.ReplaceAllStringFunc(format, func(match string) string {
 		// TODO rewrite: the trims may not be needed with more effecient regex
 		word := strings.TrimPrefix(match, "{{")
 		word = strings.TrimSuffix(word, "}}")
 		word = strings.ReplaceAll(word, "%", "")
 		return fmt.Sprintf("(?P<%s>.+)", word)
 	})
-	re = regexp.MustCompile(`\{\{([[:word:]]+)\}\}`)
-	result = re.ReplaceAllStringFunc(result, func(match string) string {
+	result = format2RegexPlain.ReplaceAllStringFunc(result, func(match string) string {
 		word := strings.TrimPrefix(match, "{{")
 		word = strings.TrimSuffix(word, "}}")
 		return fmt.Sprintf("(?P<%s>[^/]+)", word)
