@@ -12,8 +12,9 @@
 */ -}}
 // The API can return endpointSettings containing only default values
 // (e.g. {"jumboFramesEnabled": false}) even when it was never configured.
-// If it carries no data and the user hasn't configured the block, drop it so
-// it doesn't cause a permadiff.
+// It may also contain a server-assigned contentCloudRegion (e.g. US_CENTRAL).
+// If it carries no user-settable data and the user hasn't configured the
+// block, drop it so it doesn't cause a permadiff.
 var isEmptyValue func(v interface{}) bool
 isEmptyValue = func(v interface{}) bool {
 	switch t := v.(type) {
@@ -42,9 +43,19 @@ isEmptyValue = func(v interface{}) bool {
 	}
 	return false
 }
-if settings, ok := res["endpointSettings"]; ok {
-	if _, configured := d.GetOk("endpoint_settings"); !configured && isEmptyValue(settings) {
-		delete(res, "endpointSettings")
+if settings, ok := res["endpointSettings"].(map[string]interface{}); ok {
+	if _, configured := d.GetOk("endpoint_settings"); !configured {
+		// Ignore the server-assigned contentCloudRegion when deciding
+		// whether the block is empty.
+		withoutServerDefaults := make(map[string]interface{}, len(settings))
+		for k, v := range settings {
+			if k != "contentCloudRegion" {
+				withoutServerDefaults[k] = v
+			}
+		}
+		if isEmptyValue(withoutServerDefaults) {
+			delete(res, "endpointSettings")
+		}
 	}
 }
 return res, nil

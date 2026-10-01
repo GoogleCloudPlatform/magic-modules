@@ -154,6 +154,13 @@ properties:
     type: NestedObject
     description: |
       Settings for the endpoint.
+    # jumboFramesEnabled is immutable and the API rejects update masks that
+    # include immutable paths, so only list the mutable sub-fields here.
+    # These paths only exist in beta, but this update path is unreachable in
+    # GA because jumboFramesEnabled (the only GA sub-field) forces recreation.
+    update_mask_fields:
+      - 'endpointSettings.contentCloudRegion'
+      - 'endpointSettings.httpPartialResponseBlocked'
     properties:
       - name: jumboFramesEnabled
         type: Boolean
@@ -164,6 +171,8 @@ properties:
       - name: contentCloudRegion
         type: String
         min_version: beta
+        # The API assigns a region (e.g. US_CENTRAL) when this is not set.
+        default_from_api: true
         description: |
           The Palo Alto Networks content cloud region of the firewall endpoint,
           for example `US_CENTRAL` or `CANADA`.
