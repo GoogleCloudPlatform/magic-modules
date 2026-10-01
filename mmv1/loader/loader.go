@@ -6,8 +6,10 @@ import (
 	"log"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	apiresource "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -168,7 +170,9 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 		go func(name string) {
 			defer wg.Done()
 
+			start := time.Now()
 			product, err := l.LoadProduct(name)
+			google.LogVerbose("%s: loaded in %s", name, time.Since(start).Round(time.Millisecond))
 			productChan <- loadResult{
 				name:    name,
 				product: product,
@@ -279,9 +283,12 @@ func NewVarsReplacingFS(inner google.ReadDirReadFileFS) google.ReadDirReadFileFS
 	return varsReplacingFS{inner}
 }
 
+// resourceLoadSem bounds how many resources are loaded concurrently across all products.
+var resourceLoadSem = make(chan struct{}, runtime.GOMAXPROCS(0))
+
 // loadResources loads all resources for a product
 func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
-	var resources []*api.Resource = make([]*api.Resource, 0)
+	var resources []*api.Resource
 
 	// Get base resource files
 	resourceFiles, err := filepath.Glob(filepath.Join(l.baseDirectory, product.PackagePath, "*"))
@@ -289,7 +296,8 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 		return nil, fmt.Errorf("cannot get resource files: %v", err)
 	}
 
-	// Compile base resources (skip those that will be merged with overrides)
+	// Collect base resources to compile (skip those that will be merged with overrides)
+	var baseResourcePaths []string
 	for _, resourceYamlPath := range resourceFiles {
 		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
 			continue
@@ -306,10 +314,25 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 				continue
 			}
 		}
-
-		resource := l.loadResource(product, resourceYamlPath, "")
-		resources = append(resources, resource)
+		baseResourcePaths = append(baseResourcePaths, resourceYamlPath)
 	}
+
+	// Compile base resources concurrently. Loading a resource only touches that
+	// resource (and reads the product), so resources within a product are
+	// independent. Products already load in parallel with one another, but the
+	// largest product would otherwise be the critical path of the load phase.
+	resources = make([]*api.Resource, len(baseResourcePaths))
+	var wg sync.WaitGroup
+	for i, resourceYamlPath := range baseResourcePaths {
+		wg.Add(1)
+		go func(i int, resourceYamlPath string) {
+			defer wg.Done()
+			resourceLoadSem <- struct{}{}
+			defer func() { <-resourceLoadSem }()
+			resources[i] = l.loadResource(product, resourceYamlPath, "")
+		}(i, resourceYamlPath)
+	}
+	wg.Wait()
 
 	// Compile override resources
 	if l.overrideDirectory != "" {
