@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"runtime/debug"
 	"runtime/pprof"
 	"strings"
 	"sync"
@@ -44,6 +45,14 @@ func main() {
 
 	// Handle all flags in main. Other functions must not access flag values directly.
 	flag.Parse()
+
+	// Generation is a short-lived, allocation-heavy batch job: template execution
+	// and gofmt allocate far more than they retain. Trading some peak memory
+	// (~1.0GB -> ~1.3GB for a full beta run) for fewer GC cycles is ~12% faster.
+	// An explicit GOGC in the environment still takes precedence.
+	if os.Getenv("GOGC") == "" {
+		debug.SetGCPercent(200)
+	}
 
 	if *cpuProfileFlag != "" {
 		f, err := os.Create(*cpuProfileFlag)
