@@ -48,7 +48,7 @@ func resourceDatastreamStreamCustomDiff(_ context.Context, diff *schema.Resource
 // include_objects.objects and exclude_objects.objects inside the Salesforce
 // source config. These arrays are order-independent but use TypeList, so
 // Terraform would otherwise show misleading rename diffs when an object is
-// added or reordered.
+// added, removed, or reordered.
 func resourceDatastreamStreamObjectsSetStyleDiff(diff tpgresource.TerraformResourceDiff) error {
 	paths := []string{
 		"source_config.0.salesforce_source_config.0.include_objects.0.objects",
@@ -65,30 +65,77 @@ func resourceDatastreamStreamObjectsSetStyleDiff(diff tpgresource.TerraformResou
 		if oldN == 0 && newN == 0 {
 			continue
 		}
-		// Real additions or removals: counts differ, so this is not just reordering.
-		if oldN != newN {
-			continue
-		}
+
 		old := make([]interface{}, 0, oldN)
-		new := make([]interface{}, 0, newN)
 		for i := 0; i < oldN; i++ {
-			o, n := diff.GetChange(fmt.Sprintf("%s.%d", basePath, i))
+			o, _ := diff.GetChange(fmt.Sprintf("%s.%d", basePath, i))
 			if o != nil {
 				old = append(old, o)
 			}
+		}
+
+		newObjs := make([]interface{}, 0, newN)
+		for i := 0; i < newN; i++ {
+			_, n := diff.GetChange(fmt.Sprintf("%s.%d", basePath, i))
 			if n != nil {
-				new = append(new, n)
+				newObjs = append(newObjs, n)
 			}
 		}
-		hashFunc := func(v interface{}) int {
-			m := v.(map[string]interface{})
-			return schema.HashString(m["object_name"])
+
+		if oldN == newN {
+			// Same count: suppress if the sets are equal (pure reorder).
+			hashFunc := func(v interface{}) int {
+				m := v.(map[string]interface{})
+				return schema.HashString(m["object_name"])
+			}
+			oldSet := schema.NewSet(hashFunc, old)
+			newSet := schema.NewSet(hashFunc, newObjs)
+			if oldSet.Equal(newSet) {
+				if err := diff.Clear(basePath); err != nil {
+					return err
+				}
+			}
+			continue
 		}
-		oldSet := schema.NewSet(hashFunc, old)
-		newSet := schema.NewSet(hashFunc, new)
-		if oldSet.Equal(newSet) {
-			if err := diff.Clear(basePath); err != nil {
-				return err
+
+		// Counts differ (add/remove). Reorder the new list so that objects
+		// present in both old and new keep their original positions, with
+		// genuinely new objects appended at the end. This prevents the
+		// positional cascade where every object after an insertion shows
+		// as changed.
+		oldOrder := make(map[string]int, oldN)
+		for i, o := range old {
+			m := o.(map[string]interface{})
+			oldOrder[m["object_name"].(string)] = i
+		}
+
+		shared := make([]interface{}, 0, newN)
+		added := make([]interface{}, 0)
+		for _, n := range newObjs {
+			m := n.(map[string]interface{})
+			name := m["object_name"].(string)
+			if _, exists := oldOrder[name]; exists {
+				shared = append(shared, n)
+			} else {
+				added = append(added, n)
+			}
+		}
+
+		// Sort shared objects by their position in the old list.
+		sort.SliceStable(shared, func(i, j int) bool {
+			ni := shared[i].(map[string]interface{})["object_name"].(string)
+			nj := shared[j].(map[string]interface{})["object_name"].(string)
+			return oldOrder[ni] < oldOrder[nj]
+		})
+
+		reordered := append(shared, added...)
+		for i, obj := range reordered {
+			m := obj.(map[string]interface{})
+			for k, v := range m {
+				key := fmt.Sprintf("%s.%d.%s", basePath, i, k)
+				if err := diff.SetNew(key, v); err != nil {
+					return err
+				}
 			}
 		}
 	}
