@@ -51,7 +51,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
-{{- if $.ListResponseIsArray }}
+{{- if eq $.ListResponseIsArray true }}
 	return transport_tpg.ListArrayPages(transport_tpg.ListArrayPagesOptions{
 		Config:         config,
 		TempData:       resourceData,
