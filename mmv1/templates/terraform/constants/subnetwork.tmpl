@@ -243,7 +243,7 @@ func resourceComputeSubnetworkIpv6ConditionalForceNewFunc(diff tpgresource.Terra
 			continue
 		}
 		// Removing the field from configuration (for example, when converting a dual-stack subnetwork
-		// back to IPV4_ONLY) doesn't send a new value to the API, so it shouldn't force recreation.
+		// back to IPV4_ONLY) seems to not cause API errors; excluding from ForceNew.
 		if !subnetworkFieldIsSetInConfig(diff, field) {
 			continue
 		}
