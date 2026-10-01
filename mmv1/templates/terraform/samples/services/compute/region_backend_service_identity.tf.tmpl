@@ -1,0 +1,19 @@
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
+  region = "europe-north1"
+  name          = "{{index $.ResourceIdVars "region_backend_service_name"}}"
+  health_checks = [google_compute_region_health_check.default.id]
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  protocol = "HTTPS"
+  tls_settings {
+    identity = "//test.global.123456789.workload.id.goog/ns/test-ns/sa/test-id"
+  }
+  description = "{{index $.Vars "description"}}"
+}
+
+resource "google_compute_region_health_check" "default" {
+  name = "{{index $.ResourceIdVars "health_check_name"}}"
+  region = "europe-north1"
+  http_health_check {
+    port = 80
+  }
+}

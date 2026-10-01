@@ -262,3 +262,9 @@ properties:
             type: Boolean
             description: |
               Whether to disable the private KG for query UI chips.
+  - name: procurementContactEmails
+    type: Array
+    description: |
+      The emails of the procurement contacts.
+    item_type:
+      type: String
