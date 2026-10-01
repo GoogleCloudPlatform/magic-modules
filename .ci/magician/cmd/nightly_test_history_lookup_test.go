@@ -140,21 +140,29 @@ func TestBuildVCRTestRowsNightlyStatus(t *testing.T) {
 	history := &NightlyTestHistoryReport{
 		EndDate: "2026-09-30",
 		Tests: map[string]*NightlyTestHistory{
-			"TestAccA": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: "2026-09-30"},
-			"TestAccB": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: "2026-09-30"},
+			"TestAccA": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: "2026-09-30", TestNameId: "1"},
+			"TestAccB": {Failures: 30, LastStatus: "FAILURE", LastFailureDate: "2026-09-30", TestNameId: "2"},
 		},
 	}
 
 	rows := buildVCRTestRows(replaying, recording, replayingAfter, "https://logs", history)
 	got := map[string]string{}
+	urls := map[string]string{}
 	for _, r := range rows {
 		got[r.DisplayName] = r.NightlyStatus
+		urls[r.DisplayName] = r.NightlyTestUrl
 	}
 	assert.Equal(t, map[string]string{
 		"TestAccA": "", // only tests failing in recording are annotated
 		"TestAccB": NightlyStatusFailing,
 		"TestAccC": NightlyStatusNotFound,
 	}, got)
+	// Only failing tests found in nightly link to their TeamCity history.
+	assert.Equal(t, map[string]string{
+		"TestAccA": "",
+		"TestAccB": nightlyTestUrl("2", provider.Beta),
+		"TestAccC": "",
+	}, urls)
 
 	for _, r := range buildVCRTestRows(replaying, recording, replayingAfter, "https://logs", nil) {
 		assert.Empty(t, r.NightlyStatus)
@@ -201,10 +209,21 @@ func TestNightlyDetail(t *testing.T) {
 	assert.Equal(t, "67% of 30", nightlyDetail(noDate, NightlyStatusRecentlyFixed))
 }
 
+func TestNightlyTestUrl(t *testing.T) {
+	assert.Equal(t,
+		"https://hashicorp.teamcity.com/test/6946391424746324317?currentProjectId=TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS",
+		nightlyTestUrl("6946391424746324317", provider.Beta))
+	assert.Equal(t,
+		"https://hashicorp.teamcity.com/test/123?currentProjectId=TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS",
+		nightlyTestUrl("123", provider.GA))
+	// Histories collected before test ids were captured must not render a broken link.
+	assert.Equal(t, "", nightlyTestUrl("", provider.Beta))
+}
+
 func TestRecordReplayFindingsColumn(t *testing.T) {
 	data := recordReplay{
 		TestRows: []VCRTestTableRow{
-			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyDetail: "100% of 25"},
+			{DisplayName: "TestAcc_a", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusFailing, NightlyDetail: "100% of 25", NightlyTestUrl: "https://hashicorp.teamcity.com/test/99"},
 			{DisplayName: "TestAcc_b", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusPassing, NightlyDetail: "100% of 30"},
 			{DisplayName: "TestAcc_c", RecordingStatus: "Failed", ReplayingAfterRecordingStatus: "-", NightlyStatus: NightlyStatusRecentlyFixed, NightlyDetail: "last failed 2026-09-27"},
 			// No nightly baseline to compare against, so no finding.
@@ -222,7 +241,7 @@ func TestRecordReplayFindingsColumn(t *testing.T) {
 	got, err := formatRecordReplay(data, new(strings.Builder))
 	assert.NoError(t, err)
 	assert.Contains(t, got, "| Recording Mode | Findings | Test Name |")
-	assert.Contains(t, got, "| ❌ | `⚪ Nightly fails 100% of 25` | TestAcc_a |")
+	assert.Contains(t, got, "| ❌ | `⚪ Nightly fails 100% of 25` | [TestAcc_a](https://hashicorp.teamcity.com/test/99) |")
 	// Healthy in nightly, so this failure most likely belongs to the PR.
 	assert.Contains(t, got, "| ❌ | `🔴 Nightly passes 100% of 30` | TestAcc_b |")
 	assert.Contains(t, got, "| ❌ | `🔴 Nightly fixed last failed 2026-09-27` | TestAcc_c |")

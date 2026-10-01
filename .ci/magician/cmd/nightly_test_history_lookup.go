@@ -128,6 +128,16 @@ func classifyNightlyStatus(h *NightlyTestHistory, historyEndDate string) string 
 	return NightlyStatusPassing
 }
 
+// nightlyTestUrl links to a test's history page in the TeamCity nightly project. testNameId is
+// TeamCity's cross-build test identifier; it cannot be derived from the test name, so it is
+// captured when the nightly history is collected.
+func nightlyTestUrl(testNameId string, pVersion provider.Version) string {
+	if testNameId == "" {
+		return ""
+	}
+	return fmt.Sprintf("https://hashicorp.teamcity.com/test/%s?currentProjectId=%s", testNameId, pVersion.TeamCityNightlyProjectName())
+}
+
 // lookupNightlyHistory finds the history entry for a test name. The name may be a VCR
 // subtest name (Parent__sub); the parent test is used as a fallback.
 func lookupNightlyHistory(testName string, history map[string]*NightlyTestHistory) *NightlyTestHistory {
