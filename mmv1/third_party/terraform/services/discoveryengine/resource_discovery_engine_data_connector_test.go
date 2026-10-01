@@ -181,7 +181,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
       host = "https://gcpconnector1.service-now.com/"
       port = 123
     }
-    params.                    = jsonencode({
+    params                     = jsonencode({
       "destination_type": "private"
     })
   }
