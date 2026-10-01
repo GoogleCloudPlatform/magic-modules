@@ -51,6 +51,14 @@ async:
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+sweeper:
+  dependencies:
+    - google_network_security_firewall_endpoint_association
+  url_substitutions:
+    - parent: organizations/${ORG_ID}
+      location: us-central1-a
+    - parent: projects/${PROJECT_NAME}
+      location: us-central1-a
 samples:
   - name: network_security_firewall_endpoint_basic
     primary_resource_id: default
