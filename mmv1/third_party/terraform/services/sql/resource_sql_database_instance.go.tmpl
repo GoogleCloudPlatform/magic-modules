@@ -4503,6 +4503,14 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 		}
 	}
 
+	if (activeEnv == "SOURCE" && bgdRes.SourceInstance != "" && bgdRes.SourceInstance != instanceName) ||
+		(activeEnv == "TARGET" && bgdRes.SwitchoverTargetInstance != "" && bgdRes.SwitchoverTargetInstance != instanceName) {
+		if err := d.Set("blue_green_deployment", nil); err != nil {
+			return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
+		}
+		return nil
+	}
+
 	deleteOldSource := false
 	if bgdStateMap != nil {
 		if val, ok := bgdStateMap["delete_old_source_on_destroy"].(bool); ok {
@@ -4614,7 +4622,7 @@ func switchoverBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg
 		config, op, project, "Switching Over Blue-Green Deployment", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
-		return fmt.Errorf("Error waiting for Blue-Green Deployment %q switchover on instance %q: %s", deploymentName, instanceName, err)
+		return err
 	}
 
 	return nil
@@ -4648,7 +4656,7 @@ func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 		config, op, project, "Creating Blue-Green Deployment", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
-		return fmt.Errorf("Error waiting for Blue-Green Deployment %q creation on instance %q: %s", deploymentName, instanceName, err)
+		return err
 	}
 
 	return nil
@@ -4683,7 +4691,7 @@ func deleteBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 			config, op, project, "Deleting Blue-Green Deployment", userAgent,
 			timeout)
 		if err != nil {
-			return fmt.Errorf("Error waiting for Blue-Green Deployment %q deletion on instance %q: %s", deploymentName, instanceName, err)
+			return err
 		}
 	}
 
