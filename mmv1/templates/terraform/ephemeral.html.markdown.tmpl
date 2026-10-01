@@ -1,0 +1,95 @@
+---
+{{ $.MarkdownHeader TemplatePath }}
+subcategory: "{{ $.ProductMetadata.DisplayName }}"
+description: |-
+  {{ if $.ExcludeRead }}Create{{ else }}Read{{ end }} an ephemeral {{ $.ProductMetadata.DisplayName }} {{ $.Name }}.
+---
+
+# {{ $.TerraformName }}
+
+{{ if $.ExcludeRead }}Creates{{ else }}Reads{{ end }} a {{ $.ProductMetadata.DisplayName }} {{ $.Name }} during a Terraform operation without persisting its returned values in plan or state files.
+
+Requires Terraform 1.11 or later. Ephemeral values can be used in supported contexts such as provider configurations and write-only resource arguments.
+See [Using ephemeral resources](../guides/using_ephemeral_resources.html.markdown).
+{{- if eq $.MinVersion "beta" }}
+~> This ephemeral resource requires the `google-beta` provider.
+{{- end }}
+{{- if $.References.Api }}
+See the [API reference]({{ $.References.Api }}) for service behavior and permissions.
+{{- end }}
+
+## Example Usage
+{{- range $sample := $.EphemeralSamples }}
+{{- range $i, $step := $sample.TestSteps }}
+{{- if or (and (eq $i 0) (not $sample.ExcludeBasicDoc)) $step.IncludeStepDoc }}
+
+### {{ $sample.Name }}
+
+```hcl
+{{ $step.DocumentationHCLText }}```
+{{- end }}
+{{- end }}
+{{- else }}
+
+```hcl
+ephemeral "{{ $.TerraformName }}" "example" {
+{{- if eq $.MinVersion "beta" }}
+  provider = google-beta
+{{- end }}
+{{- range $p := $.EphemeralModelProperties }}
+{{- if $p.IsEphemeralInput }}
+  {{ underscore $p.Name }} = {{ if ne $p.DefaultValue nil }}{{ $p.GoLiteral $p.DefaultValue }}{{ else }}"YOUR_{{ upper (underscore $p.Name) }}"{{ end }}
+{{- end }}
+{{- end }}
+}
+```
+{{- end }}
+
+## Argument Reference
+
+{{- range $p := $.EphemeralModelProperties }}
+{{- if $p.IsEphemeralInput }}
+
+* `{{ underscore $p.Name }}` - ({{ if $p.Required }}Required{{ else }}Optional{{ end }}) {{ $p.ResourceMetadata.FormatDocDescription $p.GetDescription true }}
+{{- if ne $p.DefaultValue nil }}
+  Defaults to `{{ $p.DefaultValue }}`.
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $.HasProject }}
+
+* `project` - (Optional) Project ID. Defaults to the provider project.
+{{- end }}
+{{- if $.HasRegion }}
+
+* `region` - (Optional) Region. Defaults to the provider region.
+{{- end }}
+{{- if $.HasZone }}
+
+* `zone` - (Optional) Zone. Defaults to the provider zone.
+{{- end }}
+
+## Attributes Reference
+
+{{- range $p := $.EphemeralModelProperties }}
+{{- if not $p.IsEphemeralInput }}
+{{- template "EphemeralDocField" dict "Property" $p "Path" (underscore $p.Name) }}
+{{- end }}
+{{- end }}
+
+{{- define "EphemeralDocField" }}
+{{- $p := .Property }}
+
+
+* `{{ .Path }}` - {{ $p.ResourceMetadata.FormatDocDescription $p.GetDescription true }}
+{{- if $p.Sensitive }}
+  This attribute is sensitive.
+{{- end }}
+{{- if $p.DeprecationMessage }}
+  **Deprecated:** {{ $p.DeprecationMessage }}
+{{- end }}
+{{- $path := .Path }}
+{{- range $child := $p.NestedProperties }}
+{{- template "EphemeralDocField" dict "Property" $child "Path" (printf "%s.%s" $path (underscore $child.Name)) }}
+{{- end }}
+{{- end }}
