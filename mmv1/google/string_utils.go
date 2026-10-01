@@ -18,6 +18,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -35,15 +36,24 @@ var (
 	format2RegexPlain     = regexp.MustCompile(`\{\{([[:word:]]+)\}\}`)
 )
 
+// underscoreCache memoizes Underscore. Its inputs are identifiers (field,
+// resource and product names), a small bounded set, but it is called millions
+// of times per run through Type.Lineage() recursion.
+var underscoreCache sync.Map // map[string]string
+
 // // Helper class to process and mutate strings.
 // class StringUtils
 // Converts string from camel case to underscore
 func Underscore(source string) string {
+	if cached, ok := underscoreCache.Load(source); ok {
+		return cached.(string)
+	}
 	tmp := acronymBoundaryRegexp.ReplaceAllString(source, "${1}_${2}")
 	tmp = wordBoundaryRegexp.ReplaceAllString(tmp, "${1}_${2}")
 	tmp = strings.ReplaceAll(tmp, "-", "_")
 	tmp = strings.ReplaceAll(tmp, ".", "_")
 	tmp = strings.ToLower(tmp)
+	underscoreCache.Store(source, tmp)
 	return tmp
 }
 
