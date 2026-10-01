@@ -95,7 +95,9 @@ clean-provider: check_safe_build
 				echo "---> Removing tracked files that will be regenerated..." && \
 				git ls-files -z | grep -z -v -E '(^\.git|^\.changelog|^\.agents/|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|docscheck\.sh$$|^\.whitesource$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples|^scripts/)' | xargs -0 -r rm -f && \
 				find . -mindepth 1 -type d -empty -not -path './.git' -not -path './.git/*' -delete && \
-				echo "---> clean-provider actions finished."; \
+				echo "---> Unstaging changes with git reset..." && \
+				git reset -q && \
+				echo "---> clean-provider actions finished. Changes have been unstaged."; \
 			fi \
 		) && echo "clean-provider target finished successfully."; \
 	fi
