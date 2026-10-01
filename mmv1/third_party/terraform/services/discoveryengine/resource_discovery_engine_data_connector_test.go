@@ -165,7 +165,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   entities {
-    entity_name = "knowledge_base"
+    entity_name = "knowledge"
     params = jsonencode({
       "inclusion_filters" : {
         "knowledgeBaseSysId" : [
@@ -252,7 +252,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   entities {
-    entity_name                = "knowledge_base"
+    entity_name                = "knowledge"
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
@@ -340,7 +340,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   entities {
-    entity_name                = "knowledge_base"
+    entity_name                = "knowledge"
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
