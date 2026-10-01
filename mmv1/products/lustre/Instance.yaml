@@ -58,8 +58,6 @@ custom_code:
   # Required so that the create encoder above does not also run on update; MMv1
   # falls back to `encoder` on the update path when `update_encoder` is unset.
   update_encoder: 'templates/terraform/update_encoder/lustre_instance.go.tmpl'
-custom_diff:
-  - 'lustreInstanceVersionUpgradeCustomDiff'
 samples:
   - name: lustre_instance_basic
     primary_resource_id: instance
@@ -464,6 +462,7 @@ properties:
       The API clears this field once the upgrade finishes, so it always reads
       back as empty on an idle instance.
     diff_suppress_func: 'lustreInstanceTargetVersionDiffSuppress'
+    is_missing_in_cai: true
   - name: uid
     type: String
     description: |-
