@@ -36,7 +36,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "location", "params", "state", "sync_mode", "update_time"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
@@ -72,7 +72,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "location", "params", "state", "sync_mode", "update_time"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context, "200"),
@@ -96,7 +96,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "location", "json_params", "state", "sync_mode", "update_time"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context, "300"),
@@ -115,7 +115,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "json_params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "location", "json_params", "state", "sync_mode", "update_time"},
 			},
 		},
 	})
@@ -129,23 +129,18 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
-  data_source_version          = 3
+  tag                          = "tf-test-tag-%{random_suffix}"
   params = {
     auth_type                  = "OAUTH_PASSWORD_GRANT"
     instance_uri               = "https://gcpconnector1.service-now.com/"
     client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
     client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
-    static_ip_enabled          = "false"
     user_account               = "connectorsuserqa@google.com"
     password                   = "SECRET_MANAGER_RESOURCE_NAME"
   }
   refresh_interval             = "86400s"
   entities {
     entity_name                = "catalog"
-    key_property_mappings = {
-      title       = "title"
-      description = "short_description"
-    }
     params = jsonencode({
       "inclusion_filters" : {
         "knowledgeBaseSysId" : [
@@ -165,7 +160,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   entities {
-    entity_name = "knowledge"
+    entity_name = "knowledge_base"
     params = jsonencode({
       "inclusion_filters" : {
         "knowledgeBaseSysId" : [
@@ -175,42 +170,11 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   static_ip_enabled            = false
-  destination_configs {
-    key = "url"
-    destinations {
-      host = "https://gcpconnector1.service-now.com/"
-      port = 123
-    }
-    params                     = jsonencode({
-      "destination_type": "private"
-    })
-  }
   incremental_refresh_interval = "21600s"
-  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
+  connector_modes              = ["DATA_INGESTION"]
   sync_mode                    = "PERIODIC"
   auto_run_disabled            = true
   incremental_sync_disabled    = true
-  action_config {
-    action_params = {
-      instance_uri  = "https://example.atlassian.net"
-      instance_id   = "unused"
-      client_id     = "unused"
-      client_secret = "unused"
-      auth_type     = "OAUTH"
-    }
-    create_bap_connection = true
-  }
-  bap_config {
-    supported_connector_modes = ["ACTIONS"]
-    enabled_actions = [
-      "create_issue",
-      "update_issue",
-      "change_issue_status",
-      "create_comment",
-      "update_comment",
-      "upload_attachment",
-    ]
-  }
 }
 `, context)
 }
@@ -227,6 +191,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
+  tag                          = "tf-test-tag-%{random_suffix}"
   params = {
     max_qps                    = "100"
   }
@@ -252,7 +217,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   entities {
-    entity_name                = "knowledge"
+    entity_name                = "knowledge_base"
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
@@ -262,42 +227,11 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   static_ip_enabled            = false
-  destination_configs {
-    key = "url"
-    destinations {
-      host = "https://gcpconnector1.service-now.com/"
-      port = 123
-    }
-    params                     = jsonencode({
-      "destination_type": "private"
-    })
-  }
   incremental_refresh_interval = "21600s"
-  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
+  connector_modes              = ["DATA_INGESTION"]
   sync_mode                    = "PERIODIC"
   auto_run_disabled            = false
   incremental_sync_disabled    = false
-  action_config {
-    action_params = {
-      instance_uri  = "https://example.atlassian.net"
-      instance_id   = "unused"
-      client_id     = "unused"
-      client_secret = "unused"
-      auth_type     = "OAUTH"
-    }
-    create_bap_connection = true
-  }
-  bap_config {
-    supported_connector_modes = ["ACTIONS"]
-    enabled_actions = [
-      "create_issue",
-      "update_issue",
-      "change_issue_status",
-      "create_comment",
-      "update_comment",
-      "upload_attachment",
-    ]
-  }
 }
 `, context)
 }
@@ -315,6 +249,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
+  tag                          = "tf-test-tag-%{random_suffix}"
   json_params = jsonencode({
     max_qps                    = "%{max_qps}"
   })
@@ -340,7 +275,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   entities {
-    entity_name                = "knowledge"
+    entity_name                = "knowledge_base"
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
@@ -350,42 +285,11 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   static_ip_enabled            = false
-  destination_configs {
-    key = "url"
-    destinations {
-      host = "https://gcpconnector1.service-now.com/"
-      port = 123
-    }
-    params                     = jsonencode({
-      "destination_type": "private"
-    })
-  }
   incremental_refresh_interval = "21600s"
-  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
+  connector_modes              = ["DATA_INGESTION"]
   sync_mode                    = "PERIODIC"
   auto_run_disabled            = false
   incremental_sync_disabled    = false
-  action_config {
-    action_params = {
-      instance_uri  = "https://example.atlassian.net"
-      instance_id   = "unused"
-      client_id     = "unused"
-      client_secret = "unused"
-      auth_type     = "OAUTH"
-    }
-    create_bap_connection = true
-  }
-  bap_config {
-    supported_connector_modes = ["ACTIONS"]
-    enabled_actions = [
-      "create_issue",
-      "update_issue",
-      "change_issue_status",
-      "create_comment",
-      "update_comment",
-      "upload_attachment",
-    ]
-  }
 }
 `, context)
 }
