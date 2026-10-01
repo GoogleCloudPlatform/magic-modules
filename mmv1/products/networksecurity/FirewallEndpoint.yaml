@@ -175,7 +175,9 @@ properties:
         default_from_api: true
         description: |
           The Palo Alto Networks content cloud region of the firewall endpoint,
-          for example `US_CENTRAL` or `CANADA`.
+          for example `US_CENTRAL` or `CANADA`. See
+          [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.firewallEndpoints#contentcloudregion)
+          for the list of supported regions.
       - name: httpPartialResponseBlocked
         type: Boolean
         min_version: beta
@@ -210,7 +212,7 @@ properties:
         description: |
           The WildFire region for the firewall endpoint, for example
           `UNITED_STATES` or `CANADA`. See
-          https://docs.paloaltonetworks.com/advanced-wildfire/administration/advanced-wildfire-overview/advanced-wildfire-deployments/advanced-wildfire-global-cloud
+          [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.firewallEndpoints#wildfireregion)
           for the list of supported regions.
       - name: wildfireRealtimeLookupDuration
         type: String
