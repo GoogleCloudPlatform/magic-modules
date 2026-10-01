@@ -218,6 +218,20 @@ func TestFieldMappingEphemeralFWTemplate(t *testing.T) {
 	}
 }
 
+func TestEphemeralNestedTransformMapping(t *testing.T) {
+	_, object := newEphemeralTestResource()
+	object.Properties[0].CustomFlattenEphemeral = "flattenEphemeralNestedValue"
+	wrapper := "ephemeral_field_mapping_test_wrapper.go.tmpl"
+	tmpl := parseEphemeralTemplate(t, wrapper, "templates/terraform/schema_property_ephemeral_fw.go.tmpl")
+	out, err := renderEphemeral(tmpl, wrapper, object)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "Transform: flattenEphemeralNestedValue,") {
+		t.Fatal("nested custom transform missing from field mapping")
+	}
+}
+
 func TestEphemeralUrlTemplate(t *testing.T) {
 	wrapperFile := "ephemeral_url_test_wrapper.go.tmpl"
 	tmpl := parseEphemeralTemplate(t, wrapperFile, "templates/terraform/ephemeral_url_fw.go.tmpl")

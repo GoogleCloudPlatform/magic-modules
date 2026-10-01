@@ -1,11 +1,71 @@
 package fwutils
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+func TestFlattenEphemeralValue_Transform(t *testing.T) {
+	mapping := EphemeralFieldMapping{
+		AttrType: types.ObjectType{AttrTypes: map[string]attr.Type{"value": types.StringType}},
+		Fields: map[string]EphemeralFieldMapping{
+			"value": {ApiName: "encoded", AttrType: types.StringType, Transform: func(v interface{}) (interface{}, error) {
+				return strings.ToUpper(v.(string)), nil
+			}},
+		},
+	}
+	got, diags := FlattenEphemeralValue(map[string]interface{}{"encoded": "hello"}, mapping)
+	if diags.HasError() {
+		t.Fatal(diags)
+	}
+	if !got.(types.Object).Attributes()["value"].Equal(types.StringValue("HELLO")) {
+		t.Fatal("nested transform was not applied")
+	}
+	mapping.Fields["value"] = EphemeralFieldMapping{
+		ApiName: "encoded", AttrType: types.StringType,
+		Transform: func(v interface{}) (interface{}, error) { return nil, fmt.Errorf("secret-value") },
+	}
+	got, diags = FlattenEphemeralValue(map[string]interface{}{"encoded": "secret-value"}, mapping)
+	if !diags.HasError() || got != nil {
+		t.Fatal("expected transformation error to propagate out of nested object")
+	}
+	if strings.Contains(fmt.Sprint(diags), "secret-value") {
+		t.Fatal("diagnostic exposed the raw secret or transformation error")
+	}
+}
+
+func TestFlattenEphemeralValue_MalformedResponse(t *testing.T) {
+	child := map[string]EphemeralFieldMapping{"enabled": {ApiName: "enabled", AttrType: types.BoolType}}
+	object := types.ObjectType{AttrTypes: map[string]attr.Type{"enabled": types.BoolType}}
+	for _, tc := range []struct {
+		name    string
+		raw     interface{}
+		mapping EphemeralFieldMapping
+	}{
+		{"string", true, EphemeralFieldMapping{AttrType: types.StringType}},
+		{"bool", "secret-value", EphemeralFieldMapping{AttrType: types.BoolType}},
+		{"integer suffix", "42secret-value", EphemeralFieldMapping{AttrType: types.Int64Type}},
+		{"object shape", "secret-value", EphemeralFieldMapping{AttrType: object, Fields: child}},
+		{"object child", map[string]interface{}{"enabled": "secret-value"}, EphemeralFieldMapping{AttrType: object, Fields: child}},
+		{"list child", []interface{}{map[string]interface{}{"enabled": "secret-value"}}, EphemeralFieldMapping{AttrType: types.ListType{ElemType: object}, Fields: child}},
+		{"set child", []interface{}{map[string]interface{}{"enabled": "secret-value"}}, EphemeralFieldMapping{AttrType: types.SetType{ElemType: object}, Fields: child}},
+		{"map child", map[string]interface{}{"entry": map[string]interface{}{"enabled": "secret-value"}}, EphemeralFieldMapping{AttrType: types.MapType{ElemType: object}, Fields: child}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, diags := FlattenEphemeralValue(tc.raw, tc.mapping)
+			if !diags.HasError() {
+				t.Fatal("expected malformed response diagnostic")
+			}
+			if strings.Contains(fmt.Sprint(diags), "secret-value") {
+				t.Fatal("diagnostic exposed raw response")
+			}
+		})
+	}
+}
 
 func TestFlattenEphemeralValue_Scalar(t *testing.T) {
 	cases := []struct {

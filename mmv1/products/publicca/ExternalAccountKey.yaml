@@ -92,6 +92,7 @@ properties:
     output: true
     deprecation_message: '`b64url_mac_key` is deprecated and will be removed in a future major release. Use `mac_key` instead.'
     custom_flatten: templates/terraform/custom_flatten/publicca_b64url_mac_key.go.tmpl
+    custom_flatten_ephemeral: flattenEphemeralPublicCAB64URLMacKey
   - name: MacKey
     type: String
     api_name: b64MacKey
@@ -101,3 +102,4 @@ properties:
     sensitive: true
     output: true
     custom_flatten: templates/terraform/custom_flatten/publicca_mac_key.go.tmpl
+    custom_flatten_ephemeral: flattenEphemeralPublicCAMacKey

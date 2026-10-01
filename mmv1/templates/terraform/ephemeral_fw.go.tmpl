@@ -209,6 +209,9 @@ func (p *googleEphemeral{{$.ResourceName}}) Open(ctx context.Context, req epheme
 {{ range $prop := $.EphemeralResponseProperties }}
 	{{ camelize $prop.Name "lower" }}Val, {{ camelize $prop.Name "lower" }}Diags := fwutils.FlattenEphemeralValue(res["{{$prop.ApiName}}"], {{template "FieldMappingEphemeralFW" $prop}})
 	resp.Diagnostics.Append({{ camelize $prop.Name "lower" }}Diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	data.{{ camelize $prop.Name "upper" }} = {{ camelize $prop.Name "lower" }}Val.(types.{{ $prop.GetFWType }})
 {{ end }}
 	if resp.Diagnostics.HasError() {

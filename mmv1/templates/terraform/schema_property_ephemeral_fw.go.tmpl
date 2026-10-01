@@ -206,6 +206,9 @@ fwutils.EphemeralRequestField{
 fwutils.EphemeralFieldMapping{
   ApiName: "{{.ApiName}}",
   AttrType: {{template "AttrTypeEphemeralFW" .}},
+  {{- if .CustomFlattenEphemeral }}
+  Transform: {{.CustomFlattenEphemeral}},
+  {{- end }}
   {{- if eq .Type "NestedObject" }}
   Fields: {{template "FieldMappingsEphemeralFW" .}},
   {{- else if and (eq .Type "Array") (eq .ItemType.Type "NestedObject") }}

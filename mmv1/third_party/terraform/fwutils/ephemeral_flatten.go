@@ -2,6 +2,7 @@ package fwutils
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -26,6 +27,9 @@ type EphemeralFieldMapping struct {
 	// (when AttrType is types.ListType/SetType/MapType). Keyed by Terraform
 	// attribute name; ignored for scalar AttrTypes.
 	Fields map[string]EphemeralFieldMapping
+	// Transform runs before type conversion, including for a missing API value.
+	// It returns API-shaped data, not SDK ResourceData or Framework values.
+	Transform func(interface{}) (interface{}, error)
 }
 
 // FlattenEphemeralValue converts a raw JSON value into an attr.Value matching
@@ -34,6 +38,17 @@ type EphemeralFieldMapping struct {
 // mapping.AttrType's value type (e.g. types.StringType -> types.String), so
 // callers can safely type-assert it into a generated model struct field.
 func FlattenEphemeralValue(raw interface{}, mapping EphemeralFieldMapping) (attr.Value, diag.Diagnostics) {
+	if mapping.Transform != nil {
+		var err error
+		raw, err = mapping.Transform(raw)
+		if err != nil {
+			var diags diag.Diagnostics
+			// Transformation errors may include secret material. Identify the field,
+			// but do not put the raw value or arbitrary error text in diagnostics.
+			diags.AddError("Error transforming API response", fmt.Sprintf("Could not transform API field %q.", mapping.ApiName))
+			return nil, diags
+		}
+	}
 	switch t := mapping.AttrType.(type) {
 	case types.ObjectType:
 		return flattenEphemeralObject(raw, t, mapping.Fields)
@@ -53,6 +68,9 @@ func flattenEphemeralObject(raw interface{}, t types.ObjectType, fields map[stri
 
 	m, ok := raw.(map[string]interface{})
 	if !ok {
+		if raw != nil {
+			return unexpectedEphemeralType(raw, t)
+		}
 		return types.ObjectNull(t.AttrTypes), diags
 	}
 
@@ -61,6 +79,9 @@ func flattenEphemeralObject(raw interface{}, t types.ObjectType, fields map[stri
 		val, d := FlattenEphemeralValue(m[fieldMapping.ApiName], fieldMapping)
 		diags.Append(d...)
 		attrs[attrName] = val
+	}
+	if diags.HasError() {
+		return nil, diags
 	}
 
 	objVal, d := types.ObjectValue(t.AttrTypes, attrs)
@@ -73,6 +94,9 @@ func flattenEphemeralList(raw interface{}, t types.ListType, elemMapping map[str
 
 	arr, ok := raw.([]interface{})
 	if !ok {
+		if raw != nil {
+			return unexpectedEphemeralType(raw, t)
+		}
 		return types.ListNull(t.ElemType), diags
 	}
 
@@ -82,6 +106,9 @@ func flattenEphemeralList(raw interface{}, t types.ListType, elemMapping map[str
 		val, d := FlattenEphemeralValue(item, mapping)
 		diags.Append(d...)
 		values = append(values, val)
+	}
+	if diags.HasError() {
+		return nil, diags
 	}
 
 	listVal, d := types.ListValue(t.ElemType, values)
@@ -94,6 +121,9 @@ func flattenEphemeralSet(raw interface{}, t types.SetType, elemMapping map[strin
 
 	arr, ok := raw.([]interface{})
 	if !ok {
+		if raw != nil {
+			return unexpectedEphemeralType(raw, t)
+		}
 		return types.SetNull(t.ElemType), diags
 	}
 
@@ -103,6 +133,9 @@ func flattenEphemeralSet(raw interface{}, t types.SetType, elemMapping map[strin
 		val, d := FlattenEphemeralValue(item, mapping)
 		diags.Append(d...)
 		values = append(values, val)
+	}
+	if diags.HasError() {
+		return nil, diags
 	}
 
 	setVal, d := types.SetValue(t.ElemType, values)
@@ -115,6 +148,9 @@ func flattenEphemeralMap(raw interface{}, t types.MapType, valueMapping map[stri
 
 	m, ok := raw.(map[string]interface{})
 	if !ok {
+		if raw != nil {
+			return unexpectedEphemeralType(raw, t)
+		}
 		return types.MapNull(t.ElemType), diags
 	}
 
@@ -124,6 +160,9 @@ func flattenEphemeralMap(raw interface{}, t types.MapType, valueMapping map[stri
 		val, d := FlattenEphemeralValue(v, mapping)
 		diags.Append(d...)
 		values[k] = val
+	}
+	if diags.HasError() {
+		return nil, diags
 	}
 
 	mapVal, d := types.MapValue(t.ElemType, values)
@@ -141,8 +180,6 @@ func flattenEphemeralScalar(raw interface{}, t attr.Type) (attr.Value, diag.Diag
 			return types.StringNull(), diags
 		case string:
 			return types.StringValue(v), diags
-		default:
-			return types.StringValue(fmt.Sprintf("%v", v)), diags
 		}
 	case types.BoolType:
 		switch v := raw.(type) {
@@ -158,8 +195,7 @@ func flattenEphemeralScalar(raw interface{}, t attr.Type) (attr.Value, diag.Diag
 		case float64:
 			return types.Int64Value(int64(v)), diags
 		case string:
-			var i int64
-			if _, err := fmt.Sscanf(v, "%d", &i); err == nil {
+			if i, err := strconv.ParseInt(v, 10, 64); err == nil {
 				return types.Int64Value(i), diags
 			}
 		}
@@ -170,16 +206,20 @@ func flattenEphemeralScalar(raw interface{}, t attr.Type) (attr.Value, diag.Diag
 		case float64:
 			return types.Float64Value(v), diags
 		case string:
-			var f float64
-			if _, err := fmt.Sscanf(v, "%g", &f); err == nil {
+			if f, err := strconv.ParseFloat(v, 64); err == nil {
 				return types.Float64Value(f), diags
 			}
 		}
 	}
 
+	return unexpectedEphemeralType(raw, t)
+}
+
+func unexpectedEphemeralType(raw interface{}, t attr.Type) (attr.Value, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	diags.AddError(
 		"Unexpected API response type",
-		fmt.Sprintf("Could not convert value %#v (%T) into attribute type %s. Please report this issue to the provider developers.", raw, raw, t.String()),
+		fmt.Sprintf("Could not convert API value of type %T into attribute type %s.", raw, t.String()),
 	)
 	return nil, diags
 }
