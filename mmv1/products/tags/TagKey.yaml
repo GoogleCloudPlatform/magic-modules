@@ -32,6 +32,8 @@ id_format: tagKeys/{{name}}
 import_format:
   - tagKeys/{{name}}
   - '{{name}}'
+  - tagKeys/{{name}} <purpose-data-key>=<purpose-data-value>
+  - '{{name}} <purpose-data-key>=<purpose-data-value>'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -48,6 +50,7 @@ async:
 autogen_async: true
 exclude_tgc: true
 custom_code:
+  custom_import: templates/terraform/custom_import/tags_tag_key.go.tmpl
 samples:
   - name: tag_key_basic
     primary_resource_id: key
