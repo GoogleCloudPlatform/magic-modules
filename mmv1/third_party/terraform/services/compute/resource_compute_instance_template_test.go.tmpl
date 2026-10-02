@@ -2226,6 +2226,7 @@ func TestAccComputeInstanceTemplate_schedulingSkipGuestOSShutdown(t *testing.T) 
 		},
 	})
 }
+{{- end }}
 
 func TestAccComputeInstanceTemplate_schedulingPreemptionNoticeDuration(t *testing.T) {
 	t.Parallel()
@@ -2255,7 +2256,6 @@ func TestAccComputeInstanceTemplate_schedulingPreemptionNoticeDuration(t *testin
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstanceTemplate_dynamicNic(t *testing.T) {
 	t.Parallel()
@@ -6041,6 +6041,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, context)
 }
+{{- end }}
 
 func testAccComputeInstanceTemplate_schedulingPreemptionNoticeDuration(suffix string) string {
 	return fmt.Sprintf(`
@@ -6086,8 +6087,6 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-
-{{- end }}
 
 func testAccComputeInstanceTemplate_keyRevocationActionType(context map[string]interface{}) string {
 	return acctest.Nprintf(`
