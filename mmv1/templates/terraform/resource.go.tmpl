@@ -322,7 +322,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return err
     }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -590,8 +590,8 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+        if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
+            return nil, fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
         }
 {{- end }}
 
@@ -694,7 +694,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -986,7 +986,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         return err
     }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
         return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -1106,7 +1106,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
             return err
         }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
+        if strings.Contains(getUrl, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
             return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
         }
 {{- end }}
@@ -1201,7 +1201,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
             return err
         }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+        if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
             return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
         }
 {{- end }}
@@ -1358,7 +1358,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return err
     }
 {{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RepUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
