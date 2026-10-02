@@ -28,7 +28,6 @@ service/aiplatform-dataset:
 service/aiplatform-evaluation:
   resources:
   - google_vertex_ai_evaluation_.*
-  - google_vertex_ai_online_evaluator
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*

@@ -69,9 +69,9 @@ samples:
 parameters:
   - name: region
     type: String
-    description: The region of the OnlineEvaluator (e.g. us-central1).
+    description: The region of the OnlineEvaluator (e.g. us-central1). If
+      unset, the provider's region is used.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: name
