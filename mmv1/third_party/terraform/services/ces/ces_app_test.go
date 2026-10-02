@@ -24,6 +24,11 @@ func TestAccCESApp_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCESApp_cesAppBasicExample_full(ctx),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "locked", "true"),
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "default_channel_profile.0.web_widget_config.0.security_settings.0.enable_public_access", "true"),
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "default_channel_profile.0.web_widget_config.0.security_settings.0.allowed_origins.0", "https://example.com"),
+				),
 			},
 			{
 				ResourceName:            "google_ces_app.ces_app_basic",
@@ -38,6 +43,12 @@ func TestAccCESApp_update(t *testing.T) {
 						plancheck.ExpectResourceAction("google_ces_app.ces_app_basic", plancheck.ResourceActionUpdate),
 					},
 				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "locked", "false"),
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "default_channel_profile.0.web_widget_config.0.security_settings.0.enable_public_access", "false"),
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "default_channel_profile.0.web_widget_config.0.security_settings.0.enable_origin_check", "true"),
+					resource.TestCheckResourceAttr("google_ces_app.ces_app_basic", "default_channel_profile.0.web_widget_config.0.security_settings.0.enable_recaptcha", "true"),
+				),
 			},
 			{
 				ResourceName:            "google_ces_app.ces_app_basic",
@@ -79,6 +90,7 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Basic CES App example"
   display_name = "tf-test-my-app-%{random_suffix}"
   pinned = false
+  locked = true
   tool_execution_mode = "SEQUENTIAL"
 
   language_settings {
@@ -138,6 +150,10 @@ resource "google_ces_app" "ces_app_basic" {
       disable_conversation_logging = true
       retention_window = "86400s"
     }
+
+    metric_analysis_settings {
+      llm_metrics_opted_out = false
+    }
   }
 
   model_settings {
@@ -150,11 +166,17 @@ resource "google_ces_app" "ces_app_basic" {
       turn_level_metrics_thresholds {
         semantic_similarity_success_threshold        = 3
         overall_tool_invocation_correctness_threshold = 1.0
+        semantic_similarity_channel                   = "TEXT"
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 1.0
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "ALLOW"
+      }
     }
+    golden_hallucination_metric_behavior   = "ENABLED"
+    scenario_hallucination_metric_behavior = "ENABLED"
   }
 
   variable_declarations {
@@ -219,6 +241,12 @@ resource "google_ces_app" "ces_app_basic" {
       modality = "CHAT_ONLY"
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
+      security_settings {
+        enable_public_access = true
+        enable_origin_check  = false
+        enable_recaptcha     = false
+        allowed_origins      = ["https://example.com"]
+      }
     }
   }
 
@@ -288,6 +316,7 @@ resource "google_ces_app" "ces_app_basic" {
   description = "Updated CES App example"
   display_name = "tf-test-my-app%{random_suffix}"
   pinned = true
+  locked = false
   tool_execution_mode = "PARALLEL"
 
   language_settings {
@@ -347,6 +376,10 @@ resource "google_ces_app" "ces_app_basic" {
       disable_conversation_logging = true
       retention_window = "172800s"
     }
+
+    metric_analysis_settings {
+      llm_metrics_opted_out = true
+    }
   }
 
   model_settings {
@@ -359,11 +392,17 @@ resource "google_ces_app" "ces_app_basic" {
       turn_level_metrics_thresholds {
         semantic_similarity_success_threshold        = 4
         overall_tool_invocation_correctness_threshold = 0.1
+        semantic_similarity_channel                   = "AUDIO"
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 0.1
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "FAIL"
+      }
     }
+    golden_hallucination_metric_behavior   = "DISABLED"
+    scenario_hallucination_metric_behavior = "DISABLED"
   }
 
   variable_declarations {
@@ -428,6 +467,12 @@ resource "google_ces_app" "ces_app_basic" {
       modality = "CHAT_ONLY"
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
+      security_settings {
+        enable_public_access = false
+        enable_origin_check  = true
+        enable_recaptcha     = true
+        allowed_origins      = ["https://example.com", "https://example.org"]
+      }
     }
     whatsapp_config {
       waba_id = "123456789012345"
@@ -468,6 +513,122 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   # Root agent should not be specified when creating an app
+}
+`, context)
+}
+
+func TestAccCESApp_synthesizeSpeechConfig(t *testing.T) {
+	t.Parallel()
+	ctx := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESAppDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESApp_synthesizeSpeechConfig_initial(ctx),
+			},
+			{
+				ResourceName:            "google_ces_app.ces_app_tts",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				Config: testAccCESApp_synthesizeSpeechConfig_update(ctx),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_app.ces_app_tts", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_app.ces_app_tts",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+		},
+	})
+}
+
+func testAccCESApp_synthesizeSpeechConfig_initial(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_tts" {
+  app_id       = "tf-test-app-tts-%{random_suffix}"
+  location     = "us"
+  description  = "CES App with Gemini TTS model and instruction"
+  display_name = "tf-test-my-app-tts-%{random_suffix}"
+
+  language_settings {
+    default_language_code       = "en-US"
+    supported_language_codes    = ["es-ES"]
+    enable_multilingual_support = true
+    fallback_action             = "escalate"
+  }
+
+  audio_processing_config {
+    synthesize_speech_configs {
+      language_code = "en-US"
+      voice         = "en-US-Standard-A"
+      speaking_rate = 1.0
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Speak clearly in a professional tone."
+    }
+    synthesize_speech_configs {
+      language_code = "es-ES"
+      voice         = "es-ES-Standard-A"
+      speaking_rate = 0.95
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla claramente."
+    }
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+`, context)
+}
+
+func testAccCESApp_synthesizeSpeechConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_tts" {
+  app_id       = "tf-test-app-tts-%{random_suffix}"
+  location     = "us"
+  description  = "CES App with updated Gemini TTS model and instruction"
+  display_name = "tf-test-my-app-tts-%{random_suffix}"
+
+  language_settings {
+    default_language_code       = "en-US"
+    supported_language_codes    = ["es-ES"]
+    enable_multilingual_support = true
+    fallback_action             = "escalate"
+  }
+
+  audio_processing_config {
+    synthesize_speech_configs {
+      language_code = "en-US"
+      voice         = "en-US-Standard-A"
+      speaking_rate = 1.05
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Speak in an updated friendly tone."
+    }
+    synthesize_speech_configs {
+      language_code = "es-ES"
+      voice         = "es-ES-Standard-A"
+      speaking_rate = 1.0
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla con tono amigable."
+    }
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
 }
 `, context)
 }

@@ -1724,4 +1724,86 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
+
+// Regression test for https://github.com/hashicorp/terraform-provider-google/issues/22197
+// Verifies no permadiff occurs when network_config is set with enable_public_ip = false (the default).
+func TestAccAlloydbInstance_networkConfigNoPublicIpNoDiff(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	networkName := servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+
+	context := map[string]interface{}{
+		"random_suffix": suffix,
+		"network_name":  networkName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create an instance with network_config.enable_public_ip explicitly set to false.
+				Config: testAccAlloydbInstance_networkConfigPublicIpDisabled(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_outbound_public_ip", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+			{
+				// Apply the same config again — expect no diff (regression check for permadiff).
+				Config:             testAccAlloydbInstance_networkConfigPublicIpDisabled(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_networkConfigPublicIpDisabled(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+
+  network_config {
+    enable_public_ip          = false
+    enable_outbound_public_ip = false
+  }
+
+  database_flags = {
+    "password.enforce_complexity" = "true"
+  }
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
 {{- end }}

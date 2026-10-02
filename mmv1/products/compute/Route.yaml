@@ -104,10 +104,12 @@ samples:
           backend_name: 'compute-backend'
           route_name: 'route-ilb'
         test_vars_overrides:
-          # for backward compatible
-          producer_name: '"producer" + randomSuffix'
-          # for backward compatible
-          consumer_name: '"consumer" + randomSuffix'
+          # google_compute_network_peering.name is validated client-side by
+          # verify.ValidateGCEName (max 63 chars), and the peering names in this
+          # sample are built from both network names. Keep these short so that
+          # the rendered peering name still fits.
+          producer_name: '"tf-test-prod" + randomSuffix'
+          consumer_name: '"tf-test-cons" + randomSuffix'
 parameters:
 properties:
   - name: 'destRange'

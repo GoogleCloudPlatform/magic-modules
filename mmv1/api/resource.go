@@ -34,6 +34,19 @@ import (
 const RELATIVE_MAGICIAN_LOCATION = "mmv1/"
 const GITHUB_BASE_URL = "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/" + RELATIVE_MAGICIAN_LOCATION
 
+// Regular expressions shared by Resource helpers. Compiled once at init rather
+// than per call, as these helpers are invoked from templates for every resource.
+var (
+	// {{name}} markers in id/url formats.
+	fieldMarkerRegexp = regexp.MustCompile(`\{\{(\w+)\}\}`)
+	// {{name}} or {{%name}} markers in IAM url/import formats.
+	iamFieldMarkerRegexp = regexp.MustCompile(`\{\{%?(\w+)\}\}`)
+	// {{ name }} markers, tolerating surrounding whitespace.
+	looseFieldMarkerRegexp = regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+	// "key": entries in an extra_schema_entry file.
+	schemaEntryKeyRegexp = regexp.MustCompile(`"([^"]+)"\s*:`)
+)
+
 type Resource struct {
 	Name string
 
@@ -781,7 +794,7 @@ func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "name" }) {
 		keys = append(keys, "name")
 	}
-	markers := regexp.MustCompile(`\{\{(\w+)\}\}`).FindAllStringSubmatch(r.IdFormat, -1)
+	markers := fieldMarkerRegexp.FindAllStringSubmatch(r.IdFormat, -1)
 	if len(markers) > 0 {
 		tail := markers[len(markers)-1][1]
 		if !slices.Contains(keys, tail) {
@@ -801,7 +814,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy || p.WriteOnly
+		return p.WriteOnly
 	})
 }
 
@@ -1478,7 +1491,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	}
 
 	// short id: {{project}}/{{zone}}/{{name}}
-	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
+	fieldMarkers := fieldMarkerRegexp.FindAllString(idFormats[0], -1)
 	shortIdFormat := strings.Join(fieldMarkers, "/")
 
 	// short ids without fields with provider-level defaults:
@@ -1672,7 +1685,7 @@ func (r Resource) IamResourceUri() string {
 
 // For example: "projects/%s/schemas/%s"
 func (r Resource) IamResourceUriFormat() string {
-	return regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(r.IamResourceUri(), "%s")
+	return iamFieldMarkerRegexp.ReplaceAllString(r.IamResourceUri(), "%s")
 }
 
 // For example: the uri "projects/{{project}}/schemas/{{name}}"
@@ -1700,7 +1713,7 @@ func (r Resource) IamResourceUriStringQualifiers() string {
 // For example, for the url "projects/{{project}}/schemas/{{schema}}",
 // the identifiers are "project", "schema".
 func (r Resource) ExtractIdentifiers(url string) []string {
-	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
+	matches := iamFieldMarkerRegexp.FindAllStringSubmatch(url, -1)
 	var result []string
 	for _, match := range matches {
 		result = append(result, match[1])
@@ -1838,6 +1851,25 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
+// FirstRunnableTestConfig is FirstTestConfig plus skip_test. List-query tests
+// use this so they do not apply a skipped sample as setup.
+func (r Resource) FirstRunnableTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || sample.SkipTest != "" || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) SamplePrimaryResourceId() string {
 	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
@@ -1885,7 +1917,7 @@ func (r Resource) IamImportFormatTemplate() string {
 func (r Resource) IamImportFormat() string {
 	importFormat := r.IamImportFormatTemplate()
 
-	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
+	importFormat = iamFieldMarkerRegexp.ReplaceAllString(importFormat, "%s")
 	return strings.ReplaceAll(importFormat, r.ProductMetadata.Version.BaseUrl, "")
 }
 
@@ -2439,7 +2471,7 @@ func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
 
 func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 	// Create regex to match anything between {{ and }}
-	re := regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+	re := looseFieldMarkerRegexp
 
 	// Find all matches in the template URL
 	matches := re.FindAllStringSubmatch(templateURL, -1)
@@ -2591,7 +2623,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide {
 			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}
@@ -2620,7 +2652,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		if err != nil {
 			log.Printf("Warning: failed to read extra_schema_entry file %s: %v", r.CustomCode.ExtraSchemaEntry, err)
 		} else {
-			re := regexp.MustCompile(`"([^"]+)"\s*:`)
+			re := schemaEntryKeyRegexp
 			matches := re.FindAllStringSubmatch(string(b), -1)
 			for _, match := range matches {
 				if len(match) > 1 {
