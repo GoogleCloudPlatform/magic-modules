@@ -616,7 +616,10 @@ properties:
                     type: String
                     description: |-
                       Name of the environment variable. Must be a C_IDENTIFIER, and may not exceed 32768 characters.
+                      The name `PORT` is reserved and set automatically by Cloud Run; use `ports.container_port` instead.
                     required: true
+                    validation:
+                      function: 'validation.StringNotInSlice([]string{"PORT"}, false)'
                   - name: 'value'
                     type: String
                     # env is a set.
