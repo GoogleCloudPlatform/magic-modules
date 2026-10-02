@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -17,9 +18,10 @@ func DataSourceIAMBetaWorkloadIdentityPoolOpenIdConfig() *schema.Resource {
 		Read: dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead,
 		Schema: map[string]*schema.Schema{
 			"resource_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The OIDC discovery URI.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsURLWithHTTPS,
+				Description:  "The OIDC discovery URI.",
 			},
 			"issuer": {
 				Type:        schema.TypeString,
@@ -71,6 +73,9 @@ func dataSourceIAMBetaWorkloadIdentityPoolOpenIdConfigRead(d *schema.ResourceDat
 	}
 
 	url := d.Get("resource_name").(string)
+	if err := validateWorkloadIdentityPoolURL(url); err != nil {
+		return err
+	}
 	// We cannot use standard provider transport (transport_tpg.SendRequest) here because
 	// the OIDC discovery endpoint (/.well-known/openid-configuration) is a public, unauthenticated API.
 	// If the provider transport is used, it attaches an OAuth Bearer token to the request which
