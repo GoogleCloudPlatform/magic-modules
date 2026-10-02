@@ -358,5 +358,7 @@ properties:
           enum_values:
             - AFRICA_SOUTH1
             - ME_CENTRAL1
+            - EUROPE_WEST3
+            - US_EAST5
         min_size: 1
         max_size: 1
