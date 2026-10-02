@@ -492,7 +492,12 @@ service/gce-rollout-plan:
   - google_compute_rollout_plan
 service/gemini:
   resources:
-  - google_gemini_.*
+  - google_gemini_code_repository_index
+  - google_gemini_repository_group.*
+  - google_gemini_.*_setting(_binding)?
+service/geminidataanalytics:
+  resources:
+  - google_gemini_data_analytics_.*
 service/gkebackup:
   resources:
   - google_gke_backup_.*
