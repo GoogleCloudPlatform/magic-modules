@@ -32,6 +32,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 mutex: tagBindings/{{parent}}
+# tagBindings.list is scoped by a ?parent= query parameter naming the *bound*
+# resource, so there is no way to enumerate bindings globally the way a sweeper
+# needs to. Bindings are reclaimed when either end goes away: the resource they
+# are attached to, or the TagValue once it is unbound.
 exclude_sweeper: true
 async:
   type: OpAsync

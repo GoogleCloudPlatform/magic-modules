@@ -37,6 +37,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 mutex: tagValues/{{parent}}
+# tagValues.list is scoped by a ?parent= query parameter naming the TagKey, and
+# the generated sweeper truncates its list URL at the first "?". TagValues are
+# swept by the handwritten TagKey sweeper in
+# third_party/terraform/services/tags/resource_tags_tag_key_sweeper.go, which
+# has to delete them before their parent key anyway.
 exclude_sweeper: true
 async:
   type: OpAsync
