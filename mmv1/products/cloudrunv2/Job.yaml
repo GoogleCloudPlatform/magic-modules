@@ -308,6 +308,12 @@ properties:
       The sum of job name and token length must be fewer than 63 characters.
     conflicts:
       - run_execution_token
+    # The API drops this create_execution token from the Job as soon as an
+    # execution is created any other way - jobs:run, a Cloud Scheduler trigger,
+    # the console - so the response is not authoritative for what the
+    # configuration asked for. Reading it back clears the configured value from
+    # state, and every later plan proposes an update to put it back.
+    ignore_read: true
   - name: runExecutionToken
     type: String
     description: |-
@@ -315,6 +321,9 @@ properties:
       The sum of job name and token length must be fewer than 63 characters.
     conflicts:
       - start_execution_token
+    # Cleared by out-of-band executions in the same way; see
+    # startExecutionToken above.
+    ignore_read: true
   - name: template
     type: NestedObject
     description: |
