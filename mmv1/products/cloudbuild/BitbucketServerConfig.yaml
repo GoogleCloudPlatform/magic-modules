@@ -126,6 +126,7 @@ properties:
     description: |
       Immutable. API Key that will be attached to webhook. Once this field has been set, it cannot be changed.
       Changing this field will result in deleting/ recreating the resource.
+    sensitive: true
     immutable: true
   - name: connectedRepositories
     type: Array
