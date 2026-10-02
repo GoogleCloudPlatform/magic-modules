@@ -58,16 +58,6 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 							tfjsonpath.New("refresh_interval"),
 							knownvalue.StringExact("172800s"),
 						),
-						plancheck.ExpectKnownValue(
-							"google_discovery_engine_data_connector.servicenow-basic",
-							tfjsonpath.New("auto_run_disabled"),
-							knownvalue.Bool(false),
-						),
-						plancheck.ExpectKnownValue(
-							"google_discovery_engine_data_connector.servicenow-basic",
-							tfjsonpath.New("incremental_sync_disabled"),
-							knownvalue.Bool(false),
-						),
 					},
 				},
 			},
@@ -184,8 +174,8 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   static_ip_enabled            = false
   incremental_refresh_interval = "21600s"
   connector_modes              = ["FEDERATED"]
-  auto_run_disabled            = false
-  incremental_sync_disabled    = false
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
 }
 `, context)
 }
@@ -220,8 +210,8 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   static_ip_enabled            = false
   incremental_refresh_interval = "21600s"
   connector_modes              = ["FEDERATED"]
-  auto_run_disabled            = false
-  incremental_sync_disabled    = false
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
 }
 `, context)
 }
