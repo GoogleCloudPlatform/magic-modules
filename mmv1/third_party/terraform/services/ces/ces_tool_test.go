@@ -763,7 +763,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_agent" "target_agent" {
-  agent_id     = "target-agent-%{random_suffix}"
+  agent_id     = "tf-test-target-agent-%{random_suffix}"
   location     = "us"
   app          = google_ces_app.my-app.app_id
   display_name = "Target Agent"
@@ -797,7 +797,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_agent" "target_agent" {
-  agent_id     = "target-agent-%{random_suffix}"
+  agent_id     = "tf-test-target-agent-%{random_suffix}"
   location     = "us"
   app          = google_ces_app.my-app.app_id
   display_name = "Target Agent"
