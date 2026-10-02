@@ -1,0 +1,22 @@
+// initiateDelete only starts the deletion: its operation completes while the binding is still
+// in the DELETION_INITIATED state. The API removes the binding once it has stopped protecting
+// the resources in the binding's scope. Wait for the binding to be removed, so that the
+// deletion is complete when Terraform reports it, and so that the parent policy (which the API
+// refuses to delete while it still has bindings) can be deleted afterwards.
+pollReadAutoProtectionPolicyBinding := func() (map[string]interface{}, error) {
+	readUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
+	if err != nil {
+		return nil, err
+	}
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    readUrl,
+		UserAgent: userAgent,
+	})
+}
+err = transport_tpg.PollingWaitTime(pollReadAutoProtectionPolicyBinding, transport_tpg.PollCheckForAbsence, "Waiting for {{$.Name}} to be removed", d.Timeout(schema.TimeoutDelete), 1)
+if err != nil {
+	return fmt.Errorf("Error waiting for {{$.Name}} %q to be removed: %s", d.Id(), err)
+}
