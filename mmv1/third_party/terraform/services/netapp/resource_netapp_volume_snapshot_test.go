@@ -70,7 +70,7 @@ resource "google_netapp_volume_snapshot" "test_snapshot" {
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
   description = "This is a test description"
-  name = "testvolumesnap%{random_suffix}"
+  name = "tf-test-testvolumesnap%{random_suffix}"
   labels = {
 	key= "test"
 	value= "snapshot"
@@ -107,7 +107,7 @@ resource "google_netapp_volume_snapshot" "test_snapshot" {
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
   description = "This is a update description"
-  name = "testvolumesnap%{random_suffix}"
+  name = "tf-test-testvolumesnap%{random_suffix}"
   labels = {
 	key= "test"
 	value= "snapshot_update"
@@ -119,7 +119,7 @@ resource "google_netapp_volume_snapshot" "test_snapshot2" {
 	location = google_netapp_volume.default.location
 	volume_name = google_netapp_volume.default.name
 	description = "This is a update description"
-	name = "testvolumesnap2%{random_suffix}"
+	name = "tf-test-testvolumesnap2%{random_suffix}"
 }
 
 data "google_compute_network" "default" {
