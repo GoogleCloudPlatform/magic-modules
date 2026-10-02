@@ -37,7 +37,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "location", "params", "state", "sync_mode", "update_time"},
+				ImportStateVerifyIgnore: []string{"auto_run_disabled", "collection_display_name", "collection_id", "incremental_sync_disabled", "location", "params", "state", "update_time"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
@@ -67,7 +67,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "location", "params", "state", "sync_mode", "update_time"},
+				ImportStateVerifyIgnore: []string{"auto_run_disabled", "collection_display_name", "collection_id", "incremental_sync_disabled", "location", "params", "update_time"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context, "tenant_id_3"),
@@ -92,7 +92,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "json_params", "location", "params", "state", "sync_mode", "update_time"},
+				ImportStateVerifyIgnore: []string{"auto_run_disabled", "collection_display_name", "collection_id", "incremental_sync_disabled", "json_params", "location", "params", "update_time"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_updateJsonParams(context, "tenant_id_4"),
@@ -112,7 +112,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"action_state", "auto_run_disabled", "collection_display_name", "collection_id", "errors", "incremental_sync_disabled", "json_params", "location", "params", "state", "sync_mode", "update_time"},
+				ImportStateVerifyIgnore: []string{"auto_run_disabled", "collection_display_name", "collection_id", "incremental_sync_disabled", "json_params", "location", "params", "update_time"},
 			},
 		},
 	})
