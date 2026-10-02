@@ -211,6 +211,9 @@ properties:
         send_empty_value: true
         description: |
           Indicates whether WildFire is enabled for the firewall endpoint.
+          Enabling WildFire requires accepting the WildFire end-user license
+          agreement (EULA) for the endpoint's billing project; see
+          [Configure WildFire](https://docs.cloud.google.com/firewall/docs/configure-wildfire).
       - name: wildfireRegion
         type: String
         default_from_api: true
@@ -222,6 +225,7 @@ properties:
       - name: wildfireRealtimeLookupDuration
         type: String
         default_from_api: true
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
         description: |
           The duration for which the firewall endpoint waits for a real-time
           signature lookup response from the WildFire cloud before taking the
@@ -245,6 +249,7 @@ properties:
           - name: maxAnalysisDuration
             type: String
             default_from_api: true
+            diff_suppress_func: 'tpgresource.DurationDiffSuppress'
             description: |
               The maximum duration for which the firewall endpoint holds a file
               while waiting for an inline cloud analysis verdict before taking

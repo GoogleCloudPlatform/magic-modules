@@ -253,10 +253,10 @@ resource "google_network_security_firewall_endpoint" "foobar" {
   wildfire_settings {
     enabled                                 = false
     wildfire_region                         = "CANADA"
-    wildfire_realtime_lookup_duration       = "2s"
+    wildfire_realtime_lookup_duration       = "0.5s"
     wildfire_realtime_lookup_timeout_action = "DENY"
     wildfire_inline_cloud_analysis_settings {
-      max_analysis_duration               = "60s"
+      max_analysis_duration               = "60.5s"
       timeout_action                      = "DENY"
       submission_timeout_logging_disabled = false
     }
