@@ -134,7 +134,6 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret = google_secret_manager_secret.secret-basic.name
 
   secret_data = "my-tf-test-secret%{random_suffix}"
-  enabled     = true
 }
 `, context)
 }
