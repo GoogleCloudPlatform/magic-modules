@@ -90,6 +90,7 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
           principal_selector = "CLIENT_CERT_URI_SAN"
 
           principal {
+            ignore_case = {{index $.Vars "not_sources_principal_ignore_case"}}
             exact = "{{index $.Vars "not_sources_principal"}}"
           }
         }
@@ -104,6 +105,7 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
           principal_selector = "CLIENT_CERT_URI_SAN"
           
           principal {
+            ignore_case = {{index $.Vars "sources_principal_ignore_case"}}
             exact = "{{index $.Vars "sources_principal"}}"
           }
         }
@@ -113,10 +115,18 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
     to {
       operations {
         snis {
-          exact = "{{index $.Vars "to_operations_snis_exact"}}"
+          ignore_case = false
+          contains = "/beta/"
+        }
+      }
+      not_operations {
+        snis {
+          ignore_case = false
+          contains = "/beta/"
         }
       }
     }
+    when = "request.host.endsWith('.example.com')"
   }
 
   labels = {
