@@ -1150,6 +1150,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(1, 36135),
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("0"),
 										Description:  `The number of days to retain the final backup after the instance deletion. The valid range is between 1 and 365. For instances managed by BackupDR, the valid range is between 1 day and 99 years. The final backup will be purged at (time_of_instance_deletion + retention_days).`,
 									},
 								},
@@ -1174,6 +1175,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(1, 20),
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("0"),
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
 										Description:  `Maximum number of nodes in the read pool. If set to lower than current node count, node count will be updated.`,
 									},
@@ -1181,6 +1183,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(1, 20),
+										DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("0"),
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
 										Description:  `Minimum number of nodes in the read pool. If set to higher than current node count, node count will be updated.`,
 									},
@@ -1500,7 +1503,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format.`),
-							DiffSuppressFunc: areDRReplicaNamesEqual,
+							DiffSuppressFunc: failoverDrReplicaNameDiffSuppress,
 						},
 						"dr_replica": {
 							Type:        schema.TypeBool,
@@ -4234,6 +4237,14 @@ func areDRReplicaNamesEqual(_, oldValue, newValue string, d *schema.ResourceData
 		return oldValue == newValue
 	}
 	return normalizeDRReplicaName(oldValue, project) == normalizeDRReplicaName(newValue, project)
+}
+// failoverDrReplicaNameDiffSuppress additionally suppresses the "" -> null permadiff
+// on top of the existing project-aware DR replica name comparison.
+func failoverDrReplicaNameDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if tpgresource.EmptyOrDefaultStringSuppress("")(k, old, new, d) {
+		return true
+	}
+	return areDRReplicaNamesEqual(k, old, new, d)
 }
 
 // normalizeDRReplicaName normalizes DR replica name by prefixing project name when it's missing.
