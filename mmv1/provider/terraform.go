@@ -119,6 +119,11 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
 	}
+	// Definitions with exclude_resource can still generate an independently
+	// opted-in ephemeral artifact without a managed CRUD resource.
+	if object.ExcludeResource && !object.Exclude {
+		t.GenerateEphemeralResource(object, *templateData, outputFolder, generateCode)
+	}
 
 	// if iam_policy is not defined or excluded, don't generate it
 	if object.IamPolicy == nil || object.IamPolicy.Exclude {

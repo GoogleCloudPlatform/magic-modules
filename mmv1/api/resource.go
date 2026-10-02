@@ -2522,6 +2522,18 @@ func (r *Resource) ShouldGenerateEphemeralResourceTests() bool {
 	return !r.Ephemeral.ExcludeTest
 }
 
+func (r Resource) EphemeralBodyProperties() []*Type {
+	return google.Select(r.AllUserProperties(), func(p *Type) bool {
+		return r.ExcludeRead && !p.Output && !p.UrlParamOnly && !p.ClientSide && !p.IgnoreWrite
+	})
+}
+
+func (r Resource) EphemeralResponseProperties() []*Type {
+	return google.Reject(r.GettableProperties(), func(p *Type) bool {
+		return r.ExcludeRead && p.IsEphemeralInput()
+	})
+}
+
 // HasEphemeralNestedProperties reports whether this resource has any top-level
 // property shaped as a nested object (directly, or as the item/value type of
 // an Array/Map) — i.e. whether the generated ephemeral resource's schema needs

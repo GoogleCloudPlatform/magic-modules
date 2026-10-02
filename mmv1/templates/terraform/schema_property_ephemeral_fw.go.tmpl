@@ -161,6 +161,40 @@ map[string]attr.Type{
 {{- end -}}
 {{- end -}}
 
+{{- define "RequestMappingEphemeralFW" -}}
+fwutils.EphemeralRequestField{
+  ApiName: {{printf "%q" .ApiName}},
+  AttrType: {{template "AttrTypeEphemeralFW" .}},
+  Required: {{.Required}},
+  Output: {{.Output}},
+  DefaultJSON: {{printf "%q" .EphemeralDefaultJSON}},
+  {{- if .MinSize }}
+  MinSize: {{.MinSize}},
+  {{- end }}
+  {{- if .MaxSize }}
+  MaxSize: {{.MaxSize}},
+  {{- end }}
+  {{- if .EnumValues }}
+  Enum: []string{ {{range .EnumValues}}{{printf "%q" .}},{{end}} },
+  {{- end }}
+  {{- if .Validation.Regex }}
+  Pattern: {{printf "%q" .Validation.Regex}},
+  {{- end }}
+  {{- if .UserProperties }}
+  Fields: map[string]fwutils.EphemeralRequestField{
+    {{- range .UserProperties }}
+    {{printf "%q" (underscore .Name)}}: {{template "RequestMappingEphemeralFW" .}},
+    {{- end }}
+  },
+  {{- end }}
+  {{- if eq .Type "Array" }}
+  Element: &{{template "RequestMappingEphemeralFW" .ItemType}},
+  {{- else if eq .Type "Map" }}
+  Element: &{{template "RequestMappingEphemeralFW" .ValueType}},
+  {{- end }}
+}
+{{- end -}}
+
 {{/* Given a property, emits the fwutils.EphemeralFieldMapping{...} literal that
   describes how to flatten this field out of a raw API response — pairing the
   JSON key (ApiName) with the attr.Type built above, and recursing into Fields

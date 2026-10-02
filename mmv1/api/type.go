@@ -14,6 +14,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -520,6 +521,18 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
+	if t.ResourceMetadata != nil && t.ResourceMetadata.ShouldGenerateEphemeralResource() && t.ResourceMetadata.ExcludeRead && !t.Exclude && t.IsEphemeralInput() {
+		if t.CustomExpand != "" || t.FlattenObject || t.IsA("ResourceRef") {
+			es = append(es, fmt.Errorf("ephemeral action input %s in %s uses unsupported custom expansion, flatten_object, or ResourceRef", fullFieldPath, rName))
+		}
+		if t.Validation.Function != "" || len(t.Conflicts) > 0 || len(t.ExactlyOneOf) > 0 || len(t.AtLeastOneOf) > 0 || len(t.RequiredWith) > 0 {
+			es = append(es, fmt.Errorf("ephemeral action input %s in %s uses unsupported SDK validation or field constraints", fullFieldPath, rName))
+		}
+		if t.DefaultValue != nil && (t.ParentMetadata != nil || t.IsA("Array") || t.IsA("Map") || t.IsA("NestedObject")) {
+			es = append(es, fmt.Errorf("ephemeral action input %s in %s supports defaults only on top-level scalar attributes", fullFieldPath, rName))
+		}
+	}
+
 	t.validateLabelsField()
 
 	switch {
@@ -627,6 +640,28 @@ func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 
 func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
+}
+
+func (t Type) IsEphemeralInput() bool {
+	r := t.ResourceMetadata
+	url := r.SelfLinkUri()
+	if r.ExcludeRead {
+		url = r.CreateUrl
+	}
+	for _, id := range r.ExtractIdentifiers(url) {
+		if google.Underscore(id) == google.Underscore(t.Name) {
+			return true
+		}
+	}
+	return r.ExcludeRead && !t.Output && !t.IgnoreWrite && !t.ClientSide
+}
+
+func (t Type) EphemeralDefaultJSON() string {
+	if t.DefaultValue == nil {
+		return ""
+	}
+	b, _ := json.Marshal(t.DefaultValue)
+	return string(b)
 }
 
 func (t Type) CamelizeProperty() string {

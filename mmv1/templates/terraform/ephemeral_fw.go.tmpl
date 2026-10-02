@@ -165,9 +165,15 @@ func (p *googleEphemeral{{$.ResourceName}}) Open(ctx context.Context, req epheme
 
 {{ if $.ExcludeRead }}
 	obj := make(map[string]interface{})
-{{- range $prop := $.SettableProperties }}
-	if !data.{{camelize $prop.Name "upper"}}.IsNull() {
-		obj["{{$prop.ApiName}}"] = data.{{camelize $prop.Name "upper"}}.ValueString()
+{{- range $prop := $.EphemeralBodyProperties }}
+	{{camelize $prop.Name "lower"}}Body, {{camelize $prop.Name "lower"}}Input, {{camelize $prop.Name "lower"}}Diags := fwutils.ExpandEphemeralValue(ctx, data.{{camelize $prop.Name "upper"}}, {{template "RequestMappingEphemeralFW" $prop}})
+	resp.Diagnostics.Append({{camelize $prop.Name "lower"}}Diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	data.{{camelize $prop.Name "upper"}} = {{camelize $prop.Name "lower"}}Input.(types.{{$prop.GetFWType}})
+	if !{{camelize $prop.Name "lower"}}Input.IsNull() {
+		obj["{{$prop.ApiName}}"] = {{camelize $prop.Name "lower"}}Body
 	}
 {{- end }}
 
@@ -175,7 +181,7 @@ func (p *googleEphemeral{{$.ResourceName}}) Open(ctx context.Context, req epheme
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
-		Method:    "POST",
+		Method:    "{{$.CreateVerb}}",
 		Project:   {{ if $.HasProject }}project{{ else }}config.Project{{ end }},
 		RawURL:    url,
 		UserAgent: userAgent,
@@ -200,7 +206,7 @@ func (p *googleEphemeral{{$.ResourceName}}) Open(ctx context.Context, req epheme
 		return
 	}
 {{ end }}
-{{ range $prop := $.GettableProperties }}
+{{ range $prop := $.EphemeralResponseProperties }}
 	{{ camelize $prop.Name "lower" }}Val, {{ camelize $prop.Name "lower" }}Diags := fwutils.FlattenEphemeralValue(res["{{$prop.ApiName}}"], {{template "FieldMappingEphemeralFW" $prop}})
 	resp.Diagnostics.Append({{ camelize $prop.Name "lower" }}Diags...)
 	data.{{ camelize $prop.Name "upper" }} = {{ camelize $prop.Name "lower" }}Val.(types.{{ $prop.GetFWType }})
