@@ -158,6 +158,17 @@ properties:
           time). If set, the certificates will be issued with a not_before_time of the issuance
           time minus the backdate_duration. The not_after_time will be adjusted to preserve the
           requested lifetime. The backdate_duration must be less than or equal to 48 hours.
+        conflicts:
+          - allow_requester_specified_not_before_time
+      - name: allowRequesterSpecifiedNotBeforeTime
+        type: Boolean
+        description: |
+          If set to true, allows requesters to specify the requested_not_before_time
+          field when creating a Certificate. Certificates requested with this
+          option enabled will have a 'not_before_time' equal to the value
+          specified in the request.
+        conflicts:
+          - backdate_duration
       - name: maximumLifetime
         type: String
         description: |
