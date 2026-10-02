@@ -25,6 +25,10 @@ id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 autogen_status: VGVtcGxhdGU=
+sweeper:
+  url_substitutions:
+    - location: us-central1
+    - location: us
 custom_code:
   pre_update: templates/terraform/pre_update/modelarmor_template.go.tmpl
 samples:
@@ -70,7 +74,7 @@ samples:
       - name: modelarmor_template_template_metadata
         resource_id_vars:
           templateId: modelarmor3
-          location: us-central1
+          location: us
           filter_config_rai_settings_rai_filters_0_filter_type: HARASSMENT
           filter_config_rai_settings_rai_filters_0_confidence_level: MEDIUM_AND_ABOVE
           template_metadata_log_template_operations: true
@@ -85,7 +89,7 @@ samples:
           template_metadata_filter_version_selector_alias: FILTER_VERSION_ALIAS_LATEST
         test_vars_overrides:
           templateId: '"modelarmor3"'
-          location: '"us-central1"'
+          location: '"us"'
           filter_config_rai_settings_rai_filters_0_filter_type: '"HARASSMENT"'
           filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
           template_metadata_log_template_operations: true
