@@ -30,6 +30,11 @@ collection_url_key: sessionTemplates
 id_format: '{{name}}'
 import_format:
   - '{{name}}'
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
+    - region: us-east1
 autogen_async: true
 custom_code:
   custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
