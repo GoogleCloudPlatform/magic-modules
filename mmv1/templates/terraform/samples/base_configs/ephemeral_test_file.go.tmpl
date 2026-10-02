@@ -6,6 +6,7 @@
 package {{ $.PackageName }}_test
 
 import (
+  "strings"
   "testing"
 
   "github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -63,14 +64,16 @@ func TestAccEphemeral{{ $.ResourceName }}_{{ camelize $sample.Name "lower" }}Gen
     Steps: []resource.TestStep{
 {{- range $i, $step := $sample.TestSteps }}
       {
-        Config: acctest.Nprintf({{ printf "%q" $step.TestHCLText }}, context{{ $i }}) + acctest.EchoResourceConfig(`{
+        // Echo stores provider data at creation, so each step needs a fresh
+        // resource to evaluate its own assertions rather than reuse old state.
+        Config: acctest.Nprintf({{ printf "%q" $step.TestHCLText }}, context{{ $i }}) + strings.Replace(acctest.EchoResourceConfig(`{
 {{- range $name, $expression := $step.EphemeralAssertions }}
           {{ printf "%q" $name }} = ({{ $expression }})
 {{- end }}
-        }`),
+        }`), `resource "echo" "test"`, `resource "echo" "test_step_{{ $i }}"`, 1),
         Check: resource.ComposeAggregateTestCheckFunc(
 {{- range $name, $expression := $step.EphemeralAssertions }}
-          resource.TestCheckResourceAttr(acctest.EchoResourceName, {{ printf "%q" (printf "data.%s" $name) }}, "true"),
+          resource.TestCheckResourceAttr("echo.test_step_{{ $i }}", {{ printf "%q" (printf "data.%s" $name) }}, "true"),
 {{- end }}
         ),
       },

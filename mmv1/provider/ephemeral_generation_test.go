@@ -117,3 +117,53 @@ func TestEphemeralInputIdentifierNormalization(t *testing.T) {
 		t.Fatal("snake_case URL identifier must match camelCase property")
 	}
 }
+
+func TestEphemeralSetupThenReadGeneration(t *testing.T) {
+	r, _ := newEphemeralTestResource()
+	r.TargetVersionName = "ga"
+	r.ImportPath = ImportPathFromVersion("ga")
+	r.Runtime.ResourcePrefixPkgMap = map[string]string{"google_compute_": "services/compute"}
+	r.Ephemeral = &resource.Ephemeral{Generate: true, Samples: []*resource.Sample{{
+		Name: "nested_read", ExcludeBasicDoc: true,
+		Steps: []*resource.Step{
+			{Name: "setup", ConfigPath: "setup.tf.tmpl", ResourceIdVars: map[string]string{"network": "example-network"}, EphemeralAssertions: map[string]string{"ready": "google_compute_network.fixture.name != \"\""}},
+			{Name: "read", ConfigPath: "read.tf.tmpl", IncludeStepDoc: true, ResourceIdVars: map[string]string{"network": "example-network"}, EphemeralAssertions: map[string]string{"nested": "ephemeral.google_test_product_test_resource.test.edition_config != null"}},
+		},
+	}}}
+	config := `resource "google_compute_network" "fixture" { name = "{{index $.ResourceIdVars "network"}}" }`
+	r.TestSampleSetUp(fstest.MapFS{
+		"setup.tf.tmpl": {Data: []byte(config)},
+		"read.tf.tmpl": {Data: []byte(config + `
+ephemeral "google_test_product_test_resource" "test" { name = google_compute_network.fixture.name }
+`)},
+	})
+	td := NewTemplateData(t.TempDir(), "ga", os.DirFS(".."))
+	testPath := filepath.Join(td.OutputFolder, "ephemeral_test.go")
+	docPath := filepath.Join(td.OutputFolder, "ephemeral.md")
+	td.GenerateEphemeralResourceTestFile(testPath, *r)
+	td.GenerateEphemeralResourceDocumentationFile(docPath, *r)
+	b, err := os.ReadFile(testPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := parser.ParseFile(token.NewFileSet(), testPath, b, parser.AllErrors); err != nil {
+		t.Fatal(err)
+	}
+	text := string(b)
+	for _, want := range []string{`_ "` + r.ImportPath + `/services/compute"`, "context0", "context1", `"echo.test_step_0", "data.ready", "true"`, `"echo.test_step_1", "data.nested", "true"`, `resource "echo" "test_step_0"`, `resource "echo" "test_step_1"`} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("generated multi-step test missing %q", want)
+		}
+	}
+	steps := r.Ephemeral.Samples[0].Steps
+	if steps[0].TestContextVars["network"] != steps[1].TestContextVars["network"] {
+		t.Fatal("fixture names must remain stable across setup and read")
+	}
+	b, err = os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(string(b), `resource "google_compute_network"`) != 1 || !strings.Contains(string(b), `ephemeral "google_test_product_test_resource"`) {
+		t.Fatal("documentation must show only the complete read example")
+	}
+}
