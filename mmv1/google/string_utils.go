@@ -178,3 +178,15 @@ func Format2Regex(format string) string {
 	})
 	return result
 }
+
+// ExtractTemplateVariables returns the names of the {{var}} markers in s, in
+// order of appearance. For example, for
+// "https://looker.{{region}}.rep.googleapis.com/v1/" it returns ["region"].
+// URL-encoded {{%var}} markers are not matched.
+func ExtractTemplateVariables(s string) []string {
+	var result []string
+	for _, m := range format2RegexPlain.FindAllStringSubmatch(s, -1) {
+		result = append(result, m[1])
+	}
+	return result
+}
