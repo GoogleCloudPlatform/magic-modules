@@ -38,7 +38,14 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-exclude_sweeper: true
+sweeper:
+  # A budget's name is an output-only, server-assigned id, so displayName is the
+  # only user-chosen field a sweeper can match on.
+  identifier_field: 'displayName'
+  # The sweeper defaults billing_account to GOOGLE_BILLING_ACCOUNT, but the tests
+  # create budgets under the master billing account.
+  url_substitutions:
+    - billing_account: 'MASTER_BILLING_ACCT'
 schema_version: 1
 state_upgraders: true
 custom_code:
@@ -51,8 +58,10 @@ samples:
         resource_id_vars:
           display_name: Example Billing Budget
         test_vars_overrides:
-          # for backward compatible
-          display_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          display_name: '"tf-test Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
   - name: billing_budget_lastperiod
@@ -62,8 +71,10 @@ samples:
         resource_id_vars:
           display_name: Example Billing Budget
         test_vars_overrides:
-          # for backward compatible
-          display_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          display_name: '"tf-test Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
   - name: billing_budget_filter
@@ -73,8 +84,10 @@ samples:
         resource_id_vars:
           display_name: Example Billing Budget
         test_vars_overrides:
-          # for backward compatible
-          display_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          display_name: '"tf-test Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
           org_id: ORG_ID
@@ -86,8 +99,10 @@ samples:
           budget_name: Example Billing Budget
           channel_name: Example Notification Channel
         test_vars_overrides:
-          # for backward compatible
-          budget_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          budget_name: '"tf-test Example Billing Budget" + randomSuffix'
           # for backward compatible
           channel_name: '"Example Notification Channel" + randomSuffix'
         test_env_vars:
@@ -99,8 +114,10 @@ samples:
         resource_id_vars:
           budget_name: Example Billing Budget
         test_vars_overrides:
-          # for backward compatible
-          budget_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          budget_name: '"tf-test Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
   - name: billing_budget_customperiod
@@ -110,8 +127,10 @@ samples:
         resource_id_vars:
           display_name: Example Billing Budget
         test_vars_overrides:
-          # for backward compatible
-          display_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          display_name: '"tf-test Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
   - name: billing_budget_optional
@@ -123,8 +142,10 @@ samples:
           display_name: Example Billing Budget
           topic_name: example-topic
         test_vars_overrides:
-          # for backward compatible
-          display_name: '"Example Billing Budget" + randomSuffix'
+          # displayName is the only field the sweeper can match on, and the
+          # "tf-test" prefix is not added automatically to values without a
+          # "-" or "_", so it is spelled out here.
+          display_name: '"tf-test Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
 parameters:
