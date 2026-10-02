@@ -255,9 +255,9 @@ fields:
   - api_field: 'scheduling.provisioningModel'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'scheduling.skipGuestOsShutdown'
+{{- end }}
   - api_field: 'scheduling.preemptionNoticeDuration.nanos'
   - api_field: 'scheduling.preemptionNoticeDuration.seconds'
-{{- end }}
   - api_field: 'scheduling.terminationTime'
   - api_field: 'disks.deviceName'
     field: 'scratch_disk.device_name'
