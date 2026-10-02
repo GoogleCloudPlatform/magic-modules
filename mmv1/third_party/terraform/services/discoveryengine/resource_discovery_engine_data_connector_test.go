@@ -1,14 +1,18 @@
 package discoveryengine_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(t *testing.T) {
@@ -27,6 +31,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_basic(context),
+				Check:  testAccCheckDiscoveryEngineDataConnectorParamsTenantId(t, "google_discovery_engine_data_connector.servicenow-basic", "tenant_id_1"),
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -56,6 +61,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 						),
 					},
 				},
+				Check: testAccCheckDiscoveryEngineDataConnectorParamsTenantId(t, "google_discovery_engine_data_connector.servicenow-basic", "tenant_id_2"),
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -80,6 +86,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 						),
 					},
 				},
+				Check: testAccCheckDiscoveryEngineDataConnectorParamsTenantId(t, "google_discovery_engine_data_connector.servicenow-basic", "tenant_id_3"),
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -99,6 +106,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 						),
 					},
 				},
+				Check: testAccCheckDiscoveryEngineDataConnectorParamsTenantId(t, "google_discovery_engine_data_connector.servicenow-basic", "tenant_id_4"),
 			},
 			{
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
@@ -108,6 +116,47 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 			},
 		},
 	})
+}
+
+func testAccCheckDiscoveryEngineDataConnectorParamsTenantId(t *testing.T, resourceName, expectedTenantId string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(discoveryengine.Product, config)+"projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector")
+		if err != nil {
+			return err
+		}
+
+		billingProject := ""
+		if config.BillingProject != "" {
+			billingProject = config.BillingProject
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return err
+		}
+
+		params, ok := res["params"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("expected params map in API response, got: %#v", res["params"])
+		}
+		gotTenantId, ok := params["tenant_id"].(string)
+		if !ok || gotTenantId != expectedTenantId {
+			return fmt.Errorf("expected API params.tenant_id to be %q, got %q", expectedTenantId, gotTenantId)
+		}
+		return nil
+	}
 }
 
 func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_basic(context map[string]interface{}) string {
