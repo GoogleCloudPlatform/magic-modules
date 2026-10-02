@@ -1,0 +1,121 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RequestTemplate
+description: >
+  RequestTemplate provides APIs to manage Chronicle SOAR Request Templates.
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://docs.cloud.google.com/chronicle/docs/reference/rest/v1beta/projects.locations.instances.requestTemplates'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/requestTemplates
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/requestTemplates/{{request_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/requestTemplates
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/requestTemplates/{{request_template_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/requestTemplates/{{request_template_id}}
+autogen_status: UmVxdWVzdFRlbXBsYXRl
+samples:
+  - name: chronicle_requesttemplate_update
+    primary_resource_id: sample
+    min_version: beta
+    steps:
+      - name: "chronicle_requesttemplate_basic"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+      - name: "chronicle_requesttemplate_full"
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: requestTemplateId
+    type: String
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Id of the RequestTemplate record.
+properties:
+  - name: displayName
+    type: String
+    required: true
+    description: Request template display name, limited to 4096 characters.
+  - name: visualFamily
+    type: String
+    required: true
+    description: Visual family name for the mapping of the request event data.
+  - name: environments
+    type: Array
+    required: true
+    description: Request template associated logical environments.
+    item_type:
+      type: String
+  - name: allowDescription
+    type: Boolean
+    required: true
+    send_empty_value: true
+    description: Include description field in the request form.
+  - name: eventFieldDefinitions
+    type: Array
+    required: true
+    description: Request event fields definitions.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: name
+          type: String
+          required: true
+          description: The name of the event field related to the request template.
+        - name: entityTypes
+          type: Array
+          default_from_api: true
+          description: The entity types of the RequestEventFieldDefinition.
+          item_type:
+            type: String
+        - name: watermark
+          type: String
+          required: true
+          description: Serves as an example of possible values to set for current field.
+        - name: type
+          type: String
+          required: true
+          description: |-
+            The RequestEventFieldType of the RequestEventFieldDefinition.
+            Possible values:
+            REQUEST_EVENT_FIELD_TYPE_UNSPECIFIED
+            STRING
+            BOOLEAN
+            NUMBER
+            LIST
+            EMAIL
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the RequestTemplate.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/requestTemplates/{request_template}
+    output: true
