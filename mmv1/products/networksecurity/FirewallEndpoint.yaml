@@ -51,7 +51,6 @@ async:
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
-  decoder: 'templates/terraform/decoders/network_security_firewall_endpoint.go.tmpl'
 sweeper:
   dependencies:
     - google_network_security_firewall_endpoint_association
@@ -154,6 +153,9 @@ properties:
     type: NestedObject
     description: |
       Settings for the endpoint.
+    # The API populates this block when WildFire is enabled (e.g. with a
+    # location-dependent contentCloudRegion such as NETHERLANDS in europe-west1).
+    default_from_api: true
     # jumboFramesEnabled is immutable and the API rejects update masks that
     # include immutable paths, so only list the mutable sub-fields here.
     # These paths only exist in beta, but this update path is unreachable in
@@ -192,6 +194,9 @@ properties:
     min_version: beta
     description: |
       Settings for WildFire analysis on the firewall endpoint.
+    # The API returns default values for this block once WildFire has been
+    # configured, even after the settings are cleared.
+    default_from_api: true
     update_mask_fields:
       - 'wildfireSettings.enabled'
       - 'wildfireSettings.wildfireRegion'

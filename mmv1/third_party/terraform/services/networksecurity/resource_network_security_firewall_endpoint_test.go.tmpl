@@ -177,8 +177,9 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				// Removing the wildfire_settings block should update the resource
-				// and leave no diff afterwards.
+				// Removing the wildfire_settings block leaves the server-side values
+				// in place (default_from_api) and shouldn't cause a permadiff. The
+				// update comes from the labels change.
 				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUnset(projectId, randomSuffix),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
