@@ -17,7 +17,8 @@ description: Framework deployments represent the assignment of a framework to a 
 references:
   api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworkDeployments
 base_url: '{{parent}}/locations/{{location}}/frameworkDeployments'
-immutable: true
+update_verb: PATCH
+update_mask: true
 self_link: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
 create_url: '{{parent}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}'
 id_format: '{{parent}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}'
@@ -29,6 +30,12 @@ samples:
     primary_resource_id: "example"
     steps:
       - name: "cloudsecuritycompliance_framework_deployment_org_basic"
+        resource_id_vars:
+          deployment_name: "example-deployment"
+          framework_name: "example-framework"
+        test_env_vars:
+          org_id: "ORG_ID"
+      - name: "cloudsecuritycompliance_framework_deployment_org_update"
         resource_id_vars:
           deployment_name: "example-deployment"
           framework_name: "example-framework"
@@ -105,10 +112,12 @@ async:
   operation:
     timeouts:
       insert_minutes: 20
+      update_minutes: 20
       delete_minutes: 20
     base_url: "{{op_id}}"
   actions:
     - create
+    - update
     - delete
   type: OpAsync
   result:
@@ -321,6 +330,7 @@ properties:
   - name: description
     type: String
     description: User provided description of the Framework deployment
+    immutable: true
   - name: etag
     type: String
     description: |-
@@ -334,6 +344,8 @@ properties:
     type: NestedObject
     description: FrameworkReference contains the reference of a framework.
     required: true
+    update_mask_fields:
+      - 'framework.major_revision_id'
     properties:
       - name: framework
         type: String
@@ -341,6 +353,7 @@ properties:
           In the format:
           {parent}/locations/{location}/frameworks/{framework}
         required: true
+        immutable: true
       - name: majorRevisionId
         type: String
         description: |-
@@ -358,6 +371,7 @@ properties:
       TargetResourceConfig contains either the name of the target_resource or
       contains the config to create a new target_resource.
     required: true
+    immutable: true
     properties:
       - name: existingTargetResource
         type: String
