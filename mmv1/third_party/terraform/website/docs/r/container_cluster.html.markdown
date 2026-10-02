@@ -1210,6 +1210,11 @@ gvnic {
 
 * `flex_start` - (Optional) Enables Flex Start provisioning model for the node pool.
 
+* `consolidation_delay` - (Optional) The duration after which the Cluster Autoscaler can scale down
+    underutilized nodes, in seconds and terminated by 's'. Example: "600s". If unset, nodes are
+    scaled down according to the cluster's [autoscaling profile](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles).
+    Can be updated in place. Removing the field from your configuration leaves the current value unchanged.
+
 * `host_maintenance_policy` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The maintenance policy for the hosts on which the GKE VMs run on. Structure is [documented below](#nested_host_maintenance_policy).
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
