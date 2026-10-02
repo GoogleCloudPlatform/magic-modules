@@ -514,3 +514,32 @@ properties:
           Free-form, multi-line note about the connector's capabilities.
         default_from_api: true
         immutable: true
+  - name: 'federatedConfig'
+    type: NestedObject
+    description: |
+      Configuration for unified data source that supports federated mode.
+      Notice that mathematical intersection of ConnectorModes (specifically,
+      both `DATA_INGESTION` and `FEDERATED` are set) indicates the unified
+      data source is deployed in hybrid mode, in which case this field is
+      required.
+    properties:
+      - name: 'authParams'
+        type: String
+        description: |
+          Any authentication parameters specific to federated mode in structured json format.
+        diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'additionalParams'
+        type: String
+        description: |
+          Any additional parameters specific to federated mode in structured json format.
+        diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation:
+          function: 'validation.StringIsJSON'
