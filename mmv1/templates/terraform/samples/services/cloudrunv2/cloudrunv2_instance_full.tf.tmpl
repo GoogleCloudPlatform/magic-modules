@@ -1,0 +1,30 @@
+resource "google_cloud_run_v2_instance" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.ResourceIdVars "cloud_run_instance_name"}}"
+  location             = "us-east4"
+  ingress              = "INGRESS_TRAFFIC_ALL"
+  restart_policy       = "ON_FAILURE"
+  launch_stage         = "GA"
+  default_uri_disabled = true
+  invoker_iam_disabled = true
+
+  labels = {
+    env = "staging"
+  }
+
+  annotations = {
+    test-annotation = "initial-value"
+  }
+
+  containers {
+    image = "us-docker.pkg.dev/cloudrun/container/hello"
+    ports {
+      container_port = 8080
+    }
+    resources {
+      limits = {
+        cpu    = "1"
+        memory = "1024Mi"
+      }
+    }
+  }
+}
