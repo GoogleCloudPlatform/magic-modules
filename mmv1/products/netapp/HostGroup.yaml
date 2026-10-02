@@ -35,8 +35,6 @@ timeouts:
   insert_minutes: 10
   update_minutes: 10
   delete_minutes: 30
-# Skipping the sweeper since we need to sweep multiple regions
-exclude_sweeper: true
 async:
   type: OpAsync
   operation:
@@ -45,6 +43,12 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
+sweeper:
+  # Volumes reference host groups.
+  dependencies:
+    - "google_netapp_volume"
+  url_substitutions:
+    - location: us-central1
 custom_code:
 samples:
   - name: netapp_host_group

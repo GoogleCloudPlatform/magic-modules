@@ -55,8 +55,6 @@ timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 45
-# Skipping the sweeper since we need to sweep multiple regions
-exclude_sweeper: true
 async:
   type: OpAsync
   operation:
@@ -66,6 +64,24 @@ async:
     resource_inside_response: false
 autogen_async: true
 include_in_tgc_next: true
+sweeper:
+  # Storage pools cannot be deleted while they still contain volumes.
+  dependencies:
+    - "google_netapp_volume"
+  # Locations here mirror the locations the netapp tests actually create
+  # storage pools in, including the zonal locations used by Flex pools.
+  url_substitutions:
+    - location: us-central1
+    - location: us-east1
+    - location: us-east4
+    - location: us-west2
+    - location: us-west4
+    - location: northamerica-northeast1
+    - location: us-central1-a
+    - location: us-central1-c
+    - location: us-east4-a
+    - location: us-south1-a
+    - location: europe-west3-a
 custom_code:
   pre_update: templates/terraform/pre_update/netapp_storagepool.go.tmpl
 samples:

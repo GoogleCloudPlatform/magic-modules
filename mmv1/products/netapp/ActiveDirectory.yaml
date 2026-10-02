@@ -34,8 +34,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-# Skipping the sweeper since we need to sweep multiple regions
-exclude_sweeper: true
 async:
   type: OpAsync
   operation:
@@ -45,6 +43,14 @@ async:
     resource_inside_response: false
 autogen_async: true
 include_in_tgc_next: true
+sweeper:
+  # Storage pools reference active directory policies.
+  dependencies:
+    - "google_netapp_storage_pool"
+  url_substitutions:
+    - location: us-central1
+    - location: us-east4
+    - location: us-west2
 custom_code:
 samples:
   - name: netapp_active_directory_full
