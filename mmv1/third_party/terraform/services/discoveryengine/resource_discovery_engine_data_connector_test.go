@@ -12,10 +12,6 @@ import (
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(t *testing.T) {
-	// TODO(b/560162779): DO NOT SUBMIT - Uncomment t.Skip() before marking PR ready for review!
-	// Skips this update test due to duration and flakiness.
-	// t.Skip()
-
 	t.Parallel()
 
 	context := map[string]interface{}{
