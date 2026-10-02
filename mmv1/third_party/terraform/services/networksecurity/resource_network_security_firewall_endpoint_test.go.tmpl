@@ -6,6 +6,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if ne $.TargetVersionName "ga" }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -147,6 +150,11 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
 			},
 			{
 				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettings(projectId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_firewall_endpoint.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -156,6 +164,11 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
 			},
 			{
 				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUpdate(projectId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_firewall_endpoint.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -164,8 +177,14 @@ func TestAccNetworkSecurityFirewallEndpoints_wildfireSettings(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				// Removing the wildfire_settings block should not produce a diff or error.
+				// Removing the wildfire_settings block should update the resource
+				// and leave no diff afterwards.
 				Config: testAccNetworkSecurityFirewallEndpoints_wildfireSettingsUnset(projectId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_firewall_endpoint.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -271,6 +290,11 @@ func TestAccNetworkSecurityFirewallEndpoints_endpointSettings(t *testing.T) {
 			},
 			{
 				Config: testAccNetworkSecurityFirewallEndpoints_endpointSettingsUpdate(projectId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_firewall_endpoint.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
