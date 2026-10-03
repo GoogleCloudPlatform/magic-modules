@@ -36,7 +36,21 @@ error_retry_predicates:
 legacy_long_form_project: true
 autogen_async: true
 custom_code:
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'channel'
+  allowed_iam_role: 'roles/eventarc.admin'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/channels/{{channel}}'
+    - '{{channel}}'
 samples:
+  - name: eventarc_channel
+    primary_resource_id: primary
+    exclude_basic_doc: true
+    steps:
+      - name: eventarc_channel
+        resource_id_vars:
+          channel_name: some-channel
   - name: eventarc_channel_with_cmek
     primary_resource_id: primary
     bootstrap_iam:
@@ -52,13 +66,6 @@ samples:
           project_number: PROJECT_NUMBER
         test_vars_overrides:
           key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name
-  - name: eventarc_channel
-    primary_resource_id: primary
-    exclude_basic_doc: true
-    steps:
-      - name: eventarc_channel
-        resource_id_vars:
-          channel_name: some-channel
 parameters:
   - name: location
     type: String
