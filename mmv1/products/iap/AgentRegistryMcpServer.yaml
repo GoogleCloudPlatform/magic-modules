@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 name: AgentRegistryMcpServer
 description: |
@@ -36,14 +37,16 @@ iam_policy:
   parent_resource_attribute: mcp_server_id
   iam_conditions_request_type: REQUEST_BODY
 exclude_tgc: true
-examples:
+samples:
   - name: agent_registry_mcp_server_basic
     primary_resource_id: default
     external_providers: [time]
-    vars:
-      mcp_server_id: mcp-server-id
-    test_env_vars:
-      org_id: ORG_ID
+    steps:
+      - name: agent_registry_mcp_server_basic
+        resource_id_vars:
+          mcp_server_id: mcp-server-id
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: location
     type: String
