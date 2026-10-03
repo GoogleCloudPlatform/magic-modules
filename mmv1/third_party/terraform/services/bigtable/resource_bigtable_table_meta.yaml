@@ -21,3 +21,6 @@ fields:
   - field: 'split_keys'
   - field: 'deletion_policy'
     provider_only: true
+  - field: 'ignore_warnings'
+    provider_only: true
+  - api_field: 'tieredStorageConfig.infrequentAccess.includeIfOlderThan'
