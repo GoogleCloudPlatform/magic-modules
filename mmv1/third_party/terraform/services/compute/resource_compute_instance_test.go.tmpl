@@ -5569,6 +5569,55 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	})
 }
 
+// testAccServiceClassId is the PSC Interface service class the test projects are
+// authorized to connect with. A network attachment admits a producer VM by service
+// class only if that service class is in its producer_accept_lists AND the producer
+// project owns the service class.
+const testAccServiceClassId = "gcp-memorystore-redis"
+
+func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
+	t.Parallel()
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	var instance map[string]interface{}
+
+{{ if eq $.TargetVersionName `ga` }}
+	providerVersion := "v1"
+{{- else }}
+	providerVersion := "beta"
+{{- end }}
+
+	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
+
+	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
+
+	context := map[string]interface{}{
+		"suffix":                  suffix,
+		"network_attachment_name": testNetworkAttachmentName,
+		"region":                  envRegion,
+		"service_class_id":        testAccServiceClassId,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_networkAttachmentServiceClass(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.service_class_id", testAccServiceClassId),
+				),
+			},
+			computeInstanceImportStep(fmt.Sprintf("%s-a", envRegion), fmt.Sprintf("tf-test-instance-%s", suffix), []string{}),
+		},
+	})
+}
+
 func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 	t.Parallel()
 	suffix := acctest.RandString(t, 10)
@@ -13490,6 +13539,63 @@ resource "google_compute_instance" "foobar" {
 	metadata = {
 		foo = "bar"
 	}
+}
+`, context)
+}
+
+func testAccComputeInstance_networkAttachmentServiceClass(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "test-network" {
+  name                    = "tf-test-network-%{suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-subnetwork" {
+  name          = "tf-test-compute-subnet-%{suffix}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "%{region}"
+  network       = google_compute_network.test-network.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+  name                  = "%{network_attachment_name}"
+  region                = "%{region}"
+  description           = "network attachment description"
+  connection_preference = "ACCEPT_MANUAL"
+
+  producer_accept_lists = [
+    "serviceclasses/%{service_class_id}",
+  ]
+
+  subnetworks = [
+    google_compute_subnetwork.test-subnetwork.self_link
+  ]
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "tf-test-instance-%{suffix}"
+  machine_type = "e2-medium"
+  zone         = "%{region}-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.id
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  network_interface {
+    network_attachment = google_compute_network_attachment.test_network_attachment.self_link
+    service_class_id   = "%{service_class_id}"
+  }
 }
 `, context)
 }
