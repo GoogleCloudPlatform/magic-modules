@@ -1,0 +1,11 @@
+if v, ok := d.GetOk("ignore_safety_checks"); ok && v.(string) != "QUOTA_SAFETY_CHECK_UNSPECIFIED" {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"ignoreSafetyChecks": v.(string)})
+	if err != nil {
+		return err
+	}
+} else if v, ok := d.GetOk("ignore_safety_checks_set"); ok {
+	url, err = transport_tpg.AddArrayQueryParams(url, "ignoreSafetyChecks", v.(*schema.Set).List())
+	if err != nil {
+		return err
+	}
+}
