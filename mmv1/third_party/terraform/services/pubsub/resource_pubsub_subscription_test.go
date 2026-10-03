@@ -202,7 +202,7 @@ func TestAccPubsubSubscription_pushNoWrapperEmpty(t *testing.T) {
 func TestAccPubsubSubscriptionBigQuery_update(t *testing.T) {
 	t.Parallel()
 
-	dataset := fmt.Sprintf("tftestdataset%s", acctest.RandString(t, 10))
+	dataset := fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10))
 	table := fmt.Sprintf("tf-test-table-%s", acctest.RandString(t, 10))
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
@@ -240,12 +240,12 @@ func TestAccPubsubSubscriptionBigQuery_update(t *testing.T) {
 func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	t.Parallel()
 
-	dataset := fmt.Sprintf("tftestdataset%s", acctest.RandString(t, 10))
+	dataset := fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10))
 	table := fmt.Sprintf("tf-test-table-%s", acctest.RandString(t, 10))
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-	serviceAccount := fmt.Sprintf("bq-test-sa-%s", acctest.RandString(t, 10))
-	serviceAccount2 := fmt.Sprintf("bq-test-sa2-%s", acctest.RandString(t, 10))
+	serviceAccount := fmt.Sprintf("tf-test-bq-sa-%s", acctest.RandString(t, 10))
+	serviceAccount2 := fmt.Sprintf("tf-test-bq-sa2-%s", acctest.RandString(t, 10))
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
@@ -396,8 +396,8 @@ func TestAccPubsubSubscriptionCloudStorage_serviceAccount(t *testing.T) {
 	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-	serviceAccount := fmt.Sprintf("gcs-test-sa-%s", acctest.RandString(t, 10))
-	serviceAccount2 := fmt.Sprintf("gcs-test-sa2-%s", acctest.RandString(t, 10))
+	serviceAccount := fmt.Sprintf("tf-test-gcs-sa-%s", acctest.RandString(t, 10))
+	serviceAccount2 := fmt.Sprintf("tf-test-gcs-sa2-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1163,7 +1163,7 @@ resource "google_pubsub_subscription" "foo" {
 func testAccPubsubSubscription_bigquery_config(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "foo" {
-  name = "topic-%{suffix}"
+  name = "tf-test-topic-%{suffix}"
 }
 
 resource "time_sleep" "wait_60_seconds" {
@@ -1231,7 +1231,7 @@ resource "google_bigquery_table_iam_policy" "policy" {
 func testAccPubsubSubscription_bigquery_config_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "foo" {
-  name = "topic-%{suffix}"
+  name = "tf-test-topic-%{suffix}"
 }
 
 resource "time_sleep" "wait_60_seconds" {
