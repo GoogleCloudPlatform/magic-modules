@@ -104,6 +104,15 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 			{
 				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context),
 			},
+			// Regression test for https://github.com/hashicorp/terraform-provider-google/issues/20073:
+			// purpose_data was ignore_read, so importing left it empty and the (immutable) field
+			// forced a replacement on the next plan.
+			{
+				ResourceName:            "google_tags_tag_key.key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
 		},
 	})
 }
@@ -120,9 +129,11 @@ resource "google_tags_tag_key" "key" {
 	  short_name = "tf-test-foo%{random_suffix}"
 	  description = "For foo%{random_suffix} resources."
 	  purpose = "GCE_FIREWALL"
-	  # purpose_data expects either a selfLinkWithId (not a property of google_compute_network) or the format <project-name>/<vpc-name>.
-	  # selfLink is not sufficient and will result in an error, so we build a string to match the second option.
-	  purpose_data = {network = "${google_compute_network.tag_network.project}/${google_compute_network.tag_network.name}"}
+	  # purpose_data.network must be a Compute network self link containing the numeric network id,
+	  # which is the form the API returns. google_compute_network.self_link is
+	  # "{version}/projects/{project}/global/networks/{network_name}", so the id-bearing self link is
+	  # built from its parts.
+	  purpose_data = {network = "https://www.googleapis.com/compute/v1/projects/${google_compute_network.tag_network.project}/global/networks/${google_compute_network.tag_network.network_id}"}
 	}
 
 `, context)
@@ -1650,5 +1661,114 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 			}
 		}
 		return nil
+	}
+}
+
+func TestTagsTagKeyPurposeDataValidate(t *testing.T) {
+	cases := map[string]struct {
+		purposeData map[string]interface{}
+		expectErr   bool
+	}{
+		"self link with a numeric id is valid": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/123456789",
+			},
+		},
+		"a custom compute endpoint host is valid": {
+			purposeData: map[string]interface{}{
+				"network": "https://compute.mirror.example.com/compute/v1/projects/my-project/global/networks/123456789",
+			},
+		},
+		"no network key is valid": {
+			purposeData: map[string]interface{}{"organization": "auto"},
+		},
+		"empty network is valid": {
+			purposeData: map[string]interface{}{"network": ""},
+		},
+		"organization auto is valid": {
+			purposeData: map[string]interface{}{"organization": "auto"},
+		},
+		"empty organization is valid": {
+			purposeData: map[string]interface{}{"organization": ""},
+		},
+		"short form is rejected": {
+			purposeData: map[string]interface{}{"network": "my-project/vpc-us-west1"},
+			expectErr:   true,
+		},
+		"organization other than auto is rejected": {
+			purposeData: map[string]interface{}{"organization": "123456789012"},
+			expectErr:   true,
+		},
+		"self link with a network name is rejected": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/vpc-us-west1",
+			},
+			expectErr: true,
+		},
+		"missing numeric id is rejected": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/",
+			},
+			expectErr: true,
+		},
+		"regional network path is rejected": {
+			purposeData: map[string]interface{}{
+				"network": "https://www.googleapis.com/compute/v1/projects/my-project/regions/us-west1/networks/123456789",
+			},
+			expectErr: true,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, errs := tags.TagsTagKeyPurposeDataValidate(tc.purposeData, "purpose_data")
+			if tc.expectErr && len(errs) == 0 {
+				t.Fatalf("expected an error for %#v, got none", tc.purposeData)
+			}
+			if !tc.expectErr && len(errs) > 0 {
+				t.Fatalf("expected no error for %#v, got %v", tc.purposeData, errs)
+			}
+		})
+	}
+}
+
+func TestTagsTagKeyPurposeDataDiffSuppress(t *testing.T) {
+	const (
+		orgID    = "123456789012"
+		selfLink = "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/123456789"
+	)
+
+	cases := map[string]struct {
+		k        string
+		oldValue string
+		newValue string
+		want     bool
+	}{
+		// The API replaces "auto" (the config value) with the organization id it stores, so the
+		// config side is what has to be suppressed.
+		"config auto against the resolved organization id is suppressed": {
+			k: "purpose_data.organization", oldValue: orgID, newValue: "auto", want: true,
+		},
+		// State never holds "auto", so this direction is not expected; suppress nothing.
+		"state auto against a resolved id is not suppressed": {
+			k: "purpose_data.organization", oldValue: "auto", newValue: orgID, want: false,
+		},
+		// network is validated to a single form, so it is compared normally.
+		"identical network values are not suppressed here": {
+			k: "purpose_data.network", oldValue: selfLink, newValue: selfLink, want: false,
+		},
+		// Any other key falls through.
+		"other key is not suppressed": {
+			k: "purpose_data.something_else", oldValue: "auto", newValue: orgID, want: false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got := tags.TagsTagKeyPurposeDataDiffSuppress(tc.k, tc.oldValue, tc.newValue, nil)
+			if got != tc.want {
+				t.Errorf("want suppress=%t, got %t for k=%q old=%q new=%q", tc.want, got, tc.k, tc.oldValue, tc.newValue)
+			}
+		})
 	}
 }

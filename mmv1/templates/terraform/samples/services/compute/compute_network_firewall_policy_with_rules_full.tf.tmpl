@@ -86,6 +86,10 @@ resource "google_network_security_address_group" "address_group_1" {
   capacity    = 100
 }
 
+data "google_compute_network" "tag_network" {
+  name = "default"
+}
+
 resource "google_tags_tag_key" "secure_tag_key_1" {
   description = "Tag key"
   parent      = data.google_project.project.id
@@ -93,7 +97,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   short_name  = "{{index $.ResourceIdVars "tag_key"}}"
 
   purpose_data = {
-    network = "${data.google_project.project.name}/default"
+    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
