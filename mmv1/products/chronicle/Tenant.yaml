@@ -1,0 +1,191 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Tenant
+description: The Tenant resource represents a customer tenant in Chronicle.
+min_version: 'beta'
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.tenants'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tenants
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tenants
+update_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tenants/{{tenant}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tenants/{{tenant}}
+update_mask: true
+update_verb: PATCH
+exclude_delete: true
+exclude_read: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/tenants/{{tenant}}
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+    path: name
+    full_url: 'https://staging-chronicle.sandbox.googleapis.com/v1alpha/{{op_id}}'
+    wait_ms: 1000
+  actions:
+    - create
+  type: OpAsync
+  result:
+    resource_inside_response: true
+    path: response
+  error:
+    path: error
+    message: message
+  include_project: false
+autogen_status: VGVuYW50
+custom_code:
+  post_create: 'templates/terraform/post_create/chronicle_tenant_id.go.tmpl'
+samples:
+  - name: 'chronicle_tenant_basic'
+    primary_resource_id: chronicle_tenant_create_test
+    exclude_test: true
+    steps:
+      - name: 'chronicle_tenant_basic'
+        exclude_import_test: true
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          tenant_gcp_project: 'TENANT_GCP_PROJECT'
+          billing_account: 'BILLING_ACCT'
+        vars:
+          resource_name: test-resource
+  - name: 'chronicle_tenant_update'
+    primary_resource_id: chronicle_tenant_update_test
+    exclude_basic_doc: true
+    steps:
+      - name: 'chronicle_tenant_update'
+        exclude_import_test: true
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          tenant_gcp_project: 'TENANT_GCP_PROJECT'
+          billing_account: 'BILLING_ACCT'
+        vars:
+          resource_name: test-update
+      - name: 'chronicle_tenant_update_step2'
+        exclude_import_test: true
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+          tenant_gcp_project: 'TENANT_GCP_PROJECT'
+          billing_account: 'BILLING_ACCT'
+        vars:
+          resource_name: test-update
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: instance
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: tenant
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    default_from_api: true
+properties:
+  - name: authMethod
+    type: String
+    required: true
+    description: |-
+      Auth Method used by tenant
+      Possible values:
+      WORKFORCE_IDENTITY_FEDERATION
+      CLOUD_IDENTITY
+  - name: billingAccount
+    type: String
+    required: true
+    description: The billing account ID of the customer.
+  - name: customerCode
+    type: String
+    required: true
+    description: Customer code associated with the tenant.
+  - name: displayName
+    type: String
+    required: true
+    description: The display name of the tenant.
+    immutable: true
+  - name: frontendPathConfigs
+    type: Array
+    required: true
+    description: Configuration for the tenant's frontend paths.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: frontendPath
+          type: String
+          required: true
+          description: Frontend path that is part of the instance.
+        - name: workforcePoolProviderId
+          type: String
+          description: |-
+            Workforce pool provider id connected to the frontend path.
+            Format:
+            `locations/{location}/workforcePools/{workforce_pool_id}/providers/{provider_id}`
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of this tenant.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/tenants/{tenant_id}
+    output: true
+  - name: provisioningFlow
+    type: String
+    required: false # From proto
+    description: |-
+      The provisioning flow of the tenant.
+      Possible values:
+      BACKSTORY_API_PARITY
+      TENANT_ATTRIBUTION
+  - name: retentionDuration
+    type: String
+    required: true
+    description: |-
+      Customer's contractually agreed data retention duration.
+      Possible values:
+      ONE_YEAR
+      EIGHTEEN_MONTHS
+      SIX_MONTHS
+      TWO_YEARS
+      THREE_YEARS
+      FOUR_YEARS
+      FIVE_YEARS
+      THIRTEEN_MONTHS
+      SIXTY_THREE_DAYS
+      THREE_MONTHS
+      UNLIMITED
+  - name: state
+    type: String
+    description: |-
+      The state of the Tenant.
+      Possible values:
+      ACTIVE
+      SOFT_DELETED
+      SOFT_DELETE_INITIATED
+      UNDELETE_INITIATED
+    output: true
+  - name: tenantGcpProject
+    type: String
+    required: true
+    description: |-
+      Project name of the tenant's BYOP project.
+      Format: projects/{project_id} or projects/{project_number}
