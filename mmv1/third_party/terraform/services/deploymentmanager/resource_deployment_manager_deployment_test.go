@@ -22,8 +22,8 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 	t.Parallel()
 
 	randSuffix := acctest.RandString(t, 10)
-	deploymentId := "tf-dm-" + randSuffix
-	accountId := "tf-dm-account-" + randSuffix
+	deploymentId := "tf-test-dm-" + randSuffix
+	accountId := "tf-test-dm-account-" + randSuffix
 	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/service_account.yml", map[string]interface{}{
 		"account_id": accountId,
 	})
@@ -52,8 +52,8 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
-	deploymentName := "tf-dm-" + randStr
-	accountId := "tf-dm-" + randStr
+	deploymentName := "tf-test-dm-" + randStr
+	accountId := "tf-test-dm-" + randStr
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,8 +72,8 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
-	deploymentName := "tf-dm-" + randStr
-	accountId := "tf-dm-" + randStr
+	deploymentName := "tf-test-dm-" + randStr
+	accountId := "tf-test-dm-" + randStr
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -97,8 +97,8 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
-	deploymentName := "tf-dm-" + randStr
-	accountId := "tf-dm-" + randStr
+	deploymentName := "tf-test-dm-" + randStr
+	accountId := "tf-test-dm-" + randStr
 	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/service_account.yml", map[string]interface{}{
 		"account_id": "{{ env['name'] }}",
 	})
@@ -128,9 +128,9 @@ func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	t.Parallel()
 
 	randStr := acctest.RandString(t, 10)
-	deploymentName := "tf-dm-" + randStr
-	accountId := "tf-dm-first" + randStr
-	accountId2 := "tf-dm-second" + randStr
+	deploymentName := "tf-test-dm-" + randStr
+	accountId := "tf-test-dm-first" + randStr
+	accountId2 := "tf-test-dm-second" + randStr
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
