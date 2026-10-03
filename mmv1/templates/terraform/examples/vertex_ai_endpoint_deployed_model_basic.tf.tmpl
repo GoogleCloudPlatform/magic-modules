@@ -1,0 +1,28 @@
+resource "google_vertex_ai_endpoint_deployed_model" "{{$.PrimaryResourceId}}" {
+  deployed_model {
+    dedicated_resources {
+      min_replica_count   = 1
+      machine_spec {
+        machine_type      = "n1-standard-32"
+      }
+    }
+    display_name = "sample-deployed-model"
+    model        = "projects/316788426028/locations/us-central1/models/7706876121802866688"
+    disable_container_logging = false
+  }
+
+  endpoint     = google_vertex_ai_endpoint.basic.id
+  region       = "us-central1"
+}
+
+resource "google_vertex_ai_endpoint" "basic" {
+  name         = "{{index $.Vars "endpoint_name"}}"
+  display_name = "sample-endpoint"
+  description  = "A sample vertex endpoint"
+  location     = "us-central1"
+  region       = "us-central1"
+  labels       = {
+    label-one = "value-one"
+  }
+  dedicated_endpoint_enabled = true
+}
