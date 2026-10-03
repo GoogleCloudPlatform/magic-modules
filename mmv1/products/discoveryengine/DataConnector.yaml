@@ -43,7 +43,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: false
 async:
-  actions: ['create', 'delete']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
