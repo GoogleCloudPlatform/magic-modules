@@ -5573,7 +5573,7 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 // authorized to connect with. A network attachment admits a producer VM by service
 // class only if that service class is in its producer_accept_lists AND the producer
 // project owns the service class.
-const testAccServiceClassId = "gcp-tf-test-service-class"
+const testAccServiceClassId = "gcp-memorystore-redis"
 
 func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
 	t.Parallel()
