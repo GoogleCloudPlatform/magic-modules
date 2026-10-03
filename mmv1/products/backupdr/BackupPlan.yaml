@@ -70,6 +70,15 @@ samples:
           backup_plan_id: backup-plan-filestore-test
         test_env_vars:
           project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_netapp_volume
+    primary_resource_id: my-netapp-backup-plan-1
+    steps:
+      - name: backup_dr_backup_plan_for_netapp_volume
+        resource_id_vars:
+          backup_vault_id: backup-vault-netapp-test
+          backup_plan_id: backup-plan-netapp-test
+        test_env_vars:
+          project: :PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -119,7 +128,7 @@ properties:
     type: String
     description: |
       The resource type to which the `BackupPlan` will be applied.
-      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance", "alloydb.googleapis.com/Cluster", "file.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance", "alloydb.googleapis.com/Cluster", "file.googleapis.com/Instance", "netapp.googleapis.com/Volume" and "storage.googleapis.com/Bucket".
     required: true
   - name: createTime
     type: String
