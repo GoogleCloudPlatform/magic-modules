@@ -74,9 +74,9 @@ autogen_async: true
 exclude_tgc: true
 custom_code:
   constants: templates/terraform/constants/service_networking_vpc_service_controls.go.tmpl
-  custom_create: templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl
+  custom_create: 'resourceServiceNetworkingVPCServiceControlsCustomCreate'
   pre_read: templates/terraform/pre_read/service_networking_vpc_service_controls.go.tmpl
-  custom_update: templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl
+  custom_update: templates/terraform/custom_update/service_networking_vpc_service_controls.go.tmpl
 samples:
   - name: service_networking_vpc_service_controls_basic
     primary_resource_id: default

@@ -1,7 +1,0 @@
-id, err := tpgresource.ReplaceVars(d, config, "{{$.SelfLinkUri}}")
-if err != nil {
-	return fmt.Errorf("Error constructing id: %s", err)
-}
-d.SetId(id)
-
-return resourcePrivilegedAccessManagerSettingsUpdate(d, meta)
