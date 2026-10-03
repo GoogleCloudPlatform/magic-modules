@@ -1,0 +1,17 @@
+// If a `context` URL parameter is present, insert the segment
+// `/context/{context}` before the `/mode/{subject}` path piece.
+// Use d.GetOkExists because `context` is a url_param_only parameter.
+if v, ok := d.GetOkExists("context"); ok {
+    if ctxStr, ok := v.(string); ok && ctxStr != "" {
+        // Retrieve the "subject" parameter from the resource data
+        if subjectVal, ok := d.GetOk("subject"); ok {
+            subStr := subjectVal.(string)
+
+            // Construct the target string to find in the URL
+            target := fmt.Sprintf("/mode/%s", subStr)
+            // Construct the replacement string
+            replacement := fmt.Sprintf("/contexts/%s/mode/%s", ctxStr, subStr)
+            url = strings.Replace(url, target, replacement, 1)
+        }
+    }
+}
