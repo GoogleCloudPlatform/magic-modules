@@ -84,7 +84,7 @@ resource "google_saas_runtime_release" "example_previous" {
   release_id        = "tf-test-previous-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
+    package = "us-central1-docker.pkg.dev/easysaas-e2e-blueprints/tf-test-blueprints/tf-test-easysaas-alpha-image@sha256:85a3d3685b69bc1760a3047c1f9ccd3894a16cff8e411bf06a4a742fb75d1e4a"
   }
 }
 
@@ -94,7 +94,7 @@ resource "google_saas_runtime_release" "example" {
   release_id        = "tf-test-example-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-beta-image@sha256:7bba0fa85b2956df7768f7b32e715b6fe11f4f4193e2a70a35bf3f286a6cdf9e"
+    package = "us-central1-docker.pkg.dev/easysaas-e2e-blueprints/tf-test-blueprints/tf-test-easysaas-beta-image@sha256:ab773784582ef8af4185c275036c4653d13350bb3711ed26b06d9c023f24afc9"
   }
   input_variable_defaults {
     variable = "name"
@@ -130,7 +130,7 @@ resource "google_saas_runtime_release" "example_previous" {
   release_id        = "tf-test-previous-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
+    package = "us-central1-docker.pkg.dev/easysaas-e2e-blueprints/tf-test-blueprints/tf-test-easysaas-alpha-image@sha256:85a3d3685b69bc1760a3047c1f9ccd3894a16cff8e411bf06a4a742fb75d1e4a"
   }
 }
 
@@ -140,7 +140,7 @@ resource "google_saas_runtime_release" "example" {
   release_id        = "tf-test-example-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-beta-image@sha256:7bba0fa85b2956df7768f7b32e715b6fe11f4f4193e2a70a35bf3f286a6cdf9e"
+    package = "us-central1-docker.pkg.dev/easysaas-e2e-blueprints/tf-test-blueprints/tf-test-easysaas-beta-image@sha256:ab773784582ef8af4185c275036c4653d13350bb3711ed26b06d9c023f24afc9"
   }
   input_variable_defaults {
     variable = "name"
