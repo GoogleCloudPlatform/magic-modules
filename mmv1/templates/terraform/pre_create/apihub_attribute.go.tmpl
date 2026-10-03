@@ -1,0 +1,27 @@
+// Check if the attribute already exists (system-defined attributes)
+// System-defined attributes cannot be created, only updated
+attributeId := d.Get("attribute_id").(string)
+location := d.Get("location").(string)
+proj := config.Project
+
+// Build the GET URL (without the attributeId query parameter)
+getUrl := fmt.Sprintf("https://apihub.googleapis.com/v1/projects/%s/locations/%s/attributes/%s", proj, location, attributeId)
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+	Timeout:   d.Timeout(schema.TimeoutRead),
+})
+if err == nil {
+	// Attribute exists, check if it's system-defined
+	if defType, ok := getRes["definitionType"].(string); ok && defType == "SYSTEM_DEFINED" {
+		return fmt.Errorf("Cannot create system-defined attribute '%s'. System-defined attributes are pre-configured and cannot be created through Terraform. To manage their allowed values, use `google_apihub_attribute_allowed_values` instead.", attributeId)
+	}
+	// If it's user-defined but already exists, return an error
+	return fmt.Errorf("Attribute '%s' already exists", attributeId)
+}
+// If we get a 404, the attribute doesn't exist and we can proceed with creation
+if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+	return fmt.Errorf("Error checking if attribute exists: %v", err)
+}
