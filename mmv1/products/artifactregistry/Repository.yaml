@@ -34,6 +34,9 @@ iam_policy:
     - projects/{{project}}/locations/{{location}}/repositories/{{repository}}
     - '{{repository}}'
   self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+  list_resource:
+    member_iam_resource:
+      generate: true
 id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
