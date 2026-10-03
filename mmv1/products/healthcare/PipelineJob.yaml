@@ -184,8 +184,6 @@ properties:
             required: false
       - name: fhirStoreDestination
         type: String
-        conflicts:
-          - reconciliationDestination
         description: |
           If set, the mapping pipeline will write snapshots to this
           FHIR store without assigning stable IDs. You must
@@ -199,8 +197,6 @@ properties:
         required: false
       - name: reconciliationDestination
         type: Boolean
-        conflicts:
-          - fhirStoreDestination
         description: |
           If set to true, a mapping pipeline will send output snapshots
           to the reconciliation pipeline in its dataset. A reconciliation

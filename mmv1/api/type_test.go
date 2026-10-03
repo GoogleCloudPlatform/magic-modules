@@ -624,3 +624,185 @@ func TestProviderOnly(t *testing.T) {
 		})
 	}
 }
+
+func TestTypeValidateConflicts(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+			{Name: "beta", BaseUrl: "beta_url"},
+		},
+	}
+
+	t.Run("valid conflicts path passes validation", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name:      "foo",
+					Type:      "String",
+					Conflicts: []string{"bar"},
+				},
+				{
+					Name:      "bar",
+					Type:      "String",
+					Conflicts: []string{"foo"},
+				},
+			},
+		}
+		res.SetDefault(p)
+
+		if errs := res.Properties[0].Validate(res.Name); len(errs) != 0 {
+			t.Errorf("expected no validation errors, got %v", errs)
+		}
+	})
+
+	t.Run("bad conflicts path that resolves to empty ConflictsWith returns error", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name: "nested",
+					Type: "NestedObject",
+					Properties: []*Type{
+						{
+							Name:      "foo",
+							Type:      "String",
+							Conflicts: []string{"bar"},
+						},
+						{
+							Name:      "bar",
+							Type:      "String",
+							Conflicts: []string{"foo"},
+						},
+					},
+				},
+			},
+		}
+		res.SetDefault(p)
+
+		errs := res.Properties[0].Validate(res.Name)
+		if len(errs) != 2 {
+			t.Fatalf("expected 2 validation errors, got %d: %v", len(errs), errs)
+		}
+		for _, err := range errs {
+			if !strings.Contains(err.Error(), "resolved to an empty ConflictsWith") {
+				t.Errorf("expected error to mention empty ConflictsWith, got %v", err)
+			}
+		}
+	})
+
+	t.Run("GA field with mutual beta conflict is culled in GA and preserved in beta", func(t *testing.T) {
+		t.Parallel()
+
+		newRes := func() *Resource {
+			res := &Resource{
+				Name: "TestResource",
+				Properties: []*Type{
+					{
+						Name:      "gaField",
+						Type:      "String",
+						Conflicts: []string{"beta_field"},
+					},
+					{
+						Name:       "betaField",
+						Type:       "String",
+						MinVersion: "beta",
+						Conflicts:  []string{"ga_field"},
+					},
+				},
+			}
+			res.SetDefault(p)
+			return res
+		}
+
+		gaRes := newRes()
+		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+		if errs := gaRes.Properties[0].Validate(gaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for gaField with valid mutual beta conflict in GA, got %v", errs)
+		}
+		if got := gaRes.Properties[0].Conflicting(); len(got) != 0 {
+			t.Errorf("expected gaField.Conflicting() to be culled to empty in GA, got %v", got)
+		}
+		if errs := gaRes.Properties[1].Validate(gaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for excluded betaField in GA, got %v", errs)
+		}
+
+		betaRes := newRes()
+		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+		if got := betaRes.Properties[0].Conflicting(); !reflect.DeepEqual(got, []string{"beta_field"}) {
+			t.Errorf("expected gaField.Conflicting() to be [beta_field] in beta, got %v", got)
+		}
+		if errs := betaRes.Properties[0].Validate(betaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for gaField in beta, got %v", errs)
+		}
+		if errs := betaRes.Properties[1].Validate(betaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for betaField in beta, got %v", errs)
+		}
+	})
+
+	t.Run("GA field conflicting with non-mutual beta field returns error in GA", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name:      "gaField",
+					Type:      "String",
+					Conflicts: []string{"beta_field"},
+				},
+				{
+					Name:       "otherGaField",
+					Type:       "String",
+					MinVersion: "ga",
+				},
+				{
+					Name:       "betaField",
+					Type:       "String",
+					MinVersion: "beta",
+					Conflicts:  []string{"other_ga_field"},
+				},
+			},
+		}
+		res.SetDefault(p)
+		res.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+		if errs := res.Properties[0].Validate(res.Name); len(errs) == 0 {
+			t.Errorf("expected validation error for gaField conflicting with non-mutual betaField in GA, got none")
+		}
+	})
+
+	t.Run("field conflicting with unconditionally excluded field returns error", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name:      "gaField",
+					Type:      "String",
+					Conflicts: []string{"excluded_field"},
+				},
+				{
+					Name:      "excludedField",
+					Type:      "String",
+					Exclude:   true,
+					Conflicts: []string{"ga_field"},
+				},
+			},
+		}
+		res.SetDefault(p)
+		res.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+		if errs := res.Properties[0].Validate(res.Name); len(errs) == 0 {
+			t.Errorf("expected validation error for gaField conflicting with unconditionally excluded field, got none")
+		}
+	})
+}
