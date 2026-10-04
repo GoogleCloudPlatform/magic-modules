@@ -1529,9 +1529,10 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 {{- end }}
 
 {{- if ne $.TargetVersionName "ga" }}
-// The 5 acceptance tests below cover all 5 initial creation configs and all 20
+// The 5 acceptance tests below cover all 5 initial creation configs, all 20
 // directed transitions between the 5 managed_opentelemetry_config states
-// (Missing, Empty, SCOPE_UNSPECIFIED, COLLECTION, and NONE), with 4 transitions per cluster.
+// (Missing, Empty, SCOPE_UNSPECIFIED, COLLECTION, and NONE), and prior-state
+// preservation when omitting the block (Missing) or scope (Empty).
 const (
 	otelConfigMissing     = ""
 	otelConfigEmpty       = "managed_opentelemetry_config {}"
@@ -1576,7 +1577,7 @@ func testAccManagedOpenTelemetryImportStep() resource.TestStep {
 }
 
 // Create with Missing, then transition:
-// Missing -> SCOPE_UNSPECIFIED -> NONE -> COLLECTION -> Missing
+// Missing -> SCOPE_UNSPECIFIED -> NONE -> COLLECTION -> Missing -> Empty -> COLLECTION
 func TestAccContainerCluster_withManagedOpenTelemetryConfig_createMissing(t *testing.T) {
 	t.Parallel()
 
@@ -1613,6 +1614,19 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig_createMissing(t *tes
 				// Optional+Computed: omitting the block keeps the previous state (COLLECTION)
 				Config: testAccContainerCluster_withManagedOpenTelemetryConfigBlock(clusterName, networkName, subnetworkName, otelConfigMissing),
 				Check:  testAccCheckManagedOpenTelemetryScope(t, "COLLECTION -> Missing", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"),
+			},
+			testAccManagedOpenTelemetryImportStep(),
+			{
+				// Optional+Computed: switching from omitted block (Missing) to empty block (Empty)
+				// also keeps the previous state (COLLECTION)
+				Config: testAccContainerCluster_withManagedOpenTelemetryConfigBlock(clusterName, networkName, subnetworkName, otelConfigEmpty),
+				Check:  testAccCheckManagedOpenTelemetryScope(t, "Missing (COLLECTION) -> Empty", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"),
+			},
+			testAccManagedOpenTelemetryImportStep(),
+			{
+				// Re-specifying the same scope (COLLECTION) that was preserved in state is a no-op
+				Config: testAccContainerCluster_withManagedOpenTelemetryConfigBlock(clusterName, networkName, subnetworkName, otelConfigCollection),
+				Check:  testAccCheckManagedOpenTelemetryScope(t, "Empty (COLLECTION) -> COLLECTION", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"),
 			},
 			testAccManagedOpenTelemetryImportStep(),
 		},
@@ -1688,8 +1702,9 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig_createCollection(t *
 			},
 			testAccManagedOpenTelemetryImportStep(),
 			{
+				// Optional+Computed: omitting scope keeps the previous state (NONE)
 				Config: testAccContainerCluster_withManagedOpenTelemetryConfigBlock(clusterName, networkName, subnetworkName, otelConfigEmpty),
-				Check:  testAccCheckManagedOpenTelemetryScope(t, "NONE -> Empty", "SCOPE_UNSPECIFIED"),
+				Check:  testAccCheckManagedOpenTelemetryScope(t, "NONE -> Empty", "NONE"),
 			},
 			testAccManagedOpenTelemetryImportStep(),
 			{
@@ -1737,8 +1752,9 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig_createNone(t *testin
 			},
 			testAccManagedOpenTelemetryImportStep(),
 			{
+				// Optional+Computed: omitting scope keeps the previous state (COLLECTION)
 				Config: testAccContainerCluster_withManagedOpenTelemetryConfigBlock(clusterName, networkName, subnetworkName, otelConfigEmpty),
-				Check:  testAccCheckManagedOpenTelemetryScope(t, "COLLECTION -> Empty", "SCOPE_UNSPECIFIED"),
+				Check:  testAccCheckManagedOpenTelemetryScope(t, "COLLECTION -> Empty", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"),
 			},
 			testAccManagedOpenTelemetryImportStep(),
 			{
