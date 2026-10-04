@@ -1528,7 +1528,6 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 }
 {{- end }}
 
-{{- if ne $.TargetVersionName "ga" }}
 // The 5 acceptance tests below cover all 5 initial creation configs, all 20
 // directed transitions between the 5 managed_opentelemetry_config states
 // (Missing, Empty, SCOPE_UNSPECIFIED, COLLECTION, and NONE), and prior-state
@@ -1831,7 +1830,6 @@ resource "google_container_cluster" "with_managed_opentelemetry" {
 }
 `, clusterName, networkName, subnetworkName, otelBlock)
 }
-{{- end }}
 
 {{- if ne $.TargetVersionName "ga" }}
 func TestAccContainerCluster_withManagedMLDiagnosticsConfig(t *testing.T) {
