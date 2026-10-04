@@ -2236,7 +2236,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"scope": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Description:  "The scope of the Managed OpenTelemetry pipeline. Available options include SCOPE_UNSPECIFIED, NONE, and COLLECTION_AND_INSTRUMENTATION_COMPONENTS.",
+							Description: "The scope of the Managed OpenTelemetry pipeline. Available options include NONE and COLLECTION_AND_INSTRUMENTATION_COMPONENTS. To disable the feature, explicitly set this to NONE.",
 							ValidateFunc: validation.StringInSlice([]string{"SCOPE_UNSPECIFIED", "NONE", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"}, false),
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
 						},
@@ -6807,8 +6807,15 @@ func flattenManagedMachineLearningDiagnosticsConfig(c *container.ManagedMachineL
 {{- if ne $.TargetVersionName "ga" }}
 func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
+	if len(l) == 0 {
 		return nil
+	}
+	// l[0] is nil when the block is present with an empty or diff-suppressed
+	// default scope (e.g. `{}` or `scope = "SCOPE_UNSPECIFIED"` from an unset state).
+	// Return an empty struct `{}` (which the API normalizes to SCOPE_UNSPECIFIED)
+	// rather than nil to avoid a permadiff on Create and an empty-update 400 on Update.
+	if l[0] == nil {
+		return &container.ManagedOpenTelemetryConfig{}
 	}
 	config := l[0].(map[string]interface{})
 	return &container.ManagedOpenTelemetryConfig{
