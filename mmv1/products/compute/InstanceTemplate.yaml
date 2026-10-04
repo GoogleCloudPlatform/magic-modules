@@ -14,6 +14,14 @@ properties:
       Name of the resource.
     required: true
     immutable: true
+  - name: 'scheduling'
+    type: NestedObject
+    description: Sets the scheduling options for this instance.
+    properties:
+      - name: 'exposeHostTopology'
+        type: Boolean
+        description: |
+          Opt-in flag to expose the hashed physical host ID in the VM's ResourceStatus.
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/global/instanceTemplates/{{name}}'
