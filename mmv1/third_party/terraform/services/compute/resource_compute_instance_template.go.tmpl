@@ -1817,9 +1817,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	} else if v, ok := d.GetOk("name_prefix"); ok {
 		prefix := v.(string)
 		if len(prefix) > 37 {
-			itName = tpgresource.ReducedPrefixedUniqueId(prefix)
+			itName = tpgresource.ReducedPrefixedRandomId(prefix)
 		} else {
-			itName = id.PrefixedUniqueId(prefix)
+			itName = tpgresource.PrefixedRandomId(prefix)
 		}
 	} else {
 		itName = id.UniqueId()

@@ -312,9 +312,9 @@ The following arguments are supported:
   UUID that will be more prone to collisions.
 
   Resulting name for a `name_prefix` <= 37 characters:
-  `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
+  `name_prefix` + 26 random lowercase alphanumeric characters
   Resulting name for a `name_prefix` 38 - 54 characters:
-  `name_prefix` + YYmmdd + 3 digit incremental counter
+  `name_prefix` + 9 random lowercase alphanumeric characters
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.

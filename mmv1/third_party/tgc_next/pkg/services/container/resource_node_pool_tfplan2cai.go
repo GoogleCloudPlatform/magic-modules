@@ -484,7 +484,12 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 		}
 		name = v.(string)
 	} else if v, ok := d.GetOk(prefix + "name_prefix"); ok {
-		name = id.PrefixedUniqueId(v.(string))
+		p := v.(string)
+		if len(p) > 14 {
+			name = tpgresource.ReducedPrefixedRandomId(p)
+		} else {
+			name = tpgresource.PrefixedRandomId(p)
+		}
 	} else {
 		name = id.UniqueId()
 	}

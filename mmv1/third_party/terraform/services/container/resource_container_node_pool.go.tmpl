@@ -1247,9 +1247,9 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 	} else if v, ok := d.GetOk(prefix + "name_prefix"); ok {
 		p := v.(string)
 		if len(p) > 14 {
-			name = tpgresource.ReducedPrefixedUniqueId(p)
+			name = tpgresource.ReducedPrefixedRandomId(p)
 		} else {
-			name = id.PrefixedUniqueId(p)
+			name = tpgresource.PrefixedRandomId(p)
 		}
 	} else {
 		name = id.UniqueId()

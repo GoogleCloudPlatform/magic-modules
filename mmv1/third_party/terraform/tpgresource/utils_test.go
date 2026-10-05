@@ -3,6 +3,7 @@ package tpgresource_test
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -1262,6 +1263,40 @@ func TestNormalizeIamPrincipalCasing(t *testing.T) {
 
 			if normalizedPrincipal != tc.Expected {
 				t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, normalizedPrincipal)
+			}
+		})
+	}
+}
+
+func TestPrefixedRandomId(t *testing.T) {
+	prefix := "tf-test-prefix-"
+	suffixRegex := regexp.MustCompile(`^[0-9a-z]+$`)
+	cases := map[string]struct {
+		fn        func(string) string
+		suffixLen int
+	}{
+		"PrefixedRandomId":        {tpgresource.PrefixedRandomId, tpgresource.PrefixedRandomIdSuffixLength},
+		"ReducedPrefixedRandomId": {tpgresource.ReducedPrefixedRandomId, tpgresource.ReducedPrefixedRandomIdSuffixLength},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			seen := make(map[string]bool)
+			for i := 0; i < 10000; i++ {
+				got := tc.fn(prefix)
+				suffix, ok := strings.CutPrefix(got, prefix)
+				if !ok {
+					t.Fatalf("%s(%q) = %q, want prefix %q", name, prefix, got, prefix)
+				}
+				if len(suffix) != tc.suffixLen {
+					t.Fatalf("%s(%q) = %q, suffix length %d, want %d", name, prefix, got, len(suffix), tc.suffixLen)
+				}
+				if !suffixRegex.MatchString(suffix) {
+					t.Fatalf("%s(%q) = %q, suffix %q is not lowercase alphanumeric", name, prefix, got, suffix)
+				}
+				if seen[got] {
+					t.Fatalf("%s(%q) returned duplicate %q after %d calls", name, prefix, got, i)
+				}
+				seen[got] = true
 			}
 		})
 	}
