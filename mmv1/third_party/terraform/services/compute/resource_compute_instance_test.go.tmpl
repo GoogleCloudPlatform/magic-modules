@@ -5569,16 +5569,28 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	})
 }
 
-// testAccServiceClassId is the PSC Interface service class the test projects are
-// authorized to connect with. A network attachment admits a producer VM by service
-// class only if that service class is in its producer_accept_lists AND the producer
-// project owns the service class.
-const testAccServiceClassId = "gcp-memorystore-redis"
+// testAccServiceClassId returns the PSC Interface service class the given test
+// project is authorized to use as a producer. Setting service_class_id on a
+// network interface requires networkconnectivity.serviceClasses.use on the
+// service class, which is owned by the producer project, so each CI project has
+// its own class (see b/521416084). They only exist in us-central1.
+func testAccServiceClassId(project string) string {
+	switch project {
+	case "ci-test-project-nightly-ga":
+		return "gcp-tf-persistent-service-class-ga"
+	case "ci-test-project-nightly-beta":
+		return "gcp-tf-persistent-service-class-beta"
+	default:
+		return "gcp-tf-persistent-service-class-dev"
+	}
+}
 
 func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
 	t.Parallel()
 	suffix := acctest.RandString(t, 10)
-	envRegion := envvar.GetTestRegionFromEnv()
+	project := envvar.GetTestProjectFromEnv()
+	region := "us-central1"
+	serviceClassId := testAccServiceClassId(project)
 	var instance map[string]interface{}
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -5590,13 +5602,13 @@ func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
 	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
 
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
-	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", project, region, testNetworkAttachmentName)
 
 	context := map[string]interface{}{
 		"suffix":                  suffix,
 		"network_attachment_name": testNetworkAttachmentName,
-		"region":                  envRegion,
-		"service_class_id":        testAccServiceClassId,
+		"region":                  region,
+		"service_class_id":        serviceClassId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5610,10 +5622,10 @@ func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.service_class_id", testAccServiceClassId),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.service_class_id", serviceClassId),
 				),
 			},
-			computeInstanceImportStep(fmt.Sprintf("%s-a", envRegion), fmt.Sprintf("tf-test-instance-%s", suffix), []string{}),
+			computeInstanceImportStep(fmt.Sprintf("%s-a", region), fmt.Sprintf("tf-test-instance-%s", suffix), []string{}),
 		},
 	})
 }

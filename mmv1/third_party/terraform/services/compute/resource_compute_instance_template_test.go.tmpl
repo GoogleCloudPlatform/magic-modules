@@ -1885,12 +1885,13 @@ func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{networkAttachmentName}
 	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), networkAttachmentName)
+	serviceClassId := testAccServiceClassId(envvar.GetTestProjectFromEnv())
 
 	context := map[string]interface{}{
 		"subnet":             subnetName,
 		"suffix":             (acctest.RandString(t, 10)),
 		"network_attachment": fullFormNetworkAttachmentName,
-		"service_class_id":   testAccServiceClassId,
+		"service_class_id":   serviceClassId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1901,7 +1902,7 @@ func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 			{
 				Config: testAccComputeInstanceTemplate_network_attachment(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "network_interface.1.service_class_id", testAccServiceClassId),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "network_interface.1.service_class_id", serviceClassId),
 				),
 			},
 			{

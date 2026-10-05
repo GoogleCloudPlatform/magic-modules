@@ -1976,13 +1976,14 @@ func TestAccComputeRegionInstanceTemplate_networkAttachment(t *testing.T) {
 
 	networkAttachmentShortname := tpgcompute.BootstrapNetworkAttachment(t, "tf-test-attachment", subnet)
 	networkAttachment := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), networkAttachmentShortname)
+	serviceClassId := testAccServiceClassId(envvar.GetTestProjectFromEnv())
 
 	context := map[string]interface{}{
 		"instance_name":      fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"subnet":             subnet,
 		"network_attachment": networkAttachment,
 		"region":             region,
-		"service_class_id":   testAccServiceClassId,
+		"service_class_id":   serviceClassId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1993,7 +1994,7 @@ func TestAccComputeRegionInstanceTemplate_networkAttachment(t *testing.T) {
 			{
 				Config: testAccComputeRegionInstanceTemplate_networkAttachment(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "network_interface.1.service_class_id", testAccServiceClassId),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "network_interface.1.service_class_id", serviceClassId),
 				),
 			},
 			{
