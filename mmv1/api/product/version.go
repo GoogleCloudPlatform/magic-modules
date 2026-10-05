@@ -17,6 +17,8 @@ import (
 	"log"
 
 	"golang.org/x/exp/slices"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 var ORDER = []string{"ga", "beta", "nightly", "alpha", "private", "internal"}
@@ -45,6 +47,11 @@ func (v *Version) Validate(pName string) {
 	if v.BaseUrl == "" {
 		log.Fatalf("Missing `base_url` in `version` for product %s", pName)
 	}
+	if v.RepUrl != "" {
+		if n := len(google.ExtractTemplateVariables(v.RepUrl)); n != 1 {
+			log.Fatalf("`rep_url` %q in `version` %s for product %s must contain exactly one template variable (e.g. {{location}} or {{region}}), found %d", v.RepUrl, v.Name, pName, n)
+		}
+	}
 }
 
 func (v *Version) CompareTo(other *Version) int {
@@ -55,4 +62,15 @@ func (v *Version) CompareTo(other *Version) int {
 // of regional vs global is controlled at the product level
 func (v *Version) RepEnabled() bool {
 	return v.RepUrl != ""
+}
+
+// RepUrlVariable returns the name of the template variable in RepUrl (for
+// example "location" for https://foo.{{location}}.rep.googleapis.com/v1/).
+// Validate ensures a non-empty RepUrl contains exactly one variable. Returns
+// an empty string if REP is not enabled for this version.
+func (v *Version) RepUrlVariable() string {
+	if vars := google.ExtractTemplateVariables(v.RepUrl); len(vars) > 0 {
+		return vars[0]
+	}
+	return ""
 }
