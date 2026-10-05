@@ -4996,6 +4996,7 @@ func TestAccComputeInstance_schedulingSkipGuestOSShutdown(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func TestAccComputeInstance_preemptionNoticeDuration(t *testing.T) {
 	t.Parallel()
@@ -5021,6 +5022,7 @@ func TestAccComputeInstance_preemptionNoticeDuration(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *testing.T) {
 	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -5438,6 +5440,7 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
+{{ end }}
 
 func testAccComputeInstance_preemptionNoticeDuration(instance string) string {
 	return fmt.Sprintf(`
@@ -5474,8 +5477,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
-
-{{ end }}
 
 func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {

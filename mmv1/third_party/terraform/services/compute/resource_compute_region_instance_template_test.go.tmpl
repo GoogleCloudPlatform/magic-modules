@@ -1906,6 +1906,7 @@ func TestAccComputeRegionInstanceTemplate_schedulingSkipGuestOSShutdown(t *testi
 		},
 	})
 }
+{{- end }}
 
 func TestAccComputeRegionInstanceTemplate_schedulingPreemptionNoticeDuration(t *testing.T) {
 	t.Parallel()
@@ -1935,7 +1936,6 @@ func TestAccComputeRegionInstanceTemplate_schedulingPreemptionNoticeDuration(t *
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeRegionInstanceTemplate_GuestOsFeatures(t *testing.T) {
 	t.Parallel()
@@ -5656,6 +5656,7 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, context)
 }
+{{- end }}
 
 func testAccComputeRegionInstanceTemplate_schedulingPreemptionNoticeDuration(suffix string) string {
 	return fmt.Sprintf(`
@@ -5702,6 +5703,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_aliasIpv6Range(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "custom-test" {
