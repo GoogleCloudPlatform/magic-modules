@@ -143,6 +143,26 @@ samples:
           url_map_name: 'urlmap'
           backend_service_name: 'home'
           health_check_name: 'health-check'
+  - name: 'url_map_dynamic_compression_policy_basic'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_dynamic_compression_policy_basic'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
+  - name: 'url_map_dynamic_compression_policy_multi_level'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_dynamic_compression_policy_multi_level'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
   - name: 'url_map_path_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -1338,6 +1358,23 @@ properties:
                               be specified.
                             item_type:
                               type: String
+                  - name: 'dynamicCompressionPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    is_missing_in_cai: true
+                    description: |
+                      Dynamic compression policy for this URL Map's route. Available only for
+                      Global EXTERNAL_MANAGED load balancer schemes.
+                    properties:
+                      - name: 'compressionMode'
+                        type: Enum
+                        is_missing_in_cai: true
+                        description: |
+                          Compress text responses using Brotli or gzip compression, based on
+                          the client's Accept-Encoding header.
+                        enum_values:
+                          - 'AUTOMATIC'
+                          - 'DISABLED'
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -2449,6 +2486,23 @@ properties:
                               be specified.
                             item_type:
                               type: String
+                  - name: 'dynamicCompressionPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    is_missing_in_cai: true
+                    description: |
+                      Dynamic compression policy for this URL Map's route. Available only for
+                      Global EXTERNAL_MANAGED load balancer schemes.
+                    properties:
+                      - name: 'compressionMode'
+                        type: Enum
+                        is_missing_in_cai: true
+                        description: |
+                          Compress text responses using Brotli or gzip compression, based on
+                          the client's Accept-Encoding header.
+                        enum_values:
+                          - 'AUTOMATIC'
+                          - 'DISABLED'
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -3354,6 +3408,23 @@ properties:
                         be specified.
                       item_type:
                         type: String
+            - name: 'dynamicCompressionPolicy'
+              type: NestedObject
+              min_version: beta
+              is_missing_in_cai: true
+              description: |
+                Dynamic compression policy for this URL Map's route. Available only for
+                Global EXTERNAL_MANAGED load balancer schemes.
+              properties:
+                - name: 'compressionMode'
+                  type: Enum
+                  is_missing_in_cai: true
+                  description: |
+                    Compress text responses using Brotli or gzip compression, based on
+                    the client's Accept-Encoding header.
+                  enum_values:
+                    - 'AUTOMATIC'
+                    - 'DISABLED'
   - name: 'defaultCustomErrorResponsePolicy'
     type: NestedObject
     description: |
@@ -3586,6 +3657,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         exactly_one_of:
           - 'default_service'
           - 'default_url_redirect'
@@ -3693,6 +3765,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'pathPrefixRewrite'
             type: String
@@ -3731,6 +3804,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'seconds'
             type: String
@@ -3782,6 +3856,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'retryConditions'
             type: Array
@@ -3862,6 +3937,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'backendService'
             type: ResourceRef
@@ -3894,6 +3970,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'allowOrigins'
             type: Array
@@ -4034,6 +4111,7 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
         properties:
           - name: 'delay'
             type: NestedObject
@@ -4574,3 +4652,30 @@ properties:
                   - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
                 item_type:
                   type: String
+      - name: 'dynamicCompressionPolicy'
+        type: NestedObject
+        min_version: beta
+        is_missing_in_cai: true
+        description: |
+          Dynamic compression policy for this URL Map's route. Available only for
+          Global EXTERNAL_MANAGED load balancer schemes.
+        at_least_one_of:
+          - 'default_route_action.0.weighted_backend_services'
+          - 'default_route_action.0.url_rewrite'
+          - 'default_route_action.0.timeout'
+          - 'default_route_action.0.retry_policy'
+          - 'default_route_action.0.request_mirror_policy'
+          - 'default_route_action.0.cors_policy'
+          - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+        properties:
+          - name: 'compressionMode'
+            type: Enum
+            is_missing_in_cai: true
+            description: |
+              Compress text responses using Brotli or gzip compression, based on
+              the client's Accept-Encoding header.
+            enum_values:
+              - 'AUTOMATIC'
+              - 'DISABLED'
