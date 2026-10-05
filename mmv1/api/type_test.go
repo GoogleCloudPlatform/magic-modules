@@ -698,6 +698,44 @@ func TestTypeValidateConflicts(t *testing.T) {
 		}
 	})
 
+	t.Run("conflicts with one valid and one invalid entry returns error", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name: "nested",
+					Type: "NestedObject",
+					Properties: []*Type{
+						{
+							Name:      "foo",
+							Type:      "String",
+							Conflicts: []string{"nested.0.bar", "nonexistent"},
+						},
+						{
+							Name:      "bar",
+							Type:      "String",
+							Conflicts: []string{"nested.0.foo"},
+						},
+					},
+				},
+			},
+		}
+		res.SetDefault(p)
+
+		errs := res.Properties[0].Validate(res.Name)
+		if len(errs) != 1 {
+			t.Fatalf("expected 1 validation error, got %d: %v", len(errs), errs)
+		}
+		if !strings.Contains(errs[0].Error(), "resolved to an empty ConflictsWith") {
+			t.Errorf("expected error to mention empty ConflictsWith, got %v", errs[0])
+		}
+		if !strings.Contains(errs[0].Error(), "nonexistent") {
+			t.Errorf("expected error to mention the invalid entry 'nonexistent', got %v", errs[0])
+		}
+	})
+
 	t.Run("GA field with mutual beta conflict is culled in GA and preserved in beta", func(t *testing.T) {
 		t.Parallel()
 

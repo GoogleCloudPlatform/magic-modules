@@ -549,8 +549,10 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	if !t.isExcluded() && len(t.Conflicting()) > 0 {
 		t.cullHigherVersionConflicts()
-		if len(t.Conflicting()) > 0 && len(t.GetPropertySchemaPathList(t.Conflicting())) == 0 {
-			es = append(es, fmt.Errorf("property %s has `conflicts` that resolved to an empty ConflictsWith in resource %s", fullFieldPath, rName))
+		for _, c := range t.Conflicting() {
+			if _, path := t.ResourceMetadata.resolvePropertySchemaPath(c); path == "" {
+				es = append(es, fmt.Errorf("property %s has `conflicts` entry %q that resolved to an empty ConflictsWith in resource %s", fullFieldPath, c, rName))
+			}
 		}
 	}
 
