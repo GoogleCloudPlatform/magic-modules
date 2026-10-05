@@ -1,0 +1,92 @@
+resource "google_compute_network" "net" {
+  provider                = google-beta
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  provider      = google-beta
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.net.id
+}
+
+resource "google_filestore_instance" "home" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "filestore_name"}}"
+  location = "us-central1-a"
+  tier     = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+
+  networks {
+    network = google_compute_network.net.name
+    modes   = ["MODE_IPV4"]
+  }
+}
+
+resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" {
+  provider                     = google-beta
+  region                       = "us-central1"
+  model_development_cluster_id = "{{index $.ResourceIdVars "model_development_cluster_id"}}"
+  display_name                 = "{{index $.Vars "display_name"}}"
+
+  labels = {
+    env = "dev"
+  }
+
+  network {
+    network    = google_compute_network.net.id
+    subnetwork = google_compute_subnetwork.subnet.id
+  }
+
+  orchestrator_spec {
+    slurm_spec {
+      home_directory_storage = google_filestore_instance.home.id
+      login_node_pool_id     = "login"
+
+      partitions {
+        id            = "main"
+        node_pool_ids = ["cpu-pool"]
+      }
+
+      default_partition_id = "main"
+    }
+  }
+
+  node_pools {
+    id   = "login"
+    zone = "us-central1-a"
+
+    machine_spec {
+      machine_type = "n2-standard-4"
+    }
+
+    scaling_spec {
+      min_node_count = 1
+      max_node_count = 1
+    }
+
+    enable_public_ips = true
+  }
+
+  node_pools {
+    id   = "cpu-pool"
+    zone = "us-central1-a"
+
+    machine_spec {
+      machine_type = "e2-standard-4"
+    }
+
+    scaling_spec {
+      min_node_count = 1
+      max_node_count = {{index $.Vars "max_node_count"}}
+    }
+
+    enable_public_ips = true
+  }
+}

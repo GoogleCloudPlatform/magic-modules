@@ -1,0 +1,1114 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ModelDevelopmentCluster
+description: |-
+  A Vertex AI ModelDevelopmentCluster resource that manages a cluster of compute
+  resources with an orchestrator (such as Slurm or GKE) for model development
+  and training workloads.
+min_version: beta
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/vertex-ai/docs
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.modelDevelopmentClusters
+base_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters
+self_link: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}
+create_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters?modelDevelopmentClusterId={{model_development_cluster_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}
+timeouts:
+  insert_minutes: 120
+  update_minutes: 120
+  delete_minutes: 120
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: TW9kZWxEZXZlbG9wbWVudENsdXN0ZXJBdXRvZ2VuVjJBZ2VudA==
+samples:
+  - name: vertex_ai_model_development_cluster_basic
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: vertex_ai_model_development_cluster_basic
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          filestore_name: mdc-home
+        test_vars_overrides:
+          model_development_cluster_id: '"tf-test" + randomSuffix[:3]'
+        vars:
+          display_name: tftest
+          max_node_count: '2'
+      - name: vertex_ai_model_development_cluster_basic
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          filestore_name: mdc-home
+        test_vars_overrides:
+          model_development_cluster_id: '"tf-test" + randomSuffix[:3]'
+        vars:
+          display_name: tftest-updated
+          max_node_count: '3'
+parameters:
+  - name: region
+    type: String
+    description: The region of the ModelDevelopmentCluster. eg us-central1
+    immutable: true
+    url_param_only: true
+  - name: modelDevelopmentClusterId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the cluster, which is the final component
+      of the ModelDevelopmentCluster's resource name.
+
+      This value should be 1-10 characters, and valid characters
+      are `/^[a-z]([a-z0-9-]{0,8}[a-z0-9])?$/`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: clusterEvents
+    type: Array
+    description: The events of the cluster. Displays the 100 most recent events.
+    output: true
+    item_type:
+      type: NestedObject
+      output: true
+      properties:
+        - name: eventMessage
+          type: String
+          description: The detailed description of the cluster event.
+          output: true
+        - name: eventTime
+          type: String
+          description: The occurrence time of the cluster event.
+          output: true
+        - name: eventType
+          type: String
+          description: |-
+            The type of the cluster event.
+            Possible values:
+            VM_PROLOG_ERROR
+            VM_EPILOG_ERROR
+            VM_CONTINUOUS_GPU_ERROR
+            VM_SCAN_ERROR
+            VM_SLURM_POWER_DOWN
+            VM_SLURM_DRAIN
+            VM_DELETION
+            VM_REPORT_AND_REPLACEMENT
+            VM_REBOOT
+          output: true
+  - name: clusterStatus
+    type: NestedObject
+    description: The status information of the cluster.
+    output: true
+    properties:
+      - name: detail
+        type: String
+        description: The detail description of the cluster status.
+        output: true
+      - name: error
+        type: NestedObject
+        description: |-
+          The `Status` type defines a logical error model that is suitable for
+          different programming environments, including REST APIs and RPC APIs. It is
+          used by [gRPC](https://github.com/grpc). Each `Status` message contains
+          three pieces of data: error code, error message, and error details.
+
+          You can find out more about this error model and how to work with it in the
+          [API Design Guide](https://cloud.google.com/apis/design/errors).
+        output: true
+        properties:
+          - name: code
+            type: Integer
+            description: The status code, which should be an enum value of google.rpc.Code.
+            output: true
+          - name: details
+            type: Array
+            description: |-
+              A list of messages that carry the error details.  There is a common set of
+              message types for APIs to use.
+            output: true
+            item_type:
+              type: KeyValuePairs
+          - name: message
+            type: String
+            description: |-
+              A developer-facing error message, which should be in English. Any
+              user-facing error message should be localized and sent in the
+              google.rpc.Status.details field, or localized by the client.
+            output: true
+      - name: nodesStatus
+        type: Array
+        description: The status information of all the nodes in the cluster.
+        output: true
+        item_type:
+          type: NestedObject
+          output: true
+          properties:
+            - name: createTime
+              type: String
+              description: The time when the node was created.
+              output: true
+            - name: detail
+              type: String
+              description: The detail description of the node status.
+              output: true
+            - name: instanceId
+              type: String
+              description: The VM instance ID of the node.
+              output: true
+            - name: instanceName
+              type: String
+              description: The name of the Compute Engine instance associated with the node.
+              output: true
+            - name: lastUpdateTime
+              type: String
+              description: The time when the node's current state or detail last changed.
+              output: true
+            - name: nodePoolId
+              type: String
+              description: The ID of the node pool.
+              output: true
+            - name: nodePoolType
+              type: String
+              description: |-
+                The type of the node pool.
+                Possible values:
+                NODE_POOL_TYPE_LOGIN
+                NODE_POOL_TYPE_COMPUTE
+              output: true
+            - name: nodeState
+              type: String
+              description: |-
+                The state of the node.
+                Possible values:
+                PREPARING
+                RUNNING
+                ERROR
+                UPDATING
+              output: true
+            - name: physicalHost
+              type: NestedObject
+              description: Physical Host Hardware information.
+              output: true
+              properties:
+                - name: blockId
+                  type: String
+                  description: Name of the block.
+                  output: true
+                - name: clusterName
+                  type: String
+                  description: Name of the physical cluster.
+                  output: true
+                - name: hostId
+                  type: String
+                  description: Name of the host.
+                  output: true
+                - name: subblockId
+                  type: String
+                  description: Name of the sub-block.
+                  output: true
+      - name: state
+        type: String
+        description: |-
+          The realtime state of the cluster.
+          Possible values:
+          PROVISIONING
+          RUNNING
+          STOPPING
+          ERROR
+          UPDATING
+        output: true
+  - name: createTime
+    type: String
+    description: Time when the ModelDevelopmentCluster was created.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      The display name of the ModelDevelopmentCluster.
+      The name can be up to 128 characters long and can consist of any UTF-8
+      characters.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      The labels with user-defined metadata to organize PersistentResource.
+
+      Label keys and values can be no longer than 64 characters
+      (Unicode codepoints), can only contain lowercase letters, numeric
+      characters, underscores and dashes. International characters are allowed.
+
+      See https://goo.gl/xmQnxf for more information and examples of labels.
+  - name: lustreExportConfig
+    type: NestedObject
+    description: |-
+      Configuration for backing up the Managed Lustre instances attached to a
+      cluster to a Cloud Storage bucket.
+
+      By default every instance attached to any node pool is backed up; set
+      `lustres` to narrow that to a subset. Each instance is written to its own
+      prefix under the bucket, so several instances, and several clusters, can
+      share a destination.
+    properties:
+      - name: daysOfWeek
+        type: Array
+        description: |-
+          Days of the week on which a backup runs, each at most once and
+          none of them DAY_OF_WEEK_UNSPECIFIED. If empty, a backup runs every day.
+        item_type:
+          type: String
+      - name: destinationBucket
+        type: String
+        required: true
+        description: |-
+          The Cloud Storage bucket that backups are written to, without
+          the "gs://" scheme.
+      - name: lustres
+        type: Array
+        description: |-
+          The Managed Lustre instances to back up, each named as
+          "projects/{project}/locations/{zone}/instances/{instance}". Every entry
+          must be attached to one of the cluster's node pools, and no entry may
+          repeat. If empty, every attached instance is backed up.
+        item_type:
+          type: String
+      - name: startTime
+        type: NestedObject
+        description: |-
+          Represents a time of day. The date and time zone are either not significant
+          or are specified elsewhere. An API may choose to allow leap seconds. Related
+          types are google.type.Date and `google.protobuf.Timestamp`.
+        properties:
+          - name: hours
+            type: Integer
+            description: |-
+              Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+              typically must be less than or equal to 23. An API may choose to allow the
+              value "24:00:00" for scenarios like business closing time.
+          - name: minutes
+            type: Integer
+            description: |-
+              Minutes of an hour. Must be greater than or equal to 0 and less than or
+              equal to 59.
+          - name: nanos
+            type: Integer
+            description: |-
+              Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+              and less than or equal to 999,999,999.
+          - name: seconds
+            type: Integer
+            description: |-
+              Seconds of a minute. Must be greater than or equal to 0 and typically must
+              be less than or equal to 59. An API may allow the value 60 if it allows
+              leap-seconds.
+  - name: name
+    type: String
+    description: Identifier. Resource name of an ModelDevelopmentCluster.
+    output: true
+  - name: network
+    type: NestedObject
+    description: Network spec of the cluster.
+    default_from_api: true
+    immutable: true
+    properties:
+      - name: effectivePodsSecondaryRangeName
+        type: String
+        description: |-
+          The effective name of the secondary IP range within the subnetwork for
+          pods. This field reflects the value of `pods_secondary_range_name` if it
+          is set by the user, or the server-applied default ("pods-secondary-range")
+          if it is not.
+        output: true
+      - name: effectiveServicesSecondaryRangeName
+        type: String
+        description: |-
+          The effective name of the secondary IP range within the subnetwork for
+          services. This field reflects the value of `services_secondary_range_name`
+          if it is set by the user, or the server-applied default
+          ("services-secondary-range") if it is not.
+        output: true
+      - name: network
+        type: String
+        required: true
+        description: |-
+          The name of the VPC network where to create the cluster.
+          The `default` network is used if not specified.
+        immutable: true
+      - name: podsSecondaryRangeName
+        type: String
+        description: |-
+          The name of the secondary IP range within the subnetwork for pods.
+          If not specified, "pods-secondary-range" will be used.
+        immutable: true
+      - name: servicesSecondaryRangeName
+        type: String
+        description: |-
+          The name of the secondary IP range within the subnetwork for services.
+          If not specified, "services-secondary-range" will be used.
+        immutable: true
+      - name: subnetwork
+        type: String
+        description: |-
+          The name of the subnetwork in the above network to create the cluster.
+          If not specified:
+          * for auto mode VPC, the subnet in corresponding region is auto-selected;
+          * for custom mode VPC, a new subnet will be automatically created.
+        default_from_api: true
+        immutable: true
+  - name: nodePools
+    type: Array
+    required: true
+    description: The spec of the pools of different resources.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: additionalDisks
+          type: Array
+          description: Additional disk specs for the instances in this node pool.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: diskSizeGb
+                type: Integer
+                description: Size in GB of the disk (default is 100GB).
+                default_from_api: true
+              - name: diskType
+                type: String
+                description: |-
+                  Type of the disk (default is "pd-standard").
+                  Valid values: "pd-ssd" (Persistent Disk Solid State Drive)
+                  "pd-standard" (Persistent Disk Hard Disk Drive)
+                  "pd-balanced" (Balanced Persistent Disk)
+                  "pd-extreme" (Extreme Persistent Disk)
+                  "hyperdisk-balanced" (Hyperdisk Balanced)
+                  "hyperdisk-extreme" (Hyperdisk Extreme)
+                  "hyperdisk-balanced-high-availability" (Hyperdisk Balanced High
+                  Availability)
+                  "hyperdisk-ml" (Hyperdisk ML)
+                  "hyperdisk-throughput" (Hyperdisk Throughput)
+                default_from_api: true
+        - name: bootDisk
+          type: NestedObject
+          description: Represents the spec of disk options.
+          default_from_api: true
+          properties:
+            - name: bootDiskSizeGb
+              type: Integer
+              description: Size in GB of the boot disk (default is 100GB).
+              default_from_api: true
+            - name: bootDiskType
+              type: String
+              description: |-
+                Type of the boot disk. For non-A3U machines, the default value is
+                "pd-ssd", for A3U machines, the default value is "hyperdisk-balanced".
+                Valid values: "pd-ssd" (Persistent Disk Solid State Drive),
+                "pd-standard" (Persistent Disk Hard Disk Drive) or "hyperdisk-balanced".
+              default_from_api: true
+        - name: confidentialInstanceConfig
+          type: NestedObject
+          description: |-
+            Confidential Computing options for the node pool's VM instances.
+
+            Not on `MachineSpec`, whose
+            `confidential_instance_config` is shared with Workbench: its proto copier
+            pins that enum to SEV only.
+          immutable: true
+          properties:
+            - name: confidentialInstanceType
+              type: String
+              required: true
+              description: |-
+                The technology to use. Must be the one offered by the machine type's CPU
+                platform; see
+                https://cloud.google.com/confidential-computing/confidential-vm/docs/supported-configurations.
+                Possible values:
+                SEV
+                SEV_SNP
+                TDX
+              immutable: true
+        - name: dynamicSlicing
+          type: Boolean
+          description: |-
+            Whether dynamic slicing is enabled for this node pool.
+            Dynamic slicing is only supported on TPU v7x (tpu7x) machine types.
+        - name: effectiveFlexStartMaxDuration
+          type: String
+          description: |-
+            The effective maximum duration for instances in this node pool.
+            This field reflects the value of `flex_start_max_duration` if it is
+            set by the user, or the server-applied default (for example, 7 days) if it
+            is not.
+            This field is only applicable when `provisioning_model` is set to
+            `FLEX_START`.
+          output: true
+        - name: enablePublicIps
+          type: Boolean
+          description: Whether to enable public IPs for the node pool.
+        - name: filestores
+          type: Array
+          description: |-
+            List of the existing Filestore instances to be mounted.
+            For example:
+            if "projects/my-project/locations/us-central1-a/instances/my-instance" is
+            specified, the instance will be mounted to the node pool under the path
+            "mnt/filestore/"
+          item_type:
+            type: String
+        - name: flexStartMaxDuration
+          type: String
+          description: |-
+            The maximum duration for instances in this node pool.
+            This field is only applicable when `provisioning_model` is set to
+            `FLEX_START`.
+        - name: id
+          type: String
+          required: true
+          description: The unique ID referring to this node pool.
+          immutable: true
+        - name: labels
+          type: KeyValuePairs
+          description: |-
+            The labels with user-defined metadata to organize the node pool. These
+            labels are applied to the underlying compute resources (for example, the
+            VM instances) of the node pool, so they appear in billing exports and
+            Cloud Monitoring filters.
+
+            Label keys and values can be no longer than 64 characters
+            (Unicode codepoints), can only contain lowercase letters, numeric
+            characters, underscores and dashes. International characters are allowed.
+
+            See https://goo.gl/xmQnxf for more information and examples of labels.
+        - name: lustres
+          type: Array
+          description: |-
+            List of the existing Google Managed Lustre instances to be mounted.
+            Similar to the filestores, the instance will be mounted to the node pool
+            under the path "/mnt/lustre/"
+          item_type:
+            type: String
+        - name: machineSpec
+          type: NestedObject
+          required: true
+          description: Specification of a single machine.
+          immutable: true
+          properties:
+            - name: acceleratorCount
+              type: Integer
+              description: |-
+                The number of accelerators to attach to the machine.
+
+                For [accelerator optimized machine
+                types](https://cloud.google.com/compute/docs/accelerator-optimized-machines),
+                One may set the accelerator_count from 1 to N for machine with N GPUs.
+                If accelerator_count is less than or equal to N / 2, Agent Platform
+                co-schedules the replicas of the model into the same VM to save cost.
+
+                For example, if the machine type is a3-highgpu-8g, which has 8 H100 GPUs,
+                one can set accelerator_count to 1 to 8. If accelerator_count is 1, 2, 3,
+                or 4, Agent Platform co-schedules 8, 4, 2, or 2 replicas of the model into
+                the same VM to save cost.
+
+                When co-scheduling, CPU, memory and storage on the VM will be distributed
+                to replicas on the VM. For example, one can expect a co-scheduled replica
+                requesting 2 GPUs out of a 8-GPU VM will receive 25% of the CPU, memory and
+                storage of the VM.
+
+                Note that the feature is not compatible with multihost_gpu_node_count.
+                When multihost_gpu_node_count is set, the co-scheduling will not be
+                enabled.
+              immutable: true
+            - name: acceleratorType
+              type: String
+              description: |-
+                Possible values:
+                NVIDIA_TESLA_K80
+                NVIDIA_TESLA_P100
+                NVIDIA_TESLA_V100
+                NVIDIA_TESLA_P4
+                NVIDIA_TESLA_T4
+                NVIDIA_TESLA_A100
+                NVIDIA_A100_80GB
+                NVIDIA_L4
+                NVIDIA_H100_80GB
+                NVIDIA_H100_MEGA_80GB
+                NVIDIA_H200_141GB
+                NVIDIA_B200
+                NVIDIA_GB200
+                NVIDIA_RTX_PRO_6000
+                TPU_V2
+                TPU_V3
+                TPU_V4_POD
+                TPU_V5_LITEPOD
+              immutable: true
+            - name: gpuPartitionSize
+              type: String
+              description: |-
+                The Nvidia GPU partition size.
+
+                When specified, the requested accelerators will be partitioned into
+                smaller GPU partitions. For example, if the request is for 8 units of
+                NVIDIA A100 GPUs, and gpu_partition_size="1g.10gb", the service will
+                create 8 * 7 = 56 partitioned MIG instances.
+
+                The partition size must be a value supported by the requested accelerator.
+                Refer to
+                [Nvidia GPU
+                Partitioning](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus-multi#multi-instance_gpu_partitions)
+                for the available partition sizes.
+
+                If set, the accelerator_count should be set to 1.
+              immutable: true
+            - name: machineType
+              type: String
+              description: |-
+                The type of the machine.
+
+                See the [list of machine types supported for
+                prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types)
+
+                See the [list of machine types supported for custom
+                training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types).
+
+                For DeployedModel this field is optional, and the default
+                value is `n1-standard-2`. For BatchPredictionJob or as part of
+                WorkerPoolSpec this field is required.
+              immutable: true
+            - name: minGpuDriverVersion
+              type: String
+              description: |-
+                The minimum GPU driver version that this machine requires. For example,
+                "535.104.06". If not specified, the default GPU driver version will be
+                used by the underlying infrastructure.
+              immutable: true
+            - name: multihostGpuNodeCount
+              type: Integer
+              description: The number of nodes per replica for multihost GPU deployments.
+              immutable: true
+            - name: reservationAffinity
+              type: NestedObject
+              description: |-
+                A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
+                DeployedModel) to draw its Compute Engine resources from a Shared
+                Reservation, or exclusively from on-demand capacity.
+              immutable: true
+              properties:
+                - name: key
+                  type: String
+                  description: |-
+                    Corresponds to the label key of a reservation resource. To target a
+                    SPECIFIC_RESERVATION by name, use `compute.googleapis.com/reservation-name`
+                    as the key and specify the name of your reservation as its value.
+                  immutable: true
+                - name: reservationAffinityType
+                  type: String
+                  required: true
+                  description: |-
+                    Specifies the reservation affinity type.
+                    Possible values:
+                    NO_RESERVATION
+                    ANY_RESERVATION
+                    SPECIFIC_RESERVATION
+                  immutable: true
+                - name: values
+                  type: Array
+                  description: |-
+                    Corresponds to the label values of a reservation resource. This must be the
+                    resource name of the reservation, reservation block, or reservation sub-
+                    block.
+                  immutable: true
+                  item_type:
+                    type: String
+            - name: tpuTopology
+              type: String
+              description: |-
+                The topology of the TPUs. Corresponds to the TPU topologies available from
+                GKE. (Example: tpu_topology: "2x2x1").
+              immutable: true
+        - name: nodeImage
+          type: String
+          description: |-
+            The node image to be used for the VMs in the node pool.
+            In format of "projects//global/images/" or
+            "projects/test-project/global/images/family/"
+        - name: provisioningModel
+          type: String
+          description: |-
+            Specifies the provisioning model for the node pool.
+
+            Behavior for `PROVISIONING_MODEL_UNSPECIFIED`:
+            - For CPU node pools: Defaults to `ON_DEMAND`.
+            - For GPU node pools:
+            - If
+            `machine_spec.reservation_affinity`
+            is set, it defaults to `RESERVATION`.
+            - If
+            `machine_spec.reservation_affinity`
+            is NOT set, this is an INVALID state and the request will be rejected.
+            An explicit `provisioning_model` must be provided.
+
+            ## Constraints:
+
+            `machine_spec.reservation_affinity`
+            must not be set if `provisioning_model` is `ON_DEMAND`, `SPOT` or
+            ## `FLEX_START`.
+
+            `machine_spec.reservation_affinity`
+            must be set if `provisioning_model` is `RESERVATION`.
+            Possible values:
+            ON_DEMAND
+            RESERVATION
+            SPOT
+            FLEX_START
+          default_from_api: true
+          immutable: true
+        - name: scalingSpec
+          type: NestedObject
+          description: The scaling spec of the node pool.
+          properties:
+            - name: maxNodeCount
+              type: Integer
+              description: |-
+                maximum size of the node pool,
+                must be ≥ min_node_count
+            - name: minNodeCount
+              type: Integer
+              description: |-
+                minimum size of the node pool,
+                must be >= 0 and <= max_node_count
+        - name: startupScript
+          type: String
+          description: Startup script for the node pool instances.
+        - name: zone
+          type: String
+          description: The zone of the node pool.
+  - name: orchestratorSpec
+    type: NestedObject
+    required: true
+    description: The spec of the orchestrator. Only one orchestrator may be specified.
+    properties:
+      - name: kubernetesSpec
+        type: NestedObject
+        description: Specification for a Kubernetes cluster.
+        properties:
+          - name: enableIpAlias
+            type: Boolean
+            description: Whether to enable IP alias.
+          - name: nodePoolIds
+            type: Array
+            description: |-
+              IDs of the NodePools to be included in this GKE cluster.
+              These IDs must correspond to NodePools defined in the
+              ModelDevelopmentCluster.node_pools field.
+            item_type:
+              type: String
+          - name: publicAccessEndpointEnabled
+            type: Boolean
+            description: |-
+              Whether the GKE cluster's control plane endpoint is publicly accessible.
+              If true, the cluster is created with a public access endpoint (i.e. the
+              private cluster configuration is disabled). If false or unset, the cluster
+              is created with only private control plane access by default.
+      - name: slurmSpec
+        type: NestedObject
+        description: The Slurm orchestrator related spec of the cluster.
+        properties:
+          - name: accounting
+            type: NestedObject
+            description: 'The accounting spec for slurm: https://slurm.schedmd.com/accounting.html'
+            properties:
+              - name: accountingStorageEnforce
+                type: String
+                description: |-
+                  In format of comma-separated combination of the following:
+                  * all,associations, limits, nojobs, nosteps, qos, safe, wckeys
+                  Empty string means no enforcement.
+          - name: config
+            type: KeyValuePairs
+            description: |-
+              Cluster-scoped Slurm settings, emitted as global `Key=Value` lines in
+              slurm.conf.
+
+              Keys are Slurm parameter names exactly as documented by SchedMD
+              (https://slurm.schedmd.com/slurm.conf.html), matched case-insensitively.
+              Values are written the way slurm.conf writes them, including composite
+              forms such as `bf_window=1440,bf_resolution=600`.
+
+              Example:
+              { "PriorityType":            "priority/multifactor",
+              "PriorityWeightAge":       "1000",
+              "PreemptMode":             "SUSPEND,GANG",
+              "SchedulerParameters":     "bf_window=1440,bf_resolution=600" }
+
+              Unsupported, reserved, or misspelled parameters, and values that are not
+              legal for the parameter, are rejected at request time with the offending
+              parameter named; they are never silently dropped. Settings
+              that apply to a single partition or node pool belong in
+              `SlurmPartition.config` or `SlurmNodeSet.config` instead -
+              several parameters (e.g. `DefMemPerCPU`, `OverTimeLimit`, `PreemptMode`)
+              are valid at more than one scope with different meanings and different
+              legal values.
+
+              On update this map is replaced wholesale; supply the complete desired set.
+          - name: defaultPartitionId
+            type: String
+            description: |-
+              Id of the partition that Slurm jobs submitted without an explicit
+              partition run on, for example `sbatch` without `--partition`. Must match
+              the `id` of one of `partitions`.
+
+              If unset, the service uses the first entry of `partitions` and this field
+              stays empty; the cluster always has a default partition whether or not this
+              field is set. Setting it makes the choice independent of list order, which
+              matters because `partitions` is replaced wholesale on update: reordering
+              the list, or prepending a partition to it, otherwise moves the default and
+              silently redirects every job submitted without `--partition`.
+          - name: epilogBashScripts
+            type: Array
+            description: Custom bash scripts executed after each slurm job on every allocated node.
+            item_type:
+              type: String
+          - name: homeDirectoryStorage
+            type: String
+            required: true
+            description: Full name of the Filestore to be mounted as /home directory on every node.
+          - name: loginNodePoolId
+            type: String
+            required: true
+            description: The node pool id to be used as slurm login node.
+          - name: nodeSets
+            type: Array
+            description: |-
+              Node-scoped Slurm settings, keyed by node pool. At most one entry per node
+              pool. Node pools without an entry use the settings derived by the cluster's
+              Slurm controller.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: config
+                  type: KeyValuePairs
+                  description: |-
+                    Node-scoped Slurm settings, emitted as additional `Key=Value` pairs on the
+                    `NodeName=` line for this node pool's nodes in slurm.conf.
+
+                    Example:
+                    { "Features":     "a3mega,nvlink",
+                    "Weight":       "10",
+                    "MemSpecLimit": "4096" }
+
+                    On update this map is replaced wholesale; supply the complete desired set.
+                - name: nodePoolId
+                  type: String
+                  required: true
+                  description: |-
+                    Id of the node pool these settings apply to. Must match the `id` of one of
+                    the node pools in the cluster.
+          - name: partitions
+            type: Array
+            description: The Slurm partitions spec.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: config
+                  type: KeyValuePairs
+                  description: |-
+                    Partition-scoped Slurm settings, emitted as additional `Key=Value` pairs
+                    on this partition's `PartitionName=` line in slurm.conf.
+
+                    Example:
+                    { "MaxTime":       "4-00:00:00",
+                    "DenyAccounts":  "low-pri",
+                    "PriorityTier":  "20",
+                    "OverSubscribe": "YES:4" }
+
+                    Note: values set here take precedence over service-computed defaults for
+                    the same parameter (for example `OverSubscribe` and `DefMemPerCPU`, which
+                    the service otherwise derives from the partition's exclusivity and from
+                    the memory per CPU of its nodes).
+
+                    `Default` is rejected here: which partition is the default is a
+                    cluster-scoped choice, so it belongs in `SlurmSpec.default_partition_id`.
+                - name: id
+                  type: String
+                  required: true
+                  description: Id of the slurm partiton
+                - name: nodePoolIds
+                  type: Array
+                  required: true
+                  description: Node pools for the slurm partition
+                  item_type:
+                    type: String
+          - name: prologBashScripts
+            type: Array
+            description: Custom bash scripts executed before each slurm job on every allocated node.
+            item_type:
+              type: String
+          - name: scheduling
+            type: NestedObject
+            description: |-
+              The scheduling related spec for slurm, see
+              * https://slurm.schedmd.com/scheduling.html
+              * https://slurm.schedmd.com/preempt.html
+              * https://slurm.schedmd.com/priority_multifactor.html
+            properties:
+              - name: preemptExemptTime
+                type: String
+                description: |-
+                  A string that specifies the time of jobs before they are considered for
+                  preemption.
+                  "-1" disables the option, equivalent to "0".
+                  Other acceptable time formats include: "minutes", "minutes:seconds",
+                  "hours:minutes:seconds", "days\-hours", "days\-hours:minutes", and
+                  "days\-hours:minutes:seconds".
+              - name: preemptMode
+                type: String
+                description: |-
+                  The mechanism used to preempt jobs or enable gang scheduling.
+                  Available options:  OFF, CANCEL,GANG,REQUEUE, SUSPEND
+                  GANG can be specified in addition to other settings, e.g. "SUSPEND,GANG".
+              - name: preemptType
+                type: String
+                description: |-
+                  The plugin used to identify which jobs can be preempted in order to start
+                  a pending job. Valid values are: "preempt/none"(default),
+                  "preempt/partition_prio" or "preempt/qos".
+                default_from_api: true
+              - name: priorityType
+                type: String
+                description: Either "priority/basic" or "priority/multifactor" (default).
+                default_from_api: true
+              - name: priorityWeightAge
+                type: Integer
+                description: An unsigned integer that scales the contribution of the age factor.
+              - name: priorityWeightAssoc
+                type: Integer
+                description: |-
+                  An unsigned integer that scales the contribution of the association
+                  factor.
+              - name: priorityWeightFairshare
+                type: Integer
+                description: |-
+                  An unsigned integer that scales the contribution of the fair-share
+                  factor.
+              - name: priorityWeightJobSize
+                type: Integer
+                description: An unsigned integer that scales the contribution of the job size factor.
+              - name: priorityWeightPartition
+                type: Integer
+                description: An unsigned integer that scales the contribution of the partition factor.
+              - name: priorityWeightQos
+                type: Integer
+                description: |-
+                  An unsigned integer that scales the contribution of the quality of
+                  service factor.
+              - name: priorityWeightTres
+                type: String
+                description: |-
+                  A comma-separated list of TRES Types and weights that sets the degree
+                  that each TRES Type contributes to the job's priority.
+  - name: runtime
+    type: NestedObject
+    description: The runtime backfilled records of the cluster.
+    output: true
+    properties:
+      - name: rayClusterEndpoints
+        type: Map
+        description: |-
+          The map of Ray cluster endpoints, keyed by the `ray_cluster_spec_id` in
+          `RayClusterSpec`.
+        output: true
+        value_type:
+          type: NestedObject
+          output: true
+          properties:
+            - name: rayClientHostAddress
+              type: String
+              description: The RayClient host address of the Ray cluster.
+              output: true
+            - name: rayDashboardAddress
+              type: String
+              description: The dashboard address of the Ray cluster.
+              output: true
+        key_name: name
+      - name: trainingServices
+        type: Array
+        description: The training services running on this Vertex AI Training Cluster.
+        output: true
+        item_type:
+          type: NestedObject
+          output: true
+          properties:
+            - name: createTime
+              type: String
+              description: Time when the TrainingService was created.
+              output: true
+            - name: deploymentSpec
+              type: NestedObject
+              description: Orchestrator-agnostic deployment spec.
+              output: true
+              properties:
+                - name: workerNodeCount
+                  type: Integer
+                  description: Number of worker nodes to allocate.
+                  output: true
+                - name: workerNodePoolId
+                  type: String
+                  description: |-
+                    ID of a node pool on the parent ModelDevelopmentCluster (see
+                    `ModelDevelopmentCluster.node_pools[].id`) on which to place the worker
+                    nodes.
+                  output: true
+            - name: gcsBucket
+              type: String
+              description: |-
+                Cloud Storage bucket name dynamically GCSFuse-mounted on all nodes, for
+                storing checkpoints and other service outputs.
+              output: true
+            - name: imageUri
+              type: String
+              description: Cloud Storage URI of the squashfs (.sqsh) container image.
+              output: true
+            - name: name
+              type: String
+              description: |-
+                Identifier. Resource name of the TrainingService. Format:
+                `projects/{project}/locations/{location}/modelDevelopmentClusters/{cluster}/trainingServices/{training_service}`
+              output: true
+            - name: serviceStatus
+              type: NestedObject
+              description: Status of a TrainingService.
+              output: true
+              properties:
+                - name: detail
+                  type: String
+                  description: Human-readable detail about the current state.
+                  output: true
+                - name: endpoints
+                  type: KeyValuePairs
+                  description: Endpoints clients use to connect to the running service.
+                  output: true
+                - name: state
+                  type: String
+                  description: |-
+                    The realtime state.
+                    Possible values:
+                    PROVISIONING
+                    RUNNING
+                    STOPPING
+                    ERROR
+                  output: true
+            - name: updateTime
+              type: String
+              description: Time when the TrainingService was most recently updated.
+              output: true
+      - name: xmanager
+        type: NestedObject
+        description: |-
+          A purpose-built, output-only view of the XManager instance attached to a
+          cluster.
+        output: true
+        properties:
+          - name: apiEndpoint
+            type: String
+            description: |-
+              The gRPC API endpoint (Experiment State Server) of the
+              XManager instance. Empty unless the instance is running.
+            output: true
+          - name: error
+            type: NestedObject
+            description: |-
+              The `Status` type defines a logical error model that is suitable for
+              different programming environments, including REST APIs and RPC APIs. It is
+              used by [gRPC](https://github.com/grpc). Each `Status` message contains
+              three pieces of data: error code, error message, and error details.
+
+              You can find out more about this error model and how to work with it in the
+              [API Design Guide](https://cloud.google.com/apis/design/errors).
+            output: true
+            properties:
+              - name: code
+                type: Integer
+                description: The status code, which should be an enum value of google.rpc.Code.
+                output: true
+              - name: details
+                type: Array
+                description: |-
+                  A list of messages that carry the error details.  There is a common set of
+                  message types for APIs to use.
+                output: true
+                item_type:
+                  type: KeyValuePairs
+              - name: message
+                type: String
+                description: |-
+                  A developer-facing error message, which should be in English. Any
+                  user-facing error message should be localized and sent in the
+                  google.rpc.Status.details field, or localized by the client.
+                output: true
+          - name: instanceId
+            type: String
+            description: The XManager instance ID (for example, "xmc-").
+            output: true
+          - name: state
+            type: String
+            description: |-
+              The current state of the XManager instance.
+              Possible values:
+              PROVISIONING
+              RUNNING
+              DELETING
+              ERROR
+            output: true
+          - name: uiEndpoint
+            type: String
+            description: |-
+              The UI endpoint of the XManager instance. Empty unless the
+              instance is running.
+            output: true
+  - name: runtimeSpec
+    type: NestedObject
+    description: The runtime spec of the cluster.
+    default_from_api: true
+    immutable: true
+    properties:
+      - name: serviceAccount
+        type: String
+        description: |-
+          The default service account used by the cluster when running any workloads
+          on it. If not specified, the default compute engine service account will be
+          used.
+        default_from_api: true
+        immutable: true
+  - name: startTime
+    type: String
+    description: |-
+      Time when the ModelDevelopmentCluster for the first time entered the
+      `RUNNING` state.
+    output: true
+  - name: updateTime
+    type: String
+    description: Time when the ModelDevelopmentCluster was most recently updated.
+    output: true
