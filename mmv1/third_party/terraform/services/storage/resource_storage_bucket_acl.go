@@ -85,11 +85,30 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 
 	var finalAcls []interface{}
 
+	// The role entities in state were read from the bucket in state, so that is
+	// the bucket whose project decides which of them are default ACLs.
+	bucket, _ := diff.GetChange("bucket")
+	bucketProject := ""
+
 	// Preserve order from oldList and handle removals, this will help avoid permadiff
 	// Iterate through the original list to maintain its order.
 	for _, item := range oldList {
 		key := item.(string)
-		if _, exists := newSet[key]; exists || isDefaultGcpAcl(key) {
+		_, keep := newSet[key]
+		if aclProject, ok := defaultGcpAclProject(key); ok && !keep {
+			// Only look the bucket up when state holds a default-shaped entry
+			// the config leaves out, so other plans cost no extra request.
+			if bucketProject == "" {
+				config := meta.(*transport_tpg.Config)
+				bkt, err := NewClient(config, config.UserAgent).Buckets.Get(bucket.(string)).Do()
+				if err != nil {
+					return fmt.Errorf("Error reading bucket %q: %v", bucket, err)
+				}
+				bucketProject = strconv.FormatUint(bkt.ProjectNumber, 10)
+			}
+			keep = aclProject == bucketProject
+		}
+		if keep {
 			visited[key] = struct{}{}
 			finalAcls = append(finalAcls, item)
 		}
@@ -112,10 +131,17 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 	return nil
 }
 
-func isDefaultGcpAcl(key string) bool {
-	return strings.HasPrefix(key, "OWNER:project-owners-") ||
-		strings.HasPrefix(key, "OWNER:project-editors-") ||
-		strings.HasPrefix(key, "READER:project-viewers-")
+// defaultGcpAclProject returns the project number named by a role entity that
+// has the shape of a default GCS ACL. GCS only grants those by default to the
+// teams of the project that owns the bucket; the same roles held by another
+// project's teams are regular grants that the config has to list.
+func defaultGcpAclProject(key string) (string, bool) {
+	for _, prefix := range []string{"OWNER:project-owners-", "OWNER:project-editors-", "READER:project-viewers-"} {
+		if strings.HasPrefix(key, prefix) {
+			return strings.TrimPrefix(key, prefix), true
+		}
+	}
+	return "", false
 }
 
 type RoleEntity struct {
