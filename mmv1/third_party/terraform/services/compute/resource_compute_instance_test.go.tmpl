@@ -5569,19 +5569,24 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	})
 }
 
-// testAccServiceClassId returns the PSC Interface service class the given test
+// testAccServiceClassId returns the PSC Interface service class the current test
 // project is authorized to use as a producer. Setting service_class_id on a
 // network interface requires networkconnectivity.serviceClasses.use on the
-// service class, which is owned by the producer project, so each CI project has
-// its own class (see b/521416084). They only exist in us-central1.
-func testAccServiceClassId(project string) string {
-	switch project {
+// service class, which is owned by the producer project. Creating a service class
+// is an internal API, so each CI project was given its own class in b/521416084;
+// they only exist in us-central1. Tests that need one are skipped in any other
+// project because they cannot pass there.
+func testAccServiceClassId(t *testing.T) string {
+	switch envvar.GetTestProjectFromEnv() {
+	case "ci-test-project-188019":
+		return "gcp-tf-persistent-service-class-dev"
 	case "ci-test-project-nightly-ga":
 		return "gcp-tf-persistent-service-class-ga"
 	case "ci-test-project-nightly-beta":
 		return "gcp-tf-persistent-service-class-beta"
 	default:
-		return "gcp-tf-persistent-service-class-dev"
+		t.Skip("b/521416084")
+		return ""
 	}
 }
 
@@ -5590,7 +5595,7 @@ func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
 	suffix := acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 	region := "us-central1"
-	serviceClassId := testAccServiceClassId(project)
+	serviceClassId := testAccServiceClassId(t)
 	var instance map[string]interface{}
 
 {{ if eq $.TargetVersionName `ga` }}
