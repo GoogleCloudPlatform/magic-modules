@@ -5308,17 +5308,17 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_mvuSwitchover(t *testing.T) 
 			// Step 4 (TC-NH01): Plan-time guard blocking in-place rename of deployment_name.
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withBgd(instanceName, "MYSQL_8_0", deploymentName+"-renamed", "MYSQL_8_4", "SOURCE", false),
-				ExpectError: regexp.MustCompile("cannot create new Blue-Green Deployment .* already exists on instance"),
+				ExpectError: regexp.MustCompile("Source instance '.*' already has a blue-green deployment\\."),
 			},
 			// Step 5 (TC-NH02): Plan-time guard blocking modification of target_database_version.
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withBgd(instanceName, "MYSQL_8_0", deploymentName, "MYSQL_8_0", "SOURCE", false),
-				ExpectError: regexp.MustCompile("cannot change target_database_version .* target_database_version is immutable after creation"),
+				ExpectError: regexp.MustCompile("target_database_version is immutable and cannot be changed from .* to .*"),
 			},
 			// Step 6 (TC-NH04): Plan-time guard blocking switchover without updating root database_version.
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withBgd(instanceName, "MYSQL_8_0", deploymentName, "MYSQL_8_4", "TARGET", false),
-				ExpectError: regexp.MustCompile("when switching over Blue-Green Deployment .* database_version .* must be updated to match target_database_version"),
+				ExpectError: regexp.MustCompile("during switchover of deployment .*, database_version .* must match target_database_version"),
 			},
 			// Step 7 (TC-H01): Single-step atomic switchover to TARGET + update root database_version = MYSQL_8_4.
 			{
@@ -5347,7 +5347,7 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_mvuSwitchover(t *testing.T) 
 			// Step 9 (TC-NH03): Plan-time guard blocking reversal of active_environment from TARGET back to SOURCE.
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withBgd(instanceName, "MYSQL_8_4", deploymentName, "MYSQL_8_4", "SOURCE", false),
-				ExpectError: regexp.MustCompile("cannot change active_environment from \"TARGET\" back to \"SOURCE\" .* switchover cannot be reversed"),
+				ExpectError: regexp.MustCompile("switchover is irreversible: cannot revert active_environment from \"TARGET\" to \"SOURCE\" on deployment"),
 			},
 			// Step 10 (TC-H06): Update delete_old_source_on_destroy = true in-place post-switchover.
 			{
@@ -5398,7 +5398,7 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_createAndAbort(t *testing.T)
 			// Step 3 (TC-NH09): Plan-time guard blocking initial BGD creation with active_environment = TARGET.
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_sameVersion(instanceName, "MYSQL_8_0", deploymentName, "TARGET", true),
-				ExpectError: regexp.MustCompile("cannot create new Blue-Green Deployment .* with active_environment = \"TARGET\": initial active_environment must be \"SOURCE\""),
+				ExpectError: regexp.MustCompile("cannot create deployment .* with active_environment \"TARGET\": initial value must be \"SOURCE\""),
 			},
 			// Step 4 (TC-H02, TC-H03): Create instance and initiate same-version BGD in a single apply.
 			{

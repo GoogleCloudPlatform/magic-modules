@@ -4374,7 +4374,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 		newEnv, _ := newMap["active_environment"].(string)
 		if newEnv == "TARGET" {
 			return fmt.Errorf(
-				"cannot create new Blue-Green Deployment %q with active_environment = %q: initial active_environment must be \"SOURCE\"",
+				"cannot create deployment %q with active_environment %q: initial value must be \"SOURCE\"",
 				newName, newEnv,
 			)
 		}
@@ -4390,8 +4390,8 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 		newName, _ := newMap["deployment_name"].(string)
 		if oldName != "" && newName != "" && oldName != newName {
 			return fmt.Errorf(
-				"cannot create new Blue-Green Deployment %q: Blue-Green Deployment %q already exists on instance %q. No new Blue-Green Deployment can be created when one already exists",
-				newName, oldName, d.Get("name").(string),
+				"Source instance '%s' already has a blue-green deployment.",
+				d.Get("name").(string),
 			)
 		}
 
@@ -4400,7 +4400,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 		newDbVer, _ := newMap["target_database_version"].(string)
 		if oldDbVer != newDbVer {
 			return fmt.Errorf(
-				"cannot change target_database_version from %q to %q on existing Blue-Green Deployment %q: target_database_version is immutable after creation",
+				"target_database_version is immutable and cannot be changed from %q to %q (deployment: %q)",
 				oldDbVer, newDbVer, oldName,
 			)
 		}
@@ -4410,7 +4410,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 		newEnv, _ := newMap["active_environment"].(string)
 		if oldEnv == "TARGET" && newEnv == "SOURCE" {
 			return fmt.Errorf(
-				"cannot change active_environment from %q back to %q on Blue-Green Deployment %q: switchover cannot be reversed",
+				"switchover is irreversible: cannot revert active_environment from %q to %q on deployment %q",
 				oldEnv, newEnv, oldName,
 			)
 		}
@@ -4421,7 +4421,7 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 			rootDbVer, _ := d.Get("database_version").(string)
 			if rootDbVer != newDbVer {
 				return fmt.Errorf(
-					"when switching over Blue-Green Deployment %q (active_environment = \"TARGET\"), database_version (%q) must be updated to match target_database_version (%q)",
+					"during switchover of deployment %q, database_version (%q) must match target_database_version (%q)",
 					oldName, rootDbVer, newDbVer,
 				)
 			}
