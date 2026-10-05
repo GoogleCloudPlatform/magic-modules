@@ -50,6 +50,42 @@ resource "google_vertex_ai_online_evaluator" "{{$.PrimaryResourceId}}" {
           value               = 0
         }
       }
+      filter {
+        user_turns {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
+      filter {
+        model_calls {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
+      filter {
+        model_call_errors {
+          comparison_operator = "GREATER_OR_EQUAL"
+          value               = 0
+        }
+      }
+      filter {
+        tool_calls {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
+      filter {
+        tool_call_errors {
+          comparison_operator = "GREATER_OR_EQUAL"
+          value               = 0
+        }
+      }
+      filter {
+        duration {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
     }
   }
 

@@ -5,23 +5,29 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // Exercises the mutable fields of the OnlineEvaluator (display_name and the
-// config sampling settings), which the generated example tests do not cover.
+// config sampling settings), plus cloud_observability fields not covered by the
+// generated example tests (log_view, trace_view, and the trace_scope
+// total_token_usage predicate).
 func TestAccVertexAIOnlineEvaluator_update(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
 
 	first := map[string]interface{}{
 		"random_suffix": suffix,
+		"project":       project,
 		"display_name":  "tf-test-online-evaluator" + suffix,
 		"max_samples":   "100",
 		"percentage":    10,
 	}
 	second := map[string]interface{}{
 		"random_suffix": suffix,
+		"project":       project,
 		"display_name":  "tf-test-online-evaluator-updated" + suffix,
 		"max_samples":   "200",
 		"percentage":    25,
@@ -75,6 +81,9 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
   }
 
   cloud_observability {
+    log_view   = "projects/%{project}/locations/global/buckets/_Default/views/_Default"
+    trace_view = "projects/%{project}/locations/us/buckets/_Trace/datasets/Spans/views/_AllSpans"
+
     open_telemetry {
       semconv_version = "1.39.0"
     }
@@ -82,6 +91,12 @@ resource "google_vertex_ai_online_evaluator" "evaluator" {
     trace_scope {
       filter {
         duration {
+          comparison_operator = "GREATER"
+          value               = 0
+        }
+      }
+      filter {
+        total_token_usage {
           comparison_operator = "GREATER"
           value               = 0
         }
