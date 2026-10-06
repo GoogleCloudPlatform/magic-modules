@@ -2,6 +2,7 @@ package tpgresource
 
 import (
 	"encoding/json"
+	"net"
 	"reflect"
 )
 
@@ -94,4 +95,18 @@ func setOmittedFields(item, out interface{}) {
 			}
 		}
 	}
+}
+
+// CanonicalizeIp parses an IP address string and returns its canonical format,
+// or the original value if parsing fails or if v is empty/non-string.
+func CanonicalizeIp(v interface{}) interface{} {
+	if v == nil {
+		return v
+	}
+	if strVal, ok := v.(string); ok && strVal != "" {
+		if ip := net.ParseIP(strVal); ip != nil {
+			return ip.String()
+		}
+	}
+	return v
 }

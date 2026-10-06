@@ -30,7 +30,7 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
 docs:
-id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}'
+id_format: '{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{ipv6_address}}/{{port}}'
 base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 self_link: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/listNetworkEndpoints'
 create_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/attachNetworkEndpoints'
@@ -53,6 +53,7 @@ async:
 identity:
   - instance
   - ipAddress
+  - ipv6Address
   - port
 nested_query:
   keys:
@@ -124,4 +125,20 @@ properties:
       IPv4 address of network endpoint. The IP address must belong
       to a VM in GCE (either the primary IP or as part of an aliased IP
       range).
-    required: true
+    at_least_one_of:
+      - 'ip_address'
+      - 'ipv6_address'
+    diff_suppress_func: 'tpgresource.IpAddressDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/ip_address_canonicalize.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/ip_address_canonicalize.go.tmpl'
+  - name: 'ipv6Address'
+    type: String
+    description: |
+      IPv6 address of network endpoint. The result of parsing the endpoint config,
+      or empty if IPv6 is not used.
+    at_least_one_of:
+      - 'ip_address'
+      - 'ipv6_address'
+    diff_suppress_func: 'tpgresource.IpAddressDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/ip_address_canonicalize.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/ip_address_canonicalize.go.tmpl'

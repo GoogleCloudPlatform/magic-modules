@@ -12,33 +12,79 @@
 	limitations under the License.
 */ -}}
 
+import "net"
+
 type NetworkEndpointsNetworkEndpoint struct {
-	IPAddress string
-	Port	  int
-	Instance  string
+	IPAddress   string
+	IPv6Address string
+	Port        int
+	Instance    string
 }
 
 func NetworkEndpointsNetworkEndpointConvertToStruct(endpoint interface{}) NetworkEndpointsNetworkEndpoint {
 	e := endpoint.(map[string]interface{})
-	ipAddress := e["ip_address"].(string)
-	port := e["port"].(int)
+	ipAddress, _ := e["ip_address"].(string)
+	if parsed := net.ParseIP(ipAddress); parsed != nil {
+		ipAddress = parsed.String()
+	}
+	ipv6Address, _ := e["ipv6_address"].(string)
+	if parsed := net.ParseIP(ipv6Address); parsed != nil {
+		ipv6Address = parsed.String()
+	}
+	port, _ := e["port"].(int)
 	instance, _ := e["instance"].(string)
 	return NetworkEndpointsNetworkEndpoint{
-		IPAddress: ipAddress,
-		Port: port,
-		Instance: instance,
+		IPAddress:   ipAddress,
+		IPv6Address: ipv6Address,
+		Port:        port,
+		Instance:    instance,
 	}
 }
 
 func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetworkEndpoint) interface{} {
 	m := make(map[string]interface{})
-	m["ip_address"] = endpoint.IPAddress
+	if endpoint.IPAddress != "" {
+		m["ip_address"] = endpoint.IPAddress
+	}
+	if endpoint.IPv6Address != "" {
+		m["ipv6_address"] = endpoint.IPv6Address
+	}
 	m["port"] = endpoint.Port
-  if endpoint.Instance != "" {
-    m["instance"] = endpoint.Instance
-  }
+	if endpoint.Instance != "" {
+		m["instance"] = endpoint.Instance
+	}
 	return m
 }
+
+func resourceComputeNetworkEndpointsEndpointHash(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	if instance, ok := m["instance"].(string); ok && instance != "" {
+		buf.WriteString(fmt.Sprintf("%s-", tpgresource.GetResourceNameFromSelfLink(instance)))
+	}
+	if ip, ok := m["ip_address"].(string); ok && ip != "" {
+		if parsed := net.ParseIP(ip); parsed != nil {
+			buf.WriteString(fmt.Sprintf("%s-", parsed.String()))
+		} else {
+			buf.WriteString(fmt.Sprintf("%s-", ip))
+		}
+	}
+	if ipv6, ok := m["ipv6_address"].(string); ok && ipv6 != "" {
+		if parsed := net.ParseIP(ipv6); parsed != nil {
+			buf.WriteString(fmt.Sprintf("%s-", parsed.String()))
+		} else {
+			buf.WriteString(fmt.Sprintf("%s-", ipv6))
+		}
+	}
+	if port, ok := m["port"].(int); ok {
+		buf.WriteString(fmt.Sprintf("%d-", port))
+	}
+	return tpgresource.Hashcode(buf.String())
+}
+
 
 // Read network endpoints as long as there are unread pages remaining
 func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg.Config, userAgent, url, project, billingProject string, res map[string]interface{}) ([]interface{}, error) {
