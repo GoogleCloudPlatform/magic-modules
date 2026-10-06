@@ -2883,15 +2883,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	{{- if ne $.TargetVersionName "ga" }}
-	if d.HasChange("blue_green_deployment") {
-		if err := handleBlueGreenDeploymentUpdate(d, config, project, d.Get("region").(string), d.Timeout(schema.TimeoutUpdate), userAgent); err != nil {
-			_ = resourceSqlDatabaseInstanceRead(d, meta)
-			return err
-		}
-		return resourceSqlDatabaseInstanceRead(d, meta)
-	}
+	if !isBlueGreenSwitchover(d) {
 	{{- end }}
-
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 
@@ -3349,6 +3342,16 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
            return err
          }
       }
+	{{- if ne $.TargetVersionName "ga" }}
+	}
+
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, d.Get("region").(string), d.Timeout(schema.TimeoutUpdate), userAgent); err != nil {
+			_ = resourceSqlDatabaseInstanceRead(d, meta)
+			return err
+		}
+	}
+	{{- end }}
 
       return resourceSqlDatabaseInstanceRead(d, meta)
 }
@@ -4427,9 +4430,159 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 				)
 			}
 		}
+
+		// When switching over (active_environment changing from "SOURCE" to "TARGET"),
+		// the resource configuration must match the Green (target) instance configuration.
+		if oldEnv == "SOURCE" && newEnv == "TARGET" {
+			targetInstanceName, _ := oldMap["target_instance_name"].(string)
+			if meta != nil && targetInstanceName != "" {
+				if config, ok := meta.(*transport_tpg.Config); ok && config != nil {
+					if err := validateSwitchoverMatchesGreenInstance(d, config, oldName, targetInstanceName); err != nil {
+						return err
+					}
+				}
+			}
+		}
 	}
 
 	return nil
+}
+
+func isBlueGreenSwitchover(d *schema.ResourceData) bool {
+	if !d.HasChange("blue_green_deployment") {
+		return false
+	}
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	oldList, okOld := oldVal.([]interface{})
+	newList, okNew := newVal.([]interface{})
+	if !okOld || !okNew || len(oldList) == 0 || len(newList) == 0 || oldList[0] == nil || newList[0] == nil {
+		return false
+	}
+	oldMap := oldList[0].(map[string]interface{})
+	newMap := newList[0].(map[string]interface{})
+	oldEnv, _ := oldMap["active_environment"].(string)
+	newEnv, _ := newMap["active_environment"].(string)
+	return oldEnv == "SOURCE" && newEnv == "TARGET"
+}
+
+var skipGreenComparisonFields = map[string]bool{
+	"settings.0.backup_configuration":        true,
+	"settings.0.password_validation_policy":  true,
+	"settings.0.ip_configuration":            true,
+	"settings.0.replication_lag_max_seconds": true,
+	"settings.0.location_preference":         true,
+}
+
+func validateSwitchoverMatchesGreenInstance(d *schema.ResourceDiff, config *transport_tpg.Config, deploymentName, targetInstanceName string) error {
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return nil
+	}
+
+	project, err := tpgresource.GetProjectFromDiff(d, config)
+	if err != nil {
+		return err
+	}
+
+	var targetInstance *sqladmin.DatabaseInstance
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			targetInstance, rerr = NewClient(config, config.UserAgent).Instances.Get(project, targetInstanceName).Do()
+			return rerr
+		},
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading green instance %q to validate switchover for deployment %q: %s", targetInstanceName, deploymentName, err)
+	}
+	if targetInstance == nil || targetInstance.Settings == nil {
+		return nil
+	}
+
+	greenData := ResourceSqlDatabaseInstance().Data(nil)
+	_ = greenData.Set("settings", d.Get("settings"))
+	if err := greenData.Set("settings", flattenSettings(targetInstance.Settings, targetInstance.InstanceType, greenData)); err != nil {
+		return fmt.Errorf("Error flattening green instance %q settings: %s", targetInstanceName, err)
+	}
+
+	var mismatches []string
+	compareConfiguredField("settings", rawConfig.GetAttr("settings"), ResourceSqlDatabaseInstance().Schema["settings"], d, greenData, &mismatches)
+
+	slices.Sort(mismatches)
+	if len(mismatches) > 0 {
+		return fmt.Errorf(
+			"cannot switchover deployment %q: update terraform configuration to match green instance %q. Mismatched fields:\n - %s",
+			deploymentName, targetInstanceName, strings.Join(mismatches, "\n - "),
+		)
+	}
+
+	return nil
+}
+
+func compareConfiguredField(key string, rawVal cty.Value, fieldSchema *schema.Schema, d *schema.ResourceDiff, greenData *schema.ResourceData, mismatches *[]string) {
+	if rawVal.IsNull() || !rawVal.IsKnown() || skipGreenComparisonFields[key] || (!fieldSchema.Optional && !fieldSchema.Required) {
+		return
+	}
+
+	if fieldSchema.Type == schema.TypeList {
+		if subRes, ok := fieldSchema.Elem.(*schema.Resource); ok {
+			for i, rawElem := range rawVal.AsValueSlice() {
+				if rawElem.IsNull() || !rawElem.IsKnown() {
+					continue
+				}
+				for subName, subSchema := range subRes.Schema {
+					compareConfiguredField(fmt.Sprintf("%s.%d.%s", key, i, subName), rawElem.GetAttr(subName), subSchema, d, greenData, mismatches)
+				}
+			}
+			return
+		}
+	}
+
+	if (fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet) && len(rawVal.AsValueSlice()) == 0 {
+		return
+	}
+
+	cfgVal, greenVal := d.Get(key), greenData.Get(key)
+	if key == "settings.0.disk_size" && greenData.Get("settings.0.disk_autoresize").(bool) && greenVal.(int) > cfgVal.(int) {
+		return
+	}
+	if fieldSchema.DiffSuppressFunc != nil {
+		if cfgStr, ok1 := cfgVal.(string); ok1 {
+			if greenStr, ok2 := greenVal.(string); ok2 && fieldSchema.DiffSuppressFunc(key, greenStr, cfgStr, greenData) {
+				return
+			}
+		}
+	}
+
+	equal := reflect.DeepEqual(cfgVal, greenVal)
+	if eq, ok := cfgVal.(schema.Equal); ok {
+		equal = eq.Equal(greenVal)
+	}
+	if !equal {
+		*mismatches = append(*mismatches, fmt.Sprintf("%s (configured: %v, green instance: %v)", key, formatSchemaValue(cfgVal), formatSchemaValue(greenVal)))
+	}
+}
+
+func formatSchemaValue(v interface{}) interface{} {
+	if s, ok := v.(*schema.Set); ok {
+		v = s.List()
+	}
+	if list, ok := v.([]interface{}); ok {
+		res := make([]interface{}, len(list))
+		for i, elem := range list {
+			res[i] = formatSchemaValue(elem)
+		}
+		return res
+	}
+	if m, ok := v.(map[string]interface{}); ok {
+		res := make(map[string]interface{}, len(m))
+		for k, val := range m {
+			res[k] = formatSchemaValue(val)
+		}
+		return res
+	}
+	return v
 }
 
 func getExistingBgdStateMap(d *schema.ResourceData) map[string]interface{} {
