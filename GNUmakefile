@@ -6,10 +6,6 @@ default: build
 
 
 # mm setup
-ifneq ($(PRODUCT),)
-  mmv1_args=--product $(PRODUCT)
-endif
-
 ifneq ($(RESOURCE),)
   mmv1_args += --resource $(RESOURCE)
 endif
@@ -82,12 +78,7 @@ mmv1: mm_binary
 		fi
 
 clean-provider: check_safe_build
-	@if [ -n "$(PRODUCT)" ]; then \
-		printf "\n\e[1;33mWARNING:\e[0m Skipping clean-provider step because PRODUCT ('$(PRODUCT)') is set.\n"; \
-		printf " Ensure your downstream repository is synchronized with the Magic Modules branch\n"; \
-		printf " to avoid potential build inconsistencies.\n"; \
-		printf " Downstream repository (OUTPUT_PATH): %s\n\n" "$(OUTPUT_PATH)"; \
-	elif [ "$(SHOULD_SKIP_CLEAN)" = "true" ]; then \
+	@if [ "$(SHOULD_SKIP_CLEAN)" = "true" ]; then \
 		printf "\e[1;33mINFO:\e[0m Skipping clean-provider step because SKIP_CLEAN is set to a non-false value ('$(SKIP_CLEAN)').\n"; \
 	else \
 		echo "Executing clean-provider in $(OUTPUT_PATH)..."; \
@@ -101,8 +92,9 @@ clean-provider: check_safe_build
 			else \
 				echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
 				go mod download && \
-				echo "---> Finding tracked files to remove..." && \
-				git ls-files | grep -v -E '(^\.git|^\.changelog|^\.agents/|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|docscheck\.sh$$|^\.whitesource$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples|^scripts/)' | xargs -r git rm -f -q && \
+				echo "---> Removing tracked files that will be regenerated..." && \
+				git ls-files | grep -v -E '(^\.git|^\.changelog|^\.agents/|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|docscheck\.sh$$|^\.whitesource$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples|^scripts/)' | tr '\n' '\0' | xargs -0 -r rm -f && \
+				find . -mindepth 1 -type d -empty -not -path './.git' -not -path './.git/*' -delete && \
 				echo "---> Unstaging changes with git reset..." && \
 				git reset -q && \
 				echo "---> clean-provider actions finished. Changes have been unstaged."; \

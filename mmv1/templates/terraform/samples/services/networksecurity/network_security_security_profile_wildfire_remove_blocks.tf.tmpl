@@ -1,0 +1,11 @@
+resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "resource_name"}}"
+  parent      = "projects/{{index $.TestEnvVars "project"}}"
+  description = "my updated description"
+  type        = "WILDFIRE_ANALYSIS"
+
+  wildfire_analysis_profile {
+    wildfire_realtime_lookup = true
+  }
+}

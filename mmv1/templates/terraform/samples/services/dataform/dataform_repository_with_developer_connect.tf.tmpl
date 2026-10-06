@@ -1,19 +1,16 @@
 resource "google_project_service_identity" "devconnect_p4sa" {
-  provider = google-beta
 
   project  = "{{index $.TestEnvVars "project_id"}}"
   service  = "developerconnect.googleapis.com"
 }
 
 resource "google_project_iam_member" "devconnect_secret" {
-  provider = google-beta
   project  = "{{index $.TestEnvVars "project_id"}}"
   role     = "roles/secretmanager.admin"
   member   = google_project_service_identity.devconnect_p4sa.member
 }
 
 resource "google_developer_connect_connection" "my_connection" {
-  provider = google-beta
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
   connection_id = "{{index $.ResourceIdVars "connection_name"}}"
@@ -24,7 +21,6 @@ resource "google_developer_connect_connection" "my_connection" {
 }
 
 resource "google_developer_connect_git_repository_link" "my_repository" {
-  provider = google-beta
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
   git_repository_link_id = "{{index $.ResourceIdVars "repository_link_name"}}"
@@ -33,7 +29,6 @@ resource "google_developer_connect_git_repository_link" "my_repository" {
 }
 
 resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name = "{{index $.ResourceIdVars "dataform_repository_name"}}"
   display_name = "{{index $.ResourceIdVars "dataform_repository_name"}}"
 

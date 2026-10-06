@@ -52,7 +52,7 @@ resource "google_compute_instance" "default" {
   tags = ["foo", "bar"]
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-13"
       labels = {
         my_label = "value"
       }
@@ -238,7 +238,7 @@ resource "google_compute_instance" "default" {
   tags         = ["foo", "bar"]
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-13"
     }
   }
   network_interface {
@@ -339,8 +339,9 @@ resource "google_service_account" "default" {
 }
 
 resource "google_sql_database_instance" "instance" {
- name             = "default-%{random_suffix}"
+ name             = "tf-test-instance-%{random_suffix}"
  database_version = "MYSQL_8_0"
+ root_password    = "tf-test-password-%{random_suffix}"
  region          = "us-central1"
  deletion_protection = false
  settings {

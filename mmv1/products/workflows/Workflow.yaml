@@ -139,6 +139,7 @@ properties:
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
   - name: sourceContents
     type: String
+    required: true
     description: |
       Workflow code to be executed. The size limit is 128KB.
 

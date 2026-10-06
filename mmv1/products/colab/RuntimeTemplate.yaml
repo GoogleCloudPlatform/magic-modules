@@ -27,6 +27,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates
 update_verb: 'PATCH'
 update_mask: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
+generate_list_resource: true
 async:
   type: 'OpAsync'
   actions: ['create', 'delete']

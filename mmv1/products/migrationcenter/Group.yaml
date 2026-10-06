@@ -16,6 +16,7 @@ name: Group
 description: A resource that represents an asset group. The purpose of an asset group is to bundle a set of assets that have something in common, while allowing users to add annotations to the group.
 docs:
 base_url: projects/{{project}}/locations/{{location}}/groups
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/groups/{{group_id}}
 create_url: projects/{{project}}/locations/{{location}}/groups?groupId={{group_id}}
 update_mask: true

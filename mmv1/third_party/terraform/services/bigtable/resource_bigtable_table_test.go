@@ -141,7 +141,7 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 			},
 			{
 				Config:      testAccBigtableTable_familyType(instanceName, tableName, family, "intmin"),
-				ExpectError: regexp.MustCompile("Immutable fields 'value_type.aggregate_type' cannot be updated"),
+				ExpectError: regexp.MustCompile("Immutable fields '[^']*value_type.aggregate_type[^']*' cannot be updated"),
 			},
 		},
 	})
@@ -1115,7 +1115,7 @@ func testAccBigtableTable_automated_backups(instanceName, tableName, automatedBa
 	if automatedBackupsFrequency != "" {
 		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
 	}
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
   cluster {
@@ -1137,7 +1137,6 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, retentionPeriod, frequency, family)
-	return config
 }
 
 func testAccBigtableTable_automated_backups_locations_create(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {

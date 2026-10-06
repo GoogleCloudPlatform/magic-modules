@@ -49,6 +49,15 @@ samples:
         resource_id_vars:
           address_name: scan-ignore-http-ip
           scan_config_name: terraform-scan-config
+  - name: scan_config_static_ip
+    primary_resource_id: scan-config
+    min_version: beta
+    steps:
+      - name: scan_config_static_ip
+        min_version: beta
+        resource_id_vars:
+          address_name: scan-static-ip
+          scan_config_name: terraform-scan-config
 properties:
   - name: name
     type: String
@@ -205,3 +214,9 @@ properties:
   - name: ignoreHttpStatusErrors
     type: Boolean
     description: Whether to keep scanning even if most requests return HTTP error codes.
+  - name: staticIpScan
+    type: Boolean
+    description: |
+      Whether the scan configuration has enabled static IP address scan feature.
+      If enabled, the scanner will access applications from static IP addresses.
+    min_version: beta

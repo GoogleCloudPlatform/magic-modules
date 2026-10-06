@@ -77,7 +77,7 @@ func TestAccIAMWorkforcePoolWorkforcePool_minimal(t *testing.T) {
 func testAccIAMWorkforcePoolWorkforcePool_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id   = "my-pool-%{random_suffix}"
+  workforce_pool_id   = "tf-test-my-pool-%{random_suffix}"
   parent              = "organizations/%{org_id}"
   location            = "global"
   display_name        = "Display name"
@@ -97,7 +97,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 func testAccIAMWorkforcePoolWorkforcePool_minimal(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
 }
@@ -107,7 +107,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 func testAccIAMWorkforcePoolWorkforcePool_full_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
   display_name      = "New display name"
@@ -127,7 +127,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 func testAccIAMWorkforcePoolWorkforcePool_minimal_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
   display_name      = "New display name"

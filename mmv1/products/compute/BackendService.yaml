@@ -67,7 +67,7 @@ samples:
       - name: 'backend_service_basic'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_external_iap'
     primary_resource_id: 'default'
     steps:
@@ -80,7 +80,7 @@ samples:
       - name: 'backend_service_cache_simple'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_cache_include_http_headers'
     primary_resource_id: 'default'
     steps:
@@ -99,14 +99,14 @@ samples:
       - name: 'backend_service_cache'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_cache_bypass_cache_on_request_headers'
     primary_resource_id: 'default'
     steps:
       - name: 'backend_service_cache_bypass_cache_on_request_headers'
         resource_id_vars:
           backend_service_name: 'backend-service'
-          http_health_check_name: 'health-check'
+          health_check_name: 'health-check'
   - name: 'backend_service_traffic_director_round_robin'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -152,6 +152,10 @@ samples:
         resource_id_vars:
           backend_service_name: 'backend-service'
           health_check_name: 'health-check'
+          network_name: 'custom-vpc'
+          subnetwork_name: 'custom-subnet'
+          instance_template_name: 'instance-template'
+          igm_name: 'instance-group-manager'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     steps:
@@ -174,9 +178,6 @@ samples:
           default_neg_name: 'network-endpoint'
           health_check_name: 'health-check'
           network_name: 'network'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
     steps:
@@ -185,9 +186,21 @@ samples:
           backend_service_name: 'backend-service'
           health_check_name: 'health-check'
           authentication_name: 'authentication'
-        test_vars_overrides:
-          # for backward compatible
-          authentication_name: '"authentication" + randomSuffix'
+  - name: 'backend_service_identity'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'backend_service_identity'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+        vars:
+          description: 'description'
+      - name: 'backend_service_identity'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+        vars:
+          description: 'updated description'
   - name: 'backend_service_dynamic_backends'
     primary_resource_id: 'default'
     exclude_test: true
@@ -918,7 +931,7 @@ properties:
     description: |
       Settings for enabling Cloud Identity Aware Proxy.
       If OAuth client is not set, the Google-managed OAuth client is used.
-    default_from_api: true
+    diff_suppress_func: 'suppressIapDiffWhenUnset'
     send_empty_value: true
     properties:
       - name: 'enabled'
@@ -930,7 +943,9 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        ignore_read: true
         send_empty_value: true
+        write_only: true
         diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
@@ -940,6 +955,7 @@ properties:
         sensitive: true
         send_empty_value: true
         is_missing_in_cai: true
+        write_only: true
       - name: 'oauth2ClientSecretSha256'
         type: String
         description: |
@@ -961,7 +977,7 @@ properties:
       external load balancing. A backend service created for one type of
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
-    default_value: "EXTERNAL"
+    default_value: "EXTERNAL_MANAGED"
     # If you're modifying this value, it probably means Global ILB is now
     # an option. If that's the case, all of the documentation is based on
     # this resource supporting external load balancing only.
@@ -1682,7 +1698,7 @@ properties:
     type: String
     description: |
       URL to networkservices.ServiceLbPolicy resource.
-      Can only be set if load balancing scheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED and the scope is global.
+      Can only be set if load balancing scheme is EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED for a global backend service, and EXTERNAL_MANAGED or INTERNAL_MANAGED for a regional backend service. For a global backend service, the service lb policy must be global. For a regional backend service, the service lb policy must be regional and in the same region.
   - name: 'tlsSettings'
     type: NestedObject
     description: |
@@ -1695,6 +1711,8 @@ properties:
           TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
           server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
           regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
+        conflicts:
+          - 'tls_settings.0.identity'
       - name: 'subjectAltNames'
         type: Array
         description: |
@@ -1703,6 +1721,8 @@ properties:
           and requires that at least one SAN match one of the subjectAltNames in the list. This field is limited to 5 entries.
           When both sni and subjectAltNames are specified, the load balancer matches the backend certificate's SAN only to
           subjectAltNames.
+        conflicts:
+          - 'tls_settings.0.identity'
         item_type:
           type: NestedObject
           properties:
@@ -1724,6 +1744,21 @@ properties:
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
           Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
           Can only be specified if authenticationMode is not NONE.
+        conflicts:
+          - 'tls_settings.0.identity'
+        diff_suppress_func: 'suppressAuthenticationConfigWhenIdentitySet'
+      - name: 'identity'
+        type: String
+        description: |
+          The fully-specified SPIFFE ID without the spiffe:// scheme. Must be in the format //<trust_domain>/ns/<namespace>/sa/<subject>.
+          The load balancer uses certificates and roots of trust provisioned by the Managed Workload Identity system for this identity.
+          The Trust Domain within the identity must refer to a valid Workload Identity Pool, from which the TrustConfig and CertificateIssuanceConfig are inherited.
+          If set, you cannot configure sni, subjectAltNames, or authenticationConfig manually.
+        immutable: true
+        conflicts:
+          - 'tls_settings.0.authentication_config'
+          - 'tls_settings.0.subject_alt_names'
+          - 'tls_settings.0.sni'
   - name: 'maxStreamDuration'
     type: NestedObject
     description: |

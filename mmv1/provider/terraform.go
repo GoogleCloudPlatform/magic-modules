@@ -18,15 +18,16 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go/format"
 	"io/fs"
 	"log"
 	"maps"
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -87,24 +88,46 @@ func (t Terraform) Generate(outputFolder, resourceToGenerate string, generateCod
 	}
 }
 
+// resourceSem bounds how many resources are generated concurrently across all
+// products. Products are already generated in parallel with one another; this
+// additionally lets the resources *within* a product proceed in parallel, which
+// matters because a single large product (compute) would otherwise be the
+// critical path of the whole run.
+var resourceSem = make(chan struct{}, runtime.GOMAXPROCS(0))
+
 func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+	var objects []*api.Resource
 	for _, object := range t.Product.Objects {
 		object.ExcludeIfNotInVersion(t.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
-
-		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
+		objects = append(objects, object)
 	}
+
+	// Each resource writes only its own output files and only reads shared
+	// product state, so resources are independent and can be generated concurrently.
+	var wg sync.WaitGroup
+	for _, object := range objects {
+		wg.Add(1)
+		go func(object api.Resource) {
+			defer wg.Done()
+			resourceSem <- struct{}{}
+			defer func() { <-resourceSem }()
+			t.GenerateObject(object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
+		}(*object)
+	}
+	wg.Wait()
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 
 	if !object.IsExcluded() {
-		log.Printf("Generating %s resource", object.Name)
+		google.LogVerbose("Generating %s resource", object.Name)
+		google.IncrementResourceGenerated()
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		t.GenerateSingularDataSource(object, *templateData, outputFolder, generateCode, generateDocs)
 
@@ -171,6 +194,12 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s.html.markdown", object.TerraformName()))
 			templateData.GenerateListResourceDocumentationFile(listDocFilePath, object)
 		}
+
+		if object.IamPolicy.AnyListResource() {
+			listDocFolder := t.makeFolder(outputFolder, "website", "docs", "list-resources")
+			listDocFilePath := path.Join(listDocFolder, fmt.Sprintf("%s_iam.html.markdown", object.TerraformName()))
+			templateData.GenerateIamListResourceDocumentationFile(listDocFilePath, object)
+		}
 	}
 }
 
@@ -190,6 +219,19 @@ func (t *Terraform) GenerateListResource(object api.Resource, templateData Templ
 
 		t.GenerateListResourceQueryTest(object, templateData, targetFolder)
 	}
+}
+
+// GenerateIamListResource emits list_iam_<resource>.go containing every IAM list
+// kind requested via iam_policy.generate_list_resource, mirroring iam_policy.go.tmpl.
+func (t *Terraform) GenerateIamListResource(object api.Resource, templateData TemplateData, targetFolder string) {
+	if !object.IamPolicy.AnyListResource() {
+		return
+	}
+
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s.go", t.ResourceGoFilename(object)))
+	templatePath := "templates/terraform/iam_list_resource.go.tmpl"
+	templateData.GenerateFile(targetFilePath, templatePath, object, true, templatePath)
+	t.GenerateIamListResourceQueryTest(object, templateData, targetFolder)
 }
 
 // GenerateResourceFile is the Bazel counterpart to GenerateResource(), generating *only() the .go file and
@@ -255,11 +297,24 @@ func (t *Terraform) GenerateListResourceQueryTest(object api.Resource, templateD
 	if object.Examples != nil {
 		log.Fatalf("Examples block exists in %v", object.Name)
 	}
-	if object.Samples == nil || !t.hasEligibleSample(object) {
+	if object.Samples == nil || object.FirstRunnableTestConfig().Sample == nil {
 		return
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateQueryTestFile(targetFilePath, object)
+}
+
+// GenerateIamListResourceQueryTest emits list_iam_<resource>_generated_test.go.
+func (t *Terraform) GenerateIamListResourceQueryTest(object api.Resource, templateData TemplateData, targetFolder string) {
+	samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	if len(samples) == 0 {
+		log.Printf("[WARNING] No IAM list resource test generated for %s: no non-excluded samples available", object.Name)
+		return
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateIamQueryTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
@@ -379,6 +434,9 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
+		// Iam list resource (terraform query support)
+		t.GenerateIamListResource(object, templateData, targetFolder)
+
 		// Only generate test if testable example configs exist.
 		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
 			return s.ExcludeTest
@@ -448,7 +506,7 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files for %s", ProviderName(t))
+	google.LogVerbose("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
 	t.CopyFileList(outputFolder, files, generateCode)
@@ -565,52 +623,82 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 }
 
 func (t Terraform) CopyFileList(outputFolder string, files map[string]string, generateCode bool) {
+	// Files are independent of one another, so process them concurrently.
+	var wg sync.WaitGroup
 	for target, source := range files {
-		targetFile := filepath.Join(outputFolder, target)
-		targetDir := filepath.Dir(targetFile)
+		wg.Add(1)
+		go func(target, source string) {
+			defer wg.Done()
+			resourceSem <- struct{}{}
+			defer func() { <-resourceSem }()
+			t.copyFile(outputFolder, target, source, generateCode)
+		}(target, source)
+	}
+	wg.Wait()
+}
 
-		if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating output directory %v: %v", targetDir, err))
-		}
-		// If we've modified a file since starting an MM run, it's a reasonable
-		// assumption that it was this run that modified it.
-		if info, err := os.Stat(targetFile); !errors.Is(err, os.ErrNotExist) && t.StartTime.Before(info.ModTime()) {
-			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
-		}
+// copyFile copies a single handwritten file from the template FS to the output
+// folder, applying the version-specific import path rewrite and header
+// insertions in memory so the file is formatted at most once and written once.
+func (t Terraform) copyFile(outputFolder, target, source string, generateCode bool) {
+	targetFile := filepath.Join(outputFolder, target)
+	targetDir := filepath.Dir(targetFile)
 
-		sourceByte, err := fs.ReadFile(t.templateFS, source)
-		if err != nil {
-			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
-		}
+	if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating output directory %v: %v", targetDir, err))
+	}
+	// If we've modified a file since starting an MM run, it's a reasonable
+	// assumption that it was this run that modified it.
+	if info, err := os.Stat(targetFile); !errors.Is(err, os.ErrNotExist) && t.StartTime.Before(info.ModTime()) {
+		log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
+	}
 
-		var permission fs.FileMode
-		if strings.HasSuffix(targetDir, "scripts") {
-			permission = 0755
-		} else {
-			permission = 0644
-		}
+	sourceByte, err := fs.ReadFile(t.templateFS, source)
+	if err != nil {
+		log.Fatalf("Cannot read source file %s while copying: %s", source, err)
+	}
 
-		err = os.WriteFile(targetFile, sourceByte, permission)
-		if err != nil {
-			log.Fatalf("Cannot write target file %s while copying: %s", target, err)
-		}
+	var permission fs.FileMode
+	if strings.HasSuffix(targetDir, "scripts") {
+		permission = 0755
+	} else {
+		permission = 0644
+	}
 
-		// Replace import path based on version (beta/alpha)
-		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
-			t.replaceImportPath(outputFolder, target)
+	ext := filepath.Ext(target)
+	needsFormat := false
+
+	// Replace import path based on version (beta/alpha)
+	if ext == ".go" || (ext == ".mod" && generateCode) {
+		var replaced bool
+		sourceByte, replaced = t.replaceImportPathBytes(target, sourceByte)
+		if replaced && ext == ".go" {
+			needsFormat = true
 		}
-		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".markdown" {
-			t.addCopyfileHeader(source, outputFolder, target)
+	}
+	if ext == ".go" || ext == ".markdown" {
+		var added bool
+		sourceByte, added = copyfileHeaderBytes(source, target, sourceByte)
+		if added && ext == ".go" {
+			needsFormat = true
 		}
-		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".yaml" {
-			t.addHashicorpCopyRightHeader(outputFolder, target)
-		}
+	}
+	if needsFormat {
+		sourceByte = formatGoSource(targetFile, sourceByte)
+	}
+	if ext == ".go" || ext == ".yaml" {
+		sourceByte = t.hashicorpCopyRightHeaderBytes(outputFolder, target, sourceByte)
+	}
+
+	err = os.WriteFile(targetFile, sourceByte, permission)
+	if err != nil {
+		log.Fatalf("Cannot write target file %s while copying: %s", target, err)
 	}
 }
 
 // Compiles files that are shared at the provider level
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	log.Printf("Generating common files for %s", ProviderName(t))
+	google.LogVerbose("Generating common files for %s", ProviderName(t))
 	if t.Product == nil {
 		t.generateResourcesForVersion(products)
 	}
@@ -713,47 +801,70 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
 
+	// Files are independent of one another, so process them concurrently.
+	var wg sync.WaitGroup
 	for target, source := range files {
-		targetFile := filepath.Join(outputFolder, target)
-		targetDir := filepath.Dir(targetFile)
-		if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating output directory %v: %v", targetDir, err))
-		}
+		wg.Add(1)
+		go func(target, source string) {
+			defer wg.Done()
+			resourceSem <- struct{}{}
+			defer func() { <-resourceSem }()
+			t.compileFile(outputFolder, target, source, fileTemplate, providerWithProducts)
+		}(target, source)
+	}
+	wg.Wait()
+}
 
-		templates := []string{
-			source,
-		}
+// compileFile renders a single handwritten template to the output folder,
+// applying the version-specific import path rewrite and header insertions in
+// memory so the file is formatted at most once and written once.
+func (t Terraform) compileFile(outputFolder, target, source string, fileTemplate TemplateData, input any) {
+	targetFile := filepath.Join(outputFolder, target)
+	targetDir := filepath.Dir(targetFile)
+	if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating output directory %v: %v", targetDir, err))
+	}
 
-		formatFile := filepath.Ext(targetFile) == ".go"
+	sourceByte := fileTemplate.renderFile(targetFile, source, input, source)
+	// skip this file if no file was generated
+	if sourceByte == nil {
+		return
+	}
 
-		fileTemplate.GenerateFile(targetFile, source, providerWithProducts, formatFile, templates...)
-		// continue to next file if no file was generated
-		if _, err := os.Stat(targetFile); errors.Is(err, os.ErrNotExist) {
-			continue
-		}
-		t.replaceImportPath(outputFolder, target)
-		if filepath.Ext(targetFile) == ".go" || filepath.Ext(targetFile) == ".markdown" {
-			t.addCopyfileHeader(source, outputFolder, target)
-		}
-		t.addHashicorpCopyRightHeader(outputFolder, target)
+	ext := filepath.Ext(targetFile)
+	if ext == ".go" {
+		// Format before inserting the header: rendered templates frequently start
+		// with blank lines, and whether gofmt treats the header as the package
+		// doc comment (re-indenting it) depends on those being stripped first.
+		sourceByte = formatGoSource(targetFile, sourceByte)
+	}
+	sourceByte, _ = t.replaceImportPathBytes(target, sourceByte)
+	if ext == ".go" || ext == ".markdown" {
+		sourceByte, _ = copyfileHeaderBytes(source, target, sourceByte)
+	}
+	if ext == ".go" {
+		sourceByte = formatGoSource(targetFile, sourceByte)
+	}
+	sourceByte = t.hashicorpCopyRightHeaderBytes(outputFolder, target, sourceByte)
+
+	if err := os.WriteFile(targetFile, sourceByte, 0644); err != nil {
+		log.Fatalf("Cannot write file %s: %s", targetFile, err)
 	}
 }
 
-func (t Terraform) addCopyfileHeader(srcpath, outputFolder, target string) {
+// copyfileHeaderBytes prepends the "AUTO GENERATED CODE / Type: Handwritten"
+// banner to content, unless the banner is already present. It returns the
+// (possibly) updated content and whether the banner was added. Callers are
+// responsible for running gofmt on Go sources afterwards.
+func copyfileHeaderBytes(srcpath, target string, content []byte) ([]byte, bool) {
 	githubPrefix := "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/"
 	if !strings.HasPrefix(srcpath, githubPrefix) {
 		srcpath = githubPrefix + srcpath
 	}
 
-	targetFile := filepath.Join(outputFolder, target)
-	sourceByte, err := os.ReadFile(targetFile)
-	if err != nil {
-		log.Fatalf("Cannot read file %s to add copy file header: %s", targetFile, err)
-	}
-
-	srcStr := string(sourceByte)
+	srcStr := string(content)
 	if strings.Contains(srcStr, "***     AUTO GENERATED CODE    ***    Type: Handwritten     ***") {
-		return
+		return content, false
 	}
 
 	templateFormat := `// ----------------------------------------------------------------------------
@@ -771,32 +882,60 @@ func (t Terraform) addCopyfileHeader(srcpath, outputFolder, target string) {
 //
 // ----------------------------------------------------------------------------
 %s`
-	content := srcStr
+	body := srcStr
 	if filepath.Ext(target) == ".markdown" {
 		// insert the header after ---
 		templateFormat = "---\n" + strings.Replace(templateFormat, "//", "#", -1)
-		content = strings.TrimPrefix(srcStr, "---\n")
+		body = strings.TrimPrefix(srcStr, "---\n")
 	}
 
-	fileStr := fmt.Sprintf(templateFormat, srcpath, content)
+	return []byte(fmt.Sprintf(templateFormat, srcpath, body)), true
+}
 
-	sourceByte = []byte(fileStr)
-	// format go file
-	if filepath.Ext(targetFile) == ".go" {
-		sourceByte, err = format.Source(sourceByte)
-		if err != nil {
-			log.Printf("error formatting %s: %s\n", targetFile, err)
-			return
-		}
-	}
-
-	err = os.WriteFile(targetFile, sourceByte, 0644)
+// addHashicorpCopyRightHeader applies hashicorpCopyRightHeaderBytes to a file on disk.
+func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
+	targetFile := filepath.Join(outputFolder, target)
+	sourceByte, err := os.ReadFile(targetFile)
 	if err != nil {
-		log.Fatalf("Cannot write file %s to add copy file header: %s", target, err)
+		log.Fatalf("Cannot read file %s to add Hashicorp copy right: %s", targetFile, err)
+	}
+
+	updated := t.hashicorpCopyRightHeaderBytes(outputFolder, target, sourceByte)
+	if bytes.Equal(updated, sourceByte) {
+		return
+	}
+
+	err = os.WriteFile(targetFile, updated, 0644)
+	if err != nil {
+		log.Fatalf("Cannot write file %s to add Hashicorp copy right: %s", target, err)
 	}
 }
 
-func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
+// hashicorpCopyRightHeaderBytes prepends the HashiCorp copyright header to
+// content when target is a file that should carry one, and returns the result.
+// Content that already carries the header is returned unchanged.
+func (t Terraform) hashicorpCopyRightHeaderBytes(outputFolder, target string, content []byte) []byte {
+	if !t.shouldAddHashicorpCopyRightHeader(outputFolder, target) {
+		return content
+	}
+
+	lang := languageFromFilename(target)
+
+	// File is not ignored and is appropriate file type to add header to
+	copyrightHeader := []string{"Copyright IBM Corp. 2014, 2026", "SPDX-License-Identifier: MPL-2.0"}
+	header := commentBlock(copyrightHeader, lang)
+
+	if bytes.Contains(content, []byte("Copyright IBM Corp. 2014, 2026")) &&
+		bytes.Contains(content, []byte("SPDX-License-Identifier: MPL-2.0")) {
+		return content
+	}
+
+	return google.Concat([]byte(header), content)
+}
+
+// shouldAddHashicorpCopyRightHeader reports whether target (relative to
+// outputFolder) is a file that should carry the HashiCorp copyright header.
+func (t Terraform) shouldAddHashicorpCopyRightHeader(outputFolder, target string) bool {
 	if !expectedOutputFolder(outputFolder) {
 		log.Printf("Unexpected output folder (%s) detected "+
 			"when deciding to add HashiCorp copyright headers.\n"+
@@ -804,7 +943,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	}
 	// only add copyright headers when generating TPG, TPGB, and TPGN
 	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta") || strings.HasSuffix(outputFolder, "terraform-provider-google-nightly")) {
-		return
+		return false
 	}
 
 	// Prevent adding copyright header to files with paths or names matching the strings below
@@ -814,52 +953,24 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	//       not file by file
 	ignoredFolders := []string{".release/", ".changelog/", "examples/", "scripts/"}
 	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json"}
-	shouldAddHeader := true
 	for _, folder := range ignoredFolders {
 		// folder will be path leading to file
 		if strings.HasPrefix(target, folder) {
-			shouldAddHeader = false
-			break
+			return false
 		}
-	}
-	if !shouldAddHeader {
-		return
 	}
 
 	for _, file := range ignoredFiles {
 		// file will be the filename and extension, with no preceding path
 		if strings.HasSuffix(target, file) {
-			shouldAddHeader = false
-			break
+			return false
 		}
 	}
-	if !shouldAddHeader {
-		return
-	}
 
-	lang := languageFromFilename(target)
 	// Some file types we don't want to add headers to
 	// e.g. .sh where headers are functional
 	// Also, this guards against new filetypes being added and triggering build errors
-	if lang == "unsupported" {
-		return
-	}
-
-	// File is not ignored and is appropriate file type to add header to
-	copyrightHeader := []string{"Copyright IBM Corp. 2014, 2026", "SPDX-License-Identifier: MPL-2.0"}
-	header := commentBlock(copyrightHeader, lang)
-
-	targetFile := filepath.Join(outputFolder, target)
-	sourceByte, err := os.ReadFile(targetFile)
-	if err != nil {
-		log.Fatalf("Cannot read file %s to add Hashicorp copy right: %s", targetFile, err)
-	}
-
-	sourceByte = google.Concat([]byte(header), sourceByte)
-	err = os.WriteFile(targetFile, sourceByte, 0644)
-	if err != nil {
-		log.Fatalf("Cannot write file %s to add Hashicorp copy right: %s", target, err)
-	}
+	return languageFromFilename(target) != "unsupported"
 }
 
 func expectedOutputFolder(outputFolder string) bool {
@@ -876,24 +987,21 @@ func expectedOutputFolder(outputFolder string) bool {
 	return isExpected
 }
 
-func (t Terraform) replaceImportPath(outputFolder, target string) {
-	targetFile := filepath.Join(outputFolder, target)
-	sourceByte, err := os.ReadFile(targetFile)
-	if err != nil {
-		log.Fatalf("Cannot read file %s to replace import path: %s", targetFile, err)
-	}
-
-	data := string(sourceByte)
-
+// replaceImportPathBytes rewrites GA provider import paths in content to the
+// paths for the target version. It returns the updated content and whether a
+// rewrite was performed (always false for the GA provider). Callers are
+// responsible for running gofmt on Go sources afterwards. It exits if content
+// imports from the beta module directly, which is never allowed.
+func (t Terraform) replaceImportPathBytes(target string, content []byte) ([]byte, bool) {
 	gaImportPath := ImportPathFromVersion("ga")
 	betaImportPath := ImportPathFromVersion("beta")
 
-	if strings.Contains(data, betaImportPath) {
+	if bytes.Contains(content, []byte(betaImportPath)) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
 	}
 
 	if t.TargetVersionName == "ga" {
-		return
+		return content, false
 	}
 
 	// Replace the import pathes in utility files
@@ -907,23 +1015,10 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 		dir = "google-" + t.TargetVersionName
 	}
 
-	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(tpg+"/"+dir), -1)
-	sourceByte = bytes.Replace(sourceByte, []byte(TERRAFORM_PROVIDER_GA+"/version"), []byte(tpg+"/version"), -1)
-	sourceByte = bytes.Replace(sourceByte, []byte("module "+TERRAFORM_PROVIDER_GA), []byte("module "+tpg), -1)
-
-	if filepath.Ext(targetFile) == (".go") {
-		formatByte, err := format.Source(sourceByte)
-		if err != nil {
-			log.Printf("error formatting %s: %s", targetFile, err)
-		} else {
-			sourceByte = formatByte
-		}
-	}
-
-	err = os.WriteFile(targetFile, sourceByte, 0644)
-	if err != nil {
-		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
-	}
+	content = bytes.Replace(content, []byte(gaImportPath), []byte(tpg+"/"+dir), -1)
+	content = bytes.Replace(content, []byte(TERRAFORM_PROVIDER_GA+"/version"), []byte(tpg+"/version"), -1)
+	content = bytes.Replace(content, []byte("module "+TERRAFORM_PROVIDER_GA), []byte("module "+tpg), -1)
+	return content, true
 }
 
 func (t Terraform) ProviderFromVersion() string {

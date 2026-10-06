@@ -45,6 +45,13 @@ type TestResult struct {
 	FirstFailedUrl FirstFailed `json:"firstFailed"`
 	Status         string      `json:"status"`
 	Duration       int         `json:"duration"`
+	// Test identifies the test across builds; its Id is TeamCity's testNameId, used to link to
+	// the test's history page.
+	Test Test `json:"test"`
+}
+
+type Test struct {
+	Id string `json:"id"`
 }
 type TestResults struct {
 	TestResults []TestResult `json:"testOccurrence"`
@@ -67,7 +74,7 @@ func (tc *Client) GetBuilds(params url.Values) (Builds, error) {
 }
 
 func (tc *Client) GetTestResults(build Build) (TestResults, error) {
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/testOccurrences?locator=count:5000,build:(id:%d)&fields=testOccurrence(id,name,status,duration,firstFailed(href),details)", build.Id)
+	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/testOccurrences?locator=count:5000,build:(id:%d)&fields=testOccurrence(id,name,status,duration,firstFailed(href),details,test(id))", build.Id)
 
 	var testResults TestResults
 

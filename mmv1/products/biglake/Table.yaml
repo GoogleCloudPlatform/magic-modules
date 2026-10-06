@@ -13,6 +13,8 @@
 
 ---
 name: Table
+api_variant_patterns:
+  - projects/{project}/locations/{location}/catalogs/{catalog}/databases/{database}/tables/{table}
 description: |
   Represents a table.
 references:
@@ -137,3 +139,12 @@ properties:
             type: String
             description: |
               The fully qualified Java class name of the output format.
+          - name: serdeInfo
+            type: NestedObject
+            description: |
+              Serializer and deserializer information.
+            properties:
+              - name: serializationLib
+                type: String
+                description: |
+                  The fully qualified Java class name of the serialization library.

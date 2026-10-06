@@ -23,6 +23,8 @@ min_version: beta
 immutable: true
 self_link: projects/{{project}}/locations/global/sacRealms/{{name}}
 create_url: projects/{{project}}/locations/global/sacRealms?sacRealmId={{name}}
+generate_list_resource: true
+
 async:
   operation:
     base_url: '{{op_id}}'

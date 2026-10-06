@@ -18,14 +18,11 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 {{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
 {{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
 	container "google.golang.org/api/container/v1beta1"
 {{- end }}
 )
@@ -96,7 +93,7 @@ func (nodePoolCache *nodePoolCache) remove(nodePool string) {
 }
 
 type instanceGroupManagerWithUpdateTime struct {
-	instanceGroupManager *compute.InstanceGroupManager
+	instanceGroupManager map[string]interface{}
 	updateTime           time.Time
 }
 
@@ -106,7 +103,7 @@ type instanceGroupManagerCache struct {
 	mutex                 sync.RWMutex
 }
 
-func (instanceGroupManagerCache *instanceGroupManagerCache) get(fullyQualifiedName string) (*compute.InstanceGroupManager, bool) {
+func (instanceGroupManagerCache *instanceGroupManagerCache) get(fullyQualifiedName string) (map[string]interface{}, bool) {
 	instanceGroupManagerCache.mutex.RLock()
 	defer instanceGroupManagerCache.mutex.RUnlock()
 	igm, ok := instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName]
@@ -130,17 +127,55 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) refreshIfNeeded(d *s
 	}
 
     updateTime := time.Now()
-	err := compute_tpg.NewClient(config, userAgent).InstanceGroupManagers.List(matches[1], matches[2]).Pages(context.Background(), instanceGroupManagerCache.processList(updateTime))
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("InstanceGroupManagers for node pool %q", npName))
+	project := matches[1]
+	zone := matches[2]
+	computeBasePath := transport_tpg.BaseUrl(registry.GetProduct("compute"), config)
+	baseUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instanceGroupManagers", computeBasePath, project, zone)
+	pageToken := ""
+	for {
+		url := baseUrl
+		if pageToken != "" {
+			var err error
+			url, err = transport_tpg.AddQueryParams(baseUrl, map[string]string{"pageToken": pageToken})
+			if err != nil {
+				return err
+			}
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("InstanceGroupManagers for node pool %q", npName))
+		}
+		if err := instanceGroupManagerCache.processList(updateTime)(res); err != nil {
+			return err
+		}
+		token, ok := res["nextPageToken"].(string)
+		if !ok || token == "" {
+			break
+		}
+		pageToken = token
 	}
 	return nil
 }
 
-func (instanceGroupManagerCache *instanceGroupManagerCache) processList(updateTime time.Time) func(*compute.InstanceGroupManagerList) error {
-    return func(igmList *compute.InstanceGroupManagerList) error {
-        for _, instanceGroupManager := range igmList.Items {
-            fullyQualifiedName := instanceGroupManagerURL.FindString(instanceGroupManager.SelfLink)
+func (instanceGroupManagerCache *instanceGroupManagerCache) processList(updateTime time.Time) func(map[string]interface{}) error {
+    return func(igmList map[string]interface{}) error {
+        rawItems, ok := igmList["items"].([]interface{})
+        if !ok {
+            return nil
+        }
+        for _, raw := range rawItems {
+            instanceGroupManager, ok := raw.(map[string]interface{})
+            if !ok {
+                continue
+            }
+            selfLink, _ := instanceGroupManager["selfLink"].(string)
+            fullyQualifiedName := instanceGroupManagerURL.FindString(selfLink)
             instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName] = &instanceGroupManagerWithUpdateTime{
                 instanceGroupManager: instanceGroupManager,
                 updateTime:           updateTime,
@@ -156,6 +191,19 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQu
 		return true
 	}
 	return time.Since(igm.updateTime) > instanceGroupManagerCache.ttl
+}
+
+// invalidateItem removes a specific Instance Group Manager from the cache by its URL.
+// This is called when a node pool is resized or when ignore_node_count_changes is active,
+// ensuring that stale cached target sizes are not served on subsequent lookups.
+func (instanceGroupManagerCache *instanceGroupManagerCache) invalidateItem(igmUrl string) {
+	instanceGroupManagerCache.mutex.Lock()
+	defer instanceGroupManagerCache.mutex.Unlock()
+
+	matches := instanceGroupManagerURL.FindStringSubmatch(igmUrl)
+	if len(matches) >= 4 {
+		delete(instanceGroupManagerCache.instanceGroupManagers, matches[0])
+	}
 }
 
 // We need to set ttl to 0 to disable caching in VCR testing.
@@ -205,6 +253,7 @@ func ResourceContainerNodePool() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceNodeConfigEmptyGuestAccelerator,
 			nodePoolAcceleratorNetworkProfileCustomizeDiff,
+			nodePoolBestEffortProvisioningCustomizeDiff,
 		),
 
 		UseJSONNumber: true,
@@ -232,6 +281,7 @@ func ResourceContainerNodePool() *schema.Resource {
 					ForceNew:    true,
 					Description: `The location (region or zone) of the cluster.`,
 				},
+				// Used internally for resumption after preemption; user-facing docs are intentionally omitted.
 				"operation": {
 					Type:     schema.TypeString,
 					Computed: true,
@@ -405,6 +455,31 @@ var schemaNodePool = map[string]*schema.Schema{
 		},
 	},
 
+	"best_effort_provisioning": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		ForceNew:    true,
+		MaxItems:    1,
+		Description: `Specifies the configuration for best effort provisioning.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:        schema.TypeBool,
+					Required:    true,
+					ForceNew:    true,
+					Description: `Whether node pool creation ignores non-fatal errors like stockout to provision as many nodes as possible, eventually bringing up the target number of nodes.`,
+				},
+				"min_provision_nodes": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.IntAtLeast(0),
+					Description:  `Minimum number of nodes that must be provisioned for the creation to be considered successful. Can only be set when enabled is true.`,
+				},
+			},
+		},
+	},
+
 	"max_pods_per_node": {
 		Type:        schema.TypeInt,
 		Optional:    true,
@@ -518,7 +593,15 @@ var schemaNodePool = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 		ForceNew:    true,
-		Description: `Creates a unique name for the node pool beginning with the specified prefix. Conflicts with name.`,
+		Description: `Creates a unique name for the node pool beginning with the specified prefix. Conflicts with name. Max length is 31 characters. Prefixes with lengths longer than 14 characters will use a shortened UUID that will be more prone to collisions.`,
+		ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+			value := v.(string)
+			if len(value) > 31 {
+				errors = append(errors, fmt.Errorf(
+					"%q cannot be longer than 31 characters, name is limited to 40", k))
+			}
+			return
+		},
 	},
 
 	"node_config": schemaNodeConfig(),
@@ -601,6 +684,16 @@ var schemaNodePool = map[string]*schema.Schema{
 								ForceNew:	  true,
 								Description:  `Name of the subnetwork where the additional interface belongs.`,
 							},
+							{{ if ne $.TargetVersionName `ga` -}}
+							"stack_type": {
+								Type:         schema.TypeString,
+								Optional:     true,
+								Computed:     true,
+								ForceNew:     true,
+								ValidateFunc: validation.StringInSlice([]string{"IPV4", "IPV4_IPV6", "IPV6"}, false),
+								Description:  `The IP stack type of the additional node interface. Possible values are IPV4, IPV4_IPV6 and IPV6. If unset, the value is inferred from the additional subnetwork.`,
+							},
+							{{- end }}
 						},
 					},
 				},
@@ -767,11 +860,6 @@ func (nodePoolInformation *NodePoolInformation) parent() string {
 	)
 }
 
-func (nodePoolInformation *NodePoolInformation) clusterLockKey() string {
-	return containerClusterMutexKey(nodePoolInformation.project,
-		nodePoolInformation.location, nodePoolInformation.cluster)
-}
-
 func (nodePoolInformation *NodePoolInformation) nodePoolLockKey(nodePoolName string) string {
 	return fmt.Sprintf(
 		"projects/%s/locations/%s/clusters/%s/nodePools/%s",
@@ -829,10 +917,6 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.clusterLockKey()
-	transport_tpg.MutexStore.RLock(clusterLockKey)
-	defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 	// Acquire write-lock on nodepool.
 	npLockKey := nodePoolInfo.nodePoolLockKey(nodePool.Name)
@@ -1008,10 +1092,6 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 	}
 	
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
 
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
@@ -1019,26 +1099,11 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 	}
 	name := getNodePoolName(d.Id())
 
-	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), nodePoolInfo.project, userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return err
-	}
-
 	d.Partial(true)
 	if err := nodePoolUpdate(d, meta, nodePoolInfo, "", d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return err
 	}
 	d.Partial(false)
-
-	//Check cluster is in running state
-	_, err = containerClusterAwaitRestingState(config, nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster, userAgent, d.Timeout(schema.TimeoutCreate))
-	if err != nil {
-		return err
-	}
-	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), nodePoolInfo.project, userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return err
-	}
 
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
 
@@ -1078,10 +1143,6 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.clusterLockKey()
-	transport_tpg.MutexStore.RLock(clusterLockKey)
-	defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 	// Acquire write-lock on nodepool.
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
@@ -1162,11 +1223,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
-
 	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<cluster>[^/]+)/nodePools/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
@@ -1177,26 +1233,6 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 	}
 
 	d.SetId(id)
-
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	nodePoolInfo, err := extractNodePoolInformation(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	//Check cluster is in running state
-	_, err = containerClusterAwaitRestingState(config, nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster, userAgent, d.Timeout(schema.TimeoutCreate))
-	if err != nil {
-		return nil, err
-	}
-
-	if _, err := containerNodePoolAwaitRestingState(config, d.Id(), project, userAgent, d.Timeout(schema.TimeoutCreate)); err != nil {
-		return nil, err
-	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -1209,7 +1245,12 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 		name = v.(string)
 	} else if v, ok := d.GetOk(prefix + "name_prefix"); ok {
-		name = id.PrefixedUniqueId(v.(string))
+		p := v.(string)
+		if len(p) > 14 {
+			name = tpgresource.ReducedPrefixedUniqueId(p)
+		} else {
+			name = id.PrefixedUniqueId(p)
+		}
 	} else {
 		name = id.UniqueId()
 	}
@@ -1269,6 +1310,24 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			queued_provisioning := v.([]interface{})[0].(map[string]interface{})
 			np.QueuedProvisioning = &container.QueuedProvisioning{
 				Enabled: queued_provisioning["enabled"].(bool),
+			}
+		}
+	}
+
+	if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			bep := l[0].(map[string]interface{})
+			enabled := bep["enabled"].(bool)
+			minProvisionNodes := bep["min_provision_nodes"].(int)
+			// The API rejects a bestEffortProvisioning message, even an empty one,
+			// unless enabled is true, so omit it entirely when disabled.
+			if enabled {
+				np.BestEffortProvisioning = &container.BestEffortProvisioning{
+					Enabled:           true,
+					MinProvisionNodes: int64(minProvisionNodes),
+				}
+			} else if minProvisionNodes > 0 {
+				return nil, fmt.Errorf("best_effort_provisioning.min_provision_nodes can only be set when best_effort_provisioning.enabled is true")
 			}
 		}
 	}
@@ -1524,6 +1583,7 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		// or leave them empty. Passing the API URLs to igmUrls at least populates them for basic usage.
 		for _, url := range np.InstanceGroupUrls {
 			igmUrls = append(igmUrls, url)
+			igmCache.invalidateItem(url)
 		}
 	} else {
 		for _, url := range np.InstanceGroupUrls {
@@ -1544,9 +1604,14 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 				// The IGM URL is stale; don't include it
 				continue
 			}
-			size += int(igm.TargetSize)
+			targetSize, ok := igm["targetSize"].(float64)
+			if !ok {
+				return nil, fmt.Errorf("targetSize field is missing or not a number in instance group manager %q", matches[0])
+			}
+			size += int(targetSize)
 			igmUrls = append(igmUrls, url)
-			managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
+			instanceGroup, _ := igm["instanceGroup"].(string)
+			managedIgmUrls = append(managedIgmUrls, instanceGroup)
 		}
 		if len(igmUrls) > 0 {
 			nodeCount = size / len(igmUrls)
@@ -1596,6 +1661,24 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
 				"enabled": np.QueuedProvisioning.Enabled,
+			},
+		}
+	}
+
+	if np.BestEffortProvisioning != nil && np.BestEffortProvisioning.Enabled {
+		nodePool["best_effort_provisioning"] = []map[string]interface{}{
+			{
+				"enabled":             true,
+				"min_provision_nodes": np.BestEffortProvisioning.MinProvisionNodes,
+			},
+		}
+	} else if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok && len(v.([]interface{})) > 0 {
+		// The API omits bestEffortProvisioning when it is disabled. Keep an explicitly
+		// configured `enabled = false` block in state so it doesn't cause a permadiff.
+		nodePool["best_effort_provisioning"] = []map[string]interface{}{
+			{
+				"enabled":             false,
+				"min_provision_nodes": 0,
 			},
 		}
 	}
@@ -1669,6 +1752,9 @@ func flattenAdditionalNodeNetworkConfig(c []*container.AdditionalNodeNetworkConf
 		result = append(result, map[string]interface{}{
 			"network":    nodeNetworkConfig.Network,
 			"subnetwork": nodeNetworkConfig.Subnetwork,
+			{{ if ne $.TargetVersionName `ga` -}}
+			"stack_type": nodeNetworkConfig.StackType,
+			{{- end }}
 		})
 	}
 	return result
@@ -1726,6 +1812,9 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 			networkConfig := &container.AdditionalNodeNetworkConfig{
 				Network:    data["network"].(string),
 				Subnetwork: data["subnetwork"].(string),
+				{{ if ne $.TargetVersionName `ga` -}}
+				StackType:  data["stack_type"].(string),
+				{{- end }}
 			}
 			nodeNetworkConfigs = append(nodeNetworkConfigs, networkConfig)
 		}
@@ -1781,10 +1870,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		return err
 	}
 
-	// Acquire read-lock on cluster.
-	clusterLockKey := nodePoolInfo.clusterLockKey()
-	transport_tpg.MutexStore.RLock(clusterLockKey)
-	defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 	// Nodepool write-lock will be acquired when update function is called.
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
@@ -1867,6 +1952,11 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		}
 		if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
 				return err
+		}
+		if urls, ok := d.GetOk(prefix + "instance_group_urls"); ok {
+			for _, u := range urls.([]interface{}) {
+				igmCache.invalidateItem(u.(string))
+			}
 		}
 		log.Printf("[INFO] GKE node pool %s size has been updated to %d", name, newSize)
 	}
@@ -2267,6 +2357,26 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 	}
 
 	return nil
+}
+
+// validateBestEffortProvisioningDiff rejects min_provision_nodes without enabled at plan time.
+// All best_effort_provisioning fields are ForceNew, so failing at apply time would destroy the
+// existing node pool before the API rejects the replacement.
+func validateBestEffortProvisioningDiff(diff *schema.ResourceDiff, prefix string) error {
+	key := prefix + "best_effort_provisioning.0."
+	if !diff.NewValueKnown(key+"enabled") || !diff.NewValueKnown(key+"min_provision_nodes") {
+		return nil
+	}
+	enabled, _ := diff.Get(key + "enabled").(bool)
+	minProvisionNodes, _ := diff.Get(key + "min_provision_nodes").(int)
+	if !enabled && minProvisionNodes > 0 {
+		return fmt.Errorf("%smin_provision_nodes can only be set when %senabled is true", key, key)
+	}
+	return nil
+}
+
+func nodePoolBestEffortProvisioningCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
+	return validateBestEffortProvisioningDiff(diff, "")
 }
 
 func init() {

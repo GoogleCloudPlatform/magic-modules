@@ -16,6 +16,7 @@
           "goog-terraform-provisioned": "true"
         },
         "location": "US",
+        "defaultCollation": "",
         "friendlyName": ""
       }
     },

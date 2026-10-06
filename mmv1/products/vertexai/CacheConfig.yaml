@@ -33,6 +33,9 @@ async:
   result:
     resource_inside_response: true
 exclude_delete: true
+# Singleton resource (projects/{{project}}/cacheConfig). The API only exposes
+# UpdateCacheConfig — there is no list/collection endpoint.
+# generate_list_resource: true
 samples:
   - name: vertex_ai_cache_config
     primary_resource_id: cache_config

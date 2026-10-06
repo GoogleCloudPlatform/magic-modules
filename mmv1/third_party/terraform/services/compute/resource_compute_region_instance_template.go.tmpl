@@ -524,6 +524,13 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
 
+						"enable_vpc_scoped_dns": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `If true, DNS resolution will be enabled over this interface. Only valid with network_attachment.`,
+						},
+
 						"parent_nic_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -865,13 +872,13 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"host_error_timeout_seconds": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							ForceNew:    true,
 							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
+{{- if ne $.TargetVersionName "ga" }}
 
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
@@ -1144,7 +1151,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
+							DiffSuppressFunc: performanceMonitoringUnitDiffSuppress,
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
 						},
