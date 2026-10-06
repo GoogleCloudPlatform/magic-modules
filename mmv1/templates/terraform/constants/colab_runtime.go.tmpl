@@ -21,7 +21,7 @@ func ModifyColabRuntimeOperation(config *transport_tpg.Config, d *schema.Resourc
 func waitForColabOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := ColabOperationWaitTimeWithResponse(
-		config, response, &opRes, project, "Waiting for Colab Runtime Operation", userAgent,
+		config, response, &opRes, project, tpgresource.LocationFromId(d.Id()), "Waiting for Colab Runtime Operation", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
