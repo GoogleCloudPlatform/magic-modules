@@ -1817,6 +1817,7 @@ properties:
         description: |
           Dynamic Forwarding Proxy configuration.
         min_version: beta
+        immutable: true
         properties:
           - name: 'enabled'
             type: Boolean
