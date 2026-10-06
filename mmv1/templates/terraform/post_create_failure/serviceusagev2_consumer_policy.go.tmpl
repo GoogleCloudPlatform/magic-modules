@@ -11,7 +11,11 @@
 	limitations under the License.
 */ -}}
 
-// Post-create failure QoL log hints
-log.Printf("[WARN] Service Usage Policy creation failed.")
-log.Printf("[WARN] Hint 1: If due to concurrent modification (SU_CONFLICTING_CONCURRENT_MODIFICATION), re-sync and retry.")
+if ok, _ := isCommonOpError(err, ApiErrorSuConflictingConcurrentModification); ok || isTimeoutError(err) {
+	return errors.New("The consumer policy might have been changed from other toolings. Please try again.")
+} else if ok, msg := isCommonOpError(err, ApiErrorCommonSuServicesHaveUsage); ok {
+	return errors.New(getErrorMessageForServicesInUse(msg))
+} else if ok, msg := isCommonOpError(err, ApiErrorCommonSuServicesHaveHierarchicalUsage); ok {
+	return errors.New(getErrorMessageForServicesInUse(msg))
+}
 return err

@@ -41,6 +41,8 @@ custom_code:
   pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   pre_delete: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   post_create_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+  post_update_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+  post_delete_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
 
 
 parameters:
@@ -62,6 +64,7 @@ properties:
     required: true
     description: |
       The consumer policy rule that defines enabled services. The structure is documented below.
+    custom_flatten: templates/terraform/custom_flatten/serviceusagev2_consumer_policy_enable_rules.go.tmpl
     item_type:
       type: NestedObject
       properties:
