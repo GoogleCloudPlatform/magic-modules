@@ -295,16 +295,6 @@ func TestIpAddressDiffSuppress(t *testing.T) {
 		Old, New           string
 		ExpectDiffSuppress bool
 	}{
-		"identical IPv4": {
-			Old:                "10.0.0.1",
-			New:                "10.0.0.1",
-			ExpectDiffSuppress: true,
-		},
-		"different IPv4": {
-			Old:                "10.0.0.1",
-			New:                "10.0.0.2",
-			ExpectDiffSuppress: false,
-		},
 		"identical IPv6": {
 			Old:                "2600:1900:4000:1::1",
 			New:                "2600:1900:4000:1::1",
@@ -315,9 +305,19 @@ func TestIpAddressDiffSuppress(t *testing.T) {
 			New:                "2600:1900:4000:1::1",
 			ExpectDiffSuppress: true,
 		},
+		"IPv6 trailing zeros uncompressed vs compressed": {
+			Old:                "2600:1900:4000:318:0:0:0:0",
+			New:                "2600:1900:4000:318::",
+			ExpectDiffSuppress: true,
+		},
 		"IPv6 leading zeros omitted": {
 			Old:                "2001:0db8:0000:0000:0000:0000:0000:0001",
 			New:                "2001:db8::1",
+			ExpectDiffSuppress: true,
+		},
+		"IPv6 uppercase vs lowercase hex": {
+			Old:                "2001:DB8::ABCD",
+			New:                "2001:db8::abcd",
 			ExpectDiffSuppress: true,
 		},
 		"different IPv6": {
@@ -331,7 +331,7 @@ func TestIpAddressDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: true,
 		},
 		"one empty": {
-			Old:                "10.0.0.1",
+			Old:                "2600:1900:4000:1::1",
 			New:                "",
 			ExpectDiffSuppress: false,
 		},
@@ -348,7 +348,7 @@ func TestIpAddressDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if IpAddressDiffSuppress("ip_address", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if IpAddressDiffSuppress("ipv6_address", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("failed case %s: Old='%s', New='%s', expected suppress=%t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}

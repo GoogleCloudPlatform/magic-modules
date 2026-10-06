@@ -24,9 +24,6 @@ type NetworkEndpointsNetworkEndpoint struct {
 func NetworkEndpointsNetworkEndpointConvertToStruct(endpoint interface{}) NetworkEndpointsNetworkEndpoint {
 	e := endpoint.(map[string]interface{})
 	ipAddress, _ := e["ip_address"].(string)
-	if parsed := net.ParseIP(ipAddress); parsed != nil {
-		ipAddress = parsed.String()
-	}
 	ipv6Address, _ := e["ipv6_address"].(string)
 	if parsed := net.ParseIP(ipv6Address); parsed != nil {
 		ipv6Address = parsed.String()
@@ -56,6 +53,10 @@ func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetwor
 	return m
 }
 
+// A custom hash function is needed because the default schema.HashResource hashes raw string values
+// and ignores field-level DiffSuppressFuncs. Normalizing instance (from self_link to resource name)
+// and ipv6_address (to canonical RFC 5952 format via net.ParseIP) ensures that equivalent endpoints
+// produce the same set hash regardless of how they are formatted in config vs API responses.
 func resourceComputeNetworkEndpointsEndpointHash(v interface{}) int {
 	if v == nil {
 		return 0
@@ -66,11 +67,7 @@ func resourceComputeNetworkEndpointsEndpointHash(v interface{}) int {
 		buf.WriteString(fmt.Sprintf("%s-", tpgresource.GetResourceNameFromSelfLink(instance)))
 	}
 	if ip, ok := m["ip_address"].(string); ok && ip != "" {
-		if parsed := net.ParseIP(ip); parsed != nil {
-			buf.WriteString(fmt.Sprintf("%s-", parsed.String()))
-		} else {
-			buf.WriteString(fmt.Sprintf("%s-", ip))
-		}
+		buf.WriteString(fmt.Sprintf("%s-", ip))
 	}
 	if ipv6, ok := m["ipv6_address"].(string); ok && ipv6 != "" {
 		if parsed := net.ParseIP(ipv6); parsed != nil {

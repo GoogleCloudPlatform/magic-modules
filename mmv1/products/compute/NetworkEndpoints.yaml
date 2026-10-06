@@ -138,9 +138,6 @@ properties:
             to a VM in GCE (either the primary IP or as part of an aliased IP
             range).
             **Note** `ip_address` is required unless the Network Endpoint Group is created with the type of `GCE_VM_IP_DEDICATED_BACKEND`
-          diff_suppress_func: 'tpgresource.IpAddressDiffSuppress'
-          custom_expand: 'templates/terraform/custom_expand/ip_address_canonicalize.go.tmpl'
-          custom_flatten: 'templates/terraform/custom_flatten/ip_address_canonicalize.go.tmpl'
         - name: 'ipv6Address'
           type: String
           description: |

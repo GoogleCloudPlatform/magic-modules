@@ -178,8 +178,9 @@ func SuppressMajorRevisionId(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
-// IpAddressDiffSuppress compares two IP addresses (IPv4 or IPv6) for semantic equality,
-// suppressing diffs caused by different string representations (e.g. IPv6 compression or leading zeros).
+// IpAddressDiffSuppress compares two IP addresses for semantic equality,
+// suppressing diffs caused by different IPv6 string representations
+// (e.g. RFC 5952 zero-compression, leading zeros, or hex casing).
 func IpAddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	if old == "" || new == "" {
 		return old == new
