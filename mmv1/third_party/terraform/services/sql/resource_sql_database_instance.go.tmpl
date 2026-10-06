@@ -2100,14 +2100,6 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	{{- if ne $.TargetVersionName "ga" }}
-	if d.HasChange("blue_green_deployment") {
-		if err := handleBlueGreenDeploymentUpdate(d, config, project, userAgent); err != nil {
-			return err
-		}
-	}
-	{{- end }}
-
 	err = resourceSqlDatabaseInstanceRead(d, meta)
 	if err != nil {
 		return err
@@ -2161,6 +2153,15 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			return err
 		}
 	}
+
+	{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, region, d.Timeout(schema.TimeoutCreate), userAgent); err != nil {
+			return err
+		}
+		return resourceSqlDatabaseInstanceRead(d, meta)
+	}
+	{{- end }}
 
 	return nil
 }
@@ -2826,7 +2827,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	    return err
 	}
 	{{- if ne $.TargetVersionName "ga" }}
-	if err := readBlueGreenDeployment(d, config, project, instance.Name, instance.Region, userAgent); err != nil {
+	if err := readBlueGreenDeployment(d, config, project, instance, userAgent); err != nil {
 		return err
 	}
 	{{- end }}
@@ -2883,7 +2884,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("blue_green_deployment") {
-		if err := handleBlueGreenDeploymentUpdate(d, config, project, userAgent); err != nil {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, d.Get("region").(string), d.Timeout(schema.TimeoutUpdate), userAgent); err != nil {
 			_ = resourceSqlDatabaseInstanceRead(d, meta)
 			return err
 		}
@@ -4431,22 +4432,17 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 	return nil
 }
 
-func getInstanceDeploymentId(config *transport_tpg.Config, project, instanceName, userAgent string) (string, error) {
-	inst, err := NewClient(config, userAgent).Instances.Get(project, instanceName).Do()
-	if err != nil {
-		return "", err
-	}
-	if inst != nil && inst.DeploymentInfo != nil {
-		return inst.DeploymentInfo.DeploymentId, nil
-	}
-	return "", nil
-}
-
 func getExistingBgdStateMap(d *schema.ResourceData) map[string]interface{} {
 	if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		return v.([]interface{})[0].(map[string]interface{})
 	}
-	if oldVal, _ := d.GetChange("blue_green_deployment"); oldVal != nil {
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	if newVal != nil {
+		if newList, ok := newVal.([]interface{}); ok && len(newList) > 0 && newList[0] != nil {
+			return newList[0].(map[string]interface{})
+		}
+	}
+	if oldVal != nil {
 		if oldList, ok := oldVal.([]interface{}); ok && len(oldList) > 0 && oldList[0] != nil {
 			return oldList[0].(map[string]interface{})
 		}
@@ -4454,15 +4450,11 @@ func getExistingBgdStateMap(d *schema.ResourceData) map[string]interface{} {
 	return nil
 }
 
-func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, userAgent string) error {
+func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project string, instance *sqladmin.DatabaseInstance, userAgent string) error {
 	bgdStateMap := getExistingBgdStateMap(d)
 	deploymentName := ""
-	if depId, err := getInstanceDeploymentId(config, project, instanceName, userAgent); err == nil && depId != "" {
-		deploymentName = depId
-	} else if bgdStateMap != nil {
-		if name, ok := bgdStateMap["deployment_name"].(string); ok {
-			deploymentName = name
-		}
+	if instance != nil && instance.DeploymentInfo != nil && instance.DeploymentInfo.DeploymentId != "" {
+		deploymentName = instance.DeploymentInfo.DeploymentId
 	}
 
 	if deploymentName == "" {
@@ -4472,7 +4464,7 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 		return nil
 	}
 
-	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, instance.Region, deploymentName)
 	bgdRes, err := NewClient(config, userAgent).BlueGreenDeployments.Get(bgdName).Do()
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
@@ -4503,8 +4495,8 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 		}
 	}
 
-	if (activeEnv == "SOURCE" && bgdRes.SourceInstance != "" && bgdRes.SourceInstance != instanceName) ||
-		(activeEnv == "TARGET" && bgdRes.SwitchoverTargetInstance != "" && bgdRes.SwitchoverTargetInstance != instanceName) {
+	if (activeEnv == "SOURCE" && bgdRes.SourceInstance != "" && bgdRes.SourceInstance != instance.Name) ||
+		(activeEnv == "TARGET" && bgdRes.SwitchoverTargetInstance != "" && bgdRes.SwitchoverTargetInstance != instance.Name) {
 		if err := d.Set("blue_green_deployment", nil); err != nil {
 			return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
 		}
@@ -4521,23 +4513,28 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 	targetInstanceName := bgdRes.SwitchoverTargetInstance
 	targetConnName := ""
 	targetIpAddresses := []map[string]interface{}{}
-	if targetInstanceName != "" {
-		targetInst, err := NewClient(config, userAgent).Instances.Get(project, targetInstanceName).Do()
-		if err == nil && targetInst != nil {
-			targetInstanceName = targetInst.Name
-			targetConnName = targetInst.ConnectionName
-			targetIpAddresses = flattenIpAddresses(targetInst.IpAddresses)
-		}
-	}
-
 	oldSourceInstanceName := ""
 	oldSourceConnName := ""
-	if activeEnv == "TARGET" && bgdRes.SourceInstance != "" {
+	if activeEnv == "TARGET" {
 		oldSourceInstanceName = bgdRes.SourceInstance
-		oldInst, err := NewClient(config, userAgent).Instances.Get(project, oldSourceInstanceName).Do()
-		if err == nil && oldInst != nil {
-			oldSourceInstanceName = oldInst.Name
-			oldSourceConnName = oldInst.ConnectionName
+	}
+
+	for _, mapping := range bgdRes.DeploymentMappings {
+		if mapping == nil {
+			continue
+		}
+		if mapping.Target != nil && (targetInstanceName == "" || mapping.Target.Instance == targetInstanceName) {
+			if targetInstanceName == "" {
+				targetInstanceName = mapping.Target.Instance
+			}
+			targetConnName = mapping.Target.Connection
+			targetIpAddresses = flattenIpAddresses(mapping.Target.IpMappings)
+		}
+		if activeEnv == "TARGET" && mapping.Source != nil && (oldSourceInstanceName == "" || mapping.Source.Instance == oldSourceInstanceName) {
+			if oldSourceInstanceName == "" {
+				oldSourceInstanceName = mapping.Source.Instance
+			}
+			oldSourceConnName = mapping.Source.Connection
 		}
 	}
 
@@ -4560,13 +4557,12 @@ func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Confi
 	return nil
 }
 
-func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_tpg.Config, project, userAgent string) error {
+func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_tpg.Config, project, region string, timeout time.Duration, userAgent string) error {
 	oldVal, newVal := d.GetChange("blue_green_deployment")
 	oldList := oldVal.([]interface{})
 	newList := newVal.([]interface{})
 
 	instanceName := d.Get("name").(string)
-	region := d.Get("region").(string)
 
 	// Case 1: Adding a new blue_green_deployment block
 	if len(oldList) == 0 && len(newList) > 0 && newList[0] != nil {
@@ -4574,7 +4570,7 @@ func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_t
 		deploymentName, _ := newMap["deployment_name"].(string)
 		targetDbVersion, _ := newMap["target_database_version"].(string)
 
-		return createBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, targetDbVersion, userAgent)
+		return createBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, targetDbVersion, timeout, userAgent)
 	}
 
 	// Case 2: Removing an existing blue_green_deployment block (or deleting out-of-band BGD in Scenario A)
@@ -4603,6 +4599,9 @@ func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_t
 }
 
 func switchoverBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, userAgent string) error {
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instanceName))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instanceName))
+
 	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
 
 	var op *sqladmin.Operation
@@ -4628,7 +4627,10 @@ func switchoverBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg
 	return nil
 }
 
-func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, targetDbVersion, userAgent string) error {
+func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, targetDbVersion string, timeout time.Duration, userAgent string) error {
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instanceName))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instanceName))
+
 	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
 	bgdReq := &sqladmin.BlueGreenDeployment{
 		SourceInstance: instanceName,
@@ -4645,7 +4647,7 @@ func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Create(parent, bgdReq).BlueGreenDeploymentId(deploymentName).Do()
 			return rerr
 		},
-		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		Timeout:              timeout,
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 	})
 	if err != nil {
@@ -4654,7 +4656,7 @@ func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 
 	err = SqlAdminOperationWaitTime(
 		config, op, project, "Creating Blue-Green Deployment", userAgent,
-		d.Timeout(schema.TimeoutUpdate))
+		timeout)
 	if err != nil {
 		return err
 	}
@@ -4666,6 +4668,9 @@ func deleteBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 	if deploymentName == "" {
 		return nil
 	}
+
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instanceName))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instanceName))
 
 	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
 
