@@ -55,6 +55,12 @@ samples:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
+  - name: looker_instance_shared_oauth_client
+    primary_resource_id: looker-instance
+    steps:
+      - name: looker_instance_shared_oauth_client
+        resource_id_vars:
+          instance_name: my-instance
   - name: looker_instance_full
     primary_resource_id: looker-instance
     steps:
@@ -438,20 +444,37 @@ properties:
   - name: oauthConfig
     type: NestedObject
     description: |
-      Looker Instance OAuth login settings.
+      Looker Instance OAuth login settings. Set either `shared_oauth_client_enabled`
+      to `true`, or both `client_id` and `client_secret`.
     ignore_read: true
     required: true
     properties:
       - name: clientId
         type: String
         description: |
-          The client ID for the Oauth config.
-        required: true
+          The client ID for the Oauth config. Required unless `shared_oauth_client_enabled` is `true`.
+        at_least_one_of:
+          - 'oauth_config.0.client_id'
+          - 'oauth_config.0.shared_oauth_client_enabled'
+        required_with:
+          - 'oauth_config.0.client_secret'
       - name: clientSecret
         type: String
         description: |
-          The client secret for the Oauth config.
-        required: true
+          The client secret for the Oauth config. Required unless `shared_oauth_client_enabled` is `true`.
+        required_with:
+          - 'oauth_config.0.client_id'
+      - name: sharedOauthClientEnabled
+        type: Boolean
+        description: |
+          Whether to use the Looker-managed shared OAuth client instead of `client_id` and
+          `client_secret`. Supported only on instances that use public IP only and no custom domain.
+          Setting this to `false` has no effect; set `client_id` and `client_secret` instead.
+          An instance can move from the shared client to its own `client_id` and `client_secret`,
+          but not back.
+        at_least_one_of:
+          - 'oauth_config.0.client_id'
+          - 'oauth_config.0.shared_oauth_client_enabled'
   # Oauth Object - End
   # Periodic Export Config Object
   - name: periodicExportConfig
