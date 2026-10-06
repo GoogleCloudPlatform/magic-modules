@@ -766,6 +766,7 @@ properties:
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
+        default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'clientTtl'
         type: Integer
