@@ -12,13 +12,14 @@
 */ -}}
 newRules := d.Get("enable_rules")
 newServices := getServices(newRules)
+newCatalogs := getCatalogs(newRules)
 
 // check dependencies if the "respect_dependencies" flag is enabled
 validateDependenciesEnabled := d.Get("validate_dependencies").(bool)
 
 if validateDependenciesEnabled {
     name := fmt.Sprintf("%s/consumerPolicies/%s", d.Get("parent"), d.Get("name"))
-    analysisRequest := NewAnalysisRequest(name, newServices)
+    analysisRequest := NewAnalysisRequest(name, newServices, newCatalogs)
     req := transport_tpg.SendRequestOptions{
         Config:    config,
         Method:    "POST",
@@ -64,10 +65,8 @@ if validateDependenciesEnabled {
     }
 }
 
-if !d.Get("check_usage_on_remove").(bool) {
-    if url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"}); err != nil {
-        return err
-    }
+if url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"}); err != nil {
+    return err
 }
 
 log.Printf("[DEBUG] Update policy request: %v", obj)
