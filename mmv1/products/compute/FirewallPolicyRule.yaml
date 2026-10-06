@@ -207,8 +207,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_context
       - name: 'destNetworkContext'
         type: Enum
         default_from_api: true
@@ -220,8 +218,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_scope
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

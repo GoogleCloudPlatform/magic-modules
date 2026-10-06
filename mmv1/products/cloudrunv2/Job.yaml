@@ -293,14 +293,10 @@ properties:
         type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
-        conflicts:
-          - policy
       - name: policy
         type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
-        conflicts:
-          - use_default
   - name: startExecutionToken
     type: String
     description: |-
@@ -721,8 +717,6 @@ properties:
               - name: connector
                 type: String
                 description: 'VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.'
-                conflicts:
-                  - template.0.vpc_access.0.network_interfaces
               - name: egress
                 type: Enum
                 description: Traffic VPC egress settings.
@@ -733,8 +727,6 @@ properties:
               - name: networkInterfaces
                 type: Array
                 description: Direct VPC egress settings. Currently only single network interface is supported.
-                conflicts:
-                  - template.0.vpc_access.0.connector
                 item_type:
                   type: NestedObject
                   properties:
