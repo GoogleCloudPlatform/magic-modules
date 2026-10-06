@@ -1948,6 +1948,7 @@ resource "google_compute_backend_service" "foobar" {
     cache_mode        = "CACHE_ALL_STATIC"
     client_ttl        = 0
     default_ttl       = 0
+    max_ttl       = 0
     negative_caching  = false
     serve_while_stale = 0
     cache_key_policy {
