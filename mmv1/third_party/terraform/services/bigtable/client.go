@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/bigtable"
+	btadmin "cloud.google.com/go/bigtable/admin/apiv2"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/option"
@@ -78,6 +79,11 @@ func (s ClientFactory) getClientOptions(isDataClient bool) []option.ClientOption
 func (s ClientFactory) NewInstanceAdminClient(project string) (*bigtable.InstanceAdminClient, error) {
 	opts := s.getClientOptions(false)
 	return bigtable.NewInstanceAdminClient(context.Background(), project, opts...)
+}
+
+func (s ClientFactory) NewBigtableInstanceAdminClient(ctx context.Context) (*btadmin.BigtableInstanceAdminClient, error) {
+	opts := s.getClientOptions(false)
+	return btadmin.NewBigtableInstanceAdminClient(ctx, opts...)
 }
 
 func (s ClientFactory) NewAdminClient(project, instance string) (*bigtable.AdminClient, error) {

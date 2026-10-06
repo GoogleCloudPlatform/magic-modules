@@ -1,12 +1,14 @@
 package bigtable_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"golang.org/x/oauth2"
 )
 
 func TestClientFactoryPropagatesEndpoints(t *testing.T) {
@@ -68,4 +70,20 @@ func TestClientFactoryPropagatesRequestReasonFromEnv(t *testing.T) {
 	if factory.RequestReason != expectedReason {
 		t.Errorf("Expected RequestReason '%s' from env, got '%s'", expectedReason, factory.RequestReason)
 	}
+}
+
+func TestClientFactoryNewBigtableInstanceAdminClient(t *testing.T) {
+	cfg := &transport_tpg.Config{
+		TokenSource: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "fake-token"}),
+		CustomEndpoints: map[string]string{
+			"bigtable_custom_endpoint": "https://bigtableadmin.googleapis.com/v2/",
+		},
+	}
+
+	factory := bigtable.NewClientFactory(cfg, "test-agent")
+	client, err := factory.NewBigtableInstanceAdminClient(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected error creating BigtableInstanceAdminClient: %v", err)
+	}
+	defer client.Close()
 }
