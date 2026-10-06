@@ -350,15 +350,11 @@ properties:
           Whenever possible, content will be fetched from origin and cached in or
           near the specified origin. Best effort.
 
-          You must specify exactly one FlexShieldingRegion.
+          You must specify exactly one FlexShieldingRegion. Possible values include
+          `AFRICA_SOUTH1`, `ME_CENTRAL1`, `EUROPE_WEST3`, and `US_EAST5`. See
+          [FlexShieldingRegion](https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheOrigins#FlexShieldingRegion)
+          for the full list of supported regions.
         item_type:
-          type: Enum
-          description: |
-            Available regions for flexible shielding caching layer.
-          enum_values:
-            - AFRICA_SOUTH1
-            - ME_CENTRAL1
-            - EUROPE_WEST3
-            - US_EAST5
+          type: String
         min_size: 1
         max_size: 1
