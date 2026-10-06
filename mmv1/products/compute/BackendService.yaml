@@ -1834,6 +1834,7 @@ properties:
             enum_values:
               - 'DIRECT_FORWARDING'
               - 'CLOUD_RUN'
+            immutable: true
             required: true
   - name: 'params'
     type: NestedObject
