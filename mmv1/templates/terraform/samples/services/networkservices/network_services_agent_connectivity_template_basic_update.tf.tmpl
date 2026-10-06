@@ -9,5 +9,7 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
     tier = "platinum"
     new_label = "added"
   }
-  access_path = "CLIENT_TO_AGENT"
+  agent_compute    = "CLOUD_RUN"
+  deployment_model = "AMBIENT"
+  access_path      = "CLIENT_TO_AGENT"
 }
