@@ -320,7 +320,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 `, context)
 }
 
-func testAccAccessContextManagerGcpUserAccessBindingEslProjectScopeTest(t *testing.T) {
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]any{
@@ -335,19 +335,19 @@ func testAccAccessContextManagerGcpUserAccessBindingEslProjectScopeTest(t *testi
 		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerGcpUserAccessBindingEslProjectScopeExample(context, "3600s"),
+				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context, "3600s"),
 			},
 			{
-				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_project_esl",
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_project",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
 			},
 			{
-				Config: testAccAccessContextManagerGcpUserAccessBindingEslProjectScopeExample(context, "7200s"),
+				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context, "7200s"),
 			},
 			{
-				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_project_esl",
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_project",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
@@ -356,10 +356,10 @@ func testAccAccessContextManagerGcpUserAccessBindingEslProjectScopeTest(t *testi
 	})
 }
 
-func testAccAccessContextManagerGcpUserAccessBindingEslProjectScopeExample(context map[string]any, sessionLength string) string {
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context map[string]any, sessionLength string) string {
 	context["session_length"] = sessionLength
 	return acctest.Nprintf(`
-resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_project_esl" {
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_restricted_project" {
   organization_id = "%{org_id}"
   principal {
     federated_principal = "principalSet://cloudresourcemanager.googleapis.com/organizations/%{org_id}/type/WorkforcePool"
@@ -384,7 +384,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 `, context)
 }
 
-func testAccAccessContextManagerGcpUserAccessBindingEslAppScopeTest(t *testing.T) {
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]any{
@@ -398,10 +398,10 @@ func testAccAccessContextManagerGcpUserAccessBindingEslAppScopeTest(t *testing.T
 		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerGcpUserAccessBindingEslAppScopeExample(context),
+				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeExample(context),
 			},
 			{
-				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_app_esl",
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_client_application",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
@@ -410,9 +410,9 @@ func testAccAccessContextManagerGcpUserAccessBindingEslAppScopeTest(t *testing.T
 	})
 }
 
-func testAccAccessContextManagerGcpUserAccessBindingEslAppScopeExample(context map[string]any) string {
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeExample(context map[string]any) string {
 	return acctest.Nprintf(`
-resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_app_esl" {
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_restricted_client_application" {
   organization_id = "%{org_id}"
   principal {
     federated_principal = "principalSet://cloudresourcemanager.googleapis.com/organizations/%{org_id}/type/WorkforcePool"
@@ -437,7 +437,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 `, context)
 }
 
-func testAccAccessContextManagerGcpUserAccessBindingEslMultiScopeTest(t *testing.T) {
+func testAccAccessContextManagerGcpUserAccessBindingMultiScopeTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]any{
@@ -452,7 +452,7 @@ func testAccAccessContextManagerGcpUserAccessBindingEslMultiScopeTest(t *testing
 		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerGcpUserAccessBindingEslMultiScopeExample(context),
+				Config: testAccAccessContextManagerGcpUserAccessBindingMultiScopeExample(context),
 			},
 			{
 				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_multiscope",
@@ -464,7 +464,7 @@ func testAccAccessContextManagerGcpUserAccessBindingEslMultiScopeTest(t *testing
 	})
 }
 
-func testAccAccessContextManagerGcpUserAccessBindingEslMultiScopeExample(context map[string]any) string {
+func testAccAccessContextManagerGcpUserAccessBindingMultiScopeExample(context map[string]any) string {
 	return acctest.Nprintf(`
 resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_multiscope" {
   organization_id = "%{org_id}"
