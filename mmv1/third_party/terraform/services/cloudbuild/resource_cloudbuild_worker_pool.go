@@ -216,6 +216,13 @@ func CloudbuildWorkerPoolWorkerConfigSchema() *schema.Resource {
 				Optional:    true,
 				Description: "If true, workers are created without any public address, which prevents network egress to public IPs.",
 			},
+
+			"worker_release": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: "Option to specify which release or release channel (rapid|regular|stable) to use to run this build.",
+			},
 		},
 	}
 }
@@ -560,6 +567,7 @@ func expandCloudbuildWorkerPoolWorkerConfig(o interface{}) *WorkerPoolWorkerConf
 		EnableNestedVirtualization: dcl.Bool(obj["enable_nested_virtualization"].(bool)),
 		MachineType:                dcl.String(obj["machine_type"].(string)),
 		NoExternalIP:               dcl.Bool(obj["no_external_ip"].(bool)),
+		WorkerRelease:              dcl.String(obj["worker_release"].(string)),
 	}
 }
 
@@ -572,6 +580,7 @@ func flattenCloudbuildWorkerPoolWorkerConfig(obj *WorkerPoolWorkerConfig) interf
 		"enable_nested_virtualization": obj.EnableNestedVirtualization,
 		"machine_type":                 obj.MachineType,
 		"no_external_ip":               obj.NoExternalIP,
+		"worker_release":               obj.WorkerRelease,
 	}
 
 	return []interface{}{transformed}
