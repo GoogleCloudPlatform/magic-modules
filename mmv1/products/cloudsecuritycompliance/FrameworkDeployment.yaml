@@ -438,3 +438,15 @@ properties:
     type: String
     description: The time at which the resource last updated.
     output: true
+  - name: productType
+    type: Enum
+    description: |-
+      The product type of the framework deployment.
+      Possible values:
+      PRODUCT_TYPE_UNSPECIFIED
+      PRODUCT_TYPE_COMPLIANCE_MANAGER
+      PRODUCT_TYPE_DATA_BOUNDARY
+    enum_values:
+      - PRODUCT_TYPE_UNSPECIFIED
+      - PRODUCT_TYPE_COMPLIANCE_MANAGER
+      - PRODUCT_TYPE_DATA_BOUNDARY
