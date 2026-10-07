@@ -375,28 +375,6 @@ properties:
                 Valid values: "pd-ssd" (Persistent Disk Solid State Drive),
                 "pd-standard" (Persistent Disk Hard Disk Drive) or "hyperdisk-balanced".
               default_from_api: true
-        - name: confidentialInstanceConfig
-          type: NestedObject
-          description: |-
-            Confidential Computing options for the node pool's VM instances.
-
-            Not on `MachineSpec`, whose
-            `confidential_instance_config` is shared with Workbench: its proto copier
-            pins that enum to SEV only.
-          immutable: true
-          properties:
-            - name: confidentialInstanceType
-              type: String
-              required: true
-              description: |-
-                The technology to use. Must be the one offered by the machine type's CPU
-                platform; see
-                https://cloud.google.com/confidential-computing/confidential-vm/docs/supported-configurations.
-                Possible values:
-                SEV
-                SEV_SNP
-                TDX
-              immutable: true
         - name: effectiveFlexStartMaxDuration
           type: String
           description: |-
