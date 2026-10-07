@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -206,8 +207,8 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: true,
 		},
 		"matching image debian arm64 self_link": {
-			Old:                "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-arm64-v20220719",
-			New:                "debian-11-arm64",
+			Old:                "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-13-trixie-arm64-v20260827",
+			New:                "debian-13-arm64",
 			ExpectDiffSuppress: true,
 		},
 		"different architecture image opensuse arm64 self_link": {
@@ -231,8 +232,8 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: false,
 		},
 		"different architecture image debian arm64 self_link": {
-			Old:                "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-arm64-v20220719",
-			New:                "debian-11",
+			Old:                "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-13-trixie-arm64-v20260827",
+			New:                "debian-13",
 			ExpectDiffSuppress: false,
 		},
 		"different architecture image opensuse arm64 family": {
@@ -256,8 +257,8 @@ func TestDiskImageDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: false,
 		},
 		"different architecture image debian arm64 family": {
-			Old:                "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-v20220719",
-			New:                "debian-11-arm64",
+			Old:                "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-13-trixie-v20260827",
+			New:                "debian-13-arm64",
 			ExpectDiffSuppress: false,
 		},
 		// amd images
@@ -698,6 +699,149 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeDisk_encryptionKMSUpdate(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	key2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-kms-update-key2").CryptoKey.Name
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdateNoKey(diskName),
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdateKey(diskName, key1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdateKey(diskName, key2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Out-of-band key change is reverted in place.
+				PreConfig: testAccComputeDiskUpdateKmsKeyOutOfBand(t, pid, "us-central1-a", diskName, key1),
+				Config:    testAccComputeDisk_encryptionKMSUpdateKey(diskName, key2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdateNoKey(diskName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+		},
+	})
+}
+
+// updateKmsKey drops kms_key_service_account, so key changes with a service account set still recreate the disk.
+func TestAccComputeDisk_encryptionKMSUpdateWithServiceAccount(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	key2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-kms-update-key2").CryptoKey.Name
+	pid := envvar.GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+		{
+			Member: "serviceAccount:{project_number}-compute@developer.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+	serviceAccount := fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectNumberFromEnv())
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdateKeyWithServiceAccount(diskName, key1, serviceAccount),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeDisk_encryptionKMSUpdateKeyWithServiceAccount(diskName, key2, serviceAccount),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccComputeDiskUpdateKmsKeyOutOfBand(t *testing.T, project, zone, diskName, kmsKey string) func() {
+	return func() {
+		config := acctest.GoogleProviderConfig(t)
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/disks/%s/updateKmsKey", transport_tpg.BaseUrl(tpgcompute.Product, config), project, zone, diskName)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      map[string]interface{}{"kmsKeyName": kmsKey},
+		})
+		if err != nil {
+			t.Fatalf("Error updating the KMS key of disk %s: %s", diskName, err)
+		}
+		if err := tpgcompute.ComputeOperationWaitTime(config, res, project, "Updating Disk KMS Key", config.UserAgent, 10*time.Minute); err != nil {
+			t.Fatalf("Error waiting for the KMS key update of disk %s: %s", diskName, err)
+		}
+	}
 }
 
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
@@ -1214,7 +1358,7 @@ func TestAccComputeDisk_createSnapshotBeforeDestroy(t *testing.T) {
 	var disk3 map[string]interface{}
 	context := map[string]interface{}{
 		"disk_name1":        fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10)),
-		"disk_name2":        fmt.Sprintf("test-%s", acctest.RandString(t, 44)), //this is over the snapshot character creation limit of 48
+		"disk_name2":        fmt.Sprintf("tf-test-%s", acctest.RandString(t, 41)), //this is over the snapshot character creation limit of 48
 		"disk_name3":        fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10)),
 		"snapshot_prefix":   fmt.Sprintf("tf-test-snapshot-%s", acctest.RandString(t, 10)),
 		"kms_key_self_link": kms.BootstrapKMSKey(t).CryptoKey.Name,
@@ -1311,7 +1455,7 @@ func TestAccComputeDisk_VSSWindows(t *testing.T) {
 func testAccComputeDisk_basic(diskName string, diskType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1331,7 +1475,7 @@ resource "google_compute_disk" "foobar" {
 func testAccComputeDisk_updated(diskName string, diskType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1352,7 +1496,7 @@ resource "google_compute_disk" "foobar" {
 func testAccComputeDisk_fromSnapshot(projectName, firstDiskName, snapshotName, diskName, ref_selector string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1385,7 +1529,7 @@ resource "google_compute_disk" "seconddisk" {
 func testAccComputeDisk_encryption(diskName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1405,7 +1549,7 @@ resource "google_compute_disk" "foobar" {
 func testAccComputeDisk_encryptionKMS(diskName, kmsKey string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1423,10 +1567,52 @@ resource "google_compute_disk" "foobar" {
 `, diskName, kmsKey)
 }
 
+func testAccComputeDisk_encryptionKMSUpdateNoKey(diskName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+}
+`, diskName)
+}
+
+func testAccComputeDisk_encryptionKMSUpdateKey(diskName, kmsKey string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+
+  disk_encryption_key {
+    kms_key_self_link = "%s"
+  }
+}
+`, diskName, kmsKey)
+}
+
+func testAccComputeDisk_encryptionKMSUpdateKeyWithServiceAccount(diskName, kmsKey, serviceAccount string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+
+  disk_encryption_key {
+    kms_key_self_link       = "%s"
+    kms_key_service_account = "%s"
+  }
+}
+`, diskName, kmsKey, serviceAccount)
+}
+
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1463,7 +1649,7 @@ resource "google_compute_instance" "bar" {
 func testAccComputeDisk_deleteDetachIGM(diskName, mgrName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1577,7 +1763,7 @@ resource "google_compute_disk" "foobar" {
 func testAccComputeDisk_resourcePolicies(diskName, policyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1610,7 +1796,7 @@ resource "google_compute_disk" "foobar" {
 func testAccComputeDisk_updateResourcePolicies(diskName, policyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1643,7 +1829,7 @@ resource "google_compute_disk" "foobar" {
 func testAccComputeDisk_multiWriter(instance string, diskName string, enableMultiwriter bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1687,7 +1873,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeDisk_diskClone(diskName, refSelector string) string {
 	return fmt.Sprintf(`
 	data "google_compute_image" "my_image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 
@@ -1741,7 +1927,7 @@ func TestAccComputeDisk_encryptionWithRSAEncryptedKey(t *testing.T) {
 func testAccComputeDisk_encryptionWithRSAEncryptedKey(diskName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1924,7 +2110,7 @@ provider "google" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1949,7 +2135,7 @@ provider "google" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2359,12 +2545,12 @@ func testAccComputeDisk_resourceManagerTags(context map[string]interface{}) stri
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "tag_key" {
   parent = "projects/%{project_id}"
-  short_name = "test-%{random_suffix}"
+  short_name = "tf-test-%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value" {
   parent = "tagKeys/${google_tags_tag_key.tag_key.name}"
-  short_name = "name-%{random_suffix}"
+  short_name = "tf-test-name-%{random_suffix}"
 }
 
 resource "google_compute_disk" "foobar" {

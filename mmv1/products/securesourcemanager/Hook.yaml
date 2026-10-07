@@ -78,6 +78,25 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
+  - name: secure_source_manager_hook_service_account_auth
+    primary_resource_id: default
+    steps:
+      - name: secure_source_manager_hook_service_account_auth
+        resource_id_vars:
+          hook_id: my-sa-hook
+          repository_id: my-sa-repository
+          instance_id: my-sa-instance
+          sa_id: my-sa
+          prevent_destroy: "true"
+          deletion_policy: '"PREVENT"'
+        test_vars_overrides:
+          prevent_destroy: "false"
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          prevent_destroy: "false"
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
 parameters:
   - name: hook_id
     type: String
@@ -146,6 +165,11 @@ properties:
     ignore_read: true
     description: |
       The sensitive query string to be appended to the target URI.
+  - name: serviceAccountAuth
+    type: Boolean
+    description: |
+      Determines if the hook uses the Repository Service Account to
+      generate an OIDC ID Token for webhook authentication.
   - name: pushOption
     type: NestedObject
     allow_empty_object: true

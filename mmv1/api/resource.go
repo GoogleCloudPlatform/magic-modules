@@ -34,6 +34,19 @@ import (
 const RELATIVE_MAGICIAN_LOCATION = "mmv1/"
 const GITHUB_BASE_URL = "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/" + RELATIVE_MAGICIAN_LOCATION
 
+// Regular expressions shared by Resource helpers. Compiled once at init rather
+// than per call, as these helpers are invoked from templates for every resource.
+var (
+	// {{name}} markers in id/url formats.
+	fieldMarkerRegexp = regexp.MustCompile(`\{\{(\w+)\}\}`)
+	// {{name}} or {{%name}} markers in IAM url/import formats.
+	iamFieldMarkerRegexp = regexp.MustCompile(`\{\{%?(\w+)\}\}`)
+	// {{ name }} markers, tolerating surrounding whitespace.
+	looseFieldMarkerRegexp = regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+	// "key": entries in an extra_schema_entry file.
+	schemaEntryKeyRegexp = regexp.MustCompile(`"([^"]+)"\s*:`)
+)
+
 type Resource struct {
 	Name string
 
@@ -379,6 +392,13 @@ type Resource struct {
 	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
 	constraintGroupsInitialized bool                 `yaml:"-"`
 
+	// Shallow copy of the resource schema at the maximum version
+	// rather than the run version, used for cross-version validations.
+	// This will only account for the highest loaded overrides for the
+	// run; a run at nightly will not have loaded internal overrides
+	// so we can only reason about the merged public+nightly schemas.
+	maxVersionSchema *Resource `yaml:"-"`
+
 	// ====================
 	// TGC
 	// ====================
@@ -567,21 +587,21 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("`is_list_of_ids: true` implies resource has exactly one `identity` property"))
 	}
 
-	// Ensures we have all properties defined
-	for _, i := range r.Identity {
-		hasIdentify := slices.ContainsFunc(r.AllUserProperties(), func(p *Type) bool {
-			return p.Name == i
-		})
-		if !hasIdentify {
-			es = append(es, fmt.Errorf("missing property/parameter for identity %s", i))
-		}
-	}
-
 	if r.Description == "" {
 		es = append(es, fmt.Errorf("missing `description` for resource %s", r.Name))
 	}
 
 	if !r.Exclude {
+		// Ensures we have all properties defined
+		for _, i := range r.Identity {
+			hasIdentify := slices.ContainsFunc(r.AllUserProperties(), func(p *Type) bool {
+				return p.Name == i
+			})
+			if !hasIdentify {
+				es = append(es, fmt.Errorf("missing property/parameter for identity %s", i))
+			}
+		}
+
 		if len(r.Properties) == 0 {
 			es = append(es, fmt.Errorf("missing `properties` for resource %s", r.Name))
 		}
@@ -607,7 +627,7 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("value on `update_verb` should be one of %#v", allowed))
 	}
 
-	for _, property := range r.AllProperties() {
+	for _, property := range google.Concat(r.AllProperties(), r.VirtualFields) {
 		es = append(es, property.Validate(r.Name)...)
 	}
 
@@ -713,6 +733,82 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
+// resolvePropertySchemaPath resolves a Terraform field path (e.g. 'a_field',
+// 'parent_field.0.child_name') against the resource's user-facing properties,
+// returning the terminal *Type and the updated Terraform schema path with
+// flattened object segments removed. It returns (nil, "") if the property is
+// not included in the resource's properties or if an intermediate segment is an
+// unbounded Array.
+//
+// FYI: Fields that have been renamed should use the new name, however, flattened
+// fields still need to be included, ie:
+// flattenedField > newParent > renameMe should be passed to this function as
+// flattened_field.0.new_parent.0.im_renamed
+// TODO: Change format of input for
+// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+// convert to snake in this method
+func (r *Resource) resolvePropertySchemaPath(schemaPath string) (*Type, string) {
+	if r == nil {
+		return nil, ""
+	}
+	nestedProps := google.Concat(r.AllUserProperties(), r.UserVirtualFields())
+
+	pathSegments := strings.Split(schemaPath, ".0.")
+	var pathTkns []string
+	var lastProp *Type
+	for i, pname := range pathSegments {
+		camelPname := google.Camelize(pname, "lower")
+		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
+
+		// if we couldn't find it, see if it was renamed at the top level
+		if prop == nil {
+			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
+		}
+
+		if prop == nil {
+			return nil, ""
+		}
+
+		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
+		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
+		// intermediate segment. The terminal segment itself may be any type, so
+		// only apply this guard to non-final path tokens.
+		isIntermediate := i < len(pathSegments)-1
+		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
+			return nil, ""
+		}
+
+		lastProp = prop
+		nestedProps = prop.NestedProperties()
+		if !prop.FlattenObject {
+			pathTkns = append(pathTkns, google.Underscore(pname))
+		}
+	}
+
+	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
+		return nil, ""
+	}
+
+	return lastProp, strings.Join(pathTkns[:], ".0.")
+}
+
+// findPropByNameInFlattenedList searches for a property by camelCase name in a
+// list of properties. It also searches recursively inside any FlattenObject
+// nested objects, since those appear as top-level fields in the Terraform schema.
+func findPropByNameInFlattenedList(props []*Type, name string) *Type {
+	for _, p := range props {
+		if p.Name == name {
+			return p
+		}
+		if p.FlattenObject {
+			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
+}
+
 // appendSynthesizedProviderDefaultFields appends synthesized Type entries for "project", "zone", and "region"
 // when they appear in the given scope (a list of identifier names) but are not already present in props.
 func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []string) []*Type {
@@ -781,7 +877,7 @@ func (r Resource) ListResultDisplayNameKeyStrings() []string {
 	if slices.ContainsFunc(r.RootProperties(), func(p *Type) bool { return p.Name == "name" }) {
 		keys = append(keys, "name")
 	}
-	markers := regexp.MustCompile(`\{\{(\w+)\}\}`).FindAllStringSubmatch(r.IdFormat, -1)
+	markers := fieldMarkerRegexp.FindAllStringSubmatch(r.IdFormat, -1)
 	if len(markers) > 0 {
 		tail := markers[len(markers)-1][1]
 		if !slices.Contains(keys, tail) {
@@ -801,7 +897,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy || p.WriteOnly
+		return p.WriteOnly
 	})
 }
 
@@ -1225,6 +1321,8 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 // 'exclude' instance variable if the property is at a version below the
 // one that is passed in.
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
+	r.populateMaxVersionSchema() // set before filtering exclusions out of schema
+
 	if !r.Exclude {
 		r.Exclude = r.NotInVersion(version)
 	}
@@ -1240,6 +1338,35 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 			p.ExcludeIfNotInVersion(version)
 		}
 	}
+}
+
+func (r *Resource) populateMaxVersionSchema() {
+	maxSchemaResource := &Resource{
+		Name:            r.Name,
+		MinVersion:      r.MinVersion,
+		Exclude:         r.Exclude,
+		ProductMetadata: r.ProductMetadata,
+	}
+	if r.Properties != nil {
+		maxSchemaResource.Properties = make([]*Type, len(r.Properties))
+		for i, p := range r.Properties {
+			maxSchemaResource.Properties[i] = p.cloneForMaxSchema(maxSchemaResource, nil)
+		}
+	}
+	if r.Parameters != nil {
+		maxSchemaResource.Parameters = make([]*Type, len(r.Parameters))
+		for i, p := range r.Parameters {
+			maxSchemaResource.Parameters[i] = p.cloneForMaxSchema(maxSchemaResource, nil)
+		}
+	}
+	if r.VirtualFields != nil {
+		maxSchemaResource.VirtualFields = make([]*Type, len(r.VirtualFields))
+		for i, p := range r.VirtualFields {
+			maxSchemaResource.VirtualFields[i] = p.cloneForMaxSchema(maxSchemaResource, nil)
+		}
+	}
+
+	r.maxVersionSchema = maxSchemaResource
 }
 
 // ====================
@@ -1478,7 +1605,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	}
 
 	// short id: {{project}}/{{zone}}/{{name}}
-	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
+	fieldMarkers := fieldMarkerRegexp.FindAllString(idFormats[0], -1)
 	shortIdFormat := strings.Join(fieldMarkers, "/")
 
 	// short ids without fields with provider-level defaults:
@@ -1672,7 +1799,7 @@ func (r Resource) IamResourceUri() string {
 
 // For example: "projects/%s/schemas/%s"
 func (r Resource) IamResourceUriFormat() string {
-	return regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(r.IamResourceUri(), "%s")
+	return iamFieldMarkerRegexp.ReplaceAllString(r.IamResourceUri(), "%s")
 }
 
 // For example: the uri "projects/{{project}}/schemas/{{name}}"
@@ -1700,7 +1827,7 @@ func (r Resource) IamResourceUriStringQualifiers() string {
 // For example, for the url "projects/{{project}}/schemas/{{schema}}",
 // the identifiers are "project", "schema".
 func (r Resource) ExtractIdentifiers(url string) []string {
-	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
+	matches := iamFieldMarkerRegexp.FindAllStringSubmatch(url, -1)
 	var result []string
 	for _, match := range matches {
 		result = append(result, match[1])
@@ -1838,6 +1965,25 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
+// FirstRunnableTestConfig is FirstTestConfig plus skip_test. List-query tests
+// use this so they do not apply a skipped sample as setup.
+func (r Resource) FirstRunnableTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || sample.SkipTest != "" || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) SamplePrimaryResourceId() string {
 	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
@@ -1885,7 +2031,7 @@ func (r Resource) IamImportFormatTemplate() string {
 func (r Resource) IamImportFormat() string {
 	importFormat := r.IamImportFormatTemplate()
 
-	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
+	importFormat = iamFieldMarkerRegexp.ReplaceAllString(importFormat, "%s")
 	return strings.ReplaceAll(importFormat, r.ProductMetadata.Version.BaseUrl, "")
 }
 
@@ -2439,7 +2585,7 @@ func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
 
 func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 	// Create regex to match anything between {{ and }}
-	re := regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+	re := looseFieldMarkerRegexp
 
 	// Find all matches in the template URL
 	matches := re.FindAllStringSubmatch(templateURL, -1)
@@ -2591,7 +2737,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide {
 			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}
@@ -2620,7 +2766,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		if err != nil {
 			log.Printf("Warning: failed to read extra_schema_entry file %s: %v", r.CustomCode.ExtraSchemaEntry, err)
 		} else {
-			re := regexp.MustCompile(`"([^"]+)"\s*:`)
+			re := schemaEntryKeyRegexp
 			matches := re.FindAllStringSubmatch(string(b), -1)
 			for _, match := range matches {
 				if len(match) > 1 {

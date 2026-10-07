@@ -26,7 +26,7 @@ Before creating a branch or generating the link, verify all of the following rul
    - Adding multiple resources? Put **one resource per PR**.
    - Fixing a bug and adding new fields? Split into **two separate PRs**.
 2. **Strict PR Title Length Limit:**
-   - PR title must be concise and strictly **under 70 characters**.
+   - PR title must be concise and strictly **under 60 characters** (hard limit 63 chars so appending ` (#12345)` on squash-merge stays within GitHub's 72-character commit subject limit).
    - Format: `<product>: <action> <target>` (e.g. `beyondcorp: deprecate google_beyondcorp_app_*` or `compute: add foo field to google_compute_instance`).
 3. **No Downstream Artifacts in Magic Modules:**
    - Do NOT commit generated downstream provider code into `magic-modules`.
@@ -37,6 +37,8 @@ Before creating a branch or generating the link, verify all of the following rul
 ## Execution Steps
 
 ### 1. Sync and Create Feature Branch
+
+Ensure the branch has a clean, `<short-descriptive-branch-name>` matching the change (never push internal worktree or task branch names; rename with `git branch -m "$BRANCH"` if already committed on a worktree branch):
 
 ```bash
 UPSTREAM_REMOTE=$(git remote -v | grep -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
@@ -53,7 +55,7 @@ git checkout -b "$BRANCH" "$UPSTREAM_REMOTE/$BASE_BRANCH"
 
 ```bash
 git add mmv1/products/<product>/ # or other relevant files
-git commit -m "<product>: <concise description under 70 chars>"
+git commit -m "<product>: <concise description under 60 chars>"
 ```
 
 ### 3. Push to Personal Fork
@@ -69,15 +71,17 @@ git push -u "$FORK_REMOTE" "$BRANCH"
 
 ### 4. Format PR Body & Release Notes
 
-Every PR must contain a clear summary and a release note block in the PR body.
-
-Refer to [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) for details on categories (`enhancement`, `bug`, `none`, `new-resource`, `new-datasource`, `new-list-resource`, `deprecation`, `breaking-change`).
+Every PR must contain:
+1. A concise summary of what changed and why.
+2. A standalone `Fixes <github_issue_url>` and/or `Fixes b/<bug_id>` (or `Part of ...`) line for the issue or bug the PR addresses (when working from an internal `b/` bug, also check if a corresponding GitHub issue exists and link both).
+3. A release note block. Refer to [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) for categories (`enhancement`, `bug`, `none`, `new-resource`, `new-datasource`, `new-list-resource`, `deprecation`, `breaking-change`).
 
 #### Sample PR Body
 ```markdown
 Summary of what changed and why in a few concise sentences.
 
 Fixes https://github.com/hashicorp/terraform-provider-google/issues/12345
+Fixes b/123456789
 
 ```release-note:enhancement
 <product>: added `foo` field to `google_compute_instance`

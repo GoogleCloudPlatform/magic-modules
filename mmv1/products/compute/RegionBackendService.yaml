@@ -64,6 +64,7 @@ sweeper:
     - region: "europe-west4"
     - region: "europe-west1"
     - region: "us-west1"
+    - region: "europe-north1"
 samples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
@@ -126,6 +127,19 @@ samples:
           rigm_name: 'rbs-rigm'
           region_health_check_name: 'rbs-health-check'
           network_name: 'rbs-net'
+  - name: 'region_backend_service_in_flight'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'region_backend_service_in_flight'
+        min_version: 'beta'
+        resource_id_vars:
+          region_backend_service_name: 'region-service'
+          health_check_name: 'rbs-health-check'
+          network_name: 'custom-vpc'
+          subnetwork_name: 'custom-subnet'
+          instance_template_name: 'instance-template'
+          igm_name: 'instance-group-manager'
   - name: 'region_backend_service_connection_tracking'
     primary_resource_id: 'default'
     steps:
@@ -149,9 +163,6 @@ samples:
           default_neg_name: 'network-endpoint'
           health_check_name: 'rbs-health-check'
           network_name: 'network'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_backend_count'
     primary_resource_id: 'default'
     exclude_test: true
@@ -162,9 +173,6 @@ samples:
           health_check_name: 'health-check'
           instance_group_name: 'instance_group'
           network_name: 'network'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
   - name: 'region_backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -225,9 +233,21 @@ samples:
           region_backend_service_name: 'region-service'
           health_check_name: 'health-check'
           authentication_name: 'authentication'
-        test_vars_overrides:
-          # for backward compatible
-          authentication_name: '"authentication" + randomSuffix'
+  - name: 'region_backend_service_identity'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'region_backend_service_identity'
+        resource_id_vars:
+          region_backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+        vars:
+          description: 'description'
+      - name: 'region_backend_service_identity'
+        resource_id_vars:
+          region_backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+        vars:
+          description: 'updated description'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -273,6 +293,7 @@ properties:
             - 'RATE'
             - 'CONNECTION'
             - 'CUSTOM_METRICS'
+            - 'IN_FLIGHT'
         - name: 'capacityScaler'
           type: Double
           description: |
@@ -1742,6 +1763,12 @@ properties:
         api_name: resourceManagerTags
         ignore_read: true
         immutable: true
+  - name: 'serviceLbPolicy'
+    type: String
+    description: |
+      URL to networkservices.ServiceLbPolicy resource.
+      Can only be set if load balancing scheme is EXTERNAL_MANAGED or INTERNAL_MANAGED.
+      The service lb policy must be regional and in the same region as the backend service.
   - name: 'tlsSettings'
     type: NestedObject
     description: |
@@ -1754,6 +1781,8 @@ properties:
           TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
           server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
           regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
+        conflicts:
+          - 'tls_settings.0.identity'
       - name: 'subjectAltNames'
         type: Array
         description: |
@@ -1762,6 +1791,8 @@ properties:
           and requires that at least one SAN match one of the subjectAltNames in the list. This field is limited to 5 entries.
           When both sni and subjectAltNames are specified, the load balancer matches the backend certificate's SAN only to
           subjectAltNames.
+        conflicts:
+          - 'tls_settings.0.identity'
         item_type:
           type: NestedObject
           properties:
@@ -1783,3 +1814,18 @@ properties:
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
           Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
           Can only be specified if authenticationMode is not NONE.
+        conflicts:
+          - 'tls_settings.0.identity'
+        diff_suppress_func: 'suppressAuthenticationConfigWhenIdentitySet'
+      - name: 'identity'
+        type: String
+        description: |
+          The fully-specified SPIFFE ID without the spiffe:// scheme. Must be in the format //<trust_domain>/ns/<namespace>/sa/<subject>.
+          The load balancer uses certificates and roots of trust provisioned by the Managed Workload Identity system for this identity.
+          The Trust Domain within the identity must refer to a valid Workload Identity Pool, from which the TrustConfig and CertificateIssuanceConfig are inherited.
+          If set, you cannot configure sni, subjectAltNames, or authenticationConfig manually.
+        immutable: true
+        conflicts:
+          - 'tls_settings.0.authentication_config'
+          - 'tls_settings.0.subject_alt_names'
+          - 'tls_settings.0.sni'

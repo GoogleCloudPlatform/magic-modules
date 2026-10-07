@@ -41,30 +41,16 @@ samples:
           backend_service_name: backend-service
           health_check_name: health-check
           target_tcp_proxy_name: test-proxy
-  - name: target_tcp_proxy_basic_beta
-    primary_resource_id: default
-    min_version: beta
-    steps:
-      - name: target_tcp_proxy_basic_beta
-        min_version: beta
-        resource_id_vars:
-          backend_service_name: backend-service
-          health_check_name: health-check
-          target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_backendless
-    min_version: beta
     primary_resource_id: default
     steps:
       - name: target_tcp_proxy_backendless
-        min_version: beta
         resource_id_vars:
           target_tcp_proxy_name: test-proxy
   - name: target_tcp_proxy_tls_route
-    min_version: beta
     primary_resource_id: default
     steps:
       - name: target_tcp_proxy_tls_route
-        min_version: beta
         resource_id_vars:
           backend_service_name: backend-service
           health_check_name: health-check
@@ -112,7 +98,7 @@ properties:
     type: ResourceRef
     description: |
       A reference to the BackendService resource. This field is optional when
-      the loadBalancingScheme (available in beta) is set to INTERNAL_MANAGED.
+      the loadBalancingScheme is set to INTERNAL_MANAGED.
     update_verb: POST
     update_url: projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService
     at_least_one_of:
@@ -133,7 +119,6 @@ properties:
       Specifies the load balancer type. A target TCP proxy created for one type
       of load balancer cannot be used with another. For more information, refer
       to [Summary of types of Google Cloud load balancers](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview#summary-gclb).
-    min_version: beta
     at_least_one_of:
       - backend_service
       - load_balancing_scheme

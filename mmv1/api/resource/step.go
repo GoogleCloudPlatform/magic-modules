@@ -31,6 +31,17 @@ import (
 
 var hclResourceRegexp = regexp.MustCompile(`(?:resource|data|list|ephemeral) "(?P<resource>google_[^"]+)"`)
 
+// Regular expressions used when rendering sample/step HCL. Compiled once at
+// init as they are applied to every step of every sample, several times each.
+var (
+	trailingBlankLineRegexp  = regexp.MustCompile(`\n\n$`)
+	regionTagLineRegexp      = regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	regionTagTrailingRegexp  = regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	testEnvVarUsageRegexp    = regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	varUsageRegexp           = regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	resourceIdVarUsageRegexp = regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+)
+
 type Step struct {
 	Name string `yaml:"name,omitempty"`
 
@@ -221,11 +232,11 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	}
 	s.TestEnvVars = docTestEnvVars
 	s.DocumentationHCLText = s.ExecuteTemplate(sysfs)
-	s.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.DocumentationHCLText, "\n")
+	s.DocumentationHCLText = trailingBlankLineRegexp.ReplaceAllString(s.DocumentationHCLText, "\n")
 
 	// Remove region tags
-	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	re1 := regionTagLineRegexp
+	re2 := regionTagTrailingRegexp
 	s.DocumentationHCLText = re1.ReplaceAllString(s.DocumentationHCLText, "")
 	s.DocumentationHCLText = re2.ReplaceAllString(s.DocumentationHCLText, "")
 
@@ -276,7 +287,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.Vars = testVars
 	s.TestContextVars = testContextVars
 	s.TestHCLText = s.ExecuteTemplate(sysfs)
-	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
+	s.TestHCLText = trailingBlankLineRegexp.ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = re2.ReplaceAllString(s.TestHCLText, "")
@@ -297,11 +308,11 @@ func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
 	fileContentString := string(templateContent)
 
 	// Check that any variables in ResourceIdVars, Vars or TestEnvVars used in the step are defined via YAML
-	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	envVarRegex := testEnvVarUsageRegexp
 	validateRegexForContents(envVarRegex, fileContentString, s.ConfigPath, "test_env_vars", s.TestEnvVars)
-	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	varRegex := varUsageRegexp
 	validateRegexForContents(varRegex, fileContentString, s.ConfigPath, "vars", s.Vars)
-	prefixedVarRegex := regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+	prefixedVarRegex := resourceIdVarUsageRegexp
 	validateRegexForContents(prefixedVarRegex, fileContentString, s.ConfigPath, "resource_id_vars", s.ResourceIdVars)
 
 	templateFileName := filepath.Base(s.ConfigPath)
@@ -366,8 +377,8 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	originalVars := s.Vars
 
 	// // Remove region tags
-	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	re1 := regionTagLineRegexp
+	re2 := regionTagTrailingRegexp
 
 	testResourceIdVars := make(map[string]string)
 	testVars := make(map[string]string)
@@ -392,7 +403,7 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	s.ResourceIdVars = testResourceIdVars
 	s.Vars = testVars
 	s.OicsHCLText = s.ExecuteTemplate(sysfs)
-	s.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.OicsHCLText, "\n")
+	s.OicsHCLText = trailingBlankLineRegexp.ReplaceAllString(s.OicsHCLText, "\n")
 
 	// Remove region tags
 	s.OicsHCLText = re1.ReplaceAllString(s.OicsHCLText, "")

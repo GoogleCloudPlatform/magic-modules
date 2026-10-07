@@ -66,6 +66,14 @@ samples:
           cloud_run_job_name: cloudrun-job
         ignore_read_extra:
           - deletion_protection
+  - name: cloudrunv2_job_sandbox
+    primary_resource_id: default
+    steps:
+      - name: cloudrunv2_job_sandbox
+        resource_id_vars:
+          cloud_run_job_name: cloudrun-job
+        ignore_read_extra:
+          - deletion_protection
   - name: cloudrunv2_job_sql
     primary_resource_id: default
     steps:
@@ -285,14 +293,10 @@ properties:
         type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
-        conflicts:
-          - policy
       - name: policy
         type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
-        conflicts:
-          - use_default
   - name: startExecutionToken
     type: String
     description: |-
@@ -339,6 +343,10 @@ properties:
         type: Integer
         description: 'Specifies the desired number of tasks the execution should run. Setting to 1 means that parallelism is limited to 1 and the success of that task signals the success of the execution. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/'
         default_from_api: true
+      - name: delayExecution
+        type: Boolean
+        description: |
+          If true, the system will start the execution within the next 12 hours depending on available capacity.
       - name: template
         type: NestedObject
         description: |
@@ -433,6 +441,9 @@ properties:
                       - name: containerPort
                         type: Integer
                         description: Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
+                - name: sandboxLauncher
+                  type: Boolean
+                  description: Indicates that this container can act as a sandbox supervisor and launch sandboxes.
                 - name: volumeMounts
                   type: Array
                   description: Volume to mount into the container's filesystem.
@@ -706,8 +717,6 @@ properties:
               - name: connector
                 type: String
                 description: 'VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.'
-                conflicts:
-                  - template.0.vpc_access.0.network_interfaces
               - name: egress
                 type: Enum
                 description: Traffic VPC egress settings.
@@ -718,8 +727,6 @@ properties:
               - name: networkInterfaces
                 type: Array
                 description: Direct VPC egress settings. Currently only single network interface is supported.
-                conflicts:
-                  - template.0.vpc_access.0.connector
                 item_type:
                   type: NestedObject
                   properties:

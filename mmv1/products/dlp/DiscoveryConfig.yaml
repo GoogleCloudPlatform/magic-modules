@@ -150,13 +150,9 @@ properties:
         properties:
           - name: accountId
             type: String
-            conflicts:
-              - other_cloud_starting_location.aws_location.all_assets_inventory_assets
             description: 'The AWS account ID that this discovery config applies to. Within an organization, you can find the AWS account ID inside an AWS account ARN. Example: arn:<partition>:organizations::<management-account-id>:account/<organization-id>/<account-id>'
           - name: allAssetInventoryAssets
             type: Boolean
-            conflicts:
-              - other_cloud_starting_location.aws_location.account_id
             description: All AWS assets stored in Asset Inventory that didn't match other AWS discovery configs.
   - name: inspectTemplates
     type: Array
@@ -469,6 +465,13 @@ properties:
                         - UPDATE_FREQUENCY_NEVER
                         - UPDATE_FREQUENCY_DAILY
                         - UPDATE_FREQUENCY_MONTHLY
+                - name: refreshFrequency
+                  type: Enum
+                  description: Frequency at which profiles should be updated, regardless of whether the underlying resource has changed. Defaults to never.
+                  enum_values:
+                    - UPDATE_FREQUENCY_NEVER
+                    - UPDATE_FREQUENCY_DAILY
+                    - UPDATE_FREQUENCY_MONTHLY
                 - name: inspectTemplateModifiedCadence
                   type: NestedObject
                   description: Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If not set, changing the template will not cause a data profile to update.
@@ -689,16 +692,12 @@ properties:
                                   `{parent_id}/{tag_key_short_name}/{short_name}`, for example,
                                   "123456/environment/prod" for an organization parent, or
                                   "my-project/environment/prod" for a project parent.
-                                conflicts:
-                                  - targets.cloud_storage_target.filter.collection.include_tags.tag_filters.namespaced_tag_key
                               - name: namespacedTagKey
                                 type: String
                                 description: |
                                   The namespaced name for the tag key. Must be in the format
                                   `{parent_id}/{tag_key_short_name}`, for example, "123456/sensitive" for
                                   an organization parent, or "my-project/sensitive" for a project parent.
-                                conflicts:
-                                  - targets.cloud_storage_target.filter.collection.include_tags.tag_filters.namespaced_tag_value
                 - name: cloudStorageResourceReference
                   type: NestedObject
                   description: The bucket to scan. Targets including this can only include one target (the target with this bucket). This enables profiling the contents of a single bucket, while the other options allow for easy profiling of many buckets within a project or an organization.

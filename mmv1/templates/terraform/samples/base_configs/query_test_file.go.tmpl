@@ -22,6 +22,7 @@ package {{ lower $.ProductMetadata.Name }}_test
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
@@ -30,7 +31,7 @@ import (
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
-{{- range $pkg, $alias := ($.FirstTestConfig.Sample.TestDependencies $.Runtime.ResourcePrefixPkgMap) }}
+{{- range $pkg, $alias := ($.FirstRunnableTestConfig.Sample.TestDependencies $.Runtime.ResourcePrefixPkgMap) }}
 	{{ $alias }} "{{ $.ImportPath }}/{{ $pkg }}"
 {{- end }}
 )
@@ -38,11 +39,16 @@ import (
 var (
 	_ = strings.Trim
 	_ = envvar.TestEnvVar
+	_ = time.Now
 )
 
-{{ $sample := $.FirstTestConfig.Sample }}
-{{ $step := $.FirstTestConfig.Step }}
+{{ $sample := $.FirstRunnableTestConfig.Sample }}
+{{ $step := $.FirstRunnableTestConfig.Step }}
 func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
+	{{- if $sample.SkipFunc }}
+	{{$sample.SkipFunc}}
+	{{- end}}
+
 	t.Parallel()
 
 	{{- if $sample.SkipVcr }}

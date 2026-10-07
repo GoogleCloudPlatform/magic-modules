@@ -53,11 +53,6 @@ samples:
           http_health_check_name: 'health-check'
           backend_bucket_name: 'static-asset-backend-bucket'
           storage_bucket_name: 'static-asset-bucket'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          login_backend_service_name: '"login" + randomSuffix'
   - name: 'url_map_traffic_director_route'
     primary_resource_id: 'urlmap'
     steps:
@@ -66,11 +61,6 @@ samples:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_route_partial'
     primary_resource_id: 'urlmap'
     steps:
@@ -79,11 +69,6 @@ samples:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_path'
     primary_resource_id: 'urlmap'
     steps:
@@ -92,11 +77,6 @@ samples:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_traffic_director_path_partial'
     primary_resource_id: 'urlmap'
     steps:
@@ -105,11 +85,6 @@ samples:
           url_map_name: 'urlmap'
           home_backend_service_name: 'home'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_header_based_routing'
     primary_resource_id: 'urlmap'
     steps:
@@ -120,11 +95,6 @@ samples:
           service_a_backend_service_name: 'service-a'
           service_b_backend_service_name: 'service-b'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          default_backend_service_name: '"default" + randomSuffix'
   - name: 'url_map_parameter_based_routing'
     primary_resource_id: 'urlmap'
     steps:
@@ -135,11 +105,6 @@ samples:
           service_a_backend_service_name: 'service-a'
           service_b_backend_service_name: 'service-b'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          default_backend_service_name: '"default" + randomSuffix'
   - name: 'url_map_default_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -151,13 +116,6 @@ samples:
           home_backend_service_name: 'home'
           mirror_backend_service_name: 'mirror'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
-          # for backward compatible
-          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_path_matcher_default_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -169,13 +127,6 @@ samples:
           home_backend_service_name: 'home'
           mirror_backend_service_name: 'mirror'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
-          # for backward compatible
-          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_cache_policy_basic'
     primary_resource_id: 'urlmap'
     steps:
@@ -184,11 +135,6 @@ samples:
           url_map_name: 'urlmap'
           backend_service_name: 'home'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          backend_service_name: '"home" + randomSuffix'
   - name: 'url_map_cache_policy_multi_level'
     primary_resource_id: 'urlmap'
     steps:
@@ -197,11 +143,26 @@ samples:
           url_map_name: 'urlmap'
           backend_service_name: 'home'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          backend_service_name: '"home" + randomSuffix'
+  - name: 'url_map_dynamic_compression_policy_basic'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_dynamic_compression_policy_basic'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
+  - name: 'url_map_dynamic_compression_policy_multi_level'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_dynamic_compression_policy_multi_level'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'home'
+          health_check_name: 'health-check'
   - name: 'url_map_path_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -213,13 +174,6 @@ samples:
           home_backend_service_name: 'home'
           mirror_backend_service_name: 'mirror'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
-          # for backward compatible
-          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_route_rule_mirror_percent'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -231,13 +185,6 @@ samples:
           home_backend_service_name: 'home'
           mirror_backend_service_name: 'mirror'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          home_backend_service_name: '"home" + randomSuffix'
-          # for backward compatible
-          mirror_backend_service_name: '"mirror" + randomSuffix'
   - name: 'url_map_test_headers'
     primary_resource_id: 'urlmap'
     steps:
@@ -246,11 +193,6 @@ samples:
           url_map_name: 'urlmap'
           backend_service_name: 'backend'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
   - name: 'url_map_test_expected_output_url'
     primary_resource_id: 'urlmap'
     steps:
@@ -259,11 +201,6 @@ samples:
           url_map_name: 'urlmap'
           backend_service_name: 'backend'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
   - name: 'url_map_test_redirect_response_code'
     primary_resource_id: 'urlmap'
     steps:
@@ -272,11 +209,6 @@ samples:
           url_map_name: 'urlmap'
           backend_service_name: 'backend'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
     # Very similar to external_http_lb_mig_backend_custom_header
@@ -308,9 +240,6 @@ samples:
           http_health_check_name: 'health-check'
           backend_bucket_name: 'static-asset-backend-bucket'
           storage_bucket_name: 'static-asset-bucket'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
   - name: 'url_map_custom_error_response_policy'
     primary_resource_id: 'urlmap'
     steps:
@@ -321,11 +250,6 @@ samples:
           http_health_check_name: 'health-check'
           storage_bucket_name: 'static-asset-bucket'
           error_backend_bucket_name: 'error-backend-bucket'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
-          # for backward compatible
-          backend_service_name: '"login" + randomSuffix'
   - name: 'url_map_http_filter_configs'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -337,9 +261,6 @@ samples:
           default_backend_service_name: 'default-backend'
           service_a_backend_service_name: 'service-a-backend'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
   - name: 'url_map_http_filter_metadata'
     primary_resource_id: 'urlmap'
     min_version: 'beta'
@@ -352,9 +273,32 @@ samples:
           service_a_backend_service_name: 'service-a-backend'
           service_b_backend_service_name: 'service-b-backend'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          url_map_name: '"urlmap" + randomSuffix'
+  - name: 'url_map_image_optimization_policy'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    steps:
+      - name: 'url_map_image_optimization_policy'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'example'
+          health_check_name: 'health-check'
+        vars:
+          default_route_action_qpi: 'ENABLED'
+          path_matcher_default_qpi: 'DISABLED'
+          path_rule_qpi: 'ENABLED'
+          route_rule_qpi: 'DISABLED'
+      - name: 'url_map_image_optimization_policy'
+        min_version: 'beta'
+        resource_id_vars:
+          url_map_name: 'urlmap'
+          backend_service_name: 'example'
+          health_check_name: 'health-check'
+        vars:
+          default_route_action_qpi: 'DISABLED'
+          path_matcher_default_qpi: 'ENABLED'
+          path_rule_qpi: 'DISABLED'
+          route_rule_qpi: 'ENABLED'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -1440,6 +1384,38 @@ properties:
                               be specified.
                             item_type:
                               type: String
+                  - name: 'dynamicCompressionPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    is_missing_in_cai: true
+                    description: |
+                      Dynamic compression policy for this URL Map's route. Available only for
+                      Global EXTERNAL_MANAGED load balancer schemes.
+                    properties:
+                      - name: 'compressionMode'
+                        type: Enum
+                        is_missing_in_cai: true
+                        description: |
+                          Compress text responses using Brotli or gzip compression, based on
+                          the client's Accept-Encoding header.
+                        enum_values:
+                          - 'AUTOMATIC'
+                          - 'DISABLED'
+                  - name: 'imageOptimizationPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    description: |
+                      Specifies the policy for optimizing images returned in the HTTP response.
+                    properties:
+                      - name: 'queryParameterInterpretation'
+                        type: Enum
+                        description: |
+                          Controls whether presets or control parameters specified as URL query
+                          parameters are used to optimize the image. If not specified, the default
+                          value is DISABLED.
+                        enum_values:
+                          - 'DISABLED'
+                          - 'ENABLED'
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -2099,6 +2075,9 @@ properties:
                           Prior to forwarding the request to the selected backend service, the matching
                           portion of the request's path is replaced by pathPrefixRewrite. The value must
                           be between 1 and 1024 characters.
+
+                          Only one of pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be
+                          specified.
                       - name: 'pathTemplateRewrite'
                         type: String
                         description: |
@@ -2114,8 +2093,37 @@ properties:
                           pathTemplateRewrite may only be used when all of a route's
                           MatchRules specify pathTemplate.
 
-                          Only one of pathPrefixRewrite and pathTemplateRewrite may be
+                          Only one of pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be
                           specified.
+                      - name: 'regexRewrite'
+                        type: NestedObject
+                        description: |
+                          The regex rewrite to be applied to the URL. Only one of
+                          pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be
+                          specified.
+                        properties:
+                          - name: 'pathPattern'
+                            type: String
+                            required: true
+                            description: |
+                              The regular expression used to match against the URL path.
+                              It uses RE2 syntax with the following constraints:
+
+                              * Any single character operators are allowed.
+                              * Groups may only contain a submatch operator, and may not
+                                contain character repetition (for example, `.*`).
+                              * Character repetition (for example, `.*`) may only be used in
+                                a regex together with empty string operators, other
+                                repetitions, ranges, and repetitions of ranges.
+                              * Ranges may only contain character ranges, digit ranges, and
+                                symbols allowed for ranges.
+                          - name: 'pathSubstitution'
+                            type: String
+                            required: true
+                            description: |
+                              The substitution used to rewrite the parts of the URL path
+                              matched by pathPattern. May reference capture groups from
+                              pathPattern.
                   - name: 'weightedBackendServices'
                     type: Array
                     description: |
@@ -2519,6 +2527,38 @@ properties:
                               be specified.
                             item_type:
                               type: String
+                  - name: 'dynamicCompressionPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    is_missing_in_cai: true
+                    description: |
+                      Dynamic compression policy for this URL Map's route. Available only for
+                      Global EXTERNAL_MANAGED load balancer schemes.
+                    properties:
+                      - name: 'compressionMode'
+                        type: Enum
+                        is_missing_in_cai: true
+                        description: |
+                          Compress text responses using Brotli or gzip compression, based on
+                          the client's Accept-Encoding header.
+                        enum_values:
+                          - 'AUTOMATIC'
+                          - 'DISABLED'
+                  - name: 'imageOptimizationPolicy'
+                    type: NestedObject
+                    min_version: beta
+                    description: |
+                      Specifies the policy for optimizing images returned in the HTTP response.
+                    properties:
+                      - name: 'queryParameterInterpretation'
+                        type: Enum
+                        description: |
+                          Controls whether presets or control parameters specified as URL query
+                          parameters are used to optimize the image. If not specified, the default
+                          value is DISABLED.
+                        enum_values:
+                          - 'DISABLED'
+                          - 'ENABLED'
               - name: 'urlRedirect'
                 type: NestedObject
                 description: |
@@ -3424,6 +3464,38 @@ properties:
                         be specified.
                       item_type:
                         type: String
+            - name: 'dynamicCompressionPolicy'
+              type: NestedObject
+              min_version: beta
+              is_missing_in_cai: true
+              description: |
+                Dynamic compression policy for this URL Map's route. Available only for
+                Global EXTERNAL_MANAGED load balancer schemes.
+              properties:
+                - name: 'compressionMode'
+                  type: Enum
+                  is_missing_in_cai: true
+                  description: |
+                    Compress text responses using Brotli or gzip compression, based on
+                    the client's Accept-Encoding header.
+                  enum_values:
+                    - 'AUTOMATIC'
+                    - 'DISABLED'
+            - name: 'imageOptimizationPolicy'
+              type: NestedObject
+              min_version: beta
+              description: |
+                Specifies the policy for optimizing images returned in the HTTP response.
+              properties:
+                - name: 'queryParameterInterpretation'
+                  type: Enum
+                  description: |
+                    Controls whether presets or control parameters specified as URL query
+                    parameters are used to optimize the image. If not specified, the default
+                    value is DISABLED.
+                  enum_values:
+                    - 'DISABLED'
+                    - 'ENABLED'
   - name: 'defaultCustomErrorResponsePolicy'
     type: NestedObject
     description: |
@@ -3656,6 +3728,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         exactly_one_of:
           - 'default_service'
           - 'default_url_redirect'
@@ -3763,6 +3837,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'pathPrefixRewrite'
             type: String
@@ -3801,6 +3877,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'seconds'
             type: String
@@ -3852,6 +3930,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'retryConditions'
             type: Array
@@ -3932,6 +4012,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'backendService'
             type: ResourceRef
@@ -3964,6 +4046,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'allowOrigins'
             type: Array
@@ -4104,6 +4188,8 @@ properties:
           - 'default_route_action.0.cors_policy'
           - 'default_route_action.0.fault_injection_policy'
           - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
         properties:
           - name: 'delay'
             type: NestedObject
@@ -4644,3 +4730,57 @@ properties:
                   - 'default_route_action.0.cache_policy.0.cache_key_policy.0.included_cookie_names'
                 item_type:
                   type: String
+      - name: 'dynamicCompressionPolicy'
+        type: NestedObject
+        min_version: beta
+        is_missing_in_cai: true
+        description: |
+          Dynamic compression policy for this URL Map's route. Available only for
+          Global EXTERNAL_MANAGED load balancer schemes.
+        at_least_one_of:
+          - 'default_route_action.0.weighted_backend_services'
+          - 'default_route_action.0.url_rewrite'
+          - 'default_route_action.0.timeout'
+          - 'default_route_action.0.retry_policy'
+          - 'default_route_action.0.request_mirror_policy'
+          - 'default_route_action.0.cors_policy'
+          - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
+        properties:
+          - name: 'compressionMode'
+            type: Enum
+            is_missing_in_cai: true
+            description: |
+              Compress text responses using Brotli or gzip compression, based on
+              the client's Accept-Encoding header.
+            enum_values:
+              - 'AUTOMATIC'
+              - 'DISABLED'
+      - name: 'imageOptimizationPolicy'
+        type: NestedObject
+        min_version: beta
+        description: |
+          Specifies the policy for optimizing images returned in the HTTP response.
+        at_least_one_of:
+          - 'default_route_action.0.weighted_backend_services'
+          - 'default_route_action.0.url_rewrite'
+          - 'default_route_action.0.timeout'
+          - 'default_route_action.0.retry_policy'
+          - 'default_route_action.0.request_mirror_policy'
+          - 'default_route_action.0.cors_policy'
+          - 'default_route_action.0.fault_injection_policy'
+          - 'default_route_action.0.cache_policy'
+          - 'default_route_action.0.dynamic_compression_policy'
+          - 'default_route_action.0.image_optimization_policy'
+        properties:
+          - name: 'queryParameterInterpretation'
+            type: Enum
+            description: |
+              Controls whether presets or control parameters specified as URL query
+              parameters are used to optimize the image. If not specified, the default
+              value is DISABLED.
+            enum_values:
+              - 'DISABLED'
+              - 'ENABLED'

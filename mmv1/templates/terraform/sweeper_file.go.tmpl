@@ -16,7 +16,7 @@ import (
 {{- end }}
 	"strings"
 	"testing"
-{{- if $.Sweeper.EnsureValue }}
+{{- if or $.Sweeper.EnsureValue $.Sweeper.WaitForDeleteOperation }}
 	"time"
 {{- end }}
 
@@ -255,16 +255,34 @@ func listAndAction{{ $.ResourceName }}(action sweeper.ResourceAction) error {
 	return lastError
 }
 
+{{/* Which Go variable holds the id to append to the delete URL. It is the
+matched name itself unless the sweeper matches on a field that is not the
+resource's own id, in which case the id has to be resolved separately. */}}
+{{- $deleteId := "name" -}}
 func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgresource.ResourceDataMock, obj map[string]interface{}) error {
 	var deletionerror error
 	resourceName := "{{ $.ResourceName }}"
 	var name string
 	{{- if $.Sweeper.IdentifierField }}
+	{{- $deleteId = "deleteId" }}
+	var deleteId string
 	if obj["{{ $.Sweeper.IdentifierField }}"] == nil {
 		log.Printf("[INFO][SWEEPER_LOG] %s resource {{ $.Sweeper.IdentifierField }} was nil", resourceName)
 		return fmt.Errorf("%s resource {{ $.Sweeper.IdentifierField }} was nil", resourceName)
 	}
 	name = obj["{{ $.Sweeper.IdentifierField }}"].(string)
+
+	// {{ $.Sweeper.IdentifierField }} decides whether this resource is sweepable, but the delete
+	// URL needs the resource's own id, which is usually a different value.
+	if obj["name"] != nil {
+		deleteId = tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
+	} else if obj["id"] != nil {
+		deleteId = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
+	} else {
+		// The list response carries no id of its own, so {{ $.Sweeper.IdentifierField }} is all
+		// there is to delete by.
+		deleteId = name
+	}
 	{{- else if contains $.DeleteUrlTemplate "_id" }}
 	// Id detected in the delete URL, attempt to use id.
 	if obj["id"] != nil {
@@ -397,7 +415,7 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 			log.Printf("[INFO][SWEEPER_LOG] error preparing update url: %s", err)
 			return err
 		}
-		updateURL = updateURL + name
+		updateURL = updateURL + {{ $deleteId }}
 
 		{{- if $.Sweeper.QueryString }}
 		// Apply additional query string defined in Sweeper config
@@ -493,14 +511,18 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 			"{{ $.Sweeper.EnsureValue.Field }}")
 	}
 	{{- end }}
-	url = url + name
+	url = url + {{ $deleteId }}
 	{{- if $.Sweeper.QueryString }}
 	// Apply additional query string defined in Sweeper config
 	url = url + "{{ $.Sweeper.QueryString }}"
 	{{- end }}
 
+	{{ if $.Sweeper.WaitForDeleteOperation -}}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	{{- else -}}
 	// Don't wait on operations as we may have a lot to delete
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	{{- end }}
 		Config:    config,
 		Method:    "DELETE",
 		Project:   config.Project,
@@ -513,6 +535,14 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 	} else {
 		log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, name)
 	}
+	{{- if $.Sweeper.WaitForDeleteOperation }}
+	err = {{ $.ClientNamePascal }}OperationWaitTime(
+		config, res, config.Project, fmt.Sprintf("Deleting %s", resourceName), config.UserAgent,
+		time.Minute*5)
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] Error waiting for deletion of %s resource (%s): %s", resourceName, name, err)
+	}
+	{{- end }}
 
 	return deletionerror
 }

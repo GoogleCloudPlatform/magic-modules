@@ -1,7 +1,7 @@
 resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   connection_profile_id = "{{index $.ResourceIdVars "profile"}}"
-  display_name = "{{index $.ResourceIdVars "profile"}}_display"
+  display_name = "{{index $.ResourceIdVars "profile"}}-display"
   labels = { 
     foo = "bar" 
   }

@@ -105,6 +105,7 @@ MMV1_PID=$!
   (cd tools/template-check && go test ./...)
   (cd tools/test-reader && go test ./...)
   (cd .ci/magician && go test ./...)
+  python3 -m unittest discover -s .agents/scripts -p "test_*.py"
 ) > "${LOGS_DIR}/tools_unit.log" 2>&1 &
 TOOLS_PID=$!
 

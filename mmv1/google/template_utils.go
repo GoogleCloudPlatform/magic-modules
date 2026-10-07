@@ -109,7 +109,7 @@ func (t *functionsData) trimTemplate(templatePath string, e any) (string, error)
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(t.templateFunctions()).ParseFS(t.templateFS, templates...)
+	tmpl, err := ParseTemplatesCached(t.templateFS, "trimTemplate:"+strings.Join(templates, "|"), templateFileName, t.templateFunctions, templates...)
 	if err != nil {
 		return "", err
 	}
@@ -144,7 +144,7 @@ func (t functionsData) customTemplate(e any, templatePath string, appendNewline 
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(t.templateFunctions()).ParseFS(t.templateFS, templates...)
+	tmpl, err := ParseTemplatesCached(t.templateFS, "customTemplate:"+strings.Join(templates, "|"), templateFileName, t.templateFunctions, templates...)
 	if err != nil {
 		return "", err
 	}

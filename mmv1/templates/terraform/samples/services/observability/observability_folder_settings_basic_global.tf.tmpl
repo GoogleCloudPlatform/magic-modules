@@ -1,5 +1,4 @@
 resource "google_folder" "test_folder" {
-  provider            = "google-beta"
   display_name        = "tf-test-%{random_suffix}"
   parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
@@ -12,14 +11,12 @@ resource "time_sleep" "wait_for_folder" {
 }
 
 data "google_observability_folder_settings" "settings_data" {
-  provider   = "google-beta"
   folder     = google_folder.test_folder.folder_id
   location   = "global"
   depends_on = [time_sleep.wait_for_folder]
 }
 
 resource "google_observability_folder_settings" "primary_global" {
-  provider                 = "google-beta"
   location                 = "global"
   folder                   = google_folder.test_folder.folder_id
   default_storage_location = "us"
