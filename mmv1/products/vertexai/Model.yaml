@@ -23,7 +23,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
 description: |-
-  A trained machine learning Model copied from an existing Model.
+  A trained machine learning Model copied from an existing Model or uploaded
+  from model artifacts and a serving container.
 id_format: '{{name}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -68,6 +69,14 @@ samples:
       - name: 'vertex_ai_model_source_basic_2'
         vars:
           model_id: 'test-model'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        ignore_read_extra:
+          - project
+  - name: 'vertex_ai_model_upload_basic'
+    primary_resource_id: 'model'
+    steps:
+      - name: 'vertex_ai_model_upload_basic'
         test_env_vars:
           project_name: 'PROJECT_NAME'
         ignore_read_extra:
@@ -152,7 +161,58 @@ properties:
   - type: String
     name: artifactUri
     description: Path to the directory containing the Model artifact.
-    output: true
+    immutable: true
+    default_from_api: true
+    conflicts_with:
+      - sourceModel
+  - type: NestedObject
+    name: containerSpec
+    description: Specification of the container for serving predictions.
+    immutable: true
+    conflicts_with:
+      - sourceModel
+    properties:
+      - type: String
+        name: imageUri
+        description: URI of the Docker image used to serve predictions.
+        required: true
+      - type: Array
+        name: command
+        description: Command to run when the container starts.
+        item_type:
+          type: String
+      - type: Array
+        name: args
+        description: Arguments for the container startup command.
+        item_type:
+          type: String
+      - type: Array
+        name: env
+        description: Environment variables to set in the serving container.
+        item_type:
+          type: NestedObject
+          properties:
+            - type: String
+              name: name
+            - type: String
+              name: value
+      - type: Array
+        name: ports
+        description: Ports exposed by the serving container.
+        item_type:
+          type: NestedObject
+          properties:
+            - type: Integer
+              name: containerPort
+      - type: String
+        name: healthRoute
+        description: HTTP path used for container health checks.
+      - type: String
+        name: predictRoute
+        description: HTTP path used for prediction requests.
+      - type: String
+        name: invokeRoute
+        description: HTTP path used for invoke requests.
   - type: String
     name: createTime
     description: Timestamp when the Model was created.
@@ -196,11 +256,21 @@ properties:
     immutable: true
     ignore_read: true
   - type: String
+    name: serviceAccount
+    description: Optional service account used to upload the Model.
+    immutable: true
+  - type: String
+    name: parentModel
+    description: Existing Model resource into which a new version is uploaded.
+    immutable: true
+  - type: String
     name: sourceModel
     immutable: true
     ignore_read: true
     at_least_one_of:
       - sourceModel
+      - artifactUri
+      - containerSpec
     description: Resource name of the Model to copy.
   - type: String
     name: modelId

@@ -1,0 +1,10 @@
+resource "google_vertex_ai_model" "{{$.PrimaryResourceId}}" {
+  project      = "{{index $.TestEnvVars "project_name"}}"
+  region       = "us-central1"
+  display_name = "tf-upload-model"
+
+  artifact_uri = "gs://cloud-samples-data/vertex-ai/model-deployment/models/boston/model/"
+  container_spec {
+    image_uri = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-3:latest"
+  }
+}
