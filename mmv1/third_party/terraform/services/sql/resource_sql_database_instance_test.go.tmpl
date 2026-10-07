@@ -5318,7 +5318,12 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_mvuSwitchover(t *testing.T) 
 			// Step 6 (TC-NH04): Plan-time guard blocking switchover without updating root database_version.
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withBgd(instanceName, "MYSQL_8_0", deploymentName, "MYSQL_8_4", "TARGET", false),
-				ExpectError: regexp.MustCompile("during switchover of deployment .*, database_version .* must match target_database_version"),
+				ExpectError: regexp.MustCompile("(?s)cannot switchover deployment .*: update terraform configuration to match green instance .*database_version \\(configured: MYSQL_8_0, green instance: MYSQL_8_4\\)"),
+			},
+			// Plan-time guard blocking changing database_version while active_environment stays SOURCE.
+			{
+				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withBgd(instanceName, "MYSQL_8_4", deploymentName, "MYSQL_8_4", "SOURCE", false),
+				ExpectError: regexp.MustCompile("cannot change database_version while active_environment is \"SOURCE\"; to perform a switchover, you must update both active_environment to \"TARGET\" and database_version together"),
 			},
 			// Step 7 (TC-H01): Single-step atomic switchover to TARGET + update root database_version = MYSQL_8_4.
 			{

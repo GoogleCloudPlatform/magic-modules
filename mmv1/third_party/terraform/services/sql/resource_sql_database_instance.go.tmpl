@@ -3010,7 +3010,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
-		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
 			op, err = NewClient(config, userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
@@ -3022,6 +3021,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		})
 
 		if err != nil {
+			transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
 				return fmt.Errorf("Error re-setting root_password: %s", err)
 			}
@@ -3029,6 +3029,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 		err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 		if err != nil {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
@@ -4363,6 +4364,14 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 
 {{- if ne $.TargetVersionName "ga" }}
 func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.HasChange("database_version") {
+		if _, n := d.GetChange("blue_green_deployment"); len(n.([]interface{})) > 0 && n.([]interface{})[0] != nil {
+			if n.([]interface{})[0].(map[string]interface{})["active_environment"] != "TARGET" {
+				return fmt.Errorf("cannot change database_version while active_environment is \"SOURCE\"; to perform a switchover, you must update both active_environment to \"TARGET\" and database_version together")
+			}
+		}
+	}
+
 	if !d.HasChange("blue_green_deployment") {
 		return nil
 	}
@@ -4419,18 +4428,6 @@ func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 			)
 		}
 
-		// When switching over (active_environment changing from "SOURCE" to "TARGET") with a target_database_version,
-		// the instance's root database_version must be updated simultaneously to match target_database_version.
-		if oldEnv == "SOURCE" && newEnv == "TARGET" && newDbVer != "" {
-			rootDbVer, _ := d.Get("database_version").(string)
-			if rootDbVer != newDbVer {
-				return fmt.Errorf(
-					"during switchover of deployment %q, database_version (%q) must match target_database_version (%q)",
-					oldName, rootDbVer, newDbVer,
-				)
-			}
-		}
-
 		// When switching over (active_environment changing from "SOURCE" to "TARGET"),
 		// the resource configuration must match the Green (target) instance configuration.
 		if oldEnv == "SOURCE" && newEnv == "TARGET" {
@@ -4466,11 +4463,20 @@ func isBlueGreenSwitchover(d *schema.ResourceData) bool {
 }
 
 var skipGreenComparisonFields = map[string]bool{
-	"settings.0.backup_configuration":        true,
-	"settings.0.password_validation_policy":  true,
-	"settings.0.ip_configuration":            true,
-	"settings.0.replication_lag_max_seconds": true,
-	"settings.0.location_preference":         true,
+	// Top-level fields expected to differ on the Green instance before switchover because Green is a BGD target replica of Blue:
+	"name":                  true, // Green has an auto-generated target name until switchover swaps the Blue and Green names.
+	"blue_green_deployment": true, // The BGD configuration block itself is being updated to trigger the switchover.
+	"instance_type":         true, // Green is a READ_REPLICA_INSTANCE until switchover promotes it to CLOUD_SQL_INSTANCE.
+	"master_instance_name":  true, // Green points to the Blue instance as its master until switchover promotes it to primary.
+	"replica_configuration": true, // Green carries replica configuration until switchover promotes it to primary.
+	"replica_names":         true, // Replica list is attached to the Blue primary until switchover swaps roles.
+	"replication_cluster":   true, // DR replication cluster metadata belongs to the primary until switchover.
+	// Settings sub-fields expected to differ on the Green replica before switchover:
+	"settings.0.backup_configuration":        true, // Backups are disabled on the Green instance until switchover completes.
+	"settings.0.password_validation_policy":  true, // Password validation policy is not returned on the Green replica before switchover.
+	"settings.0.ip_configuration":            true, // IP and PSC configuration can differ between Blue and Green before switchover.
+	"settings.0.replication_lag_max_seconds": true, // Replica-only setting populated on Green while replicating from Blue.
+	"settings.0.location_preference":         true, // Primary zone preference can differ between Blue and Green instances.
 }
 
 func validateSwitchoverMatchesGreenInstance(d *schema.ResourceDiff, config *transport_tpg.Config, deploymentName, targetInstanceName string) error {
@@ -4484,30 +4490,27 @@ func validateSwitchoverMatchesGreenInstance(d *schema.ResourceDiff, config *tran
 		return err
 	}
 
-	var targetInstance *sqladmin.DatabaseInstance
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (rerr error) {
-			targetInstance, rerr = NewClient(config, config.UserAgent).Instances.Get(project, targetInstanceName).Do()
-			return rerr
-		},
-		Timeout:              5 * time.Minute,
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
-	})
-	if err != nil {
+	resourceSchema := ResourceSqlDatabaseInstance().Schema
+	greenData := ResourceSqlDatabaseInstance().Data(nil)
+	for k := range resourceSchema {
+		oldVal, _ := d.GetChange(k)
+		_ = greenData.Set(k, oldVal)
+	}
+	_ = greenData.Set("project", project)
+	_ = greenData.Set("name", targetInstanceName)
+	greenData.SetId(targetInstanceName)
+
+	if err := resourceSqlDatabaseInstanceRead(greenData, config); err != nil {
 		return fmt.Errorf("Error reading green instance %q to validate switchover for deployment %q: %s", targetInstanceName, deploymentName, err)
 	}
-	if targetInstance == nil || targetInstance.Settings == nil {
+	if greenData.Id() == "" {
 		return nil
 	}
 
-	greenData := ResourceSqlDatabaseInstance().Data(nil)
-	_ = greenData.Set("settings", d.Get("settings"))
-	if err := greenData.Set("settings", flattenSettings(targetInstance.Settings, targetInstance.InstanceType, greenData)); err != nil {
-		return fmt.Errorf("Error flattening green instance %q settings: %s", targetInstanceName, err)
-	}
-
 	var mismatches []string
-	compareConfiguredField("settings", rawConfig.GetAttr("settings"), ResourceSqlDatabaseInstance().Schema["settings"], d, greenData, &mismatches)
+	for k, fieldSchema := range resourceSchema {
+		compareConfiguredField(k, rawConfig.GetAttr(k), fieldSchema, d, greenData, &mismatches)
+	}
 
 	slices.Sort(mismatches)
 	if len(mismatches) > 0 {
@@ -4521,26 +4524,31 @@ func validateSwitchoverMatchesGreenInstance(d *schema.ResourceDiff, config *tran
 }
 
 func compareConfiguredField(key string, rawVal cty.Value, fieldSchema *schema.Schema, d *schema.ResourceDiff, greenData *schema.ResourceData, mismatches *[]string) {
-	if rawVal.IsNull() || !rawVal.IsKnown() || skipGreenComparisonFields[key] || (!fieldSchema.Optional && !fieldSchema.Required) {
+	if !rawVal.IsKnown() || skipGreenComparisonFields[key] || fieldSchema.WriteOnly || (!fieldSchema.Optional && !fieldSchema.Required) {
+		return
+	}
+
+	isUnsetInConfig := rawVal.IsNull() || ((fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet) && len(rawVal.AsValueSlice()) == 0)
+	if isUnsetInConfig && fieldSchema.Computed {
 		return
 	}
 
 	if fieldSchema.Type == schema.TypeList {
-		if subRes, ok := fieldSchema.Elem.(*schema.Resource); ok {
-			for i, rawElem := range rawVal.AsValueSlice() {
-				if rawElem.IsNull() || !rawElem.IsKnown() {
-					continue
+		if subRes, ok := fieldSchema.Elem.(*schema.Resource); ok && !isUnsetInConfig {
+			rawSlice := rawVal.AsValueSlice()
+			greenSlice, okGreen := greenData.Get(key).([]interface{})
+			if okGreen && len(greenSlice) == len(rawSlice) {
+				for i, rawElem := range rawSlice {
+					if rawElem.IsNull() || !rawElem.IsKnown() {
+						continue
+					}
+					for subName, subSchema := range subRes.Schema {
+						compareConfiguredField(fmt.Sprintf("%s.%d.%s", key, i, subName), rawElem.GetAttr(subName), subSchema, d, greenData, mismatches)
+					}
 				}
-				for subName, subSchema := range subRes.Schema {
-					compareConfiguredField(fmt.Sprintf("%s.%d.%s", key, i, subName), rawElem.GetAttr(subName), subSchema, d, greenData, mismatches)
-				}
+				return
 			}
-			return
 		}
-	}
-
-	if (fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet) && len(rawVal.AsValueSlice()) == 0 {
-		return
 	}
 
 	cfgVal, greenVal := d.Get(key), greenData.Get(key)
