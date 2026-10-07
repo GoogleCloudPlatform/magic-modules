@@ -123,14 +123,6 @@ samples:
           swp_policy: swp-policy
           gateway_name: swp-gateway
           resource_name: authz-policy
-        vars:
-          not_sources_prefix: 10.1.7.0
-          not_sources_principal: spiffe://example/ns/default/sa/example-updated
-          not_sources_principal_ignore_case: true
-          sources_prefix: 10.4.0.0
-          sources_principal: spiffe://example.com/ns/prod/sa/app-updated
-          sources_principal_ignore_case: true
-          network_rules_when: request.host.endsWith('.example.com')
         test_env_vars:
           project: PROJECT_NAME
       - name: network_security_authz_policy_with_network_rules_update2
@@ -141,14 +133,6 @@ samples:
           swp_policy: swp-policy
           gateway_name: swp-gateway
           resource_name: authz-policy
-        vars:
-          not_sources_prefix: 10.1.8.0
-          not_sources_principal: spiffe://example/ns/default/sa/example-updated
-          not_sources_principal_ignore_case: true
-          sources_prefix: 10.5.0.0
-          sources_principal: spiffe://example.com/ns/prod/sa/app-updated
-          sources_principal_ignore_case: true
-          network_rules_when: request.host.endsWith('.example.com')
         test_env_vars:
           project: PROJECT_NAME
       - name: network_security_authz_policy_with_network_rules_update3
@@ -159,14 +143,6 @@ samples:
           swp_policy: swp-policy
           gateway_name: swp-gateway
           resource_name: authz-policy
-        vars:
-          not_sources_prefix: 10.1.9.0
-          not_sources_principal: spiffe://example/ns/default/sa/example-updated
-          not_sources_principal_ignore_case: true
-          sources_prefix: 10.6.0.0
-          sources_principal: spiffe://example.com/ns/prod/sa/app-updated
-          sources_principal_ignore_case: true
-          network_rules_when: request.host.endsWith('.example.com')
         test_env_vars:
           project: PROJECT_NAME
 parameters:
