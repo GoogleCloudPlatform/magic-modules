@@ -987,10 +987,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																ForceNew:    true,
 															},
 															"disk_type": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																ForceNew:    true,
+																Type:             schema.TypeString,
+																Optional:         true,
+																DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																ForceNew:         true,
 															},
 															"provisioned_iops": {
 																Type:        schema.TypeInt,
@@ -1129,10 +1130,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																						ForceNew:    true,
 																					},
 																					"disk_type": {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																						ForceNew:    true,
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
 																					},
 																					"provisioned_iops": {
 																						Type:        schema.TypeInt,
@@ -1331,10 +1333,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																ForceNew:    true,
 															},
 															"disk_type": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																ForceNew:    true,
+																Type:             schema.TypeString,
+																Optional:         true,
+																DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																ForceNew:         true,
 															},
 															"provisioned_iops": {
 																Type:        schema.TypeInt,
@@ -1492,10 +1495,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																						ForceNew:    true,
 																					},
 																					"disk_type": {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																						ForceNew:    true,
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
 																					},
 																					"provisioned_iops": {
 																						Type:        schema.TypeInt,
@@ -1665,10 +1669,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																ForceNew:    true,
 															},
 															"disk_type": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																ForceNew:    true,
+																Type:             schema.TypeString,
+																Optional:         true,
+																DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																ForceNew:         true,
 															},
 															"provisioned_iops": {
 																Type:        schema.TypeInt,
@@ -1794,10 +1799,11 @@ func ResourceDataprocCluster() *schema.Resource {
 																						ForceNew:    true,
 																					},
 																					"disk_type": {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
-																						ForceNew:    true,
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
 																					},
 																					"provisioned_iops": {
 																						Type:        schema.TypeInt,
@@ -2356,6 +2362,177 @@ by Dataproc`,
 																			Description: `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
 																			ForceNew:    true,
 																		},
+																		"attached_disk_config": {
+																			Type:        schema.TypeList,
+																			Optional:    true,
+																			Description: `Optional. Attached disk configuration.`,
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					"disk_size_gb": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Size of the attached disk, specified in GB.`,
+																						ForceNew:    true,
+																					},
+																					"disk_type": {
+																						Type:             schema.TypeString,
+																						Optional:         true,
+																						DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																						Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:         true,
+																					},
+																					"provisioned_iops": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																					"provisioned_throughput": {
+																						Type:        schema.TypeInt,
+																						Optional:    true,
+																						Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																						ForceNew:    true,
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+															"instance_flexibility_policy": {
+																Type:        schema.TypeList,
+																Optional:    true,
+																Computed:    true,
+																Description: `Instance flexibility Policy allowing a mixture of VM shapes`,
+																MaxItems:    1,
+																Elem: &schema.Resource{
+																	Schema: map[string]*schema.Schema{
+																		"instance_selection_list": {
+																			Type:        schema.TypeList,
+																			Computed:    true,
+																			Optional:    true,
+																			ForceNew:    true,
+																			Description: `List of instance selection options that the group will use when creating new VMs.`,
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					"machine_types": {
+																						Type:        schema.TypeList,
+																						Computed:    true,
+																						Optional:    true,
+																						ForceNew:    true,
+																						Elem:        &schema.Schema{Type: schema.TypeString},
+																						Description: `Full machine-type names, e.g. "n1-standard-16".`,
+																					},
+																					"rank": {
+																						Type:        schema.TypeInt,
+																						Computed:    true,
+																						Optional:    true,
+																						ForceNew:    true,
+																						Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
+																					},
+																					"disk_config": {
+																						Type:        schema.TypeList,
+																						Optional:    true,
+																						ForceNew:    true,
+																						Description: `Optional. Disk configuration to apply to the instances in this instance selection.`,
+																						MaxItems:    1,
+																						Elem: &schema.Resource{
+																							Schema: map[string]*schema.Schema{
+																								"boot_disk_size_gb": {
+																									Type:        schema.TypeInt,
+																									Optional:    true,
+																									Description: `Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+																									ForceNew:    true,
+																								},
+																								"boot_disk_type": {
+																									Type:        schema.TypeString,
+																									Optional:    true,
+																									Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".`,
+																									ForceNew:    true,
+																								},
+																								"boot_disk_provisioned_iops": {
+																									Type:        schema.TypeInt,
+																									Optional:    true,
+																									Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																									ForceNew:    true,
+																								},
+																								"boot_disk_provisioned_throughput": {
+																									Type:        schema.TypeInt,
+																									Optional:    true,
+																									Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																									ForceNew:    true,
+																								},
+																								"local_ssd_interface": {
+																									Type:        schema.TypeString,
+																									Optional:    true,
+																									Description: `Interface type of local SSDs (no Local SSDs or NVMe). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+																									ForceNew:    true,
+																								},
+																								"num_local_ssds": {
+																									Type:        schema.TypeInt,
+																									Optional:    true,
+																									Description: `The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.`,
+																									ForceNew:    true,
+																								},
+																								"attached_disk_config": {
+																									Type:        schema.TypeList,
+																									Optional:    true,
+																									Description: `Optional. Attached disk configuration.`,
+																									Elem: &schema.Resource{
+																										Schema: map[string]*schema.Schema{
+																											"disk_size_gb": {
+																												Type:        schema.TypeInt,
+																												Optional:    true,
+																												Description: `Size of the attached disk, specified in GB.`,
+																												ForceNew:    true,
+																											},
+																											"disk_type": {
+																												Type:             schema.TypeString,
+																												Optional:         true,
+																												DiffSuppressFunc: attachedDiskConfigDiskTypeDiffSuppress,
+																												Description:      `The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".`,
+																												ForceNew:         true,
+																											},
+																											"provisioned_iops": {
+																												Type:        schema.TypeInt,
+																												Optional:    true,
+																												Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
+																												ForceNew:    true,
+																											},
+																											"provisioned_throughput": {
+																												Type:        schema.TypeInt,
+																												Optional:    true,
+																												Description: `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
+																												ForceNew:    true,
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																		"instance_selection_results": {
+																			Type:        schema.TypeList,
+																			Computed:    true,
+																			Description: `A list of instance selection results in the group.`,
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					"machine_type": {
+																						Type:        schema.TypeString,
+																						Computed:    true,
+																						Description: `Full machine-type names, e.g. "n1-standard-16".`,
+																					},
+																					"vm_count": {
+																						Type:        schema.TypeInt,
+																						Computed:    true,
+																						Description: `Number of VM provisioned with the machine_type.`,
+																					},
+																				},
+																			},
+																		},
 																	},
 																},
 															},
@@ -2838,6 +3015,17 @@ func expandNodeGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupCo
 
 	if dc, ok := cfg["disk_config"]; ok {
 		icg.DiskConfig = expandDiskConfig(dc)
+	}
+
+	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
+		ifps := ifpc.([]interface{})
+		if len(ifps) > 0 && ifps[0] != nil {
+			flexibilityPolicy := ifps[0].(map[string]interface{})
+			icg.InstanceFlexibilityPolicy = &dataproc.InstanceFlexibilityPolicy{}
+			if v, ok := flexibilityPolicy["instance_selection_list"]; ok {
+				icg.InstanceFlexibilityPolicy.InstanceSelectionList = expandInstanceSelectionList(v)
+			}
+		}
 	}
 
 	icg.Accelerators = expandAccelerators(cfg["accelerators"].(*schema.Set).List())
@@ -3896,6 +4084,7 @@ func flatternNodeGroup(ng *dataproc.NodeGroup) []map[string]interface{} {
 }
 
 func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
+	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
 	if icg != nil {
@@ -3906,9 +4095,16 @@ func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]inte
 		if icg.DiskConfig != nil {
 			data["disk_config"] = flattenDiskConfig(icg.DiskConfig)
 		}
+		if icg.InstanceFlexibilityPolicy != nil {
+			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
+				instanceFlexibilityPolicy["instance_selection_list"] = flattenInstanceSelectionList(icg.InstanceFlexibilityPolicy.InstanceSelectionList)
+				instanceFlexibilityPolicy["instance_selection_results"] = flattenInstanceSelectionResults(icg.InstanceFlexibilityPolicy.InstanceSelectionResults)
+			}
+		}
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 	}
 
+	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
@@ -4250,6 +4446,10 @@ func init() {
 	}.Register()
 }
 
+func attachedDiskConfigDiskTypeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return strings.ToUpper(strings.ReplaceAll(old, "-", "_")) == strings.ToUpper(strings.ReplaceAll(new, "-", "_"))
+}
+
 func expandAttachedDiskConfig(l []interface{}) []*dataproc.AttachedDiskConfig {
 	if len(l) == 0 || l[0] == nil {
 		return nil
@@ -4265,7 +4465,7 @@ func expandAttachedDiskConfig(l []interface{}) []*dataproc.AttachedDiskConfig {
 			c.DiskSizeGb = int64(v.(int))
 		}
 		if v, ok := rawMap["disk_type"]; ok {
-			c.DiskType = v.(string)
+			c.DiskType = strings.ToUpper(strings.ReplaceAll(v.(string), "-", "_"))
 		}
 		if v, ok := rawMap["provisioned_iops"]; ok && v.(int) > 0 {
 			c.ProvisionedIops = int64(v.(int))
@@ -4289,7 +4489,13 @@ func flattenAttachedDiskConfig(configs []*dataproc.AttachedDiskConfig) []map[str
 		}
 		m := make(map[string]interface{})
 		m["disk_size_gb"] = c.DiskSizeGb
-		m["disk_type"] = c.DiskType
+		diskType := c.DiskType
+		if diskType == "" && c.Type != "" {
+			diskType = strings.ToUpper(strings.ReplaceAll(c.Type, "-", "_"))
+		} else if diskType != "" {
+			diskType = strings.ToUpper(strings.ReplaceAll(diskType, "-", "_"))
+		}
+		m["disk_type"] = diskType
 		if c.ProvisionedIops > 0 {
 			m["provisioned_iops"] = c.ProvisionedIops
 		}

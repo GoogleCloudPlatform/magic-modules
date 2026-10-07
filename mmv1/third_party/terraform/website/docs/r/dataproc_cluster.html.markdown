@@ -574,7 +574,7 @@ cluster_config {
 
         * `attached_disk_config` - (Optional) Attached disk configuration.
             * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
-            * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+            * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
             * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
             * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 * `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes.
@@ -593,7 +593,7 @@ cluster_config {
             * `local_ssd_interface` - (Optional) Interface type of local SSDs (no Local SSDs or NVMe).
             * `attached_disk_config` - (Optional) Attached disk configuration.
                 * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
-                * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+                * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
                 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
                 * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
@@ -681,7 +681,7 @@ cluster_config {
 
     * `attached_disk_config` - (Optional) Attached disk configuration.
         * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
-        * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+        * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
         * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
         * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
@@ -705,7 +705,7 @@ cluster_config {
             * `local_ssd_interface` - (Optional) Interface type of local SSDs (no Local SSDs or NVMe).
             * `attached_disk_config` - (Optional) Attached disk configuration.
                 * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
-                * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+                * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
                 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
                 * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
@@ -783,7 +783,7 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
         * `attached_disk_config` - (Optional) Attached disk configuration.
             * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
-            * `disk_type` - (Optional) The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".
+            * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
             * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
             * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
@@ -1046,6 +1046,32 @@ auxiliary_node_groups{
 
       * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each master cluster node. 
          Defaults to 0.
+
+      * `local_ssd_interface` - (Optional) Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).
+
+      * `attached_disk_config` - (Optional) Attached disk configuration.
+        * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+        * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
+        * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+        * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+
+    * `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes.
+
+      * `instance_selection_list` - (Optional) List of instance selection options that the group will use when creating new VMs.
+        * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
+        * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
+        * `disk_config` - (Optional) Disk configuration to apply to the instances in this instance selection.
+          * `boot_disk_size_gb` - (Optional) Size of the primary disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.
+          * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard".
+          * `num_local_ssds` - (Optional) The amount of local SSD disks that will be attached to each cluster node. Defaults to 0.
+          * `boot_disk_provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+          * `boot_disk_provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+          * `local_ssd_interface` - (Optional) Interface type of local SSDs (no Local SSDs or NVMe).
+          * `attached_disk_config` - (Optional) Attached disk configuration.
+            * `disk_size_gb` - (Optional) Size of the attached disk, specified in GB.
+            * `disk_type` - (Optional) The disk type of the attached disk. Valid values include "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME", "HYPERDISK_BALANCED", "HYPERDISK_ML", "HYPERDISK_EXTREME", or lowercase/hyphenated equivalents such as "pd-ssd" or "pd-standard".
+            * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+            * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
 
     * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified 
        multiple times.
