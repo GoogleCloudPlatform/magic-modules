@@ -138,7 +138,12 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "custom_service_account", context["service_account"].(string)),
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "encryption_spec.0.kms_key_name", context["kms_key_name"].(string)),
-					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.0", context["version_alias"].(string)),
+				),
+			},
+			{
+				Config: testAccVertexAIModel_copyWithOptionalFieldsUpdate(context),
+				Check: resource.TestCheckResourceAttr(
+					"google_vertex_ai_model.model", "version_aliases.0", context["version_alias"].(string),
 				),
 			},
 		},
@@ -146,6 +151,22 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 }
 
 func testAccVertexAIModel_copyWithOptionalFields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_model" "model" {
+  model_id = "%{model_id}"
+  project = "%{project_name}"
+  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+
+  region = "us-central1"
+  custom_service_account = "%{service_account}"
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIModel_copyWithOptionalFieldsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
