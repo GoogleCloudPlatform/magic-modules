@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_compute_network" "net" {
   provider                = google-beta
   name                    = "{{index $.ResourceIdVars "network_name"}}"
@@ -5,17 +9,38 @@ resource "google_compute_network" "net" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
+  provider                 = google-beta
+  name                     = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  ip_cidr_range            = "10.0.0.0/24"
+  region                   = "us-central1"
+  network                  = google_compute_network.net.id
+  private_ip_google_access = true
+}
+
+resource "google_compute_firewall" "internal" {
   provider      = google-beta
-  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
-  ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
-  network       = google_compute_network.net.id
+  name          = "{{index $.ResourceIdVars "firewall_name"}}"
+  network       = google_compute_network.net.name
+  direction     = "INGRESS"
+  source_ranges = ["10.0.0.0/24"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "icmp"
+  }
 }
 
 resource "google_filestore_instance" "home" {
   provider = google-beta
   name     = "{{index $.ResourceIdVars "filestore_name"}}"
-  location = "us-central1-a"
+  location = "us-central1-b"
   tier     = "BASIC_HDD"
 
   file_shares {
@@ -29,14 +54,61 @@ resource "google_filestore_instance" "home" {
   }
 }
 
+resource "google_filestore_instance" "data" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "data_filestore_name"}}"
+  location = "us-central1-b"
+  tier     = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+
+  networks {
+    network = google_compute_network.net.name
+    modes   = ["MODE_IPV4"]
+  }
+}
+
+resource "google_compute_reservation" "res" {
+  provider                      = google-beta
+  name                          = "{{index $.ResourceIdVars "reservation_name"}}"
+  zone                          = "us-central1-b"
+  specific_reservation_required = true
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "n2-standard-4"
+    }
+  }
+}
+
 resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" {
   provider                     = google-beta
   region                       = "us-central1"
   model_development_cluster_id = "{{index $.ResourceIdVars "model_development_cluster_id"}}"
   display_name                 = "{{index $.Vars "display_name"}}"
+  deletion_policy              = "DELETE"
+  depends_on                   = [google_compute_firewall.internal]
 
   labels = {
     env = "dev"
+  }
+
+  runtime_spec {
+    service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  }
+
+  lustre_export_config {
+    destination_bucket = "mdc-backup-bucket"
+    days_of_week       = ["MONDAY", "THURSDAY"]
+
+    start_time {
+      hours   = 4
+      minutes = 30
+    }
   }
 
   network {
@@ -48,19 +120,106 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     slurm_spec {
       home_directory_storage = google_filestore_instance.home.id
       login_node_pool_id     = "login"
+      default_partition_id   = "main"
+      prolog_bash_scripts    = ["#!/bin/bash\necho prolog"]
+      epilog_bash_scripts    = ["#!/bin/bash\necho epilog"]
+
+      config = {
+        PriorityType      = "priority/multifactor"
+        PriorityWeightAge = "{{index $.Vars "priority_weight_age"}}"
+      }
+
+      node_sets {
+        node_pool_id = "compute"
+        config = {
+          Weight = "10"
+        }
+      }
 
       partitions {
         id            = "main"
-        node_pool_ids = ["cpu-pool"]
+        node_pool_ids = ["compute", "flexpool", "respool"]
+        config = {
+          PriorityTier = "10"
+        }
       }
-
-      default_partition_id = "main"
     }
   }
 
   node_pools {
-    id   = "login"
-    zone = "us-central1-a"
+    id                 = "compute"
+    zone               = "us-central1-b"
+    provisioning_model = "ON_DEMAND"
+    node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
+    startup_script     = "#!/bin/bash\necho hello"
+    enable_public_ips  = true
+    filestores         = [google_filestore_instance.data.id]
+
+    labels = {
+      pool = "compute"
+    }
+
+    boot_disk {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
+
+    machine_spec {
+      machine_type = "n2-standard-4"
+    }
+
+    scaling_spec {
+      min_node_count = 1
+      max_node_count = {{index $.Vars "max_node_count"}}
+    }
+  }
+
+  node_pools {
+    id                      = "flexpool"
+    zone                    = "us-central1-b"
+    provisioning_model      = "FLEX_START"
+    flex_start_max_duration = "3600s"
+    node_image              = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
+    startup_script          = "#!/bin/bash\necho hello"
+    enable_public_ips       = true
+    filestores              = [google_filestore_instance.data.id]
+
+    labels = {
+      pool = "flexpool"
+    }
+
+    boot_disk {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "hyperdisk-balanced"
+    }
+
+    machine_spec {
+      machine_type = "a3-ultragpu-8g"
+    }
+
+    scaling_spec {
+      min_node_count = 0
+      max_node_count = 1
+    }
+  }
+
+  node_pools {
+    id                 = "login"
+    zone               = "us-central1-b"
+    provisioning_model = "ON_DEMAND"
+    node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
+    startup_script     = "#!/bin/bash\necho hello"
+    enable_public_ips  = true
+    filestores         = [google_filestore_instance.data.id]
+
+    labels = {
+      pool = "login"
+    }
+
+    boot_disk {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
 
     machine_spec {
       machine_type = "n2-standard-4"
@@ -70,23 +229,37 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
       min_node_count = 1
       max_node_count = 1
     }
-
-    enable_public_ips = true
   }
 
   node_pools {
-    id   = "cpu-pool"
-    zone = "us-central1-a"
+    id                 = "respool"
+    zone               = "us-central1-b"
+    provisioning_model = "RESERVATION"
+    node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
+    startup_script     = "#!/bin/bash\necho hello"
+    enable_public_ips  = true
+    filestores         = [google_filestore_instance.data.id]
+
+    labels = {
+      pool = "respool"
+    }
+
+    boot_disk {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
 
     machine_spec {
-      machine_type = "e2-standard-4"
+      machine_type = "n2-standard-4"
+      reservation_affinity {
+        reservation_affinity_type = "SPECIFIC_RESERVATION"
+        values                    = [google_compute_reservation.res.id]
+      }
     }
 
     scaling_spec {
-      min_node_count = 1
-      max_node_count = {{index $.Vars "max_node_count"}}
+      min_node_count = 0
+      max_node_count = 1
     }
-
-    enable_public_ips = true
   }
 }

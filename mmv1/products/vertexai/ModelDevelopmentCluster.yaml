@@ -42,6 +42,8 @@ async:
     - delete
   result:
     resource_inside_response: true
+custom_code:
+  decoder: templates/terraform/decoders/vertex_ai_model_development_cluster.go.tmpl
 autogen_status: TW9kZWxEZXZlbG9wbWVudENsdXN0ZXJBdXRvZ2VuVjJBZ2VudA==
 samples:
   - name: vertex_ai_model_development_cluster_basic
@@ -54,24 +56,32 @@ samples:
           model_development_cluster_id: tftest
           network_name: mdc-net
           subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
           filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
         test_vars_overrides:
-          model_development_cluster_id: '"tf-test" + randomSuffix[:3]'
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
         vars:
           display_name: tftest
           max_node_count: '2'
+          priority_weight_age: '1000'
       - name: vertex_ai_model_development_cluster_basic
         min_version: beta
         resource_id_vars:
           model_development_cluster_id: tftest
           network_name: mdc-net
           subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
           filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
         test_vars_overrides:
-          model_development_cluster_id: '"tf-test" + randomSuffix[:3]'
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
         vars:
           display_name: tftest-updated
           max_node_count: '3'
+          priority_weight_age: '2000'
 parameters:
   - name: region
     type: String
@@ -86,7 +96,8 @@ parameters:
       of the ModelDevelopmentCluster's resource name.
 
       This value should be 1-10 characters, and valid characters
-      are `/^[a-z]([a-z0-9-]{0,8}[a-z0-9])?$/`.
+      are `/^[a-z]([a-z0-9-]{0,8}[a-z0-9])?$/`. When using `slurm_spec`,
+      hyphens are not allowed (`/^[a-z][a-z0-9]{0,9}$/`).
     immutable: true
     url_param_only: true
 properties:
@@ -314,17 +325,6 @@ properties:
             description: |-
               Minutes of an hour. Must be greater than or equal to 0 and less than or
               equal to 59.
-          - name: nanos
-            type: Integer
-            description: |-
-              Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
-              and less than or equal to 999,999,999.
-          - name: seconds
-            type: Integer
-            description: |-
-              Seconds of a minute. Must be greater than or equal to 0 and typically must
-              be less than or equal to 59. An API may allow the value 60 if it allows
-              leap-seconds.
   - name: name
     type: String
     description: Identifier. Resource name of an ModelDevelopmentCluster.
@@ -335,40 +335,12 @@ properties:
     default_from_api: true
     immutable: true
     properties:
-      - name: effectivePodsSecondaryRangeName
-        type: String
-        description: |-
-          The effective name of the secondary IP range within the subnetwork for
-          pods. This field reflects the value of `pods_secondary_range_name` if it
-          is set by the user, or the server-applied default ("pods-secondary-range")
-          if it is not.
-        output: true
-      - name: effectiveServicesSecondaryRangeName
-        type: String
-        description: |-
-          The effective name of the secondary IP range within the subnetwork for
-          services. This field reflects the value of `services_secondary_range_name`
-          if it is set by the user, or the server-applied default
-          ("services-secondary-range") if it is not.
-        output: true
       - name: network
         type: String
         required: true
         description: |-
           The name of the VPC network where to create the cluster.
           The `default` network is used if not specified.
-        immutable: true
-      - name: podsSecondaryRangeName
-        type: String
-        description: |-
-          The name of the secondary IP range within the subnetwork for pods.
-          If not specified, "pods-secondary-range" will be used.
-        immutable: true
-      - name: servicesSecondaryRangeName
-        type: String
-        description: |-
-          The name of the secondary IP range within the subnetwork for services.
-          If not specified, "services-secondary-range" will be used.
         immutable: true
       - name: subnetwork
         type: String
@@ -386,31 +358,6 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: additionalDisks
-          type: Array
-          description: Additional disk specs for the instances in this node pool.
-          item_type:
-            type: NestedObject
-            properties:
-              - name: diskSizeGb
-                type: Integer
-                description: Size in GB of the disk (default is 100GB).
-                default_from_api: true
-              - name: diskType
-                type: String
-                description: |-
-                  Type of the disk (default is "pd-standard").
-                  Valid values: "pd-ssd" (Persistent Disk Solid State Drive)
-                  "pd-standard" (Persistent Disk Hard Disk Drive)
-                  "pd-balanced" (Balanced Persistent Disk)
-                  "pd-extreme" (Extreme Persistent Disk)
-                  "hyperdisk-balanced" (Hyperdisk Balanced)
-                  "hyperdisk-extreme" (Hyperdisk Extreme)
-                  "hyperdisk-balanced-high-availability" (Hyperdisk Balanced High
-                  Availability)
-                  "hyperdisk-ml" (Hyperdisk ML)
-                  "hyperdisk-throughput" (Hyperdisk Throughput)
-                default_from_api: true
         - name: bootDisk
           type: NestedObject
           description: Represents the spec of disk options.
@@ -450,11 +397,6 @@ properties:
                 SEV_SNP
                 TDX
               immutable: true
-        - name: dynamicSlicing
-          type: Boolean
-          description: |-
-            Whether dynamic slicing is enabled for this node pool.
-            Dynamic slicing is only supported on TPU v7x (tpu7x) machine types.
         - name: effectiveFlexStartMaxDuration
           type: String
           description: |-
@@ -516,74 +458,9 @@ properties:
           description: Specification of a single machine.
           immutable: true
           properties:
-            - name: acceleratorCount
-              type: Integer
-              description: |-
-                The number of accelerators to attach to the machine.
-
-                For [accelerator optimized machine
-                types](https://cloud.google.com/compute/docs/accelerator-optimized-machines),
-                One may set the accelerator_count from 1 to N for machine with N GPUs.
-                If accelerator_count is less than or equal to N / 2, Agent Platform
-                co-schedules the replicas of the model into the same VM to save cost.
-
-                For example, if the machine type is a3-highgpu-8g, which has 8 H100 GPUs,
-                one can set accelerator_count to 1 to 8. If accelerator_count is 1, 2, 3,
-                or 4, Agent Platform co-schedules 8, 4, 2, or 2 replicas of the model into
-                the same VM to save cost.
-
-                When co-scheduling, CPU, memory and storage on the VM will be distributed
-                to replicas on the VM. For example, one can expect a co-scheduled replica
-                requesting 2 GPUs out of a 8-GPU VM will receive 25% of the CPU, memory and
-                storage of the VM.
-
-                Note that the feature is not compatible with multihost_gpu_node_count.
-                When multihost_gpu_node_count is set, the co-scheduling will not be
-                enabled.
-              immutable: true
-            - name: acceleratorType
-              type: String
-              description: |-
-                Possible values:
-                NVIDIA_TESLA_K80
-                NVIDIA_TESLA_P100
-                NVIDIA_TESLA_V100
-                NVIDIA_TESLA_P4
-                NVIDIA_TESLA_T4
-                NVIDIA_TESLA_A100
-                NVIDIA_A100_80GB
-                NVIDIA_L4
-                NVIDIA_H100_80GB
-                NVIDIA_H100_MEGA_80GB
-                NVIDIA_H200_141GB
-                NVIDIA_B200
-                NVIDIA_GB200
-                NVIDIA_RTX_PRO_6000
-                TPU_V2
-                TPU_V3
-                TPU_V4_POD
-                TPU_V5_LITEPOD
-              immutable: true
-            - name: gpuPartitionSize
-              type: String
-              description: |-
-                The Nvidia GPU partition size.
-
-                When specified, the requested accelerators will be partitioned into
-                smaller GPU partitions. For example, if the request is for 8 units of
-                NVIDIA A100 GPUs, and gpu_partition_size="1g.10gb", the service will
-                create 8 * 7 = 56 partitioned MIG instances.
-
-                The partition size must be a value supported by the requested accelerator.
-                Refer to
-                [Nvidia GPU
-                Partitioning](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus-multi#multi-instance_gpu_partitions)
-                for the available partition sizes.
-
-                If set, the accelerator_count should be set to 1.
-              immutable: true
             - name: machineType
               type: String
+              required: true
               description: |-
                 The type of the machine.
 
@@ -597,17 +474,6 @@ properties:
                 value is `n1-standard-2`. For BatchPredictionJob or as part of
                 WorkerPoolSpec this field is required.
               immutable: true
-            - name: minGpuDriverVersion
-              type: String
-              description: |-
-                The minimum GPU driver version that this machine requires. For example,
-                "535.104.06". If not specified, the default GPU driver version will be
-                used by the underlying infrastructure.
-              immutable: true
-            - name: multihostGpuNodeCount
-              type: Integer
-              description: The number of nodes per replica for multihost GPU deployments.
-              immutable: true
             - name: reservationAffinity
               type: NestedObject
               description: |-
@@ -616,13 +482,6 @@ properties:
                 Reservation, or exclusively from on-demand capacity.
               immutable: true
               properties:
-                - name: key
-                  type: String
-                  description: |-
-                    Corresponds to the label key of a reservation resource. To target a
-                    SPECIFIC_RESERVATION by name, use `compute.googleapis.com/reservation-name`
-                    as the key and specify the name of your reservation as its value.
-                  immutable: true
                 - name: reservationAffinityType
                   type: String
                   required: true
@@ -642,18 +501,13 @@ properties:
                   immutable: true
                   item_type:
                     type: String
-            - name: tpuTopology
-              type: String
-              description: |-
-                The topology of the TPUs. Corresponds to the TPU topologies available from
-                GKE. (Example: tpu_topology: "2x2x1").
-              immutable: true
         - name: nodeImage
           type: String
           description: |-
             The node image to be used for the VMs in the node pool.
             In format of "projects//global/images/" or
             "projects/test-project/global/images/family/"
+          default_from_api: true
         - name: provisioningModel
           type: String
           description: |-
@@ -694,11 +548,13 @@ properties:
               description: |-
                 maximum size of the node pool,
                 must be ≥ min_node_count
+              send_empty_value: true
             - name: minNodeCount
               type: Integer
               description: |-
                 minimum size of the node pool,
                 must be >= 0 and <= max_node_count
+              send_empty_value: true
         - name: startupScript
           type: String
           description: Startup script for the node pool instances.
@@ -709,43 +565,21 @@ properties:
     type: NestedObject
     required: true
     description: The spec of the orchestrator. Only one orchestrator may be specified.
+    update_mask_fields:
+      - orchestrator_spec.slurm_spec.accounting
+      - orchestrator_spec.slurm_spec.config
+      - orchestrator_spec.slurm_spec.default_partition_id
+      - orchestrator_spec.slurm_spec.epilog_bash_scripts
+      - orchestrator_spec.slurm_spec.login_node_pool_id
+      - orchestrator_spec.slurm_spec.node_sets
+      - orchestrator_spec.slurm_spec.partitions
+      - orchestrator_spec.slurm_spec.prolog_bash_scripts
+      - orchestrator_spec.slurm_spec.scheduling
     properties:
-      - name: kubernetesSpec
-        type: NestedObject
-        description: Specification for a Kubernetes cluster.
-        properties:
-          - name: enableIpAlias
-            type: Boolean
-            description: Whether to enable IP alias.
-          - name: nodePoolIds
-            type: Array
-            description: |-
-              IDs of the NodePools to be included in this GKE cluster.
-              These IDs must correspond to NodePools defined in the
-              ModelDevelopmentCluster.node_pools field.
-            item_type:
-              type: String
-          - name: publicAccessEndpointEnabled
-            type: Boolean
-            description: |-
-              Whether the GKE cluster's control plane endpoint is publicly accessible.
-              If true, the cluster is created with a public access endpoint (i.e. the
-              private cluster configuration is disabled). If false or unset, the cluster
-              is created with only private control plane access by default.
       - name: slurmSpec
         type: NestedObject
         description: The Slurm orchestrator related spec of the cluster.
         properties:
-          - name: accounting
-            type: NestedObject
-            description: 'The accounting spec for slurm: https://slurm.schedmd.com/accounting.html'
-            properties:
-              - name: accountingStorageEnforce
-                type: String
-                description: |-
-                  In format of comma-separated combination of the following:
-                  * all,associations, limits, nojobs, nosteps, qos, safe, wckeys
-                  Empty string means no enforcement.
           - name: config
             type: KeyValuePairs
             description: |-
@@ -795,6 +629,7 @@ properties:
             type: String
             required: true
             description: Full name of the Filestore to be mounted as /home directory on every node.
+            immutable: true
           - name: loginNodePoolId
             type: String
             required: true
@@ -866,93 +701,11 @@ properties:
             description: Custom bash scripts executed before each slurm job on every allocated node.
             item_type:
               type: String
-          - name: scheduling
-            type: NestedObject
-            description: |-
-              The scheduling related spec for slurm, see
-              * https://slurm.schedmd.com/scheduling.html
-              * https://slurm.schedmd.com/preempt.html
-              * https://slurm.schedmd.com/priority_multifactor.html
-            properties:
-              - name: preemptExemptTime
-                type: String
-                description: |-
-                  A string that specifies the time of jobs before they are considered for
-                  preemption.
-                  "-1" disables the option, equivalent to "0".
-                  Other acceptable time formats include: "minutes", "minutes:seconds",
-                  "hours:minutes:seconds", "days\-hours", "days\-hours:minutes", and
-                  "days\-hours:minutes:seconds".
-              - name: preemptMode
-                type: String
-                description: |-
-                  The mechanism used to preempt jobs or enable gang scheduling.
-                  Available options:  OFF, CANCEL,GANG,REQUEUE, SUSPEND
-                  GANG can be specified in addition to other settings, e.g. "SUSPEND,GANG".
-              - name: preemptType
-                type: String
-                description: |-
-                  The plugin used to identify which jobs can be preempted in order to start
-                  a pending job. Valid values are: "preempt/none"(default),
-                  "preempt/partition_prio" or "preempt/qos".
-                default_from_api: true
-              - name: priorityType
-                type: String
-                description: Either "priority/basic" or "priority/multifactor" (default).
-                default_from_api: true
-              - name: priorityWeightAge
-                type: Integer
-                description: An unsigned integer that scales the contribution of the age factor.
-              - name: priorityWeightAssoc
-                type: Integer
-                description: |-
-                  An unsigned integer that scales the contribution of the association
-                  factor.
-              - name: priorityWeightFairshare
-                type: Integer
-                description: |-
-                  An unsigned integer that scales the contribution of the fair-share
-                  factor.
-              - name: priorityWeightJobSize
-                type: Integer
-                description: An unsigned integer that scales the contribution of the job size factor.
-              - name: priorityWeightPartition
-                type: Integer
-                description: An unsigned integer that scales the contribution of the partition factor.
-              - name: priorityWeightQos
-                type: Integer
-                description: |-
-                  An unsigned integer that scales the contribution of the quality of
-                  service factor.
-              - name: priorityWeightTres
-                type: String
-                description: |-
-                  A comma-separated list of TRES Types and weights that sets the degree
-                  that each TRES Type contributes to the job's priority.
   - name: runtime
     type: NestedObject
     description: The runtime backfilled records of the cluster.
     output: true
     properties:
-      - name: rayClusterEndpoints
-        type: Map
-        description: |-
-          The map of Ray cluster endpoints, keyed by the `ray_cluster_spec_id` in
-          `RayClusterSpec`.
-        output: true
-        value_type:
-          type: NestedObject
-          output: true
-          properties:
-            - name: rayClientHostAddress
-              type: String
-              description: The RayClient host address of the Ray cluster.
-              output: true
-            - name: rayDashboardAddress
-              type: String
-              description: The dashboard address of the Ray cluster.
-              output: true
-        key_name: name
       - name: trainingServices
         type: Array
         description: The training services running on this Vertex AI Training Cluster.
