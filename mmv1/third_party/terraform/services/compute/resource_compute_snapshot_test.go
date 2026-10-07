@@ -85,15 +85,7 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
-			},
-			{
 				Config: testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_snapshot.foobar", plancheck.ResourceActionReplace),
-					},
-				},
 			},
 			{
 				ResourceName:      "google_compute_snapshot.foobar",
@@ -123,10 +115,44 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 				ExpectError: regexp.MustCompile("remove the /cryptoKeyVersions/ suffix"),
 			},
 			{
+				Config:      testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1+"/cryptoKeyVersions/1"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("includes a crypto key version"),
+			},
+			{
+				Config:      testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("removing the Cloud KMS key isn't supported"),
+			},
+		},
+	})
+}
+
+// Adding a key plans an update. Not applied: the API rejects it until it
+// supports adding a key to a snapshot without one.
+func TestAccComputeSnapshot_encryptionCMEKAdd(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	suffix := acctest.RandString(t, 10)
+	snapshotName := fmt.Sprintf("tf-test-%s", suffix)
+	diskName := fmt.Sprintf("tf-test-%s", suffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
 				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
+			},
+			{
+				Config:             testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_snapshot.foobar", plancheck.ResourceActionReplace),
+					PostApplyPreRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_snapshot.foobar", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
