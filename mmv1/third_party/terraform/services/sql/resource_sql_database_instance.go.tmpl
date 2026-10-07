@@ -4364,7 +4364,7 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 
 {{- if ne $.TargetVersionName "ga" }}
 func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	if d.HasChange("database_version") {
+	if d.Id() != "" && d.HasChange("database_version") {
 		if _, n := d.GetChange("blue_green_deployment"); len(n.([]interface{})) > 0 && n.([]interface{})[0] != nil {
 			if n.([]interface{})[0].(map[string]interface{})["active_environment"] != "TARGET" {
 				return fmt.Errorf("cannot change database_version while active_environment is \"SOURCE\"; to perform a switchover, you must update both active_environment to \"TARGET\" and database_version together")
