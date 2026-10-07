@@ -53,20 +53,20 @@ custom_code:
 samples:
   - name: 'vertex_ai_model_source_basic_1'
     primary_resource_id: 'model'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
     steps:
       - name: 'vertex_ai_model_source_basic_1'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
         ignore_read_extra:
           - project
   - name: 'vertex_ai_model_source_basic_2'
     primary_resource_id: 'model'
-    vars:
-      model_id: 'test-model'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
     steps:
       - name: 'vertex_ai_model_source_basic_2'
+        vars:
+          model_id: 'test-model'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
         ignore_read_extra:
           - project
 parameters:
