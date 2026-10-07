@@ -450,11 +450,11 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 					engineConfigs: map[string]string{
 						"maxmemory-policy": "volatile-ttl",
 					},
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
+					maintenanceDay:     "MONDAY",
+					maintenanceHours:   1,
 					maintenanceMinutes: 0,
 					maintenanceSeconds: 0,
-					maintenanceNanos: 0,
+					maintenanceNanos:   0,
 				}),
 			},
 			{
@@ -473,11 +473,11 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 						"maxmemory-policy":  "allkeys-lru",
 						"maxmemory-clients": "90%",
 					},
-					maintenanceDay: "TUESDAY",
-					maintenanceHours: 1,
+					maintenanceDay:     "TUESDAY",
+					maintenanceHours:   1,
 					maintenanceMinutes: 0,
 					maintenanceSeconds: 0,
-					maintenanceNanos: 0,
+					maintenanceNanos:   0,
 				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
