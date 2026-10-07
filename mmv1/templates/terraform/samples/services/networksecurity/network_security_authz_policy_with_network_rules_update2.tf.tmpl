@@ -94,6 +94,16 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
             exact = "spiffe://example/ns/default/sa/example-updated"
           }
         }
+
+        resources {
+          iam_service_account {
+            ignore_case = true
+            suffix = "/samples"
+          }
+          tag_value_id_set {
+            ids = ["3"]
+          }
+        }
       }
       sources {
         ip_blocks {
@@ -107,6 +117,16 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
           principal {
             ignore_case = true
             exact = "spiffe://example.com/ns/prod/sa/app-updated"
+          }
+        }
+
+        resources {
+          iam_service_account {
+            ignore_case = true
+            suffix = "/samples"
+          }
+          tag_value_id_set {
+            ids = ["3"]
           }
         }
       }
