@@ -91,7 +91,7 @@ func testAccAlloydbClusterAndInstanceAndBackup(context map[string]interface{}) s
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -110,7 +110,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -130,7 +130,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context map[
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -149,7 +149,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -158,7 +158,7 @@ resource "google_alloydb_backup" "default" {
 
 resource "google_alloydb_cluster" "restored" {
   cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -193,7 +193,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_SourceClusterAndPointInTimeRequir
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -212,7 +212,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -221,7 +221,7 @@ resource "google_alloydb_backup" "default" {
 
 resource "google_alloydb_cluster" "restored" {
   cluster_id             = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -253,7 +253,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackup(context map[st
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -272,7 +272,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -281,7 +281,7 @@ resource "google_alloydb_backup" "default" {
 
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location              = "us-central1"
+  location              = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -313,7 +313,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFrom
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -332,7 +332,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -341,7 +341,7 @@ resource "google_alloydb_backup" "default" {
 
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location              = "us-central1"
+  location              = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -361,7 +361,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
 
 resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -394,7 +394,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFrom
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -413,7 +413,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -422,7 +422,7 @@ resource "google_alloydb_backup" "default" {
 
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location              = "us-central1"
+  location              = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -447,7 +447,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
 
 resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -485,7 +485,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFrom
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -503,7 +503,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -511,7 +511,7 @@ resource "google_alloydb_backup" "default" {
 }
 
 resource "google_alloydb_backup" "default2" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup2-%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -520,7 +520,7 @@ resource "google_alloydb_backup" "default2" {
 
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location              = "us-central1"
+  location              = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -547,7 +547,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
 
 resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -585,7 +585,7 @@ func testAccAlloydbClusterAndInstanceAndBackup_RestoredFromBackupAndRestoredFrom
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "source" {
   cluster_id   = "tf-test-alloydb-cluster%{random_suffix}"
-  location     = "us-central1"
+  location     = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -603,7 +603,7 @@ resource "google_alloydb_instance" "source" {
 }
 
 resource "google_alloydb_backup" "default" {
-  location     = "us-central1"
+  location     = "us-east1"
   backup_id    = "tf-test-alloydb-backup%{random_suffix}"
   cluster_name = google_alloydb_cluster.source.name
 
@@ -612,7 +612,7 @@ resource "google_alloydb_backup" "default" {
 
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "tf-test-alloydb-backup-restored-cluster-%{random_suffix}"
-  location              = "us-central1"
+  location              = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -628,7 +628,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
 
 resource "google_alloydb_cluster" "restored_from_point_in_time" {
   cluster_id             = "tf-test-alloydb-pitr-restored-cluster-%{random_suffix}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -656,7 +656,7 @@ func TestAccAlloydbCluster_restoreFromBackupDrBackup(t *testing.T) {
 
 	// Bootstrap the BackupDR vault
 	backupVaultID := "bv-test"
-	location := "us-central1"
+	location := "us-east1"
 	project := envvar.GetTestProjectFromEnv()
 
 	context := map[string]interface{}{
@@ -777,7 +777,7 @@ resource "time_sleep" "wait_10_mins" {
 
 data "google_backup_dr_backup" "alloydb_backups" {
   project         = "%{project}"
-  location        = "us-central1"
+  location        = "us-east1"
   backup_vault_id = "%{backup_vault_id}"
   data_source_id  = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
@@ -878,7 +878,7 @@ resource "time_sleep" "wait_10_mins" {
 
 data "google_backup_dr_backup" "alloydb_backups" {
   project         = "%{project}"
-  location        = "us-central1"
+  location        = "us-east1"
   backup_vault_id = "%{backup_vault_id}"
   data_source_id  = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
@@ -983,7 +983,7 @@ resource "time_sleep" "wait_10_mins" {
 }
 
 data "google_backup_dr_backup_plan_association" "association" {
-  location =  "us-central1"
+  location =  "us-east1"
   backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
 
   depends_on = [ time_sleep.wait_10_mins ]
