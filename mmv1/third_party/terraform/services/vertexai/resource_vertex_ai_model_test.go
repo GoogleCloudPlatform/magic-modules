@@ -33,7 +33,7 @@ func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
 			{
 				ResourceName:      "google_vertex_ai_model.model",
 				ImportState:       true,
-				ImportStateVerify:       true,
+				ImportStateVerify: true,
 				// The API returns the project number, and source_model is
 				// write-only because it is only used when copying a model.
 				ImportStateVerifyIgnore: []string{"project", "source_model"},
