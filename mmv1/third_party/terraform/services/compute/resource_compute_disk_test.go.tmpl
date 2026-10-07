@@ -764,6 +764,11 @@ func TestAccComputeDisk_encryptionKMSUpdate(t *testing.T) {
 				},
 			},
 			{
+				// A version of the current key is ignored.
+				Config:   testAccComputeDisk_encryptionKMSUpdateKey(diskName, key2+"/cryptoKeyVersions/1"),
+				PlanOnly: true,
+			},
+			{
 				Config: testAccComputeDisk_encryptionKMSUpdateNoKey(diskName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{

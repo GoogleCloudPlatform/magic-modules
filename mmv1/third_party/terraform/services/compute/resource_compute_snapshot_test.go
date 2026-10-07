@@ -39,8 +39,6 @@ func TestAccComputeSnapshot_encryption(t *testing.T) {
 
 func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	t.Parallel()
-	// KMS causes errors due to rotation
-	acctest.SkipIfVcr(t)
 
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -117,6 +115,11 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 				ImportStateVerify: true,
 				// Not returned by the API.
 				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
+			},
+			{
+				// A version of the current key is ignored.
+				Config:   testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key2+"/cryptoKeyVersions/1"),
+				PlanOnly: true,
 			},
 			{
 				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
