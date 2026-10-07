@@ -344,7 +344,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 	d.SetId(id)
 
-	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, config, userAgent, project, conf.InstanceID, nil, d.Get("cluster").([]interface{}), true); err != nil {
+	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, conf.InstanceID, nil, d.Get("cluster").([]interface{}), true); err != nil {
 		return err
 	}
 
@@ -405,7 +405,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
-	memoryLayers, err := listBigtableClusterMemoryLayers(ctxWithTimeout, config, userAgent, project, instanceName)
+	memoryLayers, err := listBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, instanceName)
 	if err != nil {
 		return err
 	}
@@ -548,13 +548,13 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	oldClusters, _ := oldClustersRaw.([]interface{})
 	newClusters, _ := newClustersRaw.([]interface{})
 
-	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, config, userAgent, project, conf.InstanceID, oldClusters, newClusters, false); err != nil {
+	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, conf.InstanceID, oldClusters, newClusters, false); err != nil {
 		return err
 	}
 	if _, err := bigtable.UpdateInstanceAndSyncClusters(ctxWithTimeout, c, conf); err != nil {
 		return fmt.Errorf("Error updating instance. %s", err)
 	}
-	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, config, userAgent, project, conf.InstanceID, oldClusters, newClusters, true); err != nil {
+	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, conf.InstanceID, oldClusters, newClusters, true); err != nil {
 		return err
 	}
 
@@ -747,7 +747,7 @@ func clustersNeedingMemoryLayerUpdate(oldClusters, newClusters []interface{}) ma
 	return updates
 }
 
-func syncBigtableClusterMemoryLayers(ctx context.Context, config *transport_tpg.Config, userAgent, project, instanceID string, oldClusters, newClusters []interface{}, targetEnabled bool) error {
+func syncBigtableClusterMemoryLayers(ctx context.Context, client *btadmin.BigtableInstanceAdminClient, project, instanceID string, oldClusters, newClusters []interface{}, targetEnabled bool) error {
 	updates := clustersNeedingMemoryLayerUpdate(oldClusters, newClusters)
 	var clusterIDs []string
 	for _, raw := range newClusters {
@@ -764,14 +764,8 @@ func syncBigtableClusterMemoryLayers(ctx context.Context, config *transport_tpg.
 		return nil
 	}
 
-	gapicClient, err := NewClientFactory(config, userAgent).NewBigtableInstanceAdminClient(ctx)
-	if err != nil {
-		return fmt.Errorf("Error starting GAPIC instance admin client: %s", err)
-	}
-	defer gapicClient.Close()
-
 	for _, clusterID := range clusterIDs {
-		if err := updateBigtableClusterMemoryLayer(ctx, gapicClient, project, instanceID, clusterID, targetEnabled); err != nil {
+		if err := updateBigtableClusterMemoryLayer(ctx, client, project, instanceID, clusterID, targetEnabled); err != nil {
 			return err
 		}
 	}
@@ -802,15 +796,9 @@ func updateBigtableClusterMemoryLayer(ctx context.Context, client *btadmin.Bigta
 	return nil
 }
 
-func listBigtableClusterMemoryLayers(ctx context.Context, config *transport_tpg.Config, userAgent, project, instanceID string) (map[string]*adminpb.MemoryLayer, error) {
-	gapicClient, err := NewClientFactory(config, userAgent).NewBigtableInstanceAdminClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("Error starting GAPIC instance admin client: %s", err)
-	}
-	defer gapicClient.Close()
-
+func listBigtableClusterMemoryLayers(ctx context.Context, client *btadmin.BigtableInstanceAdminClient, project, instanceID string) (map[string]*adminpb.MemoryLayer, error) {
 	parent := fmt.Sprintf("projects/%s/instances/%s/clusters/-", project, instanceID)
-	it := gapicClient.ListMemoryLayers(ctx, &adminpb.ListMemoryLayersRequest{
+	it := client.ListMemoryLayers(ctx, &adminpb.ListMemoryLayersRequest{
 		Parent: parent,
 	})
 	result := make(map[string]*adminpb.MemoryLayer)
