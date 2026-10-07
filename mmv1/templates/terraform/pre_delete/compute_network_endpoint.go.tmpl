@@ -19,7 +19,17 @@ ipAddressProp, err := expandNestedComputeNetworkEndpointIpAddress(d.Get("ip_addr
 if err != nil {
 	return err
 }
-toDelete["ipAddress"] = ipAddressProp
+if ipAddressProp != nil && ipAddressProp != "" {
+	toDelete["ipAddress"] = ipAddressProp
+}
+
+ipv6AddressProp, err := expandNestedComputeNetworkEndpointIpv6Address(d.Get("ipv6_address"), d, config)
+if err != nil {
+	return err
+}
+if ipv6AddressProp != nil && ipv6AddressProp != "" {
+	toDelete["ipv6Address"] = ipv6AddressProp
+}
 
 obj = map[string]interface{}{
 	"networkEndpoints": []map[string]interface{}{toDelete},

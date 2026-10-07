@@ -1266,3 +1266,46 @@ func TestNormalizeIamPrincipalCasing(t *testing.T) {
 		})
 	}
 }
+
+func TestCanonicalizeIp(t *testing.T) {
+	cases := map[string]struct {
+		Input    interface{}
+		Expected interface{}
+	}{
+		"nil": {
+			Input:    nil,
+			Expected: nil,
+		},
+		"empty string": {
+			Input:    "",
+			Expected: "",
+		},
+		"IPv4": {
+			Input:    "10.0.0.1",
+			Expected: "10.0.0.1",
+		},
+		"IPv6 full": {
+			Input:    "2600:1900:4000:90ae:0:0:0:0",
+			Expected: "2600:1900:4000:90ae::",
+		},
+		"IPv6 compressed": {
+			Input:    "2600:1900:4000:90ae::",
+			Expected: "2600:1900:4000:90ae::",
+		},
+		"non-ip string": {
+			Input:    "not-an-ip",
+			Expected: "not-an-ip",
+		},
+		"integer": {
+			Input:    80,
+			Expected: 80,
+		},
+	}
+
+	for tn, tc := range cases {
+		actual := tpgresource.CanonicalizeIp(tc.Input)
+		if !reflect.DeepEqual(actual, tc.Expected) {
+			t.Errorf("%s failed: expected %#v, got %#v", tn, tc.Expected, actual)
+		}
+	}
+}

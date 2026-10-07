@@ -110,6 +110,7 @@ properties:
       (NEG). Each endpoint specifies an IP address and port, along with
       additional information depending on the NEG type.
     is_set: true
+    set_hash_func: 'resourceComputeNetworkEndpointsEndpointHash'
     item_type:
       type: NestedObject
       properties:
@@ -137,3 +138,11 @@ properties:
             to a VM in GCE (either the primary IP or as part of an aliased IP
             range).
             **Note** `ip_address` is required unless the Network Endpoint Group is created with the type of `GCE_VM_IP_DEDICATED_BACKEND`
+        - name: 'ipv6Address'
+          type: String
+          description: |
+            IPv6 address of network endpoint. The result of parsing the endpoint config,
+            or empty if IPv6 is not used.
+          diff_suppress_func: 'tpgresource.IpAddressDiffSuppress'
+          custom_expand: 'templates/terraform/custom_expand/ip_address_canonicalize.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/ip_address_canonicalize.go.tmpl'

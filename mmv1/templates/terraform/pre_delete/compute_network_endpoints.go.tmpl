@@ -25,7 +25,17 @@ for _, e := range(endpoints) {
     if err != nil {
         return err
     }
-    toDelete["ipAddress"] = ipAddressProp
+    if ipAddressProp != nil && ipAddressProp != "" {
+        toDelete["ipAddress"] = ipAddressProp
+    }
+
+    ipv6AddressProp, err := expandNestedComputeNetworkEndpointIpv6Address(endpoint["ipv6_address"], d, config)
+    if err != nil {
+        return err
+    }
+    if ipv6AddressProp != nil && ipv6AddressProp != "" {
+        toDelete["ipv6Address"] = ipv6AddressProp
+    }
     endpointsToDelete = append(endpointsToDelete, toDelete)
 }
 
