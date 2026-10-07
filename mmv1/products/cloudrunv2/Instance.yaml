@@ -200,13 +200,11 @@ properties:
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
       environment, state, etc. For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
-      All system labels in v1 now have a corresponding field in v2 Instance.
   - name: 'annotations'
     type: KeyValueAnnotations
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
       Cloud Run API v2 does not support annotations with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected in new resources.
-      All system annotations in v1 now have a corresponding field in v2 Instance.
       This field follows Kubernetes annotations' namespacing, limits, and rules.
   - name: 'createTime'
     type: Time
@@ -242,10 +240,6 @@ properties:
     type: String
     description: |
       Arbitrary identifier for the API client.
-  - name: 'clientVersion'
-    type: String
-    description: |
-      Arbitrary version identifier for the API client.
   - name: 'launchStage'
     type: Enum
     description: |
@@ -307,7 +301,7 @@ properties:
               - name: 'name'
                 type: String
                 description: |-
-                  Name of the environment variable. Must be a C_IDENTIFIER, and mnay not exceed 32768 characters.
+                  Name of the environment variable. Must be a C_IDENTIFIER, and may not exceed 32768 characters.
                 required: true
               - name: 'value'
                 type: String
@@ -817,7 +811,7 @@ properties:
       When a new Instance is created, or an existing one is updated, Cloud Run will asynchronously perform all necessary steps to bring the Instance to the desired serving state. This process is called reconciliation. While reconciliation is in process, observedGeneration will have a transient value that might mismatch the intended state: Once reconciliation is over (and this field is false), there are two possible outcomes: reconciliation succeeded and the serving state matches the Instance, or there was an error, and reconciliation failed. This state can be found in terminalCondition.state.
     output: true
   - name: 'etag'
-    type: String
+    type: Fingerprint
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
     output: true
