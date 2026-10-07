@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -427,7 +428,8 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 	})
 }
 
-// Validate that node type is updated for the instance
+// Validate that node type is updated for the instance, and that updates to other fields at
+// the same time work.
 func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 	t.Parallel()
 
@@ -445,6 +447,14 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 					shardCount:           3,
 					zoneDistributionMode: "MULTI_ZONE",
 					nodeType:             "HIGHMEM_MEDIUM",
+					engineConfigs: map[string]string{
+						"maxmemory-policy": "volatile-ttl",
+					},
+					maintenanceDay: "MONDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0,
 				}),
 			},
 			{
@@ -459,7 +469,21 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 					shardCount:           3,
 					zoneDistributionMode: "MULTI_ZONE",
 					nodeType:             "STANDARD_SMALL",
+					engineConfigs: map[string]string{
+						"maxmemory-policy":  "allkeys-lru",
+						"maxmemory-clients": "90%",
+					},
+					maintenanceDay: "TUESDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0,
 				}),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_memorystore_instance.test", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",

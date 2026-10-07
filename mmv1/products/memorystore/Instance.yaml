@@ -331,6 +331,9 @@ properties:
     type: String
     description: "Optional. Machine type for individual nodes of the instance. \n Possible values:\n SHARED_CORE_NANO\nCUSTOM_PICO\nCUSTOM_MICRO\nCUSTOM_MINI\nHIGHMEM_MEDIUM\nHIGHCPU_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL\nSTANDARD_LARGE\nHIGHMEM_2XLARGE"
     default_from_api: true
+    update_verb: POST  # Set update_verb and update_url to trigger update grouping
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+    update_id: node_type_and_engine_configs
   - name: persistenceConfig
     type: NestedObject
     description: 'Represents persistence configuration for a instance. '
@@ -509,6 +512,9 @@ properties:
   - name: engineConfigs
     type: KeyValuePairs
     description: 'Optional. User-provided engine configurations for the instance. '
+    update_verb: POST  # Set update_verb and update_url to trigger update grouping
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+    update_id: node_type_and_engine_configs
   - name: nodeConfig
     type: NestedObject
     description: 'Represents configuration for nodes of the instance. '
