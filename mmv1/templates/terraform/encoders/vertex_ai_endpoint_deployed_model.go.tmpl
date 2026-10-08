@@ -1,0 +1,18 @@
+req := make(map[string]interface{})
+deployedModel := make(map[string]interface{})
+for key, value := range obj {
+	deployedModel[key] = value
+}
+trafficSplit, hasTrafficSplit := deployedModel["trafficSplit"]
+delete(deployedModel, "trafficSplit")
+delete(deployedModel, "endpoint")
+delete(deployedModel, "region")
+delete(deployedModel, "deployedModelId")
+if id, ok := d.GetOk("deployed_model_id"); ok {
+	deployedModel["id"] = id
+}
+req["deployedModel"] = deployedModel
+if hasTrafficSplit {
+	req["trafficSplit"] = trafficSplit
+}
+return req, nil

@@ -1,0 +1,19 @@
+deployedModels, ok := res["deployedModels"].([]interface{})
+if !ok {
+	return nil, fmt.Errorf("Vertex AI endpoint response did not contain deployedModels")
+}
+deployedModelID := d.Get("deployed_model_id").(string)
+for _, raw := range deployedModels {
+	model, ok := raw.(map[string]interface{})
+	if !ok {
+		continue
+	}
+	if id, _ := model["id"].(string); id == deployedModelID {
+		model["endpoint"] = d.Get("endpoint")
+		model["region"] = d.Get("region")
+		model["deployedModelId"] = deployedModelID
+		model["trafficSplit"] = res["trafficSplit"]
+		return model, nil
+	}
+}
+return nil, fmt.Errorf("deployed model %q was not found on endpoint %q", deployedModelID, d.Get("endpoint"))
