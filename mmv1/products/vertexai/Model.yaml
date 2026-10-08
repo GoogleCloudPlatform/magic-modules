@@ -185,6 +185,7 @@ properties:
     name: customServiceAccount
     description: Optional service account used to copy the Model.
     immutable: true
+    ignore_read: true
   - type: String
     name: sourceModel
     immutable: true
