@@ -238,6 +238,10 @@ properties:
             output: true
   - name: automatedBackupConfig
     type: NestedObject
+    send_empty_value: true
+    update_id: automatedBackupConfig
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=automatedBackupConfig
+    update_verb: PATCH
     description: The automated backup config for a instance.
     custom_flatten: templates/terraform/custom_flatten/memorystore_instance_automated_backup_config.go.tmpl
     custom_expand: templates/terraform/custom_expand/memorystore_instance_automated_backup_config.go.tmpl
@@ -273,6 +277,9 @@ properties:
     output: true
   - name: replicaCount
     type: Integer
+    update_id: replicaCount
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=replicaCount
+    update_verb: PATCH
     description: 'Optional. Number of replica nodes per shard. If omitted the default is 0 replicas. '
     default_from_api: true
     send_empty_value: true
@@ -288,6 +295,9 @@ properties:
     default_from_api: true
   - name: aclPolicy
     type: String
+    update_id: aclPolicy
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=aclPolicy
+    update_verb: PATCH
     # The Memorystore API accepts aclPolicy on create/update but does not return it in GET instance responses.
     ignore_read: true
     description: |
@@ -305,6 +315,9 @@ properties:
     default_from_api: true
   - name: shardCount
     type: Integer
+    update_id: shardCount
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=shardCount
+    update_verb: PATCH
     description: 'Required. Number of shards for the instance. '
     required: true
   - name: discoveryEndpoints
@@ -329,10 +342,16 @@ properties:
           output: true
   - name: nodeType
     type: String
+    update_id: nodeType
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=nodeType
+    update_verb: PATCH
     description: "Optional. Machine type for individual nodes of the instance. \n Possible values:\n SHARED_CORE_NANO\nCUSTOM_PICO\nCUSTOM_MICRO\nCUSTOM_MINI\nHIGHMEM_MEDIUM\nHIGHCPU_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL\nSTANDARD_LARGE\nHIGHMEM_2XLARGE"
     default_from_api: true
   - name: persistenceConfig
     type: NestedObject
+    update_id: persistenceConfig
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=persistenceConfig
+    update_verb: PATCH
     description: 'Represents persistence configuration for a instance. '
     default_from_api: true
     properties:
@@ -368,6 +387,9 @@ properties:
             default_from_api: true
   - name: maintenancePolicy
     type: NestedObject
+    update_id: maintenancePolicy
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=maintenancePolicy
+    update_verb: PATCH
     description: Maintenance policy for a cluster
     properties:
       - name: createTime
@@ -487,6 +509,9 @@ properties:
         output: true
   - name: maintenanceVersion
     type: String
+    update_id: maintenanceVersion
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=maintenanceVersion
+    update_verb: PATCH
     description: |
       This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
       *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
@@ -504,10 +529,16 @@ properties:
     output: true
   - name: engineVersion
     type: String
+    update_id: engineVersion
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=engineVersion
+    update_verb: PATCH
     description: Optional. Engine version of the instance.
     default_from_api: true
   - name: engineConfigs
     type: KeyValuePairs
+    update_id: engineConfigs
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=engineConfigs
+    update_verb: PATCH
     description: 'Optional. User-provided engine configurations for the instance. '
   - name: nodeConfig
     type: NestedObject
@@ -537,6 +568,9 @@ properties:
           - SINGLE_ZONE
   - name: deletionProtectionEnabled
     type: Boolean
+    update_id: deletionProtectionEnabled
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=deletionProtectionEnabled
+    update_verb: PATCH
     description: 'Optional. If set to true deletion of the instance will fail. '
     default_value: true
   - name: endpoints
@@ -594,6 +628,9 @@ properties:
                     output: true
   - name: crossInstanceReplicationConfig
     type: NestedObject
+    update_id: crossInstanceReplicationConfig
+    update_url: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}?updateMask=crossInstanceReplicationConfig
+    update_verb: PATCH
     description: Cross instance replication config
     default_from_api: true
     properties:
