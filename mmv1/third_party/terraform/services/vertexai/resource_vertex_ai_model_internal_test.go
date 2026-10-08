@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -39,24 +38,12 @@ func TestVertexAIModelVersionAliasChanges(t *testing.T) {
 func TestVertexAIModelFilterVersionAliases(t *testing.T) {
 	t.Parallel()
 	aliases := []interface{}{"default", "alias", "drifted"}
-	for _, tc := range []struct {
-		name       string
-		configured cty.Value
-		want       []interface{}
-	}{
-		{"unset", cty.NullVal(cty.Set(cty.String)), aliases},
-		{"unknown", cty.UnknownVal(cty.Set(cty.String)), aliases},
-		{"partially unknown", cty.SetVal([]cty.Value{cty.UnknownVal(cty.String)}), aliases},
-		{"explicit default", cty.SetVal([]cty.Value{cty.StringVal("default")}), aliases},
-		{"implicit default", cty.SetVal([]cty.Value{cty.StringVal("alias")}), []interface{}{"alias", "drifted"}},
-		{"empty", cty.SetValEmpty(cty.String), []interface{}{"alias", "drifted"}},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			got := vertexAiModelFilterVersionAliases(aliases, tc.configured)
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("aliases = %v, want %v", got, tc.want)
-			}
-		})
+	if got := vertexAiModelFilterVersionAliases(aliases, true); !reflect.DeepEqual(got, aliases) {
+		t.Errorf("keep default: aliases = %v, want %v", got, aliases)
+	}
+	want := []interface{}{"alias", "drifted"}
+	if got := vertexAiModelFilterVersionAliases(aliases, false); !reflect.DeepEqual(got, want) {
+		t.Errorf("hide default: aliases = %v, want %v", got, want)
 	}
 }
 

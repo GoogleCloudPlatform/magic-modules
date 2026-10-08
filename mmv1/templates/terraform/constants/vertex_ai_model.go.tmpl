@@ -22,12 +22,14 @@ func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, m
 
 {{ if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
 func vertexAiModelMergeVersionAliases(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
-	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
+	baseURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
 	if err != nil {
 		return err
 	}
+	// Before the first read after create, version_id is unset and the GET resolves the copied model's default version.
+	readURL := baseURL
 	if versionID, ok := d.GetOk("version_id"); ok {
-		url += "@" + versionID.(string)
+		readURL += "@" + versionID.(string)
 	}
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -44,7 +46,7 @@ func vertexAiModelMergeVersionAliases(d *schema.ResourceData, config *transport_
 		Config: config,
 		Method: "GET",
 		Project: project,
-		RawURL: url,
+		RawURL: readURL,
 		UserAgent: userAgent,
 		Timeout: timeout,
 	})
@@ -66,12 +68,11 @@ func vertexAiModelMergeVersionAliases(d *schema.ResourceData, config *transport_
 	if len(aliases) == 0 {
 		return nil
 	}
-	url = strings.Split(url, "@")[0] + "@" + versionID + ":mergeVersionAliases"
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
 		Method: "POST",
 		Project: project,
-		RawURL: url,
+		RawURL: baseURL + "@" + versionID + ":mergeVersionAliases",
 		UserAgent: userAgent,
 		Body: map[string]interface{}{"versionAliases": aliases},
 		Timeout: timeout,
@@ -93,14 +94,10 @@ func vertexAiModelVersionAliasChanges(current, desired *schema.Set) []interface{
 	return aliases
 }
 
-func vertexAiModelFilterVersionAliases(aliases []interface{}, configured cty.Value) []interface{} {
-	if configured.IsNull() || !configured.IsWhollyKnown() {
+// vertexAiModelFilterVersionAliases hides the API-managed default alias unless it is configured.
+func vertexAiModelFilterVersionAliases(aliases []interface{}, keepDefault bool) []interface{} {
+	if keepDefault {
 		return aliases
-	}
-	for _, alias := range configured.AsValueSlice() {
-		if alias.AsString() == "default" {
-			return aliases
-		}
 	}
 	filtered := make([]interface{}, 0, len(aliases))
 	for _, alias := range aliases {

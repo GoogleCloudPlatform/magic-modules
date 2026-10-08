@@ -2,23 +2,20 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if v == nil {
 		return nil
 	}
-	rawConfig := d.GetRawConfig()
-	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+	var keepDefault bool
+	if rawConfig := d.GetRawConfig(); rawConfig.IsNull() || !rawConfig.IsKnown() {
 		// Refresh has no raw configuration; retain the previous state's default-alias policy.
 		previous, exists := d.GetOkExists("version_aliases")
 		if !exists {
 			return v
 		}
-		aliases := previous.(*schema.Set)
-		configured := cty.SetValEmpty(cty.String)
-		if aliases.Len() > 0 {
-			values := make([]cty.Value, 0, aliases.Len())
-			for _, alias := range aliases.List() {
-				values = append(values, cty.StringVal(alias.(string)))
-			}
-			configured = cty.SetVal(values)
+		keepDefault = previous.(*schema.Set).Contains("default")
+	} else {
+		configured := rawConfig.GetAttr("version_aliases")
+		if configured.IsNull() || !configured.IsWhollyKnown() {
+			return v
 		}
-		return vertexAiModelFilterVersionAliases(v.([]interface{}), configured)
+		keepDefault = configured.HasElement(cty.StringVal("default")).True()
 	}
-	return vertexAiModelFilterVersionAliases(v.([]interface{}), rawConfig.GetAttr("version_aliases"))
+	return vertexAiModelFilterVersionAliases(v.([]interface{}), keepDefault)
 }
