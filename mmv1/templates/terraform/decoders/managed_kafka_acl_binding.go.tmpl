@@ -1,0 +1,67 @@
+// AddAclEntryResponse/RemoveAclEntryResponse wrap the parent Acl under an
+// "acl" key (and won't be present at all if RemoveAclEntry deleted the last
+// entry, in which case there's nothing to decode and the caller should treat
+// this as a 404). A plain GET of the parent Acl (used by Read) returns the
+// Acl fields directly, with no "acl" wrapper. Handle both shapes and then
+// search aclEntries for the one entry that matches this resource's config.
+aclObj, ok := res["acl"]
+if !ok {
+	if _, deleted := res["aclDeleted"]; deleted {
+		return nil, nil
+	}
+	// GET of the parent Acl: the response *is* the Acl.
+	aclObj = res
+}
+
+acl, ok := aclObj.(map[string]interface{})
+if !ok {
+	return nil, nil
+}
+
+entries, _ := acl["aclEntries"].([]interface{})
+
+wantPermissionType := d.Get("permission_type").(string)
+if wantPermissionType == "" {
+	wantPermissionType = "ALLOW"
+}
+wantHost := d.Get("host").(string)
+if wantHost == "" {
+	wantHost = "*"
+}
+
+for _, e := range entries {
+	entry, ok := e.(map[string]interface{})
+	if !ok {
+		continue
+	}
+
+	gotPermissionType, _ := entry["permissionType"].(string)
+	if gotPermissionType == "" {
+		gotPermissionType = "ALLOW"
+	}
+	gotHost, _ := entry["host"].(string)
+	if gotHost == "" {
+		gotHost = "*"
+	}
+
+	gotOperation, _ := entry["operation"].(string)
+
+	// principal is case-sensitive (it's an account identifier); operation,
+	// permission_type and host are documented as case insensitive, and the
+	// API may echo them back in a different case than what was sent. An
+	// exact-case comparison here would make a just-created entry look
+	// "not found" on the immediate post-create Read, surfacing as
+	// "Provider produced inconsistent result after apply".
+	if entry["principal"] == d.Get("principal").(string) &&
+		strings.EqualFold(gotOperation, d.Get("operation").(string)) &&
+		strings.EqualFold(gotPermissionType, wantPermissionType) &&
+		strings.EqualFold(gotHost, wantHost) {
+		entry["permissionType"] = gotPermissionType
+		entry["host"] = gotHost
+		return entry, nil
+	}
+}
+
+// The entry isn't in the parent Acl (any more) - signal not-found so the
+// framework drops it from state instead of erroring.
+return nil, nil

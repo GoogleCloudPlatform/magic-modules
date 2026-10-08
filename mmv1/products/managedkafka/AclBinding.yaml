@@ -1,0 +1,145 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AclBinding
+description: |
+  A single grant (principal, operation, permission type and host) on a
+  Managed Service for Apache Kafka ACL. Unlike `google_managed_kafka_acl`,
+  whose `Update` call (`UpdateAcl`) replaces the entire `acl_entries` list,
+  this resource adds and removes exactly one entry via the `AddAclEntry` and
+  `RemoveAclEntry` RPCs, so multiple independently-managed Terraform
+  configurations can each own one grant on the same ACL without clobbering
+  each other's entries on `apply`. Apache Kafka is a trademark owned by the
+  Apache Software Foundation.
+references:
+  guides:
+  api: https://cloud.google.com/managed-service-for-apache-kafka/docs/reference/rest/v1/projects.locations.clusters.acls/addAclEntry
+docs:
+# Same path shape as the sibling Acl resource (location/cluster/acl_id as
+# separate parameters, rather than one pre-built `acl` path string) - see
+# the equivalent fields in Acl.yaml.
+base_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{acl_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{acl_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{acl_id}}:addAclEntry'
+delete_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{acl_id}}:removeAclEntry'
+create_verb: POST
+delete_verb: POST
+# AclEntry has no fields that can be changed in place (principal/operation/
+# permission_type/host are all `immutable` below) - a change forces
+# delete+recreate, i.e. RemoveAclEntry then AddAclEntry. No update_url/verb.
+id_format: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{acl_id}}/aclEntry/{{principal}}/{{operation}}/{{permission_type}}'
+import_format:
+  # acl_id is itself allowed to contain '/' (Acl.yaml: "topic/{resource_name}"
+  # etc.), hence '%' for a greedy match, same as Acl.yaml's own import_format.
+  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{%acl_id}}/aclEntry/{{principal}}/{{operation}}/{{permission_type}}'
+# The import id's `principal` segment contains ':' and '@' - exclude the
+# generated resource_identity machinery, same as IndexEndpointDeployedIndex
+# does for the same reason.
+exclude_identity_generation: true
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+custom_code:
+  # The sibling Acl resource carries this same hook (see Acl.yaml) for the
+  # same reason: AddAclEntry can return success before the entry is visible
+  # on a subsequent GET of the parent Acl, which is exactly what Read()
+  # does right after Create(). Without this, Terraform's post-apply
+  # consistency check intermittently sees the just-created binding as
+  # absent ("Provider produced inconsistent result after apply").
+  post_create: templates/terraform/post_create/sleep.go.tmpl
+  # AddAclEntry/RemoveAclEntry both return `{acl: {...Acl...}, aclCreated|aclDeleted: bool}`,
+  # not the entry itself, and there's no single-entry GET, so Read() fetches
+  # the parent Acl (via self_link) and the decoder locates the matching entry
+  # inside its `aclEntries` list either way.
+  decoder: templates/terraform/decoders/managed_kafka_acl_binding.go.tmpl
+  # Without this, the generated Delete() sends a nil body to
+  # `:removeAclEntry` - it does not run the same expand-property loop
+  # Create() does, so RemoveAclEntry would have no way to know which entry
+  # to remove. See IndexEndpointDeployedIndex's pre_delete for the same
+  # reason.
+  pre_delete: templates/terraform/pre_delete/managed_kafka_acl_binding.go.tmpl
+samples:
+  - name: managedkafka_acl_binding_basic
+    primary_resource_id: example
+    steps:
+      - name: managedkafka_acl_binding_basic
+        resource_id_vars:
+          cluster_id: my-cluster
+          acl_id: topic/mytopic
+        test_vars_overrides:
+          acl_id: '"topic/mytopic"'
+parameters:
+  # location/cluster/acl_id match Acl.yaml's own parameters exactly - see
+  # that file for the full acl_id format rules (topic/, consumerGroup/,
+  # transactionalId/, the *Prefixed/ variants, allTopics, etc). AddAclEntry
+  # creates the Acl resource automatically if it doesn't already exist, so
+  # unlike the sibling resource, there doesn't need to be a
+  # `google_managed_kafka_acl` for this acl_id at all.
+  - name: location
+    type: String
+    description: ID of the location of the Kafka resource. See https://cloud.google.com/managed-kafka/docs/locations for a list of supported locations.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: cluster
+    type: String
+    description: The cluster name.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: aclId
+    type: String
+    description: |-
+      The ID of the acl this entry belongs to, which is the final component
+      of the acl's name. The structure of `aclId` defines the Resource
+      Pattern (resource_type, resource_name, pattern_type) of the acl.
+      `aclId` is structured like one of the following:
+      For acls on the cluster: `cluster`
+      For acls on a single resource within the cluster: `topic/{resource_name}` `consumerGroup/{resource_name}` `transactionalId/{resource_name}`
+      For acls on all resources that match a prefix: `topicPrefixed/{resource_name}` `consumerGroupPrefixed/{resource_name}` `transactionalIdPrefixed/{resource_name}`
+      For acls on all resources of a given type (i.e. the wildcard literal '*''): `allTopics` (represents `topic/*`) `allConsumerGroups` (represents `consumerGroup/*`) `allTransactionalIds` (represents `transactionalId/*`).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: principal
+    type: String
+    description: |-
+      The principal. Specified as a Google Cloud account, with the Kafka
+      StandardAuthorizer prefix "User:". For example:
+      "User:test-kafka-client@test-project.iam.gserviceaccount.com". Can be
+      the wildcard "User:*" to refer to all users.
+    required: true
+    immutable: true
+  - name: operation
+    type: String
+    description: |
+      The operation type. Allowed values are (case insensitive): ALL, READ,
+      WRITE, CREATE, DELETE, ALTER, DESCRIBE, CLUSTER_ACTION, DESCRIBE_CONFIGS,
+      ALTER_CONFIGS, and IDEMPOTENT_WRITE. See
+      https://kafka.apache.org/documentation/#operations_resources_and_protocols
+      for valid combinations of resource_type and operation for different
+      Kafka API requests.
+    required: true
+    immutable: true
+  - name: permissionType
+    type: String
+    description: 'The permission type. Accepted values are (case insensitive): ALLOW, DENY.'
+    default_value: ALLOW
+    immutable: true
+  - name: host
+    type: String
+    description: The host. Must be set to "*" for Managed Service for Apache Kafka.
+    default_value: '*'
+    immutable: true
