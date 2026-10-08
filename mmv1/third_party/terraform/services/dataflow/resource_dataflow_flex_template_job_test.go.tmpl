@@ -894,7 +894,7 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 			"maxResults": []string{"2"},
 			"fields":     []string{"items/properties"},
 		}
-		rawURL := fmt.Sprintf("%sprojects/%s/regions/%s/regionInstanceTemplates?%s", transport_tpg.BaseUrl(compute_tpg.Product, config), config.Project, config.Region, query.Encode())
+		rawURL := fmt.Sprintf("%sprojects/%s/regions/%s/instanceTemplates?%s", transport_tpg.BaseUrl(compute_tpg.Product, config), config.Project, config.Region, query.Encode())
 		response, rerr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
