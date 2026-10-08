@@ -81,9 +81,9 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 			},
 
 			"labels": {
-				Type:             schema.TypeMap,
-				Optional:         true,
-				Description:      `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Type:     schema.TypeMap,
+				Optional: true,
+				Description: `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
 
@@ -514,7 +514,6 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		optionsMap["sdkContainerImage"] = job.Environment.WorkerPools[0].WorkerHarnessContainerImage
 	}
 
-
 	if err := d.Set("temp_location", optionsMap["tempLocation"]); err != nil {
 		return fmt.Errorf("Error setting temp_gcs_location: %s", err)
 	}
@@ -530,7 +529,7 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("sdk_container_image", optionsMap["sdkContainerImage"]); err != nil {
 		return fmt.Errorf("Error setting sdk_container_image: %s", err)
 	}
-	if err := d.Set("network",  job.Environment.WorkerPools[0].Network); err != nil {
+	if err := d.Set("network", job.Environment.WorkerPools[0].Network); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("subnetwork", job.Environment.WorkerPools[0].Subnetwork); err != nil {
@@ -545,11 +544,10 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		d.SetId("")
 		return nil
 	}
-	
-	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
-	    return err
+
+	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil {
+		return err
 	}
-	
 
 	// Explicitly set client-side fields to default values if unset
 	if _, ok := d.GetOkExists("create_ignore_already_exists"); !ok {
@@ -605,11 +603,10 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 	if resourceDataflowJobIsVirtualUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		return nil
 	}
-	
+
 	if tpgresource.DeletionPolicyPreUpdate(d, ResourceDataflowFlexTemplateJob) {
-	    return ResourceDataflowFlexTemplateJob().Read(d, meta)
+		return ResourceDataflowFlexTemplateJob().Read(d, meta)
 	}
-	
 
 	if flexTemplateJobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
 		config := meta.(*transport_tpg.Config)
@@ -676,13 +673,13 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interface{}) error {
-	
-	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
-	    return err
-	}else if ok{
-	    return nil
+
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
 	}
-	
+
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -913,7 +910,7 @@ func dataflowFlexJobTypeParameterOverride(ename, pname string, d *schema.Resourc
 
 func findDataflowJobByName(config *transport_tpg.Config, project, region, userAgent, name string) (*dataflow.Job, error) {
 	client := NewClient(config, userAgent)
-	
+
 	if region == "" {
 		return nil, fmt.Errorf("region is required to list dataflow jobs")
 	}
@@ -954,9 +951,9 @@ func flexTemplateJobHasUpdate(d *schema.ResourceData, resourceSchema map[string]
 
 func init() {
 	registry.Schema{
-		Name: "google_dataflow_flex_template_job",
+		Name:        "google_dataflow_flex_template_job",
 		ProductName: "dataflow",
-		Type: registry.SchemaTypeResource,
-		Schema: ResourceDataflowFlexTemplateJob(),
+		Type:        registry.SchemaTypeResource,
+		Schema:      ResourceDataflowFlexTemplateJob(),
 	}.Register()
 }
