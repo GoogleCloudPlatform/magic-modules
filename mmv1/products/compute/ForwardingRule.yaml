@@ -360,7 +360,6 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'InternalIpDiffSuppress'
   - name: 'IPProtocol'
     type: Enum
     description: |
