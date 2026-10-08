@@ -41,6 +41,8 @@ samples:
           framework_name: "example-framework"
         test_env_vars:
           org_id: "ORG_ID"
+        ignore_read_extra:
+          - "cloud_control_metadata"
   - name: "cloudsecuritycompliance_framework_deployment_project_basic"
     primary_resource_id: "example"
     steps:
@@ -216,6 +218,7 @@ properties:
           type: NestedObject
           description: CloudControlDetails contains the details of a CloudControl.
           required: true
+          custom_flatten: templates/terraform/custom_flatten/cloudsecuritycompliance_framework_deployment_cloud_control_details.go.tmpl
           properties:
             - name: majorRevisionId
               type: String
