@@ -20,6 +20,7 @@ func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, m
 	return nil
 }
 
+{{ if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
 func vertexAiModelMergeVersionAliases(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
 	if err != nil {
@@ -109,3 +110,4 @@ func vertexAiModelFilterVersionAliases(aliases []interface{}, configured cty.Val
 	}
 	return filtered
 }
+{{- end }}
