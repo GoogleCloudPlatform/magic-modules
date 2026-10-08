@@ -914,6 +914,10 @@ properties:
       - data_discovery_spec
       - data_documentation_spec
     properties:
+      - name: customInstructions
+        type: String
+        description: |
+          Specifies optional custom instructions for generating documentation scan.
       - name: catalogPublishingEnabled
         type: Boolean
         description: |

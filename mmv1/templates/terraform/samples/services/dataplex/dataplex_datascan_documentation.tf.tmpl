@@ -75,6 +75,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   }
 
   data_documentation_spec {
+    custom_instructions        = "example custom instructions"
     catalog_publishing_enabled = true
     sql_dialect                = "{{index $.Vars "sql_dialect"}}"
   }
