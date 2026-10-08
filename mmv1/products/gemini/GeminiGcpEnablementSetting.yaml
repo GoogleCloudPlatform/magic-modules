@@ -83,3 +83,18 @@ properties:
   - name: mutationsEnabled
     type: Boolean
     description: Whether resource mutations should be enabled.
+  - name: geminiEnterpriseProject
+    type: String
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    description: |-
+      The Gemini enterprise project for this setting.
+      Format: projects/{project}
+      The `{project}` segment can be the project ID or project number.
+  - name: releaseChannel
+    type: Enum
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("CHANNEL_TYPE_UNSPECIFIED")'
+    description: |-
+      Specifies the release channel for Gemini features. The release channel determines which set of features are available to the user.
+    enum_values:
+      - 'STABLE'
+      - 'EXPERIMENTAL'
