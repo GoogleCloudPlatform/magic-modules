@@ -1,5 +1,4 @@
 package dataflow
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -200,5 +199,3 @@ func resourceDataflowFlexTemplateJobResourceV0() *schema.Resource {
 func ResourceDataflowFlexTemplateJobStateUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	return tpgresource.LabelsStateUpgrade(rawState, resourceDataflowJobGoogleLabelPrefix)
 }
-
-{{ end }}
