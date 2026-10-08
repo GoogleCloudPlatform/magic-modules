@@ -28,7 +28,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basicTest(t 
 	serviceAccount := iambeta.BootstrapServiceAccount(t, "acm-ingress-1", initialServiceAccount)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -98,7 +98,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basic(org, p
 
 resource "google_access_context_manager_access_level" "test-access" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/level"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_level"
   title       = "level"
   description = "hello"
   basic {
@@ -189,7 +189,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_updateTest(t
 	org := envvar.GetTestOrgFromEnv(t)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -259,7 +259,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_ingressPolic
 
 resource "google_access_context_manager_access_level" "update-test" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/updatetestlevel"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_updatetestlevel"
   title       = "updatetestlevel"
   description = "Access level for dry run ingress update test"
   basic {
@@ -293,7 +293,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_ingressPolic
 
 resource "google_access_context_manager_access_level" "update-test" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/updatetestlevel"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_updatetestlevel"
   title       = "updatetestlevel"
   description = "Access level for dry run ingress update test"
   basic {
