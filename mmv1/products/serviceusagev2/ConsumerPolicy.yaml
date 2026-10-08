@@ -41,6 +41,8 @@ custom_code:
   pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   pre_delete: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   post_create_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+  post_update_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+  post_delete_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
 
 
 parameters:
@@ -62,6 +64,7 @@ properties:
     required: true
     description: |
       The consumer policy rule that defines enabled services. The structure is documented below.
+    custom_flatten: templates/terraform/custom_flatten/serviceusagev2_consumer_policy_enable_rules.go.tmpl
     item_type:
       type: NestedObject
       properties:
@@ -71,6 +74,14 @@ properties:
           is_set: true
           description: |
             (Optional): List of service names to be enabled in the format of services/<service_name>
+          item_type:
+            type: String
+        - name: 'catalogs'
+          type: Array
+          send_empty_value: true
+          is_set: true
+          description: |
+            (Optional): List of service catalog names to be enabled in the format of catalogs/<catalog_name>, for example catalogs/default-cloud-services.
           item_type:
             type: String
   - name: 'etag'
@@ -89,3 +100,4 @@ virtual_fields:
     description: |
       (Optional) Default value is false. If true, the usage of the service to be removed will be checked. If the service has been used within the past 30 days or was enabled in the last 3 days, an error will be thrown.
     default_value: false
+    deprecation_message: '`check_usage_on_remove` is deprecated and will be removed in a future major release.'
