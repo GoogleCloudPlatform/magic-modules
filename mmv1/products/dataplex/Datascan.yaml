@@ -173,9 +173,6 @@ samples:
       - name: dataplex_datascan_documentation
         resource_id_vars:
           datascan_name: datadocumentation
-        test_vars_overrides:
-          # for backward compatible
-          datascan_name: '"datadocumentation" + randomSuffix'
         test_env_vars:
           project_name: PROJECT_NAME
           location: REGION
@@ -184,9 +181,6 @@ samples:
       - name: dataplex_datascan_documentation
         resource_id_vars:
           datascan_name: datadocumentation
-        test_vars_overrides:
-          # for backward compatible
-          datascan_name: '"datadocumentation" + randomSuffix'
         test_env_vars:
           project_name: PROJECT_NAME
           location: REGION
