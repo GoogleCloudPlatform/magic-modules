@@ -446,6 +446,7 @@ type WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig struct {
 	ReservationAffinity     *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity         `json:"reservationAffinity"`
 	NodeGroupAffinity       *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity           `json:"nodeGroupAffinity"`
 	ShieldedInstanceConfig  *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig      `json:"shieldedInstanceConfig"`
+	MultiZoneConfig         *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig             `json:"multiZoneConfig"`
 }
 
 type jsonWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig
@@ -486,6 +487,8 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig) Unmarsha
 		r.NodeGroupAffinity = res.NodeGroupAffinity
 
 		r.ShieldedInstanceConfig = res.ShieldedInstanceConfig
+
+		r.MultiZoneConfig = res.MultiZoneConfig
 
 	}
 	return nil
@@ -603,6 +606,52 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupA
 }
 
 func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity) HashCode() string {
+	// Placeholder for a more complex hash method that handles ordering, etc
+	// Hash resource body for easy comparison later
+	hash := sha256.Sum256([]byte(r.String()))
+	return fmt.Sprintf("%x", hash)
+}
+
+type WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig struct {
+	empty       bool    `json:"-"`
+	TargetShape *string `json:"targetShape"`
+}
+
+type jsonWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) UnmarshalJSON(data []byte) error {
+	var res jsonWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	if err := json.Unmarshal(data, &res); err != nil {
+		return err
+	}
+
+	var m map[string]interface{}
+	json.Unmarshal(data, &m)
+
+	if len(m) == 0 {
+		*r = *EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	} else {
+
+		r.TargetShape = res.TargetShape
+
+	}
+	return nil
+}
+
+// This object is used to assert a desired state where this WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig = &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{empty: true}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) Empty() bool {
+	return r.empty
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) String() string {
+	return dcl.SprintResource(r)
+}
+
+func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) HashCode() string {
 	// Placeholder for a more complex hash method that handles ordering, etc
 	// Hash resource body for easy comparison later
 	hash := sha256.Sum256([]byte(r.String()))

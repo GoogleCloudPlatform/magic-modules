@@ -302,7 +302,7 @@ When this this key is provided, the following workflow template job arguments, i
 
 * `gce_cluster_config` -
   (Optional)
-  The shared Compute Engine config settings for all instances in a cluster.
+  The shared Compute Engine config settings for all instances in a cluster. Structure is [documented below](#nested_gce_cluster_config).
 
 * `gke_cluster_config` -
   (Optional)
@@ -1004,7 +1004,7 @@ The `endpoint_config` block supports:
 * `http_ports` -
   Output only. The map of port descriptions to URLs. Will only be populated if enable_http_port_access is true.
 
-The `gce_cluster_config` block supports:
+<a name="nested_gce_cluster_config"></a>The `gce_cluster_config` block supports:
 
 * `internal_ip_only` -
   (Optional)
@@ -1013,6 +1013,10 @@ The `gce_cluster_config` block supports:
 * `metadata` -
   (Optional)
   The Compute Engine metadata entries to add to all instances (see [About VM metadata](https://docs.cloud.google.com/compute/docs/metadata/overview)).
+
+* `multi_zone_config` -
+  (Optional)
+  Multi-zone cluster configuration. Structure is [documented below](#nested_multi_zone_config).
 
 * `network` -
   (Optional)
@@ -1053,6 +1057,12 @@ The `gce_cluster_config` block supports:
 * `zone` -
   (Optional)
   The zone where the Compute Engine cluster will be located. On a create request, it is required in the "global" region. If omitted in a non-global Dataproc region, the service will pick a zone in the corresponding Compute Engine region. On a get request, zone will always be present. A full URL, partial URI, or short name are valid. Examples: * `https://www.googleapis.com/compute/v1/projects/` * `us-central1-f`
+
+<a name="nested_multi_zone_config"></a>The `multi_zone_config` block supports:
+
+* `target_shape` -
+  (Required)
+  Required. Target shape of the cluster. Possible values: `ANY`.
 
 The `node_group_affinity` block supports:
 
