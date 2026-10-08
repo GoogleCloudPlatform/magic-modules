@@ -163,13 +163,14 @@ properties:
     description: Path to the directory containing the Model artifact.
     immutable: true
     default_from_api: true
-    conflicts_with:
+    conflicts:
       - sourceModel
   - type: NestedObject
     name: containerSpec
     description: Specification of the container for serving predictions.
     immutable: true
-    conflicts_with:
+    default_from_api: true
+    conflicts:
       - sourceModel
     properties:
       - type: String
@@ -259,10 +260,12 @@ properties:
     name: serviceAccount
     description: Optional service account used to upload the Model.
     immutable: true
+    ignore_read: true
   - type: String
     name: parentModel
     description: Existing Model resource into which a new version is uploaded.
     immutable: true
+    ignore_read: true
   - type: String
     name: sourceModel
     immutable: true
