@@ -26,6 +26,7 @@ description: |-
   A trained machine learning Model copied from an existing Model.
 id_format: '{{name}}'
 update_verb: 'PATCH'
+update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
 async:
