@@ -127,6 +127,10 @@ var (
 					startDate: newDate(2026, 7, 5),
 					endDate:   newDate(2026, 8, 17),
 				},
+				{
+					startDate: newDate(2026, 10, 12),
+					endDate:   newDate(2026, 11, 6),
+				},
 			},
 		},
 		"ScottSuarez": {
