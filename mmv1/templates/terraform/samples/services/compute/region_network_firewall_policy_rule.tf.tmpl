@@ -48,6 +48,11 @@ resource "google_compute_network" "basic_network" {
   name = "{{index $.ResourceIdVars "network"}}"
 }
 
+data "google_compute_network" "tag_network" {
+  name    = google_compute_network.basic_network.name
+  project = "{{index $.TestEnvVars "project_name"}}"
+}
+
 resource "google_tags_tag_key" "basic_key" {
   description = "For keyname resources."
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
@@ -55,7 +60,7 @@ resource "google_tags_tag_key" "basic_key" {
   short_name  = "{{index $.ResourceIdVars "tag_key"}}"
 
   purpose_data = {
-    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.basic_network.name}"
+    network = "https://www.googleapis.com/compute/v1/projects/{{index $.TestEnvVars "project_name"}}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
