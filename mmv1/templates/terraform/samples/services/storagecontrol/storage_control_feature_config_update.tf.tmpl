@@ -1,0 +1,14 @@
+resource "google_storage_bucket" "test_bucket" {
+  name     = "{{index $.ResourceIdVars "bucket_name"}}"
+  location = "US"
+}
+
+resource "google_storage_control_feature_config" "{{$.PrimaryResourceId}}" {
+  feature_config_id = "{{index $.ResourceIdVars "feature_config_id"}}"
+  auto_annotate_config {
+    processing_location = "eu"
+    models {
+      name = "object-detector"
+    }
+  }
+}

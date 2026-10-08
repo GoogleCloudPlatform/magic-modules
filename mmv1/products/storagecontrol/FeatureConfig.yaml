@@ -1,0 +1,152 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: FeatureConfig
+api_resource_type_kind: FeatureConfig
+description: |
+  A feature configuration resource for Google Cloud Storage Control.
+  FeatureConfig manages Smart Storage features such as Auto Annotate (Object enrichments) within a given project. Auto Annotate uses AI models (such as label detection, object detection, etc.) to analyze and enrich Google Cloud Storage objects.
+references:
+  guides:
+    Cloud Storage Control Overview: https://cloud.google.com/storage/docs/overview-storage-control
+  api: https://cloud.google.com/storage/docs/reference/rest/storage/v2/projects.locations.featureConfigs
+base_url: projects/{{project}}/locations/{{location}}/featureConfigs
+self_link: projects/{{project}}/locations/{{location}}/featureConfigs/{{feature_config_id}}
+create_url: projects/{{project}}/locations/{{location}}/featureConfigs?featureConfigId={{feature_config_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/featureConfigs/{{feature_config_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/featureConfigs/{{feature_config_id}}
+sweeper:
+  url_substitutions:
+    - location: global
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, update, delete]
+  result:
+    resource_inside_response: true
+autogen_async: true
+samples:
+  - name: storage_control_feature_config_basic
+    primary_resource_id: example
+    steps:
+      - name: storage_control_feature_config_basic
+        resource_id_vars:
+          feature_config_id: "example-fc"
+          bucket_name: "example-bkt"
+  - name: storage_control_feature_config_update
+    primary_resource_id: example
+    steps:
+      - name: storage_control_feature_config_basic
+        resource_id_vars:
+          feature_config_id: "example-fc"
+          bucket_name: "example-bkt"
+      - name: storage_control_feature_config_update
+        resource_id_vars:
+          feature_config_id: "example-fc"
+          bucket_name: "example-bkt"
+parameters:
+  - name: location
+    type: String
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection.
+      Currently, only `global` is supported.
+    immutable: true
+    url_param_only: true
+    default_value: global
+  - name: featureConfigId
+    type: String
+    description: The ID to use for the feature config, which will become the final component of the feature config's resource name.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    output: true
+    description: |
+      The name of the FeatureConfig resource.
+  - name: description
+    type: String
+    description: |
+      A description of the feature configuration.
+  - name: createTime
+    type: String
+    output: true
+    description: |
+      The time at which the feature configuration was created.
+  - name: updateTime
+    type: String
+    output: true
+    description: |
+      The time at which the feature configuration was last updated.
+  - name: type
+    type: String
+    output: true
+    description: |
+      Specifies the type of the feature configuration.
+  - name: filter
+    type: NestedObject
+    diff_suppress_func: intelligenceFilterDiffSuppress
+    description: |
+      Filter over location and bucket using include or exclude semantics.
+    properties:
+      - name: includedCloudStorageBuckets
+        type: NestedObject
+        required: false
+        description: |
+          Buckets to include.
+        diff_suppress_func: intelligenceFilterincludedCloudStorageBucketsDiffSuppress
+        properties:
+          - name: bucketIdRegexes
+            required: true
+            send_empty_value: true
+            type: Array
+            item_type:
+              type: String
+            description: |
+              List of Cloud Storage buckets to include. Note that Auto Annotate requires exact bucket names rather than regular expression patterns.
+  - name: autoAnnotateConfig
+    type: NestedObject
+    required: true
+    description: |
+      Configuration for auto_annotate (Object enrichments).
+    properties:
+      - name: processingLocation
+        type: String
+        required: true
+        description: |
+          Specifies the geographic location (case-sensitive) where data is processed.
+          Currently, only multi-regional locations such as `us`, `eu`, or `asia` are supported.
+
+          To avoid duplicate billing, it is highly recommended to configure exactly one processing location
+          per bucket and model combination. If you configure multiple processing locations for the same
+          bucket and model across different configurations, the system triggers separate annotation runs in
+          each location, and you will be billed for every resulting annotation.
+      - name: models
+        type: Array
+        required: true
+        description: |
+          The list of unique models selected. Each model is uniquely identified by its `name` string.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: name
+              type: String
+              required: true
+              description: |
+                The name of the model (for example, `label-detector`, `object-detector`).
