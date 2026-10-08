@@ -51,6 +51,8 @@ custom_code:
   encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
   post_create: templates/terraform/post_create/vertex_ai_models.go.tmpl
+  pre_update: templates/terraform/pre_update/vertex_ai_models.go.tmpl
+  post_update: templates/terraform/post_update/vertex_ai_models.go.tmpl
 samples:
   - name: 'vertex_ai_model_source_basic_1'
     primary_resource_id: 'model'
@@ -170,8 +172,14 @@ properties:
     ignore_read: true
   - type: Array
     name: versionAliases
-    description: User-provided version aliases.
+    description: |
+      User-provided version aliases, managed after the Model is copied and on updates.
+      Aliases are unordered. The API-required `default` alias is preserved when omitted
+      from configuration and is only included in state when explicitly configured
+      or when this field is unset.
     default_from_api: true
+    is_set: true
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_model_version_aliases.go.tmpl
     item_type:
       type: String
   - type: NestedObject

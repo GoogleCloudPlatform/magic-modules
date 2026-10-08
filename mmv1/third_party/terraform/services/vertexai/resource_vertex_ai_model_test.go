@@ -2,6 +2,7 @@ package vertexai_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -114,11 +115,12 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":    envvar.GetTestProjectFromEnv(),
-		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-		"kms_key_name":    kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-vertex-ai-model-key").CryptoKey.Name,
-		"model_id":        fmt.Sprintf("tf-test-test-model%s", acctest.RandString(t, 10)),
-		"version_alias":   "tf-test-alias",
+		"project_name":          envvar.GetTestProjectFromEnv(),
+		"service_account":       envvar.GetTestServiceAccountFromEnv(t),
+		"kms_key_name":          kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-vertex-ai-model-key").CryptoKey.Name,
+		"model_id":              fmt.Sprintf("tf-test-test-model%s", acctest.RandString(t, 10)),
+		"version_alias":         "tf-test-alias",
+		"updated_version_alias": "tf-test-updated-alias",
 	}
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
@@ -138,13 +140,43 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "custom_service_account", context["service_account"].(string)),
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "encryption_spec.0.kms_key_name", context["kms_key_name"].(string)),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
 				),
 			},
 			{
 				Config: testAccVertexAIModel_copyWithOptionalFieldsUpdate(context),
-				Check: resource.TestCheckResourceAttr(
-					// Vertex AI retains the reserved "default" alias at index 0.
-					"google_vertex_ai_model.model", "version_aliases.1", context["version_alias"].(string),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "2"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "description", "updated"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["updated_version_alias"].(string)),
+				),
+			},
+			{
+				Config: testAccVertexAIModel_copyWithOptionalFields(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
+				),
+			},
+			{
+				Config: strings.Replace(testAccVertexAIModel_copyWithOptionalFields(context), `version_aliases = ["`+context["version_alias"].(string)+`"]`, `version_aliases = []`, 1),
+				Check:  resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "0"),
+			},
+			{
+				Config: strings.Replace(testAccVertexAIModel_copyWithOptionalFields(context), `version_aliases = [`, `version_aliases = ["default", `, 1),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "2"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", "default"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
+				),
+			},
+			{
+				Config: testAccVertexAIModel_copyWithOptionalFields(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
 				),
 			},
 		},
@@ -160,6 +192,7 @@ resource "google_vertex_ai_model" "model" {
 
   region = "us-central1"
   custom_service_account = "%{service_account}"
+  version_aliases = ["%{version_alias}"]
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
@@ -176,7 +209,8 @@ resource "google_vertex_ai_model" "model" {
 
   region = "us-central1"
   custom_service_account = "%{service_account}"
-  version_aliases = ["%{version_alias}"]
+  version_aliases = ["%{version_alias}", "%{updated_version_alias}"]
+  description = "updated"
 
   encryption_spec {
     kms_key_name = "%{kms_key_name}"

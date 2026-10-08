@@ -5,7 +5,6 @@ func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, m
 		fieldNames := []string{
 			"description",
 			"display_name",
-			"version_aliases",
 		}
 		found := []string{}
 		for _, field := range fieldNames {
@@ -19,4 +18,94 @@ func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, m
 	}
 	// Either we are not creating a resource, or no disallowed fields are present
 	return nil
+}
+
+func vertexAiModelMergeVersionAliases(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
+	if err != nil {
+		return err
+	}
+	if versionID, ok := d.GetOk("version_id"); ok {
+		url += "@" + versionID.(string)
+	}
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	if billingProject, err := tpgresource.GetBillingProject(d, config); err == nil {
+		project = billingProject
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "GET",
+		Project: project,
+		RawURL: url,
+		UserAgent: userAgent,
+		Timeout: timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading Model %q before merging version aliases: %w", d.Id(), err)
+	}
+	versionID, ok := res["versionId"].(string)
+	if !ok || versionID == "" {
+		return fmt.Errorf("Model %q response did not include a version ID", d.Id())
+	}
+	var currentAliases []interface{}
+	if value, present := res["versionAliases"]; present {
+		currentAliases, ok = value.([]interface{})
+		if !ok {
+			return fmt.Errorf("Model %q response included invalid version aliases", d.Id())
+		}
+	}
+	aliases := vertexAiModelVersionAliasChanges(schema.NewSet(schema.HashString, currentAliases), d.Get("version_aliases").(*schema.Set))
+	if len(aliases) == 0 {
+		return nil
+	}
+	url = strings.Split(url, "@")[0] + "@" + versionID + ":mergeVersionAliases"
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: project,
+		RawURL: url,
+		UserAgent: userAgent,
+		Body: map[string]interface{}{"versionAliases": aliases},
+		Timeout: timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error merging version aliases for Model %q version %q: %w", d.Id(), versionID, err)
+	}
+	return nil
+}
+
+func vertexAiModelVersionAliasChanges(current, desired *schema.Set) []interface{} {
+	aliases := desired.Difference(current).List()
+	for _, alias := range current.Difference(desired).List() {
+		// Every model must retain a default version; omission must not delete its reserved alias.
+		if alias != "default" {
+			aliases = append(aliases, "-"+alias.(string))
+		}
+	}
+	return aliases
+}
+
+func vertexAiModelFilterVersionAliases(aliases []interface{}, configured cty.Value) []interface{} {
+	if configured.IsNull() || !configured.IsWhollyKnown() {
+		return aliases
+	}
+	for _, alias := range configured.AsValueSlice() {
+		if alias.AsString() == "default" {
+			return aliases
+		}
+	}
+	filtered := make([]interface{}, 0, len(aliases))
+	for _, alias := range aliases {
+		if alias != "default" {
+			filtered = append(filtered, alias)
+		}
+	}
+	return filtered
 }
