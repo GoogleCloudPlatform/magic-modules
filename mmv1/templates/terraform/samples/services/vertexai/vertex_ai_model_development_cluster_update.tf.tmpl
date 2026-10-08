@@ -89,12 +89,13 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
   provider                     = google-beta
   region                       = "us-central1"
   model_development_cluster_id = "{{index $.ResourceIdVars "model_development_cluster_id"}}"
-  display_name                 = "tftest"
+  display_name                 = "tftest-updated"
   deletion_policy              = "DELETE"
   depends_on                   = [google_compute_firewall.internal]
 
   labels = {
-    env = "dev"
+    env  = "prod"
+    team = "ml"
   }
 
   runtime_spec {
@@ -102,12 +103,12 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
   }
 
   lustre_export_config {
-    destination_bucket = "mdc-backup-bucket"
-    days_of_week       = ["MONDAY", "THURSDAY"]
+    destination_bucket = "mdc-backup-bucket-updated"
+    days_of_week       = ["TUESDAY", "FRIDAY", "SUNDAY"]
 
     start_time {
-      hours   = 4
-      minutes = 30
+      hours   = 6
+      minutes = 0
     }
   }
 
@@ -121,26 +122,42 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
       home_directory_storage = google_filestore_instance.home.id
       login_node_pool_id     = "login"
       default_partition_id   = "main"
-      prolog_bash_scripts    = ["#!/bin/bash\necho prolog"]
-      epilog_bash_scripts    = ["#!/bin/bash\necho epilog"]
+      prolog_bash_scripts    = ["#!/bin/bash\necho prolog-updated", "#!/bin/bash\necho prolog-2"]
+      epilog_bash_scripts    = ["#!/bin/bash\necho epilog-updated"]
 
       config = {
         PriorityType      = "priority/multifactor"
-        PriorityWeightAge = "1000"
+        PriorityWeightAge = "2000"
+        PriorityWeightQOS = "500"
       }
 
       node_sets {
         node_pool_id = "compute"
         config = {
-          Weight = "10"
+          Weight = "20"
+        }
+      }
+
+      node_sets {
+        node_pool_id = "respool"
+        config = {
+          Weight = "5"
         }
       }
 
       partitions {
         id            = "main"
-        node_pool_ids = ["compute", "flexpool", "respool"]
+        node_pool_ids = ["compute", "respool"]
         config = {
-          PriorityTier = "10"
+          PriorityTier = "20"
+        }
+      }
+
+      partitions {
+        id            = "flex"
+        node_pool_ids = ["flexpool"]
+        config = {
+          PriorityTier = "5"
         }
       }
     }
@@ -151,16 +168,17 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     zone               = "us-central1-b"
     provisioning_model = "ON_DEMAND"
     node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
-    startup_script     = "#!/bin/bash\necho hello"
+    startup_script     = "#!/bin/bash\necho hello-updated"
     enable_public_ips  = true
     filestores         = [google_filestore_instance.data.id]
 
     labels = {
       pool = "compute"
+      tier = "updated"
     }
 
     boot_disk {
-      boot_disk_size_gb = 100
+      boot_disk_size_gb = 150
       boot_disk_type    = "pd-ssd"
     }
 
@@ -170,7 +188,7 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
 
     scaling_spec {
       min_node_count = 1
-      max_node_count = 2
+      max_node_count = 3
     }
   }
 
@@ -178,18 +196,19 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     id                      = "flexpool"
     zone                    = "us-central1-b"
     provisioning_model      = "FLEX_START"
-    flex_start_max_duration = "3600s"
+    flex_start_max_duration = "7200s"
     node_image              = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
-    startup_script          = "#!/bin/bash\necho hello"
+    startup_script          = "#!/bin/bash\necho hello-updated"
     enable_public_ips       = true
     filestores              = [google_filestore_instance.data.id]
 
     labels = {
       pool = "flexpool"
+      tier = "updated"
     }
 
     boot_disk {
-      boot_disk_size_gb = 100
+      boot_disk_size_gb = 150
       boot_disk_type    = "hyperdisk-balanced"
     }
 
@@ -199,7 +218,7 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
 
     scaling_spec {
       min_node_count = 0
-      max_node_count = 1
+      max_node_count = 2
     }
   }
 
@@ -208,16 +227,17 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     zone               = "us-central1-b"
     provisioning_model = "ON_DEMAND"
     node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
-    startup_script     = "#!/bin/bash\necho hello"
+    startup_script     = "#!/bin/bash\necho hello-updated"
     enable_public_ips  = true
     filestores         = [google_filestore_instance.data.id]
 
     labels = {
       pool = "login"
+      tier = "updated"
     }
 
     boot_disk {
-      boot_disk_size_gb = 100
+      boot_disk_size_gb = 150
       boot_disk_type    = "pd-ssd"
     }
 
@@ -236,16 +256,17 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     zone               = "us-central1-b"
     provisioning_model = "RESERVATION"
     node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
-    startup_script     = "#!/bin/bash\necho hello"
+    startup_script     = "#!/bin/bash\necho hello-updated"
     enable_public_ips  = true
     filestores         = [google_filestore_instance.data.id]
 
     labels = {
       pool = "respool"
+      tier = "updated"
     }
 
     boot_disk {
-      boot_disk_size_gb = 100
+      boot_disk_size_gb = 150
       boot_disk_type    = "pd-ssd"
     }
 

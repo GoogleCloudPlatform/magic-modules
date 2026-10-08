@@ -62,11 +62,7 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
-        vars:
-          display_name: tftest
-          max_node_count: '2'
-          priority_weight_age: '1000'
-      - name: vertex_ai_model_development_cluster_basic
+      - name: vertex_ai_model_development_cluster_update
         min_version: beta
         resource_id_vars:
           model_development_cluster_id: tftest
@@ -78,10 +74,6 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
-        vars:
-          display_name: tftest-updated
-          max_node_count: '3'
-          priority_weight_age: '2000'
 parameters:
   - name: region
     type: String
