@@ -128,8 +128,8 @@ var (
 					endDate:   newDate(2026, 8, 17),
 				},
 				{
-					startDate: newDate(2026, 10, 12),
-					endDate:   newDate(2026, 11, 6),
+					startDate: newDate(2026, 10, 8),
+					endDate:   newDate(2026, 11, 8),
 				},
 			},
 		},
