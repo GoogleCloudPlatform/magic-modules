@@ -1,5 +1,4 @@
 package dataflow
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -961,5 +960,3 @@ func init() {
 		Schema: ResourceDataflowFlexTemplateJob(),
 	}.Register()
 }
-
-{{ end }}

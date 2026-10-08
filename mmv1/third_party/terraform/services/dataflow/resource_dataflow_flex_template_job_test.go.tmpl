@@ -1,5 +1,4 @@
 package dataflow_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"encoding/json"
@@ -2276,5 +2275,3 @@ resource "google_dataflow_flex_template_job" "duplicate" {
 }
 `, topicName, bucket, job, job)
 }
-
-{{- end }}
