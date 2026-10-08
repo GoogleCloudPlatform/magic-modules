@@ -143,7 +143,8 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 			{
 				Config: testAccVertexAIModel_copyWithOptionalFieldsUpdate(context),
 				Check: resource.TestCheckResourceAttr(
-					"google_vertex_ai_model.model", "version_aliases.0", context["version_alias"].(string),
+					// Vertex AI retains the reserved "default" alias at index 0.
+					"google_vertex_ai_model.model", "version_aliases.1", context["version_alias"].(string),
 				),
 			},
 		},
