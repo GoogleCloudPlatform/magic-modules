@@ -64,6 +64,24 @@ samples:
         ignore_read_extra:
           - "submit"
           - "deletion_policy"
+  - name: "bigquery_analyticshub_querytemplate_cmek"
+    primary_resource_id: "querytemplate"
+    region_override: "us"
+    # Test requires google_project_service_identity which is a beta-only resource
+    min_version: "beta"
+    external_providers: ["time"]
+    steps:
+      - name: "bigquery_analyticshub_querytemplate_cmek"
+        min_version: "beta"
+        resource_id_vars:
+          data_exchange_id: "my_data_exchange"
+          query_template_id: "my_query_template"
+          kms_key_name: "projects/keys-project/locations/us/keyRings/key-ring/cryptoKeys/crypto-key"
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+        ignore_read_extra:
+          - "submit"
+          - "deletion_policy"
 
 custom_code:
   constants: "templates/terraform/constants/bigquery_analytics_hub_query_template.go.tmpl"
@@ -149,6 +167,21 @@ properties:
       - name: "definitionBody"
         type: String
         description: "SQL query logic."
+  - name: "encryptionConfiguration"
+    type: NestedObject
+    description: |
+      Encryption configuration for the query template.
+      If set, the customer-managed KMS key is used to encrypt the query
+      template definition body.
+    immutable: true
+    properties:
+      - name: "kmsKeyName"
+        type: String
+        description: |
+          The KMS key used to encrypt the query template.
+          Format: `projects/{project}/locations/{location}/keyRings/{keyring}/cryptoKeys/{key}`
+        required: true
+        immutable: true
   - name: "createTime"
     type: String
     description: "Timestamp when the QueryTemplate was created."
