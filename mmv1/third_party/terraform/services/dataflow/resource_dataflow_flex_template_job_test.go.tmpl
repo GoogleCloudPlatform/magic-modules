@@ -3,6 +3,7 @@ package dataflow_test
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -19,12 +20,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
@@ -861,7 +857,24 @@ func testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t *testing.T, re
 	}
 }
 
-func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *terraform.State, res string) (*compute.InstanceTemplate, error) {
+type dataflowFlexTemplateInstanceTemplate struct {
+	Properties *dataflowFlexTemplateInstanceTemplateProperties `json:"properties"`
+}
+
+type dataflowFlexTemplateInstanceTemplateProperties struct {
+	NetworkInterfaces []dataflowFlexTemplateNetworkInterface `json:"networkInterfaces"`
+}
+
+type dataflowFlexTemplateNetworkInterface struct {
+	Network    string `json:"network"`
+	Subnetwork string `json:"subnetwork"`
+}
+
+type dataflowFlexTemplateInstanceTemplatesResponse struct {
+	Items []dataflowFlexTemplateInstanceTemplate `json:"items"`
+}
+
+func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *terraform.State, res string) (*dataflowFlexTemplateInstanceTemplate, error) {
 	rs, ok := s.RootModule().Resources[res]
 	if !ok {
 		return nil, fmt.Errorf("resource %q not in state", res)
@@ -873,15 +886,30 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 
 	config := acctest.GoogleProviderConfig(t)
 
-	var instanceTemplate *compute.InstanceTemplate
+	var instanceTemplate *dataflowFlexTemplateInstanceTemplate
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		instanceTemplates, rerr := compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).RegionInstanceTemplates.
-			List(config.Project, config.Region).
-			Filter(filter).
-			MaxResults(2).
-			Fields("items/properties").Do()
+		query := url.Values{
+			"filter":     []string{filter},
+			"maxResults": []string{"2"},
+			"fields":     []string{"items/properties"},
+		}
+		rawURL := fmt.Sprintf("%sprojects/%s/regions/%s/regionInstanceTemplates?%s", transport_tpg.BaseUrl(compute_tpg.Product, config), config.Project, config.Region, query.Encode())
+		response, rerr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    rawURL,
+			UserAgent: config.UserAgent,
+		})
 		if rerr != nil {
+			return resource.NonRetryableError(rerr)
+		}
+		responseJSON, rerr := json.Marshal(response)
+		if rerr != nil {
+			return resource.NonRetryableError(rerr)
+		}
+		var instanceTemplates dataflowFlexTemplateInstanceTemplatesResponse
+		if rerr := json.Unmarshal(responseJSON, &instanceTemplates); rerr != nil {
 			return resource.NonRetryableError(rerr)
 		}
 		if len(instanceTemplates.Items) == 0 {
@@ -890,7 +918,7 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 		if len(instanceTemplates.Items) > 1 {
 			return resource.NonRetryableError(fmt.Errorf("Wrong number of matching instance templates for dataflow job: %s, %d", rs.Primary.ID, len(instanceTemplates.Items)))
 		}
-		instanceTemplate = instanceTemplates.Items[0]
+		instanceTemplate = &instanceTemplates.Items[0]
 		if instanceTemplate == nil || instanceTemplate.Properties == nil {
 			return resource.NonRetryableError(fmt.Errorf("invalid instance template has no properties"))
 		}
