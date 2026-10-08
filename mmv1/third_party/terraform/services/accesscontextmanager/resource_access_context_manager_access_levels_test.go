@@ -101,6 +101,12 @@ resource "google_access_context_manager_access_levels" "test-access" {
 	  combining_function = "AND"
 	  conditions {
 	    ip_subnetworks = ["192.0.4.0/24"]
+	    device_policy {
+	      os_constraints {
+	        os_type                    = "DESKTOP_CHROME_OS"
+	        require_verified_chrome_os = true
+	      }
+	    }
 	  }
     }
   }
@@ -141,6 +147,12 @@ resource "google_access_context_manager_access_levels" "test-access" {
 	  combining_function = "AND"
 	  conditions {
 	    ip_subnetworks = ["192.0.2.0/24"]
+	    device_policy {
+	      os_constraints {
+	        os_type                    = "DESKTOP_CHROME_OS"
+	        require_verified_chrome_os = false
+	      }
+	    }
 	  }
     }
   }

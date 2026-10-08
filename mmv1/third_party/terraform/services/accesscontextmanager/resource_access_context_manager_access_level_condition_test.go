@@ -21,21 +21,34 @@ import (
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 
 func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
+	testAccAccessContextManagerAccessLevelCondition_requireVerifiedChromeOs(t, true)
+}
+
+// The resource is immutable, so require_verified_chrome_os = false is covered by a separate test rather than an update step.
+func testAccAccessContextManagerAccessLevelCondition_unverifiedChromeOsTest(t *testing.T) {
+	testAccAccessContextManagerAccessLevelCondition_requireVerifiedChromeOs(t, false)
+}
+
+func testAccAccessContextManagerAccessLevelCondition_requireVerifiedChromeOs(t *testing.T, requireVerifiedChromeOs bool) {
 	org := envvar.GetTestOrgFromEnv(t)
 	project := envvar.GetTestProjectFromEnv()
 
 	serviceAccountName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
 
+	// The API omits requireVerifiedChromeOs from the response when it is false.
+	osConstraint := map[string]interface{}{
+		"osType": "DESKTOP_CHROME_OS",
+	}
+	if requireVerifiedChromeOs {
+		osConstraint["requireVerifiedChromeOs"] = true
+	}
+
 	expected := map[string]interface{}{
 		"members": []interface{}{fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", serviceAccountName, project)},
 		"devicePolicy": map[string]interface{}{
 			"requireCorpOwned": true,
-			"osConstraints": []interface{}{
-				map[string]interface{}{
-					"osType": "DESKTOP_CHROME_OS",
-				},
-			},
+			"osConstraints":    []interface{}{osConstraint},
 		},
 		"regions": []interface{}{"IT", "US"},
 		"vpcNetworkSources": []interface{}{
@@ -54,7 +67,7 @@ func testAccAccessContextManagerAccessLevelCondition_basicTest(t *testing.T) {
 		CheckDestroy:             testAccCheckAccessContextManagerAccessLevelConditionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerAccessLevelCondition_basic(org, "my policy", "level", serviceAccountName, vpcName),
+				Config: testAccAccessContextManagerAccessLevelCondition_basic(org, "my policy", "level", serviceAccountName, vpcName, requireVerifiedChromeOs),
 				Check:  testAccCheckAccessContextManagerAccessLevelConditionPresent(t, "google_access_context_manager_access_level_condition.access-level-condition", expected),
 			},
 		},
@@ -121,7 +134,7 @@ func testAccCheckAccessContextManagerAccessLevelConditionDestroyProducer(t *test
 	}
 }
 
-func testAccAccessContextManagerAccessLevelCondition_basic(org, policyTitle, levelTitleName, saName, vpcName string) string {
+func testAccAccessContextManagerAccessLevelCondition_basic(org, policyTitle, levelTitleName, saName, vpcName string, requireVerifiedChromeOs bool) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
@@ -174,6 +187,7 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
     require_corp_owned = true
     os_constraints {
       os_type = "DESKTOP_CHROME_OS"
+      require_verified_chrome_os = %t
     }
   }
   regions = [
@@ -188,5 +202,5 @@ resource "google_access_context_manager_access_level_condition" "access-level-co
 		}
 	}
 }
-`, org, policyTitle, levelTitleName, levelTitleName, saName, vpcName)
+`, org, policyTitle, levelTitleName, levelTitleName, saName, vpcName, requireVerifiedChromeOs)
 }
