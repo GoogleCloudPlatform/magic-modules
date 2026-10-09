@@ -1,0 +1,138 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AutoProtectionPolicyBinding
+description: |
+  An AutoProtectionPolicyBinding applies an AutoProtectionPolicy to a scope, such as a
+  project. Once bound, the policy automatically protects the eligible resources in that
+  scope that match its criteria.
+min_version: beta
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/backup-disaster-recovery/docs
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1beta/projects.locations.autoProtectionPolicies.bindings
+docs:
+  note: |
+    Deleting a binding is asynchronous: the API first stops applying the policy to the
+    resources in the binding's scope, and then removes the binding. Terraform waits until
+    the binding has been removed, which can take several minutes.
+base_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings
+self_link: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings/{{auto_protection_policy_binding_id}}
+create_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings?autoProtectionPolicyBindingId={{auto_protection_policy_binding_id}}
+# The API has no standard Delete method for bindings. Deletion goes through the custom
+# initiateDelete method, followed by a wait in post_delete until the binding is removed.
+delete_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings/{{auto_protection_policy_binding_id}}:initiateDelete
+delete_verb: POST
+# The API has no Update method for bindings.
+immutable: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings/{{auto_protection_policy_binding_id}}
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 60
+autogen_async: true
+custom_code:
+  post_delete: templates/terraform/post_delete/backup_dr_auto_protection_policy_binding.go.tmpl
+samples:
+  - name: backup_dr_auto_protection_policy_binding_basic
+    primary_resource_id: my-binding
+    min_version: beta
+    steps:
+      - name: backup_dr_auto_protection_policy_binding_basic
+        resource_id_vars:
+          backup_vault_id: bv-app-binding
+          backup_plan_id: bp-app-binding
+          auto_protection_policy_id: app-binding
+          auto_protection_policy_binding_id: my-project-binding
+          # Unique label value, so that the policy doesn't protect any existing
+          # resources in the test project while it is bound.
+          label_value: gold
+parameters:
+  - name: location
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location of the auto protection policy.
+  - name: autoProtectionPolicyId
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the auto protection policy to bind.
+  - name: autoProtectionPolicyBindingId
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the binding. This becomes the final component of the binding's resource name.
+properties:
+  - name: name
+    type: String
+    output: true
+    description: |
+      The resource name of the binding, in the format
+      `projects/{project}/locations/{location}/autoProtectionPolicies/{auto_protection_policy_id}/bindings/{auto_protection_policy_binding_id}`.
+  - name: scope
+    type: String
+    required: true
+    # The API returns the scope with the project number, even when it was set with the project ID.
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    description: |
+      The container that the policy is applied to, in the format `projects/{project}`.
+  - name: state
+    type: String
+    output: true
+    description: |
+      The current state of the binding.
+      Possible values are `CREATING`, `ACTIVE`, and `DELETION_INITIATED`.
+  - name: etag
+    type: String
+    output: true
+    description: |
+      The etag of the binding, used for optimistic concurrency control.
+  - name: createTime
+    type: String
+    output: true
+    description: |
+      The time when the binding was created.
+  - name: updateTime
+    type: String
+    output: true
+    description: |
+      The time when the binding was last updated.
+  - name: bindingEvaluationSummary
+    type: NestedObject
+    output: true
+    description: |
+      A summary of the last run of the job that applies the policy to matching resources within the binding's scope.
+    properties:
+      - name: matchingResourceCount
+        type: String
+        output: true
+        description: |
+          The number of resources that currently match the policy's criteria.
+      - name: protectedResourceCount
+        type: String
+        output: true
+        description: |
+          The number of matching resources that are successfully protected.
+      - name: failedResourceCount
+        type: String
+        output: true
+        description: |
+          The number of matching resources whose protection failed during the last job run.
