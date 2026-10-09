@@ -12,7 +12,7 @@ resource "google_firestore_database" "database" {
 resource "google_firestore_field" "{{$.PrimaryResourceId}}" {
   project    = "{{index $.TestEnvVars "project_id"}}"
   database   = google_firestore_database.database.name
-  collection = "chatrooms"
+  collection = "chatrooms_%{random_suffix}"
   field      = "timestamp"
 
   # Enable a TTL policy for the collection based on timestamp values in the field.
