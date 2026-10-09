@@ -26,6 +26,14 @@ docs:
 base_url: v3/projects/{{project}}/groups
 self_link: v3/{{name}}
 id_format: '{{name}}'
+# ListGroupsResponse returns the list under the singular "group", not "groups";
+# without this the sweeper would find nothing. Note that reading the list is
+# necessary but not sufficient: the tf-test prefix is on displayName, while
+# "name" is projects/{{project}}/groups/{{group_id}} with a server-generated
+# group_id, so nothing matches yet. Pointing identifier_field at displayName
+# needs a template fix first, because the delete URL is v3/{{name}} and the
+# sweeper strips it down to a bare group_id.
+collection_url_key: group
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
