@@ -11,12 +11,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"cloud.google.com/go/bigtable"
+	btadmin "cloud.google.com/go/bigtable/admin/apiv2"
+	adminpb "cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 )
 
 // resourceBigtableInstanceVirtualUpdate identifies if an update to the resource includes only virtual field updates
@@ -160,6 +165,26 @@ func ResourceBigtableInstance() *schema.Resource {
 							Default:      "NodeScalingFactor1X",
 							ValidateFunc: validation.StringInSlice([]string{"NodeScalingFactor1X", "NodeScalingFactor2X"}, false),
 							Description:  `The node scaling factor of this cluster. One of "NodeScalingFactor1X" or "NodeScalingFactor2X". Defaults to "NodeScalingFactor1X".`,
+						},
+						"memory_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: `The memory layer configuration for the cluster. Set an empty memory_config block to enable the memory layer. Unset this to disable the memory layer.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"storage_size_gib": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: `Reporting the current size of the memory layer in GiB.`,
+									},
+									"state": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: `The current state of the memory layer.`,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -319,6 +344,10 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 	d.SetId(id)
 
+	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, conf.InstanceID, nil, d.Get("cluster").([]interface{}), true); err != nil {
+		return err
+	}
+
 	return resourceBigtableInstanceRead(d, meta)
 }
 
@@ -376,9 +405,18 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
+	memoryLayers, err := listBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, instanceName)
+	if err != nil {
+		return err
+	}
+
 	clustersNewState := []map[string]interface{}{}
 	for _, cluster := range clusters {
-		clustersNewState = append(clustersNewState, flattenBigtableCluster(cluster))
+		clusterState := flattenBigtableCluster(cluster)
+		if ml := memoryLayers[cluster.Name]; ml != nil && ml.GetMemoryConfig() != nil {
+			clusterState["memory_config"] = flattenBigtableMemoryLayer(ml)
+		}
+		clustersNewState = append(clustersNewState, clusterState)
 	}
 
 	log.Printf("[DEBUG] Setting clusters in state: %#v", clustersNewState)
@@ -505,8 +543,19 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, d.Timeout(schema.TimeoutUpdate))
 	defer cancel()
+
+	oldClustersRaw, newClustersRaw := d.GetChange("cluster")
+	oldClusters, _ := oldClustersRaw.([]interface{})
+	newClusters, _ := newClustersRaw.([]interface{})
+
+	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, conf.InstanceID, oldClusters, newClusters, false); err != nil {
+		return err
+	}
 	if _, err := bigtable.UpdateInstanceAndSyncClusters(ctxWithTimeout, c, conf); err != nil {
 		return fmt.Errorf("Error updating instance. %s", err)
+	}
+	if err := syncBigtableClusterMemoryLayers(ctxWithTimeout, c.InstanceAdminClientV2(), project, conf.InstanceID, oldClusters, newClusters, true); err != nil {
+		return err
 	}
 
 	return resourceBigtableInstanceRead(d, meta)
@@ -627,6 +676,149 @@ func flattenBigtableCluster(c *bigtable.ClusterInfo) map[string]interface{} {
 		autoscaling_config[0]["storage_target"] = c.AutoscalingConfig.StorageUtilizationPerNode
 	}
 	return cluster
+}
+
+func flattenBigtableMemoryLayer(ml *adminpb.MemoryLayer) []map[string]interface{} {
+	if ml == nil || ml.GetMemoryConfig() == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"storage_size_gib": int(ml.GetMemoryConfig().GetStorageSizeGib()),
+			"state":            ml.GetState().String(),
+		},
+	}
+}
+
+func clusterIDFromMemoryLayerName(name string) string {
+	parts := strings.Split(name, "/")
+	for i := 0; i+1 < len(parts); i++ {
+		if parts[i] == "clusters" {
+			return parts[i+1]
+		}
+	}
+	return ""
+}
+
+func isClusterMemoryLayerEnabled(cluster map[string]interface{}) bool {
+	if v, ok := cluster["memory_config"]; ok && v != nil {
+		if l, ok := v.([]interface{}); ok {
+			return len(l) > 0
+		}
+		if l, ok := v.([]map[string]interface{}); ok {
+			return len(l) > 0
+		}
+	}
+	return false
+}
+
+func clustersNeedingMemoryLayerUpdate(oldClusters, newClusters []interface{}) map[string]bool {
+	oldEnabled := make(map[string]bool, len(oldClusters))
+	for _, raw := range oldClusters {
+		c, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		clusterID, _ := c["cluster_id"].(string)
+		if clusterID != "" {
+			oldEnabled[clusterID] = isClusterMemoryLayerEnabled(c)
+		}
+	}
+
+	updates := make(map[string]bool)
+	for _, raw := range newClusters {
+		c, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		clusterID, _ := c["cluster_id"].(string)
+		if clusterID == "" {
+			continue
+		}
+		enabled := isClusterMemoryLayerEnabled(c)
+		if prevEnabled, existed := oldEnabled[clusterID]; existed {
+			if prevEnabled != enabled {
+				updates[clusterID] = enabled
+			}
+		} else if enabled {
+			updates[clusterID] = true
+		}
+	}
+	return updates
+}
+
+func syncBigtableClusterMemoryLayers(ctx context.Context, client *btadmin.BigtableInstanceAdminClient, project, instanceID string, oldClusters, newClusters []interface{}, targetEnabled bool) error {
+	updates := clustersNeedingMemoryLayerUpdate(oldClusters, newClusters)
+	var clusterIDs []string
+	for _, raw := range newClusters {
+		c, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		clusterID, _ := c["cluster_id"].(string)
+		if enabled, needsUpdate := updates[clusterID]; needsUpdate && enabled == targetEnabled {
+			clusterIDs = append(clusterIDs, clusterID)
+		}
+	}
+	if len(clusterIDs) == 0 {
+		return nil
+	}
+
+	for _, clusterID := range clusterIDs {
+		if err := updateBigtableClusterMemoryLayer(ctx, client, project, instanceID, clusterID, targetEnabled); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func updateBigtableClusterMemoryLayer(ctx context.Context, client *btadmin.BigtableInstanceAdminClient, project, instanceID, clusterID string, enable bool) error {
+	name := fmt.Sprintf("projects/%s/instances/%s/clusters/%s/memoryLayer", project, instanceID, clusterID)
+	ml := &adminpb.MemoryLayer{
+		Name: name,
+	}
+	if enable {
+		ml.MemoryConfig = &adminpb.MemoryLayer_MemoryConfig{}
+	}
+	req := &adminpb.UpdateMemoryLayerRequest{
+		MemoryLayer: ml,
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"memory_config"},
+		},
+	}
+	op, err := client.UpdateMemoryLayer(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Error updating memory layer for cluster %s: %s", clusterID, err)
+	}
+	if _, err := op.Wait(ctx); err != nil {
+		return fmt.Errorf("Error waiting for memory layer update for cluster %s: %s", clusterID, err)
+	}
+	return nil
+}
+
+func listBigtableClusterMemoryLayers(ctx context.Context, client *btadmin.BigtableInstanceAdminClient, project, instanceID string) (map[string]*adminpb.MemoryLayer, error) {
+	parent := fmt.Sprintf("projects/%s/instances/%s/clusters/-", project, instanceID)
+	it := client.ListMemoryLayers(ctx, &adminpb.ListMemoryLayersRequest{
+		Parent: parent,
+	})
+	result := make(map[string]*adminpb.MemoryLayer)
+	for {
+		ml, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			if st, ok := status.FromError(err); ok && (st.Code() == codes.Unimplemented || st.Code() == codes.PermissionDenied) {
+				log.Printf("[DEBUG] Ignoring %s error when listing memory layers for instance %s: %s", st.Code(), instanceID, err)
+				return result, nil
+			}
+			return nil, fmt.Errorf("Error retrieving instance memory layers: %s", err)
+		}
+		if clusterID := clusterIDFromMemoryLayerName(ml.GetName()); clusterID != "" {
+			result[clusterID] = ml
+		}
+	}
+	return result, nil
 }
 
 func getInstanceFromResponse(instances []*bigtable.InstanceInfo, instanceName string, err error, d *schema.ResourceData) (*bigtable.InstanceInfo, bool, error) {
@@ -796,12 +988,17 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 	}
 
 	oldIds := []string{}
+	oldClusters := make(map[string]map[string]interface{}, oldCount.(int))
 	clusters := make(map[string]interface{}, newCount.(int))
 
 	for i := 0; i < oldCount.(int); i++ {
 		oldId, _ := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		if oldId != nil && oldId != "" {
 			oldIds = append(oldIds, oldId.(string))
+			oldC, _ := diff.GetChange(fmt.Sprintf("cluster.%d", i))
+			if oldClusterMap, ok := oldC.(map[string]interface{}); ok {
+				oldClusters[oldId.(string)] = oldClusterMap
+			}
 		}
 	}
 	log.Printf("[DEBUG] Saw old ids: %#v", oldIds)
@@ -811,6 +1008,11 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
 		typedCluster := c.(map[string]interface{})
 		typedCluster["state"] = "READY"
+		if isClusterMemoryLayerEnabled(typedCluster) {
+			if oldCluster, ok := oldClusters[newId.(string)]; ok && isClusterMemoryLayerEnabled(oldCluster) {
+				typedCluster["memory_config"] = oldCluster["memory_config"]
+			}
+		}
 		clusters[newId.(string)] = typedCluster
 	}
 

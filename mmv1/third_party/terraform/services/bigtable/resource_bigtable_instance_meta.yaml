@@ -12,6 +12,8 @@ fields:
   - field: 'cluster.autoscaling_config.storage_target'
   - field: 'cluster.cluster_id'
   - field: 'cluster.kms_key_name'
+  - field: 'cluster.memory_config.state'
+  - field: 'cluster.memory_config.storage_size_gib'
   - field: 'cluster.node_scaling_factor'
   - field: 'cluster.num_nodes'
   - field: 'cluster.state'
