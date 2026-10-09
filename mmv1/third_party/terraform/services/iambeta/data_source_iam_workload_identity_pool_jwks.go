@@ -26,7 +26,7 @@ func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 			"resource_name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				ValidateFunc: validation.IsURLWithHTTPS,
 				Description:  "The JWKS URI to retrieve the public keys from (e.g. from google_iam_workload_identity_pool_openid_config.jwks_uri).",
 			},
 			"jwks_json": {
@@ -85,6 +85,9 @@ func dataSourceIAMBetaWorkloadIdentityPoolJwksRead(d *schema.ResourceData, meta 
 	}
 
 	url := d.Get("resource_name").(string)
+	if err := validateWorkloadIdentityPoolURL(url); err != nil {
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(config.Context, d.Timeout(schema.TimeoutRead))
 	defer cancel()
