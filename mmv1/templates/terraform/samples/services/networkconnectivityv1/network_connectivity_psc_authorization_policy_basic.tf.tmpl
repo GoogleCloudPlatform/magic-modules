@@ -1,0 +1,13 @@
+resource "google_network_connectivity_psc_authorization_policy" "{{$.PrimaryResourceId}}" {
+  name                         = "{{index $.ResourceIdVars "policy_name"}}"
+  location                     = "us-central1"
+  description                  = "My PSC Authorization Policy"
+  target_resource_uri          = "//agentregistry.googleapis.com/projects/${data.google_project.project.number}/locations/global"
+  authorized_client_resources  = ["projects/${data.google_project.project.number}"]
+  authorization_mode           = "AUTHORIZATION_MODE_TRANSITIVE_TO_SERVICE_ATTACHMENT"
+  labels = {
+    foo = "bar"
+  }
+}
+
+data "google_project" "project" {}
