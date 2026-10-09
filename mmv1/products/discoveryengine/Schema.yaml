@@ -24,7 +24,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas
 generate_list_resource: true
-immutable: true
+update_verb: PATCH
 self_link: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}
 delete_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
@@ -91,7 +91,6 @@ properties:
     type: String
     description: |
       The JSON representation of the schema.
-    immutable: true
     exactly_one_of:
       - json_schema
     state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
