@@ -321,8 +321,6 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 }
 
 func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]any{
 		"org_id":         envvar.GetTestOrgFromEnv(t),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
@@ -385,8 +383,6 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 }
 
 func testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeTest(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]any{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
@@ -438,8 +434,6 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 }
 
 func testAccAccessContextManagerGcpUserAccessBindingMultiScopeTest(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]any{
 		"org_id":         envvar.GetTestOrgFromEnv(t),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
