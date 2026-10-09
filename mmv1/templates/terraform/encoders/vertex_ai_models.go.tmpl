@@ -1,5 +1,24 @@
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
 // Copy and UpdateModel do not manage aliases; the post hooks use mergeVersionAliases.
 delete(obj, "versionAliases")
+
+// UploadModel nests Model fields under "model"; copy and UpdateModel do not.
+if _, ok := d.GetOk("source_model"); ok || d.Id() != "" {
+	return obj, nil
+}
+model := make(map[string]interface{})
+for _, field := range []string{
+	"displayName",
+	"description",
+	"artifactUri",
+	"containerSpec",
+	"encryptionSpec",
+} {
+	if value, ok := obj[field]; ok {
+		model[field] = value
+		delete(obj, field)
+	}
+}
+obj["model"] = model
 {{- end }}
 return obj, nil
