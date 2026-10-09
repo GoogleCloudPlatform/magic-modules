@@ -1,0 +1,197 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SchemaVersion
+description: |
+  SchemaVersion is a version of the Schema which is created in Schema.
+references:
+  api: https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.schemas.schemaVersions
+docs:
+base_url: projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions
+self_link: projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions/{{name}}
+update_mask: true
+update_verb: PATCH
+autogen_async: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [delete]
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+samples:
+  - name: documentai_schema_version
+    primary_resource_id: schema_version
+    steps:
+      - name: documentai_schema_version
+        resource_id_vars:
+          schema_display_name: my-schema
+        vars:
+          display_name: my-schema-version
+          env_label: test
+      - name: documentai_schema_version
+        resource_id_vars:
+          schema_display_name: my-schema
+        vars:
+          display_name: my-schema-version-updated
+          env_label: updated
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: schema_id
+    type: String
+    description: |
+      The schema id that this schema version belongs to.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the SchemaVersion.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      The user-defined name of the SchemaVersion.
+    required: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      The Google Cloud labels for the SchemaVersion.
+  - name: createTime
+    type: Time
+    description: |
+      The time when the SchemaVersion was created.
+    output: true
+  - name: schema
+    type: NestedObject
+    description: |
+      The schema of the SchemaVersion.
+    required: true
+    immutable: true
+    properties:
+      - name: displayName
+        type: String
+        description: |
+          Display name to show users.
+      - name: description
+        type: String
+        description: |
+          Description of the schema.
+      - name: documentPrompt
+        type: String
+        description: |
+          Document-level prompt provided by the user. This custom text is injected into the AI model's prompt to provide extra, document-wide guidance for processing.
+      - name: metadata
+        type: NestedObject
+        description: |
+          Metadata of the schema.
+        properties:
+          - name: documentSplitter
+            type: Boolean
+            description: |
+              If true, a `document` entity type can be applied to subdocument (splitting). Otherwise, it can only be applied to the entire document (classification).
+          - name: documentAllowMultipleLabels
+            type: Boolean
+            description: |
+              If true, on a given page, there can be multiple `document` annotations covering it.
+          - name: prefixedNamingOnProperties
+            type: Boolean
+            description: |
+              If set, all the nested entities must be prefixed with the parents.
+          - name: skipNamingValidation
+            type: Boolean
+            description: |
+              If set, this will skip the naming format validation in the schema. So the string values in `DocumentSchema.EntityType.name` and `DocumentSchema.EntityType.Property.name` will not be checked.
+      - name: entityTypes
+        type: Array
+        description: |
+          Entity types of the schema.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: name
+              type: String
+              description: |
+                Name of the type. It must be unique within the schema file and cannot be a "Common Type".
+              required: true
+            - name: displayName
+              type: String
+              description: |
+                User defined name for the type.
+            - name: baseTypes
+              type: Array
+              description: |
+                The entity type that this type is derived from. For now, one and only one should be set.
+              item_type:
+                type: String
+            - name: enumValues
+              type: NestedObject
+              description: |
+                Defines a list of enum values.
+              properties:
+                - name: values
+                  type: Array
+                  description: |
+                    The individual values that this enum values type can include.
+                  item_type:
+                    type: String
+            - name: properties
+              type: Array
+              description: |
+                Defines properties that can be part of the entity type.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: name
+                    type: String
+                    description: |
+                      The name of the property. Follows the same guidelines as the EntityType name.
+                    required: true
+                  - name: displayName
+                    type: String
+                    description: |
+                      User defined name for the property.
+                  - name: valueType
+                    type: String
+                    description: |
+                      A reference to the value type of the property. This type is subject to the same conventions as the `Entity.base_types` field.
+                    required: true
+                  - name: occurrenceType
+                    type: Enum
+                    description: |
+                      Occurrence type limits the number of instances an entity type appears in the document.
+                    enum_values:
+                      - OPTIONAL_ONCE
+                      - OPTIONAL_MULTIPLE
+                      - REQUIRED_ONCE
+                      - REQUIRED_MULTIPLE
+                  - name: method
+                    type: Enum
+                    description: |
+                      Specifies how the entity's value is obtained.
+                    enum_values:
+                      - EXTRACT
+                      - DERIVE
+                      - RELAXED_EXTRACT
