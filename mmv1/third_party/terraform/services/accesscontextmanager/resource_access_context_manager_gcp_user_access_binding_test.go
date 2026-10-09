@@ -319,3 +319,184 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
 }
 `, context)
 }
+
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest(t *testing.T) {
+	context := map[string]any{
+		"org_id":         envvar.GetTestOrgFromEnv(t),
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"random_suffix":  acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context, "3600s"),
+			},
+			{
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_project",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+			{
+				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context, "7200s"),
+			},
+			{
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_project",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+		},
+	})
+}
+
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context map[string]any, sessionLength string) string {
+	context["session_length"] = sessionLength
+	return acctest.Nprintf(`
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_restricted_project" {
+  organization_id = "%{org_id}"
+  principal {
+    federated_principal = "principalSet://cloudresourcemanager.googleapis.com/organizations/%{org_id}/type/WorkforcePool"
+  }
+  scoped_access_settings {
+    scope {
+      client_scope {
+        restricted_project {
+          name = "projects/%{project_number}"
+        }
+      }
+    }
+    active_settings {
+      session_settings {
+        session_length         = "%{session_length}"
+        session_length_enabled = true
+        session_reauth_method  = "LOGIN"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeTest(t *testing.T) {
+	context := map[string]any{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeExample(context),
+			},
+			{
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_client_application",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+		},
+	})
+}
+
+func testAccAccessContextManagerGcpUserAccessBindingRestrictedClientApplicationScopeExample(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_restricted_client_application" {
+  organization_id = "%{org_id}"
+  principal {
+    federated_principal = "principalSet://cloudresourcemanager.googleapis.com/organizations/%{org_id}/type/WorkforcePool"
+  }
+  scoped_access_settings {
+    scope {
+      client_scope {
+        restricted_client_application {
+          name = "Gemini Enterprise mobile Android"
+        }
+      }
+    }
+    active_settings {
+      session_settings {
+        session_length         = "7776000s"
+        session_length_enabled = true
+        session_reauth_method  = "LOGIN"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccAccessContextManagerGcpUserAccessBindingMultiScopeTest(t *testing.T) {
+	context := map[string]any{
+		"org_id":         envvar.GetTestOrgFromEnv(t),
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"random_suffix":  acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAccessContextManagerGcpUserAccessBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccessContextManagerGcpUserAccessBindingMultiScopeExample(context),
+			},
+			{
+				ResourceName:            "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_multiscope",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+		},
+	})
+}
+
+func testAccAccessContextManagerGcpUserAccessBindingMultiScopeExample(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_multiscope" {
+  organization_id = "%{org_id}"
+  principal {
+    federated_principal = "principalSet://cloudresourcemanager.googleapis.com/organizations/%{org_id}/type/WorkforcePool"
+  }
+  scoped_access_settings {
+    scope {
+      client_scope {
+        restricted_project {
+          name = "projects/%{project_number}"
+        }
+      }
+    }
+    active_settings {
+      session_settings {
+        session_length         = "7200s"
+        session_length_enabled = true
+        session_reauth_method  = "LOGIN"
+      }
+    }
+  }
+  scoped_access_settings {
+    scope {
+      client_scope {
+        restricted_client_application {
+          name = "Gemini Enterprise mobile Android"
+        }
+      }
+    }
+    active_settings {
+      session_settings {
+        session_length         = "7776000s"
+        session_length_enabled = true
+        session_reauth_method  = "LOGIN"
+      }
+    }
+  }
+}
+`, context)
+}
