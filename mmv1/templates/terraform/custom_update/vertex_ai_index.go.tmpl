@@ -90,7 +90,7 @@ if len(updateMask) > 0 {
 	}
 
 	err = VertexAIOperationWaitTime(
-		config, res, project, "Updating Index", userAgent,
+		config, res, project, tpgresource.LocationFromId(d.Id()), "Updating Index", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
@@ -132,7 +132,7 @@ if len(secondUpdateMask) > 0 {
 	}
 
 	err = VertexAIOperationWaitTime(
-		config, res, project, "Updating Index", userAgent,
+		config, res, project, tpgresource.LocationFromId(d.Id()), "Updating Index", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {

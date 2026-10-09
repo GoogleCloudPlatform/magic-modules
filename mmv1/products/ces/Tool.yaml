@@ -605,8 +605,6 @@ properties:
       - name: dataStoreSource
         type: NestedObject
         description: Optional. Search within a single specific DataStore.
-        conflicts:
-          - engineSource
         properties:
           - name: filter
             type: String
@@ -678,8 +676,6 @@ properties:
         description: |-
           Configuration for searching within an Engine, potentially targeting
           specific DataStores.
-        conflicts:
-          - dataStoreSource
         properties:
           - name: dataStoreSources
             type: Array

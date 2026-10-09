@@ -1,0 +1,537 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataAgent'
+description: |-
+  A DataAgent lets users interact with configured data sources by using
+  natural language, as part of the Conversational Analytics API.
+
+  ~> **Note:** Deleting a DataAgent soft-deletes it. A soft-deleted DataAgent
+  is purged after 30 days (see `purge_time`), and its `data_agent_id` cannot be
+  reused in the same project and location until then. Changing a field that
+  forces replacement (such as `kms_key`) while keeping the same `data_agent_id`
+  therefore fails with an `ALREADY_EXISTS` error; use a new `data_agent_id`
+  instead.
+references:
+  guides:
+    'Conversational Analytics API overview': 'https://cloud.google.com/gemini/data-agents/conversational-analytics-api/overview'
+  api: 'https://cloud.google.com/gemini/docs/conversational-analytics-api/reference/rest/v1/projects.locations.dataAgents'
+base_url: 'projects/{{project}}/locations/{{location}}/dataAgents'
+self_link: 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataAgents:createSync?dataAgentId={{data_agent_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}:updateSync'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}:deleteSync'
+id_format: 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}'
+# Uses the *Sync RPCs (createSync/updateSync/deleteSync), which return the resource
+# directly rather than a long-running operation, so there's no async block.
+autogen_async: false
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+# The generated sweeper assumes delete_url ends in the ID, so the :deleteSync suffix
+# yields `.../dataAgents/:deleteSync<id>`. Re-enable once the template handles it.
+exclude_sweeper: true
+custom_code:
+  decoder: 'templates/terraform/decoders/gemini_data_analytics_data_agent.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/gemini_data_analytics_data_agent_soft_delete.go.tmpl'
+iam_policy:
+  parent_resource_attribute: 'data_agent_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  set_iam_policy_verb: 'POST'
+  sample_config_body: 'templates/terraform/iam/example_config_body/gemini_data_analytics_data_agent.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/dataAgents/{{data_agent_id}}'
+    - '{{data_agent_id}}'
+  allowed_iam_role: 'roles/geminidataanalytics.dataAgentUser'
+samples:
+  - name: 'gemini_data_analytics_data_agent_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'gemini_data_analytics_data_agent_basic'
+        resource_id_vars:
+          data_agent_id: 'data-agent'
+  - name: 'gemini_data_analytics_data_agent_bigquery'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'gemini_data_analytics_data_agent_bigquery'
+        resource_id_vars:
+          data_agent_id: 'data-agent-bq'
+          dataset_id: 'data_agent'
+          table_id: 'sales'
+  # CMEK is rejected in 'global' ("Global KMS keys are not allowed for Data Agent", b/487933644),
+  # while regional locations required for CMEK are currently gated by CCFE location visibility.
+  - name: 'gemini_data_analytics_data_agent_cmek'
+    primary_resource_id: 'example'
+    skip_test: 'CMEK is disallowed in global and regional locations are not yet enabled in CCFE.'
+    steps:
+      - name: 'gemini_data_analytics_data_agent_cmek'
+        resource_id_vars:
+          data_agent_id: 'data-agent-cmek'
+          kms_key_name: 'kms-key'
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The location of the DataAgent.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'dataAgentId'
+    type: String
+    description: |-
+      Required. The ID to use for the DataAgent, which becomes the final component
+      of the resource name. The ID must start with a lowercase letter and may
+      contain lowercase letters, digits, underscores, and hyphens, up to 63
+      characters in total.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      Output only. Identifier. The unique resource name of a DataAgent.
+      Format: projects/{project}/locations/{location}/dataAgents/{dataAgentId}
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |-
+      Optional. User friendly display name. Must be between 1 and 256 characters.
+  - name: 'description'
+    type: String
+    description: |-
+      Optional. Description of the agent. Must be between 1 and 1024 characters.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Optional. Labels to help users filter related agents.
+  - name: 'dataAnalyticsAgent'
+    type: NestedObject
+    description: |-
+      Data analytics agent configuration.
+    properties:
+      - name: 'stagingContext'
+        type: NestedObject
+        description: |-
+          Optional. The staging context for the agent. This context is used to
+          test and validate changes before publishing.
+        properties:
+          - name: 'systemInstruction'
+            type: String
+            description: |-
+              Optional. The basic entry point for data owners creating domain
+              knowledge for the agent.
+          - name: 'datasourceReferences'
+            type: NestedObject
+            description: |-
+              Required. Data sources that are available for answering questions.
+              This Terraform resource currently supports BigQuery table references.
+            required: true
+            properties:
+              - name: 'bq'
+                type: NestedObject
+                description: |-
+                  References to BigQuery tables.
+                required: true
+                properties:
+                  - name: 'tableReferences'
+                    type: Array
+                    description: |-
+                      Optional. References to BigQuery tables.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            Required. The project that the table belongs to.
+                          required: true
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            Required. The dataset that the table belongs to.
+                          required: true
+                        - name: 'tableId'
+                          type: String
+                          description: |-
+                            Required. The table ID.
+                          required: true
+          - name: 'options'
+            type: NestedObject
+            description: |-
+              Optional. Additional options for the conversation.
+            properties:
+              - name: 'analysis'
+                type: NestedObject
+                description: |-
+                  Optional. Options for analysis.
+                properties:
+                  - name: 'python'
+                    type: NestedObject
+                    description: |-
+                      Optional. Options for Python analysis.
+                    properties:
+                      - name: 'enabled'
+                        type: Boolean
+                        description: |-
+                          Optional. Whether to enable Python analysis. Defaults to false.
+              - name: 'datasource'
+                type: NestedObject
+                description: |-
+                  Optional. Options for datasource configuration.
+                properties:
+                  - name: 'bigQueryMaxBilledBytes'
+                    type: Integer
+                    description: |-
+                      Optional. Limits the bytes billed for each BigQuery query job.
+          - name: 'exampleQueries'
+            type: Array
+            description: |-
+              Optional. A list of example queries for BigQuery data sources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'naturalLanguageQuestion'
+                  type: String
+                  description: |-
+                    Optional. A natural language question that a user might ask.
+                - name: 'sqlQuery'
+                  type: String
+                  description: |-
+                    Optional. The SQL query that should be generated to answer
+                    the natural language question.
+          - name: 'glossaryTerms'
+            type: Array
+            description: |-
+              Optional. Term definitions for the agent's domain.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'displayName'
+                  type: String
+                  description: |-
+                    Required. User friendly display name of the glossary term.
+                  required: true
+                - name: 'description'
+                  type: String
+                  description: |-
+                    Required. The description or meaning of the term.
+                  required: true
+                - name: 'labels'
+                  type: Array
+                  description: |-
+                    Optional. A list of general purpose labels associated with this term.
+                  item_type:
+                    type: String
+          - name: 'schemaRelationships'
+            type: Array
+            description: |-
+              Optional. Relationships between table schemas, including referencing
+              and referenced columns.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'leftSchemaPaths'
+                  type: NestedObject
+                  description: |-
+                    Required. An ordered list of fields for the left side of the join.
+                  required: true
+                  properties:
+                    - name: 'tableFqn'
+                      type: String
+                      description: |-
+                        Required. The service-qualified full resource name of the table.
+                      required: true
+                    - name: 'paths'
+                      type: Array
+                      description: |-
+                        Required. The ordered list of paths within the table schema.
+                      required: true
+                      item_type:
+                        type: String
+                - name: 'rightSchemaPaths'
+                  type: NestedObject
+                  description: |-
+                    Required. An ordered list of fields for the right side of the join.
+                  required: true
+                  properties:
+                    - name: 'tableFqn'
+                      type: String
+                      description: |-
+                        Required. The service-qualified full resource name of the table.
+                      required: true
+                    - name: 'paths'
+                      type: Array
+                      description: |-
+                        Required. The ordered list of paths within the table schema.
+                      required: true
+                      item_type:
+                        type: String
+                - name: 'sources'
+                  type: Array
+                  description: |-
+                    Optional. Sources which generated the schema relation edge.
+                    Possible values: BIGQUERY_JOB_HISTORY, LLM_SUGGESTED, BIGQUERY_TABLE_CONSTRAINTS.
+                  item_type:
+                    type: String
+                - name: 'confidenceScore'
+                  type: Double
+                  description: |-
+                    Optional. A confidence score for the suggested relationship.
+      - name: 'publishedContext'
+        type: NestedObject
+        description: |-
+          Optional. The published context for the agent. This context is used by
+          the Chat API in production.
+        properties:
+          - name: 'systemInstruction'
+            type: String
+            description: |-
+              Optional. The basic entry point for data owners creating domain
+              knowledge for the agent.
+          - name: 'datasourceReferences'
+            type: NestedObject
+            description: |-
+              Required. Data sources that are available for answering questions.
+              This Terraform resource currently supports BigQuery table references.
+            required: true
+            properties:
+              - name: 'bq'
+                type: NestedObject
+                description: |-
+                  References to BigQuery tables.
+                required: true
+                properties:
+                  - name: 'tableReferences'
+                    type: Array
+                    description: |-
+                      Optional. References to BigQuery tables.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            Required. The project that the table belongs to.
+                          required: true
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            Required. The dataset that the table belongs to.
+                          required: true
+                        - name: 'tableId'
+                          type: String
+                          description: |-
+                            Required. The table ID.
+                          required: true
+          - name: 'options'
+            type: NestedObject
+            description: |-
+              Optional. Additional options for the conversation.
+            properties:
+              - name: 'analysis'
+                type: NestedObject
+                description: |-
+                  Optional. Options for analysis.
+                properties:
+                  - name: 'python'
+                    type: NestedObject
+                    description: |-
+                      Optional. Options for Python analysis.
+                    properties:
+                      - name: 'enabled'
+                        type: Boolean
+                        description: |-
+                          Optional. Whether to enable Python analysis. Defaults to false.
+              - name: 'datasource'
+                type: NestedObject
+                description: |-
+                  Optional. Options for datasource configuration.
+                properties:
+                  - name: 'bigQueryMaxBilledBytes'
+                    type: Integer
+                    description: |-
+                      Optional. Limits the bytes billed for each BigQuery query job.
+          - name: 'exampleQueries'
+            type: Array
+            description: |-
+              Optional. A list of example queries for BigQuery data sources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'naturalLanguageQuestion'
+                  type: String
+                  description: |-
+                    Optional. A natural language question that a user might ask.
+                - name: 'sqlQuery'
+                  type: String
+                  description: |-
+                    Optional. The SQL query that should be generated to answer
+                    the natural language question.
+          - name: 'glossaryTerms'
+            type: Array
+            description: |-
+              Optional. Term definitions for the agent's domain.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'displayName'
+                  type: String
+                  description: |-
+                    Required. User friendly display name of the glossary term.
+                  required: true
+                - name: 'description'
+                  type: String
+                  description: |-
+                    Required. The description or meaning of the term.
+                  required: true
+                - name: 'labels'
+                  type: Array
+                  description: |-
+                    Optional. A list of general purpose labels associated with this term.
+                  item_type:
+                    type: String
+          - name: 'schemaRelationships'
+            type: Array
+            description: |-
+              Optional. Relationships between table schemas, including referencing
+              and referenced columns.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'leftSchemaPaths'
+                  type: NestedObject
+                  description: |-
+                    Required. An ordered list of fields for the left side of the join.
+                  required: true
+                  properties:
+                    - name: 'tableFqn'
+                      type: String
+                      description: |-
+                        Required. The service-qualified full resource name of the table.
+                      required: true
+                    - name: 'paths'
+                      type: Array
+                      description: |-
+                        Required. The ordered list of paths within the table schema.
+                      required: true
+                      item_type:
+                        type: String
+                - name: 'rightSchemaPaths'
+                  type: NestedObject
+                  description: |-
+                    Required. An ordered list of fields for the right side of the join.
+                  required: true
+                  properties:
+                    - name: 'tableFqn'
+                      type: String
+                      description: |-
+                        Required. The service-qualified full resource name of the table.
+                      required: true
+                    - name: 'paths'
+                      type: Array
+                      description: |-
+                        Required. The ordered list of paths within the table schema.
+                      required: true
+                      item_type:
+                        type: String
+                - name: 'sources'
+                  type: Array
+                  description: |-
+                    Optional. Sources which generated the schema relation edge.
+                    Possible values: BIGQUERY_JOB_HISTORY, LLM_SUGGESTED, BIGQUERY_TABLE_CONSTRAINTS.
+                  item_type:
+                    type: String
+                - name: 'confidenceScore'
+                  type: Double
+                  description: |-
+                    Optional. A confidence score for the suggested relationship.
+      - name: 'lastPublishedContext'
+        type: NestedObject
+        description: |-
+          Output only. The last published context for the agent.
+        output: true
+        properties:
+          - name: 'systemInstruction'
+            type: String
+            description: |-
+              Output only. The basic entry point for data owners creating domain
+              knowledge for the agent.
+          - name: 'datasourceReferences'
+            type: NestedObject
+            description: |-
+              Output only. Data sources that are available for answering questions.
+            properties:
+              - name: 'bq'
+                type: NestedObject
+                description: |-
+                  References to BigQuery tables.
+                properties:
+                  - name: 'tableReferences'
+                    type: Array
+                    description: |-
+                      References to BigQuery tables.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            The project that the table belongs to.
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            The dataset that the table belongs to.
+                        - name: 'tableId'
+                          type: String
+                          description: |-
+                            The table ID.
+  - name: 'kmsKey'
+    type: String
+    description: |-
+      Optional. Customer managed encryption key (CMEK) to use for encrypting the
+      DataAgent resources. Cloud KMS CryptoKeys must reside in the same location
+      as the DataAgent. The expected format is
+      projects/*/locations/*/keyRings/*/cryptoKeys/*.
+    # Not annotated IMMUTABLE in the proto, but updateSync rejects it:
+    # "request.update_mask: kms_key field cannot be updated."
+    immutable: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      Output only. The time when the data agent was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      Output only. The time when the data agent was last updated.
+    output: true
+  - name: 'deleteTime'
+    type: String
+    description: |-
+      Output only. The time the data agent was soft deleted.
+    output: true
+  - name: 'purgeTime'
+    type: String
+    description: |-
+      Output only. Timestamp in UTC of when this data agent is considered expired.
+    output: true

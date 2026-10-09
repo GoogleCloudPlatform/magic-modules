@@ -270,6 +270,32 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_agent_identity'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_agent_identity'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: 'cloudrunv2_service_agent_identity_update'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_service_mcp_server'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_mcp_server'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -401,6 +427,20 @@ properties:
       - 'BETA'
       - 'GA'
       - 'DEPRECATED'
+  - name: 'functionalType'
+    type: Enum
+    description: |
+      The functional type of the Service. Declares the primary purpose of the workload so that it can be
+      registered with [Agent Platform](https://cloud.google.com/run/docs/ai/agent-platform-features).
+      Once set, this field cannot be changed or unset.
+
+      A Service with `FUNCTIONAL_TYPE_AGENT` must also set `template.workload_identity_config.identity_type`
+      to `IDENTITY_TYPE_AGENT_IDENTITY`.
+    min_version: 'beta'
+    default_from_api: true
+    enum_values:
+      - 'FUNCTIONAL_TYPE_AGENT'
+      - 'FUNCTIONAL_TYPE_MCP_SERVER'
   - name: 'binaryAuthorization'
     type: NestedObject
     description: |
@@ -414,14 +454,10 @@ properties:
         type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
-        conflicts:
-          - policy
       - name: 'policy'
         type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
-        conflicts:
-          - use_default
   - name: 'customAudiences'
     type: Array
     description: |
@@ -1296,7 +1332,8 @@ properties:
       - name: 'workloadIdentityConfig'
         type: NestedObject
         description: |-
-          Workload identity settings for this Revision.
+          The Revision's workload identity settings. Used to assign an
+          [Agent Platform](https://cloud.google.com/run/docs/ai/agent-platform-features) identity to the workload.
         properties:
           - name: 'identity'
             type: String
@@ -1305,12 +1342,15 @@ properties:
           - name: 'identityCertificateEnabled'
             type: Boolean
             description: |-
-              Controls whether an instance receives a MWLID certificate.
+              Controls whether an instance receives a managed workload identity (MWLID) certificate.
+              Defaults to true when `identity_type` is `IDENTITY_TYPE_AGENT_IDENTITY`.
             send_empty_value: true
           - name: 'identityType'
             type: Enum
             description: |-
-              The type of identity to use.
+              The type of identity to use. `IDENTITY_TYPE_AGENT_IDENTITY` assigns a system-managed agent identity and
+              is required when the Service's `functional_type` is `FUNCTIONAL_TYPE_AGENT`. Once set, this field
+              cannot be changed or unset.
             enum_values:
               - 'IDENTITY_TYPE_SERVICE_ACCOUNT'
               - 'IDENTITY_TYPE_WORKLOAD_IDENTITY'

@@ -189,6 +189,8 @@ properties:
     description: |
       Params needed to access the source in the format of json string.
     ignore_read: true
+    update_mask_fields:
+      - 'params'
     exactly_one_of:
       - params
       - json_params

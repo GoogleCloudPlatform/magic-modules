@@ -59,6 +59,19 @@ samples:
         test_vars_overrides:
           # for backward compatible
           display_name: '"binding for all principals in the project" + randomSuffix'
+  - name: iam_projects_policy_binding_access_policy
+    primary_resource_id: my-project-access-policy-binding
+    external_providers: [time]
+    steps:
+      - name: iam_projects_policy_binding_access_policy
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        resource_id_vars:
+          project_id: ap-proj-
+          account_id: ap-sa-
+          access_policy_id: my-project-policy-
+          project_binding_id: my-project-access-binding-
 parameters:
   - name: location
     type: String
@@ -102,12 +115,14 @@ properties:
     type: NestedObject
     description: |
       Target is the full resource name of the resource to which the policy will be bound. Immutable once set.
+      Exactly one of `principal_set` (for principal access boundary policy bindings) or
+      `resource` (for access policy bindings) must be set.
     required: true
     properties:
       - name: principalSet
         type: String
         description: |
-          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
           Examples for each one of the following supported principal set types:
           * Project:
             * `//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER`
@@ -115,6 +130,20 @@ properties:
           * Workload Identity Pool: `//iam.googleapis.com/projects/PROJECT_NUMBER/locations/LOCATION/workloadIdentityPools/WORKLOAD_POOL_ID`
           It must be parent by the policy binding's parent (the project).
         immutable: true
+        conflicts:
+          - target.0.resource
+      - name: resource
+        type: String
+        description: |
+          Immutable. Full Resource Name of the resource used for access policy bindings.
+          Use this together with `policy_kind = "ACCESS"`. Examples:
+          * Project:
+            * `//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER`
+            * `//cloudresourcemanager.googleapis.com/projects/PROJECT_ID`
+          It must be the policy binding's parent (the project).
+        immutable: true
+        conflicts:
+          - target.0.principal_set
   - name: policyKind
     type: String
     description: |
@@ -159,6 +188,7 @@ properties:
       The exact variables and functions that may be referenced within an expression are
       determined by the service that evaluates it. See the service documentation for
       additional information.
+      Conditions are currently only supported when the bound policy is a principal access boundary policy.
     properties:
       - name: expression
         type: String

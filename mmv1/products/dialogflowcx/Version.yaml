@@ -34,9 +34,11 @@ timeouts:
 custom_diff:
   - tpgresource.DefaultProviderProject
 exclude_sweeper: true
+autogen_async: true
 async:
   type: OpAsync
   operation:
+    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 60
       update_minutes: 20
