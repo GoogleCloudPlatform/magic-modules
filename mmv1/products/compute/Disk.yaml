@@ -215,8 +215,8 @@ properties:
       you do not need to provide a key to use the disk later.
 
       ~>**NOTE** `kms_key_self_link` can be added or changed in place.
-      Removing it fails at plan time. Other changes to this block, and key
-      changes while `kms_key_service_account` is set, recreate the disk.
+      Removing it, or changing it while `kms_key_service_account` is set,
+      fails at plan time. Other changes to this block recreate the disk.
     # Sent by custom_update; see validateKmsKeyChange.
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/updateKmsKey'
     update_verb: 'NOOP'

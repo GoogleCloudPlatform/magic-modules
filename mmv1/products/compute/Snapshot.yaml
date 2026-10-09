@@ -128,8 +128,8 @@ parameters:
       key and you do not need to provide a key to use the snapshot later.
 
       ~>**NOTE** `kms_key_self_link` can be added or changed in place.
-      Removing it fails at plan time. Other changes to this block, and key
-      changes while `kms_key_service_account` is set, recreate the snapshot.
+      Removing it, or changing it while `kms_key_service_account` is set,
+      fails at plan time. Other changes to this block recreate the snapshot.
     # Sent by post_update; see validateKmsKeyChange.
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/updateKmsKey'
     update_verb: 'NOOP'

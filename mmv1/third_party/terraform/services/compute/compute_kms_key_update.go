@@ -17,16 +17,21 @@ import (
 // it can't be made. serviceAccountSet is true if kms_key_service_account is
 // set; customerSuppliedKey is true if the resource uses or switches to a CSEK.
 func kmsKeyChange(newKey string, newKeyKnown, serviceAccountSet, customerSuppliedKey bool) (bool, error) {
-	if serviceAccountSet || customerSuppliedKey {
+	if customerSuppliedKey {
 		return true, nil
+	}
+	if newKeyKnown && newKey == "" {
+		// -replace still hits this error; taint doesn't.
+		return false, fmt.Errorf("removing the Cloud KMS key isn't supported; to recreate the resource without a key, taint or destroy it first")
+	}
+	if serviceAccountSet {
+		// updateKmsKey drops kmsKeyServiceAccount, and the next plan would
+		// recreate the resource to restore it.
+		return false, fmt.Errorf("the Cloud KMS key can't be changed while kms_key_service_account is set; to change it, taint or destroy the resource first")
 	}
 	if !newKeyKnown {
 		// Once known, this is an update or an error, never a replacement.
 		return false, nil
-	}
-	if newKey == "" {
-		// -replace still hits this error; taint doesn't.
-		return false, fmt.Errorf("removing the Cloud KMS key isn't supported; to recreate the resource without a key, taint or destroy it first")
 	}
 	if isCryptoKeyVersionName(newKey) {
 		return false, fmt.Errorf("Cloud KMS key %q includes a crypto key version, which isn't supported; remove the /cryptoKeyVersions/ suffix", newKey)
