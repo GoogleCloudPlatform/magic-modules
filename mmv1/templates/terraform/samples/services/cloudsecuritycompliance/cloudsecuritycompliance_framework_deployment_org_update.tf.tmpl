@@ -119,8 +119,8 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   location     = "global"
   framework_id = "{{index $.ResourceIdVars "framework_name"}}"
 
-  display_name = "Terraform Framework Name"
-  description  = "An Terraform description for the framework"
+  display_name = "Updated Terraform Framework Name"
+  description  = "An updated Terraform description for the framework"
 
   cloud_control_details {
     name              = google_cloud_security_compliance_cloud_control.example.name
@@ -143,7 +143,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
 
   framework {
     framework         = google_cloud_security_compliance_framework.example.name
-    major_revision_id = "1"
+    major_revision_id = "2"
   }
 
   target_resource_config {
@@ -168,7 +168,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         name = "regions"
         parameter_value {
           string_list_value {
-            values = ["us-central1", "us-west1", "us-east1"]
+            values = ["us-central1", "us-west1"]
           }
         }
       }
@@ -176,7 +176,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
       parameters {
         name = "location"
         parameter_value {
-          string_value = "us-central1"
+          string_value = "us-west1"
         }
       }
 
@@ -184,9 +184,9 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         name = "oneof-parameter"
         parameter_value {
           oneof_value {
-            name = "test-oneof"
+            name = "updated-test-oneof"
             parameter_value {
-              string_value = "test-value"
+              string_value = "updated-test-value"
             }
           }
         }
@@ -196,7 +196,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         name = "bool-parameter"
         parameter_value {
           oneof_value {
-            name = "bool-oneof"
+            name = "updated-bool-oneof"
             parameter_value {
               bool_value = true
             }
@@ -208,9 +208,9 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         name = "number-parameter"
         parameter_value {
           oneof_value {
-            name = "number-oneof"
+            name = "updated-number-oneof"
             parameter_value {
-              number_value = 123.45
+              number_value = 678.9
             }
           }
         }
@@ -220,10 +220,10 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         name = "string-list-parameter"
         parameter_value {
           oneof_value {
-            name = "string-list-oneof"
+            name = "updated-string-list-oneof"
             parameter_value {
               string_list_value {
-                values = ["value1", "value2"]
+                values = ["updated-value1", "updated-value2"]
               }
             }
           }
