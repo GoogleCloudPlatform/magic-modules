@@ -3,6 +3,8 @@ package bigquery_test
 import (
 	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -37,12 +39,70 @@ func TestAccBigQueryDatasetAccess_basic(t *testing.T) {
 				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected),
 			},
 			{
+				ResourceName:      "google_bigquery_dataset_access.access",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access"),
+			},
+			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
 				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "dataset"),
 				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected),
 			},
 		},
 	})
+}
+
+// testAccBigQueryDatasetAccessImportStateIdFunc builds the composite import ID from state
+// (rather than from the config values), since the API normalizes some fields on apply, e.g. a
+// predefined role like "roles/bigquery.dataEditor" is stored as "WRITER".
+func testAccBigQueryDatasetAccessImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource not found in state: %s", resourceName)
+		}
+		attrs := rs.Primary.Attributes
+
+		base := fmt.Sprintf("projects/%s/datasets/%s/", attrs["project"], attrs["dataset_id"])
+		if role := attrs["role"]; role != "" {
+			base = fmt.Sprintf("%sroles/%s/", base, role)
+		}
+
+		flatFields := []struct{ attr, segment string }{
+			{"user_by_email", "userByEmail"},
+			{"group_by_email", "groupByEmail"},
+			{"domain", "domain"},
+			{"special_group", "specialGroup"},
+			{"iam_member", "iamMember"},
+		}
+		for _, f := range flatFields {
+			if v := attrs[f.attr]; v != "" {
+				return fmt.Sprintf("%s%s/%s", base, f.segment, v), nil
+			}
+		}
+
+		if attrs["view.#"] == "1" {
+			return fmt.Sprintf("%sview/%s/%s/%s", base,
+				attrs["view.0.project_id"], attrs["view.0.dataset_id"], attrs["view.0.table_id"]), nil
+		}
+		if attrs["routine.#"] == "1" {
+			return fmt.Sprintf("%sroutine/%s/%s/%s", base,
+				attrs["routine.0.project_id"], attrs["routine.0.dataset_id"], attrs["routine.0.routine_id"]), nil
+		}
+		if attrs["dataset.#"] == "1" {
+			count, _ := strconv.Atoi(attrs["dataset.0.target_types.#"])
+			targetTypes := make([]string, 0, count)
+			for i := 0; i < count; i++ {
+				targetTypes = append(targetTypes, attrs[fmt.Sprintf("dataset.0.target_types.%d", i)])
+			}
+			return fmt.Sprintf("%sdataset/%s/%s/%s", base,
+				attrs["dataset.0.dataset.0.project_id"], attrs["dataset.0.dataset.0.dataset_id"],
+				strings.Join(targetTypes, ",")), nil
+		}
+
+		return "", fmt.Errorf("could not determine import id for %s: no member field is set in state", resourceName)
+	}
 }
 
 func TestAccBigQueryDatasetAccess_view(t *testing.T) {
@@ -67,6 +127,12 @@ func TestAccBigQueryDatasetAccess_view(t *testing.T) {
 			{
 				Config: testAccBigQueryDatasetAccess_view(datasetID, datasetID2, tableID),
 				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.private", expected),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.access",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access"),
 			},
 			{
 				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "private"),
@@ -99,6 +165,12 @@ func TestAccBigQueryDatasetAccess_authorizedDataset(t *testing.T) {
 			{
 				Config: testAccBigQueryDatasetAccess_authorizedDataset(datasetID, datasetID2),
 				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.private", expected),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.access",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access"),
 			},
 			{
 				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "private"),
@@ -134,6 +206,12 @@ func TestAccBigQueryDatasetAccess_authorizedRoutine(t *testing.T) {
 			{
 				Config: testAccBigQueryDatasetAccess_authorizedRoutine(context),
 				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.private", expected),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.authorized_routine",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.authorized_routine"),
 			},
 			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
@@ -173,6 +251,18 @@ func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      "google_bigquery_dataset_access.access",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access"),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.access2",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access2"),
+			},
+			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
 				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "dataset"),
 				Check: resource.ComposeTestCheckFunc(
@@ -210,11 +300,23 @@ func TestAccBigQueryDatasetAccess_predefinedRole(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      "google_bigquery_dataset_access.access",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access"),
+			},
+			{
 				// Update role
 				Config: testAccBigQueryDatasetAccess_predefinedRole("roles/bigquery.dataViewer", datasetID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected2),
 				),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.access",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.access"),
 			},
 			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
@@ -240,6 +342,12 @@ func TestAccBigQueryDatasetAccess_iamMember(t *testing.T) {
 			{
 				Config: testAccBigQueryDatasetAccess_iamMember(datasetID, sinkName),
 			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.dns_query_sink",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.dns_query_sink"),
+			},
 		},
 	})
 }
@@ -257,7 +365,19 @@ func TestAccBigQueryDatasetAccess_allUsers(t *testing.T) {
 				Config: testAccBigQueryDatasetAccess_allUsers(datasetID),
 			},
 			{
+				ResourceName:      "google_bigquery_dataset_access.dns_query_sink",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.dns_query_sink"),
+			},
+			{
 				Config: testAccBigQueryDatasetAccess_allAuthenticatedUsers(datasetID),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.dns_query_sink",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.dns_query_sink"),
 			},
 		},
 	})
@@ -275,6 +395,12 @@ func TestAccBigQueryDatasetAccess_allAuthenticatedUsers(t *testing.T) {
 			{
 				Config: testAccBigQueryDatasetAccess_allAuthenticatedUsers(datasetID),
 			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.dns_query_sink",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.dns_query_sink"),
+			},
 		},
 	})
 }
@@ -290,6 +416,12 @@ func TestAccBigQueryDatasetAccess_userByEmailWithMixedCase(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryDatasetAccess_mixedCaseEmail(datasetID, "user_by_email", "alicE@google.COM"),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.mixed_case_email",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.mixed_case_email"),
 			},
 		},
 	})
@@ -321,6 +453,12 @@ func TestAccBigQueryDatasetAccess_withCondition(t *testing.T) {
 				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected),
 			},
 			{
+				ResourceName:      "google_bigquery_dataset_access.withCondition",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.withCondition"),
+			},
+			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
 				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "dataset"),
 				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected),
@@ -340,6 +478,12 @@ func TestAccBigQueryDatasetAccess_groupByEmailWithMixedCase(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryDatasetAccess_mixedCaseEmail(datasetID, "group_by_email", "MAGIC-MODULES@gOOgle.com"),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset_access.mixed_case_email",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccBigQueryDatasetAccessImportStateIdFunc("google_bigquery_dataset_access.mixed_case_email"),
 			},
 		},
 	})
