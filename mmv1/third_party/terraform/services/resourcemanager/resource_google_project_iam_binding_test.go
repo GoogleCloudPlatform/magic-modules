@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -397,4 +398,97 @@ resource "google_project_iam_binding" "acceptance" {
   }
 }
 `, pid, pid, org, role, conditionTitle)
+}
+
+// Test prevent_overwrite_on_create: a binding is created normally for a role with no members, updates
+// and changes to the flag itself apply normally, and creating a binding for a role that already has
+// other members fails without removing them.
+func TestAccProjectIamBinding_preventOverwriteOnCreate(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	role := "roles/compute.instanceAdmin"
+	existingRole := "roles/compute.networkViewer"
+	oneMember := `["user:admin@hashicorptest.com"]`
+	twoMembers := `["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]`
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// Create with prevent_overwrite_on_create on a role with no members
+			{
+				Config: testAccProjectAssociateBindingPreventOverwriteOnCreate(pid, org, role, existingRole, oneMember, true, false),
+			},
+			{
+				ResourceName:      "google_project_iam_binding.acceptance",
+				ImportStateId:     fmt.Sprintf("%s %s", pid, role),
+				ImportState:       true,
+				ImportStateVerify: true,
+				// prevent_overwrite_on_create is a client-side field that isn't stored in the IAM policy, so
+				// an import can't read it back and it gets its default (false).
+				ImportStateVerifyIgnore: []string{"prevent_overwrite_on_create"},
+			},
+			// Updates aren't affected by prevent_overwrite_on_create
+			{
+				Config: testAccProjectAssociateBindingPreventOverwriteOnCreate(pid, org, role, existingRole, twoMembers, true, false),
+			},
+			// Changing only the flag is an in-place update
+			{
+				Config: testAccProjectAssociateBindingPreventOverwriteOnCreate(pid, org, role, existingRole, twoMembers, false, false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_project_iam_binding.acceptance", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			// Creating a binding for a role that already has a different member fails
+			{
+				Config:      testAccProjectAssociateBindingPreventOverwriteOnCreate(pid, org, role, existingRole, twoMembers, false, true),
+				ExpectError: regexp.MustCompile(regexp.QuoteMeta(fmt.Sprintf(`IAM binding for role %q already exists`, existingRole))),
+			},
+			// The existing member is still there
+			{
+				Config:   testAccProjectAssociateBindingPreventOverwriteOnCreate(pid, org, role, existingRole, twoMembers, false, false),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func testAccProjectAssociateBindingPreventOverwriteOnCreate(pid, org, role, existingRole, members string, preventOverwrite, withConflictingBinding bool) string {
+	config := fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_iam_binding" "acceptance" {
+  project                     = google_project.acceptance.project_id
+  members                     = %s
+  role                        = "%s"
+  prevent_overwrite_on_create = %t
+}
+
+resource "google_project_iam_member" "existing" {
+  project = google_project.acceptance.project_id
+  member  = "user:admin@hashicorptest.com"
+  role    = "%s"
+}
+`, pid, pid, org, members, role, preventOverwrite, existingRole)
+	if withConflictingBinding {
+		config += fmt.Sprintf(`
+resource "google_project_iam_binding" "conflicting" {
+  project                     = google_project.acceptance.project_id
+  members                     = ["user:gterraformtest1@gmail.com"]
+  role                        = "%s"
+  prevent_overwrite_on_create = true
+
+  depends_on = [google_project_iam_member.existing]
+}
+`, existingRole)
+	}
+	return config
 }

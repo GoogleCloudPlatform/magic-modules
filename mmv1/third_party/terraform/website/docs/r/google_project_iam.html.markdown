@@ -172,6 +172,11 @@ The following arguments are supported:
     Deleting this removes all policies from the project, locking out users without
     organization-level access.
 
+* `prevent_overwrite_on_create` - (Optional, only for `google_project_iam_binding`) If `true`, creating the binding
+  fails if the same role and condition already has different members, instead of replacing them,
+  including members Google Cloud grants by default. Import the existing binding to manage it with Terraform.
+  Only affects creation. Defaults to `false`.
+
 * `project` - (Required) The project id of the target project. This is not
 inferred from the provider.
 

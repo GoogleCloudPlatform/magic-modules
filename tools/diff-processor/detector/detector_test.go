@@ -153,6 +153,30 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 			},
 			want: map[string]ResourceChanges{},
 		},
+		{
+			name: "iam-binding-prevent-overwrite-on-create",
+			schemaDiff: diff.SchemaDiff{
+				"google_resource_iam_binding": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"prevent_overwrite_on_create": {
+							New: &schema.Schema{Type: schema.TypeBool, Optional: true},
+						},
+					},
+				},
+				"google_compute_instance": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"prevent_overwrite_on_create": {
+							New: &schema.Schema{Type: schema.TypeBool, Optional: true},
+						},
+					},
+				},
+			},
+			want: map[string]ResourceChanges{
+				"google_compute_instance": {
+					"prevent_overwrite_on_create": &Field{Added: true},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {

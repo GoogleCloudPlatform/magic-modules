@@ -80,6 +80,11 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 					continue
 				}
 			}
+			// prevent_overwrite_on_create is shared by every IAM binding resource and implemented once,
+			// so it's tested once (TestAccProjectIamBinding_preventOverwriteOnCreate) rather than per resource.
+			if field == "prevent_overwrite_on_create" && strings.HasSuffix(resource, "_iam_binding") {
+				continue
+			}
 			if fieldDiff.New == nil {
 				// Skip deleted fields.
 				continue

@@ -62,6 +62,13 @@ var iamBindingSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
+	"prevent_overwrite_on_create": {
+		Type:     schema.TypeBool,
+		Optional: true,
+		Description: `If true, creating the binding fails if the same role and condition already has different
+members, instead of replacing them. Only affects creation. Defaults to false.`,
+		Default: false,
+	},
 }
 
 var IamBindingBaseIdentitySchema = map[string]*schema.Schema{
@@ -80,9 +87,9 @@ func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdat
 	createTimeOut := time.Duration(settings.CreateTimeOut) * time.Minute
 
 	resource := &schema.Resource{
-		Create: resourceIamBindingCreateUpdate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
+		Create: resourceIamBindingCreate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
 		Read:   resourceIamBindingRead(newUpdaterFunc, parentSpecificSchema, settings.ParentResourceIdentityParser),
-		Update: resourceIamBindingCreateUpdate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
+		Update: resourceIamBindingUpdate(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
 		Delete: resourceIamBindingDelete(newUpdaterFunc, settings.EnableBatching, parentSpecificSchema, settings.ParentResourceIdentityParser),
 
 		// if non-empty, this will be used to send a deprecation message when the
@@ -165,7 +172,25 @@ func setIamBindingResourceIdentity(identity *schema.IdentityData, d *schema.Reso
 	}
 }
 
-func resourceIamBindingCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) func(*schema.ResourceData, interface{}) error {
+// With prevent_overwrite_on_create, Create refuses to take over an existing binding for the same
+// role+condition with different members; it must be imported first, like any other existing object.
+func resourceIamBindingCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.CreateFunc {
+	return resourceIamBindingWrite(newUpdaterFunc, enableBatching, parentSpecificSchema, parentResourceIdentityParser, true)
+}
+
+func resourceIamBindingUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc) schema.UpdateFunc {
+	write := resourceIamBindingWrite(newUpdaterFunc, enableBatching, parentSpecificSchema, parentResourceIdentityParser, false)
+	return func(d *schema.ResourceData, meta interface{}) error {
+		// prevent_overwrite_on_create is client-side and only affects creation, so changing only it
+		// doesn't need an IAM write; Terraform updates the state from the plan.
+		if !d.HasChangeExcept("prevent_overwrite_on_create") {
+			return nil
+		}
+		return write(d, meta)
+	}
+}
+
+func resourceIamBindingWrite(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, parentSpecificSchema map[string]*schema.Schema, parentResourceIdentityParser ParentResourceIdFromIdentityParserFunc, isCreate bool) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 		updater, err := newUpdaterFunc(d, config)
@@ -180,12 +205,25 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, en
 			ep.Version = IamPolicyVersion
 			return nil
 		}
+		// With prevent_overwrite_on_create, a create may only add a new binding. A binding identical to
+		// ours is unchanged by modifyF, so a create that already wrote it succeeds on retry.
+		var allowWrite iamPolicyWriteAllowedFunc
+		if isCreate && d.Get("prevent_overwrite_on_create").(bool) {
+			allowWrite = func(before, after *cloudresourcemanager.Policy) error {
+				if err := iamPolicyNoExistingBindingChanged(before, after); err != nil {
+					return fmt.Errorf("%w on %s with different members. Import it to manage it with Terraform, remove "+
+						"any other resource in your configuration that grants this role, or set prevent_overwrite_on_create "+
+						"= false to replace its members", err, updater.DescribeResource())
+				}
+				return nil
+			}
+		}
 
 		if enableBatching {
-			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, allowWrite, config, fmt.Sprintf(
 				"Set IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()))
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, allowWrite)
 		}
 		if err != nil {
 			return err
@@ -219,6 +257,13 @@ func resourceIamBindingRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpec
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
+		}
+
+		// Explicitly set client-side fields to default values if unset
+		if _, ok := d.GetOkExists("prevent_overwrite_on_create"); !ok {
+			if err := d.Set("prevent_overwrite_on_create", false); err != nil {
+				return fmt.Errorf("Error setting prevent_overwrite_on_create: %s", err)
+			}
 		}
 
 		eBinding := getResourceIamBinding(d)
@@ -388,10 +433,10 @@ func resourceIamBindingDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBa
 		}
 
 		if enableBatching {
-			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, nil, config, fmt.Sprintf(
 				"Delete IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()))
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, nil)
 		}
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))

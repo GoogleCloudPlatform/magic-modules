@@ -81,6 +81,11 @@ For `google_bigtable_instance_iam_member` or `google_bigtable_instance_iam_bindi
     `google_bigtable_instance_iam_binding` can be used per role. Note that custom roles must be of the format
     `[projects|organizations]/{parent-name}/roles/{role-name}`. Read more about roles [here](https://cloud.google.com/bigtable/docs/access-control#roles).
 
+* `prevent_overwrite_on_create` - (Optional, only for `google_bigtable_instance_iam_binding`) If `true`, creating the binding
+  fails if the same role and condition already has different members, instead of replacing them,
+  including members Google Cloud grants by default. Import the existing binding to manage it with Terraform.
+  Only affects creation. Defaults to `false`.
+
 * `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding. Structure is [documented below](#nested_condition).
 
 <a name="nested_condition"></a>The `condition` block supports:

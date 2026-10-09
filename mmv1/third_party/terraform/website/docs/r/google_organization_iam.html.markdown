@@ -176,6 +176,11 @@ The following arguments are supported:
     Deleting this removes all policies from the organization, locking out users without
     organization-level access.
 
+* `prevent_overwrite_on_create` - (Optional, only for `google_organization_iam_binding`) If `true`, creating the binding
+  fails if the same role and condition already has different members, instead of replacing them,
+  including members Google Cloud grants by default. Import the existing binding to manage it with Terraform.
+  Only affects creation. Defaults to `false`.
+
 * `org_id` - (Required) The organization id of the target organization.
 
 * `service` - (Required only by google_organization_iam_audit_config) Service which will be enabled for audit logging.  The special value `allServices` covers all services.  Note that if there are google_organization_iam_audit_config resources covering both `allServices` and a specific service then the union of the two AuditConfigs is used for that service: the `log_types` specified in each `audit_log_config` are enabled, and the `exempted_members` in each `audit_log_config` are exempted.
