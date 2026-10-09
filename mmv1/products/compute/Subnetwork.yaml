@@ -186,24 +186,24 @@ samples:
     steps:
       - name: subnetwork_with_internal_subnet_mode_pdp
         resource_id_vars:
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
           network_name: network-byoipv6-internal
           subnetwork_name: internal-subnet-mode-pdp-subnet
         test_vars_overrides:
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
   - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
     primary_resource_id: subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix
     exclude_basic_doc: true
     steps:
       - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
         resource_id_vars:
-          internal_ipv6_prefix: '"2001:db8:1::/64"'
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+          internal_ipv6_prefix: '"2600:1904:9:10::/64"'
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
           network_name: network-byoipv6-internal-prefix
           subnetwork_name: subnet-mode-pdp-subnet-internal-prefix
         test_vars_overrides:
-          internal_ipv6_prefix: fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+          internal_ipv6_prefix: fmt.Sprintf("2600:1904:9:%x::/64", acctest.RandIntRange(t, 16, 95))
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
   - name: subnetwork_ipv6_only_external
     primary_resource_id: subnetwork-ipv6-only
     exclude_basic_doc: true
@@ -218,11 +218,13 @@ samples:
     steps:
       - name: subnetwork_with_secondary_ipv6_range
         resource_id_vars:
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
           network_name: network-with-secondary-ranges
+          secondary_ipv6_cidr: '"2600:1904:9:60::/64"'
           subnetwork_name: subnet-with-secondary-ranges
-          pap_name: pap-for-secondary-ranges
-          pdp_name: pdp-for-secondary-ranges
-          sub_pdp_name: sub-pdp-for-secondary-ranges
+        test_vars_overrides:
+          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
+          secondary_ipv6_cidr: fmt.Sprintf("2600:1904:9:%x::/64", acctest.RandIntRange(t, 96, 175))
         min_version: 'beta'
 virtual_fields:
   - name: send_secondary_ip_range_if_empty
