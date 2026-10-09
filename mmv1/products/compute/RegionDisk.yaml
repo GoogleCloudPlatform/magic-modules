@@ -70,11 +70,30 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
+  - 'forceNewOnUnsupportedKmsKeyChange("disk_encryption_key.0.kms_key_name", "")'
 samples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
     steps:
       - name: 'region_disk_basic'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_disk_encryption_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_disk_encryption_key_wo'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_rsa_encrypted_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_rsa_encrypted_key_wo'
         resource_id_vars:
           region_disk_name: 'my-region-disk'
           disk_name: 'my-disk'
@@ -154,6 +173,9 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
+
+      ~>**NOTE** Only changing `kms_key_name` between Cloud KMS keys is done
+      in place; other changes to this block recreate the disk.
     immutable: true
     properties:
       - name: 'rawKey'
@@ -162,6 +184,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
@@ -170,6 +193,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'sha256'
         type: String
@@ -182,6 +206,9 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+        # Sent by custom_update; see forceNewOnUnsupportedKmsKeyChange.
+        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
+        update_verb: 'POST'
   - name: 'sourceImageEncryptionKey'
     type: NestedObject
     description: |

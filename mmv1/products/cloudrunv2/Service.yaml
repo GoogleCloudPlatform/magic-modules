@@ -60,10 +60,8 @@ samples:
           - 'deletion_protection'
   - name: 'cloudrunv2_service_scaling_controls'
     primary_resource_id: 'default'
-    min_version: 'beta'
     steps:
       - name: 'cloudrunv2_service_scaling_controls'
-        min_version: 'beta'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
         vars:
@@ -72,7 +70,6 @@ samples:
         ignore_read_extra:
           - 'deletion_protection'
       - name: 'cloudrunv2_service_scaling_controls'
-        min_version: 'beta'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
         vars:
@@ -81,7 +78,6 @@ samples:
         ignore_read_extra:
           - 'deletion_protection'
       - name: 'cloudrunv2_service_scaling_controls'
-        min_version: 'beta'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
         vars:
@@ -274,6 +270,32 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_agent_identity'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_agent_identity'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: 'cloudrunv2_service_agent_identity_update'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_service_mcp_server'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'cloudrunv2_service_mcp_server'
+        min_version: 'beta'
+        resource_id_vars:
+          cloud_run_service_name: 'cloudrun-service'
+        ignore_read_extra:
+          - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -405,6 +427,20 @@ properties:
       - 'BETA'
       - 'GA'
       - 'DEPRECATED'
+  - name: 'functionalType'
+    type: Enum
+    description: |
+      The functional type of the Service. Declares the primary purpose of the workload so that it can be
+      registered with [Agent Platform](https://cloud.google.com/run/docs/ai/agent-platform-features).
+      Once set, this field cannot be changed or unset.
+
+      A Service with `FUNCTIONAL_TYPE_AGENT` must also set `template.workload_identity_config.identity_type`
+      to `IDENTITY_TYPE_AGENT_IDENTITY`.
+    min_version: 'beta'
+    default_from_api: true
+    enum_values:
+      - 'FUNCTIONAL_TYPE_AGENT'
+      - 'FUNCTIONAL_TYPE_MCP_SERVER'
   - name: 'binaryAuthorization'
     type: NestedObject
     description: |
@@ -418,14 +454,10 @@ properties:
         type: Boolean
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
-        conflicts:
-          - policy
       - name: 'policy'
         type: String
         description: |
           The path to a binary authorization policy. Format: projects/{project}/platforms/cloudRun/{policy-name}
-        conflicts:
-          - use_default
   - name: 'customAudiences'
     type: Array
     description: |
@@ -512,12 +544,10 @@ properties:
               a default value based on the project's available container instances quota in the region and specified instance size.
           - name: 'cpuUtilization'
             type: Double
-            min_version: 'beta'
             description: |-
               Determines a threshold for CPU utilization before scaling begins. Accepted values are between 0.1 and 0.95 (inclusive) or 0.0 to disable CPU utilization as threshold for scaling. CPU and concurrency scaling cannot both be disabled.
           - name: 'concurrencyUtilization'
             type: Double
-            min_version: 'beta'
             description: |-
               Determines a threshold for concurrency utilization before scaling begins. Accepted values are between 0.1 and 0.95 (inclusive) or 0.0 to disable concurrency utilization as threshold for scaling. CPU and concurrency scaling cannot both be disabled.
       - name: 'vpcAccess'
@@ -1299,6 +1329,32 @@ properties:
                   type: String
                   description: |-
                     Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+      - name: 'workloadIdentityConfig'
+        type: NestedObject
+        description: |-
+          The Revision's workload identity settings. Used to assign an
+          [Agent Platform](https://cloud.google.com/run/docs/ai/agent-platform-features) identity to the workload.
+        properties:
+          - name: 'identity'
+            type: String
+            description: |-
+              The Revision's SPIFFE workload identity. Enables provisioning of SPIFFE workload certificates.
+          - name: 'identityCertificateEnabled'
+            type: Boolean
+            description: |-
+              Controls whether an instance receives a managed workload identity (MWLID) certificate.
+              Defaults to true when `identity_type` is `IDENTITY_TYPE_AGENT_IDENTITY`.
+            send_empty_value: true
+          - name: 'identityType'
+            type: Enum
+            description: |-
+              The type of identity to use. `IDENTITY_TYPE_AGENT_IDENTITY` assigns a system-managed agent identity and
+              is required when the Service's `functional_type` is `FUNCTIONAL_TYPE_AGENT`. Once set, this field
+              cannot be changed or unset.
+            enum_values:
+              - 'IDENTITY_TYPE_SERVICE_ACCOUNT'
+              - 'IDENTITY_TYPE_WORKLOAD_IDENTITY'
+              - 'IDENTITY_TYPE_AGENT_IDENTITY'
   - name: 'traffic'
     type: Array
     description: |-
@@ -1565,3 +1621,7 @@ properties:
     type: Boolean
     description: |
       Used to enable/disable IAP for the cloud-run service.
+  - name: 'sshEnabled'
+    type: Boolean
+    description: |
+      Enables SSH access to the Service.

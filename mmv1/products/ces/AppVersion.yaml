@@ -116,6 +116,16 @@ properties:
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
                     output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
+                    output: true
                   - name: pythonCode
                     type: String
                     description: The python code to execute for the callback.
@@ -141,6 +151,16 @@ properties:
                     description: |-
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
+                    output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
                     output: true
                   - name: pythonCode
                     type: String
@@ -168,6 +188,16 @@ properties:
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
                     output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
+                    output: true
                   - name: pythonCode
                     type: String
                     description: The python code to execute for the callback.
@@ -192,6 +222,16 @@ properties:
                     description: |-
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
+                    output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
                     output: true
                   - name: pythonCode
                     type: String
@@ -219,6 +259,16 @@ properties:
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
                     output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
+                    output: true
                   - name: pythonCode
                     type: String
                     description: The python code to execute for the callback.
@@ -244,6 +294,16 @@ properties:
                     description: |-
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
+                    output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
                     output: true
                   - name: pythonCode
                     type: String
@@ -402,6 +462,77 @@ properties:
                     output: true
                     item_type:
                       type: String
+            - name: transferRules
+              type: Array
+              description: |-
+                List of transfer rules for the agent.
+                If multiple rules match, the first one in the list will be used.
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: childAgent
+                    type: String
+                    description: |-
+                      The resource name of the child agent the rule applies to.
+                      Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
+                    output: true
+                  - name: deterministicTransfer
+                    type: NestedObject
+                    description: |-
+                      Deterministic transfer rule. When the condition evaluates to true, the
+                      transfer occurs.
+                    output: true
+                    properties:
+                      - name: expressionCondition
+                        type: NestedObject
+                        description: |-
+                          A rule that evaluates a session state condition. If the condition
+                          evaluates to true, the transfer occurs.
+                        output: true
+                        properties:
+                          - name: expression
+                            type: String
+                            description: The string representation of cloud.api.Expression condition.
+                            output: true
+                      - name: pythonCodeCondition
+                        type: NestedObject
+                        description: |-
+                          A rule that uses Python code block to evaluate the conditions. If the
+                          condition evaluates to true, the transfer occurs.
+                        output: true
+                        properties:
+                          - name: pythonCode
+                            type: String
+                            description: |-
+                              The python code to execute. The function must be named
+                              `should_trigger_transfer_callback`.
+                            output: true
+                  - name: direction
+                    type: String
+                    description: |-
+                      The direction of the transfer.
+                      Possible values:
+                      * PARENT_TO_CHILD
+                      * CHILD_TO_PARENT
+                    output: true
+                  - name: disablePlannerTransfer
+                    type: NestedObject
+                    description: |-
+                      A rule that prevents the planner from transferring to the target agent.
+                    output: true
+                    properties:
+                      - name: expressionCondition
+                        type: NestedObject
+                        description: |-
+                          If the condition evaluates to true, planner will not be allowed to
+                          transfer to the target agent.
+                        output: true
+                        properties:
+                          - name: expression
+                            type: String
+                            description: The string representation of cloud.api.Expression condition.
+                            output: true
             - name: updateTime
               type: String
               description: Timestamp when the agent was last updated.
@@ -1474,6 +1605,16 @@ properties:
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
                       output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
+                      output: true
                     - name: pythonCode
                       type: String
                       description: The python code to execute for the callback.
@@ -1494,6 +1635,16 @@ properties:
                       description: |-
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
+                      output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
                       output: true
                     - name: pythonCode
                       type: String
@@ -1516,6 +1667,16 @@ properties:
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
                       output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
+                      output: true
                     - name: pythonCode
                       type: String
                       description: The python code to execute for the callback.
@@ -1536,6 +1697,16 @@ properties:
                       description: |-
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
+                      output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
                       output: true
                     - name: pythonCode
                       type: String

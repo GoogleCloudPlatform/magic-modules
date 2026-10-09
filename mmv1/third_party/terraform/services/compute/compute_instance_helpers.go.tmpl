@@ -247,7 +247,7 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 	if v, ok := original["skip_guest_os_shutdown"]; ok {
 		result["skipGuestOsShutdown"] = v.(bool)
 	}
-
+{{- end }}
 	if v, ok := original["preemption_notice_duration"]; ok {
 		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration(v)
 		if err != nil {
@@ -257,7 +257,6 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["preemptionNoticeDuration"] = transformedPreemptionNoticeDuration
 		}
 	}
-{{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
@@ -437,11 +436,11 @@ func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok {
 		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(gs)
 	}
+{{- end }}
 
 	if pnd, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok {
 		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(pnd)
 	}
-{{- end }}
 
 	if lsrt, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(lsrt)
@@ -524,6 +523,7 @@ func flattenGracefulShutdownMaxDuration(v map[string]interface{}) []interface{} 
 	transformed["seconds"] = getInt(v["seconds"])
 	return []interface{}{transformed}
 }
+{{- end }}
 
 func expandComputePreemptionNoticeDuration(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
@@ -561,7 +561,6 @@ func flattenComputePreemptionNoticeDuration(v map[string]interface{}) []interfac
 	transformed["seconds"] = getInt(v["seconds"])
 	return []interface{}{transformed}
 }
-{{- end }}
 
 func flattenAccessConfigs(accessConfigs []interface{}) ([]map[string]interface{}, string) {
 	flattened := make([]map[string]interface{}, 0, len(accessConfigs))
@@ -727,6 +726,14 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if !ok && iface["igmpQuery"] != nil {
 			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for igmpQuery at index %d: %T", i, iface["igmpQuery"])
 		}
+		enableVpcScopedDns, ok := iface["enableVpcScopedDns"].(bool)
+		if !ok && iface["enableVpcScopedDns"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for enableVpcScopedDns at index %d: %T", i, iface["enableVpcScopedDns"])
+		}
+		serviceClassId, ok := iface["serviceClassId"].(string)
+		if !ok && iface["serviceClassId"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for serviceClassId at index %d: %T", i, iface["serviceClassId"])
+		}
 
 		subnet, err := tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
 		if err != nil {
@@ -735,24 +742,26 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		region = subnet.Region
 
 		flattened[i] = map[string]interface{}{
-			"network_ip":          networkIP,
-			"network":             tpgresource.ConvertSelfLinkToV1(network),
-			"parent_nic_name":     parentNicName,
-			"vlan":                flattenNetworkInterfaceInt64(iface["vlan"]),
-			"subnetwork":          tpgresource.ConvertSelfLinkToV1(subnetwork),
-			"subnetwork_project":  subnet.Project,
-			"access_config":       ac,
-			"alias_ip_range":      FlattenAliasIpRangeHTTP(d, aliasIpRanges, i),
+			"network_ip":                  networkIP,
+			"network":                     tpgresource.ConvertSelfLinkToV1(network),
+			"parent_nic_name":             parentNicName,
+			"vlan":                        flattenNetworkInterfaceInt64(iface["vlan"]),
+			"subnetwork":                  tpgresource.ConvertSelfLinkToV1(subnetwork),
+			"subnetwork_project":          subnet.Project,
+			"access_config":               ac,
+			"alias_ip_range":              FlattenAliasIpRangeHTTP(d, aliasIpRanges, i),
 			{{ if ne $.TargetVersionName `ga` -}}
 			"alias_ipv6_range":     flattenIpv6AliasRange(d, getInterfaceSlice(iface["aliasIpv6Ranges"]), i),
 			{{- end }}
-			"nic_type":            nicType,
-			"stack_type":          stackType,
-			"ipv6_access_config": flattenIpv6AccessConfigs(ipv6AccessConfigs),
-			"ipv6_address":        ipv6Address,
-			"queue_count":         flattenNetworkInterfaceInt64(iface["queueCount"]),
+			"nic_type":                    nicType,
+			"stack_type":                  stackType,
+			"ipv6_access_config":          flattenIpv6AccessConfigs(ipv6AccessConfigs),
+			"ipv6_address":                ipv6Address,
+			"queue_count":                 flattenNetworkInterfaceInt64(iface["queueCount"]),
 			"internal_ipv6_prefix_length": flattenNetworkInterfaceInt64(iface["internalIpv6PrefixLength"]),
-			"igmp_query":          igmpQuery,
+			"igmp_query":                  igmpQuery,
+			"enable_vpc_scoped_dns":       enableVpcScopedDns,
+			"service_class_id":            serviceClassId,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -944,6 +953,12 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		}
 		if networkAttachment != "" {
 			iface["networkAttachment"] = networkAttachment
+		}
+		if v, ok := data["enable_vpc_scoped_dns"].(bool); ok && v {
+			iface["enableVpcScopedDns"] = v
+		}
+		if v, ok := data["service_class_id"].(string); ok && v != "" {
+			iface["serviceClassId"] = v
 		}
 		if v := int64(data["vlan"].(int)); v != 0 {
 			iface["vlan"] = v
@@ -1211,6 +1226,20 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig map[string]int
 		"enable_confidential_compute": ConfidentialInstanceConfig["enableConfidentialCompute"],
 		"confidential_instance_type":  ConfidentialInstanceConfig["confidentialInstanceType"],
 	{{"}}"}}
+}
+
+func performanceMonitoringUnitDiffSuppress(_ string, old, new string, d *schema.ResourceData) bool {
+	// DiffSuppressFunc runs during planning, before IsNewResource is marked during apply.
+	// An empty ID identifies a resource that does not exist in state yet, so a new resource
+	// must send an explicitly configured STANDARD value to the API.
+	if d == nil || d.Id() == "" {
+		return false
+	}
+
+	// Existing resources may have recorded an empty value after the suppressor from
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/17887 omitted an
+	// explicitly configured STANDARD value during creation.
+	return (old == "" && new == "STANDARD") || (old == "STANDARD" && new == "")
 }
 
 func expandAdvancedMachineFeatures(d tpgresource.TerraformResourceData) map[string]interface{} {

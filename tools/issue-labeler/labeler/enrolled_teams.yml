@@ -415,6 +415,7 @@ service/dialogflow-cx:
   - google_dialogflow_fulfillment
   - google_dialogflow_generator
   - google_dialogflow_intent
+  - google_dialogflow_tool
   - google_dialogflow_version
 service/discoveryengine:
   resources:
@@ -491,7 +492,12 @@ service/gce-rollout-plan:
   - google_compute_rollout_plan
 service/gemini:
   resources:
-  - google_gemini_.*
+  - google_gemini_code_repository_index
+  - google_gemini_repository_group.*
+  - google_gemini_.*_setting(_binding)?
+service/geminidataanalytics:
+  resources:
+  - google_gemini_data_analytics_.*
 service/gkebackup:
   resources:
   - google_gke_backup_.*
@@ -672,6 +678,7 @@ service/networksecurity-swp:
 service/networkservices-agent-gateway:
   resources:
   - google_network_services_agent_gateway
+  - google_network_services_agent_connectivity_template
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*

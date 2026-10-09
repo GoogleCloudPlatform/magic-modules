@@ -74,7 +74,8 @@ func testAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
 }
 
 func testAccAccessContextManagerAccessPolicyIamBinding_basic(policy, account, role string) string {
-	return fmt.Sprintf(policy+`
+	return fmt.Sprintf(`
+%s
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
   display_name = "Access Context Manager IAM Testing Account"
@@ -87,11 +88,12 @@ resource google_access_context_manager_access_policy_iam_binding binding {
 		"serviceAccount:${google_service_account.test-account1.email}",
 	]
 }
-`, account, role)
+`, policy, account, role)
 }
 
 func testAccAccessContextManagerAccessPolicyIamMember_basic(policy, account, role string) string {
-	return fmt.Sprintf(policy+`
+	return fmt.Sprintf(`
+%s
 resource "google_service_account" "test-account" {
   account_id   = "%s"
   display_name = "Access Context Manager IAM Testing Account"
@@ -103,11 +105,12 @@ resource google_access_context_manager_access_policy_iam_member member {
     member = "serviceAccount:${google_service_account.test-account.email}"
 }
 
-`, account, role)
+`, policy, account, role)
 }
 
 func testAccAccessContextManagerAccessPolicyIamPolicy_basic(policy, account, role string) string {
-	return fmt.Sprintf(policy+`
+	return fmt.Sprintf(`
+%s
 resource "google_service_account" "test-account" {
   account_id   = "%s"
   display_name = "Access Context Manager IAM Testing Account"
@@ -125,7 +128,7 @@ resource google_access_context_manager_access_policy_iam_policy policy {
 	policy_data = data.google_iam_policy.admin.policy_data
 }
 
-`, account, role)
+`, policy, account, role)
 }
 
 func createScopedPolicy(t *testing.T, org string) string {

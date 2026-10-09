@@ -23,7 +23,7 @@ resource "google_compute_target_http_proxy" "default" {
 
 resource "google_compute_url_map" "default" {
   provider        = google-beta
-  name            = "url-map-{{index $.ResourceIdVars "http_proxy_name"}}"
+  name            = "{{index $.ResourceIdVars "http_proxy_name"}}-url-map"
   description     = "a description"
   default_service = google_compute_backend_service.default.id
 
@@ -81,7 +81,7 @@ resource "google_compute_instance_group_manager" "igm" {
 
 resource "google_compute_instance_template" "instance_template" {
   provider     = google-beta
-  name         = "template-{{index $.ResourceIdVars "backend_service_name"}}"
+  name         = "{{index $.ResourceIdVars "backend_service_name"}}-template"
   machine_type = "e2-medium"
 
   network_interface {
@@ -97,7 +97,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 resource "google_compute_health_check" "default" {
   provider           = google-beta
-  name               = "check-{{index $.ResourceIdVars "backend_service_name"}}"
+  name               = "{{index $.ResourceIdVars "backend_service_name"}}-check"
   check_interval_sec = 1
   timeout_sec        = 1
 

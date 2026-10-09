@@ -9,13 +9,25 @@ import (
 )
 
 func FromProperties(props []*api.Type) []Field {
-	// Sort props by lineage
-	slices.SortFunc(props, func(a, b *api.Type) int {
-		if strings.Join(a.Lineage(), ".") < strings.Join(b.Lineage(), ".") {
+	// Sort props by lineage. Lineage() walks the parent chain on every call,
+	// so compute each key once rather than inside the comparator.
+	type keyedProp struct {
+		key  string
+		prop *api.Type
+	}
+	keyed := make([]keyedProp, len(props))
+	for i, p := range props {
+		keyed[i] = keyedProp{key: strings.Join(p.Lineage(), "."), prop: p}
+	}
+	slices.SortFunc(keyed, func(a, b keyedProp) int {
+		if a.key < b.key {
 			return -1
 		}
 		return 1
 	})
+	for i := range keyed {
+		props[i] = keyed[i].prop
+	}
 
 	var fields []Field
 	for _, p := range props {

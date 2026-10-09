@@ -55,9 +55,6 @@ samples:
           backend_service_name: backend-service
           health_check_name: health-check
           authentication_name: authentication
-        test_vars_overrides:
-          # for backward compatible
-          authentication_name: '"authentication" + randomSuffix'
 parameters:
   - name: name
     type: String

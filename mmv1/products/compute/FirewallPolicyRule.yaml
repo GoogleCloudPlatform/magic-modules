@@ -76,8 +76,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
         min_version: beta
@@ -94,8 +92,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_secure_tags'
@@ -211,8 +207,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_context
       - name: 'destNetworkContext'
         type: Enum
         default_from_api: true
@@ -224,8 +218,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_scope
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

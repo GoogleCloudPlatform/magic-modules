@@ -86,11 +86,11 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeTargetPool_withSecurityPolicy(t *testing.T) {
-	tpname := fmt.Sprintf("tf-tp-test-%s", acctest.RandString(t, 10))
-	ddosPolicy := fmt.Sprintf("tf-tp-ddos-pol-test-%s", acctest.RandString(t, 10))
-	edgeSecService := fmt.Sprintf("tf-tp-edge-sec-test-%s", acctest.RandString(t, 10))
-	pol1 := fmt.Sprintf("tf-tp-pol1-test-%s", acctest.RandString(t, 10))
-	pol2 := fmt.Sprintf("tf-tp-pol2-test-%s", acctest.RandString(t, 10))
+	tpname := fmt.Sprintf("tf-test-tp-%s", acctest.RandString(t, 10))
+	ddosPolicy := fmt.Sprintf("tf-test-tp-ddos-pol-%s", acctest.RandString(t, 10))
+	edgeSecService := fmt.Sprintf("tf-test-tp-edge-sec-%s", acctest.RandString(t, 10))
+	pol1 := fmt.Sprintf("tf-test-tp-pol1-%s", acctest.RandString(t, 10))
+	pol2 := fmt.Sprintf("tf-test-tp-pol2-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -228,7 +228,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_http_health_check" "foobar" {
-  name = "healthcheck-test-%s"
+  name = "tf-test-healthcheck-%s"
   host = "example.com"
 }
 
@@ -251,7 +251,7 @@ resource "google_compute_instance" "foobar" {
 resource "google_compute_target_pool" "foo" {
   description      = "Resource created for Terraform acceptance testing"
   instances        = [google_compute_instance.foobar.self_link, "us-central1-b/bar"]
-  name             = "tpool-test-%s"
+  name             = "tf-test-tpool-%s"
   session_affinity = "CLIENT_IP_PROTO"
   health_checks = [
     google_compute_http_health_check.foobar.name,
@@ -260,7 +260,7 @@ resource "google_compute_target_pool" "foo" {
 
 resource "google_compute_target_pool" "bar" {
   description = "Resource created for Terraform acceptance testing"
-  name        = "tpool-test-2-%s"
+  name        = "tf-test-tpool-test-2-%s"
   health_checks = [
     google_compute_http_health_check.foobar.self_link,
   ]
