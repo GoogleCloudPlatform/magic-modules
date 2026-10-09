@@ -1,0 +1,5 @@
+if d.HasChange("version_aliases") {
+	if err := vertexAiModelMergeVersionAliases(d, config, d.Timeout(schema.TimeoutUpdate)); err != nil {
+		return err
+	}
+}

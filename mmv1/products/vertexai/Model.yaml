@@ -1,0 +1,210 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Model
+base_url: projects/{{project}}/locations/{{region}}/models
+create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
+delete_url: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
+self_link: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
+
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
+description: |-
+  A trained machine learning Model copied from an existing Model.
+id_format: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_diff:
+  - 'vertexAiModelDiffSuppress'
+custom_code:
+  constants: templates/terraform/constants/vertex_ai_model.go.tmpl
+  custom_import: templates/terraform/custom_import/vertex_ai_model.go.tmpl
+  decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
+  encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
+  pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
+  post_create: templates/terraform/post_create/vertex_ai_models.go.tmpl
+  pre_update: templates/terraform/pre_update/vertex_ai_models.go.tmpl
+  post_update: templates/terraform/post_update/vertex_ai_models.go.tmpl
+samples:
+  - name: 'vertex_ai_model_source_basic_1'
+    primary_resource_id: 'model'
+    steps:
+      - name: 'vertex_ai_model_source_basic_1'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        ignore_read_extra:
+          - project
+  - name: 'vertex_ai_model_source_basic_2'
+    primary_resource_id: 'model'
+    steps:
+      - name: 'vertex_ai_model_source_basic_2'
+        vars:
+          model_id: 'test-model'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        ignore_read_extra:
+          - project
+parameters:
+  - type: String
+    name: region
+    description: The region of the Model. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - type: String
+    name: name
+    description: The resource name of the Model.
+    output: true
+  - type: String
+    name: description
+    description: Description of the Model.
+    default_from_api: true
+  - type: String
+    name: versionId
+    description: The version ID of the Model.
+    output: true
+  - type: String
+    name: versionCreateTime
+    description: Timestamp when this version was created.
+    output: true
+  - type: String
+    name: versionUpdateTime
+    description: Timestamp when this version was most recently updated.
+    output: true
+  - type: String
+    name: versionDescription
+    description: Description of this version.
+    output: true
+  - type: String
+    name: metadataSchemaUri
+    description: URI of the schema describing additional model metadata.
+    output: true
+  - type: NestedObject
+    name: predictSchemata
+    description: Schemata describing the Model's predictions and explanations.
+    output: true
+    properties:
+      - type: String
+        name: instanceSchemaUri
+        description: URI describing the format of a prediction instance.
+        output: true
+      - type: String
+        name: parametersSchemaUri
+        description: URI describing prediction parameters.
+        output: true
+      - type: String
+        name: predictionSchemaUri
+        description: URI describing the format of a prediction.
+        output: true
+  - type: Array
+    name: supportedExportFormats
+    description: Formats in which this Model may be exported.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: id
+          output: true
+        - type: Enum
+          name: exportableContent
+          output: true
+          enum_values:
+            - :ARTIFACT
+            - :IMAGE
+  - type: String
+    name: trainerPipeline
+    description: Resource name of the TrainingPipeline that uploaded this Model.
+    output: true
+  - type: String
+    name: pipelineJob
+    description: Resource name of the PipelineJob that produced this Model.
+    output: true
+  - type: String
+    name: artifactUri
+    description: Path to the directory containing the Model artifact.
+    output: true
+  - type: String
+    name: createTime
+    description: Timestamp when the Model was created.
+    output: true
+  - type: String
+    name: updateTime
+    description: Timestamp when the Model was most recently updated.
+    output: true
+  - type: String
+    name: displayName
+    description: Display name of the Model. Optional when copying a Model.
+    default_from_api: true
+  - type: String
+    name: etag
+    description: Used to perform consistent read-modify-write updates.
+    output: true
+    ignore_read: true
+  - type: Array
+    name: versionAliases
+    description: |
+      User-provided version aliases, managed after the Model is copied and on updates.
+      Aliases are unordered. The API-required `default` alias is preserved when omitted
+      from configuration and is only included in state when explicitly configured
+      or when this field is unset.
+    default_from_api: true
+    is_set: true
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_model_version_aliases.go.tmpl
+    item_type:
+      type: String
+  - type: NestedObject
+    name: encryptionSpec
+    description: Customer-managed encryption key specification.
+    immutable: true
+    properties:
+      - type: String
+        name: kmsKeyName
+        immutable: true
+  - type: String
+    name: customServiceAccount
+    description: Optional service account used to copy the Model.
+    immutable: true
+    ignore_read: true
+  - type: String
+    name: sourceModel
+    immutable: true
+    ignore_read: true
+    at_least_one_of:
+      - sourceModel
+    description: Resource name of the Model to copy.
+  - type: String
+    name: modelId
+    immutable: true
+    ignore_read: true
+    default_from_api: true
+    description: ID for the new copied Model.
