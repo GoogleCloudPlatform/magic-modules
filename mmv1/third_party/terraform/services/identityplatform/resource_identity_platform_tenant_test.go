@@ -68,6 +68,20 @@ resource "google_identity_platform_tenant" "tenant" {
       disabled_user_deletion = true
     }
   }
+  password_policy_config {
+    password_policy_enforcement_state = "ENFORCE"
+    force_upgrade_on_signin           = true
+    password_policy_versions {
+      custom_strength_options {
+        min_password_length                 = 8
+        max_password_length                 = 30
+        contains_lowercase_character        = true
+        contains_uppercase_character        = true
+        contains_numeric_character          = true
+        contains_non_alphanumeric_character = true
+      }
+    }
+  }
 }
 `, context)
 }
