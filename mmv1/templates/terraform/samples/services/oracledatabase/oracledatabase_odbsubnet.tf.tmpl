@@ -6,7 +6,7 @@ resource "google_oracle_database_odb_subnet" "{{$.PrimaryResourceId}}"{
   cidr_range = "{{index $.ResourceIdVars "cidr_range"}}"
   purpose = "CLIENT_SUBNET"
   labels = {
-    terraform_created = "true"
+    terraform_created = "{{index $.Vars "label_value"}}"
   }
   deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
 }

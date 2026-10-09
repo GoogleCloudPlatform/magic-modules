@@ -54,7 +54,10 @@ samples:
     # TODO(shuyama): Add GH issue link
     skip_vcr: true
     steps:
+      # Step 1 -> create test
       - name: oracledatabase_odbsubnet
+        vars:
+          label_value: "true"
         resource_id_vars:
           cidr_range: 10.1.1.0/24
           project: my-project
@@ -67,8 +70,26 @@ samples:
           deletion_protection: "false"
           project: '"oasis-terraform-testing-prod"'
           odb_network_id: '"tf-test-permanent-odbnetwork"'
-          odb_subnet_id: fmt.Sprintf("tf-test-odbsubnet-%s", acctest.RandString(t, 10))
+          odb_subnet_id: fmt.Sprintf("tf-test-odbsubnet-%s", randomSuffix)
           cidr_range: fmt.Sprintf("10.1.%d.0/24", acctest.RandInt(t) % 200 + 10)
+      # Step 2 -> update test (in-place update of labels)
+      - name: oracledatabase_odbsubnet
+        vars:
+          label_value: updated
+        resource_id_vars:
+          cidr_range: 10.1.1.0/24
+          project: my-project
+          odb_network_id: my-odbnetwork
+          odb_subnet_id: my-odbsubnet
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          odb_network_id: '"tf-test-permanent-odbnetwork"'
+          odb_subnet_id: fmt.Sprintf("tf-test-odbsubnet-%s", randomSuffix)
+          cidr_range: context["cidr_range"]
 virtual_fields:
   - name: deletion_protection
     type: Boolean
@@ -108,6 +129,8 @@ properties:
     output: true
   - name: labels
     type: KeyValueLabels
+    update_url: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets/{{odb_subnet_id}}?updateMask=labels'
+    update_verb: 'PATCH'
     description: Labels or tags associated with the resource.
   - name: name
     type: String
