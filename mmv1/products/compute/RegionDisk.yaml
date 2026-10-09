@@ -206,6 +206,10 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+
+          Specify the key without a `/cryptoKeyVersions/` suffix. A version on
+          the current key is ignored.
+        diff_suppress_func: 'tpgresource.CompareKmsKeyNames'
         # Sent by custom_update; see forceNewOnUnsupportedKmsKeyChange.
         update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
         update_verb: 'POST'
