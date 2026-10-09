@@ -157,6 +157,8 @@ If no value is set, Cloud Bigtable automatically allocates nodes based on your d
 
 -> **Note**: Removing the field entirely from the config will cause the provider to default to the backend value.
 
+* `memory_config` - (Optional) The memory layer configuration for the cluster. Specify an empty `memory_config {}` block to enable the memory layer on the cluster, or omit it to disable the memory layer. Requires `edition = "ENTERPRISE_PLUS"` and `storage_type = "SSD"`.
+
 !> **Warning:** Modifying the `storage_type`, `zone` or `kms_key_name` of an existing cluster (by
 `cluster_id`) will cause Terraform to delete/recreate the entire
 `google_bigtable_instance` resource. If these values are changing, use a new
@@ -168,6 +170,8 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `id` - an identifier for the resource with format `projects/{{project}}/instances/{{name}}`
 * `cluster.0.state` - describes the current state of the cluster.
+* `cluster.0.memory_config.0.storage_size_gib` - the current size of the cluster's memory layer in GiB.
+* `cluster.0.memory_config.0.state` - the current state of the cluster's memory layer.
 
 ## Timeouts
 

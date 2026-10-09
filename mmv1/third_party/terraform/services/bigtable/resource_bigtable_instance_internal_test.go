@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/bigtable"
+	adminpb "cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
@@ -369,6 +370,173 @@ func TestUnitBigtable_resourceBigtableInstanceClusterReorderTypeListFunc(t *test
 			}
 			if !reflect.DeepEqual(gotClusterOrder, tc.wantClusterOrder) {
 				t.Errorf("bad: %s, got %q, want %q", tn, gotClusterOrder, tc.wantClusterOrder)
+			}
+		})
+	}
+}
+
+func TestUnitBigtable_flattenBigtableMemoryLayer(t *testing.T) {
+	cases := map[string]struct {
+		ml   *adminpb.MemoryLayer
+		want []map[string]interface{}
+	}{
+		"nil memory layer": {
+			ml:   nil,
+			want: nil,
+		},
+		"disabled memory layer (nil memory_config)": {
+			ml: &adminpb.MemoryLayer{
+				Name:  "projects/p/instances/i/clusters/c/memoryLayer",
+				State: adminpb.MemoryLayer_DISABLED,
+			},
+			want: nil,
+		},
+		"enabled memory layer": {
+			ml: &adminpb.MemoryLayer{
+				Name: "projects/p/instances/i/clusters/c/memoryLayer",
+				MemoryConfig: &adminpb.MemoryLayer_MemoryConfig{
+					StorageSizeGib: 64,
+				},
+				State: adminpb.MemoryLayer_READY,
+			},
+			want: []map[string]interface{}{
+				{
+					"storage_size_gib": 64,
+					"state":            "READY",
+				},
+			},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := flattenBigtableMemoryLayer(tc.ml); !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("bad: %s, got %#v, want %#v", tn, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUnitBigtable_clusterIDFromMemoryLayerName(t *testing.T) {
+	cases := map[string]struct {
+		name string
+		want string
+	}{
+		"valid name": {
+			name: "projects/my-proj/instances/my-inst/clusters/my-cluster/memoryLayer",
+			want: "my-cluster",
+		},
+		"invalid name": {
+			name: "projects/my-proj/instances/my-inst",
+			want: "",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := clusterIDFromMemoryLayerName(tc.name); got != tc.want {
+				t.Errorf("bad: %s, got %q, want %q", tn, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUnitBigtable_clustersNeedingMemoryLayerUpdate(t *testing.T) {
+	cases := map[string]struct {
+		oldClusters []interface{}
+		newClusters []interface{}
+		want        map[string]bool
+	}{
+		"create without memory_config": {
+			oldClusters: nil,
+			newClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id": "c1",
+				},
+			},
+			want: map[string]bool{},
+		},
+		"create with memory_config": {
+			oldClusters: nil,
+			newClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id":    "c1",
+					"memory_config": []interface{}{nil},
+				},
+			},
+			want: map[string]bool{
+				"c1": true,
+			},
+		},
+		"update enable memory_config": {
+			oldClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id": "c1",
+				},
+			},
+			newClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id":    "c1",
+					"memory_config": []interface{}{map[string]interface{}{}},
+				},
+			},
+			want: map[string]bool{
+				"c1": true,
+			},
+		},
+		"update disable memory_config": {
+			oldClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id": "c1",
+					"memory_config": []interface{}{
+						map[string]interface{}{
+							"storage_size_gib": 64,
+							"state":            "READY",
+						},
+					},
+				},
+			},
+			newClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id":    "c1",
+					"memory_config": []interface{}{},
+				},
+			},
+			want: map[string]bool{
+				"c1": false,
+			},
+		},
+		"update unchanged enabled memory_config": {
+			oldClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id": "c1",
+					"memory_config": []interface{}{
+						map[string]interface{}{
+							"storage_size_gib": 64,
+							"state":            "READY",
+						},
+					},
+				},
+			},
+			newClusters: []interface{}{
+				map[string]interface{}{
+					"cluster_id": "c1",
+					"memory_config": []interface{}{
+						map[string]interface{}{
+							"storage_size_gib": 64,
+							"state":            "READY",
+						},
+					},
+				},
+			},
+			want: map[string]bool{},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := clustersNeedingMemoryLayerUpdate(tc.oldClusters, tc.newClusters); !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("bad: %s, got %#v, want %#v", tn, got, tc.want)
 			}
 		})
 	}

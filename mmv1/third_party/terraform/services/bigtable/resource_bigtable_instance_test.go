@@ -1414,3 +1414,74 @@ resource "google_bigtable_instance" "instance" {
 }
 `, instanceName, edition, instanceName)
 }
+
+func TestAccBigtableInstance_memoryLayer(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableInstance_memoryLayer(instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "edition", "ENTERPRISE_PLUS"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.memory_config.#", "1"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.memory_config.0.state", "READY"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigtableInstance_memoryLayer(instanceName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.memory_config.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigtableInstance_memoryLayer(instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.memory_config.#", "1"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.memory_config.0.state", "READY"),
+				),
+			},
+		},
+	})
+}
+
+func testAccBigtableInstance_memoryLayer(instanceName string, enableMemoryLayer bool) string {
+	memoryConfigBlock := ""
+	if enableMemoryLayer {
+		memoryConfigBlock = "memory_config {}"
+	}
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name          = "%s"
+  instance_type = "PRODUCTION"
+  edition       = "ENTERPRISE_PLUS"
+  cluster {
+    cluster_id   = "%s"
+    zone         = "us-central1-b"
+    num_nodes    = 1
+    storage_type = "SSD"
+    %s
+  }
+  deletion_protection = false
+}
+`, instanceName, instanceName, memoryConfigBlock)
+}
