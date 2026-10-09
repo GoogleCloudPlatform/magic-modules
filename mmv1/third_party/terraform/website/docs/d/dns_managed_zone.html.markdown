@@ -36,15 +36,4 @@ resource "google_dns_record_set" "dns" {
 
 ## Attributes Reference
 
-The following attributes are exported:
-
-* `dns_name` - The fully qualified DNS name of this zone, e.g. `terraform.io.`.
-
-* `description` - A textual description field.
-
-* `name_servers` - The list of nameservers that will be authoritative for this
-    domain. Use NS records to redirect from your DNS provider to these names,
-    thus making Google Cloud DNS authoritative for this zone.
-
-* `visibility` - The zone's visibility: public zones are exposed to the Internet,
-    while private zones are visible only to Virtual Private Cloud resources.
+See [google_dns_managed_zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_managed_zone) resource for details of all the available attributes.
