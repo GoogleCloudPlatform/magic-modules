@@ -48,7 +48,10 @@ samples:
   - name: oracledatabase_cloud_exadata_infrastructure_basic
     primary_resource_id: my-cloud-exadata
     steps:
+      # Step 1 -> create test
       - name: oracledatabase_cloud_exadata_infrastructure_basic
+        vars:
+          label_value: value-one
         resource_id_vars:
           project: my-project
           cloud_exadata_infrastructure_id: my-instance
@@ -62,7 +65,21 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", acctest.RandString(t, 10))
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", randomSuffix)
+      # Step 2 -> update test (in-place update of labels)
+      - name: oracledatabase_cloud_exadata_infrastructure_basic
+        vars:
+          label_value: value-two
+        resource_id_vars:
+          project: my-project
+          cloud_exadata_infrastructure_id: my-instance
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oasis-terraform-testing-prod"'
+          deletion_protection: "false"
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-basic-%s", randomSuffix)
   - name: oracledatabase_cloud_exadata_infrastructure_full
     primary_resource_id: my-cloud-exadata
     steps:
@@ -299,6 +316,8 @@ properties:
             output: true
   - name: labels
     type: KeyValueLabels
+    update_url: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}?updateMask=labels'
+    update_verb: 'PATCH'
     description: 'Labels or tags associated with the resource. '
   - name: createTime
     type: String

@@ -13,5 +13,9 @@ resource "google_oracle_database_goldengate_deployment" "{{$.PrimaryResourceId}}
       deployment     = "deployment"
     }
   }
+  labels = {
+    "label-one" = "{{index $.Vars "label_value"}}"
+  }
+
   deletion_policy = "{{index $.ResourceIdVars "deletion_policy"}}"
 }

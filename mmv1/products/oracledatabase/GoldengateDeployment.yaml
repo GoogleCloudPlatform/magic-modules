@@ -36,6 +36,7 @@ async:
   actions:
     - create
     - delete
+    - update
   result:
     resource_inside_response: true
 deletion_policy_default: PREVENT
@@ -45,7 +46,10 @@ samples:
   - name: oracledatabase_goldengate_deployment_basic
     primary_resource_id: deployment
     steps:
+      # Step 1 -> create test
       - name: oracledatabase_goldengate_deployment_basic
+        vars:
+          label_value: value-one
         resource_id_vars:
           project: my-project
           goldengate_deployment_id: my-deployment
@@ -56,7 +60,23 @@ samples:
         test_vars_overrides:
           project: '"oasis-terraform-testing-prod"'
           deletion_policy: '"DELETE"'
-          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", acctest.RandString(t, 10))
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", randomSuffix)
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+      # Step 2 -> update test (in-place update of labels)
+      - name: oracledatabase_goldengate_deployment_basic
+        vars:
+          label_value: value-two
+        resource_id_vars:
+          project: my-project
+          goldengate_deployment_id: my-deployment
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-network/odbSubnets/my-subnet
+          deletion_policy: PREVENT
+        ignore_read_extra:
+          - deletion_policy
+        test_vars_overrides:
+          project: '"oasis-terraform-testing-prod"'
+          deletion_policy: '"DELETE"'
+          goldengate_deployment_id: fmt.Sprintf("tf-ggdep-basic-%s", randomSuffix)
           odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_goldengate_deployment_full
     primary_resource_id: deployment
@@ -117,6 +137,8 @@ properties:
       If not specified, the system will pick a zone based on availability.
   - name: labels
     type: KeyValueLabels
+    update_url: 'projects/{{project}}/locations/{{location}}/goldengateDeployments/{{goldengate_deployment_id}}?updateMask=labels'
+    update_verb: 'PATCH'
     description: The labels or tags associated with the GoldengateDeployment.
   - name: name
     type: String

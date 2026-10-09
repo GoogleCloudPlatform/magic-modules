@@ -15,6 +15,10 @@ resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
     hostname_prefix = "hostname1"
   }
 
+  labels = {
+    "label-one" = "{{index $.Vars "label_value"}}"
+  }
+
   deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
 }
 

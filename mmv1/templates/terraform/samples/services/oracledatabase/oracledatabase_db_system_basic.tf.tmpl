@@ -26,6 +26,10 @@ resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
             }
         }
     }
+    labels = {
+      "label-one" = "{{index $.Vars "label_value"}}"
+    }
+
     deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
 }
 
