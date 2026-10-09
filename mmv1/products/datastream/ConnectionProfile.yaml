@@ -520,10 +520,12 @@ properties:
             type: String
             description: |
               Password of the user.
+            sensitive: true
           - name: securityToken
             type: String
             description: |
               Security token of the user.
+            sensitive: true
           - name: secretManagerStoredPassword
             type: String
             description: |
@@ -548,6 +550,7 @@ properties:
             type: String
             description: |
               Client secret to use for authentication.
+            sensitive: true
           - name: secretManagerStoredClientSecret
             type: String
             description: |

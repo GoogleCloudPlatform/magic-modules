@@ -29,6 +29,7 @@ For example: projects/my-project/locations/us-west1-a/privateClouds/my-cloud`,
 			"password": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: `Initial password.`,
 			},
 		},
