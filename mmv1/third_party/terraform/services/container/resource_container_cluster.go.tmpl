@@ -6801,10 +6801,12 @@ func expandManagedOpenTelemetryConfig(configured interface{}) *container.Managed
 	if len(l) == 0 {
 		return nil
 	}
-	// l[0] is nil when the block is present with an empty or diff-suppressed
-	// default scope (e.g. `{}` or `scope = "SCOPE_UNSPECIFIED"` from an unset state).
-	// Return an empty struct `{}` (which the API normalizes to SCOPE_UNSPECIFIED)
-	// rather than nil to avoid a permadiff on Create and an empty-update 400 on Update.
+	// l[0] is nil when the block is present but its scope is empty after diff
+	// suppression: `scope = "SCOPE_UNSPECIFIED"` on Create, or `{}` /
+	// `scope = "SCOPE_UNSPECIFIED"` when the state has no block. Return an empty
+	// struct, sent as `{}`, so the server applies its default scope (currently
+	// SCOPE_UNSPECIFIED). Returning nil would omit the field, causing a permadiff
+	// on Create and an empty-update 400 on Update.
 	if l[0] == nil {
 		return &container.ManagedOpenTelemetryConfig{}
 	}
