@@ -31,8 +31,8 @@ func TestKmsKeyChange(t *testing.T) {
 		"unknown key":                  {"", false, false, false, false, false},
 		"no key":                       {"", true, false, false, false, true},
 		"key version":                  {testKmsKeyB + "/cryptoKeyVersions/1", true, false, false, false, true},
-		"key with service account":     {testKmsKeyB, true, true, false, true, false},
-		"unknown with service account": {"", false, true, false, true, false},
+		"key with service account":     {testKmsKeyB, true, true, false, false, true},
+		"unknown with service account": {"", false, true, false, false, true},
 		"key replacing a CSEK":         {testKmsKeyB, true, false, true, true, false},
 	}
 	for name, tc := range cases {
@@ -167,17 +167,17 @@ func TestValidateKmsKeyChange(t *testing.T) {
 			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyA}),
 			want:   noChange,
 		},
-		"key to key with a service account replaces": {
+		"key to key with a service account errors": {
 			withServiceAccount: true,
 			state:              keyState(testKmsKeyA, testKmsSA),
 			config:             keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB, "kms_key_service_account": testKmsSA}),
-			want:               replace,
+			want:               planError,
 		},
-		"key to unknown key with a service account replaces": {
+		"key to unknown key with a service account errors": {
 			withServiceAccount: true,
 			state:              keyState(testKmsKeyA, testKmsSA),
 			config:             keyConfig(map[string]interface{}{"kms_key_self_link": testUnknownValue, "kms_key_service_account": testKmsSA}),
-			want:               replace,
+			want:               planError,
 		},
 		"key to key without a service account set updates in place": {
 			withServiceAccount: true,
