@@ -62,6 +62,103 @@ var sqlDatabaseFlagSchemaElem *schema.Resource = &schema.Resource{
 	},
 }
 
+var sqlDatabasePscConfigSchemaElem *schema.Resource = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		"psc_enabled": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: `Whether PSC connectivity is enabled for this instance.`,
+		},
+		"psc_auto_dns_enabled": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Computed:    true,
+			Description: `Whether PSC auto DNS is enabled for this instance.`,
+		},
+		"psc_write_endpoint_dns_enabled": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Computed:    true,
+			Description: `Whether PSC write endpoint DNS is enabled for this instance.`,
+		},
+		"psc_auto_connection_policy_enabled": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Computed:    true,
+			Description: `Whether a service connection policy is created for the auto connections configured for the instance.`,
+		},
+		"allowed_consumer_projects": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Set:         schema.HashString,
+			Description: `List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).`,
+		},
+		"network_attachment_uri": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: `Name of network attachment resource used to authorize a producer service to connect a PSC interface to the consumer's VPC. For example: "projects/myProject/regions/myRegion/networkAttachments/myNetworkAttachment". This is required to enable outbound connection on a PSC instance.`,
+		},
+		"psc_auto_connections": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"consumer_service_project_id": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Computed:    true,
+						Description: `The project ID of consumer service project of this consumer endpoint.`,
+					},
+					"consumer_network": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: `The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. The consumer host project of this network might be different from the consumer service project.`,
+					},
+					"consumer_network_status": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The connection policy status of the consumer network.`,
+					},
+					"instance_auto_dns_status": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The status of the automated DNS provisioning for the instance.`,
+					},
+					"write_endpoint_auto_dns_status": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The status of the automated DNS provisioning for the write endpoint.`,
+					},
+					"ip_address": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The IP address of the consumer endpoint.`,
+					},
+					"status": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The connection status of the consumer endpoint.`,
+					},
+					"service_connection_policy": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The service connection policy created for the auto connection.`,
+					},
+					"service_connection_policy_creation_result": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: `The result of the service connection policy creation.`,
+					},
+				},
+			},
+			Description: `A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.`,
+		},
+	},
+}
+
 var (
 	backupConfigurationKeys = []string{
 		"settings.0.backup_configuration.0.binary_log_enabled",
@@ -679,103 +776,9 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"psc_config": {
 										Type:        schema.TypeSet,
 										Optional:    true,
+										Set:         resourceSqlDatabaseInstancePscConfigHash,
+										Elem:        sqlDatabasePscConfigSchemaElem,
 										Description: `PSC settings for a Cloud SQL instance.`,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"psc_enabled": {
-													Type:        schema.TypeBool,
-													Optional:    true,
-													Description: `Whether PSC connectivity is enabled for this instance.`,
-												},
-												"psc_auto_dns_enabled": {
-												        Type:        schema.TypeBool,
-												        Optional:    true,
-												        Computed:    true,
-												        Description: `Whether PSC auto DNS is enabled for this instance.`,
-												},
-												"psc_write_endpoint_dns_enabled": {
-												        Type:        schema.TypeBool,
-												        Optional:    true,
-												        Computed:    true,
-												        Description: `Whether PSC write endpoint DNS is enabled for this instance.`,
-												},
-												"psc_auto_connection_policy_enabled": {
-												        Type:        schema.TypeBool,
-												        Optional:    true,
-												        Computed:    true,
-												        Description: `Whether a service connection policy is created for the auto connections configured for the instance.`,
-												},
-												"allowed_consumer_projects": {
-													Type:     schema.TypeSet,
-													Optional: true,
-													Elem: &schema.Schema{
-														Type: schema.TypeString,
-													},
-													Set:         schema.HashString,
-													Description: `List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).`,
-												},
-												"network_attachment_uri": {
-													Type:        schema.TypeString,
-													Optional:    true,
-													Description: `Name of network attachment resource used to authorize a producer service to connect a PSC interface to the consumer's VPC. For example: "projects/myProject/regions/myRegion/networkAttachments/myNetworkAttachment". This is required to enable outbound connection on a PSC instance.`,
-												},
-												"psc_auto_connections": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-                                                                                                                Schema: map[string]*schema.Schema{
-                                                                                                                        "consumer_service_project_id": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Optional:     true,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The project ID of consumer service project of this consumer endpoint.`,
-                                                                                                                        },
-                                                                                                                        "consumer_network": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Required:     true,
-                                                                                                                                Description:  `The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. The consumer host project of this network might be different from the consumer service project.`,
-                                                                                                                        },
-                                                                                                                        "consumer_network_status": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The connection policy status of the consumer network.`,
-                                                                                                                        },
-                                                                                                                        "instance_auto_dns_status": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The status of the automated DNS provisioning for the instance.`,
-                                                                                                                        },
-                                                                                                                        "write_endpoint_auto_dns_status": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The status of the automated DNS provisioning for the write endpoint.`,
-                                                                                                                        },
-                                                                                                                        "ip_address": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The IP address of the consumer endpoint.`,
-                                                                                                                        },
-                                                                                                                        "status": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The connection status of the consumer endpoint.`,
-                                                                                                                        },
-                                                                                                                        "service_connection_policy": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The service connection policy created for the auto connection.`,
-                                                                                                                        },
-                                                                                                                        "service_connection_policy_creation_result": {
-                                                                                                                                Type:         schema.TypeString,
-                                                                                                                                Computed:     true,
-                                                                                                                                Description:  `The result of the service connection policy creation.`,
-                                                                                                                        },
-                                                                                                                },
-													},
-													Description: `A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.`,
-												},
-											},
-										},
 									},
 									"ssl_mode": {
 										Type:         schema.TypeString,
@@ -4905,6 +4908,70 @@ func deleteBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 	return nil
 }
 {{- end }}
+
+func projectFromConsumerNetwork(consumerNetwork string) string {
+	const prefix = "projects/"
+	idx := strings.Index(consumerNetwork, prefix)
+	if idx == -1 {
+		return ""
+	}
+	rest := consumerNetwork[idx+len(prefix):]
+	slash := strings.IndexByte(rest, '/')
+	if slash <= 0 {
+		return rest
+	}
+	return rest[:slash]
+}
+
+func resourceSqlDatabaseInstancePscConfigHash(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+
+	cloned := make(map[string]interface{}, len(m))
+	for k, val := range m {
+		cloned[k] = val
+	}
+
+	normalizeConn := func(conn map[string]interface{}) map[string]interface{} {
+		connClone := make(map[string]interface{}, len(conn))
+		for k, val := range conn {
+			connClone[k] = val
+		}
+		project, _ := connClone["consumer_service_project_id"].(string)
+		if project == "" {
+			if network, ok := connClone["consumer_network"].(string); ok {
+				connClone["consumer_service_project_id"] = projectFromConsumerNetwork(network)
+			}
+		}
+		return connClone
+	}
+
+	switch conns := m["psc_auto_connections"].(type) {
+	case []interface{}:
+		normalized := make([]interface{}, len(conns))
+		for i, raw := range conns {
+			if connMap, ok := raw.(map[string]interface{}); ok {
+				normalized[i] = normalizeConn(connMap)
+			} else {
+				normalized[i] = raw
+			}
+		}
+		cloned["psc_auto_connections"] = normalized
+	case []map[string]interface{}:
+		normalized := make([]interface{}, len(conns))
+		for i, connMap := range conns {
+			normalized[i] = normalizeConn(connMap)
+		}
+		cloned["psc_auto_connections"] = normalized
+	}
+
+	return schema.HashResource(sqlDatabasePscConfigSchemaElem)(cloned)
+}
 
 func init() {
 	registry.Schema{

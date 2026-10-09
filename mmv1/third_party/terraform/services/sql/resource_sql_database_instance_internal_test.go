@@ -1,9 +1,12 @@
 package sql
 
 import (
+	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestMaintenanceVersionDiffSuppress(t *testing.T) {
@@ -289,5 +292,173 @@ func TestDenyMaintenancePeriodDateDiffSuppress(t *testing.T) {
 				t.Fatalf("%q => %q expect DiffSuppress to return %t", tc.Old, tc.New, tc.ShouldSuppress)
 			}
 		})
+	}
+}
+
+func TestResourceSqlDatabaseInstancePscConfigHash(t *testing.T) {
+	t.Parallel()
+
+	configuredConn := map[string]interface{}{
+		"consumer_network":            "projects/my-project/global/networks/default",
+		"consumer_service_project_id": "",
+	}
+	configuredPscConfig := map[string]interface{}{
+		"psc_enabled":                        true,
+		"psc_auto_dns_enabled":               true,
+		"psc_write_endpoint_dns_enabled":     false,
+		"psc_auto_connection_policy_enabled": false,
+		"allowed_consumer_projects":          schema.NewSet(schema.HashString, []interface{}{"my-project"}),
+		"network_attachment_uri":             "",
+		"psc_auto_connections":               []interface{}{configuredConn},
+	}
+
+	statePscConfig := map[string]interface{}{
+		"psc_enabled":                        true,
+		"psc_auto_dns_enabled":               true,
+		"psc_write_endpoint_dns_enabled":     false,
+		"psc_auto_connection_policy_enabled": false,
+		"allowed_consumer_projects":          schema.NewSet(schema.HashString, []interface{}{"my-project"}),
+		"network_attachment_uri":             "",
+		"psc_auto_connections": []interface{}{
+			map[string]interface{}{
+				"consumer_network":                          "projects/my-project/global/networks/default",
+				"consumer_service_project_id":               "my-project",
+				"consumer_network_status":                   "VALID",
+				"instance_auto_dns_status":                  "AUTO_DNS_OK",
+				"write_endpoint_auto_dns_status":            "",
+				"ip_address":                                "10.0.0.2",
+				"status":                                    "ACTIVE",
+				"service_connection_policy":                 "projects/my-project/locations/us-central1/serviceConnectionPolicies/default",
+				"service_connection_policy_creation_result": "COMPLETED",
+			},
+		},
+	}
+
+	configHash := resourceSqlDatabaseInstancePscConfigHash(configuredPscConfig)
+	stateHash := resourceSqlDatabaseInstancePscConfigHash(statePscConfig)
+	if configHash != stateHash {
+		t.Fatalf("expected config hash (%d) to equal state hash (%d) when consumer_service_project_id is derived from consumer_network", configHash, stateHash)
+	}
+
+	// Ensure input map was not mutated in place
+	if configuredConn["consumer_service_project_id"] != "" {
+		t.Fatalf("expected configuredConn consumer_service_project_id to remain empty, got %v", configuredConn["consumer_service_project_id"])
+	}
+
+	// Explicit different consumer_service_project_id (Shared VPC) should produce a different hash
+	sharedVpcPscConfig := map[string]interface{}{
+		"psc_enabled":                        true,
+		"psc_auto_dns_enabled":               true,
+		"psc_write_endpoint_dns_enabled":     false,
+		"psc_auto_connection_policy_enabled": false,
+		"allowed_consumer_projects":          schema.NewSet(schema.HashString, []interface{}{"my-project"}),
+		"network_attachment_uri":             "",
+		"psc_auto_connections": []interface{}{
+			map[string]interface{}{
+				"consumer_network":            "projects/my-project/global/networks/default",
+				"consumer_service_project_id": "different-service-project",
+			},
+		},
+	}
+	if resourceSqlDatabaseInstancePscConfigHash(sharedVpcPscConfig) == stateHash {
+		t.Fatalf("expected different hash when consumer_service_project_id differs from host project")
+	}
+}
+
+func TestResourceSqlDatabaseInstancePscConfigNoPermaDiff(t *testing.T) {
+	t.Parallel()
+
+	res := ResourceSqlDatabaseInstance()
+
+	priorStateMap := map[string]interface{}{
+		"name":             "test-instance",
+		"project":          "my-project",
+		"region":           "us-central1",
+		"database_version": "POSTGRES_15",
+		"settings": []interface{}{
+			map[string]interface{}{
+				"tier":              "db-custom-2-8192",
+				"availability_type": "ZONAL",
+				"disk_autoresize":   true,
+				"disk_size":         10,
+				"ip_configuration": []interface{}{
+					map[string]interface{}{
+						"ipv4_enabled": false,
+						"psc_config": []interface{}{
+							map[string]interface{}{
+								"psc_enabled":                        true,
+								"psc_auto_dns_enabled":               true,
+								"psc_write_endpoint_dns_enabled":     false,
+								"psc_auto_connection_policy_enabled": false,
+								"allowed_consumer_projects":          []interface{}{"my-project"},
+								"network_attachment_uri":             "",
+								"psc_auto_connections": []interface{}{
+									map[string]interface{}{
+										"consumer_network":                          "projects/my-project/global/networks/default",
+										"consumer_service_project_id":               "my-project",
+										"consumer_network_status":                   "VALID",
+										"instance_auto_dns_status":                  "AUTO_DNS_OK",
+										"write_endpoint_auto_dns_status":            "",
+										"ip_address":                                "10.0.0.2",
+										"status":                                    "ACTIVE",
+										"service_connection_policy":                 "",
+										"service_connection_policy_creation_result": "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	rd := schema.TestResourceDataRaw(t, res.Schema, priorStateMap)
+	rd.SetId("projects/my-project/instances/test-instance")
+	priorState := rd.State()
+
+	rawCfg := map[string]interface{}{
+		"name":             "test-instance",
+		"project":          "my-project",
+		"region":           "us-central1",
+		"database_version": "POSTGRES_15",
+		"settings": []interface{}{
+			map[string]interface{}{
+				"tier":              "db-custom-2-8192",
+				"availability_type": "ZONAL",
+				"disk_autoresize":   true,
+				"disk_size":         10,
+				"ip_configuration": []interface{}{
+					map[string]interface{}{
+						"ipv4_enabled": false,
+						"psc_config": []interface{}{
+							map[string]interface{}{
+								"psc_enabled":               true,
+								"psc_auto_dns_enabled":      true,
+								"allowed_consumer_projects": []interface{}{"my-project"},
+								"psc_auto_connections": []interface{}{
+									map[string]interface{}{
+										"consumer_network": "projects/my-project/global/networks/default",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	cfg := terraform.NewResourceConfigRaw(rawCfg)
+	diff, err := schema.InternalMap(res.Schema).Diff(context.Background(), priorState, cfg, nil, nil, false)
+	if err != nil {
+		t.Fatalf("unexpected error computing diff: %v", err)
+	}
+	if diff != nil {
+		for k, attrDiff := range diff.Attributes {
+			if strings.Contains(k, "psc_config") {
+				t.Errorf("unexpected diff on %s: %+v", k, attrDiff)
+			}
+		}
 	}
 }
