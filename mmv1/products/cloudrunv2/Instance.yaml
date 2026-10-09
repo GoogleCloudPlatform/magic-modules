@@ -240,6 +240,10 @@ properties:
     type: String
     description: |
       Arbitrary identifier for the API client.
+  - name: 'clientVersion'
+    type: String
+    description: |
+      Arbitrary version identifier for the API client.
   - name: 'launchStage'
     type: Enum
     description: |
