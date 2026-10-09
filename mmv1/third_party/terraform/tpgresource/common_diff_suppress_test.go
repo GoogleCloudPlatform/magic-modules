@@ -289,3 +289,21 @@ func TestEmptyOrDefaultStringSuppress_IAP(t *testing.T) {
 		}
 	}
 }
+
+func TestCompareKmsKeyNames(t *testing.T) {
+	key := "projects/p/locations/us-central1/keyRings/r/cryptoKeys/a"
+	cases := map[string]struct {
+		old, new string
+		want     bool
+	}{
+		"same key with version":       {key, key + "/cryptoKeyVersions/1", true},
+		"self link and relative path": {key, "https://cloudkms.googleapis.com/v1/" + key, true},
+		"different key":               {key, key + "2", false},
+		"version of a different key":  {key, key + "2/cryptoKeyVersions/1", false},
+	}
+	for name, tc := range cases {
+		if got := CompareKmsKeyNames("", tc.old, tc.new, nil); got != tc.want {
+			t.Errorf("%s: CompareKmsKeyNames(%q, %q) = %t, want %t", name, tc.old, tc.new, got, tc.want)
+		}
+	}
+}

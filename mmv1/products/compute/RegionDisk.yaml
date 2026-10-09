@@ -70,7 +70,7 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-  - 'forceNewOnUnsupportedKmsKeyChange("disk_encryption_key.0.kms_key_name", "")'
+  - 'validateKmsKeyChange("disk_encryption_key.0.kms_key_name", "", "disk_encryption_key.0.sha256")'
 samples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
@@ -174,15 +174,18 @@ properties:
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
 
-      ~>**NOTE** Only changing `kms_key_name` between Cloud KMS keys is done
-      in place; other changes to this block recreate the disk.
-    immutable: true
+      ~>**NOTE** `kms_key_name` can be added or changed in place. Removing it
+      fails at plan time. Other changes to this block recreate the disk.
+    # Sent by custom_update; see validateKmsKeyChange.
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
+    update_verb: 'NOOP'
     properties:
       - name: 'rawKey'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        immutable: true
         sensitive: true
         write_only: true
         is_missing_in_cai: true
@@ -192,6 +195,7 @@ properties:
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        immutable: true
         sensitive: true
         write_only: true
         is_missing_in_cai: true
@@ -206,9 +210,10 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-        # Sent by custom_update; see forceNewOnUnsupportedKmsKeyChange.
-        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
-        update_verb: 'POST'
+
+          Specify the key without a `/cryptoKeyVersions/` suffix. A version on
+          the current key is ignored; a version on a different key fails at plan time.
+        diff_suppress_func: 'tpgresource.CompareKmsKeyNames'
   - name: 'sourceImageEncryptionKey'
     type: NestedObject
     description: |

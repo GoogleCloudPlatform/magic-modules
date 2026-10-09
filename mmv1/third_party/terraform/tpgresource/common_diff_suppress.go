@@ -144,6 +144,19 @@ func CompareCryptoKeyVersions(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
+// CompareKmsKeyNames treats self links and relative paths, with or without a
+// crypto key version, as the same Cloud KMS key.
+func CompareKmsKeyNames(k, old, new string, d *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	return CompareSelfLinkRelativePaths(k, stripCryptoKeyVersion(old), stripCryptoKeyVersion(new), d)
+}
+
+func stripCryptoKeyVersion(key string) string {
+	return strings.Split(key, "/cryptoKeyVersions/")[0]
+}
+
 func CidrOrSizeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// If the user specified a size and the API returned a full cidr block, suppress.
 	return strings.HasPrefix(new, "/") && strings.HasSuffix(old, new)

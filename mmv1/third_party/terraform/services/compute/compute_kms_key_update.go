@@ -6,50 +6,109 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
-// updateKmsKey only supports CMEK -> CMEK. It rejects non-CMEK resources and
-// key versions, clears kmsKeyServiceAccount, and rotates if kmsKeyName is empty.
+// updateKmsKey can't remove a key or use a key version, clears
+// kmsKeyServiceAccount, and rotates if kmsKeyName is empty.
 
-func kmsKeyChangeRequiresReplacement(oldKey, newKey string, newKeyKnown, serviceAccountSet bool) bool {
-	// An unknown key could resolve to one that needs replacement, and an
-	// update can't become a replace at apply time.
-	if oldKey == "" || serviceAccountSet || !newKeyKnown {
-		return true
+// kmsKeyChange reports whether a key change needs replacement, or an error if
+// it can't be made. serviceAccountSet is true if kms_key_service_account is
+// set; customerSuppliedKey is true if the resource uses or switches to a CSEK.
+func kmsKeyChange(newKey string, newKeyKnown, serviceAccountSet, customerSuppliedKey bool) (bool, error) {
+	if customerSuppliedKey {
+		return true, nil
 	}
-	return newKey == "" || isCryptoKeyVersionName(newKey)
+	if newKeyKnown && newKey == "" {
+		// -replace still hits this error; taint doesn't.
+		return false, fmt.Errorf("removing the Cloud KMS key isn't supported; to recreate the resource without a key, taint or destroy it first")
+	}
+	if serviceAccountSet {
+		// updateKmsKey drops kmsKeyServiceAccount, and the next plan would
+		// recreate the resource to restore it.
+		return false, fmt.Errorf("the Cloud KMS key can't be changed while kms_key_service_account is set; to change it, taint or destroy the resource first")
+	}
+	if !newKeyKnown {
+		// Once known, this is an update or an error, never a replacement.
+		return false, nil
+	}
+	if isCryptoKeyVersionName(newKey) {
+		return false, fmt.Errorf("Cloud KMS key %q includes a crypto key version, which isn't supported; remove the /cryptoKeyVersions/ suffix", newKey)
+	}
+	return false, nil
 }
 
 func isCryptoKeyVersionName(key string) bool {
 	return strings.Contains(key, "/cryptoKeyVersions/")
 }
 
-// forceNewOnUnsupportedKmsKeyChange forces replacement for key changes
-// updateKmsKey can't make. serviceAccountPath may be "".
-func forceNewOnUnsupportedKmsKeyChange(keyPath, serviceAccountPath string) schema.CustomizeDiffFunc {
+// validateKmsKeyChange forces replacement or errors at plan time for key
+// changes updateKmsKey can't make. serviceAccountPath may be "".
+func validateKmsKeyChange(keyPath, serviceAccountPath, sha256Path string) schema.CustomizeDiffFunc {
 	return func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 		if d.Id() == "" || !d.HasChange(keyPath) {
 			return nil
 		}
 		oldKey, newKey := d.GetChange(keyPath)
+		// HasChange ignores DiffSuppressFunc.
+		if d.NewValueKnown(keyPath) && tpgresource.CompareKmsKeyNames(keyPath, oldKey.(string), newKey.(string), nil) {
+			return nil
+		}
 		serviceAccountSet := false
 		if serviceAccountPath != "" {
 			oldServiceAccount, newServiceAccount := d.GetChange(serviceAccountPath)
 			serviceAccountSet = oldServiceAccount.(string) != "" || newServiceAccount.(string) != ""
 		}
-		if kmsKeyChangeRequiresReplacement(oldKey.(string), newKey.(string), d.NewValueKnown(keyPath), serviceAccountSet) {
+		oldSha256, _ := d.GetChange(sha256Path)
+		customerSuppliedKey := (oldKey.(string) == "" && oldSha256.(string) != "") ||
+			customerSuppliedKeyInConfig(d, strings.SplitN(keyPath, ".", 2)[0])
+		forceNew, err := kmsKeyChange(newKey.(string), d.NewValueKnown(keyPath), serviceAccountSet, customerSuppliedKey)
+		if err != nil {
+			return err
+		}
+		if forceNew {
 			return d.ForceNew(keyPath)
 		}
 		return nil
 	}
 }
 
-func kmsKeyUpdateRequestBody(oldKey, newKey, serviceAccount string) (map[string]interface{}, error) {
+// customerSuppliedKeyInConfig reports whether the config sets a raw or
+// RSA-wrapped key, including write-only variants, in the encryption block.
+func customerSuppliedKeyInConfig(d *schema.ResourceDiff, block string) bool {
+	for _, f := range []string{"raw_key", "rsa_encrypted_key"} {
+		path := block + ".0." + f
+		if v, ok := d.Get(path).(string); ok && v != "" || !d.NewValueKnown(path) {
+			return true
+		}
+	}
+	rawConfig := d.GetRawConfig()
+	if !rawConfig.IsKnown() || rawConfig.IsNull() || !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute(block) {
+		return false
+	}
+	blockValue := rawConfig.GetAttr(block)
+	if !blockValue.IsKnown() || blockValue.IsNull() || !blockValue.CanIterateElements() || blockValue.LengthInt() == 0 {
+		return false
+	}
+	for it := blockValue.ElementIterator(); it.Next(); {
+		_, elem := it.Element()
+		for _, f := range []string{"raw_key_wo", "rsa_encrypted_key_wo"} {
+			if !elem.Type().IsObjectType() || !elem.Type().HasAttribute(f) {
+				continue
+			}
+			if v := elem.GetAttr(f); !v.IsNull() && (!v.IsKnown() || v.AsString() != "") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func kmsKeyUpdateRequestBody(newKey, serviceAccount string) (map[string]interface{}, error) {
 	switch {
-	case oldKey == "":
-		return nil, fmt.Errorf("adding a Cloud KMS key requires recreating the resource")
 	case newKey == "":
-		return nil, fmt.Errorf("removing the Cloud KMS key requires recreating the resource")
+		return nil, fmt.Errorf("removing the Cloud KMS key isn't supported")
 	case isCryptoKeyVersionName(newKey):
 		return nil, fmt.Errorf("the Cloud KMS key must not include a crypto key version (%q)", newKey)
 	case serviceAccount != "":

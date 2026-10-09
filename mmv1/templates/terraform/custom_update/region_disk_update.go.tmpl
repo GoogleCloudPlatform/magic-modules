@@ -192,8 +192,7 @@ if d.HasChange("access_mode") {
 
 // 5. KMS key (POST updateKmsKey)
 if d.HasChange("disk_encryption_key.0.kms_key_name") {
-	oldKey, newKey := d.GetChange("disk_encryption_key.0.kms_key_name")
-	obj, err := kmsKeyUpdateRequestBody(oldKey.(string), newKey.(string), "")
+	obj, err := kmsKeyUpdateRequestBody(d.Get("disk_encryption_key.0.kms_key_name").(string), "")
 	if err != nil {
 		return fmt.Errorf("error updating RegionDisk %q KMS key: %w", d.Id(), err)
 	}
