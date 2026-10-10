@@ -10,6 +10,12 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+// update_encoder replaces encoder on Update, so apply the shared encoder first.
+obj, err := resource{{$.ResourceName}}Encoder(d, meta, obj)
+if err != nil {
+	return nil, err
+}
+
 // params (e.g. resourceManagerTags) can only be set on create. Since updates are sent as a
 // full PUT, it must be removed here or the API rejects the request.
 delete(obj, "params")
