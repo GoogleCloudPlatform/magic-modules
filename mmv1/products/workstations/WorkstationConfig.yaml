@@ -64,6 +64,21 @@ samples:
           key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
           value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
           org_id: envvar.GetTestOrgFromEnv(t)
+  - name: workstation_config_grant_workstation_admin_role_on_create
+    primary_resource_id: default
+    steps:
+      - name: workstation_config_grant_workstation_admin_role_on_create
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          grant_workstation_admin_role_on_create: 'false'
+      - name: workstation_config_grant_workstation_admin_role_on_create_update
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          grant_workstation_admin_role_on_create: 'true'
   - name: workstation_config_container
     primary_resource_id: default
     steps:
@@ -639,6 +654,10 @@ properties:
     type: Boolean
     description: |
       Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
+  - name: grantWorkstationAdminRoleOnCreate
+    type: Boolean
+    description: |
+      Whether to grant the creator of a workstation the `roles/workstations.policyAdmin` role in addition to the default `roles/workstations.user` role on the workstation they create. This allows workstation users to share access to either their entire workstation or individual ports. Defaults to false.
   - name: maxUsableWorkstations
     type: Integer
     description: |
