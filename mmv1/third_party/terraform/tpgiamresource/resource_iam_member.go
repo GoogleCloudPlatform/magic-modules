@@ -320,10 +320,10 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			return nil
 		}
 		if enableBatching {
-			err = BatchRequestModifyIamPolicy(updater, modifyF, config,
+			err = BatchRequestModifyIamPolicy(updater, modifyF, nil, config,
 				fmt.Sprintf("Create IAM Members %s %+v for %s", memberBind.Role, memberBind.Members[0], updater.DescribeResource()))
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, nil)
 		}
 		if err != nil {
 			return err
@@ -439,10 +439,10 @@ func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			return nil
 		}
 		if enableBatching {
-			err = BatchRequestModifyIamPolicy(updater, modifyF, config,
+			err = BatchRequestModifyIamPolicy(updater, modifyF, nil, config,
 				fmt.Sprintf("Delete IAM Members %s %s for %q", memberBind.Role, memberBind.Members[0], updater.DescribeResource()))
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, nil)
 		}
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s for IAM Member (role %q, %q)", updater.GetResourceId(), memberBind.Members[0], memberBind.Role))
