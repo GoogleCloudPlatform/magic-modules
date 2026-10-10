@@ -43,6 +43,12 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/bigquery_dataset.go.tmpl'
 generate_list_resource: true
+# A generated sweeper can't work for this resource: datasets.list returns the id
+# at datasetReference.datasetId (there is no top-level "name", and identifier_field
+# can't reach a nested field), and delete_url has a query string, which the
+# generated sweeper mangles when it appends the resource name. Swept by the
+# handwritten sweeper in
+# third_party/terraform/services/bigquery/resource_bigquery_dataset_sweeper.go.
 exclude_sweeper: true
 samples:
   - name: 'bigquery_dataset_basic'
