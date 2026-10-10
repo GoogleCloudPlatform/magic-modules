@@ -133,9 +133,11 @@ properties:
     type: NestedObject
     description: |
       Options customizing the data transfer schedule.
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'disableAutoScheduling'
         type: Boolean
+        send_empty_value: true
         description: |
           If true, automatic scheduling of data transfer runs for this
           configuration will be disabled. The runs can be started on ad-hoc
