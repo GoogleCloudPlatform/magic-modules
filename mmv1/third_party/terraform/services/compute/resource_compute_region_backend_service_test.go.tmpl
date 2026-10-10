@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -949,7 +950,22 @@ func TestAccComputeRegionBackendService_withTags(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionBackendService_withTags(serviceName, checkName, tagKeyResult["name"], tagValueResult["name"]),
+				Config: testAccComputeRegionBackendService_withTags(serviceName, checkName, tagKeyResult["name"], tagValueResult["name"], "foo"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"params"},
+			},
+			{
+				// Updating a mutable field must not resend the create-only params.resource_manager_tags.
+				Config: testAccComputeRegionBackendService_withTags(serviceName, checkName, tagKeyResult["name"], tagValueResult["name"], "bar"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_backend_service.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_backend_service.foobar",
@@ -2296,10 +2312,11 @@ resource "google_compute_region_health_check" "health_check" {
 `, serviceName, reqHeader, respHeader, checkName)
 }
 
-func testAccComputeRegionBackendService_withTags(serviceName, checkName string, tagKey string, tagValue string) string {
+func testAccComputeRegionBackendService_withTags(serviceName, checkName string, tagKey string, tagValue string, description string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
   name          = "%s"
+  description   = "%s"
   health_checks = [google_compute_health_check.zero.self_link]
   region        = "us-central1"
   params {
@@ -2318,7 +2335,7 @@ resource "google_compute_health_check" "zero" {
     port = "80"
   }
 }
-`, serviceName, tagKey, tagValue, checkName)
+`, serviceName, description, tagKey, tagValue, checkName)
 }
 
 func TestAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(t *testing.T) {
