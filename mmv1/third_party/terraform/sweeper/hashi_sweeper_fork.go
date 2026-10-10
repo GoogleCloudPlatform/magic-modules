@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -137,6 +138,20 @@ func runSweepers(t *testing.T, regions []string, sweepers map[string]*Sweeper, a
 	for _, sweeper := range sorted {
 		sweeper := sweeper // capture for closure
 		t.Run(sweeper.Name, func(t *testing.T) {
+			if mask := os.Getenv("TF_LOG_PATH_MASK"); mask != "" {
+				testName := strings.Replace(t.Name(), "/", "_", -1)
+				logPath := strings.Replace(mask, "%s", testName, -1)
+				f, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				if err == nil {
+					oldOutput := log.Writer()
+					log.SetOutput(f)
+					defer func() {
+						log.SetOutput(oldOutput)
+						f.Close()
+					}()
+				}
+			}
+
 			for _, region := range regions {
 				region := strings.TrimSpace(region)
 				err := sweeper.DeleteFunction(region)
