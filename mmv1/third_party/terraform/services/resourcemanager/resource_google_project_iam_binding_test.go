@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -399,40 +400,63 @@ resource "google_project_iam_binding" "acceptance" {
 `, pid, pid, org, role, conditionTitle)
 }
 
-// Test that with overwrite_on_create = false, a binding is created normally for a role with no
-// members, but creating one for a role that already has other members fails instead of replacing them.
-func TestAccProjectIamBinding_overwriteOnCreateFalse(t *testing.T) {
+// Test overwrite_on_create = false: a binding is created normally for a role with no members, updates
+// and changes to the flag itself apply normally, and creating a binding for a role that already has
+// other members fails without removing them.
+func TestAccProjectIamBinding_overwriteOnCreate(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	role := "roles/compute.instanceAdmin"
 	existingRole := "roles/compute.networkViewer"
+	oneMember := `["user:admin@hashicorptest.com"]`
+	twoMembers := `["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]`
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
+			// Create with overwrite_on_create = false on a role with no members
 			{
-				Config: testAccProjectAssociateBindingOverwriteOnCreateFalse(pid, org, role, existingRole, false),
+				Config: testAccProjectAssociateBindingOverwriteOnCreate(pid, org, role, existingRole, oneMember, false, false),
 			},
 			{
 				ResourceName:      "google_project_iam_binding.acceptance",
 				ImportStateId:     fmt.Sprintf("%s %s", pid, role),
 				ImportState:       true,
 				ImportStateVerify: true,
-				// overwrite_on_create only affects creation and isn't stored in the IAM policy, so an
+				// overwrite_on_create is a client-side field that isn't stored in the IAM policy, so an
 				// import can't read it back.
 				ImportStateVerifyIgnore: []string{"overwrite_on_create"},
 			},
+			// Updates aren't affected by overwrite_on_create
 			{
-				Config:      testAccProjectAssociateBindingOverwriteOnCreateFalse(pid, org, role, existingRole, true),
-				ExpectError: regexp.MustCompile("already exists"),
+				Config: testAccProjectAssociateBindingOverwriteOnCreate(pid, org, role, existingRole, twoMembers, false, false),
+			},
+			// Changing only the flag is an in-place update
+			{
+				Config: testAccProjectAssociateBindingOverwriteOnCreate(pid, org, role, existingRole, twoMembers, true, false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_project_iam_binding.acceptance", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			// Creating a binding for a role that already has a different member fails
+			{
+				Config:      testAccProjectAssociateBindingOverwriteOnCreate(pid, org, role, existingRole, twoMembers, true, true),
+				ExpectError: regexp.MustCompile(regexp.QuoteMeta(fmt.Sprintf(`IAM binding for role %q already exists`, existingRole))),
+			},
+			// The existing member is still there
+			{
+				Config:   testAccProjectAssociateBindingOverwriteOnCreate(pid, org, role, existingRole, twoMembers, true, false),
+				PlanOnly: true,
 			},
 		},
 	})
 }
 
-func testAccProjectAssociateBindingOverwriteOnCreateFalse(pid, org, role, existingRole string, withConflictingBinding bool) string {
+func testAccProjectAssociateBindingOverwriteOnCreate(pid, org, role, existingRole, members string, overwriteOnCreate, withConflictingBinding bool) string {
 	config := fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -443,9 +467,9 @@ resource "google_project" "acceptance" {
 
 resource "google_project_iam_binding" "acceptance" {
   project             = google_project.acceptance.project_id
-  members             = ["user:admin@hashicorptest.com"]
+  members             = %s
   role                = "%s"
-  overwrite_on_create = false
+  overwrite_on_create = %t
 }
 
 resource "google_project_iam_member" "existing" {
@@ -453,7 +477,7 @@ resource "google_project_iam_member" "existing" {
   member  = "user:admin@hashicorptest.com"
   role    = "%s"
 }
-`, pid, pid, org, role, existingRole)
+`, pid, pid, org, members, role, overwriteOnCreate, existingRole)
 	if withConflictingBinding {
 		config += fmt.Sprintf(`
 resource "google_project_iam_binding" "conflicting" {
