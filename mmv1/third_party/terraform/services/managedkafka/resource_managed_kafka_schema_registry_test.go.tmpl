@@ -1,0 +1,131 @@
+package managedkafka_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestAccSchemaRegistry_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    	{{ if ne $.TargetVersionName `ga` -}}
+    	ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    	{{ else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    	{{ end }}
+
+		CheckDestroy: testAccCheckSchemaRegistryDestroyProducer(t),
+		Steps: []resource.TestStep{
+    	{{ if ne $.TargetVersionName `ga` -}}
+			{
+				Config: testAccSchemaRegistryBeta(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_managed_kafka_schema_registry.test", "location", "us-central1"),
+				),
+			},
+			{
+				ResourceName:      "google_managed_kafka_schema_registry.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		{{ else }}
+			{
+				Config: testAccSchemaRegistry(context),
+				resource.TestCheckResourceAttr("google_managed_kafka_schema_registry.test", "location", "us-central1"),
+			},
+			{
+				ResourceName:      "google_managed_kafka_schema_registry.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		{{ end }}
+		},
+	})
+}
+
+func testAccCheckSchemaRegistryDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_managed_kafka_schema_registry" {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ManagedKafkaBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/schemaRegistries/{{"{{"}}schema_registry_id{{"}}"}}")
+			if err != nil {
+				return err
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config: config,
+				Method: "GET",
+				RawURL: url,
+			})
+
+			if err == nil {
+				return fmt.Errorf("Schemaregistry %q still exists", rs.Primary.ID)
+			}
+		}
+		return nil
+	}
+}
+
+func testAccCheckSchemaregistryWithContextDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_managed_kafka_schema_registry" {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}ManagedKafkaBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/schemaRegistries/{{"{{"}}schema_registry_id{{"}}"}}/context/{{"{{"}}context{{"}}"}}")
+			if err != nil {
+				return err
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config: config,
+				Method: "GET",
+				RawURL: url,
+			})
+
+			if err == nil {
+				return fmt.Errorf("Schemaregistry %q still exists", rs.Primary.ID)
+			}
+		}
+		return nil
+	}
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccSchemaRegistryBeta(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_managed_kafka_schema_registry" "test" {
+  provider           = google-beta
+  location           = "us-central1"
+  schema_registry_id = "tf_test_sr_%{random_suffix}"
+}`, context)
+}
+{{ else }}
+func testAccSchemaRegistry(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_managed_kafka_schema_registry" "test" {
+  location           = "us-central1"
+  schema_registry_id = "tf_test_sr_%{random_suffix}"
+}`, context)
+}
+{{ end }}
