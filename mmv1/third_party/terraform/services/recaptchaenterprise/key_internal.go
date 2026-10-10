@@ -87,6 +87,23 @@ func (r *KeyAndroidSettings) validate() error {
 	return nil
 }
 func (r *KeyIosSettings) validate() error {
+	if !dcl.IsEmptyValueIndirect(r.AppleDeveloperId) {
+		if err := r.AppleDeveloperId.validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (r *KeyIosSettingsAppleDeveloperId) validate() error {
+	if err := dcl.Required(r, "keyId"); err != nil {
+		return err
+	}
+	if err := dcl.Required(r, "teamId"); err != nil {
+		return err
+	}
+	if err := dcl.Required(r, "privateKey"); err != nil {
+		return err
+	}
 	return nil
 }
 func (r *KeyTestingOptions) validate() error {
@@ -972,6 +989,11 @@ func canonicalizeKeyAndroidSettings(des, initial *KeyAndroidSettings, opts ...dc
 	} else {
 		cDes.AllowedPackageNames = des.AllowedPackageNames
 	}
+	if dcl.BoolCanonicalize(des.SupportNonGoogleAppStoreDistribution, initial.SupportNonGoogleAppStoreDistribution) || dcl.IsZeroValue(des.SupportNonGoogleAppStoreDistribution) {
+		cDes.SupportNonGoogleAppStoreDistribution = initial.SupportNonGoogleAppStoreDistribution
+	} else {
+		cDes.SupportNonGoogleAppStoreDistribution = des.SupportNonGoogleAppStoreDistribution
+	}
 
 	return cDes
 }
@@ -1024,6 +1046,9 @@ func canonicalizeNewKeyAndroidSettings(c *Client, des, nw *KeyAndroidSettings) *
 	if dcl.StringArrayCanonicalize(des.AllowedPackageNames, nw.AllowedPackageNames) {
 		nw.AllowedPackageNames = des.AllowedPackageNames
 	}
+	if dcl.BoolCanonicalize(des.SupportNonGoogleAppStoreDistribution, nw.SupportNonGoogleAppStoreDistribution) {
+		nw.SupportNonGoogleAppStoreDistribution = des.SupportNonGoogleAppStoreDistribution
+	}
 
 	return nw
 }
@@ -1074,6 +1099,39 @@ func canonicalizeNewKeyAndroidSettingsSlice(c *Client, des, nw []KeyAndroidSetti
 	return items
 }
 
+func canonicalizeKeyIosSettingsAppleDeveloperId(des, initial *KeyIosSettingsAppleDeveloperId, opts ...dcl.ApplyOption) *KeyIosSettingsAppleDeveloperId {
+	if des == nil {
+		return initial
+	}
+	if des.empty {
+		return des
+	}
+
+	if initial == nil {
+		return des
+	}
+
+	cDes := &KeyIosSettingsAppleDeveloperId{}
+
+	if dcl.StringCanonicalize(des.KeyId, initial.KeyId) || dcl.IsZeroValue(des.KeyId) {
+		cDes.KeyId = initial.KeyId
+	} else {
+		cDes.KeyId = des.KeyId
+	}
+	if dcl.StringCanonicalize(des.PrivateKey, initial.PrivateKey) || dcl.IsZeroValue(des.PrivateKey) {
+		cDes.PrivateKey = initial.PrivateKey
+	} else {
+		cDes.PrivateKey = des.PrivateKey
+	}
+	if dcl.StringCanonicalize(des.TeamId, initial.TeamId) || dcl.IsZeroValue(des.TeamId) {
+		cDes.TeamId = initial.TeamId
+	} else {
+		cDes.TeamId = des.TeamId
+	}
+
+	return cDes
+}
+
 func canonicalizeKeyIosSettings(des, initial *KeyIosSettings, opts ...dcl.ApplyOption) *KeyIosSettings {
 	if des == nil {
 		return initial
@@ -1098,6 +1156,7 @@ func canonicalizeKeyIosSettings(des, initial *KeyIosSettings, opts ...dcl.ApplyO
 	} else {
 		cDes.AllowedBundleIds = des.AllowedBundleIds
 	}
+	cDes.AppleDeveloperId = canonicalizeKeyIosSettingsAppleDeveloperId(des.AppleDeveloperId, initial.AppleDeveloperId, opts...)
 
 	return cDes
 }
@@ -1130,6 +1189,33 @@ func canonicalizeKeyIosSettingsSlice(des, initial []KeyIosSettings, opts ...dcl.
 
 }
 
+func canonicalizeNewKeyIosSettingsAppleDeveloperId(c *Client, des, nw *KeyIosSettingsAppleDeveloperId) *KeyIosSettingsAppleDeveloperId {
+
+	if des == nil {
+		return nw
+	}
+
+	if nw == nil {
+		if dcl.IsEmptyValueIndirect(des) {
+			c.Config.Logger.Info("Found explicitly empty value for KeyIosSettingsAppleDeveloperId while comparing non-nil desired to nil actual.  Returning desired object.")
+			return des
+		}
+		return nil
+	}
+
+	if dcl.StringCanonicalize(des.KeyId, nw.KeyId) {
+		nw.KeyId = des.KeyId
+	}
+	if dcl.StringCanonicalize(des.PrivateKey, nw.PrivateKey) || dcl.IsEmptyValueIndirect(nw.PrivateKey) {
+		nw.PrivateKey = des.PrivateKey
+	}
+	if dcl.StringCanonicalize(des.TeamId, nw.TeamId) {
+		nw.TeamId = des.TeamId
+	}
+
+	return nw
+}
+
 func canonicalizeNewKeyIosSettings(c *Client, des, nw *KeyIosSettings) *KeyIosSettings {
 
 	if des == nil {
@@ -1150,6 +1236,7 @@ func canonicalizeNewKeyIosSettings(c *Client, des, nw *KeyIosSettings) *KeyIosSe
 	if dcl.StringArrayCanonicalize(des.AllowedBundleIds, nw.AllowedBundleIds) {
 		nw.AllowedBundleIds = des.AllowedBundleIds
 	}
+	nw.AppleDeveloperId = canonicalizeNewKeyIosSettingsAppleDeveloperId(c, des.AppleDeveloperId, nw.AppleDeveloperId)
 
 	return nw
 }
@@ -1774,6 +1861,55 @@ func compareKeyAndroidSettingsNewStyle(d, a interface{}, fn dcl.FieldName) ([]*d
 		}
 		diffs = append(diffs, ds...)
 	}
+	if ds, err := dcl.Diff(desired.SupportNonGoogleAppStoreDistribution, actual.SupportNonGoogleAppStoreDistribution, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("SupportNonGoogleAppStoreDistribution")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareKeyIosSettingsAppleDeveloperIdNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*KeyIosSettingsAppleDeveloperId)
+	if !ok {
+		desiredNotPointer, ok := d.(KeyIosSettingsAppleDeveloperId)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a KeyIosSettingsAppleDeveloperId or *KeyIosSettingsAppleDeveloperId", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*KeyIosSettingsAppleDeveloperId)
+	if !ok {
+		actualNotPointer, ok := a.(KeyIosSettingsAppleDeveloperId)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a KeyIosSettingsAppleDeveloperId", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.KeyId, actual.KeyId, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("KeyId")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.PrivateKey, actual.PrivateKey, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("PrivateKey")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.TeamId, actual.TeamId, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("TeamId")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
 	return diffs, nil
 }
 
@@ -1805,6 +1941,12 @@ func compareKeyIosSettingsNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.F
 	}
 
 	if ds, err := dcl.Diff(desired.AllowedBundleIds, actual.AllowedBundleIds, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("AllowedBundleIds")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	if ds, err := dcl.Diff(desired.AppleDeveloperId, actual.AppleDeveloperId, dcl.DiffInfo{ObjectFunction: compareKeyIosSettingsAppleDeveloperIdNewStyle, EmptyObject: EmptyKeyIosSettingsAppleDeveloperId, OperationSelector: dcl.TriggersOperation("updateKeyUpdateKeyOperation")}, fn.AddNest("AppleDeveloperId")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -2379,6 +2521,9 @@ func expandKeyAndroidSettings(c *Client, f *KeyAndroidSettings, res *Key) (map[s
 	if v := f.AllowedPackageNames; v != nil {
 		m["allowedPackageNames"] = v
 	}
+	if v := f.SupportNonGoogleAppStoreDistribution; !dcl.IsEmptyValueIndirect(v) {
+		m["supportNonGoogleAppStoreDistribution"] = v
+	}
 
 	return m, nil
 }
@@ -2398,6 +2543,129 @@ func flattenKeyAndroidSettings(c *Client, i interface{}, res *Key) *KeyAndroidSe
 	}
 	r.AllowAllPackageNames = dcl.FlattenBool(m["allowAllPackageNames"])
 	r.AllowedPackageNames = dcl.FlattenStringSlice(m["allowedPackageNames"])
+	r.SupportNonGoogleAppStoreDistribution = dcl.FlattenBool(m["supportNonGoogleAppStoreDistribution"])
+
+	return r
+}
+
+// expandKeyIosSettingsAppleDeveloperIdMap expands the contents of KeyIosSettingsAppleDeveloperId into a JSON
+// request object.
+func expandKeyIosSettingsAppleDeveloperIdMap(c *Client, f map[string]KeyIosSettingsAppleDeveloperId, res *Key) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+
+	items := make(map[string]interface{})
+	for k, item := range f {
+		i, err := expandKeyIosSettingsAppleDeveloperId(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+		if i != nil {
+			items[k] = i
+		}
+	}
+
+	return items, nil
+}
+
+// expandKeyIosSettingsAppleDeveloperIdSlice expands the contents of KeyIosSettingsAppleDeveloperId into a JSON
+// request object.
+func expandKeyIosSettingsAppleDeveloperIdSlice(c *Client, f []KeyIosSettingsAppleDeveloperId, res *Key) ([]map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+
+	items := []map[string]interface{}{}
+	for _, item := range f {
+		i, err := expandKeyIosSettingsAppleDeveloperId(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, i)
+	}
+
+	return items, nil
+}
+
+// flattenKeyIosSettingsAppleDeveloperIdMap flattens the contents of KeyIosSettingsAppleDeveloperId from a JSON
+// response object.
+func flattenKeyIosSettingsAppleDeveloperIdMap(c *Client, i interface{}, res *Key) map[string]KeyIosSettingsAppleDeveloperId {
+	a, ok := i.(map[string]interface{})
+	if !ok {
+		return map[string]KeyIosSettingsAppleDeveloperId{}
+	}
+
+	if len(a) == 0 {
+		return map[string]KeyIosSettingsAppleDeveloperId{}
+	}
+
+	items := make(map[string]KeyIosSettingsAppleDeveloperId)
+	for k, item := range a {
+		items[k] = *flattenKeyIosSettingsAppleDeveloperId(c, item.(map[string]interface{}), res)
+	}
+
+	return items
+}
+
+// flattenKeyIosSettingsAppleDeveloperIdSlice flattens the contents of KeyIosSettingsAppleDeveloperId from a JSON
+// response object.
+func flattenKeyIosSettingsAppleDeveloperIdSlice(c *Client, i interface{}, res *Key) []KeyIosSettingsAppleDeveloperId {
+	a, ok := i.([]interface{})
+	if !ok {
+		return []KeyIosSettingsAppleDeveloperId{}
+	}
+
+	if len(a) == 0 {
+		return []KeyIosSettingsAppleDeveloperId{}
+	}
+
+	items := make([]KeyIosSettingsAppleDeveloperId, 0, len(a))
+	for _, item := range a {
+		items = append(items, *flattenKeyIosSettingsAppleDeveloperId(c, item.(map[string]interface{}), res))
+	}
+
+	return items
+}
+
+// expandKeyIosSettingsAppleDeveloperId expands an instance of KeyIosSettingsAppleDeveloperId into a JSON
+// request object.
+func expandKeyIosSettingsAppleDeveloperId(c *Client, f *KeyIosSettingsAppleDeveloperId, res *Key) (map[string]interface{}, error) {
+	if dcl.IsEmptyValueIndirect(f) {
+		return nil, nil
+	}
+
+	m := make(map[string]interface{})
+	if v := f.KeyId; !dcl.IsEmptyValueIndirect(v) {
+		m["keyId"] = v
+	}
+	if v := f.PrivateKey; !dcl.IsEmptyValueIndirect(v) {
+		m["privateKey"] = v
+	}
+	if v := f.TeamId; !dcl.IsEmptyValueIndirect(v) {
+		m["teamId"] = v
+	}
+
+	return m, nil
+}
+
+// flattenKeyIosSettingsAppleDeveloperId flattens an instance of KeyIosSettingsAppleDeveloperId from a JSON
+// response object.
+func flattenKeyIosSettingsAppleDeveloperId(c *Client, i interface{}, res *Key) *KeyIosSettingsAppleDeveloperId {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	r := &KeyIosSettingsAppleDeveloperId{}
+
+	if dcl.IsEmptyValueIndirect(i) {
+		return EmptyKeyIosSettingsAppleDeveloperId
+	}
+	r.KeyId = dcl.FlattenString(m["keyId"])
+	r.PrivateKey = dcl.FlattenString(m["privateKey"])
+	r.TeamId = dcl.FlattenString(m["teamId"])
 
 	return r
 }
@@ -2497,6 +2765,11 @@ func expandKeyIosSettings(c *Client, f *KeyIosSettings, res *Key) (map[string]in
 	if v := f.AllowedBundleIds; v != nil {
 		m["allowedBundleIds"] = v
 	}
+	if v, err := expandKeyIosSettingsAppleDeveloperId(c, f.AppleDeveloperId, res); err != nil {
+		return nil, fmt.Errorf("error expanding AppleDeveloperId into appleDeveloperId: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["appleDeveloperId"] = v
+	}
 
 	return m, nil
 }
@@ -2516,6 +2789,7 @@ func flattenKeyIosSettings(c *Client, i interface{}, res *Key) *KeyIosSettings {
 	}
 	r.AllowAllBundleIds = dcl.FlattenBool(m["allowAllBundleIds"])
 	r.AllowedBundleIds = dcl.FlattenStringSlice(m["allowedBundleIds"])
+	r.AppleDeveloperId = flattenKeyIosSettingsAppleDeveloperId(c, m["appleDeveloperId"], res)
 
 	return r
 }
