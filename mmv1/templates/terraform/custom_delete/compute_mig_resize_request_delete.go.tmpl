@@ -33,15 +33,19 @@ if d.Get("state") == "CREATING" || d.Get("state") == "ACCEPTED" {
 	})
 
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, "ResizeRequest")
-	}
-
-	err = ComputeOperationWaitTime(
-		config, res, project, "Cancelling the resize request", userAgent,
-		d.Timeout(schema.TimeoutDelete))
-	
-	if err != nil {
-		return err
+		if !strings.Contains(err.Error(), "has reached a final state") {
+			return transport_tpg.HandleNotFoundError(err, d, "ResizeRequest")
+		}
+	} else {
+		err = ComputeOperationWaitTime(
+			config, res, project, "Cancelling the resize request", userAgent,
+			d.Timeout(schema.TimeoutDelete))
+		
+		if err != nil {
+			if !strings.Contains(err.Error(), "has reached a final state") {
+				return err
+			}
+		}
 	}
 }
 
