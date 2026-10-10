@@ -24,6 +24,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/sslPolicies'
 has_self_link: true
+generate_list_resource: true
 update_verb: 'PATCH'
 collection_url_key: 'items'
 kind: 'compute#sslPolicy'
