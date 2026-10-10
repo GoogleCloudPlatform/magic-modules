@@ -58,18 +58,11 @@ samples:
     steps:
       - name: dataform_repository_with_cloudsource_repo
         resource_id_vars:
-          git_repository_name: my/repository
           dataform_repository_name: dataform_repository
           data: secret-data
           secret_name: my-secret
           key_ring_name: example-key-ring
           crypto_key_name: example-crypto-key-name
-        # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
-        # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
-        # See : https://issuetracker.google.com/issues/287850319
-        test_vars_overrides:
-          # for backward compatible
-          git_repository_name: '"my/repository" + randomSuffix'
         ignore_read_extra:
           - deletion_policy
         exclude_import_test: true
@@ -79,16 +72,9 @@ samples:
     steps:
       - name: dataform_repository_with_cloudsource_repo_and_ssh
         resource_id_vars:
-          git_repository_name: my/repository
           dataform_repository_name: dataform_repository
           data: secret-data
           secret_name: my-secret
-        # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
-        # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
-        # See : https://issuetracker.google.com/issues/287850319
-        test_vars_overrides:
-          # for backward compatible
-          git_repository_name: '"my/repository" + randomSuffix'
   - name: dataform_repository_with_developer_connect
     primary_resource_id: dataform_repository
     exclude_basic_doc: true
