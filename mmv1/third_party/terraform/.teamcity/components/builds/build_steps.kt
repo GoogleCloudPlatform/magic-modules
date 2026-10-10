@@ -146,7 +146,7 @@ fun BuildSteps.saveArtifactsToGCS() {
 
             # Get current date for nightly tests
             CURRENT_DATE=$(date +"%%Y-%%m-%%d") 
-            // "%%" is used to escape "%" see details at https://www.jetbrains.com/help/teamcity/9.0/defining-and-using-build-parameters-in-build-configuration.html#using-build-parameters-in-build-configuration-settings
+            # "%%" is used to escape "%" see details at https://www.jetbrains.com/help/teamcity/9.0/defining-and-using-build-parameters-in-build-configuration.html#using-build-parameters-in-build-configuration-settings
 
             # Detect Trigger Method 
             TRIGGERED_BY_USERNAME=%teamcity.build.triggeredBy.username%
@@ -161,6 +161,13 @@ fun BuildSteps.saveArtifactsToGCS() {
 
             echo "Uploading artifacts to GCS folder: ${'$'}{FOLDER}"
             # Copy logs to GCS
+            if ! compgen -G "%teamcity.build.checkoutDir%/debug*" > /dev/null; then
+                echo "No debug artifacts found; skipping GCS upload"
+                rm google-account.json
+                gcloud auth application-default revoke
+                gcloud auth revoke --all
+                exit 0
+            fi
             gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
             # Cleanup
