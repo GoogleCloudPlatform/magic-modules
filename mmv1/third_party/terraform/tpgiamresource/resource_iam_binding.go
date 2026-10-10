@@ -62,8 +62,8 @@ var iamBindingSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
-	// No schema default: an unset value is resolved in iamBindingOverwriteOnCreate, so changing the
-	// default in a major release doesn't produce a diff for existing bindings.
+	// Client-side field. No schema default: an unset value means true (see iamBindingOverwriteOnCreate)
+	// and stays null in state, so existing bindings don't show a diff when the field is added.
 	"overwrite_on_create": {
 		Type:     schema.TypeBool,
 		Optional: true,
@@ -189,7 +189,7 @@ func resourceIamBindingUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBa
 }
 
 // Whether Create may replace members already bound to the role+condition. Unset means true, the
-// historical behavior; the default is expected to become false in the next major release.
+// current behavior.
 func iamBindingOverwriteOnCreate(d *schema.ResourceData) bool {
 	rawConfig := d.GetRawConfig()
 	if rawConfig.IsNull() || !rawConfig.IsKnown() {

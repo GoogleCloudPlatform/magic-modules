@@ -176,11 +176,10 @@ The following arguments are supported:
     Deleting this removes all policies from the organization, locking out users without
     organization-level access.
 
-* `overwrite_on_create` - (Optional, only for `google_organization_iam_binding`) If `true`, creating the binding replaces
-  any members already bound to the same role (and condition, if any), including members Google Cloud grants by default.
-  If `false`, creation fails if that role already has different members; import the existing binding instead.
-  Defaults to `true`; the default is planned to change to `false` in the next major release.
-  Changing it after the binding is created has no effect.
+* `overwrite_on_create` - (Optional, only for `google_organization_iam_binding`) If `true`, creating the binding
+  replaces any members already bound to the same role and condition, including members Google Cloud grants by default.
+  If `false`, creation fails if that role already has different members; import the existing binding to manage it with Terraform.
+  Only affects creation. Defaults to `true`.
 
 * `org_id` - (Required) The organization id of the target organization.
 
