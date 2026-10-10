@@ -1,0 +1,139 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ManagementDnsZoneBinding'
+description: |
+  Represents a binding between the management DNS zone and a VPC network or private VMWare Engine network.
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.managementDnsZoneBindings'
+docs:
+id_format: '{{parent}}/managementDnsZoneBindings/{{name}}'
+base_url: '{{parent}}/managementDnsZoneBindings'
+self_link: '{{parent}}/managementDnsZoneBindings/{{name}}'
+create_url: '{{parent}}/managementDnsZoneBindings?managementDnsZoneBindingId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/managementDnsZoneBindings/{{name}}'
+include_in_tgc_next: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+  include_project: true
+sweeper:
+  parent:
+    resource_type: "google_vmwareengine_private_cloud"
+    parent_field: "name"
+    child_field: "parent"
+examples:
+  - name: 'vmware_engine_management_dns_zone_binding_basic'
+    primary_resource_id: 'vmw-engine-mgmt-dns-zone-binding'
+    vars:
+      name: 'sample-binding'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
+    test_env_vars:
+      region: 'REGION'
+    # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+    exclude_test: true
+
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The resource name of the private cloud to create a new management DNS zone binding in.
+      Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
+      For example: projects/my-project/locations/us-central1-a/privateClouds/my-cloud
+
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the ManagementDnsZoneBinding.
+
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Creation time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
+      up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Last updated time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+    output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The state of the resource.
+
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'CREATING'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'FAILED'
+  - name: 'description'
+    type: String
+    description: |
+      User-provided description for this resource.
+  - name: 'uid'
+    type: String
+    description: |
+      System-generated unique identifier for the resource.
+    output: true
+  - name: 'vpcNetwork'
+    type: String
+    description: |
+      Network to bind is a standard consumer VPC.
+      Specify the name in the following form for consumer VPC network: projects/{project}/global/networks/{network_id}.
+      {project} can either be a project number or a project ID.
+
+    conflicts:
+      - 'vmwareEngineNetwork'
+    immutable: true
+  - name: 'vmwareEngineNetwork'
+    type: String
+    description: |
+      Network to bind is a VMware Engine network.
+      Specify the name in the following form for VMware engine network: projects/{project}/locations/global/vmwareEngineNetworks/{vmwareEngineNetworkId}.
+      {project} can either be a project number or a project ID.
+
+    conflicts:
+      - 'vpcNetwork'
+    immutable: true
