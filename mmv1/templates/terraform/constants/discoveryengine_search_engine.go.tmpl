@@ -1,0 +1,20 @@
+var discoveryEngineSearchEngineGoogleProvidedFeatures = []string{
+	"enable-end-user-sharing-with-groups",
+}
+
+func DiscoveryEngineSearchEngineFeaturesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the features provided by API when not set in config
+	for _, feature := range discoveryEngineSearchEngineGoogleProvidedFeatures {
+		if strings.Contains(k, feature) && new == "" {
+			return true
+		}
+	}
+
+	// Let diff be determined by features (above)
+	if strings.Contains(k, "features.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
