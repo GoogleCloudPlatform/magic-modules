@@ -1,0 +1,30 @@
+func tagsTagKeyPurposeDataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	switch k {
+	case "purpose_data.organization":
+		if new == "auto" && old != "" {
+			return true
+		}
+		return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
+	case "purpose_data.network":
+		if tpgresource.CompareSelfLinkOrResourceName("", old, new, d) {
+			return true
+		}
+		oldParts := strings.Split(old, "/")
+		newParts := strings.Split(new, "/")
+		if len(oldParts) >= 2 && len(newParts) >= 2 {
+			oldNet := oldParts[len(oldParts)-1]
+			newNet := newParts[len(newParts)-1]
+			if oldNet == newNet {
+				return true
+			}
+			if len(oldParts) >= 4 && oldParts[len(oldParts)-4] == "projects" && len(newParts) == 2 {
+				if oldParts[len(oldParts)-3] == newParts[0] {
+					return true
+				}
+			}
+		}
+		return false
+	default:
+		return old == new
+	}
+}

@@ -104,6 +104,11 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 			{
 				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context),
 			},
+			{
+				ResourceName:      "google_tags_tag_key.key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
