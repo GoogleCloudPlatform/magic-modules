@@ -64,6 +64,41 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: applicationTemplateComponent
+    type: NestedObject
+    description: |-
+      Reference to a component and revision in a composite Application Design
+      Center ApplicationTemplate. Set by the service on Releases created by an
+      ApplicationTemplate import.
+    output: true
+    properties:
+      - name: compositeRef
+        type: NestedObject
+        description: Reference to the composite ApplicationTemplate.
+        output: true
+        properties:
+          - name: applicationTemplate
+            type: String
+            description: Reference to the ApplicationTemplate resource.
+            output: true
+          - name: revision
+            type: String
+            description: Revision of the ApplicationTemplate.
+            output: true
+          - name: syncOperation
+            type: String
+            description: Reference to the ongoing import and replication operation. Opaque for external usage.
+            output: true
+      - name: component
+        type: String
+        description: Name of the component in the composite ApplicationTemplate.
+        output: true
+      - name: revision
+        type: String
+        description: |-
+          Revision of the component. If the component does not have a revision,
+          this is the revision of the composite ApplicationTemplate.
+        output: true
   - name: blueprint
     type: NestedObject
     description: |-
