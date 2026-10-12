@@ -757,3 +757,19 @@ func IsAgentConnectivityTemplateInUse(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry when a SaaS Runtime Saas rejects a request because an application
+// template import is running. A PATCH on a FAILED Saas (even labels-only)
+// restarts the import, and the service then rejects template/revision updates
+// and DELETE until the import reaches ACTIVE or FAILED.
+func IsSaasRuntimeSaasImportRunningError(err error) (bool, string) {
+	if err == nil {
+		return false, ""
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "because it is in RUNNING state") ||
+		strings.Contains(msg, "Cannot update application template or revision when state is RUNNING") {
+		return true, "waiting for Saas application template import to finish"
+	}
+	return false, ""
+}
