@@ -60,7 +60,7 @@ if validateDependenciesEnabled {
             }
         }
         if sb.Len() > 0 {
-            return fmt.Errorf("There are additional services for which all necessary dependencies haven't been added. Please add these missing dependencies:\n%s", sb.String())
+            return fmt.Errorf("There are additional services for which all necessary dependencies haven't been added. Please add these missing dependencies:\n%s\nTo skip dependency validation, set validate_dependencies to false.", sb.String())
         }
     }
 }
