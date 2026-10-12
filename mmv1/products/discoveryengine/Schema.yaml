@@ -24,7 +24,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas
 generate_list_resource: true
-immutable: true
+update_verb: PATCH
 self_link: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}
 delete_url: projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}
@@ -55,6 +55,23 @@ samples:
         resource_id_vars:
           data_store_id: data-store-id
           schema_id: schema-id
+  - name: discoveryengine_schema_update
+    primary_resource_id: basic
+    steps:
+      - name: discoveryengine_schema_basic
+        resource_id_vars:
+          data_store_id: data-store-id
+          schema_id: schema-id
+        vars:
+          json_schema: '{"type":"object","properties":{"title":{"type":"string"}}}'
+
+      - name: discoveryengine_schema_basic
+        resource_id_vars:
+          data_store_id: data-store-id
+          schema_id: schema-id
+        vars:
+          json_schema: '{"type":"object","properties":{"title":{"type":"string"},"description":{"type":"string"}}}'
+
 parameters:
   - name: location
     type: String
@@ -90,8 +107,7 @@ properties:
   - name: jsonSchema
     type: String
     description: |
-      The JSON representation of the schema.
-    immutable: true
+      The JSON representation of the schema. See https://docs.cloud.google.com/generative-ai-app-builder/docs/update-schemas.
     exactly_one_of:
       - json_schema
     state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
