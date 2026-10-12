@@ -98,6 +98,6 @@ virtual_fields:
   - name: 'check_usage_on_remove'
     type: Boolean
     description: |
-      (Optional) Default value is false. This field is deprecated and has no effect; `UpdateConsumerPolicy` requests always set `force=true`.
+      (Optional) Default value is false. This field is deprecated and has no effect.
     default_value: false
     deprecation_message: '`check_usage_on_remove` is deprecated and will be removed in a future major release.'
