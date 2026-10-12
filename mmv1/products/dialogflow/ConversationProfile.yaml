@@ -47,6 +47,23 @@ samples:
       - name: 'dialogflow_conversation_profile_basic'
         resource_id_vars:
           profile_name: 'dialogflow-profile'
+        vars:
+          use_gemini_asr: 'true'
+          model_id: 'gemini-3-flash-lite-asr-preview'
+          silence_duration_ms: '1000'
+          prefix_padding_ms: '500'
+          start_of_speech_sensitivity: 'START_SENSITIVITY_LOW'
+          end_of_speech_sensitivity: 'END_SENSITIVITY_LOW'
+      - name: 'dialogflow_conversation_profile_basic'
+        resource_id_vars:
+          profile_name: 'dialogflow-profile'
+        vars:
+          use_gemini_asr: 'false'
+          model_id: 'gemini-3-flash-lite-asr-preview-v2'
+          silence_duration_ms: '2000'
+          prefix_padding_ms: '800'
+          start_of_speech_sensitivity: 'START_SENSITIVITY_HIGH'
+          end_of_speech_sensitivity: 'END_SENSITIVITY_HIGH'
   - name: 'dialogflow_conversation_profile_recognition_result_notification'
     primary_resource_id: 'recognition_result_notification_profile'
     steps:
@@ -626,6 +643,42 @@ properties:
         name: 'useTimeoutBasedEndpointing'
         description: |
           Use timeout based endpointing, interpreting endpointer sensitivity as seconds of timeout value.
+      - type: Boolean
+        name: 'useGeminiAsr'
+        description: |
+          If true, Gemini ASR will be used for transcription instead of Cloud Speech-to-Text.
+        send_empty_value: true
+      - type: NestedObject
+        name: 'geminiAsrConfig'
+        description: |
+          Configuration for using Gemini ASR models served via Vertex AI, overriding the default Gemini ASR model or providing additional advanced parameters. This field is only used when `use_gemini_asr` is true.
+        properties:
+          - type: String
+            name: 'modelId'
+            description: |
+              The Gemini ASR model ID used for transcription. This value overrides the default model ID configured on the server.
+          - type: Integer
+            name: 'silenceDurationMs'
+            description: |
+              The required duration of detected silence (or non-speech) before end-of-speech is committed.
+          - type: Integer
+            name: 'prefixPaddingMs'
+            description: |
+              The required duration of detected speech before start-of-speech is committed.
+          - type: Enum
+            name: 'startOfSpeechSensitivity'
+            description: |
+              Start of speech sensitivity.
+            enum_values:
+              - START_SENSITIVITY_HIGH
+              - START_SENSITIVITY_LOW
+          - type: Enum
+            name: 'endOfSpeechSensitivity'
+            description: |
+              End of speech sensitivity.
+            enum_values:
+              - END_SENSITIVITY_HIGH
+              - END_SENSITIVITY_LOW
   - type: String
     name: 'languageCode'
     description: |
