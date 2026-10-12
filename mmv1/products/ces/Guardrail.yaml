@@ -358,11 +358,6 @@ properties:
             type: Enum
             description: |-
               The thinking level of the model.
-              Possible values:
-              DEFAULT
-              LOW
-              MEDIUM
-              HIGH
             enum_values:
               - DEFAULT
               - LOW
@@ -445,11 +440,6 @@ properties:
                 type: Enum
                 description: |-
                   The thinking level of the model.
-                  Possible values:
-                  DEFAULT
-                  LOW
-                  MEDIUM
-                  HIGH
                 enum_values:
                   - DEFAULT
                   - LOW
