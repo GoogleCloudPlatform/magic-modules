@@ -61,7 +61,7 @@ nested_query:
   modify_by_patch: false
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network_endpoint.go.tmpl'
-  decoder: 'templates/terraform/decoders/unwrap_resource.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_network_endpoint.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_network_endpoint.go.tmpl'
   custom_import: 'templates/terraform/custom_import/compute_network_endpoint.go.tmpl'
 exclude_tgc: true
