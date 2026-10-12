@@ -589,7 +589,7 @@ func TestAccVmwareengineCluster_vmwareEngineClusterVsanType(t *testing.T) {
 		"zone":                 region_id + "-b",
 		"pc_name":              "tf-test-cluster-pc" + random_suffix,
 		"mgmt_cluster_node":    3,
-		"node_type":            "standard-72",
+		"node_type":            "standard-128",
 		"vsan_type":            "VSAN_TYPE_ESA",
 	}
 

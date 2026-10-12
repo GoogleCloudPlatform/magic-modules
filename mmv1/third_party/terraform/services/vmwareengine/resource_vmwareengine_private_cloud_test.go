@@ -531,7 +531,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
   management_cluster {
     cluster_id = "tf-test-mgmt-cluster-%{random_suffix}"
     node_type_configs {
-      node_type_id = "standard-72"
+      node_type_id = "standard-128"
       node_count = 3
     }
     vsan_type = "%{vsan_type}"
