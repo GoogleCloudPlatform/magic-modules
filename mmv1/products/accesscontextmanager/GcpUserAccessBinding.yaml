@@ -253,9 +253,9 @@ properties:
           `principalSet://cloudresourcemanager.googleapis.com/organizations/{organization_id}/type/WorkforcePool`
 
           Bindings created for all Workforce Pools in a Google Cloud organization
-          support only `scoped_access_settings` with the `restricted_project` or
-          `restricted_client_application` client scopes and active `session_settings`.
-          No other configurations are allowed.
+          support only `scoped_access_settings` with the `restricted_project`
+          client scope and active `session_settings`. No other configurations are
+          allowed.
       - name: serviceAccountProjectNumber
         type: String
         immutable: true
