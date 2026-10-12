@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
-func TestAccDiscoveryEngineSchema_discoveryengineSchemaBasicExample_update(t *testing.T) {
+func TestAccDiscoveryEngineSchema_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -33,6 +34,11 @@ func TestAccDiscoveryEngineSchema_discoveryengineSchemaBasicExample_update(t *te
 			},
 			{
 				Config: testAccDiscoveryEngineSchema_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_schema.basic", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_discovery_engine_schema.basic",
