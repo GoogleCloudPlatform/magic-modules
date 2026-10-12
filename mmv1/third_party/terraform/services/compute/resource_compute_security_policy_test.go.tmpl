@@ -958,23 +958,22 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeSecurityPolicy_securityPolicyWithBodyExclude(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
-		"backend_name":    "backendpolicy" + randomSuffix,
-		"network_name":    "tf-test-test-network" + randomSuffix,
-    "health_check_name":    "tf-test-health-check" + randomSuffix,
-		"sec_policy_name": "policyruletest" + randomSuffix,
-		"random_suffix":   randomSuffix,
+		"backend_name":      "backendpolicy" + randomSuffix,
+		"network_name":      "tf-test-test-network" + randomSuffix,
+		"health_check_name": "tf-test-health-check" + randomSuffix,
+		"sec_policy_name":   "policyruletest" + randomSuffix,
+		"random_suffix":     randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -993,13 +992,11 @@ func TestAccComputeSecurityPolicy_securityPolicyWithBodyExclude(t *testing.T) {
 func testAccComputeSecurityPolicy_securityPolicyWithBodyExclude(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "%{network_name}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "%{network_name}-subnet"
   region        = "us-west2"
   network       = google_compute_network.default.id
@@ -1007,8 +1004,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
-  name     = "%{health_check_name}"
+  name = "%{health_check_name}"
 
   http_health_check {
     port = 80
@@ -1016,7 +1012,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_security_policy" "policy_rule_one" {
-  provider    = google-beta
   name        = "%{sec_policy_name}"
   description = "global security policy with body inspection"
   type        = "CLOUD_ARMOR"
@@ -1027,10 +1022,10 @@ resource "google_compute_security_policy" "policy_rule_one" {
   }
 
   rule {
-    description     = "waf body rule"
-    action          = "deny(403)"
-    priority        = 100
-    preview         = true
+    description = "waf body rule"
+    action      = "deny(403)"
+    priority    = 100
+    preview     = true
 
     match {
       expr {
@@ -1064,12 +1059,11 @@ resource "google_compute_security_policy" "policy_rule_one" {
 }
 
 resource "google_compute_instance_template" "default" {
-  provider     = google-beta
   name         = "%{backend_name}"
   machine_type = "e2-micro"
 
   disk {
-    source_image = "projects/debian-cloud/global/images/family/debian-11"
+    source_image = "projects/debian-cloud/global/images/family/debian-13"
     auto_delete  = true
     boot         = true
   }
@@ -1081,7 +1075,6 @@ resource "google_compute_instance_template" "default" {
 }
 
 resource "google_compute_instance_group_manager" "default" {
-  provider           = google-beta
   name               = "%{backend_name}"
   base_instance_name = "backend"
   zone               = "us-west2-a"
@@ -1094,7 +1087,6 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  provider              = google-beta
   name                  = "%{backend_name}"
   protocol              = "HTTP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -1110,20 +1102,17 @@ resource "google_compute_backend_service" "default" {
 }
 `, context)
 }
-{{- end }}
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeSecurityPolicy_withRequestBody(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"region":      "us-west2",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSecurityPolicy_withRequestBody(context),
@@ -1134,12 +1123,7 @@ func TestAccComputeSecurityPolicy_withRequestBody(t *testing.T) {
 
 func testAccComputeSecurityPolicy_withRequestBody(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
-  region = "%{region}"
-}
-
 resource "google_compute_security_policy" "policy" {
-  provider    = google-beta
   name        = "tf-test-sec-policy-%{random_suffix}"
   description = "Policy with Request Body inspection"
 
@@ -1168,7 +1152,6 @@ resource "google_compute_security_policy" "policy" {
 }
 `, context)
 }
-{{- end }}
 
 func testAccCheckComputeSecurityPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {

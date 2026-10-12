@@ -109,6 +109,17 @@ properties:
       If this is provided, it must match the server's etag. If the provided etag
       does not match the server's etag, the request will fail with a 409 ABORTED
       error.
+  - name: agentCompute
+    type: String
+    description: |
+      The compute environment where the agent is hosted.
+      Exactly one type of compute must be chosen.
+      Possible values are: `GKE`, `CLOUD_RUN`.
+  - name: deploymentModel
+    type: String
+    description: |
+      The deployment model for the gateway.
+      Possible values are: `CENTRALIZED`, `AMBIENT`.
   - name: accessTypes
     type: Array
     default_from_api: true

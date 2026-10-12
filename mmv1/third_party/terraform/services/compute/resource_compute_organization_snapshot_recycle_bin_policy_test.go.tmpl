@@ -1,3 +1,4 @@
+{{- if ne $.TargetVersionName "ga" }}
 package compute_test
 
 import (
@@ -208,3 +209,5 @@ resource "google_compute_organization_snapshot_recycle_bin_policy" "policy" {
 }
 `, context)
 }
+
+{{- end }}

@@ -1,5 +1,4 @@
 resource "google_compute_region_security_policy" "{{.PrimaryResourceId}}" {
-  provider    = google-beta
   name        = "{{index $.ResourceIdVars "sec_policy_name"}}"
   description = "Policy with Request Body inspection"
   region      = "us-west2"

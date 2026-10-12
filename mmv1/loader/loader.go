@@ -488,16 +488,22 @@ func (l *Loader) Validate() {
 		log.Fatalln("products have not been loaded into memory")
 	}
 
+	var allErrs []error
 	for _, product := range l.Products {
+		ver := product.VersionObjOrClosest(l.version)
 		for _, resource := range product.Objects {
+			resource.ExcludeIfNotInVersion(ver)
 			es := resource.Validate()
 			if len(es) > 0 {
 				es = utils.TransformErrs(func(e error) error {
 					return fmt.Errorf("%s%s%s: %w", utils.ColorRed, resource.SourceYamlFile, utils.ColorReset, e)
 				}, es)
-				log.Fatalf("%v", errors.Join(es...))
+				allErrs = append(allErrs, es...)
 			}
 		}
+	}
+	if len(allErrs) > 0 {
+		log.Fatalf("%v", errors.Join(allErrs...))
 	}
 }
 

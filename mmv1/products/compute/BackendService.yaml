@@ -216,6 +216,22 @@ samples:
         min_version: 'beta'
         resource_id_vars:
           backend_service_name: 'backend-service'
+  - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+  - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -790,16 +806,19 @@ properties:
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'maxTtl'
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'clientTtl'
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'negativeCaching'
         type: Boolean
         description: |
@@ -1830,6 +1849,30 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        immutable: true
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            immutable: true
+            required: true
   - name: 'params'
     type: NestedObject
     ignore_read: true

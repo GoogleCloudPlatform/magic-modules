@@ -33,9 +33,23 @@ samples:
     steps:
       - name: saas_runtime_saas_basic
         min_version: 'beta'
+        # The service reconciles a new Saas asynchronously after Create returns
+        # (provisions its blueprint repository and sets status), which refreshes
+        # the output-only etag and update_time fields.
+        ignore_read_extra:
+          - etag
+          - update_time
         resource_id_vars:
           saas_name: test-saas
 autogen_async: false
+# DeleteSaas returns before the resource is removed (no long-running operation);
+# poll until GET returns 404 so destroy completes only once the Saas is gone.
+async:
+  type: PollAsync
+  actions: [delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
 autogen_status: U2Fhcw==
 parameters:
   - name: location

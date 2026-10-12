@@ -31,7 +31,7 @@ resource "google_network_security_gateway_security_policy" "default" {
 }
 
 resource "google_compute_address" "swp_ip" {
-  name         = "{{index $.ResourceIdVars "gateway_name"}}" # Alterado para amarrar com a regra de nomenclatura do GCP
+  name         = "{{index $.ResourceIdVars "gateway_name"}}"
   project      = "{{index $.TestEnvVars "project"}}"
   region       = "us-east4"
 
@@ -93,6 +93,16 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
             exact = "{{index $.Vars "not_sources_principal"}}"
           }
         }
+
+        resources {
+          iam_service_account {
+            ignore_case = false
+            exact       = "spiffe://exact/ns/default/sa/exact"
+          }
+          tag_value_id_set {
+            ids = ["1"]
+          }
+        }
       }
       sources {
         ip_blocks {
@@ -107,6 +117,16 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
             exact = "{{index $.Vars "sources_principal"}}"
           }
         }
+
+        resources {
+          iam_service_account {
+            ignore_case = false
+            exact       = "spiffe://example/ns/default/sa/example"
+          }
+          tag_value_id_set {
+            ids = ["2"]
+          }
+        }
       }
     }
 
@@ -114,6 +134,11 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
       operations {
         snis {
           exact = "{{index $.Vars "to_operations_snis_exact"}}"
+        }
+      }
+      not_operations {
+        snis {
+          exact = "testing.com"
         }
       }
     }

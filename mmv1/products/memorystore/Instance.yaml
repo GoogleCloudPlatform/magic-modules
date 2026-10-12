@@ -150,8 +150,6 @@ virtual_fields:
     deprecation_message: '`desired_psc_auto_connections` is deprecated. Use `desired_auto_created_endpoints` instead. `terraform import` will only work with desired_auto_created_endpoints`.'
     type: Array
     immutable: true
-    conflicts:
-      - desiredAutoCreatedEndpoints
     item_type:
       type: NestedObject
       properties:
@@ -168,8 +166,6 @@ virtual_fields:
     type: Array
     immutable: true
     diff_suppress_func: memorystoreInstancedDesiredAutoConnectionsDiffSuppress
-    conflicts:
-      - desiredPscAutoConnections
     item_type:
       type: NestedObject
       properties:

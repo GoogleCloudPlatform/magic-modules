@@ -84,7 +84,6 @@ samples:
           sec_policy_name: 'my-sec-policy-with-rules'
   - name: "region_security_policy_with_body_exclude"
     primary_resource_id: "policy_rule_one"
-    min_version: beta
     steps:
       - name: "region_security_policy_with_body_exclude"
         resource_id_vars:
@@ -94,7 +93,6 @@ samples:
           health_check_name: "test-health-check"
   - name: "region_security_policy_request_body_expression"
     primary_resource_id: "policy_rule"
-    min_version: beta
     steps:
       - name: "region_security_policy_request_body_expression"
         resource_id_vars:
@@ -449,7 +447,6 @@ properties:
                             The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
                           api_name: val
                   - name: 'requestBody'
-                    min_version: 'beta'
                     type: Array
                     description: |
                       A list of request body fields to be excluded from inspection during preconfigured WAF evaluation.

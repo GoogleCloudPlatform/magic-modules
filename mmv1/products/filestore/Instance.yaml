@@ -364,8 +364,6 @@ properties:
         description: |
           The instance provisioned IOPS will change dynamically
           based on the capacity of the instance.
-        conflicts:
-          - fixed_iops
         properties:
           - name: maxIopsPerTb
             type: Integer
@@ -381,8 +379,6 @@ properties:
           The instance will have a fixed provisioned IOPS value,
           which will remain constant regardless of instance
           capacity.
-        conflicts:
-          - iops_per_tb
         properties:
           - name: maxIops
             type: Integer

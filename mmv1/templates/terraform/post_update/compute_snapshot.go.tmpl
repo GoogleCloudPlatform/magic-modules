@@ -1,0 +1,40 @@
+// Nested fields aren't handled by the generated update. Runs after
+// d.Partial(false), so set d.Partial(true) on error to keep the old state.
+if d.HasChange("snapshot_encryption_key.0.kms_key_self_link") {
+	oldKey, newKey := d.GetChange("snapshot_encryption_key.0.kms_key_self_link")
+	kmsKeyObj, err := kmsKeyUpdateRequestBody(oldKey.(string), newKey.(string), d.Get("snapshot_encryption_key.0.kms_key_service_account").(string))
+	if err != nil {
+		d.Partial(true)
+		return fmt.Errorf("Error updating Snapshot %q KMS key: %s", d.Id(), err)
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/snapshots/{{"{{"}}name{{"}}"}}/updateKmsKey")
+	if err != nil {
+		d.Partial(true)
+		return err
+	}
+
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      kmsKeyObj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+	})
+	if err != nil {
+		d.Partial(true)
+		return fmt.Errorf("Error updating Snapshot %q KMS key: %s", d.Id(), err)
+	}
+
+	err = ComputeOperationWaitTime(config, res, project, "Updating Snapshot KMS Key", userAgent, d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		d.Partial(true)
+		return err
+	}
+}

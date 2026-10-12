@@ -52,24 +52,43 @@ func (v *Version) Validate(pName string) {
 			log.Fatalf("`rep_url` %q in `version` %s for product %s must contain exactly one template variable (e.g. {{location}} or {{region}}), found %d", v.RepUrl, v.Name, pName, n)
 		}
 	}
+	baseVars := google.ExtractTemplateVariables(v.BaseUrl)
+	if n := len(baseVars); n > 1 {
+		log.Fatalf("`base_url` %q in `version` %s for product %s must contain at most one template variable (e.g. {{location}} or {{region}}), found %d", v.BaseUrl, v.Name, pName, n)
+	}
+	// Generated code substitutes a single variable name into whichever URL
+	// transport_tpg.BaseUrl returns, so base_url and rep_url must agree on it.
+	if v.RepUrl != "" && len(baseVars) == 1 {
+		if repVar := google.ExtractTemplateVariables(v.RepUrl)[0]; repVar != baseVars[0] {
+			log.Fatalf("`base_url` %q and `rep_url` %q in `version` %s for product %s must use the same template variable, found %q and %q", v.BaseUrl, v.RepUrl, v.Name, pName, baseVars[0], repVar)
+		}
+	}
 }
 
 func (v *Version) CompareTo(other *Version) int {
 	return slices.Index(ORDER, v.Name) - slices.Index(ORDER, other.Name)
 }
 
-// Whether this version supports regionalized endpoints (REP). The default
-// of regional vs global is controlled at the product level
-func (v *Version) RepEnabled() bool {
-	return v.RepUrl != ""
+// HasRegionalUrl returns whether this version has a regionalized endpoint:
+// either a regional endpoint policy (REP) URL, or a base URL that is itself
+// templated on a location (for example
+// https://{{location}}-documentai.googleapis.com/v1/). The default of
+// regional vs global for REP is controlled at the product level.
+func (v *Version) HasRegionalUrl() bool {
+	return v.RepUrl != "" || len(google.ExtractTemplateVariables(v.BaseUrl)) > 0
 }
 
-// RepUrlVariable returns the name of the template variable in RepUrl (for
-// example "location" for https://foo.{{location}}.rep.googleapis.com/v1/).
-// Validate ensures a non-empty RepUrl contains exactly one variable. Returns
-// an empty string if REP is not enabled for this version.
-func (v *Version) RepUrlVariable() string {
+// RegionalUrlVariable returns the name of the template variable in the
+// regional URL (for example "location" for
+// https://foo.{{location}}.rep.googleapis.com/v1/). RepUrl is preferred,
+// falling back to BaseUrl. Validate ensures each contains at most one variable
+// and that they match. Returns an empty string if this version has no
+// regional URL.
+func (v *Version) RegionalUrlVariable() string {
 	if vars := google.ExtractTemplateVariables(v.RepUrl); len(vars) > 0 {
+		return vars[0]
+	}
+	if vars := google.ExtractTemplateVariables(v.BaseUrl); len(vars) > 0 {
 		return vars[0]
 	}
 	return ""

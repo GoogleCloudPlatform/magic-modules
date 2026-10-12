@@ -31,7 +31,7 @@ docs:
      Resulting name for a `name_prefix` <= 37 characters:
      `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
      Resulting name for a `name_prefix` 38 - 54 characters:
-     `name_prefix` + YYmmdd + 3 digit incremental counter
+     `name_prefix` + 9 random lowercase alphanumeric characters
 base_url: 'projects/{{project}}/global/sslCertificates'
 has_self_link: true
 immutable: true
