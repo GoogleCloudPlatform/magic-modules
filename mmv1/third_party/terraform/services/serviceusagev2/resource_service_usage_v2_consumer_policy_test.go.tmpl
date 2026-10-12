@@ -273,7 +273,7 @@ resource "google_service_usage_v2_consumer_policy" "default" {
   name   = "default"
   enable_rules  {
     services = ["services/oslogin.googleapis.com"]
-    catalogs = []
+    catalogs = ["catalogs/default-cloud-services"]
   }
   validate_dependencies = true
   check_usage_on_remove = false

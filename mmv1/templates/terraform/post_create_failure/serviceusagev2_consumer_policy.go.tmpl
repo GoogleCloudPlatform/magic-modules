@@ -12,10 +12,6 @@
 */ -}}
 
 if ok, _ := isCommonOpError(err, ApiErrorSuConflictingConcurrentModification); ok || isTimeoutError(err) {
-	return errors.New("The consumer policy might have been changed from other toolings. Please try again.")
-} else if ok, msg := isCommonOpError(err, ApiErrorCommonSuServicesHaveUsage); ok {
-	return errors.New(getErrorMessageForServicesInUse(msg))
-} else if ok, msg := isCommonOpError(err, ApiErrorCommonSuServicesHaveHierarchicalUsage); ok {
-	return errors.New(getErrorMessageForServicesInUse(msg))
+	return fmt.Errorf("The consumer policy might have been changed from other toolings. Please try again: %w", err)
 }
 return err
