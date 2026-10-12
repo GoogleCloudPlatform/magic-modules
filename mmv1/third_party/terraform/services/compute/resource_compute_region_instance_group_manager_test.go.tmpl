@@ -39,13 +39,13 @@ func TestAccRegionInstanceGroupManager_basic(t *testing.T) {
 				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "no_graceful_shutdown_on_destroy"},
 			},
 			{
 				ResourceName:            "google_compute_region_instance_group_manager.igm-no-tp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "no_graceful_shutdown_on_destroy"},
 			},
 		},
 	})
@@ -670,6 +670,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
   target_pools                   = [google_compute_target_pool.igm-basic.self_link]
   base_instance_name             = "tf-test-igm-basic"
   target_size                    = 2
+  no_graceful_shutdown_on_destroy = true
   list_managed_instances_results = "PAGINATED"
 }
 
