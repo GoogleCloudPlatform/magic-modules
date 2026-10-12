@@ -1,0 +1,7 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+{{- if eq $.TargetVersionName "ga" }}
+import "github.com/hashicorp/terraform-provider-google/version"
+{{- else }}
+import "github.com/hashicorp/terraform-provider-google-{{ $.TargetVersionName }}/version"
+{{- end }}
+{{- end }}

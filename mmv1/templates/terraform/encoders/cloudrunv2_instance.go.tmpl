@@ -1,0 +1,9 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+_, hasClient := d.GetOk("client")
+_, hasClientVersion := d.GetOk("client_version")
+if !hasClient && !hasClientVersion {
+	obj["client"] = "terraform"
+	obj["clientVersion"] = version.ProviderVersion
+}
+{{- end }}
+return obj, nil

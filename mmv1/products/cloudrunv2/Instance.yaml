@@ -45,6 +45,9 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
+custom_code:
+  constants: 'templates/terraform/constants/cloudrunv2_instance.go.tmpl'
+  encoder: 'templates/terraform/encoders/cloudrunv2_instance.go.tmpl'
 taint_resource_on_failed_create: true
 samples:
   - name: 'cloudrunv2_instance_basic'
@@ -240,10 +243,12 @@ properties:
     type: String
     description: |
       Arbitrary identifier for the API client.
+    default_from_api: true
   - name: 'clientVersion'
     type: String
     description: |
       Arbitrary version identifier for the API client.
+    default_from_api: true
   - name: 'launchStage'
     type: Enum
     description: |
