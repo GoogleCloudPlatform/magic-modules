@@ -124,6 +124,9 @@ var (
 		"cluster_config.0.endpoint_config",
 		"cluster_config.0.dataproc_metric_config",
 		"cluster_config.0.auxiliary_node_groups",
+		"cluster_config.0.master_flexible_config",
+		"cluster_config.0.worker_flexible_config",
+		"cluster_config.0.secondary_worker_flexible_config",
 	}
 )
 
@@ -2430,6 +2433,18 @@ by Dataproc`,
 								},
 							},
 						},
+						"master_flexible_config": flexibleInstanceGroupConfigSchema(
+							`The configuration for the master flexible instance group in High Obtainability (HO) mode.`,
+							"master",
+						),
+						"worker_flexible_config": flexibleInstanceGroupConfigSchema(
+							`The configuration for the worker flexible instance group in High Obtainability (HO) mode.`,
+							"worker",
+						),
+						"secondary_worker_flexible_config": flexibleInstanceGroupConfigSchema(
+							`The configuration for the secondary worker flexible instance group in High Obtainability (HO) mode.`,
+							"secondary",
+						),
 					},
 				},
 			},
@@ -2482,6 +2497,94 @@ func acceleratorsSchema() *schema.Resource {
 			},
 		},
 	}
+}
+
+func flexibleInstanceGroupConfigSchema(desc string, role string) *schema.Schema {
+	var numInstancesSchema *schema.Schema
+	var conflictsWith []string
+	var requiredWith []string
+
+	switch role {
+	case "master":
+		conflictsWith = []string{
+			"cluster_config.0.master_config",
+			"cluster_config.0.gce_cluster_config.0.zone",
+		}
+		numInstancesSchema = &schema.Schema{
+			Type:         schema.TypeInt,
+			Optional:     true,
+			Default:      1,
+			ForceNew:     true,
+			ValidateFunc: validation.IntInSlice([]int{1}),
+			Description:  `Specifies the number of master instances to create. In High Obtainability (HO) mode, this must be 1. Defaults to 1. Changing this forces a new resource to be created.`,
+		}
+	case "worker":
+		conflictsWith = []string{
+			"cluster_config.0.worker_config",
+			"cluster_config.0.gce_cluster_config.0.zone",
+		}
+		requiredWith = []string{"cluster_config.0.master_flexible_config"}
+		numInstancesSchema = &schema.Schema{
+			Type:         schema.TypeInt,
+			Required:     true,
+			ValidateFunc: validation.IntAtLeast(1),
+			Description:  `Specifies the number of worker instances to create. Represents the desired capacity of the group and is updatable in place.`,
+		}
+	case "secondary":
+		conflictsWith = []string{
+			"cluster_config.0.preemptible_worker_config",
+			"cluster_config.0.gce_cluster_config.0.zone",
+		}
+		requiredWith = []string{"cluster_config.0.master_flexible_config"}
+		numInstancesSchema = &schema.Schema{
+			Type:         schema.TypeInt,
+			Optional:     true,
+			Default:      0,
+			ValidateFunc: validation.IntAtLeast(0),
+			Description:  `Specifies the number of secondary worker instances to create. Represents the desired capacity of the group and is updatable in place. Defaults to 0; can be scaled down to 0.`,
+		}
+	}
+
+	s := &schema.Schema{
+		Type:          schema.TypeList,
+		Optional:      true,
+		AtLeastOneOf:  clusterConfigKeys,
+		Computed:      true,
+		MaxItems:      1,
+		Description:   desc,
+		ConflictsWith: conflictsWith,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"num_instances": numInstancesSchema,
+				"core_count": {
+					Type:         schema.TypeInt,
+					Required:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
+					Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this forces a new resource to be created.`,
+				},
+				"hardware_class": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ForceNew:     true,
+					Default:      "STANDARD",
+					ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
+					Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this forces a new resource to be created.`,
+				},
+				"boot_disk_size_gb": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
+					Description: `The boot disk size in GB. Changing this forces a new resource to be created.`,
+				},
+			},
+		},
+	}
+	if len(requiredWith) > 0 {
+		s.RequiredWith = requiredWith
+	}
+	return s
 }
 
 func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) error {
@@ -2822,7 +2925,67 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 		log.Println("[INFO] got auxiliary node group config")
 		conf.AuxiliaryNodeGroups = expandAuxiliaryNodeGroupsConfig(v)
 	}
+
+	if v, ok := d.GetOk("cluster_config.0.master_flexible_config"); ok {
+		log.Println("[INFO] got master_flexible_config")
+		conf.MasterFlexibleConfig = expandDataprocFlexibleInstanceGroupConfig(v)
+	}
+
+	if v, ok := d.GetOk("cluster_config.0.worker_flexible_config"); ok {
+		log.Println("[INFO] got worker_flexible_config")
+		conf.WorkerFlexibleConfig = expandDataprocFlexibleInstanceGroupConfig(v)
+	}
+
+	if v, ok := d.GetOk("cluster_config.0.secondary_worker_flexible_config"); ok {
+		log.Println("[INFO] got secondary_worker_flexible_config")
+		conf.SecondaryWorkerFlexibleConfig = expandDataprocFlexibleInstanceGroupConfig(v)
+	}
 	return conf, nil
+}
+
+func expandDataprocFlexibleInstanceGroupConfig(v interface{}) *dataproc.FlexibleInstanceGroupConfig {
+	if v == nil {
+		return nil
+	}
+
+	var data map[string]interface{}
+	switch val := v.(type) {
+	case []interface{}:
+		if len(val) == 0 || val[0] == nil {
+			return nil
+		}
+		data = val[0].(map[string]interface{})
+	case map[string]interface{}:
+		data = val
+	default:
+		return nil
+	}
+
+	flexConfig := &dataproc.FlexibleInstanceGroupConfig{}
+
+	if val, ok := data["num_instances"]; ok && val != nil {
+		flexConfig.NumInstances = int64(val.(int))
+		if flexConfig.NumInstances == 0 {
+			flexConfig.ForceSendFields = append(flexConfig.ForceSendFields, "NumInstances")
+		}
+	}
+	if val, ok := data["core_count"]; ok && val != nil {
+		if coreCount := int64(val.(int)); coreCount > 0 {
+			flexConfig.CoreCount = coreCount
+		}
+	}
+	if val, ok := data["hardware_class"]; ok && val != nil {
+		if hwClass := val.(string); hwClass != "" {
+			flexConfig.HardwareClass = hwClass
+		}
+	}
+	if val, ok := data["boot_disk_size_gb"]; ok && val != nil {
+		if diskSize := int64(val.(int)); diskSize > 0 {
+			flexConfig.BootDiskSizeGb = diskSize
+		}
+	}
+
+	return flexConfig
 }
 
 func expandAuxiliaryNodeGroupsConfig(v interface{}) []*dataproc.AuxiliaryNodeGroup {
@@ -3413,6 +3576,26 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		updMask = append(updMask, "config.secondary_worker_config.num_instances")
 	}
 
+	if d.HasChange("cluster_config.0.worker_flexible_config.0.num_instances") {
+		desiredNumWorks := d.Get("cluster_config.0.worker_flexible_config.0.num_instances").(int)
+		cluster.Config.WorkerFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{
+			NumInstances:    int64(desiredNumWorks),
+			ForceSendFields: []string{"NumInstances"},
+		}
+
+		updMask = append(updMask, "config.worker_flexible_config.num_instances")
+	}
+
+	if d.HasChange("cluster_config.0.secondary_worker_flexible_config.0.num_instances") {
+		desiredNumWorks := d.Get("cluster_config.0.secondary_worker_flexible_config.0.num_instances").(int)
+		cluster.Config.SecondaryWorkerFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{
+			NumInstances:    int64(desiredNumWorks),
+			ForceSendFields: []string{"NumInstances"},
+		}
+
+		updMask = append(updMask, "config.secondary_worker_flexible_config.num_instances")
+	}
+
 	if d.HasChange("cluster_config.0.autoscaling_config") {
 		desiredPolicy := d.Get("cluster_config.0.autoscaling_config.0.policy_uri").(string)
 		cluster.Config.AutoscalingConfig = &dataproc.AutoscalingConfig{
@@ -3686,24 +3869,27 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	}
 
 	data := map[string]interface{}{
-		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
-		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
-		"engine":                    d.Get("cluster_config.0.engine").(string),
-		"cluster_type":              cfg.ClusterType,
-		"bucket":                    cfg.ConfigBucket,
-		"temp_bucket":               cfg.TempBucket,
-		"gce_cluster_config":        flattenGceClusterConfig(d, cfg.GceClusterConfig),
-		"master_config":             flattenMasterInstanceGroupConfig(d, cfg.MasterConfig),
-		"worker_config":             flattenWorkerInstanceGroupConfig(d, cfg.WorkerConfig),
-		"software_config":           flattenSoftwareConfig(d, cfg.SoftwareConfig),
-		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
-		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
-		"security_config":           flattenSecurityConfig(d, cfg.SecurityConfig),
-		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
-		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
-		"lifecycle_config":          flattenLifecycleConfig(d, cfg.LifecycleConfig),
-		"endpoint_config":           flattenEndpointConfig(d, cfg.EndpointConfig),
-		"dataproc_metric_config":    flattenDataprocMetricConfig(d, cfg.DataprocMetricConfig),
+		"staging_bucket":                   d.Get("cluster_config.0.staging_bucket").(string),
+		"cluster_tier":                     d.Get("cluster_config.0.cluster_tier").(string),
+		"engine":                           d.Get("cluster_config.0.engine").(string),
+		"cluster_type":                     cfg.ClusterType,
+		"bucket":                           cfg.ConfigBucket,
+		"temp_bucket":                      cfg.TempBucket,
+		"gce_cluster_config":               flattenGceClusterConfig(d, cfg.GceClusterConfig),
+		"master_config":                    flattenMasterInstanceGroupConfig(d, cfg.MasterConfig),
+		"worker_config":                    flattenWorkerInstanceGroupConfig(d, cfg.WorkerConfig),
+		"software_config":                  flattenSoftwareConfig(d, cfg.SoftwareConfig),
+		"encryption_config":                flattenEncryptionConfig(d, cfg.EncryptionConfig),
+		"autoscaling_config":               flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
+		"security_config":                  flattenSecurityConfig(d, cfg.SecurityConfig),
+		"preemptible_worker_config":        flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
+		"metastore_config":                 flattenMetastoreConfig(d, cfg.MetastoreConfig),
+		"lifecycle_config":                 flattenLifecycleConfig(d, cfg.LifecycleConfig),
+		"endpoint_config":                  flattenEndpointConfig(d, cfg.EndpointConfig),
+		"dataproc_metric_config":           flattenDataprocMetricConfig(d, cfg.DataprocMetricConfig),
+		"master_flexible_config":           flattenDataprocFlexibleInstanceGroupConfig(cfg.MasterFlexibleConfig),
+		"worker_flexible_config":           flattenDataprocFlexibleInstanceGroupConfig(cfg.WorkerFlexibleConfig),
+		"secondary_worker_flexible_config": flattenDataprocFlexibleInstanceGroupConfig(cfg.SecondaryWorkerFlexibleConfig),
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -3723,6 +3909,21 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	}
 
 	return []map[string]interface{}{data}, nil
+}
+
+func flattenDataprocFlexibleInstanceGroupConfig(cfg *dataproc.FlexibleInstanceGroupConfig) []map[string]interface{} {
+	if cfg == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"num_instances":     cfg.NumInstances,
+		"core_count":        cfg.CoreCount,
+		"hardware_class":    cfg.HardwareClass,
+		"boot_disk_size_gb": cfg.BootDiskSizeGb,
+	}
+
+	return []map[string]interface{}{data}
 }
 
 func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) []map[string]interface{} {
