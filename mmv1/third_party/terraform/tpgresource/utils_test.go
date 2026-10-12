@@ -1308,6 +1308,9 @@ func TestCanonicalizeIp(t *testing.T) {
 		if !reflect.DeepEqual(actual, tc.Expected) {
 			t.Errorf("%s failed: expected %#v, got %#v", tn, tc.Expected, actual)
 		}
+	}
+}
+
 func TestReducedPrefixedUniqueId(t *testing.T) {
 	prefix := "gh29660-cbd-replace-probe-name-prefix-long-ab"
 	suffixRegex := regexp.MustCompile(`^[0-9a-z]+$`)
