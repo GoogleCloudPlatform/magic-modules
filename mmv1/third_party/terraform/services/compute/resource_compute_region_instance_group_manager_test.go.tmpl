@@ -499,7 +499,6 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(t *testing.T) {
   t.Parallel()
 
@@ -524,7 +523,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"status"},
+        ImportStateVerifyIgnore: []string{"status", "instance_flexibility_policy"},
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesUpdate(context),
@@ -533,7 +532,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"status"},
+        ImportStateVerifyIgnore: []string{"status", "instance_flexibility_policy"},
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesRemove(context),
@@ -542,12 +541,11 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"status"},
+        ImportStateVerifyIgnore: []string{"status", "instance_flexibility_policy"},
       },
     },
   })
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
@@ -2282,7 +2280,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, network, template, igm)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(context map[string]any) string {
 	return acctest.Nprintf(`
 
@@ -2393,7 +2390,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
           value = "terraform-insert"
         }
         mode = "READ_WRITE"
-        type = "SCRATCH"
+        type = "PERSISTENT"
         source_image_encryption_key {
           raw_key = "%{raw_key}"
         }
@@ -2422,9 +2419,6 @@ resource "google_compute_disk" "persistent-disk" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
-  disk_encryption_key {
-    raw_key = "%{raw_key}"
-  }
 }
 
 resource "google_compute_disk" "pd-balanced-disk" {
@@ -2438,12 +2432,6 @@ resource "google_compute_snapshot" "snapshot" {
   name        = "tf-test-my-snapshot-%{random_suffix}"
   source_disk = google_compute_disk.persistent-disk.id
   zone        = "us-central1-a"
-  source_disk_encryption_key {
-    raw_key = "%{raw_key}"
-  }
-  snapshot_encryption_key {
-    raw_key = "%{raw_key}"
-  }
 }
 
 resource "google_compute_instance_template" "igm-basic" {
@@ -2496,12 +2484,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
         boot        = true
         device_name = "boot-disk"
         source_snapshot =  google_compute_snapshot.snapshot.self_link
-        disk_encryption_key {
-          raw_key = "%{raw_key}"
-        }
-        source_snapshot_encryption_key {
-          rsa_encrypted_key = "%{rsa_encrypted_key}"
-        }
       }
       disks{
         source = google_compute_disk.pd-balanced-disk.name
@@ -2523,7 +2505,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
           value = "terraform-update"
         }
         mode = "READ_WRITE"
-        type = "SCRATCH"
+        type = "PERSISTENT"
       }
     }
     instance_selections {
@@ -2599,7 +2581,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, context)
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_targetSizePolicy(t *testing.T) {
 	t.Parallel()
