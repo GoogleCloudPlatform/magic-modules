@@ -837,6 +837,20 @@ properties:
                         controls the randomness of the model's responses. Lower temperatures
                         produce responses that are more predictable. Higher temperatures produce
                         responses that are more creative.
+                    - name: thinkingLevel
+                      type: Enum
+                      description: |-
+                        The thinking level of the model.
+                        Possible values:
+                        DEFAULT
+                        LOW
+                        MEDIUM
+                        HIGH
+                      enum_values:
+                        - 'DEFAULT'
+                        - 'LOW'
+                        - 'MEDIUM'
+                        - 'HIGH'
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
@@ -872,6 +886,20 @@ properties:
                         controls the randomness of the model's responses. Lower temperatures
                         produce responses that are more predictable. Higher temperatures produce
                         responses that are more creative.
+                    - name: thinkingLevel
+                      type: Enum
+                      description: |-
+                        The thinking level of the model.
+                        Possible values:
+                        DEFAULT
+                        LOW
+                        MEDIUM
+                        HIGH
+                      enum_values:
+                        - 'DEFAULT'
+                        - 'LOW'
+                        - 'MEDIUM'
+                        - 'HIGH'
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
