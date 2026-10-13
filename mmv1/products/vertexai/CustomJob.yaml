@@ -49,6 +49,44 @@ samples:
         resource_id_vars:
           display_name: example-custom-job
           bucket_name: example-custom-job-bucket
+  - name: vertex_ai_custom_job_python_package
+    primary_resource_id: custom_job
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    steps:
+      - name: vertex_ai_custom_job_python_package
+        ignore_read_extra:
+          - state
+          - update_time
+          - start_time
+          - end_time
+          - error
+          - web_access_uris
+          - effective_labels
+        resource_id_vars:
+          display_name: example-custom-job-python
+          bucket_name: example-custom-job-python-bucket
+          service_account_id: job-sa
+          tensorboard_name: example-tensorboard
+          kms_key_name: example-key
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+  - name: vertex_ai_custom_job_tpu_network
+    primary_resource_id: custom_job
+    steps:
+      - name: vertex_ai_custom_job_tpu_network
+        ignore_read_extra:
+          - state
+          - update_time
+          - start_time
+          - end_time
+          - error
+          - effective_labels
+        resource_id_vars:
+          display_name: example-custom-job-tpu
+          network_name: custom-job-vpc-net
+          address_name: custom-job-vpc-range
 parameters:
   - name: region
     type: String
@@ -220,14 +258,22 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: instance
+                  - name: instanceIp
                     type: String
                     required: true
-                    description: 'Full resource name of the Lustre instance: projects/{project}/locations/{location}/instances/{instance}'
+                    description: IP address of the Lustre instance.
+                  - name: volumeHandle
+                    type: String
+                    required: true
+                    description: The unique identifier of the Lustre volume.
+                  - name: filesystem
+                    type: String
+                    required: true
+                    description: The name of the Lustre filesystem.
                   - name: mountPoint
                     type: String
                     required: true
-                    description: Destination mount path. The path must be absolute.
+                    description: Destination mount path. The Lustre file system will be mounted for the user under /mnt/lustre/<mount_point>.
       - name: scheduling
         type: NestedObject
         description: Scheduling options for a CustomJob.
@@ -275,14 +321,15 @@ properties:
                 - name: domain
                   type: String
                   required: true
-                  description: Domain name for DNS peering.
-                - name: dnsForwardingZone
+                  description: The DNS name suffix of the zone being peered to, e.g., "my-internal-domain.corp.". Must end with a dot.
+                - name: targetProject
                   type: String
                   required: true
-                  description: The DNS forwarding zone to reach the domain.
-      - name: persistentResourceId
-        type: String
-        description: The ID of the PersistentResource in the same Project and Location which to run.
+                  description: The project ID hosting the Cloud DNS managed zone that contains the 'domain'. The Vertex AI Service Agent requires the dns.peer role on this project.
+                - name: targetNetwork
+                  type: String
+                  required: true
+                  description: The VPC network name in the target_project where the DNS zone specified by 'domain' is visible.
       - name: baseOutputDirectory
         type: NestedObject
         description: The Cloud Storage location to store the output of this CustomJob or HyperparameterTuningJob.
@@ -291,9 +338,6 @@ properties:
             type: String
             required: true
             description: Cloud Storage folder URL to store the output.
-      - name: protectedArtifactLocationId
-        type: String
-        description: The ID of the location to store protected artifacts. e.g. us-central1.
       - name: tensorboard
         type: String
         description: The name of a Vertex AI Tensorboard resource to which this CustomJob will upload Tensorboard logs.
@@ -303,17 +347,6 @@ properties:
       - name: enableDashboardAccess
         type: Boolean
         description: Whether you want Vertex AI to enable access to the customized dashboard in training chief container.
-      - name: experiment
-        type: String
-        description: The Experiment associated with this job.
-      - name: experimentRun
-        type: String
-        description: The Experiment Run associated with this job.
-      - name: models
-        type: Array
-        description: The name of the Model resources for which to generate a mapping to artifact URIs.
-        item_type:
-          type: String
   - name: labels
     type: KeyValueLabels
     description: |-
