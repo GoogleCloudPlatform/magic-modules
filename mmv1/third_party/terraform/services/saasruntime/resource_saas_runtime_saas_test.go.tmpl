@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
   "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -129,29 +128,25 @@ resource "google_saas_runtime_saas" "example" {
 }
 
 // TestAccSaasRuntimeSaas_applicationTemplateUpdate imports the bootstrapped ADC
-// composite template "tf-bootstrap-composite" (revisions r-1 and r-2, one
-// component "sa-comp-1") from Space "tf-bootstrap-space" in the test project.
+// composite template (revisions r-1 and r-2, one component "sa-comp-1"). The
+// template and the Saas are in an isolated test project; see
+// saasruntime.BootstrapSaasRuntimeApplicationTemplate.
 func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 	t.Parallel()
-	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
-		{
-			Member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com",
-			Role:   "roles/saasservicemgmt.serviceAgent",
-		},
-	})
 
-	project := envvar.GetTestProjectFromEnv()
-	template := fmt.Sprintf("projects/%s/locations/us-central1/spaces/tf-bootstrap-space/applicationTemplates/tf-bootstrap-composite", project)
+	project, template := saasruntime.BootstrapSaasRuntimeApplicationTemplate(t)
 	suffix := acctest.RandString(t, 10)
 	saasName := fmt.Sprintf("projects/%s/locations/us-central1/saas/tf-test-app-saas%s", project, suffix)
 
 	context := map[string]interface{}{
 		"random_suffix": suffix,
+		"project":       project,
 		"template":      template,
 		"revision":      template + "/revisions/r-1",
 	}
 	contextUpdate := map[string]interface{}{
 		"random_suffix": suffix,
+		"project":       project,
 		"template":      template,
 		"revision":      template + "/revisions/r-2",
 	}
@@ -248,6 +243,7 @@ func testAccSaasRuntimeSaas_applicationTemplate(context map[string]interface{}) 
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
   provider = google-beta
+  project  = "%{project}"
   saas_id  = "tf-test-app-saas%{random_suffix}"
   location = "us-central1"
 
@@ -267,6 +263,7 @@ func testAccSaasRuntimeSaas_noApplicationTemplate(context map[string]interface{}
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
   provider = google-beta
+  project  = "%{project}"
   saas_id  = "tf-test-app-saas%{random_suffix}"
   location = "us-central1"
 
@@ -281,6 +278,7 @@ func testAccSaasRuntimeSaas_applicationTemplateImportedRelease(context map[strin
 	return testAccSaasRuntimeSaas_applicationTemplate(context) + acctest.Nprintf(`
 resource "google_saas_runtime_release" "imported" {
   provider   = google-beta
+  project    = "%{project}"
   location   = "us-central1"
   release_id = "imported"
   unit_kind  = "imported"
