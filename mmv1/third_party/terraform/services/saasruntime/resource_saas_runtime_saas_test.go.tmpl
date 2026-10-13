@@ -167,10 +167,7 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck: func() {
-			acctest.AccTestPreCheck(t)
-			testAccSaasRuntimeSaasCheckAdcFixture(t, template+"/revisions/r-1")
-		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckSaasRuntimeSaasDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -191,10 +188,7 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 						plancheck.ExpectResourceAction("google_saas_runtime_saas.example", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_saas_runtime_saas.example", "state", "STATE_ACTIVE"),
-					testAccCheckSaasRuntimeSaasImportedReleases(t, saasName, "sa-comp-1"),
-				),
+				Check: resource.TestCheckResourceAttr("google_saas_runtime_saas.example", "state", "STATE_ACTIVE"),
 			},
 			{
 				ResourceName:            "google_saas_runtime_saas.example",
@@ -203,10 +197,48 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: importStateVerifyIgnore,
 			},
 			{
+				// Release.application_template_component is output only and is set
+				// only on Releases created by the import, so test it by importing an
+				// imported Release. ImportStatePersist is false, so Terraform doesn't
+				// manage or destroy it; the config block only needs to be valid.
+				Config:            testAccSaasRuntimeSaas_applicationTemplateImportedRelease(contextUpdate),
+				ResourceName:      "google_saas_runtime_release.imported",
+				ImportState:       true,
+				ImportStateIdFunc: testAccSaasRuntimeSaasImportedReleaseId(t, saasName),
+				ImportStateCheck: func(states []*terraform.InstanceState) error {
+					if len(states) != 1 {
+						return fmt.Errorf("expected 1 imported Release, got %d", len(states))
+					}
+					want := map[string]string{
+						"application_template_component.0.component":                         "sa-comp-1",
+						"application_template_component.0.composite_ref.0.application_template": template,
+					}
+					for k, v := range want {
+						if got := states[0].Attributes[k]; got != v {
+							return fmt.Errorf("imported Release %s = %q, want %q", k, got, v)
+						}
+					}
+					return nil
+				},
+			},
+			{
 				// The imported UnitKinds and Releases aren't managed by Terraform and
 				// block the deletion of the Saas, so delete them before destroy.
 				PreConfig: func() { testAccSaasRuntimeSaasDeleteImportedResources(t, saasName) },
-				Config:    testAccSaasRuntimeSaas_applicationTemplate(contextUpdate),
+				// Also test removing application_template.
+				Config: testAccSaasRuntimeSaas_noApplicationTemplate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_saas_runtime_saas.example", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.TestCheckNoResourceAttr("google_saas_runtime_saas.example", "application_template.#"),
+			},
+			{
+				ResourceName:            "google_saas_runtime_saas.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importStateVerifyIgnore,
 			},
 		},
 	})
@@ -231,22 +263,53 @@ resource "google_saas_runtime_saas" "example" {
 `, context)
 }
 
-// testAccSaasRuntimeSaasCheckAdcFixture fails the test when the bootstrapped ADC
-// template revision is missing or inaccessible. The fixture is created once per
-// test project (b/571467075, Detailed instructions step 1). The test must fail, not
-// skip, without it. In PreCheck the config from acctest.GoogleProviderConfig(t)
-// isn't VCR-wrapped yet, so this GET runs live and unrecorded, also in replay.
-func testAccSaasRuntimeSaasCheckAdcFixture(t *testing.T, revision string) {
-	config := acctest.GoogleProviderConfig(t)
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   config.Project,
-		RawURL:    "https://designcenter.googleapis.com/v1/" + revision,
-		UserAgent: config.UserAgent,
-	})
-	if err != nil {
-		t.Fatalf("ADC fixture missing or inaccessible: see b/571467075, Detailed instructions step 1: %s", err)
+func testAccSaasRuntimeSaas_noApplicationTemplate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example" {
+  provider = google-beta
+  saas_id  = "tf-test-app-saas%{random_suffix}"
+  location = "us-central1"
+
+  locations {
+    name = "us-central1"
+  }
+}
+`, context)
+}
+
+func testAccSaasRuntimeSaas_applicationTemplateImportedRelease(context map[string]interface{}) string {
+	return testAccSaasRuntimeSaas_applicationTemplate(context) + acctest.Nprintf(`
+resource "google_saas_runtime_release" "imported" {
+  provider   = google-beta
+  location   = "us-central1"
+  release_id = "imported"
+  unit_kind  = "imported"
+}
+`, context)
+}
+
+// testAccSaasRuntimeSaasImportedReleaseId returns the ID of a Release that the
+// import created for the Saas, in the Saas's location.
+func testAccSaasRuntimeSaasImportedReleaseId(t *testing.T, saasName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		config := acctest.GoogleProviderConfig(t)
+		unitKinds, err := testAccSaasRuntimeSaasImportedUnitKinds(config, saasName)
+		if err != nil {
+			return "", err
+		}
+		for _, uk := range unitKinds {
+			name, _ := uk["name"].(string)
+			releases, err := testAccSaasRuntimeUnitKindReleases(config, name)
+			if err != nil {
+				return "", err
+			}
+			for _, r := range releases {
+				if rn, _ := r["name"].(string); rn != "" {
+					return rn, nil
+				}
+			}
+		}
+		return "", fmt.Errorf("no imported Releases found for Saas %s", saasName)
 	}
 }
 
@@ -293,39 +356,6 @@ func testAccSaasRuntimeListAll(config *transport_tpg.Config, listUrl, key string
 		if pageToken == "" {
 			return items, nil
 		}
-	}
-}
-
-// testAccCheckSaasRuntimeSaasImportedReleases checks that the import created
-// Releases whose applicationTemplateComponent.component is the expected root
-// module. This is a service-level check: the Release field is output only.
-func testAccCheckSaasRuntimeSaasImportedReleases(t *testing.T, saasName, component string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := acctest.GoogleProviderConfig(t)
-		unitKinds, err := testAccSaasRuntimeSaasImportedUnitKinds(config, saasName)
-		if err != nil {
-			return err
-		}
-		if len(unitKinds) == 0 {
-			return fmt.Errorf("no imported UnitKinds found for Saas %s", saasName)
-		}
-		for _, uk := range unitKinds {
-			name, _ := uk["name"].(string)
-			releases, err := testAccSaasRuntimeUnitKindReleases(config, name)
-			if err != nil {
-				return err
-			}
-			if len(releases) == 0 {
-				return fmt.Errorf("no Releases found for imported UnitKind %s", name)
-			}
-			for _, r := range releases {
-				atc, _ := r["applicationTemplateComponent"].(map[string]interface{})
-				if got, _ := atc["component"].(string); got != component {
-					return fmt.Errorf("Release %v has applicationTemplateComponent.component %q, want %q", r["name"], got, component)
-				}
-			}
-		}
-		return nil
 	}
 }
 
