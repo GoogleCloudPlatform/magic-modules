@@ -114,6 +114,16 @@ samples:
           display_name: '"Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_spend_cap
+    primary_resource_id: budget
+    steps:
+      - name: billing_budget_spend_cap
+        resource_id_vars:
+          display_name: Example Spend Cap Budget
+        test_vars_overrides:
+          display_name: '"Example Spend Cap Budget" + randomSuffix'
+        test_env_vars:
+          billing_acct: MASTER_BILLING_ACCT
   - name: billing_budget_optional
     primary_resource_id: budget
     exclude_basic_doc: true
@@ -541,3 +551,43 @@ properties:
       - OWNERSHIP_SCOPE_UNSPECIFIED
       - ALL_USERS
       - BILLING_ACCOUNT
+  - name: spendCap
+    type: NestedObject
+    description: |
+      The spend cap configured for this budget. When set, usage of the
+      budget's service is paused once spend exceeds the budget amount, until
+      the next period or until the cap is lifted. Spend cap budgets must
+      filter on exactly one project and one eligible service, use
+      `EXCLUDE_ALL_CREDITS`, a `MONTH` calendar period, a `specified_amount`,
+      threshold rules of 0.5, 0.8 and 1.0 on `CURRENT_SPEND`, and
+      `enable_project_level_recipients = true`. See
+      https://cloud.google.com/billing/docs/how-to/budgets-spend-caps.
+
+      While `output_state` is `ENFORCED`, only `input_state` can be changed.
+    update_mask_fields:
+      - spendCap.inputState
+    properties:
+      - name: inputState
+        type: Enum
+        description: |
+          The desired state of the spend cap. Must be `CONFIGURED` on create.
+          Set to `AWAITING_NEXT_PERIOD` to lift an enforced cap until the next
+          period starts.
+        required: true
+        enum_values:
+          - CONFIGURED
+          - AWAITING_NEXT_PERIOD
+      - name: outputState
+        type: Enum
+        description: |
+          The actual resting state of the spend cap.
+        output: true
+        enum_values:
+          - CONFIGURED
+          - ENFORCED
+          - AWAITING_NEXT_PERIOD
+      - name: reconciling
+        type: Boolean
+        description: |
+          Whether the server is processing a state transition.
+        output: true
