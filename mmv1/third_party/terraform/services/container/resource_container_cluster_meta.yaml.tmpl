@@ -256,9 +256,7 @@ fields:
   - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
   - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
   - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
-{{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedMachineLearningDiagnosticsConfig.enabled'
 {{- end }}

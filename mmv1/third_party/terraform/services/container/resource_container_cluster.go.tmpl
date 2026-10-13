@@ -2224,7 +2224,6 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
-{{- if ne $.TargetVersionName "ga" }}
 			"managed_opentelemetry_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2234,16 +2233,15 @@ func ResourceContainerCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"scope": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Description:  "The scope of the Managed OpenTelemetry pipeline. Available options include SCOPE_UNSPECIFIED, NONE, and COLLECTION_AND_INSTRUMENTATION_COMPONENTS.",
-							ValidateFunc: validation.StringInSlice([]string{"SCOPE_UNSPECIFIED", "NONE", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"}, false),
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							Description:      "The scope of the Managed OpenTelemetry pipeline. Available options include NONE and COLLECTION_AND_INSTRUMENTATION_COMPONENTS. See https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#managedopentelemetryconfig for more information. To disable the feature, explicitly set this to NONE.",
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
 						},
 					},
 				},
 			},
-{{- end }}
 
 			// Defaults to "VPC_NATIVE" during create only
 			"networking_mode": {
@@ -3235,9 +3233,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- if ne $.TargetVersionName "ga" }}
 		ManagedMachineLearningDiagnosticsConfig: expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")),
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
 		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
-{{- end }}
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
@@ -4043,11 +4039,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 {{- end }}
 
-{{ if ne $.TargetVersionName "ga" }}
 	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
 		return err
 	}
-{{- end }}
 
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
@@ -5176,7 +5170,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("managed_opentelemetry_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -5191,7 +5184,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s managed opentelemetry config has been updated", d.Id())
 	}
-{{- end }}
 
 	if d.HasChange("effective_labels") {
 		resourceLabels := d.Get("effective_labels").(map[string]interface{})
@@ -6804,11 +6796,19 @@ func flattenManagedMachineLearningDiagnosticsConfig(c *container.ManagedMachineL
 }
 {{- end }}
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
+	if len(l) == 0 {
 		return nil
+	}
+	// l[0] is nil when the block is present but its scope is empty after diff
+	// suppression: `scope = "SCOPE_UNSPECIFIED"` on Create, or `{}` /
+	// `scope = "SCOPE_UNSPECIFIED"` when the state has no block. Return an empty
+	// struct, sent as `{}`, so the server applies its default scope (currently
+	// SCOPE_UNSPECIFIED). Returning nil would omit the field, causing a permadiff
+	// on Create and an empty-update 400 on Update.
+	if l[0] == nil {
+		return &container.ManagedOpenTelemetryConfig{}
 	}
 	config := l[0].(map[string]interface{})
 	return &container.ManagedOpenTelemetryConfig{
@@ -6826,7 +6826,6 @@ func flattenManagedOpenTelemetryConfig(c *container.ManagedOpenTelemetryConfig) 
 		},
 	}
 }
-{{- end }}
 
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
 	result := &container.NetworkPolicy{}
