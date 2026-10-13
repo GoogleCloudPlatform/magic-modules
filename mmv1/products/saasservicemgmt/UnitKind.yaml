@@ -89,7 +89,6 @@ properties:
             description: |-
               Scope type.
               Possible values:
-              TYPE_UNSPECIFIED
               TYPE_REGIONAL
               TYPE_GLOBAL
   - name: applicationTemplateComponent
