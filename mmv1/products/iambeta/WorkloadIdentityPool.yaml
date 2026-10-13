@@ -310,3 +310,10 @@ properties:
             A single workload operating on Google Cloud. For example:
             `//run.googleapis.com/projects/123/type/Service/*`.
           required: true
+  - name: enableMeshCaCompatibility
+    type: Boolean
+    description: |
+       If set to `true`:
+       * The generated trust bundle for the workloads in this trust domain will include the Cloud Service Mesh certificate authority's root CA certificates.
+       * The certificate chain for the workload in this trust domain will be signed by the Cloud Service Mesh certificate authority root CA.
+    default_from_api: true

@@ -38,4 +38,5 @@ resource "google_iam_workload_identity_pool" "{{$.PrimaryResourceId}}" {
   attestation_rules {
     google_cloud_resource = "//run.googleapis.com/projects/{{index $.TestEnvVars "project"}}/type/Service/*"
   }
+  enable_mesh_ca_compatibility = false
 }
