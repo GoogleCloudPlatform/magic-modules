@@ -35,8 +35,10 @@ timeouts:
 # import; while it is RUNNING the service rejects template/revision updates and
 # DELETE with 400. Retry those until the import finishes (bounded by timeouts).
 error_retry_predicates:
-  - 'transport_tpg.IsSaasRuntimeSaasImportRunningError'
+  # Defined in templates/terraform/constants/saas_runtime_saas.go.tmpl.
+  - 'IsSaasRuntimeSaasImportRunningError'
 custom_code:
+  constants: templates/terraform/constants/saas_runtime_saas.go.tmpl
   # Wait for the application template import to reach STATE_ACTIVE or STATE_FAILED.
   post_create: templates/terraform/post_create/saas_runtime_saas_wait.go.tmpl
   post_update: templates/terraform/post_create/saas_runtime_saas_wait.go.tmpl
