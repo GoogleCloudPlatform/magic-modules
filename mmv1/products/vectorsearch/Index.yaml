@@ -72,16 +72,7 @@ virtual_fields:
   - name: skip_wait
     type: Boolean
     default_value: false
-    description: |-
-      If set to `true`, the resource create call returns as soon as the underlying
-      long-running operation (LRO) has been accepted by the API, rather than
-      blocking until the index build finishes. Building an ANN index over a
-      Vector Search 2.0 (Agent Retrieval) collection can take many hours, and the
-      backend aborts the LRO once its ~24-25 hour deadline is reached, so waiting
-      inline is often impractical for large indexes (and can outlive credentials
-      minted for the Terraform run). When set, subsequent `terraform apply`
-      invocations refresh state from the API and no-op once the build completes.
-      Defaults to `false`.
+    description: Whether to skip waiting for the index to be created.
     ignore_read: true
 parameters:
   - name: location
