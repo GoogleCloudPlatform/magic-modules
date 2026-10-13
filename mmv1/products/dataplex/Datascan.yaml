@@ -934,4 +934,3 @@ properties:
           - GOOGLE_SQL
           - SPARK_SQL
         default_from_api: true
-        
