@@ -50,6 +50,7 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_region_backend_service.go.tmpl'
   decoder: 'templates/terraform/decoders/region_backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/compute_region_backend_service.go.tmpl'
