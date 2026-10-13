@@ -1,0 +1,8 @@
+resource "google_agentic_applications_endpoint_config" "{{$.PrimaryResourceId}}" {
+  display_name       = "{{$.PrimaryResourceId}}"
+  location           = "us"
+  endpoint_config_id = "{{index $.ResourceIdVars "endpoint_config_id"}}"
+  source_config {
+    web_chat_sdk_config {}
+  }
+}

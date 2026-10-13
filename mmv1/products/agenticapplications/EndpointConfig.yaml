@@ -1,0 +1,358 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EndpointConfig
+description: |-
+  EndpointConfig is a reusable configuration for a communication channel
+  or backend service. An endpoint can be exactly one source or one destination
+  on a system that is being routed.
+base_url: projects/{{project}}/locations/{{location}}/omnichannelEndpointConfigs
+self_link:
+  projects/{{project}}/locations/{{location}}/omnichannelEndpointConfigs/{{endpoint_config_id}}
+create_url:
+  projects/{{project}}/locations/{{location}}/omnichannelEndpointConfigs?endpointConfigId={{endpoint_config_id}}
+update_verb: PATCH
+update_mask: true
+id_format:
+  projects/{{project}}/locations/{{location}}/omnichannelEndpointConfigs/{{endpoint_config_id}}
+import_format:
+- projects/{{project}}/locations/{{location}}/omnichannelEndpointConfigs/{{endpoint_config_id}}
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+  - create
+  - update
+  - delete
+  type: OpAsync
+  result:
+    resource_inside_response: false
+
+samples:
+- name: endpoint_config_basic
+  primary_resource_id: webchat_source
+  steps:
+  - name: endpoint_config_basic
+    resource_id_vars:
+      endpoint_config_id: webchat-source-config
+  - name: endpoint_config_basic_update
+    resource_id_vars:
+      endpoint_config_id: webchat-source-config
+
+parameters:
+- name: location
+  type: String
+  description: |-
+    Resource ID segment making up resource `name`. It identifies the
+    resource within its parent collection as described in
+    https://google.aip.dev/122.
+  immutable: true
+  url_param_only: true
+  required: true
+- name: endpointConfigId
+  type: String
+  description: |-
+    The ID to use for the endpoint config, which will become the final
+    component of the endpoint config's resource name.
+  immutable: true
+  url_param_only: true
+  required: true
+properties:
+- name: name
+  type: String
+  description: |-
+    Identifier. The unique identifier of the endpoint config.
+    Format: `projects/{project}/locations/{location}/omnichannelEndpointConfigs/{omnichannel_endpoint_config}`
+  output: true
+  custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+- name: displayName
+  type: String
+  description: |-
+    A human-readable display name for this endpoint config.
+  required: true
+- name: createTime
+  type: String
+  description: |-
+    Output only. The time the endpoint config was created.
+  output: true
+- name: updateTime
+  type: String
+  description: |-
+    Output only. The time the endpoint config was last updated.
+  output: true
+- name: annotations
+  type: KeyValueAnnotations
+  description: |-
+    Labels as key value pairs.
+- name: etag
+  type: String
+  description: |-
+    Etag used to ensure the object hasn't changed during a read-modify-write
+    operation. If the etag is empty, the update will overwrite any concurrent
+    changes.
+  output: true
+- name: sourceConfig
+  immutable: true
+  type: NestedObject
+  description: |-
+    The source configuration for this endpoint, if the endpoint is expected
+    to be the source of a communication flow.
+  exactly_one_of:
+  - source_config
+  - destination_config
+  properties:
+  - name: webChatSdkConfig
+    immutable: true
+    type: NestedObject
+    description: |-
+      A source configuration that connects to a Web Chat SDK instance when this
+      endpoint is the source of a communication flow.
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+    - source_config.0.web_chat_sdk_config
+    - source_config.0.sip_config
+    - source_config.0.telephony_config
+    properties: []
+  - name: sipConfig
+    immutable: true
+    type: NestedObject
+    description: |-
+      The SIP configuration for this endpoint.
+    exactly_one_of:
+    - source_config.0.web_chat_sdk_config
+    - source_config.0.sip_config
+    - source_config.0.telephony_config
+    properties:
+    - name: sipDomain
+      immutable: true
+      type: String
+      description: |-
+        The SIP domain that this endpoint config is associated with.
+        Format: `projects/{project}/locations/{location}/omnichannelSipDomains/{sip_domain}`
+      required: true
+  - name: telephonyConfig
+    immutable: true
+    type: NestedObject
+    description: |-
+      The telephony configuration for this endpoint.
+    exactly_one_of:
+    - source_config.0.web_chat_sdk_config
+    - source_config.0.sip_config
+    - source_config.0.telephony_config
+    properties:
+    - name: connection
+      immutable: true
+      type: String
+      description: |-
+        The telephony connection that this endpoint config is associated with.
+        Format: `projects/{project}/locations/{location}/omnichannelTelephonyConnections/{telephony_connection}`
+      required: true
+    - name: numbers
+      immutable: true
+      type: Array
+      description: |-
+        The list of telephone numbers that this endpoint config is associated with.
+      required: true
+      item_type:
+        type: String
+- name: destinationConfig
+  immutable: true
+  type: NestedObject
+  description: |-
+    The destination configuration for this endpoint, if the endpoint is
+    expected to be the destination of a communication flow.
+  exactly_one_of:
+  - source_config
+  - destination_config
+  properties:
+  - name: conversationProfile
+    immutable: true
+    type: NestedObject
+    description: |-
+      A destination configuration that connects to a Dialogflow Conversation
+      Profile when this endpoint is the destination of a communication flow.
+    exactly_one_of:
+    - destination_config.0.conversation_profile
+    - destination_config.0.sip_config
+    - destination_config.0.google_ccaas_chat_config
+    - destination_config.0.genesys_chat_config
+    properties:
+    - name: conversationProfile
+      immutable: true
+      type: String
+      description: |-
+        The Dialogflow conversation profile to route to.
+        Format: `projects/{project}/locations/{location}/conversationProfiles/{conversation_profile}`
+      required: true
+    - name: serviceAccount
+      immutable: true
+      type: String
+      description: |-
+        The service account email to impersonate for calling Dialogflow APIs.
+        Format: `projects/{project}/serviceAccounts/{service_account}`
+        CCG server will impersonate this service account to invoke Dialogflow APIs.
+      required: true
+  - name: sipConfig
+    api_name: destinationSipProxyConfig
+    immutable: true
+    type: NestedObject
+    description: |-
+      A destination SIP proxy configuration that routes signaling to one or
+      more SIP domains.
+    exactly_one_of:
+    - destination_config.0.conversation_profile
+    - destination_config.0.sip_config
+    - destination_config.0.google_ccaas_chat_config
+    - destination_config.0.genesys_chat_config
+    properties:
+    - name: sipDomains
+      immutable: true
+      type: Array
+      description: |-
+        A list of SIP domains that this endpoint config is associated with.
+        Format: `projects/{project}/locations/{location}/omnichannelSipDomains/{sip_domain}`
+      required: true
+      item_type:
+        type: String
+  - name: googleCcaasChatConfig
+    immutable: true
+    type: NestedObject
+    description: |-
+      A destination configuration that connects to a Google CCaaS instance when
+      this endpoint is the destination of a communication flow.
+    exactly_one_of:
+    - destination_config.0.conversation_profile
+    - destination_config.0.sip_config
+    - destination_config.0.google_ccaas_chat_config
+    - destination_config.0.genesys_chat_config
+    properties:
+    - name: googleCcaasUri
+      immutable: true
+      type: String
+      description: |-
+        The root domain of the Google CCaaS instance.
+      required: true
+    - name: contactCenterAccessUsername
+      immutable: true
+      type: String
+      description: |-
+        The username to access Google CCaaS Chat API via HTTP basic auth.
+      required: true
+    - name: contactCenterAccessPassword
+      immutable: true
+      type: String
+      description: |-
+        The password to access Google CCaaS Chat API via HTTP basic auth.
+      required: true
+      sensitive: true
+      ignore_read: true
+    - name: menuId
+      immutable: true
+      type: Integer
+      description: |-
+        The menu ID to route Google CCaaS chats to.
+      required: true
+    - name: languageCode
+      immutable: true
+      type: String
+      description: |-
+        The BCP-47 language code to use for the Google CCaaS chat, e.g., "en-US".
+        If not provided, default language will be used.
+    - name: webhookSecret
+      immutable: true
+      type: String
+      description: |-
+        The webhook secret to verify requests from Google CCaaS Chat API.
+      required: true
+      sensitive: true
+      ignore_read: true
+    - name: secondaryWebhookSecret
+      immutable: true
+      type: String
+      description: |-
+        The secondary webhook secret, used for rotating secrets with zero downtime.
+      sensitive: true
+      ignore_read: true
+    - name: contactCenterAccessPasswordSet
+      type: Boolean
+      description: |-
+        Output only. True if contact_center_access_password is configured.
+      output: true
+    - name: secondaryWebhookSecretSet
+      type: Boolean
+      description: |-
+        Output only. True if secondary_webhook_secret is configured.
+      output: true
+  - name: genesysChatConfig
+    immutable: true
+    type: NestedObject
+    description: |-
+      A destination configuration that connects to Genesys Cloud.
+    exactly_one_of:
+    - destination_config.0.conversation_profile
+    - destination_config.0.sip_config
+    - destination_config.0.google_ccaas_chat_config
+    - destination_config.0.genesys_chat_config
+    properties:
+    - name: integrationId
+      immutable: true
+      type: String
+      description: |-
+        The Genesys Open Messaging Integration ID.
+      required: true
+    - name: clientId
+      immutable: true
+      type: String
+      description: |-
+        The Genesys Client ID for API authentication.
+      required: true
+    - name: clientSecret
+      immutable: true
+      type: String
+      description: |-
+        The Genesys Client Secret for API authentication.
+      required: true
+      sensitive: true
+      ignore_read: true
+    - name: webhookSecret
+      immutable: true
+      type: String
+      description: |-
+        The webhook secret to verify requests from Genesys.
+      required: true
+      sensitive: true
+      ignore_read: true
+    - name: genesysUri
+      immutable: true
+      type: String
+      description: |-
+        The domain of Genesys Cloud instance that includes the region.
+        Example: "usw2.pure.cloud", "mypurecloud.com".
+      required: true
+    - name: clientSecretSet
+      type: Boolean
+      description: |-
+        Output only. True if client_secret is configured.
+      output: true
+    - name: webhookSecretSet
+      type: Boolean
+      description: |-
+        Output only. True if webhook_secret is configured.
+      output: true
