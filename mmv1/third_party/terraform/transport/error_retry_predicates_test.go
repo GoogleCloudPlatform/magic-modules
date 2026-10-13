@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/errwrap"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -351,5 +352,43 @@ func TestIsAgentConnectivityTemplateInUse(t *testing.T) {
 				t.Errorf("IsAgentConnectivityTemplateInUse(%v) = (%v, %q), want (%v, %q)", tc.err, isRetryable, reason, tc.expected, tc.expectedReason)
 			}
 		})
+	}
+}
+
+func TestIamCustomRoleNotFound(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "Role (projects/my-project/roles/myRole) does not exist in the resource's hierarchy.",
+	}
+	isRetryable, _ := IamCustomRoleNotFound(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIamCustomRoleNotFound_wrapped(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "Role (projects/my-project/roles/myRole) does not exist in the resource's hierarchy.",
+	}
+	for _, wrapped := range []error{
+		fmt.Errorf("Error setting IAM policy: %w", &err),
+		errwrap.Wrapf("Error setting IAM policy: {{err}}", &err),
+	} {
+		isRetryable, _ := IamCustomRoleNotFound(wrapped)
+		if !isRetryable {
+			t.Errorf("Error not detected as retryable: %s", wrapped)
+		}
+	}
+}
+
+func TestIamCustomRoleNotFound_otherError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "Role roles/notARole is not supported for this resource.",
+	}
+	isRetryable, _ := IamCustomRoleNotFound(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
 	}
 }

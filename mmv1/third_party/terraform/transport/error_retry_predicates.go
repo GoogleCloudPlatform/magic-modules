@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/errwrap"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -490,6 +491,17 @@ func IamServiceAccountNotFound(err error) (bool, string) {
 		if gerr.Code == 400 && strings.Contains(gerr.Body, "Service account") && strings.Contains(gerr.Body, "does not exist") {
 			return true, "service account not found in IAM"
 		}
+	}
+
+	return false, ""
+}
+
+// A new custom role is eventually consistent. A service can reject a policy
+// that binds the role for some seconds after IAM created the role.
+func IamCustomRoleNotFound(err error) (bool, string) {
+	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
+	if ok && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Body, "Role (") && strings.Contains(gerr.Body, "does not exist in the resource") {
+		return true, "custom role not found in the resource's hierarchy"
 	}
 
 	return false, ""
