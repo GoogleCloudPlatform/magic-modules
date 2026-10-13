@@ -42,11 +42,6 @@ custom_code:
   # Wait for the application template import to reach STATE_ACTIVE or STATE_FAILED.
   post_create: templates/terraform/post_create/saas_runtime_saas_wait.go.tmpl
   post_update: templates/terraform/post_create/saas_runtime_saas_wait.go.tmpl
-sweeper:
-  dependencies:
-    # Imported UnitKinds and Releases block Saas deletion, so sweep them first.
-    # GA promotion: drop the beta guard in resource_saas_runtime_app_import_sweeper.go.tmpl in the same change, or GA sweeps fail with "has dependency ... not found".
-    - "SaasRuntimeAppImport"
 samples:
   - name: saas_runtime_saas_basic
     primary_resource_id: "example"

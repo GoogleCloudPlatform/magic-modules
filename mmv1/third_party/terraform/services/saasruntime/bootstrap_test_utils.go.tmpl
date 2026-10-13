@@ -15,8 +15,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// Names of the bootstrapped Application Design Center (ADC) resources. The
-// tf-bootstrap- prefix keeps the sweepers away from them.
+// Names of the bootstrapped isolated test project and of the Application Design
+// Center (ADC) resources in it.
 const (
 	// Prefix of the isolated test project; BootstrapProject appends a suffix
 	// derived from the default test project.
