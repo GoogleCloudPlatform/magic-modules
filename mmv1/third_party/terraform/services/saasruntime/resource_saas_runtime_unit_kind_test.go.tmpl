@@ -249,8 +249,48 @@ func TestAccSaasRuntimeUnitKind_appCentricUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_kind_id"},
 			},
+			{
+				// Remove both App-centric blocks to verify that they're cleared.
+				Config: testAccSaasRuntimeUnitKind_appCentricRemoved(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_saas_runtime_unit_kind.example", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_saas_runtime_unit_kind.example", "app_params.#", "0"),
+					resource.TestCheckResourceAttr("google_saas_runtime_unit_kind.example", "application_template_component.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_saas_runtime_unit_kind.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_kind_id"},
+			},
 		},
 	})
+}
+
+func testAccSaasRuntimeUnitKind_appCentricRemoved(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "tf-test-example-saas%{random_suffix}"
+  location = "us-central1"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "example" {
+  provider     = google-beta
+  location     = "us-central1"
+  unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
+  saas         = google_saas_runtime_saas.example_saas.id
+}
+`, context)
 }
 
 func testAccSaasRuntimeUnitKind_appCentric(context map[string]interface{}) string {
