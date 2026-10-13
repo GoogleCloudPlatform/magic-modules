@@ -30,6 +30,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/futureReservations'
 has_self_link: true
+generate_list_resource: true
 update_url: 'projects/{{project}}/zones/{{zone}}/futureReservations/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
