@@ -1,0 +1,50 @@
+resource "google_storage_bucket" "default" {
+  name                        = "{{index $.ResourceIdVars "storage_bucket_name"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_cloud_run_v2_instance" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.ResourceIdVars "cloud_run_instance_name"}}"
+  location        = "us-east4"
+
+  containers {
+    image = "us-docker.pkg.dev/cloudrun/container/hello"
+    volume_mounts {
+      name       = "gcs-volume"
+      mount_path = "/mnt/gcs"
+    }
+    volume_mounts {
+      name       = "nfs"
+      mount_path = "/mnt/nfs"
+    }
+    volume_mounts {
+      name       = "cloudsql"
+      mount_path = "/cloudsql"
+    }
+  }
+
+  volumes {
+    name = "gcs-volume"
+    gcs {
+      bucket        = google_storage_bucket.default.name
+      read_only     = false
+      mount_options = ["log-severity=info"]
+    }
+  }
+  volumes {
+    name = "nfs"
+    nfs {
+      server    = "10.0.10.10"
+      path      = "/"
+      read_only = true
+    }
+  }
+  volumes {
+    name = "cloudsql"
+    cloud_sql_instance {
+      instances = ["fake-project:us-central1:fake-instance"]
+    }
+  }
+}
