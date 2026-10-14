@@ -1,0 +1,31 @@
+if pools, ok := obj["resourcePools"].([]interface{}); ok {
+	oldRaw, _ := d.GetChange("resource_pools")
+	var oldPools []interface{}
+	if oldRaw != nil {
+		oldPools = oldRaw.([]interface{})
+	}
+	for i, p := range pools {
+		pool, ok := p.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if id, ok := pool["id"].(string); !ok || id == "" {
+			if i < len(oldPools) {
+				if oldPool, ok := oldPools[i].(map[string]interface{}); ok {
+					if oldId, ok := oldPool["id"].(string); ok && oldId != "" {
+						pool["id"] = oldId
+					}
+				}
+			}
+			if pool["id"] == nil || pool["id"] == "" {
+				if stateId, ok := d.GetOk(fmt.Sprintf("resource_pools.%d.id", i)); ok && stateId.(string) != "" {
+					pool["id"] = stateId.(string)
+				}
+			}
+		}
+	}
+}
+if _, ok := obj["name"]; !ok {
+	obj["name"] = d.Id()
+}
+return obj, nil
