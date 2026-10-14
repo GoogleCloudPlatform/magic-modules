@@ -27,6 +27,14 @@ jobs:
           java-version: 21
           java-package: jdk
 
+      # Maven 3.10.0 (default on newer runner images) breaks TeamCity DSL generation with JDOM NoSuchMethodError
+      - name: Setup Maven
+        env:
+          MAVEN_VERSION: 3.9.16
+        run: |
+          curl -fsSL "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/apache-maven-${MAVEN_VERSION}/bin" >> "$GITHUB_PATH"
+
       - name: Cache Maven files
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
