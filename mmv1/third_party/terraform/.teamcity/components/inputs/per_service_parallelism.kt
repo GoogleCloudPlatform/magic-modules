@@ -11,23 +11,19 @@ package generated
 const val DefaultServiceParallelism = 12
 
 var ServiceParallelism = mapOf(
-    // Kept at the previous default of 6 while failures at that level are investigated before raising them to DefaultServiceParallelism.
-    // alloydb: Error 409 "unable to queue the operation"
-    "alloydb" to 6,
+    // Packages with quota failures in nightly tests are kept at the previous default of 6.
+    // cloudids: Quota 'ZonalPerProjectIDSEndpoints' exceeded (limit 10 per zone)
+    "cloudids" to 6,
     // compute: Quota 'SECURITY_POLICIES' exceeded (limit 30 globally)
     "compute" to 6,
-    // container: GKE cluster create/delete failures
-    "container" to 6,
-    // gkebackup: GKE cluster create/delete failures; shares GKE capacity with container
-    "gkebackup" to 6,
-    // netapp: BackupVaultsPerRegion and ReplicatedVolumesPerRegion quotas exceeded
+    // gemini: Quota 'Maximum number of Code Repository Indexes' exceeded (limit 10)
+    "gemini" to 6,
+    // netapp: Quotas 'BackupVaultsPerRegion' (limit 10) and 'ReplicatedVolumesPerRegion' (limit 5) exceeded
     "netapp" to 6,
-    // networkservices: operations failing with "deadline exceeded"
-    "networkservices" to 6,
-    // redis: tests conflict deleting shared ServiceConnectionPolicies
-    "redis" to 6,
-    // sql: "zone or region does not have sufficient resources"
-    "sql" to 6,
+    // networkmanagementv1: Quota 'NetworkMonitoringProvidersPerProject' exceeded (limit 1 globally)
+    "networkmanagementv1" to 6,
+    // osconfig: OS Config API quota exhausted
+    "osconfig" to 6,
 
     "looker" to 1
 )
