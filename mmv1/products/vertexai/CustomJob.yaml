@@ -404,11 +404,3 @@ properties:
     type: KeyValuePairs
     output: true
     description: URIs for accessing interactive shells (one URI for each training node).
-  - name: satisfiesPzs
-    type: Boolean
-    output: true
-    description: Reserved for future use.
-  - name: satisfiesPzi
-    type: Boolean
-    output: true
-    description: Reserved for future use.
