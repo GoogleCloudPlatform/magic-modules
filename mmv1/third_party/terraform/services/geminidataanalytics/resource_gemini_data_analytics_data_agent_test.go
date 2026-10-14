@@ -110,7 +110,13 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
 
       example_queries {
         natural_language_question = "What is the total order value?"
-        sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM tf_test_sales_%{random_suffix}"
+        sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM tf_test_sales_%{random_suffix} WHERE order_total >= @min_total"
+
+        parameters {
+          name        = "@min_total"
+          description = "The smallest order total to include."
+          data_type   = "FLOAT64"
+        }
       }
 
       glossary_terms {
