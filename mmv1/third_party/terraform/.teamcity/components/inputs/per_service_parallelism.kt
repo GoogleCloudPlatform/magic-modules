@@ -15,7 +15,7 @@ var ServiceParallelism = mapOf(
     // gemini: Quota 'Maximum number of Code Repository Indexes' exceeded (limit 10)
     "gemini" to 6,
     // netapp: Quotas 'BackupVaultsPerRegion' (limit 10) and 'ReplicatedVolumesPerRegion' (limit 5) exceeded
-    "netapp" to 6,
+    "netapp" to 5,
     // osconfig: OS Config API quota exhausted
     "osconfig" to 6,
 
