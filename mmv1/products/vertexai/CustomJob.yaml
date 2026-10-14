@@ -146,7 +146,7 @@ properties:
                     - name: reservationAffinityType
                       type: String
                       required: true
-                      description: 'Specifies the reservation affinity type. Possible values: ["RESERVATION_AFFINITY_TYPE_UNSPECIFIED", "NO_RESERVATION", "ANY_RESERVATION", "SPECIFIC_RESERVATION"]'
+                      description: 'Specifies the reservation affinity type. Possible values: "NO_RESERVATION", "ANY_RESERVATION", and "SPECIFIC_RESERVATION"'
                     - name: key
                       type: String
                       description: Corresponds to the label key of a reservation resource.
@@ -161,13 +161,14 @@ properties:
               properties:
                 - name: bootDiskType
                   type: String
-                  description: 'Type of the boot disk (default is "pd-standard"). Valid values: pd-ssd (Persistent Disk Solid State Drive) or pd-standard (Persistent Disk Hard Disk Drive).'
+                  description: 'Type of the disk. The default value depends on the machine type. Valid values include: "pd-ssd", "pd-standard", "pd-balanced", and "hyperdisk-balanced".'
                 - name: bootDiskSizeGb
                   type: Integer
                   description: Size in GB of the boot disk (default is 100GB).
             - name: containerSpec
               type: NestedObject
-              description: The custom container task.
+              description: |-
+                The custom container task. Either `container_spec` or `python_package_spec` can be provided, but not both.
               properties:
                 - name: imageUri
                   type: String
@@ -199,7 +200,8 @@ properties:
                         description: Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container.
             - name: pythonPackageSpec
               type: NestedObject
-              description: The Python packaged task.
+              description: |-
+                The Python packaged task. Either `container_spec` or `python_package_spec` can be provided, but not both.
               properties:
                 - name: executorImageUri
                   type: String
