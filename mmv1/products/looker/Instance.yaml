@@ -47,6 +47,8 @@ custom_code:
 sweeper:
   query_string: "?force=true"
 samples:
+  # Run updateable settings as steps in one lifecycle; edition, CMEK, and
+  # network settings that must be chosen at creation need separate instances.
   - name: looker_instance_basic
     primary_resource_id: looker-instance
     steps:
@@ -55,16 +57,28 @@ samples:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
-  - name: looker_instance_full
-    primary_resource_id: looker-instance
-    steps:
-      - name: looker_instance_full
+      - name: looker_instance_force_delete
+        include_step_doc: true
         resource_id_vars:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
+        ignore_read_extra:
+          - deletion_policy
+      # Keep FORCE set so the final destroy tests force deletion.
+      - name: looker_instance_full
+        include_step_doc: true
+        resource_id_vars:
+          instance_name: my-instance
+          client_id: my-client-id
+          client_secret: my-client-secret
+          custom_domain: my-custom-domain
+        ignore_read_extra:
+          - deletion_policy
+  # FIPS is tested with the Enterprise config below.
   - name: looker_instance_fips
     primary_resource_id: looker-instance
+    exclude_test: true
     steps:
       - name: looker_instance_fips
         resource_id_vars:
@@ -101,8 +115,10 @@ samples:
           address_name: compute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", compute.AddressWithPrefixLength(8))
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
           network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", servicenetworking.ServiceNetworkWithPrefixLength(8))
+  # Covered by the full step above.
   - name: looker_instance_custom_domain
     primary_resource_id: looker-instance
+    exclude_test: true
     steps:
       - name: looker_instance_custom_domain
         resource_id_vars:
@@ -118,16 +134,34 @@ samples:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
-  - name: looker_instance_force_delete
+  # Test-only: public + PSC instance updated with controlled egress, then periodic export.
+  - name: looker_instance_psc_update
     primary_resource_id: looker-instance
+    exclude_basic_doc: true
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-looker.iam.gserviceaccount.com
+        role: roles/storage.objectAdmin
+      - member: serviceAccount:service-{project_number}@gcp-sa-looker.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
     steps:
-      - name: looker_instance_force_delete
+      - name: looker_instance_psc_update
         resource_id_vars:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
-        ignore_read_extra:
-          - deletion_policy
+      - name: looker_instance_psc_update_controlled_egress
+        resource_id_vars:
+          instance_name: my-instance
+          client_id: my-client-id
+          client_secret: my-client-secret
+      - name: looker_instance_psc_update_periodic_export
+        resource_id_vars:
+          instance_name: my-instance
+          client_id: my-client-id
+          client_secret: my-client-secret
+          bucket_name: looker-export
+          kms_key_ring_name: looker-keyring
+          kms_key_name: looker-key
 virtual_fields:
   - name: deletion_policy
     type: String

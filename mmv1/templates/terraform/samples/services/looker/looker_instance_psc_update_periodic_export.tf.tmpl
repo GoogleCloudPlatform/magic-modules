@@ -1,0 +1,55 @@
+provider "google" {
+  prefer_regional_endpoints = true
+}
+
+resource "google_storage_bucket" "export" {
+  name          = "{{index $.ResourceIdVars "bucket_name"}}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "{{index $.ResourceIdVars "kms_key_ring_name"}}"
+  location = "us-west1"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name     = "{{index $.ResourceIdVars "kms_key_name"}}"
+  key_ring = google_kms_key_ring.keyring.id
+}
+
+resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
+  name              = "{{index $.ResourceIdVars "instance_name"}}"
+  platform_edition  = "LOOKER_CORE_ENTERPRISE_ANNUAL"
+  region            = "us-central1"
+  public_ip_enabled = true
+  psc_enabled       = true
+
+  psc_config {
+    allowed_vpcs = []
+  }
+
+  controlled_egress_enabled = true
+
+  controlled_egress_config {
+    marketplace_enabled = true
+    egress_fqdns        = ["google.com", "github.com"]
+  }
+
+  periodic_export_config {
+    gcs_uri = "gs://${google_storage_bucket.export.name}"
+    kms_key = google_kms_crypto_key.key.id
+
+    start_time {
+      hours   = 12
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+  }
+
+  oauth_config {
+    client_id     = "{{index $.ResourceIdVars "client_id"}}"
+    client_secret = "{{index $.ResourceIdVars "client_secret"}}"
+  }
+}
