@@ -1805,6 +1805,13 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
 				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+					v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
+					if v == cty.NullVal(cty.Bool) {
+						nc.KubeletConfig.CpuCfsQuota = true
+					} else if v.False() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
+					}
+
 					vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
 					if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
 						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
