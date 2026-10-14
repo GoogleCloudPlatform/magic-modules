@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -427,7 +428,11 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 	})
 }
 
-// Validate that node type is updated for the instance
+// Validate that node type is updated for the instance, including when other
+// fields change in the same apply. The API requires exactly 1 update_mask field
+// per request, so the provider must split multi-field updates into separate
+// requests.
+// https://github.com/hashicorp/terraform-provider-google/issues/29428
 func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 	t.Parallel()
 
@@ -439,12 +444,15 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create instance with node type highmem medium
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
-					name:                 name,
-					shardCount:           3,
-					zoneDistributionMode: "MULTI_ZONE",
-					nodeType:             "HIGHMEM_MEDIUM",
+					name:             name,
+					shardCount:       1,
+					mode:             "CLUSTER_DISABLED",
+					nodeType:         "SHARED_CORE_NANO",
+					engineVersion:    "VALKEY_8_0",
+					engineConfigs:    map[string]string{"maxmemory-policy": "volatile-ttl"},
+					maintenanceDay:   "MONDAY",
+					maintenanceHours: 1,
 				}),
 			},
 			{
@@ -453,13 +461,28 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// update instance with node type standard small
+				// update node type together with engine version, engine configs and maintenance policy
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
-					name:                 name,
-					shardCount:           3,
-					zoneDistributionMode: "MULTI_ZONE",
-					nodeType:             "STANDARD_SMALL",
+					name:             name,
+					shardCount:       1,
+					mode:             "CLUSTER_DISABLED",
+					nodeType:         "CUSTOM_PICO",
+					engineVersion:    "VALKEY_9_0",
+					engineConfigs:    map[string]string{"maxmemory-policy": "noeviction"},
+					maintenanceDay:   "TUESDAY",
+					maintenanceHours: 2,
 				}),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_memorystore_instance.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "node_type", "CUSTOM_PICO"),
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "engine_version", "VALKEY_9_0"),
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "engine_configs.maxmemory-policy", "noeviction"),
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "maintenance_policy.0.weekly_maintenance_window.0.day", "TUESDAY"),
+				),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -1080,6 +1103,7 @@ type InstanceParams struct {
 	shouldCreateSecondary     bool
 	secondaryInstanceName     string
 	icrRole                   string
+	mode                      string
 }
 
 func createSecondaryInstanceResource(params *InstanceParams) string {
@@ -1400,6 +1424,10 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 		// Create secondary instance resource
 		secondaryInstanceBlock = createSecondaryInstanceResource(params)
 	}
+	modeBlock := ``
+	if params.mode != "" {
+		modeBlock = fmt.Sprintf(`mode = "%s"`, params.mode)
+	}
 	if params.userEndpointCount == 2 {
 		createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params)
 	} else if params.userEndpointCount == 1 {
@@ -1422,6 +1450,7 @@ resource "google_memorystore_instance" "test" {
 	engine_configs = {
 		%s
 	}
+  %s
   %s
   %s
   %s
@@ -1458,7 +1487,7 @@ resource "google_compute_network" "producer_net" {
 
 data "google_project" "project" {
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, secondaryInstanceBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), modeBlock, zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, secondaryInstanceBlock, params.name, params.name, params.name)
 }
 
 func TestAccMemorystoreInstance_memorystoreInstanceTlsEnabled(t *testing.T) {
