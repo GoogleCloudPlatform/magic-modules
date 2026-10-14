@@ -46,7 +46,6 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/cloudrunv2_instance.go.tmpl'
   encoder: 'templates/terraform/encoders/cloudrunv2_instance.go.tmpl'
 taint_resource_on_failed_create: true
 samples:
