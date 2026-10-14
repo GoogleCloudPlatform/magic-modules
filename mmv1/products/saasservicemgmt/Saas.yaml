@@ -176,12 +176,15 @@ properties:
         - name: lastTransitionTime
           type: String
           description: Last time the condition transited from one status to another.
+          output: true
         - name: message
           type: String
           description: Human readable message indicating details about the last transition.
+          output: true
         - name: reason
           type: String
           description: Brief reason for the condition's last transition.
+          output: true
         - name: status
           type: String
           description: |-
@@ -190,6 +193,7 @@ properties:
             STATUS_UNKNOWN
             STATUS_TRUE
             STATUS_FALSE
+          output: true
         - name: type
           type: String
           description: |-
@@ -197,6 +201,7 @@ properties:
             Possible values:
             TYPE_READY
             TYPE_SYNCHRONIZED
+          output: true
   - name: createTime
     type: String
     description: The timestamp when the resource was created.
@@ -210,9 +215,11 @@ properties:
       - name: code
         type: Integer
         description: The status code, which should be an enum value of google.rpc.Code.
+        output: true
       - name: message
         type: String
         description: A developer-facing error message.
+        output: true
   - name: etag
     type: String
     description: |-

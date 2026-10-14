@@ -192,6 +192,26 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: importStateVerifyIgnore,
 			},
 			{
+				// A labels-only update of a STATE_ACTIVE Saas doesn't restart the
+				// import, so the provider doesn't wait for one.
+				Config: testAccSaasRuntimeSaas_applicationTemplateLabels(contextUpdate),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_saas_runtime_saas.example", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_saas_runtime_saas.example", "labels.label-one", "foo"),
+					resource.TestCheckResourceAttr("google_saas_runtime_saas.example", "state", "STATE_ACTIVE"),
+				),
+			},
+			{
+				ResourceName:            "google_saas_runtime_saas.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importStateVerifyIgnore,
+			},
+			{
 				// Release.application_template_component is output only and is set
 				// only on Releases created by the import, so test it by importing an
 				// imported Release. ImportStatePersist is false, so Terraform doesn't
@@ -254,6 +274,30 @@ resource "google_saas_runtime_saas" "example" {
   application_template {
     application_template = "%{template}"
     revision             = "%{revision}"
+  }
+}
+`, context)
+}
+
+func testAccSaasRuntimeSaas_applicationTemplateLabels(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example" {
+  provider = google-beta
+  project  = "%{project}"
+  saas_id  = "tf-test-app-saas%{random_suffix}"
+  location = "us-central1"
+
+  locations {
+    name = "us-central1"
+  }
+
+  application_template {
+    application_template = "%{template}"
+    revision             = "%{revision}"
+  }
+
+  labels = {
+    "label-one" = "foo"
   }
 }
 `, context)
