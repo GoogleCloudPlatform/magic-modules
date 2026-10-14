@@ -1,3 +1,10 @@
+// The Vertex AI backend matches each ResourcePool in the PATCH request against
+// existing pools by its "id" field. When "resource_pools.id" (Optional + Computed)
+// is omitted in config and a sibling field like "replica_count" is updated,
+// Terraform SDKv2 marks "resource_pools.<i>.id" as NewComputed ("") in the diff,
+// causing d.Get("resource_pools") and the expander to omit "id" from the payload.
+// Restore the server-generated "id" from prior state via d.GetChange so the API
+// can identify which resource pool to resize.
 if pools, ok := obj["resourcePools"].([]interface{}); ok {
 	oldRaw, _ := d.GetChange("resource_pools")
 	var oldPools []interface{}
@@ -25,6 +32,9 @@ if pools, ok := obj["resourcePools"].([]interface{}); ok {
 		}
 	}
 }
+// "name" is immutable so MMv1 excludes it from PATCH bodies, and state only
+// stores the short name via name_from_self_link. Ensure the full resource path
+// (stored in d.Id()) is included in the request body.
 if _, ok := obj["name"]; !ok {
 	obj["name"] = d.Id()
 }
