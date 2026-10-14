@@ -63,6 +63,17 @@ resource "google_gemini_data_analytics_data_agent" "{{$.PrimaryResourceId}}" {
         sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM sales"
       }
 
+      example_queries {
+        natural_language_question = "What is the total order value for a given order?"
+        sql_query                 = "SELECT SUM(order_total) AS total_order_value FROM sales WHERE order_id = @order_id"
+
+        parameters {
+          name        = "@order_id"
+          description = "The identifier of the order."
+          data_type   = "STRING"
+        }
+      }
+
       glossary_terms {
         display_name = "Order"
         description  = "A customer purchase transaction."

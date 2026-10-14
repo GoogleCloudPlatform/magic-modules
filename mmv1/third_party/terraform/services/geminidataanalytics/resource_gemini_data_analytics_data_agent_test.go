@@ -177,7 +177,13 @@ resource "google_gemini_data_analytics_data_agent" "agent" {
 
       example_queries {
         natural_language_question = "How many words does Hamlet have?"
-        sql_query                 = "SELECT SUM(word_count) FROM samples.shakespeare WHERE corpus = 'hamlet'"
+        sql_query                 = "SELECT SUM(word_count) FROM samples.shakespeare WHERE corpus = @corpus"
+
+        parameters {
+          name        = "@corpus"
+          description = "The name of the corpus, for example hamlet."
+          data_type   = "STRING"
+        }
       }
 
       glossary_terms {
