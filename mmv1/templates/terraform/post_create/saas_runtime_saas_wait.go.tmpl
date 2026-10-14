@@ -69,7 +69,10 @@ if v, ok := d.GetOk("application_template.0.revision"); ok && v.(string) != "" {
 					UserAgent: userAgent,
 				})
 				if err != nil {
-					return fmt.Errorf("transient error retrieving Saas state: %s", err)
+					// SendRequest already retries transient errors. Return others (for
+					// example, 403 or 404) as is, so they fail the wait instead of being
+					// retried until the timeout.
+					return err
 				}
 
 				state, _ := res["state"].(string)
@@ -101,9 +104,6 @@ if v, ok := d.GetOk("application_template.0.revision"); ok && v.(string) != "" {
 				func(err error) (bool, string) {
 					if strings.Contains(err.Error(), "import is still pending") {
 						return true, "retry pending import"
-					}
-					if strings.Contains(err.Error(), "transient error") {
-						return true, "retry transient error"
 					}
 					return false, ""
 				},
