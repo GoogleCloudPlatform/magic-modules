@@ -146,6 +146,21 @@ samples:
           service_account_id: example-stw
           subscription_name: example-subscription
           topic_name: example-topic
+  - name: pubsub_subscription_push_bigtable
+    primary_resource_id: example
+    # Bigtable instances and tables don't use the shared HTTP client, so they can't be recorded by VCR.
+    skip_vcr: true
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+        role: roles/bigtable.user
+    steps:
+      - name: pubsub_subscription_push_bigtable
+        resource_id_vars:
+          app_profile_id: example-profile
+          instance_name: example-bt
+          subscription_name: example-subscription
+          table_name: example-table
+          topic_name: example-topic
   - name: pubsub_subscription_single_smt
     primary_resource_id: example
     steps:
@@ -209,11 +224,12 @@ properties:
     type: NestedObject
     description: |
       If delivery to BigQuery is used with this subscription, this field is used to configure it.
-      Either pushConfig, bigQueryConfig or cloudStorageConfig can be set, but not combined.
-      If all three are empty, then the subscriber will pull and ack messages using API methods.
+      Only one of pushConfig, bigqueryConfig, cloudStorageConfig, or bigtableConfig can be set.
+      If none of them are set, then the subscriber will pull and ack messages using API methods.
     conflicts:
       - push_config
       - cloud_storage_config
+      - bigtable_config
     properties:
       - name: table
         type: String
@@ -255,11 +271,12 @@ properties:
     type: NestedObject
     description: |
       If delivery to Cloud Storage is used with this subscription, this field is used to configure it.
-      Either pushConfig, bigQueryConfig or cloudStorageConfig can be set, but not combined.
-      If all three are empty, then the subscriber will pull and ack messages using API methods.
+      Only one of pushConfig, bigqueryConfig, cloudStorageConfig, or bigtableConfig can be set.
+      If none of them are set, then the subscriber will pull and ack messages using API methods.
     conflicts:
       - push_config
       - bigquery_config
+      - bigtable_config
     is_missing_in_cai: true
     properties:
       - name: bucket
@@ -339,6 +356,105 @@ properties:
           The service account to use to write to Cloud Storage. If not specified, the Pub/Sub
           [service agent](https://cloud.google.com/iam/docs/service-agents),
           service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
+  - name: bigtableConfig
+    type: NestedObject
+    description: |
+      If delivery to Bigtable is used with this subscription, this field is used to configure it.
+      Only one of pushConfig, bigqueryConfig, cloudStorageConfig, or bigtableConfig can be set.
+      If none of them are set, then the subscriber will pull and ack messages using API methods.
+    conflicts:
+      - push_config
+      - bigquery_config
+      - cloud_storage_config
+    properties:
+      - name: table
+        type: String
+        required: true
+        description: |
+          The unique name of the table to write messages to, of the form
+          `projects/{project}/instances/{instance}/tables/{table}`.
+      - name: appProfileId
+        type: String
+        description: |
+          The app profile to use for the Bigtable writes. If not specified, the "default" application
+          profile will be used. The app profile must use single-cluster routing.
+      - name: serviceAccountEmail
+        type: String
+        description: |
+          The service account to use to write to Bigtable. The subscription creator or updater that
+          specifies this field must have `iam.serviceAccounts.actAs` permission on the service account.
+          If not specified, the Pub/Sub [service agent](https://cloud.google.com/iam/docs/service-agents),
+          service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
+      - name: writeMetadata
+        type: Boolean
+        description: |
+          When true, write the subscription name, messageId, publishTime, attributes, and orderingKey to
+          additional columns in the table under the `pubsub_metadata` column family. The subscription name,
+          messageId, and publishTime fields are put in their own columns while all other message properties
+          (other than data) are written to a JSON object in the attributes column.
+      - name: columnFamilyMapping
+        type: NestedObject
+        description: |
+          Configuration that allows writing row keys and/or columns based on fields in the input message.
+          The input message format must be JSON if this field is set.
+
+          If this field is set, top-level message fields are written to the `data` column family with
+          the field name as the column qualifier by default, or to an existing column family whose name
+          matches the field name. The cell timestamp is the message publish time.
+
+          If this field is not set, the row key is constructed from the subscription name, message ID hash,
+          and message ID delimited by `#`, and the message bytes are written to the `data` column family
+          with an empty-string column qualifier.
+        send_empty_value: true
+        allow_empty_object: true
+        properties:
+          - name: rowKeySchema
+            type: NestedObject
+            description: |
+              If set, the row key is constructed from the field names of the table's
+              [structured row key](https://cloud.google.com/bigtable/docs/manage-row-key-schemas).
+              If a field is nullable in the structured row key, it need not be present in the message;
+              null will be used instead.
+            conflicts:
+              - bigtable_config.0.column_family_mapping.0.delimited_key
+            send_empty_value: true
+            allow_empty_object: true
+            properties: []
+          - name: delimitedKey
+            type: NestedObject
+            description: |
+              If set, the row key is constructed from the given key fields and delimiter. All key fields
+              must be present in the message; otherwise, the message remains in the subscription backlog.
+            conflicts:
+              - bigtable_config.0.column_family_mapping.0.row_key_schema
+            properties:
+              - name: keyFields
+                type: Array
+                required: true
+                description: |
+                  The key fields to construct the row key from. The fields must be present in the message
+                  as top-level fields; JSON path expressions will not traverse into nested objects.
+                item_type:
+                  type: String
+              - name: delimiter
+                type: String
+                description: |
+                  The byte sequence used to delimit concatenated key fields, as a base64-encoded string
+                  (for example, `Iw==` for `#`). Must be specified if multiple key fields are used. The
+                  delimiter must contain at least 1 character and at most 50 characters.
+      - name: state
+        type: Enum
+        description: |
+          An output-only field that indicates whether or not the subscription can receive messages.
+        output: true
+        enum_values:
+          - ACTIVE
+          - NOT_FOUND
+          - APP_PROFILE_MISCONFIGURED
+          - PERMISSION_DENIED
+          - SCHEMA_MISMATCH
+          - IN_TRANSIT_LOCATION_RESTRICTION
+          - VERTEX_AI_LOCATION_RESTRICTION
   - name: pushConfig
     type: NestedObject
     description: |
@@ -348,6 +464,7 @@ properties:
     conflicts:
       - bigquery_config
       - cloud_storage_config
+      - bigtable_config
     properties:
       - name: oidcToken
         type: NestedObject
