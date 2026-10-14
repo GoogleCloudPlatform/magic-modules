@@ -12,16 +12,10 @@ const val DefaultServiceParallelism = 12
 
 var ServiceParallelism = mapOf(
     // Packages with quota failures in nightly tests are kept at the previous default of 6.
-    // cloudids: Quota 'ZonalPerProjectIDSEndpoints' exceeded (limit 10 per zone)
-    "cloudids" to 6,
-    // compute: Quota 'SECURITY_POLICIES' exceeded (limit 30 globally)
-    "compute" to 6,
     // gemini: Quota 'Maximum number of Code Repository Indexes' exceeded (limit 10)
     "gemini" to 6,
     // netapp: Quotas 'BackupVaultsPerRegion' (limit 10) and 'ReplicatedVolumesPerRegion' (limit 5) exceeded
     "netapp" to 6,
-    // networkmanagementv1: Quota 'NetworkMonitoringProvidersPerProject' exceeded (limit 1 globally)
-    "networkmanagementv1" to 6,
     // osconfig: OS Config API quota exhausted
     "osconfig" to 6,
 
