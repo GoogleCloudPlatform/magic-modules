@@ -89,56 +89,33 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	transport_tpg.MutexStore.Lock(mutexKey)
 	defer transport_tpg.MutexStore.Unlock(mutexKey)
 
-	// StateChangeConf requires Refresh to return a nil error in order to continue
-	// retrying on transient errors, which causes the SDK to swallow the error and
-	// leave retry.TimeoutError.LastError nil when WaitForState times out. Hold the
-	// most recent retryable error here so we can surface it on timeout.
-	var lastErr error
-	rmwConf := &retry.StateChangeConf{
-		Pending:    []string{"retrying"},
-		Target:     []string{"done"},
-		Timeout:    maxBackoffTimeout,
-		MinTimeout: 1 * time.Second,
-		Refresh: func() (interface{}, string, error) {
-			log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
-			p, err := updater.GetResourceIamPolicy()
-			if err != nil {
-				return nil, "", err
-			}
-			log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
-
-			err = modify(p)
-			if err != nil {
-				return nil, "", err
-			}
-
-			log.Printf("[DEBUG]: Setting policy for %s to %+v\n", updater.DescribeResource(), p)
-			err = updater.SetResourceIamPolicy(p)
-			if err == nil {
-				return p, "done", nil
-			}
-			if tpgresource.IsConflictError(err) {
-				log.Printf("[DEBUG]: Concurrent policy changes, restarting read-modify-write\n")
-				lastErr = err
-				return "", "retrying", nil
-			}
-
-			log.Printf("[DEBUG]: not retrying IAM policy for %s. error: %v", updater.DescribeResource(), err)
-			return nil, "", fmt.Errorf("Error applying IAM policy for %s: %w", updater.DescribeResource(), err)
-		},
-	}
-	if _, err := rmwConf.WaitForState(); err != nil {
-		if tErr, ok := err.(*retry.TimeoutError); ok {
-			// LastError is only set if a Refresh call still in flight at the timeout
-			// returned a non-retryable error during the SDK's grace period. Prefer it
-			// over lastErr, which may be from an earlier attempt.
-			if tErr.LastError != nil {
-				return tErr.LastError
-			}
-			if lastErr != nil {
-				return fmt.Errorf("Error applying IAM policy to %s: Last error: %w", updater.DescribeResource(), lastErr)
-			}
+	err := retry.Retry(maxBackoffTimeout, func() *retry.RetryError {
+		log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
+		p, err := updater.GetResourceIamPolicy()
+		if err != nil {
+			return retry.NonRetryableError(err)
 		}
+		log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
+
+		err = modify(p)
+		if err != nil {
+			return retry.NonRetryableError(err)
+		}
+
+		log.Printf("[DEBUG]: Setting policy for %s to %+v\n", updater.DescribeResource(), p)
+		err = updater.SetResourceIamPolicy(p)
+		if err == nil {
+			return nil
+		}
+		if tpgresource.IsConflictError(err) {
+			log.Printf("[DEBUG]: Concurrent policy changes, restarting read-modify-write\n")
+			return retry.RetryableError(fmt.Errorf("Error applying IAM policy to %s: Last error: %w", updater.DescribeResource(), err))
+		}
+
+		log.Printf("[DEBUG]: not retrying IAM policy for %s. error: %v", updater.DescribeResource(), err)
+		return retry.NonRetryableError(fmt.Errorf("Error applying IAM policy for %s: %w", updater.DescribeResource(), err))
+	})
+	if err != nil {
 		return err
 	}
 
@@ -165,7 +142,10 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		},
 	}
 	if _, err := fetchConf.WaitForState(); err != nil {
-		if _, ok := err.(*retry.TimeoutError); ok {
+		if tErr, ok := err.(*retry.TimeoutError); ok {
+			if tErr.LastError != nil {
+				return tErr.LastError
+			}
 			return fmt.Errorf("Error applying IAM policy to %s: Waited too long for propagation.\n", updater.DescribeResource())
 		}
 		return err
