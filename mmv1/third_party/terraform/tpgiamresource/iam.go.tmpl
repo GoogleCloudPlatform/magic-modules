@@ -103,11 +103,6 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		Refresh: func() (interface{}, string, error) {
 			log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
 			p, err := updater.GetResourceIamPolicy()
-			if transport_tpg.IsGoogleApiErrorWithCode(err, 429) {
-				log.Printf("[DEBUG] 429 while attempting to read policy for %s, waiting before attempting again", updater.DescribeResource())
-				lastErr = err
-				return "", "retrying", nil
-			}
 			if err != nil {
 				return nil, "", err
 			}
@@ -159,10 +154,6 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
 			new_p, err := updater.GetResourceIamPolicy()
 			if err != nil {
-				// Quota for Read is pretty limited, so watch out for running out of quota.
-				if transport_tpg.IsGoogleApiErrorWithCode(err, 429) {
-					return "", "retrying", nil
-				}
 				return nil, "", err
 			}
 			log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), new_p)
