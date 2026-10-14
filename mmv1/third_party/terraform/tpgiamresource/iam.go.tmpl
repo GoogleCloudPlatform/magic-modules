@@ -13,7 +13,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -125,7 +124,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			}
 
 			log.Printf("[DEBUG]: not retrying IAM policy for %s. error: %v", updater.DescribeResource(), err)
-			return nil, "", errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy for %s: {{"{{"}}err{{"}}"}}", updater.DescribeResource()), err)
+			return nil, "", fmt.Errorf("Error applying IAM policy for %s: %w", updater.DescribeResource(), err)
 		},
 	}
 	if _, err := rmwConf.WaitForState(); err != nil {
@@ -137,7 +136,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 				return tErr.LastError
 			}
 			if lastErr != nil {
-				return errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy to %s: Last error: {{"{{"}}err{{"}}"}}", updater.DescribeResource()), lastErr)
+				return fmt.Errorf("Error applying IAM policy to %s: Last error: %w", updater.DescribeResource(), lastErr)
 			}
 		}
 		return err
