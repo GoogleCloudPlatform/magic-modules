@@ -1027,10 +1027,12 @@ properties:
             type: Integer
             description: |-
               The minimum number of machine replicas that will be always deployed on.
-              This value must be greater than or equal to 1.
+              This value must be greater than or equal to 1. To enable scale-to-zero
+              (in beta), set this value to 0 and also set `initial_replica_count`.
 
               If traffic increases, it may dynamically be deployed onto more replicas,
               and as traffic decreases, some of these extra replicas may be freed.
+            send_empty_value: true
             update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
             update_verb: 'POST'
             required: true
@@ -1063,6 +1065,40 @@ properties:
               required_replica_count will be min_replica_count.
             update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
             update_verb: 'POST'
+          - name: initialReplicaCount
+            type: Integer
+            min_version: beta
+            description: |-
+              Number of initial replicas being deployed on when scaling the workload up
+              from zero or when creating the workload in case min_replica_count = 0.
+              When min_replica_count > 0 (meaning that the scale-to-zero feature is not
+              enabled), initial_replica_count should not be set. When min_replica_count
+              = 0 (meaning that the scale-to-zero feature is enabled),
+              initial_replica_count should be larger than zero, but no greater than
+              max_replica_count.
+            update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
+            update_verb: 'POST'
+          - name: scaleToZeroSpec
+            type: NestedObject
+            min_version: beta
+            description: |-
+              Specification for scale-to-zero feature.
+            update_url: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}:mutateDeployedModel'
+            update_verb: 'POST'
+            properties:
+              - name: minScaleupPeriod
+                type: String
+                min_version: beta
+                description: |-
+                  Minimum duration that a deployment will be scaled up before traffic is
+                  evaluated for potential scale-down. [MinValue=300] (5 minutes)
+                  [MaxValue=28800] (8 hours)
+              - name: idleScaledownPeriod
+                type: String
+                min_version: beta
+                description: |-
+                  Duration of no traffic before scaling to zero. [MinValue=300] (5
+                  minutes) [MaxValue=28800] (8 hours)
           - name: autoscalingMetricSpecs
             type: Array
             description: |-
