@@ -19,7 +19,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-const maxBackoffSeconds = 30
+const maxBackoffTimeout = 60 * time.Second
 const IamPolicyVersion = 3
 
 // These types are implemented per GCP resource type and specify how to do per-resource IAM operations.
@@ -98,7 +98,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	rmwConf := &retry.StateChangeConf{
 		Pending:    []string{"retrying"},
 		Target:     []string{"done"},
-		Timeout:    time.Duration(maxBackoffSeconds) * time.Second,
+		Timeout:    maxBackoffTimeout,
 		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {
 			log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
@@ -147,7 +147,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		Pending:                   []string{"retrying"},
 		Target:                    []string{"done"},
 		Delay:                     1 * time.Second,
-		Timeout:                   time.Duration(maxBackoffSeconds) * time.Second,
+		Timeout:                   maxBackoffTimeout,
 		MinTimeout:                1 * time.Second,
 		ContinuousTargetOccurence: 3,
 		Refresh: func() (interface{}, string, error) {
