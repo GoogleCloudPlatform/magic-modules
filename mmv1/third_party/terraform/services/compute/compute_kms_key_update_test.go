@@ -30,7 +30,6 @@ func TestKmsKeyChange(t *testing.T) {
 		"key":                          {testKmsKeyB, true, false, false, false, false},
 		"unknown key":                  {"", false, false, false, false, false},
 		"no key":                       {"", true, false, false, false, true},
-		"key version":                  {testKmsKeyB + "/cryptoKeyVersions/1", true, false, false, false, true},
 		"key with service account":     {testKmsKeyB, true, true, false, false, true},
 		"unknown with service account": {"", false, true, false, false, true},
 		"key replacing a CSEK":         {testKmsKeyB, true, false, true, true, false},
@@ -59,7 +58,6 @@ func TestKmsKeyUpdateRequestBody(t *testing.T) {
 	}{
 		"key":                      {testKmsKeyB, "", false},
 		"no key":                   {"", "", true},
-		"key version":              {testKmsKeyB + "/cryptoKeyVersions/3", "", true},
 		"key with service account": {testKmsKeyB, testKmsSA, true},
 	}
 	for name, tc := range cases {
@@ -185,11 +183,6 @@ func TestValidateKmsKeyChange(t *testing.T) {
 			config:             keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
 			want:               update,
 		},
-		"key to a version of another key errors": {
-			state:  keyState(testKmsKeyA, ""),
-			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB + "/cryptoKeyVersions/1"}),
-			want:   planError,
-		},
 		"key to empty key in a remaining block errors": {
 			state:  keyState(testKmsKeyA, ""),
 			config: keyConfig(map[string]interface{}{}),
@@ -241,7 +234,7 @@ func TestValidateKmsKeyChange_create(t *testing.T) {
 	r := testKmsKeyResource(true)
 	config := terraform.NewResourceConfigRaw(map[string]interface{}{
 		"name":           "r",
-		"encryption_key": []interface{}{map[string]interface{}{"kms_key_self_link": testKmsKeyA + "/cryptoKeyVersions/1", "kms_key_service_account": testKmsSA}},
+		"encryption_key": []interface{}{map[string]interface{}{"kms_key_self_link": testKmsKeyA, "kms_key_service_account": testKmsSA}},
 	})
 	diff, err := r.SimpleDiff(context.Background(), nil, config, nil)
 	if err != nil {

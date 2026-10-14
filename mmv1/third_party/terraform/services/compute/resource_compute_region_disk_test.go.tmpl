@@ -299,11 +299,6 @@ func TestAccComputeRegionDisk_encryptionKMSUpdate(t *testing.T) {
 				ExpectError: regexp.MustCompile("remove the /cryptoKeyVersions/ suffix"),
 			},
 			{
-				Config:      testAccComputeRegionDisk_encryptionKMSUpdateKey(diskName, key1+"/cryptoKeyVersions/1"),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("includes a crypto key version"),
-			},
-			{
 				Config:      testAccComputeRegionDisk_encryptionKMSUpdateNoKey(diskName),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("removing the Cloud KMS key isn't supported"),

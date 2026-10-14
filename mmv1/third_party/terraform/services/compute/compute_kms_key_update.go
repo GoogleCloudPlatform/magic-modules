@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// updateKmsKey can't remove a key or use a key version, clears
+// updateKmsKey can't remove a key, clears
 // kmsKeyServiceAccount, and rotates if kmsKeyName is empty.
 
 // kmsKeyChange reports whether a key change needs replacement, or an error if
@@ -31,14 +31,7 @@ func kmsKeyChange(newKey string, newKeyKnown, serviceAccountSet, customerSupplie
 		// Once known, this is an update or an error, never a replacement.
 		return false, nil
 	}
-	if isCryptoKeyVersionName(newKey) {
-		return false, fmt.Errorf("Cloud KMS key %q includes a crypto key version, which isn't supported; remove the /cryptoKeyVersions/ suffix", newKey)
-	}
 	return false, nil
-}
-
-func isCryptoKeyVersionName(key string) bool {
-	return strings.Contains(key, "/cryptoKeyVersions/")
 }
 
 // validateKmsKeyChange forces replacement or errors at plan time for key
@@ -103,8 +96,6 @@ func kmsKeyUpdateRequestBody(newKey, serviceAccount string) (map[string]interfac
 	switch {
 	case newKey == "":
 		return nil, fmt.Errorf("removing the Cloud KMS key isn't supported")
-	case isCryptoKeyVersionName(newKey):
-		return nil, fmt.Errorf("the Cloud KMS key must not include a crypto key version (%q)", newKey)
 	case serviceAccount != "":
 		return nil, fmt.Errorf("the Cloud KMS key can't be changed in place while kms_key_service_account is set")
 	}

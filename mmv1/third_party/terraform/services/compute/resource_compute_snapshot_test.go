@@ -115,11 +115,6 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 				ExpectError: regexp.MustCompile("remove the /cryptoKeyVersions/ suffix"),
 			},
 			{
-				Config:      testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1+"/cryptoKeyVersions/1"),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("includes a crypto key version"),
-			},
-			{
 				Config:      testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("removing the Cloud KMS key isn't supported"),
