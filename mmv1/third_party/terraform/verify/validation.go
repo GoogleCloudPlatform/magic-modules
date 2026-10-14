@@ -86,7 +86,7 @@ var Rfc1918Networks = []string{
 // crypto key version.
 func ValidateKmsKeyWithoutVersion(v interface{}, k string) (ws []string, errors []error) {
 	if strings.Contains(v.(string), "/cryptoKeyVersions/") {
-		errors = append(errors, fmt.Errorf("%q must not include a crypto key version; remove the /cryptoKeyVersions/ suffix", k))
+		errors = append(errors, fmt.Errorf("%q must specify a KMS Key, not a KMS KeyVersion; remove the /cryptoKeyVersions/ suffix", k))
 	}
 	return
 }
