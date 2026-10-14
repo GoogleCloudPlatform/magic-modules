@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -39,8 +40,6 @@ func TestAccComputeSnapshot_encryption(t *testing.T) {
 
 func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	t.Parallel()
-	// KMS causes errors due to rotation
-	acctest.SkipIfVcr(t)
 
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -117,6 +116,11 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 				ImportStateVerify: true,
 				// Not returned by the API.
 				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
+			},
+			{
+				Config:      testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key2+"/cryptoKeyVersions/1"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("must not include a crypto key version"),
 			},
 			{
 				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
