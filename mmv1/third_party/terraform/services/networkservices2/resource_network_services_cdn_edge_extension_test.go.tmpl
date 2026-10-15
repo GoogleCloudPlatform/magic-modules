@@ -1,0 +1,377 @@
+package networkservices2_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/networkservices2"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestAccNetworkServices2CdnEdgeExtension_basicUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServices2CdnEdgeExtensionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Upload the compiled plugin code to Artifact Registry
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+						t,
+						"google_artifact_registry_repository.test_repository",
+						"my-wasm-plugin",
+						"v1",
+						"../networkservices/test-fixtures/compiled-package/plugin.wasm",
+						"plugin.wasm",
+					),
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+						t,
+						"google_artifact_registry_repository.test_repository",
+						"my-wasm-plugin-2",
+						"v1",
+						"../networkservices/test-fixtures/compiled-package/plugin.wasm",
+						"plugin.wasm",
+					),
+				),
+			},
+			{
+				Config: testAccNetworkServices2CdnEdgeExtension_basicCreate(context),
+			},
+			{
+				ResourceName:      "google_network_services_cdn_edge_extension.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// location and name are url_param_only (not returned as standalone fields by GET);
+				// labels and terraform_labels are standard Terraform label virtual/config state fields.
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkServices2CdnEdgeExtension_basicUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_cdn_edge_extension.default", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_network_services_cdn_edge_extension.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// location and name are url_param_only (not returned as standalone fields by GET);
+				// labels and terraform_labels are standard Terraform label virtual/config state fields.
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServices2CdnEdgeExtension_edgeCacheServiceSetup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "dest" {
+  name          = "tf-test-cdn-ext-bucket-%{random_suffix}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_network_services_edge_cache_origin" "default" {
+  name           = "tf-test-cdn-ext-origin-%{random_suffix}"
+  origin_address = google_storage_bucket.dest.url
+  description    = "The default bucket for media edge test"
+  max_attempts   = 2
+  timeout {
+    connect_timeout = "10s"
+  }
+}
+
+resource "google_network_services_edge_cache_service" "default" {
+  name        = "tf-test-cdn-ext-ecs-%{random_suffix}"
+  description = "my edge cache service"
+  routing {
+    host_rule {
+      description  = "host rule description"
+      hosts        = ["sslcert.tf-test.club"]
+      path_matcher = "routes"
+    }
+    path_matcher {
+      name = "routes"
+      route_rule {
+        description = "a route rule to match against"
+        priority    = 1
+        match_rule {
+          prefix_match = "/"
+        }
+        origin = google_network_services_edge_cache_origin.default.name
+        route_action {
+          cdn_policy {
+            cache_mode  = "CACHE_ALL_STATIC"
+            default_ttl = "3600s"
+          }
+        }
+        header_action {
+          response_header_to_add {
+            header_name  = "x-cache-status"
+            header_value = "{cdn_cache_status}"
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccNetworkServices2CdnEdgeExtension_basicCreate(context map[string]interface{}) string {
+	return acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) +
+		testAccNetworkServices2CdnEdgeExtension_edgeCacheServiceSetup(context) +
+		acctest.Nprintf(`
+resource "google_network_services_cdn_edge_extension" "default" {
+  name        = "tf-test-cdn-edge-ext%{random_suffix}"
+  description = "my cdn edge extension"
+  location    = "global"
+
+  target {
+    resources = [google_network_services_edge_cache_service.default.id]
+  }
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.host == 'example.com'"
+    }
+
+    extensions {
+      name               = "ext11"
+      service            = google_network_services_wasm_plugin.wasm-plugin.id
+      fail_open          = false
+      supported_events   = ["REQUEST_HEADERS"]
+      forward_headers    = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_network_services_wasm_plugin" "wasm-plugin" {
+  name        = "tf-test-cdn-wasm-plugin%{random_suffix}"
+  description = "my wasm plugin"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label = "test_value"
+  }
+  log_config {
+    enable        = true
+    sample_rate   = 1
+    min_log_level = "WARN"
+  }
+
+  versions {
+    version_name = "v1"
+    description  = "v1 version of my wasm plugin"
+    image_uri    = "projects/%{project}/locations/us-central1/repositories/tf-test-repository-standard%{random_suffix}/genericArtifacts/my-wasm-plugin:v1"
+
+    labels = {
+      test_label = "test_value"
+    }
+  }
+}
+
+resource "google_network_services_wasm_plugin" "wasm-plugin-2" {
+  name        = "tf-test-cdn-wasm-plugin-2%{random_suffix}"
+  description = "my wasm plugin 2"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label = "test_value_2"
+  }
+  log_config {
+    enable        = true
+    sample_rate   = 1
+    min_log_level = "WARN"
+  }
+
+  versions {
+    version_name = "v1"
+    description  = "v1 version of my wasm plugin 2"
+    image_uri    = "projects/%{project}/locations/us-central1/repositories/tf-test-repository-standard%{random_suffix}/genericArtifacts/my-wasm-plugin-2:v1"
+
+    labels = {
+      test_label = "test_value_2"
+    }
+  }
+}
+`, context)
+}
+
+func testAccNetworkServices2CdnEdgeExtension_basicUpdate(context map[string]interface{}) string {
+	return acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) +
+		testAccNetworkServices2CdnEdgeExtension_edgeCacheServiceSetup(context) +
+		acctest.Nprintf(`
+resource "google_network_services_cdn_edge_extension" "default" {
+  name        = "tf-test-cdn-edge-ext%{random_suffix}"
+  description = "my cdn edge extension updated"
+  location    = "global"
+
+  target {
+    resources = [google_network_services_edge_cache_service.default.id]
+  }
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.host == 'example.com'"
+    }
+
+    extensions {
+      name               = "ext11"
+      service            = google_network_services_wasm_plugin.wasm-plugin.id
+      fail_open          = false
+      supported_events   = ["REQUEST_HEADERS"]
+      forward_headers    = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
+    }
+  }
+
+  extension_chains {
+    name = "chain2"
+
+    match_condition {
+      cel_expression = "request.host == 'testing.com'"
+    }
+
+    extensions {
+      name               = "ext12"
+      service            = google_network_services_wasm_plugin.wasm-plugin-2.id
+      fail_open          = true
+      supported_events   = ["REQUEST_HEADERS", "RESPONSE_HEADERS"]
+      forward_headers    = ["testing-header"]
+      forward_attributes = ["request.host"]
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_network_services_wasm_plugin" "wasm-plugin" {
+  name        = "tf-test-cdn-wasm-plugin%{random_suffix}"
+  description = "my wasm plugin"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label = "test_value"
+  }
+  log_config {
+    enable        = true
+    sample_rate   = 1
+    min_log_level = "WARN"
+  }
+
+  versions {
+    version_name = "v1"
+    description  = "v1 version of my wasm plugin"
+    image_uri    = "projects/%{project}/locations/us-central1/repositories/tf-test-repository-standard%{random_suffix}/genericArtifacts/my-wasm-plugin:v1"
+
+    labels = {
+      test_label = "test_value"
+    }
+  }
+}
+
+resource "google_network_services_wasm_plugin" "wasm-plugin-2" {
+  name        = "tf-test-cdn-wasm-plugin-2%{random_suffix}"
+  description = "my wasm plugin 2"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label = "test_value_2"
+  }
+  log_config {
+    enable        = true
+    sample_rate   = 1
+    min_log_level = "WARN"
+  }
+
+  versions {
+    version_name = "v1"
+    description  = "v1 version of my wasm plugin 2"
+    image_uri    = "projects/%{project}/locations/us-central1/repositories/tf-test-repository-standard%{random_suffix}/genericArtifacts/my-wasm-plugin-2:v1"
+
+    labels = {
+      test_label = "test_value_2"
+    }
+  }
+}
+`, context)
+}
+
+// Because all samples on CdnEdgeExtension have exclude_test: true, MMv1 skips
+// generating resource_network_services_cdn_edge_extension_generated_test.go
+// (where testAccCheck...DestroyProducer is normally emitted).
+func testAccCheckNetworkServices2CdnEdgeExtensionDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_network_services_cdn_edge_extension" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(networkservices2.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/cdnEdgeExtensions/{{"{{"}}name{{"}}"}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("NetworkServices2CdnEdgeExtension still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}
+{{- end }}
