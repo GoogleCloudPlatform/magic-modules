@@ -50,38 +50,44 @@ samples:
     steps:
       - name: 'organization_security_policy_rule_basic'
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_rule_expression'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_rule_expression'
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_rule_with_preconfigured_waf_config'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_rule_with_preconfigured_waf_config'
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_rule_with_header_action'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_rule_with_header_action'
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_rule_with_redirect'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_rule_with_redirect'
         test_env_vars:
-          org_id: 'ORG_ID'
+          org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_rule_firewall'
     min_version: 'beta'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_rule_firewall'
         min_version: 'beta'
         test_env_vars:
+          # FIREWALL type organization security policies are an allowlisted feature only enabled on ORG_ID.
           org_id: 'ORG_ID'
 parameters:
   - name: 'policyId'
