@@ -12541,7 +12541,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
 func testAccContainerCluster_autoprovisioningDefaultsImageType(cluster, networkName, subnetworkName string, includeImageType bool) string {
 	imageTypeCfg := ""
 	if includeImageType {
-		imageTypeCfg = `image_type = "COS_CONTAINERD"`
+		imageTypeCfg = `image_type = "UBUNTU_CONTAINERD"`
 	}
 
 	return fmt.Sprintf(`
@@ -12564,6 +12564,10 @@ resource "google_container_cluster" "with_autoprovisioning" {
       maximum       = 2048
     }
     auto_provisioning_defaults {
+      oauth_scopes = [
+        "https://www.googleapis.com/auth/devstorage.read_only",
+        "https://www.googleapis.com/auth/cloud-platform",
+      ]
       %s
     }
   }
@@ -16393,6 +16397,10 @@ resource "google_container_cluster" "with_autopilot" {
     services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
   }
 
+  node_pool_auto_config {
+    resource_manager_tags = {}
+  }
+
   addons_config {
     horizontal_pod_autoscaling {
       disabled = false
@@ -18253,7 +18261,7 @@ func TestAccContainerCluster_additional_ip_ranges_config_on_update(t *testing.T)
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri[:1], false),
+				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri, true),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
@@ -18267,7 +18275,7 @@ func TestAccContainerCluster_additional_ip_ranges_config_on_update(t *testing.T)
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri[:1], true),
+				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri, false),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),

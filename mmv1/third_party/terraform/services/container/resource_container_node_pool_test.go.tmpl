@@ -4465,6 +4465,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
+    spot         = true
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
@@ -7419,7 +7420,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   provider           = google.user-project-override
-  name               = "%[1]s"
+  name               = "%[2]s"
   location           = "%[6]s"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
