@@ -62,8 +62,6 @@ git commit -m "<product>: <concise description under 60 chars>"
 
 ### 3. Push to Personal Fork
 
-Push without force flags (`-f`, `--force`, `--force-with-lease`) unless explicitly instructed:
-
 ```bash
 FORK_REMOTE=$(git remote -v | grep -v -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
 FORK_REMOTE="${FORK_REMOTE:-origin}"
