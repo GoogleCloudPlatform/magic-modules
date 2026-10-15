@@ -32,11 +32,15 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create']
+  operation:
+    base_url: '{{op_id}}'
 error_retry_predicates:
   - transport_tpg.HealthcareDatasetNotInitialized
 custom_code:
   decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
-  post_create: templates/terraform/post_create/healthcare_dataset.go.tmpl
 samples:
   - name: healthcare_dataset_basic
     primary_resource_id: default
