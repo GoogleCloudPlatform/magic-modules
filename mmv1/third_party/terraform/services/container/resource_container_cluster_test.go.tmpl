@@ -3495,6 +3495,11 @@ func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withNodePoolDefaults(clusterName, "true", networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_node_pool_defaults", plancheck.ResourceActionCreate),
+					},
+				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool_defaults",
 						"node_pool_defaults.0.node_config_defaults.0.gcfs_config.#", "1"),
@@ -7753,6 +7758,11 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withGatewayApiConfig(clusterName, "CHANNEL_DISABLED", networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionCreate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
