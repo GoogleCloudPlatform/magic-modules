@@ -1,0 +1,18 @@
+resource "google_bigquery_reservation" "basic" {
+  name  = "{{index $.ResourceIdVars "reservation_name"}}"
+  project = "{{index $.TestEnvVars "project"}}"
+  location = "us-central1"
+  slot_capacity = 0
+  ignore_idle_slots = false
+}
+
+resource "google_bigquery_reservation_assignment" "{{$.PrimaryResourceId}}" {
+  assignee  = "projects/{{index $.TestEnvVars "project"}}"
+  location = "us-central1"
+  reservation = google_bigquery_reservation.basic.id
+
+  scheduling_policy {
+    concurrency = 10
+    max_slots   = 100
+  }
+}
