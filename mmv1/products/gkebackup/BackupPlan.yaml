@@ -66,9 +66,16 @@ samples:
       - name: gkebackup_backupplan_autopilot
         resource_id_vars:
           name: autopilot-plan
-          cluster: projects/my-project-name/locations/us-east1/clusters/autopilot-cluster
+          cluster_name: autopilot-cluster
+          deletion_protection: "true"
+          network_name: default
+          subnetwork_name: default
         test_vars_overrides:
-          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
+          deletion_protection: "false"
+          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
+          subnetwork_name: compute.BootstrapSubnetInRegion(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"), "us-east1", "10.79.0.0/20")
+        oics_vars_overrides:
+          deletion_protection: "false"
   - name: gkebackup_backupplan_cmek
     primary_resource_id: cmek
     steps:
