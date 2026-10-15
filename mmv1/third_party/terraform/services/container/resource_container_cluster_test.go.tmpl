@@ -1776,12 +1776,22 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig_createWithoutConfig(
 				// server returned a config on create, this is a no-op instead;
 				// either way, only the default checks apply.
 				Config: testAccContainerCluster_withManagedOpenTelemetryConfigEmpty(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
 			},
 			testAccManagedOpenTelemetryImportStep(),
 			{
 				// Disable. No update expectation: the server-computed prior
 				// scope could already be NONE.
 				Config: testAccContainerCluster_withManagedOpenTelemetryConfigScope(clusterName, networkName, subnetworkName, "NONE"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
 				Check:  testAccCheckManagedOpenTelemetryScope("NONE"),
 			},
 			testAccManagedOpenTelemetryImportStep(),
@@ -1835,6 +1845,11 @@ func TestAccContainerCluster_withManagedOpenTelemetryConfig_createWithConfig(t *
 				// Enable. No update expectation: the server-computed prior
 				// scope could already be COLLECTION_AND_INSTRUMENTATION_COMPONENTS.
 				Config: testAccContainerCluster_withManagedOpenTelemetryConfigScope(clusterName, networkName, subnetworkName, "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
 				Check:  testAccCheckManagedOpenTelemetryScope("COLLECTION_AND_INSTRUMENTATION_COMPONENTS"),
 			},
 			testAccManagedOpenTelemetryImportStep(),
@@ -2704,6 +2719,11 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_updateVersion(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.with_version",
