@@ -17,9 +17,12 @@ import (
 )
 
 func bootstrapTestKmsKey(t *testing.T) string {
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
 	project := envvar.GetTestProjectFromEnv()
 	keyName := fmt.Sprintf("projects/%s/locations/us-central1/keyRings/tftest-shared-keyring-1/cryptoKeys/tf-bootstrap-re-key1", project)
-	config := acctest.GoogleProviderConfig(t)
 	kmsClient := kms.NewClient(config, config.UserAgent)
 	if _, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.Get(keyName).Do(); err == nil {
 		return keyName
@@ -28,7 +31,10 @@ func bootstrapTestKmsKey(t *testing.T) string {
 }
 
 func bootstrapTestParentModel(t *testing.T) string {
-	config := acctest.GoogleProviderConfig(t)
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
 	project := envvar.GetTestProjectFromEnv()
 	location := "us-central1"
 
