@@ -82,6 +82,7 @@ samples:
           policy_name: my-mcp-policy
   - name: network_security_authz_policy_network_rules
     primary_resource_id: default
+    tgc_skip_test: 'Multi-step update test fails due to CAI asset propagation lag between steps'
     steps:
       - name: network_security_authz_policy_with_network_rules
         resource_id_vars:

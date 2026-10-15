@@ -94,6 +94,31 @@ func GetContainerNodePoolApiObject(d tpgresource.TerraformResourceData, config *
 	} else if v, ok := d.GetOkExists("location"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
 		obj["location"] = locationProp
 	}
+	if v, ok := d.GetOk("best_effort_provisioning"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			bep := l[0].(map[string]interface{})
+			if enabled, ok := bep["enabled"].(bool); ok && enabled {
+				bepMap := map[string]interface{}{"enabled": true}
+				if minNodes, ok := bep["min_provision_nodes"].(int); ok && minNodes != 0 {
+					bepMap["minProvisionNodes"] = minNodes
+				}
+				obj["bestEffortProvisioning"] = bepMap
+			}
+		}
+	}
+	if v, ok := d.GetOk("maintenance_policy"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			mp := l[0].(map[string]interface{})
+			if eu, ok := mp["exclusion_until_end_of_support"].([]interface{}); ok && len(eu) > 0 && eu[0] != nil {
+				euMap := eu[0].(map[string]interface{})
+				obj["maintenancePolicy"] = map[string]interface{}{
+					"exclusionUntilEndOfSupport": map[string]interface{}{
+						"enabled": euMap["enabled"],
+					},
+				}
+			}
+		}
+	}
 
 	return obj, nil
 }
@@ -544,6 +569,35 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 			queued_provisioning := v.([]interface{})[0].(map[string]interface{})
 			np.QueuedProvisioning = &container.QueuedProvisioning{
 				Enabled: queued_provisioning["enabled"].(bool),
+			}
+		}
+	}
+
+	if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			bep := l[0].(map[string]interface{})
+			enabled := bep["enabled"].(bool)
+			minProvisionNodes := bep["min_provision_nodes"].(int)
+			if enabled {
+				np.BestEffortProvisioning = &container.BestEffortProvisioning{
+					Enabled:           true,
+					MinProvisionNodes: int64(minProvisionNodes),
+				}
+			}
+		}
+	}
+
+	if v, ok := d.GetOk(prefix + "maintenance_policy"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			maintenancePolicy := l[0].(map[string]interface{})
+			if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+				np.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
+					ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport{},
+				}
+				exclusionUntilEndOfSupport := v.([]interface{})[0].(map[string]interface{})
+				if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
+					np.MaintenancePolicy.ExclusionUntilEndOfSupport.Enabled = v.(bool)
+				}
 			}
 		}
 	}

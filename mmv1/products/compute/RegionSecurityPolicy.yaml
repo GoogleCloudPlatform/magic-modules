@@ -448,6 +448,8 @@ properties:
                           api_name: val
                   - name: 'requestBody'
                     type: Array
+                    # requestBodiesToExclude is not present in CAI asset
+                    is_missing_in_cai: true
                     description: |
                       A list of request body fields to be excluded from inspection during preconfigured WAF evaluation.
                     api_name: requestBodiesToExclude

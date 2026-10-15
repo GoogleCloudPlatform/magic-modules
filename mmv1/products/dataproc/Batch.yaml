@@ -347,6 +347,8 @@ properties:
               type: String
           - name: kmsKey
             type: String
+            # kmsKey is not present in CAI asset
+            is_missing_in_cai: true
             description: |
               The Cloud KMS key to use for encryption.
           - name: ttl
