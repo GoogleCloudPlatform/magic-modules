@@ -380,12 +380,12 @@ properties:
     description: |
       Optional. The authorization mode of the Redis cluster. If not provided, auth feature is disabled for the cluster.
     required: false
-    immutable: true
     default_value: AUTH_MODE_DISABLED
     enum_values:
       - AUTH_MODE_UNSPECIFIED
       - AUTH_MODE_IAM_AUTH
       - AUTH_MODE_DISABLED
+      - AUTH_MODE_TOKEN_AUTH
   - name: aclPolicy
     type: String
     description: |

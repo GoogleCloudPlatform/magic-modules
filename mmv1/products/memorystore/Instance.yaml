@@ -286,12 +286,10 @@ properties:
   - name: authorizationMode
     type: String
     description: |-
-      Optional. Immutable. Authorization mode of the instance. Possible values:
+      Optional. Authorization mode of the instance. Possible values:
        AUTH_DISABLED
-      IAM_AUTH.
-
-      TOKEN_AUTH is also supported, but only available in the google-beta provider.
-    immutable: true
+      IAM_AUTH
+      TOKEN_AUTH
     default_from_api: true
   - name: aclPolicy
     type: String
