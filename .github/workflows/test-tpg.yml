@@ -79,16 +79,20 @@ jobs:
       uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
       with:
         go-version: '^1.26'
-    # `make lint` runs `go vet`, which compiles all provider packages internally
-    # without spending time linking and installing an unused binary via `go build`.
-    - name: Build and Lint
+    # `make vet` runs `go vet`, which compiles all provider packages internally
+    # without spending time linking an unused binary via `go build`.
+    - name: Build Provider
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        make lint
+        make vet
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
         make testnolint TEST="$(go list -e ./... | grep -v /scripts | tr '\n' ' ')"
+    - name: Lint Check
+      if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
+      run: |
+        make fmtcheck
     - name: Documentation Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
