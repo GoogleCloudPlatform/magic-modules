@@ -69,9 +69,8 @@ func BootstrapSharedGKEClusterInLocation(t *testing.T, testId, location string) 
 						Enabled: true,
 					},
 				},
-				DeletionProtection: false,
-				Network:            networkName,
-				Subnetwork:         subnetworkName,
+				Network:    networkName,
+				Subnetwork: subnetworkName,
 			},
 		}
 
