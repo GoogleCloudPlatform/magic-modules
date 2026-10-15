@@ -29,7 +29,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testin
 
 	//projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -116,7 +116,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 
 resource "google_access_context_manager_access_level" "test-access" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/level"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_level"
   title       = "level"
   description = "hello"
   basic {
@@ -178,7 +178,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest(t *testi
 	org := envvar.GetTestOrgFromEnv(t)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -271,7 +271,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_
 
 resource "google_access_context_manager_access_level" "update-test" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/egressupdlevel"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_egressupdlevel"
   title       = "egressupdlevel"
   description = "Access level for egress update test"
   basic {
@@ -336,7 +336,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_pscEndpointTest(t *
 	}
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -412,7 +412,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_parentPerimeterUpda
 	projects := BootstrapServicePerimeterProjects(t, 7)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 
 	perimeterProject := projects[0].ProjectNumber
 	var egressProjects []int64
