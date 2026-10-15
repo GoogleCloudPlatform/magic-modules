@@ -930,6 +930,9 @@ fields:
   - field: 'resource_usage_export_config.enable_resource_consumption_metering'
     api_field: 'resourceUsageExportConfig.consumptionMeteringConfig.enabled'
   - api_field: 'rollbackSafeUpgrade.controlPlaneSoakDuration'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'scheduleUpgradeConfig.enabled'
+{{- end }}
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'
