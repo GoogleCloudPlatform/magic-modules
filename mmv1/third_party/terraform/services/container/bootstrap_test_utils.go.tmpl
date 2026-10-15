@@ -3,7 +3,6 @@ package container
 import (
 	"fmt"
 	"log"
-	"strings"
 	"testing"
 	"time"
 
@@ -23,13 +22,8 @@ const SharedGKEClusterPrefix = "tf-bootstrap-gke-"
 // BootstrapSharedGKECluster returns the ID of a shared GKE cluster in us-east1,
 // creating it if it hasn't been created in the test project yet.
 func BootstrapSharedGKECluster(t *testing.T, testId string) string {
-	return BootstrapSharedGKEClusterInLocation(t, testId, "us-east1")
-}
-
-// BootstrapSharedGKEClusterInLocation returns the ID of a shared GKE cluster in
-// the specified location, creating it if it hasn't been created in the test project yet.
-func BootstrapSharedGKEClusterInLocation(t *testing.T, testId, location string) string {
 	project := envvar.GetTestProjectFromEnv()
+	location := "us-east1"
 	clusterName := SharedGKEClusterPrefix + testId
 	parent := fmt.Sprintf("projects/%s/locations/%s", project, location)
 	clusterId := fmt.Sprintf("%s/clusters/%s", parent, clusterName)
@@ -70,21 +64,13 @@ func BootstrapSharedGKEClusterInLocation(t *testing.T, testId, location string) 
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] GKE cluster %q not found, bootstrapping", clusterId)
 
-		region := location
-		var nodeLocations []string
-		if parts := strings.Split(location, "-"); len(parts) == 3 {
-			region = strings.Join(parts[:2], "-")
-		} else {
-			nodeLocations = []string{region + "-b"}
-		}
-
 		networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
-		subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, testId, networkName, region, "10.79.0.0/20")
+		subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, testId, networkName, location, "10.79.0.0/20")
 
 		req := &container.CreateClusterRequest{
 			Cluster: &container.Cluster{
 				Name:             clusterName,
-				Locations:        nodeLocations,
+				Locations:        []string{"us-east1-b"},
 				InitialNodeCount: 1,
 				NodeConfig: &container.NodeConfig{
 					MachineType: "n4-standard-2",
