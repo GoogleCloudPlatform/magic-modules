@@ -2,10 +2,10 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
   name           = "{{index $.ResourceIdVars "instance_name"}}"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
-  region         = "us-west1"
+  region         = "us-east1"
 
-  location_id             = "us-west1-a"
-  alternative_location_id = "us-west1-b"
+  location_id             = "us-east1-b"
+  alternative_location_id = "us-east1-c"
 
   authorized_network = data.google_compute_network.redis-network.id
 
@@ -25,7 +25,7 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
 
 resource "google_kms_key_ring" "redis_keyring" {
   name     = "redis-keyring"
-  location = "us-west1"
+  location = "us-east1"
 }
 
 resource "google_kms_crypto_key" "redis_key" {
