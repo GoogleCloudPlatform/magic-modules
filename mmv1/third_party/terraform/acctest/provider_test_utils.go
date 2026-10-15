@@ -51,6 +51,9 @@ func GoogleProviderConfig(t *testing.T) *transport_tpg.Config {
 	return sdkProvider.Meta().(*transport_tpg.Config)
 }
 
+// AccTestPreCheck wraps envvar.AccTestPreCheck for backwards compatibility with existing
+// acceptance tests. Tests in lower-level packages (e.g., transport) that acctest transitively
+// depends on should call envvar.AccTestPreCheck directly to avoid import cycles.
 func AccTestPreCheck(t *testing.T) {
 	envvar.AccTestPreCheck(t)
 }

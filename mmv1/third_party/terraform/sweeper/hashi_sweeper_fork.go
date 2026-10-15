@@ -103,7 +103,8 @@ func GetSweeper(name string) (*Sweeper, bool) {
 	return s, ok
 }
 
-// GetSweeperInventory returns a shallow copy of the map of registered sweepers.
+// GetSweeperInventory returns a shallow copy of the map of registered sweepers
+// to protect the global sweeper registry from accidental mutation by callers.
 func GetSweeperInventory() map[string]*Sweeper {
 	return maps.Clone(sweeperInventory)
 }
