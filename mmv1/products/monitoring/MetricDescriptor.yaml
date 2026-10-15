@@ -34,13 +34,14 @@ timeouts:
 async:
   type: PollAsync
   actions: [create, update, delete]
-  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_existence: 'PollCheckMetricDescriptorUpdate(d)'
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
   target_occurrences: 20
 error_retry_predicates:
   - transport_tpg.IsMonitoringConcurrentEditError
 custom_code:
+  constants: templates/terraform/constants/monitoring_metric_descriptor.go.tmpl
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
 samples:
   - name: monitoring_metric_descriptor_basic
