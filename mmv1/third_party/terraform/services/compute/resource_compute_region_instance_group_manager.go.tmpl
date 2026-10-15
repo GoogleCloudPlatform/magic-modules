@@ -2071,7 +2071,7 @@ func flattenInstanceSelectionDisks(disksRaw interface{}) []map[string]any {
         }
 
         if source, ok := disk["source"].(string); ok && source != "" {
-            diskData["source"] = tpgresource.GetResourceNameFromSelfLink(source)
+            diskData["source"] = source
         } else if initParams, ok := disk["initializeParams"].(map[string]interface{}); ok && initParams != nil {
             if v, ok := initParams["diskName"].(string); ok && v != "" {
                 diskData["disk_name"] = v

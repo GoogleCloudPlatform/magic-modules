@@ -523,7 +523,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"status", "instance_flexibility_policy"},
+        ImportStateVerifyIgnore: []string{"status"},
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesUpdate(context),
@@ -532,7 +532,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"status", "instance_flexibility_policy"},
+        ImportStateVerifyIgnore: []string{"status"},
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesRemove(context),
@@ -541,7 +541,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"status", "instance_flexibility_policy"},
+        ImportStateVerifyIgnore: []string{"status"},
       },
     },
   })
