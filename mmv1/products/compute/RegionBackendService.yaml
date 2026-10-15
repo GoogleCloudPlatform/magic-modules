@@ -67,6 +67,7 @@ sweeper:
     - region: "europe-west1"
     - region: "us-west1"
     - region: "europe-north1"
+    - region: "us-east4"
 samples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
