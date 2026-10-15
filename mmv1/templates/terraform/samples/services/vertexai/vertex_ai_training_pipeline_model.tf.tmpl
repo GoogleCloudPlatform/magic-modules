@@ -1,0 +1,98 @@
+resource "google_vertex_ai_training_pipeline" "{{.PrimaryResourceId}}" {
+  display_name             = "{{index $.ResourceIdVars "display_name"}}"
+  region                   = "us-central1"
+  training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
+
+  training_task_inputs = jsonencode({
+    workerPoolSpecs = [
+      {
+        machineSpec = {
+          machineType = "n1-standard-4"
+        }
+        replicaCount = "1"
+        diskSpec = {
+          bootDiskType   = "pd-ssd"
+          bootDiskSizeGb = 100
+        }
+        containerSpec = {
+          imageUri = "gcr.io/cloud-marketplace/google/debian11"
+        }
+      }
+    ]
+  })
+
+  model_to_upload {
+    display_name        = "{{index $.ResourceIdVars "model_name"}}"
+    description         = "A custom model uploaded from training pipeline"
+    version_description = "v1 initial release"
+    version_aliases     = ["v1", "latest"]
+    artifact_uri        = "gs://cloud-samples-data/ai-platform/flower_photos"
+
+    container_spec {
+      image_uri     = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-8:latest"
+      command       = ["python"]
+      args          = ["-m", "server"]
+      predict_route = "/predict"
+      health_route  = "/health"
+
+      env {
+        name  = "APP_ENV"
+        value = "production"
+      }
+
+      ports {
+        container_port = 8080
+      }
+
+      grpc_ports {
+        container_port = 8081
+      }
+
+      deployment_timeout     = "1800s"
+      shared_memory_size_mb  = "128"
+
+      startup_probe {
+        exec {
+          command = ["cat", "/tmp/ready"]
+        }
+        period_seconds  = 10
+        timeout_seconds = 10
+      }
+
+      health_probe {
+        exec {
+          command = ["cat", "/tmp/healthy"]
+        }
+        period_seconds  = 10
+        timeout_seconds = 10
+      }
+    }
+
+    labels = {
+      model_type = "custom"
+    }
+
+    explanation_spec {
+      parameters = jsonencode({
+        sampledShapleyAttribution = {
+          pathCount = 5
+        }
+      })
+      metadata = jsonencode({
+        inputs = {
+          features = {}
+        }
+        outputs = {
+          predictions = {}
+        }
+      })
+    }
+  }
+
+  model_id = "test_model_{{index $.ResourceIdVars "model_id"}}"
+  parent_model = "{{index $.ResourceIdVars "parent_model"}}"
+
+  labels = {
+    env = "test"
+  }
+}

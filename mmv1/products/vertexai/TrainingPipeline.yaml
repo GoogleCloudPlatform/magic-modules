@@ -1,0 +1,499 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: TrainingPipeline
+description: |
+  The TrainingPipeline orchestrates tasks associated with training a Model.
+references:
+  guides:
+    'Custom training overview': 'https://cloud.google.com/vertex-ai/docs/training/custom-training'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.trainingPipelines'
+docs:
+base_url: projects/{{project}}/locations/{{region}}/trainingPipelines
+self_link: projects/{{project}}/locations/{{region}}/trainingPipelines/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/trainingPipelines
+delete_url: projects/{{project}}/locations/{{region}}/trainingPipelines/{{name}}
+id_format: projects/{{project}}/locations/{{region}}/trainingPipelines/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/trainingPipelines/{{name}}
+  - '{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 30
+  delete_minutes: 30
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - delete
+  result:
+    resource_inside_response: true
+custom_diff:
+  - resourceVertexAITrainingPipelineCustomDiff
+custom_code:
+  constants: templates/terraform/constants/vertex_ai_training_pipeline.go.tmpl
+  pre_delete: templates/terraform/pre_delete/vertex_ai_training_pipeline.go.tmpl
+samples:
+  - name: vertex_ai_training_pipeline_basic
+    primary_resource_id: basic_pipeline
+    steps:
+      - name: vertex_ai_training_pipeline_basic
+        resource_id_vars:
+          display_name: test-training-pipeline
+        ignore_read_extra:
+          - start_time
+          - state
+          - training_task_metadata
+          - update_time
+  - name: vertex_ai_training_pipeline_model
+    primary_resource_id: model_pipeline
+    steps:
+      - name: vertex_ai_training_pipeline_model
+        resource_id_vars:
+          display_name: test-training-pipeline-model
+          model_name: test-model
+          model_id: test-model-id
+          parent_model: test-parent-model
+        test_vars_overrides:
+          parent_model: 'bootstrapTestParentModel(t)'
+        ignore_read_extra:
+          - start_time
+          - state
+          - training_task_metadata
+          - update_time
+  - name: vertex_ai_training_pipeline_dataset
+    primary_resource_id: dataset_pipeline
+    steps:
+      - name: vertex_ai_training_pipeline_dataset
+        resource_id_vars:
+          display_name: test-training-pipeline-dataset
+          dataset_name: test-dataset
+          bucket_name: test-bucket
+        ignore_read_extra:
+          - start_time
+          - state
+          - training_task_metadata
+          - update_time
+  - name: vertex_ai_training_pipeline_encryption
+    primary_resource_id: encryption_pipeline
+    steps:
+      - name: vertex_ai_training_pipeline_encryption
+        resource_id_vars:
+          display_name: test-training-pipeline-enc
+          model_name: test-model-enc
+          kms_key_name: kms-key
+        test_vars_overrides:
+          kms_key_name: 'bootstrapTestKmsKey(t)'
+        ignore_read_extra:
+          - start_time
+          - state
+          - training_task_metadata
+          - update_time
+parameters:
+  - name: region
+    type: String
+    description: The region of the training pipeline. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the TrainingPipeline.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      The user-defined name of this TrainingPipeline.
+    required: true
+  - name: trainingTaskDefinition
+    type: String
+    description: |
+      A Google Cloud Storage path to the YAML file that defines the training task which is responsible for producing the model artifact, and may also include additional auxiliary work. The definition files that can be used here are found in gs://google-cloud-aiplatform/schema/trainingjob/definition/.
+    required: true
+  - name: trainingTaskInputs
+    type: String
+    description: |
+      The training task's parameter(s), as specified in the training_task_definition's inputs. This field uses JSON data as a string.
+    required: true
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+    custom_expand: templates/terraform/custom_expand/json_value.tmpl
+    validation:
+      function: validation.StringIsJSON
+  - name: inputDataConfig
+    type: NestedObject
+    description: |
+      Specifies Vertex AI owned input data that may be used for training the Model.
+    properties:
+      - name: datasetId
+        type: String
+        description: |
+          The ID of the Dataset in the same Project and Location which data will be used to train the Model.
+        required: true
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.tmpl
+        diff_suppress_func: 'tpgresource.CompareResourceNames'
+      - name: annotationsFilter
+        type: String
+        description: |
+          Applicable only to Datasets that have DataItems and Annotations. A filter on Annotations of the Dataset.
+      - name: annotationSchemaUri
+        type: String
+        description: |
+          Applicable only to custom training with Datasets that have DataItems and Annotations. Cloud Storage URI that points to a YAML file describing the annotation schema.
+      - name: savedQueryId
+        type: String
+        description: |
+          Only applicable to Datasets that have SavedQueries. The ID of a SavedQuery under the Dataset specified by dataset_id used for filtering Annotations for training.
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.tmpl
+        diff_suppress_func: 'tpgresource.CompareResourceNames'
+      - name: persistMlUseAssignment
+        type: Boolean
+        description: |
+          Whether to persist the ML use assignment to data item system labels.
+        send_empty_value: true
+      - name: fractionSplit
+        type: NestedObject
+        description: |
+          The instructions how the input data should be split between the training, validation and test sets.
+        properties:
+          - name: trainingFraction
+            type: Double
+            description: The fraction of the input data that is to be used to train the Model.
+          - name: validationFraction
+            type: Double
+            description: The fraction of the input data that is to be used to validate the Model.
+          - name: testFraction
+            type: Double
+            description: The fraction of the input data that is to be used to evaluate the Model.
+      - name: filterSplit
+        type: NestedObject
+        description: |
+          Assigns input data to training, validation, and test sets based on the given filters.
+        properties:
+          - name: trainingFilter
+            type: String
+            description: A filter on DataItems of the Dataset for training set.
+            required: true
+          - name: validationFilter
+            type: String
+            description: A filter on DataItems of the Dataset for validation set.
+            required: true
+          - name: testFilter
+            type: String
+            description: A filter on DataItems of the Dataset for test set.
+            required: true
+      - name: predefinedSplit
+        type: NestedObject
+        description: |
+          Assigns input data to training, validation, and test sets based on the value of a provided key. Supported only for tabular Datasets.
+        properties:
+          - name: key
+            type: String
+            description: The key is a name of one of the Dataset's data columns.
+            required: true
+      - name: timestampSplit
+        type: NestedObject
+        description: |
+          Assigns input data to training, validation, and test sets based on provided timestamps. Supported only for tabular Datasets.
+        properties:
+          - name: key
+            type: String
+            description: The key is a name of one of the Dataset's data columns.
+            required: true
+          - name: trainingFraction
+            type: Double
+            description: The fraction of the input data that is to be used to train the Model.
+          - name: validationFraction
+            type: Double
+            description: The fraction of the input data that is to be used to validate the Model.
+          - name: testFraction
+            type: Double
+            description: The fraction of the input data that is to be used to evaluate the Model.
+      - name: stratifiedSplit
+        type: NestedObject
+        description: |
+          Assigns input data to the training, validation, and test sets so that the distribution of values found in the categorical column is mirrored within each split. Supported only for tabular Datasets.
+        properties:
+          - name: key
+            type: String
+            description: The key is a name of one of the Dataset's data columns.
+            required: true
+          - name: trainingFraction
+            type: Double
+            description: The fraction of the input data that is to be used to train the Model.
+          - name: validationFraction
+            type: Double
+            description: The fraction of the input data that is to be used to validate the Model.
+          - name: testFraction
+            type: Double
+            description: The fraction of the input data that is to be used to evaluate the Model.
+      - name: gcsDestination
+        type: NestedObject
+        description: |
+          The Cloud Storage location where the training data is to be written to.
+        properties:
+          - name: outputUriPrefix
+            type: String
+            description: The Cloud Storage URI prefix to write to.
+            required: true
+      - name: bigqueryDestination
+        type: NestedObject
+        description: |
+          The BigQuery location where the training data is to be written to.
+        properties:
+          - name: outputUri
+            type: String
+            description: The BigQuery table to which the output is to be written.
+            required: true
+  - name: modelToUpload
+    type: NestedObject
+    description: |
+      Describes the Model that may be uploaded by this TrainingPipeline.
+    properties:
+      - name: name
+        type: String
+        description: The resource name of the Model.
+        output: true
+      - name: displayName
+        type: String
+        description: The user-defined name of the Model.
+        required: true
+      - name: description
+        type: String
+        description: The description of the Model.
+        ignore_read: true
+      - name: versionDescription
+        type: String
+        description: The description of this version.
+        ignore_read: true
+      - name: versionAliases
+        type: Array
+        description: User provided version aliases so that a model version can be referenced using alias.
+        ignore_read: true
+        item_type:
+          type: String
+      - name: artifactUri
+        type: String
+        description: The path to the directory containing the Model artifact and any of its supporting files.
+      - name: containerSpec
+        type: NestedObject
+        description: The specification of the container that is to be used when deploying this Model.
+        properties:
+          - name: imageUri
+            type: String
+            description: URI of the Docker image to be used as the custom container for serving predictions.
+            required: true
+          - name: command
+            type: Array
+            description: Specifies the command that runs when the container starts.
+            item_type:
+              type: String
+          - name: args
+            type: Array
+            description: Specifies the arguments to the command when the container starts.
+            item_type:
+              type: String
+          - name: predictRoute
+            type: String
+            description: HTTP path on the container to send prediction requests to.
+          - name: healthRoute
+            type: String
+            description: HTTP path on the container to send health checks to.
+          - name: env
+            type: Array
+            description: List of environment variables to be set in the container.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: name
+                  type: String
+                  description: The name of the environment variable.
+                  required: true
+                - name: value
+                  type: String
+                  description: The value of the environment variable.
+                  required: true
+          - name: ports
+            type: Array
+            description: List of ports that are exposed by the container's process.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: containerPort
+                  type: Integer
+                  description: The number of the port on the container.
+                  required: true
+          - name: grpcPorts
+            type: Array
+            description: List of ports to expose from the container for gRPC.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: containerPort
+                  type: Integer
+                  description: The number of the port on the container.
+                  required: true
+          - name: deploymentTimeout
+            type: String
+            description: |
+              Deployment timeout. Limit for deployment timeout is 2 hours.
+          - name: sharedMemorySizeMb
+            type: String
+            description: |
+              The amount of the VM memory to reserve as the shared memory for the model in megabytes.
+          - name: startupProbe
+            type: NestedObject
+            description: Specification for Kubernetes startup probe.
+            properties:
+              - name: exec
+                type: NestedObject
+                description: ExecAction specifies a command to execute.
+                properties:
+                  - name: command
+                    type: Array
+                    description: Command is the command line to execute inside the container.
+                    item_type:
+                      type: String
+              - name: periodSeconds
+                type: Integer
+                description: How often (in seconds) to perform the probe.
+              - name: timeoutSeconds
+                type: Integer
+                description: Number of seconds after which the probe times out.
+          - name: healthProbe
+            type: NestedObject
+            description: Specification for Kubernetes readiness probe.
+            properties:
+              - name: exec
+                type: NestedObject
+                description: ExecAction specifies a command to execute.
+                properties:
+                  - name: command
+                    type: Array
+                    description: Command is the command line to execute inside the container.
+                    item_type:
+                      type: String
+              - name: periodSeconds
+                type: Integer
+                description: How often (in seconds) to perform the probe.
+              - name: timeoutSeconds
+                type: Integer
+                description: Number of seconds after which the probe times out.
+      - name: labels
+        type: KeyValuePairs
+        description: The labels with user-defined metadata to organize your Models.
+      - name: encryptionSpec
+        type: NestedObject
+        description: Customer-managed encryption key spec for a Model.
+        properties:
+          - name: kmsKeyName
+            type: String
+            description: The Cloud KMS resource identifier of the customer-managed encryption key used to protect the model.
+            required: true
+      - name: explanationSpec
+        type: NestedObject
+        description: |
+          Specification of Model explanation.
+        ignore_read: true
+        properties:
+          - name: parameters
+            type: String
+            description: |
+              Parameters that configure explaining of the Model's predictions. This field uses JSON data as a string.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
+            validation:
+              function: validation.StringIsJSON
+          - name: metadata
+            type: String
+            description: |
+              Metadata describing the Model's input and output for explanation. This field uses JSON data as a string.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
+            validation:
+              function: validation.StringIsJSON
+  - name: modelId
+    type: String
+    description: |
+      The ID to use for the uploaded Model, which will become the final component of the model resource name.
+    ignore_read: true
+  - name: parentModel
+    type: String
+    description: |
+      When specified, the model_to_upload will become a new version of this parent_model.
+    ignore_read: true
+  - name: encryptionSpec
+    type: NestedObject
+    description: |
+      Customer-managed encryption key spec for a TrainingPipeline.
+    properties:
+      - name: kmsKeyName
+        type: String
+        description: The Cloud KMS resource identifier of the customer-managed encryption key used to protect the training pipeline.
+        required: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      The labels with user-defined metadata to organize TrainingPipelines.
+  - name: state
+    type: String
+    description: |
+      The detailed state of the pipeline.
+    output: true
+  - name: error
+    type: NestedObject
+    description: |
+      Only populated when the pipeline's state is PIPELINE_STATE_FAILED or PIPELINE_STATE_CANCELLED.
+    output: true
+    properties:
+      - name: code
+        type: Integer
+        description: The status code, which should be an enum value of google.rpc.Code.
+        output: true
+      - name: message
+        type: String
+        description: A developer-facing error message.
+        output: true
+  - name: createTime
+    type: String
+    description: |
+      Time when the TrainingPipeline was created.
+    output: true
+  - name: startTime
+    type: String
+    description: |
+      Time when the TrainingPipeline for the first time entered the PIPELINE_STATE_RUNNING state.
+    output: true
+  - name: endTime
+    type: String
+    description: |
+      Time when the TrainingPipeline entered any of the following states: PIPELINE_STATE_SUCCEEDED, PIPELINE_STATE_FAILED, PIPELINE_STATE_CANCELLED.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      Time when the TrainingPipeline was most recently updated.
+    output: true
+  - name: trainingTaskMetadata
+    type: String
+    description: |
+      The metadata information as specified in the training_task_definition's metadata.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl

@@ -1,0 +1,59 @@
+// Cancel the TrainingPipeline first if it is still running or pending.
+// The Vertex AI TrainingPipeline API requires cancelling an active pipeline before deleting it.
+getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/trainingPipelines/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, "TrainingPipeline")
+}
+
+state, _ := getRes["state"].(string)
+log.Printf("[DEBUG] TrainingPipeline %s current state before delete: %s", d.Id(), state)
+
+if state == "PIPELINE_STATE_QUEUED" || state == "PIPELINE_STATE_PENDING" || state == "PIPELINE_STATE_RUNNING" || state == "PIPELINE_STATE_PAUSED" {
+	cancelUrl := getUrl + ":cancel"
+	log.Printf("[DEBUG] Cancelling TrainingPipeline %s before deletion", d.Id())
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    cancelUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error cancelling TrainingPipeline %s: %s", d.Id(), err)
+	}
+
+	// Poll until pipeline reaches a terminal state (CANCELLED, FAILED, or SUCCEEDED)
+	err = transport_tpg.PollingWaitTime(func() (map[string]interface{}, error) {
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    getUrl,
+			UserAgent: userAgent,
+		})
+	}, func(res map[string]interface{}, resErr error) transport_tpg.PollResult {
+		if resErr != nil {
+			return transport_tpg.ErrorPollResult(resErr)
+		}
+		currentState, _ := res["state"].(string)
+		log.Printf("[DEBUG] Polling TrainingPipeline %s state after cancel: %s", d.Id(), currentState)
+		if currentState == "PIPELINE_STATE_CANCELLED" || currentState == "PIPELINE_STATE_FAILED" || currentState == "PIPELINE_STATE_SUCCEEDED" {
+			return transport_tpg.SuccessPollResult()
+		}
+		return transport_tpg.PendingStatusPollResult(currentState)
+	}, "Waiting for TrainingPipeline to cancel", d.Timeout(schema.TimeoutDelete), 1)
+	if err != nil {
+		return fmt.Errorf("Error waiting for TrainingPipeline %s to cancel: %s", d.Id(), err)
+	}
+}

@@ -1,0 +1,13 @@
+func resourceVertexAITrainingPipelineCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.HasChange("labels") {
+		if err := diff.ForceNew("labels"); err != nil {
+			return err
+		}
+	}
+	if diff.HasChange("terraform_labels") {
+		if err := diff.ForceNew("terraform_labels"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
