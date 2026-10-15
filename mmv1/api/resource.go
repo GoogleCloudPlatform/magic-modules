@@ -288,9 +288,13 @@ type Resource struct {
 	Async *Async `yaml:"async,omitempty"`
 
 	// An array of function names that determine whether an error is retryable.
+	// Names without a package qualifier refer to exported functions in the
+	// resource's service package (for example, from custom_code.constants).
 	ErrorRetryPredicates []string `yaml:"error_retry_predicates,omitempty"`
 
 	// An array of function names that determine whether an error is not retryable.
+	// Names without a package qualifier refer to exported functions in the
+	// resource's service package (for example, from custom_code.constants).
 	ErrorAbortPredicates []string `yaml:"error_abort_predicates,omitempty"`
 
 	// Optional attributes for declaring a resource's current version and generating

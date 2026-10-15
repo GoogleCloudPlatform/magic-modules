@@ -238,6 +238,8 @@ Both functions use the following signature:
 func (err error) (bool, string) {}
 ```
 
+Shared predicates live in the `transport_tpg` package. A predicate used by only one resource can instead be defined in that resource's [`constants`](#add-reusable-variables-and-functions) custom code file. Export it, and list it without a package qualifier (for example, `- 'IsMyResourceRetryableError'`). Generated tests refer to it through the resource's service package.
+
 The function takes an error and returns:
 - `bool`: whether the error should be retried/aborted
 - `string`: a reason that will be logged
