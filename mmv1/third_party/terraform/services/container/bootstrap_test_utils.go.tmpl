@@ -51,8 +51,8 @@ func BootstrapSharedGKEClusterInLocation(t *testing.T, testId, location string) 
 			region = strings.Join(parts[:2], "-")
 		}
 
-		networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
-		subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, region, "10.79.0.0/20")
+		networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
+		subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, testId, networkName, region, "10.79.0.0/20")
 
 		req := &container.CreateClusterRequest{
 			Cluster: &container.Cluster{
