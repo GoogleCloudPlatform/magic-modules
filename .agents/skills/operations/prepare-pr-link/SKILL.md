@@ -55,8 +55,6 @@ git checkout -b "$BRANCH" "$UPSTREAM_REMOTE/$BASE_BRANCH"
 
 ### 2. Stage and Commit Changes
 
-When updating an already-pushed branch, create a new commit on top of `HEAD` (do not `--amend` unless instructed):
-
 ```bash
 git add mmv1/products/<product>/ # or other relevant files
 git commit -m "<product>: <concise description under 60 chars>"
