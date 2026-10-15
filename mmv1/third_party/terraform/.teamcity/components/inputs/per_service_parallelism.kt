@@ -19,5 +19,9 @@ var ServiceParallelism = mapOf(
     // osconfig: OS Config API quota exhausted
     "osconfig" to 6,
 
-    "looker" to 1
+    "looker" to 1,
+    // compute:  Quota 'HIERARCHICAL_SECURITY_POLICIES' exceeded.  Limit: 10.0 globally. Error on `TestAccComputeOrganizationSecurityPolicy_*
+    "compute" to 10, 
+    // dataprocmetastore: ;Create Bucket quota limit limit exceeded on the Google Cloud project. Please slow down execution and try again.
+    "dataprocmetastore" to 6
 )
