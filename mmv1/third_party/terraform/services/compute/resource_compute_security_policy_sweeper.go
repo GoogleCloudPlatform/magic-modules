@@ -10,7 +10,14 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepersLegacy("ComputeSecurityPolicy", testSweepComputeSecurityPolicy)
+	sweeper.AddTestSweepers(&sweeper.Sweeper{
+		Name:           "ComputeSecurityPolicy",
+		DeleteFunction: testSweepComputeSecurityPolicy,
+		Dependencies: []string{
+			"google_compute_backend_service",
+			"google_compute_backend_bucket",
+		},
+	})
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
@@ -58,7 +65,7 @@ func testSweepComputeSecurityPolicy(region string) error {
 		obj := ri.(map[string]interface{})
 		if obj["name"] == nil {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
-			return nil
+			continue
 		}
 
 		name := obj["name"].(string)
