@@ -1,0 +1,20 @@
+provider "google" {
+  prefer_regional_endpoints = true
+}
+
+resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
+  name              = "{{index $.ResourceIdVars "instance_name"}}"
+  platform_edition  = "LOOKER_CORE_ENTERPRISE_ANNUAL"
+  region            = "us-central1"
+  public_ip_enabled = true
+  psc_enabled       = true
+
+  psc_config {
+    allowed_vpcs = []
+  }
+
+  oauth_config {
+    client_id     = "{{index $.ResourceIdVars "client_id"}}"
+    client_secret = "{{index $.ResourceIdVars "client_secret"}}"
+  }
+}
