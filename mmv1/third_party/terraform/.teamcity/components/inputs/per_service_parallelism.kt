@@ -8,7 +8,7 @@
 package generated
 
 // specifies the default level of parallelism for per-service-package test builds, unless overridden in ServiceParallelism below
-const val DefaultServiceParallelism = 12
+const val DefaultServiceParallelism = 20
 
 var ServiceParallelism = mapOf(
     // Packages with quota failures in nightly tests are kept at the previous default of 6.
