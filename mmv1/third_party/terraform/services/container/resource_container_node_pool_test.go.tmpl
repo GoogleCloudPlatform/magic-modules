@@ -2107,6 +2107,11 @@ func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 			},
 			{
 				Config: testAccContainerNodePool_updateAutoscaling(cluster, np, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count", "0"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count", "5"),
@@ -2421,6 +2426,11 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 			{
 				// Test alternative way to specify an empty node pool
 				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, networkName, subnetworkName, 1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -5976,6 +5986,11 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
                                 ImportStateVerify:       true,
                         },{
                                 Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "SEV_SNP", "n2d-standard-2"),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                	PreApply: []plancheck.PlanCheck{
+                                		plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+                                	},
+                                },
                         },
                         {
                                 ResourceName:            "google_container_node_pool.np",
@@ -5983,6 +5998,11 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
                                 ImportStateVerify:       true,
                         },{
                                 Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "TDX", "c3-standard-4"),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                	PreApply: []plancheck.PlanCheck{
+                                		plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+                                	},
+                                },
                         },
                         {
                                 ResourceName:            "google_container_node_pool.np",
@@ -6106,6 +6126,11 @@ func TestAccContainerNodePool_withMaxRunDuration(t *testing.T) {
 			},
 			{
 				Config: testAccContainerNodePool_withMaxRunDuration(clusterName, np, networkName, subnetworkName, "1800s"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -6114,6 +6139,11 @@ func TestAccContainerNodePool_withMaxRunDuration(t *testing.T) {
 			},
 			{
 				Config: testAccContainerNodePool_disableMaxRunDuration(clusterName, np, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -8294,6 +8324,11 @@ func TestAccContainerNodePool_bestEffortProvisioning(t *testing.T) {
 				// The API omits bestEffortProvisioning when disabled, so an explicit
 				// `enabled = false` is only kept in state from config and isn't imported.
 				Config: testAccContainerNodePool_bestEffortProvisioning(clusterName, poolName, networkName, subnetworkName, false, 0),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "best_effort_provisioning.0.enabled", "false"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "best_effort_provisioning.0.min_provision_nodes", "0"),
@@ -8301,6 +8336,11 @@ func TestAccContainerNodePool_bestEffortProvisioning(t *testing.T) {
 			},
 			{
 				Config: testAccContainerNodePool_bestEffortProvisioningRemoved(clusterName, poolName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "best_effort_provisioning.#", "0"),
 				),

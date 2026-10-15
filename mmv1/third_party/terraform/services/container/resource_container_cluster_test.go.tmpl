@@ -536,6 +536,11 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, true, "", "n2d-standard-2"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.confidential_nodes", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -545,6 +550,11 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 			},
 			{
                                 Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV", "n2d-standard-2"),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                	PreApply: []plancheck.PlanCheck{
+                                		plancheck.ExpectResourceAction("google_container_cluster.confidential_nodes", plancheck.ResourceActionReplace),
+                                	},
+                                },
                         },
                         {
                                 ResourceName:            "google_container_cluster.confidential_nodes",
@@ -554,6 +564,11 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
                         },
 			{
                                 Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "SEV_SNP", "n2d-standard-2"),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                	PreApply: []plancheck.PlanCheck{
+                                		plancheck.ExpectResourceAction("google_container_cluster.confidential_nodes", plancheck.ResourceActionReplace),
+                                	},
+                                },
                         },
                         {
                                 ResourceName:            "google_container_cluster.confidential_nodes",
@@ -563,6 +578,11 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
                         },
 			{
                                 Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "TDX", "c3-standard-4"),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                	PreApply: []plancheck.PlanCheck{
+                                		plancheck.ExpectResourceAction("google_container_cluster.confidential_nodes", plancheck.ResourceActionReplace),
+                                	},
+                                },
                         },
                         {
                                 ResourceName:            "google_container_cluster.confidential_nodes",
@@ -624,6 +644,11 @@ func TestAccContainerCluster_withMaxRunDuration(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withMaxRunDuration(clusterName, npName, networkName, subnetworkName, "1800s"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.max_run_duration", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.max_run_duration",
@@ -633,6 +658,11 @@ func TestAccContainerCluster_withMaxRunDuration(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_disableMaxRunDuration(clusterName, npName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.max_run_duration", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.max_run_duration",
@@ -714,6 +744,11 @@ func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_disableILBSubSetting(clusterName, npName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.confidential_nodes", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.confidential_nodes",
@@ -16459,6 +16494,11 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 			// `google_container_cluster.node_pool`. Deletions are expected here too.
 			{
 				Config: testAccContainerCluster_withNodePoolPrivateRegistry(secretID, clusterName, nodePoolName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -16765,6 +16805,11 @@ func TestAccContainerCluster_registryHosts(t *testing.T) {
 			// `google_container_cluster.node_pool`. Deletions are expected here too.
 			{
 				Config: testAccContainerCluster_withNodePoolRegistryHosts(secretID, clusterName, nodePoolName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -17055,6 +17100,11 @@ func TestAccContainerCluster_writableCgroups(t *testing.T) {
 			// This change from a default to a named node pool is expected to force recreation.
 			{
 				Config: testAccContainerCluster_withNodePoolWritableCgroups(clusterName, nodePoolName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
