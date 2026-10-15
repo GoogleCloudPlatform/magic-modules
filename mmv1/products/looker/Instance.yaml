@@ -75,16 +75,6 @@ samples:
           custom_domain: my-custom-domain
         ignore_read_extra:
           - deletion_policy
-  # FIPS is tested with the Enterprise config below.
-  - name: looker_instance_fips
-    primary_resource_id: looker-instance
-    exclude_test: true
-    steps:
-      - name: looker_instance_fips
-        resource_id_vars:
-          instance_name: my-instance-fips
-          client_id: my-client-id
-          client_secret: my-client-secret
   - name: looker_instance_enterprise_full
     primary_resource_id: looker-instance
     exclude_test: true
@@ -115,17 +105,6 @@ samples:
           address_name: compute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", compute.AddressWithPrefixLength(8))
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
           network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", servicenetworking.ServiceNetworkWithPrefixLength(8))
-  # Covered by the full step above.
-  - name: looker_instance_custom_domain
-    primary_resource_id: looker-instance
-    exclude_test: true
-    steps:
-      - name: looker_instance_custom_domain
-        resource_id_vars:
-          instance_name: my-instance
-          client_id: my-client-id
-          client_secret: my-client-secret
-          custom_domain: my-custom-domain
   - name: looker_instance_psc
     primary_resource_id: looker-instance
     steps:
