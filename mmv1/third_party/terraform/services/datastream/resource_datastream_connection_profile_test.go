@@ -540,6 +540,8 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"create_without_validation",
+					// The Datastream API does not return secretManagerStoredPassword on read.
+					"mongodb_profile.0.secret_manager_stored_password",
 					"mongodb_profile.0.ssl_config.0.ca_certificate",
 					"mongodb_profile.0.ssl_config.0.client_certificate",
 					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
@@ -559,6 +561,8 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"create_without_validation",
+					// The Datastream API does not return secretManagerStoredPassword on read.
+					"mongodb_profile.0.secret_manager_stored_password",
 					"mongodb_profile.0.ssl_config.0.ca_certificate",
 					"mongodb_profile.0.ssl_config.0.client_certificate",
 					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
@@ -573,6 +577,8 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"create_without_validation",
+					// The Datastream API does not return password on read.
+					"mongodb_profile.0.password",
 					"mongodb_profile.0.ssl_config.0.client_key",
 					"mongodb_profile.0.ssl_config.0.ca_certificate",
 					"mongodb_profile.0.ssl_config.0.client_certificate",
