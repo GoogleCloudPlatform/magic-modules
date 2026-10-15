@@ -80,6 +80,11 @@ The following arguments are supported:
 
 - - -
 
+* `overwrite_on_create` - (Optional, only for `google_pubsub_subscription_iam_binding`) If `true`, creating the binding
+  replaces any members already bound to the same role, including members Google Cloud grants by default.
+  If `false`, creation fails if that role already has different members; import the existing binding to manage it with Terraform.
+  Only affects creation. Defaults to `true`.
+
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
 
