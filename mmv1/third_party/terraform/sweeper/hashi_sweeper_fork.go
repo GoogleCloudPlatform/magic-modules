@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"maps"
 	"strings"
 	"testing"
 
@@ -102,9 +103,9 @@ func GetSweeper(name string) (*Sweeper, bool) {
 	return s, ok
 }
 
-// GetSweeperInventory returns the map of registered sweepers
+// GetSweeperInventory returns a shallow copy of the map of registered sweepers.
 func GetSweeperInventory() map[string]*Sweeper {
-	return sweeperInventory
+	return maps.Clone(sweeperInventory)
 }
 
 // ExecuteSweepers runs registered sweepers for specified regions
@@ -237,7 +238,8 @@ func ValidateAndOrderSweepersWithDependencies(sweepers map[string]*Sweeper) ([]*
 	return TopologicalSort(unifiedSweepers), nil
 }
 
-// Add this to the UnifyRelationships function
+// UnifyRelationships returns a copy of the sweepers map with parent relationships
+// converted to reverse dependencies.
 func UnifyRelationships(sweepers map[string]*Sweeper) map[string]*Sweeper {
 	// Create a copy of the original sweepers
 	unified := make(map[string]*Sweeper, len(sweepers))
@@ -281,6 +283,7 @@ func UnifyRelationships(sweepers map[string]*Sweeper) map[string]*Sweeper {
 	return unified
 }
 
+// DetectCycles checks for circular dependencies in the given sweeper graph.
 func DetectCycles(sweepers map[string]*Sweeper) error {
 	// Build a directed graph
 	graph := make(map[string][]string)

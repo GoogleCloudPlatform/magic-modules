@@ -1770,3 +1770,17 @@ func TestProvider_ProviderConfigure_batching(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_HandleSDKDefaultsSchemaParity(t *testing.T) {
+	providerSchema := provider.Provider().Schema
+	for k, expected := range transport_tpg.HandleSDKDefaultsSchema {
+		actual, ok := providerSchema[k]
+		if !ok {
+			t.Errorf("field %q from transport.HandleSDKDefaultsSchema is missing from provider.Provider().Schema", k)
+			continue
+		}
+		if actual.Type != expected.Type {
+			t.Errorf("field %q type mismatch: transport.HandleSDKDefaultsSchema has %v, provider.Provider().Schema has %v", k, expected.Type, actual.Type)
+		}
+	}
+}
