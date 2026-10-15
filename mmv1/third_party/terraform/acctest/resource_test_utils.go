@@ -140,22 +140,6 @@ func testStringValue(sPtr *string) string {
 	return *sPtr
 }
 
-func TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_artifact_registry_repository" "test_repository" {
-  repository_id = "tf-test-repository-standard%{random_suffix}"
-  location = "us-central1"
-  description = "standard repo"
-  format = "GENERIC"
-
-  labels = {
-    my_key    = "my_val"
-    other_key = "other_val"
-  }
-}
-`, context)
-}
-
 func TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(t *testing.T, resourceName string, packageName string, version string, packageFilePath string, packageFileName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]

@@ -31,7 +31,7 @@ func TestAccNetworkServices2CdnEdgeExtension_basicUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServices2CdnEdgeExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: testAccNetworkServices2CdnEdgeExtension_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
 					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
@@ -81,6 +81,25 @@ func TestAccNetworkServices2CdnEdgeExtension_basicUpdate(t *testing.T) {
 			},
 		},
 	})
+}
+
+// Config helper functions must be defined in the local service test package
+// because tools/test-reader only resolves config functions declared in *_test.go
+// files within the same service directory.
+func testAccNetworkServices2CdnEdgeExtension_artifactRegistryRepositorySetup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_artifact_registry_repository" "test_repository" {
+  repository_id = "tf-test-repository-standard%{random_suffix}"
+  location      = "us-central1"
+  description   = "standard repo"
+  format        = "GENERIC"
+
+  labels = {
+    my_key    = "my_val"
+    other_key = "other_val"
+  }
+}
+`, context)
 }
 
 func testAccNetworkServices2CdnEdgeExtension_edgeCacheServiceSetup(context map[string]interface{}) string {
@@ -139,7 +158,7 @@ resource "google_network_services_edge_cache_service" "default" {
 }
 
 func testAccNetworkServices2CdnEdgeExtension_basicCreate(context map[string]interface{}) string {
-	return acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) +
+	return testAccNetworkServices2CdnEdgeExtension_artifactRegistryRepositorySetup(context) +
 		testAccNetworkServices2CdnEdgeExtension_edgeCacheServiceSetup(context) +
 		acctest.Nprintf(`
 resource "google_network_services_cdn_edge_extension" "default" {
@@ -228,7 +247,7 @@ resource "google_network_services_wasm_plugin" "wasm-plugin-2" {
 }
 
 func testAccNetworkServices2CdnEdgeExtension_basicUpdate(context map[string]interface{}) string {
-	return acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) +
+	return testAccNetworkServices2CdnEdgeExtension_artifactRegistryRepositorySetup(context) +
 		testAccNetworkServices2CdnEdgeExtension_edgeCacheServiceSetup(context) +
 		acctest.Nprintf(`
 resource "google_network_services_cdn_edge_extension" "default" {

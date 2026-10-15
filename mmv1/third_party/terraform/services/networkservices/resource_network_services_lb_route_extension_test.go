@@ -887,7 +887,7 @@ func TestAccNetworkServicesLbRouteExtension_crossRegionInternalPluginExtension(t
 		CheckDestroy:             testAccCheckNetworkServicesLbRouteExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
 					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
@@ -920,7 +920,7 @@ func TestAccNetworkServicesLbRouteExtension_crossRegionInternalPluginExtension(t
 }
 
 func testAccNetworkServicesLbRouteExtension_crossRegionInternalPluginExtension(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 # VPC network
 resource "google_compute_network" "gilb_network" {
   name                    = "tf-test-l7-ilb-network%{random_suffix}"

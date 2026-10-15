@@ -30,7 +30,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
 					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
@@ -85,7 +85,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
 					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
@@ -150,7 +150,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginConfigUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
 					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
@@ -232,7 +232,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginLocation(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
 					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
@@ -260,7 +260,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginLocation(t *testing.T) {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginBasicCreate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -290,7 +290,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -320,7 +320,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginVersionCreate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -359,7 +359,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -398,7 +398,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginConfigDataUpdate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
@@ -431,7 +431,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginConfigUriUpdate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
@@ -464,7 +464,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 }
 
 func testAccNetworkServicesWasmPlugin_wasmPluginLocationCreate(context map[string]interface{}) string {
-	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -492,6 +492,22 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
   }
 }
 `, context))
+}
+
+func testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_artifact_registry_repository" "test_repository" {
+  repository_id = "tf-test-repository-standard%{random_suffix}"
+  location = "us-central1"
+  description = "standard repo"
+  format = "GENERIC"
+
+  labels = {
+    my_key    = "my_val"
+    other_key = "other_val"
+  }
+}
+`, context)
 }
 
 func testAccCheckNetworkServicesWasmPluginDestroyProducer(t *testing.T) func(s *terraform.State) error {
