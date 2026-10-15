@@ -1,0 +1,112 @@
+resource "google_vertex_ai_custom_job" "{{.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  region       = "us-central1"
+
+  encryption_spec {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
+
+  job_spec {
+    service_account         = google_service_account.custom_job_sa.email
+    tensorboard             = google_vertex_ai_tensorboard.tensorboard.id
+    enable_web_access       = true
+    enable_dashboard_access = true
+
+    base_output_directory {
+      output_uri_prefix = "gs://${google_storage_bucket.job_bucket.name}/custom-job-output"
+    }
+
+    psc_interface_config {
+      network_attachment = "projects/${data.google_project.project.project_id}/regions/us-central1/networkAttachments/example-attachment"
+
+      dns_peering_configs {
+        domain         = "example.com."
+        target_project = data.google_project.project.project_id
+        target_network = "default"
+      }
+    }
+
+    scheduling {
+      timeout                       = "86400s"
+      restart_job_on_worker_restart = false
+      strategy                      = "FLEX_START"
+      disable_retries               = true
+      max_wait_duration             = "1800s"
+    }
+
+    worker_pool_specs {
+      replica_count = 1
+
+      machine_spec {
+        machine_type      = "g2-standard-4"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+
+      disk_spec {
+        boot_disk_type    = "pd-ssd"
+        boot_disk_size_gb = 100
+      }
+
+      python_package_spec {
+        executor_image_uri = "us-docker.pkg.dev/vertex-ai/training/tf-gpu.2-12.py310:latest"
+        package_uris       = ["gs://${google_storage_bucket.job_bucket.name}/${google_storage_bucket_object.trainer_package.name}"]
+        python_module      = "trainer.task"
+        args               = ["--epochs=1"]
+
+        env {
+          name  = "PYTHON_ENV"
+          value = "test_val"
+        }
+      }
+
+      nfs_mounts {
+        server      = "10.0.0.1"
+        path        = "/nfs_share"
+        mount_point = "nfs_mount"
+      }
+
+      lustre_mounts {
+        instance_ip   = "10.0.0.1"
+        volume_handle = "lustre-vol"
+        filesystem    = "lustrefs"
+        mount_point   = "lustre_mount"
+      }
+    }
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.crypto_key,
+  ]
+}
+
+resource "google_service_account" "custom_job_sa" {
+  account_id   = "{{index $.ResourceIdVars "service_account_id"}}"
+  display_name = "Custom Job Service Account"
+}
+
+resource "google_vertex_ai_tensorboard" "tensorboard" {
+  display_name = "{{index $.ResourceIdVars "tensorboard_name"}}"
+  region       = "us-central1"
+}
+
+resource "google_storage_bucket" "job_bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US-CENTRAL1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "trainer_package" {
+  name    = "trainer-0.1.tar.gz"
+  bucket  = google_storage_bucket.job_bucket.name
+  content = "placeholder"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "{{index $.ResourceIdVars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+data "google_project" "project" {}
