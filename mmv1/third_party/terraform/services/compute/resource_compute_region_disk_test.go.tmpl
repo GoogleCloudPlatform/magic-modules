@@ -304,7 +304,7 @@ func TestAccComputeRegionDisk_encryptionKMSUpdate(t *testing.T) {
 			{
 				Config:      testAccComputeRegionDisk_encryptionKMSUpdateKey(diskName, key2+"/cryptoKeyVersions/1"),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("must not include a crypto key version"),
+				ExpectError: regexp.MustCompile("remove the /cryptoKeyVersions/ suffix"),
 			},
 			{
 				Config: testAccComputeRegionDisk_encryptionKMSUpdateNoKey(diskName),

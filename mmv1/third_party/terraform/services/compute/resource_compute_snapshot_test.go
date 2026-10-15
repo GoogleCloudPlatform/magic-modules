@@ -120,7 +120,7 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 			{
 				Config:      testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key2+"/cryptoKeyVersions/1"),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("must not include a crypto key version"),
+				ExpectError: regexp.MustCompile("remove the /cryptoKeyVersions/ suffix"),
 			},
 			{
 				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
