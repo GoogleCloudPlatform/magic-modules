@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/golang/glog v1.2.5
