@@ -23,13 +23,12 @@ Instead, always run Go module commands inside a generated downstream provider (`
 
 ## Execution Steps
 
-### 1. Confirm Update Scope
+### 1. Determine Update Scope
 
-If the user did not specify which dependencies to update, clarify which scope they want before running `go get`:
-* **Targeted package bump** (most common, e.g., `google.golang.org/api` or a specific Cloud SDK): `go get <package>@<version>` (or `@latest`) + `go mod tidy`
-* **Root provider dependencies**: `go get -u` + `go mod tidy`
-* **All module & test dependencies**: `go get -u ./...` + `go mod tidy`
-* **Tidy only**: `go mod tidy`
+Unless the user explicitly specifies a narrower target (such as bumping a single package or running `go mod tidy` only), **default to updating all module and test dependencies (`go get -u ./... && go mod tidy`)**:
+* **Default — All module & test dependencies**: `go get -u ./...` + `go mod tidy`
+* **Targeted package bump** (when a specific package is requested, e.g., `google.golang.org/api`): `go get <package>@<version>` (or `@latest`) + `go mod tidy`
+* **Tidy only** (when requested): `go mod tidy`
 
 ### 2. Generate the Downstream Provider and Update Dependencies
 
@@ -50,10 +49,10 @@ make provider VERSION=ga OUTPUT_PATH="$PROVIDER_PATH"
 
 # 3. Update dependencies inside the generated downstream provider
 cd "$PROVIDER_PATH"
-# Option A: Update a specific dependency (e.g., google.golang.org/api)
-go get google.golang.org/api@latest
-# Option B: Update all module and test dependencies
-# go get -u ./...
+# Default: Update all module and test dependencies
+go get -u ./...
+# Or, if a specific package was requested:
+# go get google.golang.org/api@latest
 
 go mod tidy
 ```
