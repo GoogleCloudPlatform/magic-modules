@@ -38,17 +38,15 @@ jobs:
           go mod download
 
 
-      - name: Build Provider
+      # `make lint` runs `go vet`, which compiles all provider packages internally
+      # without spending time linking and installing an unused binary via `go build`.
+      - name: Build and Lint
         run: |
-          go build
+          make lint
 
       - name: Run Unit Tests
         run: |
           make testnolint
-
-      - name: Lint Check
-        run: |
-          make lint
 
       - name: Documentation Check
         run: |
