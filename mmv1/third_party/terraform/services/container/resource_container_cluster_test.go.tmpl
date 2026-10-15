@@ -763,6 +763,11 @@ func TestAccContainerCluster_omittedILBSubsetting(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_omittedILBSubSetting(clusterName, npName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.confidential_nodes", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -1383,6 +1388,11 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withNetworkPolicyDisabled(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_network_policy_enabled", plancheck.ResourceActionNoop),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_network_policy_enabled",
 						"network_policy.0.enabled", "false"),
@@ -2072,6 +2082,11 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_removeMasterAuthorizedNetworksConfig(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_master_authorized_networks", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:		     "google_container_cluster.with_master_authorized_networks",
@@ -5726,6 +5741,11 @@ func TestAccContainerCluster_withAutopilotKubeletConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAutopilotKubeletConfigUpdates(clusterName, networkName, subnetworkName, "FALSE"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_autopilot_kubelet_config", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.with_autopilot_kubelet_config",
@@ -6123,6 +6143,11 @@ func TestAccContainerCluster_withSecretSyncConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_forSecretSyncConfig(pid, clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -6199,6 +6224,11 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_basicWithMinGKEVersion(clusterName, networkName, subnetworkName, minVersion),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:        "google_container_cluster.primary",
@@ -6359,6 +6389,11 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			// Back to basic settings to test setting Prometheus on its own
 			{
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -6382,6 +6417,11 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withMonitoringConfigPrometheusOnly2(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -6391,6 +6431,11 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -7093,6 +7138,11 @@ func TestAccContainerCluster_withMeshCertificatesConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_updateMeshCertificatesConfig(pid, clusterName, networkName, subnetworkName, true),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_mesh_certificates_config", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.with_mesh_certificates_config",
@@ -7189,6 +7239,11 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:        "google_container_cluster.primary",
@@ -7861,6 +7916,11 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_WithEmptyFleetProject(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -8523,6 +8583,11 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, networkName, subnetworkName, true, true, true, false, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -8532,6 +8597,11 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, networkName, subnetworkName, true, true, false, true, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -8541,6 +8611,11 @@ func TestAccContainerCluster_autopilot_withDNSConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, networkName, subnetworkName, true, true, true, true, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -8579,6 +8654,11 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, networkName, subnetworkName, true, true, true, false, domain),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -8591,6 +8671,11 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, networkName, subnetworkName, true, true, false, true, domain),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -8603,6 +8688,11 @@ func TestAccContainerCluster_autopilot_withAdditiveVPC(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, networkName, subnetworkName, true, true, true, true, domain),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "dns_config.0.additive_vpc_scope_dns_domain", domain),
 				),
@@ -17660,6 +17750,11 @@ func TestAccContainerCluster_withEnterpriseConfig(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_removeEnterpriseConfig(pid, clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_enterprise_config", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.with_enterprise_config",
@@ -17752,6 +17847,11 @@ func TestAccContainerCluster_disableControlPlaneIP(t *testing.T) {
         // so this step fails with a non-empty plan unless diffs on those
         // API-dictated fields are suppressed.
         Config: testAccContainerCluster_ControlPlaneIPdisabledWithPrivateClusterConfig(clusterName, networkName, subnetworkName),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+        	PreApply: []plancheck.PlanCheck{
+        		plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+        	},
+        },
       },
       {
         ResourceName:      "google_container_cluster.primary",
