@@ -824,10 +824,10 @@ func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension
 		CheckDestroy:             testAccCheckNetworkServicesLbTrafficExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",
@@ -857,7 +857,7 @@ func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension
 }
 
 func testAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension(context map[string]interface{}) string {
-	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 # VPC network
 resource "google_compute_network" "gilb_network" {
   name                    = "tf-test-l7-ilb-network%{random_suffix}"
@@ -1083,10 +1083,10 @@ func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *t
 		CheckDestroy:             testAccCheckNetworkServicesLbTrafficExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",
@@ -1116,7 +1116,7 @@ func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *t
 }
 
 func testAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(context map[string]interface{}) string {
-	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return fmt.Sprint(acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"

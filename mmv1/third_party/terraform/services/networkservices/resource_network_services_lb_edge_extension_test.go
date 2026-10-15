@@ -31,10 +31,10 @@ func TestAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUp
 		CheckDestroy:             testAccCheckNetworkServicesLbEdgeExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Config: acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",
@@ -42,7 +42,7 @@ func TestAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUp
 						"test-fixtures/compiled-package/plugin.wasm",
 						"plugin.wasm",
 					),
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin-2",
@@ -80,7 +80,7 @@ func TestAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUp
 }
 
 func testAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicCreate(context map[string]interface{}) string {
-	return testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) + acctest.Nprintf(`
+	return acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) + acctest.Nprintf(`
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "tf-test-elb-forwarding-rule%{random_suffix}"
@@ -210,7 +210,7 @@ resource "google_network_services_wasm_plugin" "wasm-plugin-2" {
 }
 
 func testAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUpdate(context map[string]interface{}) string {
-	return testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) + acctest.Nprintf(`
+	return acctest.TestAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) + acctest.Nprintf(`
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "tf-test-elb-forwarding-rule%{random_suffix}"
