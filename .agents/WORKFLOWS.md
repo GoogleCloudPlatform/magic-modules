@@ -11,7 +11,8 @@ specific one.
 3.  **Verify before a PR:** generate, build, and run the tests relevant to the change. A task is not done because it compiles.
 4.  **Never weaken baseline test coverage:** no disabling or skipping tests, and no test-dodging behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent comment justifying the API behavior that requires them.
 5.  **PR descriptions are brief:** what changed and why, in a few sentences.
-6.  **GitHub Issue Label Routing:** When triaging a GitHub issue URL, inspect the GitHub labels (`gh issue view --json labels` or issue payload). Match against the **Issue Label Routing Matrix** below. If no matching label is present, inspect the issue title/body content; if still unmatched, fall back to the **Default Workflow**.
+6.  **Prefer adding commits on PR updates:** once a branch is pushed or a PR is open, add new commits for subsequent updates rather than amending, rebasing, or force-pushing unless instructed otherwise.
+7.  **GitHub Issue Label Routing:** When triaging a GitHub issue URL, inspect the GitHub labels (`gh issue view --json labels` or issue payload). Match against the **Issue Label Routing Matrix** below. If no matching label is present, inspect the issue title/body content; if still unmatched, fall back to the **Default Workflow**.
 
 ## Issue Label Routing Matrix:
 
