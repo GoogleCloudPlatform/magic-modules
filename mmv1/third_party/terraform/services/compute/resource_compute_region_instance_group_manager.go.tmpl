@@ -21,6 +21,15 @@ import (
 )
 
 func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
+	deletionPolicySchema := tpgresource.DeletionPolicySchemaEntry("DELETE")
+	deletionPolicySchema.Description = `Whether Terraform will be prevented from destroying the instance. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG deletion waits for all instances to shut down gracefully before deletion.
+When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
+`
 	return &schema.Resource{
 		Create: resourceComputeRegionInstanceGroupManagerCreate,
 		Read:   resourceComputeRegionInstanceGroupManagerRead,
@@ -972,15 +981,9 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 			{{- end }}
 
-			"no_graceful_shutdown_on_destroy": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: `When set to true, graceful shutdown is skipped for instance deletion even if it's configured for the instances. Otherwise, if graceful shutdown is configured, the MIG deletion waits for all instances to shut down gracefully before deletion.`,
-			},
-
 			//UDP schema start
-            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
-//UDP schema end
+			"deletion_policy": deletionPolicySchema,
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1567,7 +1570,7 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 		return err
 	}
 
-	if v, ok := d.GetOk("no_graceful_shutdown_on_destroy"); ok && v.(bool) {
+	if d.Get("deletion_policy").(string) == "FORCE" {
 		url, err = transport_tpg.AddQueryParams(url, map[string]string{"noGracefulShutdown": "true"})
 		if err != nil {
 			return err

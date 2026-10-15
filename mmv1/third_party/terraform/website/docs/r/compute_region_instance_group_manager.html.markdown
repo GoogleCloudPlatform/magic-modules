@@ -142,7 +142,8 @@ The following arguments are supported:
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
-    When set to "DELETE", deleting the resource is allowed.
+    When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
+    When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
 
 - - -
 
@@ -179,8 +180,6 @@ The following arguments are supported:
     When `STABLE` is specified this resource will wait until the instances are stable before returning. When `UPDATED` is
     set, it will wait for the version target to be reached and any per instance configs to be effective as well as all
     instances to be stable before returning. The possible values are `STABLE` and `UPDATED`
-
-* `no_graceful_shutdown_on_destroy` - (Optional) When set to true, graceful shutdown is skipped for instance deletion even if it's configured for the instances. Otherwise, if graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
 
 ---
 

@@ -228,8 +228,6 @@ The following arguments are supported:
     set, it will wait for the version target to be reached and any per instance configs to be effective as well as all
     instances to be stable before returning. The possible values are `STABLE` and `UPDATED`
 
-* `no_graceful_shutdown_on_destroy` - (Optional) When set to true, graceful shutdown is skipped for instance deletion even if it's configured for the instances. Otherwise, if graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
-
 ---
 
 * `auto_healing_policies` - (Optional) The autohealing policies for this managed instance
@@ -265,7 +263,8 @@ group. You can specify only one value. Structure is [documented below](#nested_a
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
-    When set to "DELETE", deleting the resource is allowed.
+    When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
+    When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
 
 - - -
 
