@@ -2419,6 +2419,9 @@ resource "google_compute_disk" "persistent-disk" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+  disk_encryption_key {
+    raw_key = "%{raw_key}"
+  }
 }
 
 resource "google_compute_disk" "pd-balanced-disk" {
@@ -2432,6 +2435,12 @@ resource "google_compute_snapshot" "snapshot" {
   name        = "tf-test-my-snapshot-%{random_suffix}"
   source_disk = google_compute_disk.persistent-disk.id
   zone        = "us-central1-a"
+  source_disk_encryption_key {
+    raw_key = "%{raw_key}"
+  }
+  snapshot_encryption_key {
+    raw_key = "%{raw_key}"
+  }
 }
 
 resource "google_compute_instance_template" "igm-basic" {
@@ -2484,6 +2493,12 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
         boot        = true
         device_name = "boot-disk"
         source_snapshot =  google_compute_snapshot.snapshot.self_link
+        disk_encryption_key {
+          raw_key = "%{raw_key}"
+        }
+        source_snapshot_encryption_key {
+          rsa_encrypted_key = "%{rsa_encrypted_key}"
+        }
       }
       disks{
         source = google_compute_disk.pd-balanced-disk.name
