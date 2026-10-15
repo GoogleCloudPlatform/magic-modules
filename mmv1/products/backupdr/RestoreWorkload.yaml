@@ -31,7 +31,7 @@ exclude_read: true
 # Enable LRO polling for the background resource creation process
 autogen_async: true
 custom_code:
-  custom_create: templates/terraform/custom_create/backup_dr_restore_workload.go.tmpl
+  custom_create: 'resourceBackupDRRestoreWorkloadCustomCreate'
   custom_delete: templates/terraform/custom_delete/backup_dr_restore_workload.go.tmpl
 samples:
   - name: backup_dr_restore_workload_compute_instance_basic
