@@ -286,8 +286,9 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 
 // Report whether a test step composite literal does not apply its config, so
 // its fields should not count towards coverage: steps with ExpectError set
-// expect the config to be rejected, and steps with PlanOnly set only run a
-// plan without applying.
+// expect the config to be rejected, and steps with PlanOnly, Destroy,
+// ImportState or RefreshState set to true run a plan, destroy, import or
+// refresh rather than applying the config.
 func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
 	for _, elt := range stepCompLit.Elts {
 		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
@@ -297,7 +298,7 @@ func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
 					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); !ok || valIdent.Name != "nil" {
 						return true
 					}
-				case "PlanOnly":
+				case "PlanOnly", "Destroy", "ImportState", "RefreshState":
 					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "true" {
 						return true
 					}

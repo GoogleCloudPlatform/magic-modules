@@ -22,6 +22,18 @@ func TestAccExpectError(t *testing.T) {
 				Config:   testAccExpectError_planOnly(),
 				PlanOnly: true,
 			},
+			{
+				Config:  testAccExpectError_destroy(),
+				Destroy: true,
+			},
+			{
+				Config:      testAccExpectError_importState(),
+				ImportState: true,
+			},
+			{
+				Config:       testAccExpectError_refreshState(),
+				RefreshState: true,
+			},
 		},
 	})
 }
@@ -48,6 +60,33 @@ func testAccExpectError_planOnly() string {
 resource "expect_error_resource" "resource" {
   field_one   = "value-one"
   field_three = "plan-only-value"
+}
+`
+}
+
+func testAccExpectError_destroy() string {
+	return `
+resource "expect_error_resource" "resource" {
+  field_one  = "value-one"
+  field_four = "destroy-value"
+}
+`
+}
+
+func testAccExpectError_importState() string {
+	return `
+resource "expect_error_resource" "resource" {
+  field_one  = "value-one"
+  field_five = "import-value"
+}
+`
+}
+
+func testAccExpectError_refreshState() string {
+	return `
+resource "expect_error_resource" "resource" {
+  field_one = "value-one"
+  field_six = "refresh-value"
 }
 `
 }

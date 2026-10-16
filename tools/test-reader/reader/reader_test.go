@@ -304,9 +304,9 @@ func TestReadExpectErrorTestFile(t *testing.T) {
 	if len(tests) != 1 {
 		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
 	}
-	// Steps with ExpectError or PlanOnly set are skipped, so only the step
-	// that applies cleanly is recorded and field_two / field_three from the
-	// skipped steps are not.
+	// Steps with ExpectError, PlanOnly, Destroy, ImportState or RefreshState
+	// set are skipped, so only the step that applies cleanly is recorded and
+	// fields from the skipped steps are not.
 	if len(tests[0].Steps) != 1 {
 		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
 	}
