@@ -94,6 +94,10 @@ resource "google_compute_network_firewall_policy_packet_mirroring_rule" "primary
 
 func testAccComputeNetworkFirewallPolicyPacketMirroringRule_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_network" "tag_network" {
+  name    = google_compute_network.default.name
+  project = "%{project_name}"
+}
 data "google_project" "project" {
   provider = google-beta
 }
@@ -177,7 +181,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tag-key%{random_suffix}"
   purpose_data = {
-    network = "%{project_name}/${google_compute_network.default.name}"
+    network = "https://www.googleapis.com/compute/v1/projects/%{project_name}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 

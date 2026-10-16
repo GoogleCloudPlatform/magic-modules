@@ -47,6 +47,9 @@ func TestAccComputeNetworkFirewallPolicyWithRules_update(t *testing.T) {
 
 func testAccComputeNetworkFirewallPolicyWithRules_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_network" "tag_network" {
+  name = "default"
+}
 data "google_project" "project" {
 }
 
@@ -131,7 +134,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tf-tag-key%{random_suffix}"
   purpose_data = {
-    network = "${data.google_project.project.name}/default"
+    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
@@ -159,6 +162,9 @@ resource "google_network_security_security_profile" "security_profile_1" {
 
 func testAccComputeNetworkFirewallPolicyWithRules_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_network" "tag_network" {
+  name = "default"
+}
 data "google_project" "project" {
 }
 
@@ -222,7 +228,7 @@ resource "google_tags_tag_key" "secure_tag_key_1" {
   purpose     = "GCE_FIREWALL"
   short_name  = "tf-test-tf-tag-key%{random_suffix}"
   purpose_data = {
-    network = "${data.google_project.project.name}/default"
+    network = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 

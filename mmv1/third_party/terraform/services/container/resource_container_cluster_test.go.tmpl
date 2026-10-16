@@ -16141,13 +16141,18 @@ data "google_project" "project" {
   project_id = "%[1]s"
 }
 
+data "google_compute_network" "tag_network" {
+  name    = "%[4]s"
+  project = "%[1]s"
+}
+
 resource "google_tags_tag_key" "key1" {
   parent      = data.google_project.project.id
   short_name  = "tf-test-foobarbaz-%[2]s"
   description = "For foo/bar resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
@@ -16164,7 +16169,7 @@ resource "google_tags_tag_key" "key2" {
   description = "For qux resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${data.google_compute_network.tag_network.network_id}"
   }
 }
 
@@ -16211,7 +16216,7 @@ resource "google_tags_tag_key" "key1" {
   description = "For foo/bar1 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${google_compute_network.container_network.network_id}"
   }
 
   depends_on = [google_compute_network.container_network]
@@ -16229,7 +16234,7 @@ resource "google_tags_tag_key" "key2" {
   description = "For foo/bar2 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${google_compute_network.container_network.network_id}"
   }
 
   depends_on = [
@@ -16315,7 +16320,7 @@ resource "google_tags_tag_key" "key1" {
   description = "For foo/bar1 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${google_compute_network.container_network.network_id}"
   }
 
   depends_on = [google_compute_network.container_network]
@@ -16333,7 +16338,7 @@ resource "google_tags_tag_key" "key2" {
   description = "For foo/bar2 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${google_compute_network.container_network.network_id}"
   }
 
   depends_on = [
@@ -16420,7 +16425,7 @@ resource "google_tags_tag_key" "key1" {
   description = "For foo/bar1 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${google_compute_network.container_network.network_id}"
   }
 
   depends_on = [google_compute_network.container_network]
@@ -16438,7 +16443,7 @@ resource "google_tags_tag_key" "key2" {
   description = "For foo/bar2 resources"
   purpose     = "GCE_FIREWALL"
   purpose_data = {
-    network = "%[1]s/%[4]s"
+    network = "https://www.googleapis.com/compute/v1/projects/%[1]s/global/networks/${google_compute_network.container_network.network_id}"
   }
 
   depends_on = [
