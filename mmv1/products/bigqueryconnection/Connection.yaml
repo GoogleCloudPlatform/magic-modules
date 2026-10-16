@@ -200,9 +200,11 @@ samples:
       - name: bigquery_connection_connector_configuration
         resource_id_vars:
           connection_id: my-connection
+          network_name: alloydb-network
           username: user
           password: password
         test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
           username: '"user" + randomSuffix'
           password: '"password"'
         ignore_read_extra:

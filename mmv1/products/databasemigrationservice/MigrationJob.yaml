@@ -89,11 +89,14 @@ samples:
           destination_alloydb: destination-alloydb
           destination_cp: destination-cp
           migration_id: my-migrationid
+          network_name: destination-alloydb
           source_cp: source-cp
           source_csql: source-csql
           source_sqldb_cert: cert
           source_sqldb_pass: password
           source_sqldb_user: username
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
 parameters:
   - name: migrationJobId
     type: String
