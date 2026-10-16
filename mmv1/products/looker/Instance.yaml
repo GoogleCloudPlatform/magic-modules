@@ -72,7 +72,6 @@ samples:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
-          custom_domain: my-custom-domain
         ignore_read_extra:
           - deletion_policy
   - name: looker_instance_enterprise_full
@@ -88,6 +87,7 @@ samples:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
+          custom_domain: my-custom-domain
   - name: looker_instance_enterprise_full_test
     primary_resource_id: looker-instance
     exclude_basic_doc: true
@@ -101,6 +101,7 @@ samples:
           instance_name: my-instance
           client_id: my-client-id
           client_secret: my-client-secret
+          custom_domain: my-custom-domain
         test_vars_overrides:
           address_name: compute.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", compute.AddressWithPrefixLength(8))
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
