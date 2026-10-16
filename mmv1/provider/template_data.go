@@ -21,7 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
+	"text/template" // NOLINT
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata"

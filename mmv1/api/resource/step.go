@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
+	"text/template" // NOLINT
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
