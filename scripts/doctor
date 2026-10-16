@@ -62,10 +62,14 @@ else
     version=($(go version))
     version=${version[2]}
     ok=0
-    if [[ "$version" < "go1.26.0" ]]; then
+    v="${version#go}"
+    IFS=. read -r maj min pat <<< "$v"
+    pat="${pat%%[^0-9]*}"
+    maj="${maj:-0}"; min="${min:-0}"; pat="${pat:-0}"
+    if (( maj < 1 || (maj == 1 && min < 26) || (maj == 1 && min == 26 && pat < 9) )); then
         ok=1
         exitcode=1
-        warn "yel" "   $version is installed, but go 1.26 or later is required. See https://golang.org/doc/install for information on installing it."
+        warn "yel" "   $version is installed, but go 1.26.9 or later is required. See https://golang.org/doc/install for information on installing it."
     fi
     if [[ -z "${GOPATH}" ]]; then
         ok=1

@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor
 
-go 1.26.0
+go 1.26.9
 
 replace google/provider/old => ./old
 
