@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/template-check
 
-go 1.26.9
+go 1.26.0
 
 
 require (
