@@ -680,6 +680,8 @@ The optional `settings.location_preference` subblock supports:
     [zone](https://cloud.google.com/compute/docs/zones?hl=en).
 
 * `secondary_zone` - (Optional) The preferred Compute Engine zone for the secondary/failover.
+    For `REGIONAL` instances the API assigns one when unset; the assigned
+    value is stored in state and does not produce a diff.
 
 The optional `settings.maintenance_window` subblock for instances declares a one-hour
 [maintenance window](https://cloud.google.com/sql/docs/instance-settings?hl=en#maintenance-window-2ndgen)
