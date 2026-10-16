@@ -840,8 +840,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Description:  `The preferred compute engine zone.`,
 									},
 									"secondary_zone": {
-										Type:        schema.TypeString,
-										Optional:    true,
+										Type:     schema.TypeString,
+										Optional: true,
+										// The API picks a secondary zone for REGIONAL instances when
+										// none is configured; Computed keeps that from being a permadiff.
+										Computed:    true,
 										Description: `The preferred Compute Engine zone for the secondary/failover`,
 									},
 								},
