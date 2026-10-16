@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/resource-template-converter
 
-go 1.26.9
+go 1.26.0
 
 require github.com/GoogleCloudPlatform/magic-modules/mmv1 v0.0.0
 
