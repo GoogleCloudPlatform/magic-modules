@@ -223,7 +223,7 @@ func resourceIamBindingRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpec
 
 		eBinding := getResourceIamBinding(d)
 		eCondition := conditionKeyFromCondition(eBinding.Condition)
-		p, err := iamPolicyReadWithRetry(updater)
+		p, err := iamPolicyReadWithRetry(updater, config)
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
 		}
@@ -336,7 +336,7 @@ func iamBindingImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser
 		if err != nil {
 			return nil, err
 		}
-		p, err := iamPolicyReadWithRetry(updater)
+		p, err := iamPolicyReadWithRetry(updater, config)
 		if err != nil {
 			return nil, err
 		}

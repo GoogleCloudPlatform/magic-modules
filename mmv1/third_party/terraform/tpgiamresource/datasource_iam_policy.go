@@ -45,7 +45,7 @@ func DatasourceIamPolicyRead(newUpdaterFunc NewResourceIamUpdaterFunc) schema.Re
 			return err
 		}
 
-		policy, err := iamPolicyReadWithRetry(updater)
+		policy, err := iamPolicyReadWithRetry(updater, config)
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Policy", updater.DescribeResource()))
 		}

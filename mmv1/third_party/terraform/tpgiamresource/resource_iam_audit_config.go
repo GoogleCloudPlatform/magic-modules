@@ -71,7 +71,7 @@ func resourceIamAuditConfigRead(newUpdaterFunc NewResourceIamUpdaterFunc) schema
 		}
 
 		eAuditConfig := getResourceIamAuditConfig(d)
-		p, err := iamPolicyReadWithRetry(updater)
+		p, err := iamPolicyReadWithRetry(updater, config)
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("AuditConfig for %s on %q", eAuditConfig.Service, updater.DescribeResource()))
 		}
