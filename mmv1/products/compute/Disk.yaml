@@ -71,7 +71,7 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-  - 'validateKmsKeyChange("disk_encryption_key.0.kms_key_self_link", "disk_encryption_key.0.kms_key_service_account", "disk_encryption_key.0.sha256")'
+  - 'kmsKeyUpdateCustomDiff("disk_encryption_key.0.kms_key_self_link", "disk_encryption_key.0.kms_key_service_account", "disk_encryption_key.0.sha256")'
 samples:
   - name: 'disk_basic'
     primary_resource_id: 'default'
@@ -217,7 +217,8 @@ properties:
       ~>**NOTE** `kms_key_self_link` can be added or changed in place.
       Removing it, or changing it while `kms_key_service_account` is set,
       fails at plan time. Other changes to this block recreate the disk.
-    # Sent by custom_update; see validateKmsKeyChange.
+    # NOOP: makes the block updatable without generating an update call.
+    # The key is sent by custom_update; see kmsKeyUpdateCustomDiff.
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/updateKmsKey'
     update_verb: 'NOOP'
     properties:

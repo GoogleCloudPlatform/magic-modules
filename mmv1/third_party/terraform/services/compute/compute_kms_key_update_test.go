@@ -16,9 +16,13 @@ const (
 	testUnknownValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
 )
 
-func TestKmsKeyChange(t *testing.T) {
+func TestKmsKeyChangeRequiresReplacement(t *testing.T) {
 	t.Parallel()
 
+	// A key change updates in place, including from no key and from an
+	// unknown value. Switching from or to a customer-supplied key recreates.
+	// Removing the key, or changing it while kms_key_service_account is
+	// set, fails the plan.
 	cases := map[string]struct {
 		newKey              string
 		newKeyKnown         bool
@@ -38,7 +42,7 @@ func TestKmsKeyChange(t *testing.T) {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			forceNew, err := kmsKeyChange(tc.newKey, tc.newKeyKnown, tc.serviceAccountSet, tc.customerSuppliedKey)
+			forceNew, err := kmsKeyChangeRequiresReplacement(tc.newKey, tc.newKeyKnown, tc.serviceAccountSet, tc.customerSuppliedKey)
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("got error %v, want error: %t", err, tc.wantErr)
 			}
@@ -103,11 +107,11 @@ func testKmsKeyResource(withServiceAccount bool) *schema.Resource {
 				Elem:     &schema.Resource{Schema: keySchema},
 			},
 		},
-		CustomizeDiff: validateKmsKeyChange("encryption_key.0.kms_key_self_link", serviceAccountPath, "encryption_key.0.sha256"),
+		CustomizeDiff: kmsKeyUpdateCustomDiff("encryption_key.0.kms_key_self_link", serviceAccountPath, "encryption_key.0.sha256"),
 	}
 }
 
-func TestValidateKmsKeyChange(t *testing.T) {
+func TestKmsKeyUpdateCustomDiff(t *testing.T) {
 	t.Parallel()
 
 	type action int
@@ -228,7 +232,7 @@ func TestValidateKmsKeyChange(t *testing.T) {
 	}
 }
 
-func TestValidateKmsKeyChange_create(t *testing.T) {
+func TestKmsKeyUpdateCustomDiff_create(t *testing.T) {
 	t.Parallel()
 
 	r := testKmsKeyResource(true)

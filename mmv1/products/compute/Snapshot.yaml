@@ -62,7 +62,7 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
   post_update: 'templates/terraform/post_update/compute_snapshot.go.tmpl'
 custom_diff:
-  - 'validateKmsKeyChange("snapshot_encryption_key.0.kms_key_self_link", "snapshot_encryption_key.0.kms_key_service_account", "snapshot_encryption_key.0.sha256")'
+  - 'kmsKeyUpdateCustomDiff("snapshot_encryption_key.0.kms_key_self_link", "snapshot_encryption_key.0.kms_key_service_account", "snapshot_encryption_key.0.sha256")'
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
@@ -130,7 +130,8 @@ parameters:
       ~>**NOTE** `kms_key_self_link` can be added or changed in place.
       Removing it, or changing it while `kms_key_service_account` is set,
       fails at plan time. Other changes to this block recreate the snapshot.
-    # Sent by post_update; see validateKmsKeyChange.
+    # NOOP: makes the block updatable without generating an update call.
+    # The key is sent by post_update; see kmsKeyUpdateCustomDiff.
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/updateKmsKey'
     update_verb: 'NOOP'
     properties:

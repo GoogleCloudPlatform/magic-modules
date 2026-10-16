@@ -123,8 +123,11 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 	})
 }
 
-// Adding a key plans an update. Not applied: the API rejects it until it
-// supports adding a key to a snapshot without one.
+// Adding a key to a snapshot without one plans an in-place update. The plan is
+// not applied: the API doesn't support this yet, and returns a 400 that
+// leaves the snapshot unchanged. ExpectNonEmptyPlan is required for a PlanOnly
+// step with a diff, and PostApplyPreRefresh is the hook plugin-testing
+// runs on that plan. See b/550374864.
 func TestAccComputeSnapshot_encryptionCMEKAdd(t *testing.T) {
 	t.Parallel()
 

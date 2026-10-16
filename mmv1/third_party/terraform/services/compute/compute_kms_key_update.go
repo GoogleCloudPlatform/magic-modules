@@ -11,10 +11,19 @@ import (
 // updateKmsKey can't remove a key, clears
 // kmsKeyServiceAccount, and rotates if kmsKeyName is empty.
 
-// kmsKeyChange reports whether a key change needs replacement, or an error if
-// it can't be made. serviceAccountSet is true if kms_key_service_account is
-// set; customerSuppliedKey is true if the resource uses or switches to a CSEK.
-func kmsKeyChange(newKey string, newKeyKnown, serviceAccountSet, customerSuppliedKey bool) (bool, error) {
+// kmsKeyChangeRequiresReplacement decides how a change to the KMS key field
+// is planned:
+//
+//	(true, nil)   recreate the resource
+//	(false, nil)  update in place via updateKmsKey
+//	(false, err)  fail the plan with err
+//
+// serviceAccountSet is true if kms_key_service_account is set before or after
+// the change. customerSuppliedKey is true if the resource uses, or the config
+// switches to, a raw or RSA-wrapped key. newKeyKnown is false when the new key
+// is only known at apply time; that is planned as an update, since once the
+// value is known it can only update or fail, never recreate.
+func kmsKeyChangeRequiresReplacement(newKey string, newKeyKnown, serviceAccountSet, customerSuppliedKey bool) (bool, error) {
 	if customerSuppliedKey {
 		return true, nil
 	}
@@ -27,16 +36,13 @@ func kmsKeyChange(newKey string, newKeyKnown, serviceAccountSet, customerSupplie
 		// recreate the resource to restore it.
 		return false, fmt.Errorf("the Cloud KMS key can't be changed while kms_key_service_account is set; to change it, taint or destroy the resource first")
 	}
-	if !newKeyKnown {
-		// Once known, this is an update or an error, never a replacement.
-		return false, nil
-	}
 	return false, nil
 }
 
-// validateKmsKeyChange forces replacement or errors at plan time for key
-// changes updateKmsKey can't make. serviceAccountPath may be "".
-func validateKmsKeyChange(keyPath, serviceAccountPath, sha256Path string) schema.CustomizeDiffFunc {
+// kmsKeyUpdateCustomDiff forces replacement or errors at plan time for key
+// changes updateKmsKey can't make; see kmsKeyChangeRequiresReplacement.
+// serviceAccountPath may be "".
+func kmsKeyUpdateCustomDiff(keyPath, serviceAccountPath, sha256Path string) schema.CustomizeDiffFunc {
 	return func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 		if d.Id() == "" || !d.HasChange(keyPath) {
 			return nil
@@ -50,7 +56,7 @@ func validateKmsKeyChange(keyPath, serviceAccountPath, sha256Path string) schema
 		oldSha256, _ := d.GetChange(sha256Path)
 		customerSuppliedKey := (oldKey.(string) == "" && oldSha256.(string) != "") ||
 			customerSuppliedKeyInConfig(d, strings.SplitN(keyPath, ".", 2)[0])
-		forceNew, err := kmsKeyChange(newKey.(string), d.NewValueKnown(keyPath), serviceAccountSet, customerSuppliedKey)
+		forceNew, err := kmsKeyChangeRequiresReplacement(newKey.(string), d.NewValueKnown(keyPath), serviceAccountSet, customerSuppliedKey)
 		if err != nil {
 			return err
 		}
@@ -80,8 +86,11 @@ func customerSuppliedKeyInConfig(d *schema.ResourceDiff, block string) bool {
 	}
 	for it := blockValue.ElementIterator(); it.Next(); {
 		_, elem := it.Element()
+		if elem.IsNull() || !elem.Type().IsObjectType() {
+			continue
+		}
 		for _, f := range []string{"raw_key_wo", "rsa_encrypted_key_wo"} {
-			if !elem.Type().IsObjectType() || !elem.Type().HasAttribute(f) {
+			if !elem.Type().HasAttribute(f) {
 				continue
 			}
 			if v := elem.GetAttr(f); !v.IsNull() && (!v.IsKnown() || v.AsString() != "") {
