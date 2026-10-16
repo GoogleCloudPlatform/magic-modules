@@ -69,6 +69,12 @@ func CompareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) b
 		}
 	}
 
+	if len(newParts) == 3 && (newParts[0] == "global" || newParts[0] == "regions" || newParts[0] == "zones") {
+		if strings.HasSuffix(old, "/"+new) {
+			return true
+		}
+	}
+
 	// The `new` string is a self_link
 	return CompareSelfLinkRelativePaths("", old, new, nil)
 }
