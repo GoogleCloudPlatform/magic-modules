@@ -255,6 +255,9 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
 		if eltCompLit, ok := elt.(*ast.CompositeLit); ok {
+			if shouldSkipStep(eltCompLit) {
+				continue
+			}
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
@@ -279,6 +282,31 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 		return test, fmt.Errorf("errors reading test steps: %v", errs)
 	}
 	return test, nil
+}
+
+// Report whether a test step composite literal does not apply its config, so
+// its fields should not count towards coverage: steps with ExpectError set
+// expect the config to be rejected, and steps with PlanOnly, Destroy,
+// ImportState or RefreshState set to true run a plan, destroy, import or
+// refresh rather than applying the config.
+func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
+	for _, elt := range stepCompLit.Elts {
+		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
+			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok {
+				switch ident.Name {
+				case "ExpectError":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); !ok || valIdent.Name != "nil" {
+						return true
+					}
+				case "PlanOnly", "Destroy", "ImportState", "RefreshState":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "true" {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 // Read a call expression that produces a config and return the config string.
