@@ -290,6 +290,7 @@ properties:
             type: String
             description: |
               Password to be used.
+            sensitive: true
       - name: oauth2AuthorizationCode
         type: NestedObject
         description: |
@@ -310,6 +311,7 @@ properties:
             type: String
             description: |
               The client's secret.
+            sensitive: true
           - name: scope
             type: String
             description: |
@@ -342,6 +344,7 @@ properties:
             type: String
             description: |
               The client's secret.
+            sensitive: true
           - name: tokenEndpoint
             type: String
             description: |
@@ -429,10 +432,12 @@ properties:
             type: String
             description: |
               User's pre-shared secret to sign the token.
+            sensitive: true
           - name: jwt
             type: String
             description: |
               The token calculated by the header, payload and signature.
+            sensitive: true
             output: true
       - name: authToken
         type: NestedObject
@@ -454,6 +459,7 @@ properties:
             type: String
             description: |
               The token for the auth type.
+            sensitive: true
       - name: serviceAccountCredentials
         type: NestedObject
         description: |
@@ -498,6 +504,7 @@ properties:
             type: String
             description: |
               ID token obtained for the service account.
+            sensitive: true
             output: true
           - name: tokenExpireTime
             type: String
@@ -521,9 +528,11 @@ properties:
         type: String
         description: |
           The ssl certificate encoded in PEM format. This string must include the begin header and end footer lines.
+        sensitive: true
         required: true
       - name: passphrase
         type: String
         description: |
           'passphrase' should be left unset if private key is not encrypted.
           Note that 'passphrase' is not the password for web server, but an extra layer of security to protected private key.
+        sensitive: true
