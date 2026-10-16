@@ -672,11 +672,16 @@ properties:
           secretManagerStoredPassword.
         sensitive: true
         is_missing_in_cai: true
+        # The Datastream API does not return password on read.
+        ignore_read: true
       - name: secretManagerStoredPassword
         type: String
         description: |
           A reference to a Secret Manager resource name storing the MongoDB
           connection password. Mutually exclusive with password.
+        sensitive: true
+        # The Datastream API does not return secretManagerStoredPassword on read.
+        ignore_read: true
       - name: sslConfig
         type: NestedObject
         description: |
