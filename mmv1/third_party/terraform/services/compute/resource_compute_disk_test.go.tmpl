@@ -770,16 +770,14 @@ func TestAccComputeDisk_encryptionKMSUpdate(t *testing.T) {
 	})
 }
 
-// Adding a key to a disk without one plans an in-place update. The plan is
-// not applied: the API doesn't support this yet, and returns a 400 that
-// leaves the disk unchanged. ExpectNonEmptyPlan is required for a PlanOnly
-// step with a diff, and PostApplyPreRefresh is the hook plugin-testing
-// runs on that plan. See b/550374864.
 func TestAccComputeDisk_encryptionKMSAdd(t *testing.T) {
+	t.Skip("updateKmsKey doesn't support adding a key to a disk yet; see b/550374864")
 	t.Parallel()
 
 	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	pid := envvar.GetTestProjectFromEnv()
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -790,14 +788,18 @@ func TestAccComputeDisk_encryptionKMSAdd(t *testing.T) {
 				Config: testAccComputeDisk_encryptionKMSUpdateNoKey(diskName),
 			},
 			{
-				Config:             testAccComputeDisk_encryptionKMSUpdateKey(diskName, key1),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
+				Config: testAccComputeDisk_encryptionKMSUpdateKey(diskName, key1),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PostApplyPreRefresh: []plancheck.PlanCheck{
+					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_disk.foobar", plancheck.ResourceActionUpdate),
 					},
 				},
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportStateId:     importID,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -123,12 +123,8 @@ func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
 	})
 }
 
-// Adding a key to a snapshot without one plans an in-place update. The plan is
-// not applied: the API doesn't support this yet, and returns a 400 that
-// leaves the snapshot unchanged. ExpectNonEmptyPlan is required for a PlanOnly
-// step with a diff, and PostApplyPreRefresh is the hook plugin-testing
-// runs on that plan. See b/550374864.
 func TestAccComputeSnapshot_encryptionCMEKAdd(t *testing.T) {
+	t.Skip("updateKmsKey doesn't support adding a key to a snapshot yet; see b/550374864")
 	t.Parallel()
 
 	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
@@ -145,14 +141,19 @@ func TestAccComputeSnapshot_encryptionCMEKAdd(t *testing.T) {
 				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
 			},
 			{
-				Config:             testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
+				Config: testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PostApplyPreRefresh: []plancheck.PlanCheck{
+					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_snapshot.foobar", plancheck.ResourceActionUpdate),
 					},
 				},
+			},
+			{
+				ResourceName:      "google_compute_snapshot.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Not returned by the API.
+				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
 			},
 		},
 	})

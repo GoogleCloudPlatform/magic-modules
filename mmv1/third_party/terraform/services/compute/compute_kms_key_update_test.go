@@ -19,10 +19,6 @@ const (
 func TestKmsKeyChangeRequiresReplacement(t *testing.T) {
 	t.Parallel()
 
-	// A key change updates in place, including from no key and from an
-	// unknown value. Switching from or to a customer-supplied key recreates.
-	// Removing the key, or changing it while kms_key_service_account is
-	// set, fails the plan.
 	cases := map[string]struct {
 		newKey              string
 		newKeyKnown         bool
@@ -31,12 +27,12 @@ func TestKmsKeyChangeRequiresReplacement(t *testing.T) {
 		wantForceNew        bool
 		wantErr             bool
 	}{
-		"key":                          {testKmsKeyB, true, false, false, false, false},
-		"unknown key":                  {"", false, false, false, false, false},
-		"no key":                       {"", true, false, false, false, true},
-		"key with service account":     {testKmsKeyB, true, true, false, false, true},
-		"unknown with service account": {"", false, true, false, false, true},
-		"key replacing a CSEK":         {testKmsKeyB, true, false, true, true, false},
+		"key to key updates in place":             {newKey: testKmsKeyB, newKeyKnown: true},
+		"unknown key updates in place":            {newKeyKnown: false},
+		"removing the key errors":                 {newKey: "", newKeyKnown: true, wantErr: true},
+		"key change with service account errors":  {newKey: testKmsKeyB, newKeyKnown: true, serviceAccountSet: true, wantErr: true},
+		"unknown key with service account errors": {newKeyKnown: false, serviceAccountSet: true, wantErr: true},
+		"replacing a CSEK recreates":              {newKey: testKmsKeyB, newKeyKnown: true, customerSuppliedKey: true, wantForceNew: true},
 	}
 	for name, tc := range cases {
 		tc := tc
