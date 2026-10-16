@@ -1497,3 +1497,41 @@ func TestIamPolicyReadModifyWrite_429(t *testing.T) {
 		}
 	})
 }
+
+func TestIamPolicyReadModifyWrite_serviceAccountNotFoundDoesNotDeadlock(t *testing.T) {
+	t.Parallel()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/resource:setIamPolicy" {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"error":{"code":400,"message":"Service account foo@example.iam.gserviceaccount.com does not exist."}}`))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"etag":"e1"}`))
+	}))
+	defer ts.Close()
+
+	updater := &httpTestIamUpdater{
+		resourceId: "sa-not-found-deadlock",
+		url:        ts.URL + "/resource",
+		client:     ts.Client(),
+	}
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- iamPolicyReadModifyWrite(updater, func(p *cloudresourcemanager.Policy) error {
+			return nil
+		})
+	}()
+
+	select {
+	case err := <-errCh:
+		if !transport_tpg.IsGoogleApiErrorWithCode(err, http.StatusBadRequest) {
+			t.Fatalf("expected 400 googleapi.Error, got: %v", err)
+		}
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("iamPolicyReadModifyWrite deadlocked after 400 Service account does not exist error")
+	}
+}
