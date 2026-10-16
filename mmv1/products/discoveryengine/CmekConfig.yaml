@@ -48,7 +48,7 @@ async:
   actions: [create, delete, update]
   result:
     resource_inside_response: true
-autogen_async: false
+autogen_async: true
 custom_code:
   update_encoder: templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl
 samples:
