@@ -18,6 +18,10 @@ func TestAccExpectError(t *testing.T) {
 				Config:      testAccExpectError_invalid(),
 				ExpectError: regexp.MustCompile("invalid"),
 			},
+			{
+				Config:   testAccExpectError_planOnly(),
+				PlanOnly: true,
+			},
 		},
 	})
 }
@@ -35,6 +39,15 @@ func testAccExpectError_invalid() string {
 resource "expect_error_resource" "resource" {
   field_one = "value-one"
   field_two = "invalid-value"
+}
+`
+}
+
+func testAccExpectError_planOnly() string {
+	return `
+resource "expect_error_resource" "resource" {
+  field_one   = "value-one"
+  field_three = "plan-only-value"
 }
 `
 }

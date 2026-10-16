@@ -255,7 +255,7 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
 		if eltCompLit, ok := elt.(*ast.CompositeLit); ok {
-			if hasExpectError(eltCompLit) {
+			if shouldSkipStep(eltCompLit) {
 				continue
 			}
 			for _, eltCompLitElt := range eltCompLit.Elts {
@@ -284,17 +284,24 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
-// Report whether a test step composite literal has ExpectError set. A step
-// that expects an error tests that a config is rejected rather than applied,
-// so its fields should not count towards coverage.
-func hasExpectError(stepCompLit *ast.CompositeLit) bool {
+// Report whether a test step composite literal does not apply its config, so
+// its fields should not count towards coverage: steps with ExpectError set
+// expect the config to be rejected, and steps with PlanOnly set only run a
+// plan without applying.
+func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
 	for _, elt := range stepCompLit.Elts {
 		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
-			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "ExpectError" {
-				if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "nil" {
-					return false
+			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok {
+				switch ident.Name {
+				case "ExpectError":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); !ok || valIdent.Name != "nil" {
+						return true
+					}
+				case "PlanOnly":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "true" {
+						return true
+					}
 				}
-				return true
 			}
 		}
 	}
