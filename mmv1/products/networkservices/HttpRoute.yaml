@@ -325,6 +325,46 @@ properties:
                       If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
                       If weights are specified for any one service name, they need to be specified for all of them.
                       If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
+                  - name: requestHeaderModifier
+                    type: NestedObject
+                    description: |
+                      The specification for modifying the headers of a matching request prior to delivery of the request to the destination.
+                      If HeaderModifiers are set on both the Destination and the RouteAction, they will be merged. Conflicts between the two will not be resolved on the configuration.
+                    properties:
+                      - name: set
+                        type: KeyValuePairs
+                        description: |
+                          Completely overwrite/replace the headers with given map where key is the name of the header, value is the value of the header.
+                      - name: add
+                        type: KeyValuePairs
+                        description: |
+                          Add the headers with given map where key is the name of the header, value is the value of the header.
+                      - name: remove
+                        type: Array
+                        description: |
+                          Remove headers (matching by header names) specified in the list.
+                        item_type:
+                          type: String
+                  - name: responseHeaderModifier
+                    type: NestedObject
+                    description: |
+                      The specification for modifying the headers of a response prior to sending the response back to the client.
+                      If HeaderModifiers are set on both the Destination and the RouteAction, they will be merged. Conflicts between the two will not be resolved on the configuration.
+                    properties:
+                      - name: set
+                        type: KeyValuePairs
+                        description: |
+                          Completely overwrite/replace the headers with given map where key is the name of the header, value is the value of the header.
+                      - name: add
+                        type: KeyValuePairs
+                        description: |
+                          Add the headers with given map where key is the name of the header, value is the value of the header.
+                      - name: remove
+                        type: Array
+                        description: |
+                          Remove headers (matching by header names) specified in the list.
+                        item_type:
+                          type: String
             - name: redirect
               type: NestedObject
               description: |
@@ -486,6 +526,12 @@ properties:
                         If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
                         If weights are specified for any one service name, they need to be specified for all of them.
                         If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
+                - name: mirrorPercent
+                  type: Double
+                  description: |
+                    The percentage of requests to get mirrored to the desired destination. The value must be between 0.0 and 100.0 inclusive.
+                  validation:
+                    function: 'validation.FloatBetween(0, 100)'
             - name: corsPolicy
               type: NestedObject
               description: |
@@ -533,3 +579,21 @@ properties:
                   type: Boolean
                   description: |
                     If true, the CORS policy is disabled. The default value is false, which indicates that the CORS policy is in effect.
+            - name: directResponse
+              type: NestedObject
+              description: |
+                Static HTTP response object to be returned regardless of the request.
+              properties:
+                - name: status
+                  type: Integer
+                  required: true
+                  description: |
+                    Status to return as part of HTTP response. Must be a positive integer.
+                - name: stringBody
+                  type: String
+                  description: |
+                    Response body as a string. Maximum body length is 1024 characters. Only one of `string_body` or `bytes_body` may be set.
+                - name: bytesBody
+                  type: String
+                  description: |
+                    Response body as bytes, as a base64-encoded string. Maximum body size is 4096B. Only one of `string_body` or `bytes_body` may be set.

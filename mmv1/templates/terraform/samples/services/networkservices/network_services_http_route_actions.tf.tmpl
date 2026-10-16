@@ -6,6 +6,17 @@ resource "google_network_services_http_route" "{{$.PrimaryResourceId}}" {
   description             = "my description"
   hostnames               = ["example"]
   rules                   {
+    matches {
+      prefix_match = "/maintenance"
+    }
+    action {
+      direct_response {
+        status = 503
+        bytes_body = "ZG93biBmb3IgbWFpbnRlbmFuY2U="
+      }
+    }
+  }
+  rules                   {
     action {
       fault_injection_policy {
        delay {
@@ -31,6 +42,7 @@ resource "google_network_services_http_route" "{{$.PrimaryResourceId}}" {
           service_name = "new"
           weight = 1
         }
+        mirror_percent = 33.3
       }
       cors_policy {
         allow_origins = ["example"]
