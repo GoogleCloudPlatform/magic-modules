@@ -255,6 +255,9 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
 		if eltCompLit, ok := elt.(*ast.CompositeLit); ok {
+			if hasExpectError(eltCompLit) {
+				continue
+			}
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
@@ -279,6 +282,23 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 		return test, fmt.Errorf("errors reading test steps: %v", errs)
 	}
 	return test, nil
+}
+
+// Report whether a test step composite literal has ExpectError set. A step
+// that expects an error tests that a config is rejected rather than applied,
+// so its fields should not count towards coverage.
+func hasExpectError(stepCompLit *ast.CompositeLit) bool {
+	for _, elt := range stepCompLit.Elts {
+		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
+			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "ExpectError" {
+				if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "nil" {
+					return false
+				}
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // Read a call expression that produces a config and return the config string.

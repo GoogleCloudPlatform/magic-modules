@@ -296,6 +296,33 @@ func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
 	}
 }
 
+func TestReadExpectErrorTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/expect_error_test.go"})
+	if err != nil {
+		t.Fatalf("error reading expect error test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	// A step with ExpectError set is skipped, so only the step that applies
+	// cleanly is recorded and field_two from the ExpectError step is not.
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"expect_error_resource": {
+				"resource": {
+					"field_one": "\"value-one\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
 func TestReadFormattingCallTestFile(t *testing.T) {
 	tests, err := ReadTestFiles([]string{"testdata/service/formatting_call_test.go"})
 	if err != nil {
