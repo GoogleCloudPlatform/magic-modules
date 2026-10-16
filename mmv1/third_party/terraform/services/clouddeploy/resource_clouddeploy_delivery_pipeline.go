@@ -1134,7 +1134,6 @@ func resourceClouddeployDeliveryPipelineUpdate(d *schema.ResourceData, meta inte
 	}
 	client := NewDCLClouddeployClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
-		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
 		client.Config.BasePath = bp
@@ -1144,8 +1143,6 @@ func resourceClouddeployDeliveryPipelineUpdate(d *schema.ResourceData, meta inte
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
 	} else if err != nil {
-		// The resource didn't actually create
-		d.SetId("")
 		return fmt.Errorf("Error updating DeliveryPipeline: %s", err)
 	}
 
@@ -1191,7 +1188,6 @@ func resourceClouddeployDeliveryPipelineDelete(d *schema.ResourceData, meta inte
 	}
 	client := NewDCLClouddeployClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
-		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
 		client.Config.BasePath = bp
