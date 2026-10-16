@@ -668,7 +668,7 @@ This resource provides the following
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.
-- `delete` - Default is 15 minutes. It can take up to 6 more hours if graceful shutdown configured in the instance template.
+- `delete` - Default is 15 minutes. Note if graceful shutdown is configured on the instance template and not skipped with `deletion_policy = "FORCE"` it can take up to 6 hours.
 
 
 ## Import
