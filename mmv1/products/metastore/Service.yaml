@@ -111,6 +111,7 @@ samples:
           metastore_service_name: metastore-metadata
   - name: dataproc_metastore_service_private_service_connect
     primary_resource_id: default
+    external_providers: [time]
     steps:
       - name: dataproc_metastore_service_private_service_connect
         resource_id_vars:
@@ -121,6 +122,7 @@ samples:
     primary_resource_id: default
     min_version: beta
     exclude_test: true
+    external_providers: [time]
     steps:
       - name: dataproc_metastore_service_private_service_connect_custom_routes
         min_version: beta
