@@ -681,7 +681,6 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
 {{if $.ExcludeRead -}}
   // This resource could not be read from the API.
-  return nil
 {{  else  -}}
     config := meta.(*transport_tpg.Config)
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
