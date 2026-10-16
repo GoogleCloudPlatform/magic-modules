@@ -3,4 +3,8 @@ resource "google_resource_manager_capability_config" "{{$.PrimaryResourceId}}" {
   capability_config_id = "{{index $.ResourceIdVars "capability_config_id"}}"
   display_name         = "Updated Display Name"
   types                = ["AGENT_MANAGEMENT"]
+  boundaries           = [
+    "organizations/{{index $.TestEnvVars "org_id"}}/boundaries/boundary-1",
+    "organizations/{{index $.TestEnvVars "org_id"}}/boundaries/boundary-2",
+  ]
 }

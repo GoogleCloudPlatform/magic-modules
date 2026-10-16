@@ -42,6 +42,8 @@ async:
     base_url: '{{op_id}}'
   actions: [create, update, delete]
 autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/resource_manager_capability_config.go.tmpl
 samples:
   - name: resource_manager_capability_config_basic
     primary_resource_id: capability_config
@@ -52,11 +54,19 @@ samples:
           display_name: capdisp
         test_env_vars:
           org_id: ORG_ID
+        # The API updates etag and update_time asynchronously shortly after boundary mutations complete
+        ignore_read_extra:
+          - etag
+          - update_time
       - name: resource_manager_capability_config_update
         resource_id_vars:
           capability_config_id: capcfg
         test_env_vars:
           org_id: ORG_ID
+        # The API updates etag and update_time asynchronously shortly after boundary mutations complete
+        ignore_read_extra:
+          - etag
+          - update_time
       # Verifies that an optional field can be updated from a non-zero value to
       # a zero value, i.e. that display_name can be removed once it is set.
       - name: resource_manager_capability_config_no_display_name
@@ -64,6 +74,10 @@ samples:
           capability_config_id: capcfg
         test_env_vars:
           org_id: ORG_ID
+        # The API updates etag and update_time asynchronously shortly after boundary mutations complete
+        ignore_read_extra:
+          - etag
+          - update_time
   - name: resource_manager_capability_config_folder
     primary_resource_id: capability_config
     external_providers: [time]
@@ -135,6 +149,14 @@ properties:
       Format: `projects/{project_number}`.
     immutable: true
     default_from_api: true
+  - name: boundaries
+    type: Array
+    description: |-
+      The list of Boundaries associated with this capability config.
+      Format: `organizations/{organization}/boundaries/{boundary}`, `folders/{folder}/boundaries/{boundary}`, or `projects/{project}/boundaries/{boundary}`.
+    is_set: true
+    item_type:
+      type: String
   - name: state
     type: String
     description: |-
