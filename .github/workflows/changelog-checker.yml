@@ -21,7 +21,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            repo/tools/go-changelog/go.mod
+            repo/tools/go-changelog/go.sum
 
       - name: Build
         run: |

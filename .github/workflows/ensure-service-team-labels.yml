@@ -25,7 +25,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            tools/issue-labeler/go.mod
+            tools/issue-labeler/go.sum
       - name: Build issue-labeler
         run: |
           cd tools/issue-labeler
