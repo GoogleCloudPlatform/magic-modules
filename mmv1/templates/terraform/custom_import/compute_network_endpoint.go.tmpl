@@ -9,6 +9,15 @@ if err := tpgresource.ParseImportId([]string{
 	return nil, err
 }
 
+if ipAddress, ok := d.GetOk("ip_address"); ok && strings.Contains(ipAddress.(string), ":") {
+	if err := d.Set("ipv6_address", tpgresource.CanonicalizeIp(ipAddress)); err != nil {
+		return nil, fmt.Errorf("Error setting ipv6_address: %s", err)
+	}
+	if err := d.Set("ip_address", nil); err != nil {
+		return nil, fmt.Errorf("Error clearing ip_address: %s", err)
+	}
+}
+
 // Replace import id for the resource id
 id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}project{{"}}"}}/{{"{{"}}zone{{"}}"}}/{{"{{"}}network_endpoint_group{{"}}"}}/{{"{{"}}instance{{"}}"}}/{{"{{"}}ip_address{{"}}"}}/{{"{{"}}port{{"}}"}}")
 if err != nil {
