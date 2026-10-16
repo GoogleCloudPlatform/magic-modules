@@ -3,7 +3,6 @@ package dataplex_test
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -111,7 +110,7 @@ func testAccDataplexDataScanJobTriggerRunAndWaitUntilComplete(t *testing.T, reso
 
 			switch dataScanJobState {
 			case "STATE_UNSPECIFIED", "RUNNING", "PENDING":
-				time.Sleep(10 * time.Second) // Pause for 10 seconds to prevend making too many api calls
+				_ = acctest.SleepInSecondsForTest(10)(s) // Pause for 10 seconds to prevend making too many api calls
 			case "CANCELING", "CANCELLED", "FAILED":
 				return fmt.Errorf("Data scan job failed: Invalid state: %s", dataScanJobState)
 			case "SUCCEEDED":

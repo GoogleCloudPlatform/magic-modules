@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -1897,7 +1896,7 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 		}
 
 		// Wait 10 seconds and delete again
-		time.Sleep(10000 * time.Millisecond)
+		_ = acctest.SleepInSecondsForTest(10)(s)
 
 		if err := storage_tpg.NewClient(config, config.UserAgent).Objects.Delete(bucketName, object.Name).Do(); err == nil {
 			log.Printf("[INFO] Deleted object %v at location %v\n\n", object.Name, object.SelfLink)

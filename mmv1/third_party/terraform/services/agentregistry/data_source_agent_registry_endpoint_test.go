@@ -2,12 +2,10 @@ package agentregistry_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDataSourceAgentRegistryEndpoint_basic(t *testing.T) {
@@ -28,10 +26,7 @@ func TestAccDataSourceAgentRegistryEndpoint_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceAgentRegistryEndpoint_serviceOnly(context),
 				Check: resource.ComposeTestCheckFunc(
-					func(s *terraform.State) error {
-						time.Sleep(10 * time.Second)
-						return nil
-					},
+					acctest.SleepInSecondsForTest(10),
 				),
 			},
 			{

@@ -266,7 +266,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 			}
 
 			delay = min(delay*2, maxDelay)
-			time.Sleep(delay)
+			_ = acctest.SleepInSecondsForTest(int(delay.Seconds()))(s)
 		}
 
 		// if action is DELETE, the service account should be found in the previous loop
