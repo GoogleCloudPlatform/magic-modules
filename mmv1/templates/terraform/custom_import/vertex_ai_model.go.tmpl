@@ -1,0 +1,9 @@
+config := meta.(*transport_tpg.Config)
+
+if err := tpgresource.ParseImportId([]string{
+	"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/models/(?P<model_id>[^/]+)",
+}, d, config); err != nil {
+	return nil, err
+}
+
+return []*schema.ResourceData{d}, nil
