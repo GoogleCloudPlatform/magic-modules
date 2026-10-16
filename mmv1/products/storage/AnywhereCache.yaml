@@ -13,6 +13,7 @@
 
 ---
 name: AnywhereCache
+deprecation_message: '`google_storage_anywhere_cache` is deprecated and will be removed in a future major release. Use `google_storage_rapid_cache` instead.'
 description: |
   The Google Cloud Storage (GCS) Anywhere Cache feature allows users to
   create SSD backed zonal read cache for their buckets. These zonal
