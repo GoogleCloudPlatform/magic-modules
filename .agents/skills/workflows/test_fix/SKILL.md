@@ -15,7 +15,7 @@ Consult `.agents/knowledge/index.md` for the topics the failure touches and open
 
 When diagnosing and fixing test failures, consult these core documentation guides in `docs/content/` (each contains tabbed examples for **MMv1 Generated** vs **Handwritten** code):
 * `docs/content/develop/diffs.md` — Authoritative guide for fixing plan diffs, permadiffs, API server defaults, and `ignore_read` fields (Scenario 2).
-* `docs/content/test/test.md` — Authoritative guide for acceptance test conventions, dynamic randomization, dependency bootstrapping, and VCR skipping rules (Scenario 5).
+* `docs/content/test/test.md` — Authoritative guide for acceptance test conventions, dynamic randomization, dependency bootstrapping, and VCR skipping rules (Scenarios 5 & 9).
 * `docs/content/test/run-tests.md` — Authoritative guide for compiling downstream providers and running `make testacc` verification loops.
 
 ---
@@ -23,7 +23,7 @@ When diagnosing and fixing test failures, consult these core documentation guide
 ## Execution Steps
 
 ### 1. Failure Information Intake
-* Execute the `intake-test-failure` skill (`.agents/skills/utils/intake-test-failure/SKILL.md`) via `.agents/scripts/intake_failure_helper.py` on the input provided by the user (GitHub issue URL, direct prompt text, GCS log link, or local log file).
+* Execute the `intake-test-failure` skill (`.agents/skills/utils/intake-test-failure/SKILL.md`) via `.agents/scripts/intake_failure_helper.py` on the input provided by the user (GitHub issue URL, PR VCR replay failure, direct prompt text, GCS log link, or local log file).
 * Verify that `test_name` matches `^TestAcc[A-Za-z0-9_]+$`, `target_provider` is in `{"ga", "beta", "both"}`, and raw error output is isolated in `debug_output/<test_name>/raw_error.log`.
 * Produce the **Normalized Failure Payload**:
   ```yaml
