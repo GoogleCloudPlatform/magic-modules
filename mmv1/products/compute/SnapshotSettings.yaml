@@ -25,9 +25,9 @@ update_url: 'projects/{{project}}/global/snapshotSettings'
 import_format:
   - 'projects/{{project}}/global/snapshotSettings/'
 timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 custom_code:
@@ -39,9 +39,9 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
   result:
     resource_inside_response: false
 # there is only a GET and PATCH endpoint
