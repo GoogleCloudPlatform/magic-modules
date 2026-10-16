@@ -62,11 +62,25 @@ type (
 )
 
 // Locking wrapper around read-only operation with retries.
+//
+// Reads take the read side of the per-resource lock. Concurrent reads of one
+// policy are safe with each other; a read only has to wait for an in-flight
+// read-modify-write (iamPolicyReadModifyWrite) on the same resource. Holding
+// the exclusive lock here serialized every refresh of every IAM resource that
+// shares a parent (for example all google_project_iam_member resources on one
+// project), which dominated plan time for large configurations.
 func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
 	mutexKey := updater.GetMutexKey()
-	transport_tpg.MutexStore.Lock(mutexKey)
-	defer transport_tpg.MutexStore.Unlock(mutexKey)
+	transport_tpg.MutexStore.RLock(mutexKey)
+	defer transport_tpg.MutexStore.RUnlock(mutexKey)
 
+	return iamPolicyReadWithRetryNoLock(updater)
+}
+
+// iamPolicyReadWithRetryNoLock is the read with retries for callers that
+// already hold the per-resource lock (iamPolicyReadModifyWrite). The lock is
+// not reentrant, so taking it again from such a caller would deadlock.
+func iamPolicyReadWithRetryNoLock(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
 	log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
 	var policy *cloudresourcemanager.Policy
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -165,7 +179,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			// calling a retryable function within a retry loop is not
 			// strictly the _best_ idea, but this error only happens in
 			// high-traffic projects anyways
-			currentPolicy, rerr := iamPolicyReadWithRetry(updater)
+			currentPolicy, rerr := iamPolicyReadWithRetryNoLock(updater)
 			if rerr != nil {
 				if p.Etag != currentPolicy.Etag {
 					// not matching indicates that there is a new state to attempt to apply
