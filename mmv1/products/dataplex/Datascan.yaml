@@ -916,10 +916,14 @@ properties:
     properties:
       - name: catalogPublishingEnabled
         type: Boolean
+        # catalogPublishingEnabled is not present in CAI asset
+        is_missing_in_cai: true
         description: |
           If set, the latest DataScan job result will be published to Knowledge Catalog.
       - name: sqlDialect
         type: Enum
+        # sqlDialect is not present in CAI asset
+        is_missing_in_cai: true
         description: |
           The SQL dialect to use in the generated SQL queries.
           If not specified, the default dialect is Google SQL.

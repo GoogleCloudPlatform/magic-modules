@@ -121,6 +121,9 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		hclData["key_revocation_action_type"] = strings.TrimSuffix(keyRevocationActionType, "_ON_KEY_REVOCATION")
 	}
 	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKeyTgcNext(data["instanceEncryptionKey"])
+	if wic, ok := data["workloadIdentityConfig"].(map[string]interface{}); ok && len(wic) > 0 {
+		hclData["workload_identity_config"] = flattenWorkloadIdentityConfig(wic)
+	}
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
 	if err != nil {
@@ -189,6 +192,12 @@ func flattenNetworkInterfacesTgcNext(v interface{}, project string) ([]map[strin
 		}
 		if networkAttachment, ok := iface["networkAttachment"].(string); ok && networkAttachment != "" {
 			flattened[i]["network_attachment"] = networkAttachment
+		}
+		if enableVpcScopedDns, ok := iface["enableVpcScopedDns"].(bool); ok && enableVpcScopedDns {
+			flattened[i]["enable_vpc_scoped_dns"] = enableVpcScopedDns
+		}
+		if serviceClassId, ok := iface["serviceClassId"].(string); ok && serviceClassId != "" {
+			flattened[i]["service_class_id"] = serviceClassId
 		}
 
 		if network, ok := iface["network"].(string); ok && network != "" {
@@ -558,6 +567,14 @@ func flattenSchedulingTgcNext(v interface{}) []map[string]interface{} {
 
 	if lsrt, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok && lsrt != nil {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeoutTgcNext(lsrt)
+	}
+
+	if pnd, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok && pnd != nil {
+		schedulingMap["preemption_notice_duration"] = flattenComputeLocalSsdRecoveryTimeoutTgcNext(pnd)
+	}
+
+	if hets, ok := resp["hostErrorTimeoutSeconds"].(float64); ok && hets != 0 {
+		schedulingMap["host_error_timeout_seconds"] = int(hets)
 	}
 
 	if len(schedulingMap) == 0 {

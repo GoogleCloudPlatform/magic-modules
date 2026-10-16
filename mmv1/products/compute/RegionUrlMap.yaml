@@ -981,6 +981,8 @@ properties:
                           specified.
                       - name: 'regexRewrite'
                         type: NestedObject
+                        # regexRewrite is not present in CAI asset
+                        is_missing_in_cai: true
                         description: |
                           The regex rewrite to be applied to the URL. Only one of
                           pathPrefixRewrite, pathTemplateRewrite, or regexRewrite may be

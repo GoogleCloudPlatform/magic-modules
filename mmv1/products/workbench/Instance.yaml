@@ -431,6 +431,8 @@ properties:
               diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
             - name: 'resourcePolicies'
               type: Array
+              # resourcePolicies is not present in CAI asset
+              is_missing_in_cai: true
               default_from_api: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               description: |
