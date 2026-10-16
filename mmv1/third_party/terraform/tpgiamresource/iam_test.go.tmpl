@@ -1,12 +1,68 @@
 package tpgiamresource
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/googleapi"
 )
+
+// A ResourceIamUpdater that stores the policy in memory. SetResourceIamPolicy
+// returns the entries of setErrs first, one for each call.
+type fakeIamUpdater struct {
+	policy   *cloudresourcemanager.Policy
+	setErrs  []error
+	setCalls int
+}
+
+func (u *fakeIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	return u.policy, nil
+}
+
+func (u *fakeIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	u.setCalls++
+	if len(u.setErrs) > 0 {
+		err := u.setErrs[0]
+		u.setErrs = u.setErrs[1:]
+		return err
+	}
+	u.policy = policy
+	return nil
+}
+
+func (u *fakeIamUpdater) GetMutexKey() string      { return "iam-fake-resource" }
+func (u *fakeIamUpdater) GetResourceId() string    { return "fake-resource" }
+func (u *fakeIamUpdater) DescribeResource() string { return "fake resource" }
+
+func TestIamPolicyReadModifyWrite_retriesCustomRoleNotFound(t *testing.T) {
+	binding := &cloudresourcemanager.Binding{
+		Role:    "projects/my-project/roles/myRole",
+		Members: []string{"user:someone@example.com"},
+	}
+	updater := &fakeIamUpdater{
+		policy: &cloudresourcemanager.Policy{},
+		setErrs: []error{
+			fmt.Errorf("Error setting IAM policy for fake resource: %w", &googleapi.Error{
+				Code: 400,
+				Body: "Role (projects/my-project/roles/myRole) does not exist in the resource's hierarchy.",
+			}),
+		},
+	}
+
+	err := iamPolicyReadModifyWrite(updater, func(p *cloudresourcemanager.Policy) error {
+		p.Bindings = []*cloudresourcemanager.Binding{binding}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	if updater.setCalls != 2 {
+		t.Errorf("Expected 2 calls to SetResourceIamPolicy, got %d", updater.setCalls)
+	}
+}
 
 func TestIamMergeBindings(t *testing.T) {
 	testCases := []struct {

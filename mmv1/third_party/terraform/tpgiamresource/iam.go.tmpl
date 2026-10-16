@@ -159,6 +159,16 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 			continue
 		}
 
+		if isCustomRoleNotFound, _ := transport_tpg.IamCustomRoleNotFound(err); isCustomRoleNotFound {
+			if backoff > maxBackoffSeconds*time.Second {
+				return errwrap.Wrapf(fmt.Sprintf("Error applying IAM policy to %s: Waited too long for the custom role.  Latest error: {{"{{"}}err{{"}}"}}", updater.DescribeResource()), err)
+			}
+			log.Printf("[DEBUG]: Custom role not found, restarting read-modify-write after %s\n", backoff)
+			time.Sleep(backoff)
+			backoff = backoff * 2
+			continue
+		}
+
 		// retry in the case that a service account is not found. This can happen when a service account is deleted
 		// out of band.
 		if isServiceAccountNotFoundError, _ := transport_tpg.IamServiceAccountNotFound(err); isServiceAccountNotFoundError {
