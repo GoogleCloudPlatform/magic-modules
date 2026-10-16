@@ -164,6 +164,12 @@ properties:
     type: String
     description: |
       An optional description of this resource.
+  - name: 'serviceattachmentId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'fingerprint'
     type: Fingerprint
     description: |
