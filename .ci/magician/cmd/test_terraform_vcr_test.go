@@ -64,6 +64,23 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 			packages: map[string]struct{}{},
 			all:      false,
 		},
+		{
+			name: "ignore-provider-resource-registration-files",
+			diffs: []string{
+				"google-beta/provider/provider_mmv1_resources.go",
+				"google-beta/provider/provider_dcl_resources.go",
+				"google-beta/provider/provider_register_services.go",
+				"google-beta/services/servicename/resource.go",
+			},
+			packages: map[string]struct{}{"servicename": struct{}{}},
+			all:      false,
+		},
+		{
+			name:     "only-provider-register-services",
+			diffs:    []string{"google-beta/provider/provider_register_services.go"},
+			packages: map[string]struct{}{},
+			all:      false,
+		},
 	} {
 		if packages, all := modifiedPackages(tc.diffs, provider.Beta); !reflect.DeepEqual(packages, tc.packages) {
 			t.Errorf("Unexpected packages found for test %s: %v, expected %v", tc.name, packages, tc.packages)

@@ -528,7 +528,7 @@ func modifiedPackages(changedFiles []string, version provider.Version) (map[stri
 		if strings.HasPrefix(file, version.ProviderName()+"/services/") {
 			fileParts := strings.Split(file, "/")
 			services[fileParts[2]] = struct{}{}
-		} else if file == version.ProviderName()+"/provider/provider_mmv1_resources.go" || file == version.ProviderName()+"/provider/provider_dcl_resources.go" {
+		} else if file == version.ProviderName()+"/provider/provider_mmv1_resources.go" || file == version.ProviderName()+"/provider/provider_dcl_resources.go" || file == version.ProviderName()+"/provider/provider_register_services.go" {
 			fmt.Println("ignore changes in ", file)
 		} else {
 			fmt.Println("run full tests ", file)
