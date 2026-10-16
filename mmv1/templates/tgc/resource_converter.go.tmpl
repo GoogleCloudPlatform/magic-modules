@@ -142,12 +142,6 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 }
 
-{{if $.CustomCode.Encoder -}}
-func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ customTemplate $ $.CustomCode.Encoder false -}}
-}
-{{- end}}
-
 {{ range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end}}

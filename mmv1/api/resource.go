@@ -2273,7 +2273,7 @@ func customFlattenProperties(props []*Type) []*Type {
 		if p.WriteOnly {
 			continue
 		}
-		if p.CustomFlatten != "" && !p.ShouldIgnoreCustomFlatten() {
+		if p.CustomFlattenTemplate() != "" {
 			res = append(res, p)
 		} else if nested := p.NestedProperties(); len(nested) > 0 {
 			res = append(res, customFlattenProperties(nested)...)
@@ -2283,13 +2283,19 @@ func customFlattenProperties(props []*Type) []*Type {
 }
 
 func (r Resource) CustomFlattenProperties() []*Type {
+	if r.IsTgcMainCompiler() {
+		return nil
+	}
+	if r.IsTgcCompiler() {
+		return customFlattenProperties(r.ReadPropertiesForTgc())
+	}
 	return customFlattenProperties(r.GettableProperties())
 }
 
 func customExpandProperties(props []*Type) []*Type {
 	var res []*Type
 	for _, p := range props {
-		if p.CustomExpand != "" {
+		if p.CustomExpandTemplate() != "" {
 			res = append(res, p)
 		} else if nested := p.NestedProperties(); len(nested) > 0 {
 			for _, np := range nested {
@@ -2306,21 +2312,60 @@ func (r Resource) CustomExpandProperties() []*Type {
 	return customExpandProperties(r.SettableProperties())
 }
 
+func (r Resource) IsTgcMainCompiler() bool {
+	return r.ProductMetadata != nil && r.ProductMetadata.Compiler == "terraformgoogleconversion-codegen"
+}
+
+func (r Resource) IsAnyTgcCompiler() bool {
+	return r.IsTgcMainCompiler() || r.IsTgcCompiler()
+}
+
+func (r Resource) HasCustomEncoder() bool {
+	if r.IsTgcCompiler() && r.CustomCode.TGCIgnoreTerraformEncoder {
+		return false
+	}
+	return r.CustomCode.Encoder != ""
+}
+
+func (r Resource) HasCustomTgcEncoder() bool {
+	return r.IsTgcCompiler() && r.CustomCode.TgcEncoder != ""
+}
+
+func (r Resource) HasCustomDecoder() bool {
+	if r.IsTgcMainCompiler() {
+		return false
+	}
+	if r.IsTgcCompiler() && r.CustomCode.TGCIgnoreTerraformDecoder {
+		return false
+	}
+	return r.CustomCode.Decoder != ""
+}
+
+func (r Resource) HasCustomTgcDecoder() bool {
+	return r.IsTgcCompiler() && r.CustomCode.TgcDecoder != ""
+}
+
 func (r Resource) HasCustomMethods() bool {
-	return r.CustomCode.CustomCreate != "" ||
+	hasCommon := r.HasCustomEncoder() ||
+		r.HasCustomTgcEncoder() ||
+		r.HasCustomDecoder() ||
+		r.HasCustomTgcDecoder() ||
+		len(r.CustomFlattenProperties()) > 0 ||
+		len(r.CustomExpandProperties()) > 0
+	if r.IsAnyTgcCompiler() {
+		return hasCommon
+	}
+	return hasCommon ||
+		r.CustomCode.CustomCreate != "" ||
 		(r.CustomCode.CustomUpdate != "" && r.Updatable()) ||
 		(r.CustomCode.CustomDelete != "" && !r.ExcludeDelete) ||
 		(r.CustomCode.CustomImport != "" && !r.ExcludeImport) ||
-		r.CustomCode.Encoder != "" ||
 		r.CustomCode.UpdateEncoder != "" ||
-		r.CustomCode.Decoder != "" ||
 		r.CustomCode.PostCreateFailure != "" ||
 		r.CustomCode.PostUpdateFailure != "" ||
 		r.CustomCode.PostDeleteFailure != "" ||
 		(r.SchemaVersion != 0 && r.StateUpgraders) ||
-		(r.IdentitySchemaVersion != 0 && r.IdentityUpgraders && !r.ExcludeRead) ||
-		len(r.CustomFlattenProperties()) > 0 ||
-		len(r.CustomExpandProperties()) > 0
+		(r.IdentitySchemaVersion != 0 && r.IdentityUpgraders && !r.ExcludeRead)
 }
 
 func (r Resource) TestSamples() []*resource.Sample {
@@ -2882,5 +2927,5 @@ func (r Resource) CaiResourceName() string {
 }
 
 func (r Resource) IsTgcCompiler() bool {
-	return r.ProductMetadata.Compiler == "terraformgoogleconversionnext-codegen"
+	return r.ProductMetadata != nil && r.ProductMetadata.Compiler == "terraformgoogleconversionnext-codegen"
 }

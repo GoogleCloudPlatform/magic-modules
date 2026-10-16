@@ -130,6 +130,11 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 	templatePath := "templates/tgc/resource_converter.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+
+	if object.HasCustomMethods() {
+		customTargetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_custom.go", productName, google.Underscore(object.Name)))
+		templateData.GenerateCustomFile(customTargetFilePath, object)
+	}
 }
 
 // Generate the IAM policy for this object. This is used to query and test

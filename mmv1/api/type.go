@@ -1606,7 +1606,33 @@ func (t Type) TGCSendEmptyValue() bool {
 }
 
 func (t Type) ShouldIgnoreCustomFlatten() bool {
-	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
+	return t.ResourceMetadata != nil && t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
+}
+
+func (t Type) CustomExpandTemplate() string {
+	if t.ResourceMetadata != nil && t.ResourceMetadata.IsTgcCompiler() && t.CustomTgcExpand != "" {
+		return t.CustomTgcExpand
+	}
+	return t.CustomExpand
+}
+
+func (t Type) CustomFlattenTemplate() string {
+	if t.ResourceMetadata != nil && t.ResourceMetadata.IsTgcCompiler() {
+		if t.CustomTgcFlatten != "" {
+			return t.CustomTgcFlatten
+		}
+		if t.IsA("KeyValueLabels") || t.IsA("KeyValueAnnotations") ||
+			(t.Name == "zone" && t.ResourceMetadata.HasZone()) ||
+			(t.Name == "region" && t.ResourceMetadata.HasRegion()) ||
+			t.WriteOnly || t.ShouldIgnoreCustomFlatten() {
+			return ""
+		}
+		return t.CustomFlatten
+	}
+	if t.WriteOnly || t.ShouldIgnoreCustomFlatten() {
+		return ""
+	}
+	return t.CustomFlatten
 }
 
 // It returns true if any of the nested properties are required, necessitating the initialization

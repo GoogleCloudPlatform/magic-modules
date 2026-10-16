@@ -12,9 +12,11 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
+{{- if not $.IsAnyTgcCompiler }}
 // Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
+{{ end -}}
 {{$.CodeHeader TemplatePath}}
 
 package {{ lower $.ProductMetadata.Name }}
@@ -45,10 +47,14 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-    {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
+    {{- if and (not $.IsAnyTgcCompiler) (and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead)) }}
     "github.com/hashicorp/terraform-plugin-go/tftypes"
     {{- end }}
+
     rmClient "{{ $.ImportPath }}/services/resourcemanager/client"
+    {{- if $.IsTgcCompiler }}
+    "{{ $.ImportPath }}/tgcresource"
+    {{- end }}
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
@@ -81,13 +87,17 @@ var (
     _ = schema.Noop
     _ = structure.ExpandJsonFromString
     _ = validation.All
+    {{- if $.IsTgcCompiler }}
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    {{- end }}
     _ = rmClient.NewClient
-    _ = tpgresource.SetLabels
+    _ = tpgresource.GetRegion
     _ = transport_tpg.Config{}
     _ = verify.ValidateEnum
     _ = googleapi.Error{}
 )
 
+{{- if not $.IsAnyTgcCompiler }}
 {{ if $.CustomCode.CustomCreate -}}
 func resource{{ $.ResourceName }}CustomCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
@@ -121,25 +131,41 @@ func resource{{ $.ResourceName }}CustomImport(d *schema.ResourceData, meta inter
 	{{ customTemplate $ $.CustomCode.CustomImport false -}}
 }
 {{ end }}
+{{- end }}
 
-{{- if $.CustomCode.Encoder }}
-func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{- if $.HasCustomEncoder }}
+func resource{{ $.ResourceName -}}Encoder(d {{ if $.IsAnyTgcCompiler }}tpgresource.TerraformResourceData{{ else }}*schema.ResourceData{{ end }}, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 {{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{ end -}}
 
+{{- if $.HasCustomTgcEncoder }}
+func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{ customTemplate $ $.CustomCode.TgcEncoder false -}}
+}
+{{ end -}}
+
+{{- if not $.IsAnyTgcCompiler }}
 {{- if $.CustomCode.UpdateEncoder }}
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
     {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
 }
 {{- end }}
+{{- end }}
 
-{{- if $.CustomCode.Decoder }}
+{{- if $.HasCustomDecoder }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
     {{ customTemplate $ $.CustomCode.Decoder false -}}
 }
 {{- end }}
 
+{{- if $.HasCustomTgcDecoder }}
+func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}, hclData map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {
+    {{ customTemplate $ $.CustomCode.TgcDecoder false -}}
+}
+{{- end }}
+
+{{- if not $.IsAnyTgcCompiler }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
     log.Printf("[DEBUG] Error before post_create_failure hook: %v", err)
@@ -168,11 +194,12 @@ func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta
 {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
     {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
+{{- end }}
 
 {{- range $prop := $.CustomFlattenProperties }}
-{{ customTemplate $prop $prop.CustomFlatten false }}
+{{ customTemplate $prop $prop.CustomFlattenTemplate false }}
 {{- end }}
 
 {{- range $prop := $.CustomExpandProperties }}
-{{ customTemplate $prop $prop.CustomExpand true }}
+{{ customTemplate $prop $prop.CustomExpandTemplate true }}
 {{- end }}

@@ -141,6 +141,13 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 	targetFilePath := path.Join(targetFolder, fileName)
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 	tgc.replaceImportPath(targetFolder, fileName)
+
+	if object.HasCustomMethods() {
+		customFileName := fmt.Sprintf("%s_custom.go", fileNamePrefix)
+		customTargetFilePath := path.Join(targetFolder, customFileName)
+		templateData.GenerateCustomFile(customTargetFilePath, object)
+		tgc.replaceImportPath(targetFolder, customFileName)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {

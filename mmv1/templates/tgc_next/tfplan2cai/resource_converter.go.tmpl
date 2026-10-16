@@ -154,18 +154,6 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 }
 
-{{if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
-func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ customTemplate $ $.CustomCode.Encoder false -}}
-}
-{{- end}}
-
-{{if $.CustomCode.TgcEncoder -}}
-func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ customTemplate $ $.CustomCode.TgcEncoder false -}}
-}
-{{- end}}
-
 {{ range $prop := $.SettableProperties }}
     {{- template "expandTgcPropertyMethod" $prop -}}
 {{- end}}
