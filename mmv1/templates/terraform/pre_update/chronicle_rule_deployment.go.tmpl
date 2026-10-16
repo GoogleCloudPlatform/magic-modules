@@ -31,3 +31,77 @@ if hasRunFrequencyUpdate && !hasScheduleCustomizationsUpdate {
         obj["scheduleCustomizations"] = scProp
     }
 }
+
+// removeRunFrequencyFromUpdateMask removes 'runFrequency' from the updateMask in a URL.
+removeRunFrequencyFromUpdateMask := func(url string) string {
+    url = strings.ReplaceAll(url, "%2CrunFrequency", "")
+    url = strings.ReplaceAll(url, "runFrequency%2C", "")
+    url = strings.ReplaceAll(url, "runFrequency", "")
+    url = strings.ReplaceAll(url, "%2C%2C", "%2C")
+    url = strings.TrimSuffix(url, "%2C")
+    return url
+}
+
+// Remove "runFrequency" from updateMask if run_frequency not configured by user
+if _, ok := d.GetOk("run_frequency"); !ok {
+    url = removeRunFrequencyFromUpdateMask(url)
+}
+
+// If archived is being set to true, the API does not allow it to be included
+// in an update_mask alongside any other fields. Split into two sequential PATCHes:
+// 1) all non-archived fields first, 2) archived alone (handled by main update).
+if d.HasChange("archived") {
+    if v, ok := d.GetOk("archived"); ok && v.(bool) {
+        // Build a mask and obj without archived for the first PATCH
+        maskWithoutArchived := slices.DeleteFunc(slices.Clone(updateMask), func(s string) bool {
+            return s == "archived"
+        })
+        objWithoutArchived := make(map[string]interface{})
+        for k, v := range obj {
+            if k != "archived" {
+                objWithoutArchived[k] = v
+            }
+        }
+
+        if len(maskWithoutArchived) > 0 {
+            firstUrl, err := transport_tpg.AddQueryParams(
+                strings.Split(url, "?")[0],
+                map[string]string{"updateMask": strings.Join(maskWithoutArchived, ",")},
+            )
+            if err != nil {
+                return err
+            }
+            _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                Config:    config,
+                Method:    "PATCH",
+                Project:   billingProject,
+                RawURL:    firstUrl,
+                UserAgent: userAgent,
+                Body:      objWithoutArchived,
+                Timeout:   d.Timeout(schema.TimeoutUpdate),
+                Headers:   headers,
+            })
+            if err != nil {
+                return fmt.Errorf("Error updating RuleDeployment (pre-archive step) %q: %s", d.Id(), err)
+            }
+        }
+
+        // Narrow updateMask and obj to archived only for the main generated PATCH
+        updateMask = []string{"archived"}
+        for k := range obj {
+            if k != "archived" {
+                delete(obj, k)
+            }
+        }
+
+        // Rebuild url with archived-only mask
+        url, err = transport_tpg.AddQueryParams(
+            strings.Split(url, "?")[0],
+            map[string]string{"updateMask": "archived"},
+        )
+        if err != nil {
+            return err
+        }
+    }
+}
+
