@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -835,16 +834,8 @@ func deleteAnywhereCacheIfAny(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 		}
 
-		// Sleep for 1 minute (or config.PollInterval in VCR replaying mode)
-		sleepDuration := 1 * time.Minute
-		if os.Getenv("VCR_MODE") == "REPLAYING" {
-			if config.PollInterval > 0 {
-				sleepDuration = config.PollInterval
-			} else {
-				sleepDuration = 10 * time.Millisecond
-			}
-		}
-		time.Sleep(sleepDuration)
+		// Sleep for 1 minute
+		time.Sleep(1 * time.Minute)
 	}
 
 	return nil

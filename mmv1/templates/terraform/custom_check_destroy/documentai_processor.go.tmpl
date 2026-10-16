@@ -1,5 +1,5 @@
 // Delete is eventually consistent; wait for a moment.
-_ = acctest.SleepInSecondsForTest(10)(s)
+acctest.Sleep(10 * time.Second)
 
 config := acctest.GoogleProviderConfig(t)
 url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(documentai.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/processors/{{"{{"}}name{{"}}"}}")

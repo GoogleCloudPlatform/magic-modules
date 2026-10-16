@@ -1,4 +1,4 @@
-package acctest
+package acctest_test
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
@@ -113,7 +114,7 @@ func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
 			ctx := context.Background()
 			req := prepareHttpRequest(tc.httpRequest)
 			cassetteReq := prepareCassetteRequest(tc.cassetteRequest)
-			matcher := NewVcrMatcherFunc(ctx)
+			matcher := acctest.NewVcrMatcherFunc(ctx)
 
 			// Act - use matcher
 			matchDetected := matcher(req, cassetteReq)
@@ -253,7 +254,7 @@ func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 			ctx := context.Background()
 			req := prepareHttpRequest(tc.httpRequest)
 			cassetteReq := prepareCassetteRequest(tc.cassetteRequest)
-			matcher := NewVcrMatcherFunc(ctx)
+			matcher := acctest.NewVcrMatcherFunc(ctx)
 
 			// Act - use matcher
 			matchDetected := matcher(req, cassetteReq)
@@ -348,7 +349,7 @@ func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
 			ctx := context.Background()
 			req := prepareHttpRequest(tc.httpRequest)
 			cassetteReq := prepareCassetteRequest(tc.cassetteRequest)
-			matcher := NewVcrMatcherFunc(ctx)
+			matcher := acctest.NewVcrMatcherFunc(ctx)
 
 			// Act - use matcher
 			matchDetected := matcher(req, cassetteReq)
@@ -424,87 +425,4 @@ func prepareCassetteRequest(d requestDescription) cassette.Request {
 	}
 
 	return req
-}
-
-func TestReplaceTimeSleepDuration(t *testing.T) {
-	cases := map[string]struct {
-		input    string
-		expected string
-	}{
-		"rewrites create_duration in seconds, minutes, and hours": {
-			input: `resource "time_sleep" "wait_1" {
-  create_duration = "30s"
-}
-resource "time_sleep" "wait_2" {
-  create_duration = "5m"
-}
-resource "time_sleep" "wait_3" {
-  create_duration = "1h"
-}`,
-			expected: `resource "time_sleep" "wait_1" {
-  create_duration = "1s"
-}
-resource "time_sleep" "wait_2" {
-  create_duration = "1s"
-}
-resource "time_sleep" "wait_3" {
-  create_duration = "1s"
-}`,
-		},
-		"rewrites destroy_duration in seconds, minutes, and hours": {
-			input: `resource "time_sleep" "waits_for_cache_creation" {
-  create_duration  = "5000s"
-  destroy_duration = "5000s"
-}
-resource "time_sleep" "wait_psc" {
-  destroy_duration = "35m"
-}
-resource "time_sleep" "wait_hour" {
-  destroy_duration = "1h"
-}`,
-			expected: `resource "time_sleep" "waits_for_cache_creation" {
-  create_duration = "1s"
-  destroy_duration = "1s"
-}
-resource "time_sleep" "wait_psc" {
-  destroy_duration = "1s"
-}
-resource "time_sleep" "wait_hour" {
-  destroy_duration = "1s"
-}`,
-		},
-		"handles varying whitespace around equals sign": {
-			input: `resource "time_sleep" "whitespace" {
-  create_duration="60s"
-  destroy_duration   =   "150s"
-	create_duration	= "120s"
-}`,
-			expected: `resource "time_sleep" "whitespace" {
-  create_duration = "1s"
-  destroy_duration = "1s"
-	create_duration = "1s"
-}`,
-		},
-		"leaves unrelated HCL untouched": {
-			input: `resource "google_storage_bucket" "default" {
-  name          = "my-bucket"
-  location      = "US"
-  force_destroy = true
-}`,
-			expected: `resource "google_storage_bucket" "default" {
-  name          = "my-bucket"
-  location      = "US"
-  force_destroy = true
-}`,
-		},
-	}
-
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-			got := replaceTimeSleepDuration(tc.input)
-			if got != tc.expected {
-				t.Fatalf("replaceTimeSleepDuration() mismatch:\ngot:\n%s\nwant:\n%s", got, tc.expected)
-			}
-		})
-	}
 }

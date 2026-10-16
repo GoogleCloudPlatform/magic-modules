@@ -8389,7 +8389,7 @@ func testAccCheckSqlDatabaseInstanceDeleteServiceConnectionPolicyByNetwork(t *te
 			}
 
 			for i := 0; i < 30; i++ {
-				_ = acctest.SleepInSecondsForTest(5)(s)
+				acctest.Sleep(5 * time.Second)
 				_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
 					Method:    "GET",

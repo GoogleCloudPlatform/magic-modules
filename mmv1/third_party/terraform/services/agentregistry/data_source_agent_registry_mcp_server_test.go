@@ -2,6 +2,7 @@ package agentregistry_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
@@ -26,7 +27,7 @@ func TestAccDataSourceAgentRegistryMcpServer_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceAgentRegistryMcpServer_serviceOnly(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.SleepInSecondsForTest(10),
+					acctest.SleepTestCheckFunc(10 * time.Second),
 				),
 			},
 			{

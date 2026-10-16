@@ -80,7 +80,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					acctest.SleepInSecondsForTest(10),
+					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -109,7 +109,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					acctest.SleepInSecondsForTest(10),
+					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -137,7 +137,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					acctest.SleepInSecondsForTest(10),
+					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -165,7 +165,7 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T)
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
-					acctest.SleepInSecondsForTest(10),
+					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
 				),
 			},
@@ -266,7 +266,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 			}
 
 			delay = min(delay*2, maxDelay)
-			_ = acctest.SleepInSecondsForTest(int(delay.Seconds()))(s)
+			acctest.Sleep(delay)
 		}
 
 		// if action is DELETE, the service account should be found in the previous loop
