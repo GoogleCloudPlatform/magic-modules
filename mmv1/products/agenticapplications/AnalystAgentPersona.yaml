@@ -13,7 +13,10 @@
 
 ---
 name: AnalystAgentPersona
-description: Represents a persona configuration for an analyst agent in Agentic Applications.
+description: |-
+  Represents a persona configuration for an analyst agent in Agentic Applications.
+
+  ~> **Note:** The `project` field must be set to the numeric project number (not the project ID).
 base_url: projects/{{project}}/locations/{{location}}/analystAgentPersonas
 self_link: projects/{{project}}/locations/{{location}}/analystAgentPersonas/{{analyst_agent_persona_id}}
 create_url: projects/{{project}}/locations/{{location}}/analystAgentPersonas?analystAgentPersonaId={{analyst_agent_persona_id}}
@@ -42,6 +45,8 @@ samples:
       - name: analyst_agent_persona_basic
         resource_id_vars:
           persona_id: basic
+        test_env_vars:
+          project_number: PROJECT_NUMBER
         vars:
           display_name: "Test Analyst Persona"
           customer_context: "Sample customer context for testing"
@@ -53,6 +58,8 @@ samples:
       - name: analyst_agent_persona_basic
         resource_id_vars:
           persona_id: basic
+        test_env_vars:
+          project_number: PROJECT_NUMBER
         vars:
           display_name: "Updated Test Analyst Persona"
           customer_context: "Updated customer context for testing"
@@ -70,21 +77,35 @@ samples:
           dataset_id: dataset_id
           table_id: table
           bucket_name: bucket
+        test_env_vars:
+          project_number: PROJECT_NUMBER
+        ignore_read_extra:
+          # The agenticapplications API does not return apiKey or clientSecret on read.
+          - "mcp_data_sources"
       - name: analyst_agent_persona_full_update
         resource_id_vars:
           persona_id: full
           dataset_id: dataset_id
           table_id: table
           bucket_name: bucket
+        test_env_vars:
+          project_number: PROJECT_NUMBER
+        ignore_read_extra:
+          # The agenticapplications API does not return apiKey or clientSecret on read.
+          - "mcp_data_sources"
   - name: analyst_agent_persona_methodology_export_options
     primary_resource_id: example
     steps:
       - name: analyst_agent_persona_methodology_export_options
         resource_id_vars:
           persona_id: methodology
+        test_env_vars:
+          project_number: PROJECT_NUMBER
       - name: analyst_agent_persona_methodology_export_options_update
         resource_id_vars:
           persona_id: methodology
+        test_env_vars:
+          project_number: PROJECT_NUMBER
 
 parameters:
   - name: location
@@ -714,6 +735,7 @@ properties:
   - name: mcpDataSources
     type: Array
     description: The MCP data source selections to be used by the agent.
+    custom_flatten: templates/terraform/custom_flatten/agenticapplications_mcp_data_sources.go.tmpl
     item_type:
       type: NestedObject
       properties:
