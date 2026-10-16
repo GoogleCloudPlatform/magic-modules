@@ -1976,7 +1976,7 @@ resource "google_dataflow_job" "big_data" {
 func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if wait {
-			time.Sleep(300 * time.Second)
+			acctest.Sleep(300 * time.Second)
 		}
 		rs, ok := s.RootModule().Resources[res]
 		if !ok {
@@ -2010,7 +2010,7 @@ func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue st
 func testAccDataflowFlexJobExists(t *testing.T, resource string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if wait {
-			time.Sleep(300 * time.Second)
+			acctest.Sleep(300 * time.Second)
 		}
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
