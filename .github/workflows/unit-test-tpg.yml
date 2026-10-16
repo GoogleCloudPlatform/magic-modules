@@ -38,8 +38,8 @@ jobs:
           go mod download
 
 
-      # `make vet` runs `go vet`, which compiles all provider packages internally
-      # without spending time linking an unused binary via `go build`.
+      # `make vet` runs `go vet ./...`, which compiles all provider packages and
+      # typechecks all test files without linking an unused binary via `go build`.
       - name: Build Provider
         run: |
           make vet
