@@ -26,6 +26,10 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 sweeper:
   url_substitutions:
     - location: us-central1-b
@@ -33,9 +37,9 @@ async:
   type: OpAsync
   operation:
     timeouts:
-      insert_minutes: 30
-      update_minutes: 30
-      delete_minutes: 30
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   actions:
     - create
