@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -1533,5 +1534,56 @@ func TestIamPolicyReadModifyWrite_serviceAccountNotFoundDoesNotDeadlock(t *testi
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("iamPolicyReadModifyWrite deadlocked after 400 Service account does not exist error")
+	}
+}
+
+func TestIamPolicyReadModifyWrite_conflictRetry(t *testing.T) {
+	t.Parallel()
+
+	var getCalls, setCalls int32
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/resource:getIamPolicy":
+			call := atomic.AddInt32(&getCalls, 1)
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"etag":"e%d"}`, call)))
+		case "/resource:setIamPolicy":
+			if atomic.AddInt32(&setCalls, 1) == 1 {
+				w.WriteHeader(http.StatusConflict)
+				_, _ = w.Write([]byte(`{"error":{"code":409,"message":"There were concurrent policy changes."}}`))
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"etag":"e2"}`))
+		}
+	}))
+	defer ts.Close()
+
+	updater := &httpTestIamUpdater{
+		resourceId: "conflict-retry",
+		url:        ts.URL + "/resource",
+		client:     ts.Client(),
+	}
+
+	// Stop inside modify on the second RMW attempt once the updated etag ("e2") is
+	// fetched, avoiding the hardcoded 3s post-write propagation wait.
+	errStopAfterConflictRetry := errors.New("stop after conflict retry")
+	var seenEtags []string
+	err := iamPolicyReadModifyWrite(updater, func(p *cloudresourcemanager.Policy) error {
+		seenEtags = append(seenEtags, p.Etag)
+		if len(seenEtags) == 2 {
+			return errStopAfterConflictRetry
+		}
+		return nil
+	})
+	if !errors.Is(err, errStopAfterConflictRetry) {
+		t.Fatalf("expected %v after conflict retry, got: %v", errStopAfterConflictRetry, err)
+	}
+	if !reflect.DeepEqual(seenEtags, []string{"e1", "e2"}) {
+		t.Fatalf("expected modify to see etags [e1 e2] across conflict retry, got %v", seenEtags)
+	}
+	if got := atomic.LoadInt32(&setCalls); got != 1 {
+		t.Fatalf("expected 1 setIamPolicy call before stopping on second modify, got %d", got)
 	}
 }
