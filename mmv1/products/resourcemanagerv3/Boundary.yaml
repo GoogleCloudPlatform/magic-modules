@@ -1,0 +1,173 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Boundary'
+description: |
+  A Boundary is a collection of projects defined by filtering criteria on an
+  organization or a folder. Descendant projects are dynamically included in the
+  Boundary based on the configured resource filter.
+
+  A Boundary that is attached to a `google_resource_manager_capability_config`
+  cannot be deleted until it is detached. Express this with `depends_on` so
+  Terraform orders creates and destroys correctly.
+
+  Membership is recomputed asynchronously, so the projects inside a Boundary
+  are not necessarily settled by the time the apply returns.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/boundaries'
+  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/organizations.boundaries'
+base_url: '{{parent}}/boundaries'
+self_link: '{{parent}}/boundaries/{{boundary_id}}'
+create_url: '{{parent}}/boundaries?boundaryId={{boundary_id}}'
+update_url: '{{parent}}/boundaries/{{boundary_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: '{{parent}}/boundaries/{{boundary_id}}'
+id_format: '{{parent}}/boundaries/{{boundary_id}}'
+import_format:
+- '{{%parent}}/boundaries/{{boundary_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'OpAsync'
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions: ['create', 'delete', 'update']
+  result:
+    resource_inside_response: true
+autogen_async: true
+samples:
+- name: 'resource_manager_boundary_basic'
+  primary_resource_id: 'boundary'
+  steps:
+  - name: 'resource_manager_boundary_basic'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    resource_id_vars:
+      tag_key_short_name: 'bndkey'
+      tag_value_short_name: 'bndval'
+      boundary_id: 'bnd'
+    ignore_read_extra:
+    - 'update_time'
+  - name: 'resource_manager_boundary_basic_update'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    resource_id_vars:
+      tag_key_short_name: 'bndkey'
+      tag_value_short_name: 'bndval'
+      boundary_id: 'bnd'
+    ignore_read_extra:
+    - 'update_time'
+parameters:
+- name: 'parent'
+  type: String
+  description: |
+    The parent resource under which the Boundary is created. Must be of the
+    form `organizations/{organization_id}` or `folders/{folder_id}`.
+  url_param_only: true
+  required: true
+  immutable: true
+- name: 'boundaryId'
+  type: String
+  description: |
+    The user-assigned ID for the Boundary, which becomes the final component
+    of the Boundary's resource name. Must be unique within the parent.
+    Must be 6 to 30 lowercase ASCII letters, digits, or hyphens, must start
+    with a letter, and may not end with a hyphen.
+  url_param_only: true
+  required: true
+  immutable: true
+properties:
+- name: 'name'
+  type: String
+  description: |
+    The unique resource name of the Boundary, in the form
+    `organizations/{organization_id}/boundaries/{boundary_id}` or
+    `folders/{folder_id}/boundaries/{boundary_id}`.
+  output: true
+- name: 'displayName'
+  type: String
+  description: |
+    Human-readable display name of the Boundary. When present it must be
+    between 4 and 30 characters. Allowed characters are lowercase and
+    uppercase letters, numbers, hyphen, single-quote, double-quote, space,
+    and exclamation point.
+- name: 'managementProject'
+  type: String
+  description: |
+    The Management Project associated with this Boundary, in the form
+    `projects/{project_number}`. This is populated by the service when the
+    Boundary is associated with a CapabilityConfig; it cannot be set directly
+    on the Boundary. To choose a management project, set it on the
+    `google_resource_manager_capability_config` resource instead.
+  output: true
+- name: 'resourceFilter'
+  type: NestedObject
+  description: |
+    The filter defining the criteria for descendant projects to be included
+    in the Boundary.
+
+    `tag_value` is the only part of the filter that can be changed after
+    creation, and it cannot be cleared.
+  properties:
+  - name: 'tagFilter'
+    type: NestedObject
+    description: |
+      A tag based filter. A project must match it to be included in the
+      Boundary.
+    properties:
+    - name: 'tagKey'
+      type: String
+      description: |
+        The namespaced name of the tag key, in the form
+        `{parent_id}/{tag_key_short_name}`, for example `123456789012/env`.
+      required: true
+      immutable: true
+    - name: 'tagValue'
+      type: String
+      description: |
+        The allowed short name of the tag value, for example `production`.
+        A project matches this tag filter if its effective tag value for
+        the given `tagKey` matches this value.
+      required: true
+- name: 'state'
+  type: String
+  description: |
+    The lifecycle state of the Boundary. Possible values are `CREATING` and
+    `ACTIVE`.
+  output: true
+- name: 'etag'
+  type: String
+  description: |
+    A checksum computed by the server based on the value of other fields. May
+    be sent on update and delete requests to ensure the client has an
+    up-to-date value before proceeding.
+  output: true
+- name: 'createTime'
+  type: Time
+  description: |
+    The creation time of the Boundary.
+  output: true
+- name: 'updateTime'
+  type: Time
+  description: |
+    The most recent time this Boundary was modified.
+  output: true

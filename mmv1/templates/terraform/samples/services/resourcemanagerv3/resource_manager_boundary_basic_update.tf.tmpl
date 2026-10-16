@@ -1,0 +1,39 @@
+resource "google_tags_tag_key" "boundary" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.ResourceIdVars "tag_key_short_name"}}"
+  description = "Partitioning tag key used by boundaries under this organization."
+}
+
+resource "google_tags_tag_value" "boundary" {
+  parent      = google_tags_tag_key.boundary.id
+  short_name  = "{{index $.ResourceIdVars "tag_value_short_name"}}"
+  description = "Tag value selecting the projects inside the boundary."
+}
+
+resource "google_tags_tag_value" "boundary_updated" {
+  parent      = google_tags_tag_key.boundary.id
+  short_name  = "{{index $.ResourceIdVars "tag_value_short_name"}}-updated"
+  description = "Updated tag value selecting the projects inside the boundary."
+}
+
+# A BoundaryConfig naming the partitioning tag key must exist on the parent
+# before any Boundary can be created under it.
+resource "google_resource_manager_boundary_config" "boundary" {
+  parent  = "organizations/{{index $.TestEnvVars "org_id"}}"
+  tag_key = google_tags_tag_key.boundary.namespaced_name
+}
+
+resource "google_resource_manager_boundary" "{{$.PrimaryResourceId}}" {
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  boundary_id  = "{{index $.ResourceIdVars "boundary_id"}}"
+  display_name = "Example boundary updated"
+
+  resource_filter {
+    tag_filter {
+      tag_key   = google_tags_tag_key.boundary.namespaced_name
+      tag_value = google_tags_tag_value.boundary_updated.short_name
+    }
+  }
+
+  depends_on = [google_resource_manager_boundary_config.boundary]
+}
