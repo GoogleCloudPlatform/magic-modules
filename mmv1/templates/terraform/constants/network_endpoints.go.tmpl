@@ -30,6 +30,9 @@ func NetworkEndpointsNetworkEndpointConvertToStruct(endpoint interface{}) Networ
 	}
 	port, _ := e["port"].(int)
 	instance, _ := e["instance"].(string)
+	if instance != "" {
+		instance = tpgresource.GetResourceNameFromSelfLink(instance)
+	}
 	return NetworkEndpointsNetworkEndpoint{
 		IPAddress:   ipAddress,
 		IPv6Address: ipv6Address,
@@ -41,12 +44,14 @@ func NetworkEndpointsNetworkEndpointConvertToStruct(endpoint interface{}) Networ
 func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetworkEndpoint) interface{} {
 	m := make(map[string]interface{})
 	if endpoint.IPAddress != "" {
-		m["ip_address"] = endpoint.IPAddress
+		m["ipAddress"] = endpoint.IPAddress
 	}
 	if endpoint.IPv6Address != "" {
-		m["ipv6_address"] = endpoint.IPv6Address
+		m["ipv6Address"] = endpoint.IPv6Address
 	}
-	m["port"] = endpoint.Port
+	if endpoint.Port != 0 {
+		m["port"] = endpoint.Port
+	}
 	if endpoint.Instance != "" {
 		m["instance"] = endpoint.Instance
 	}
