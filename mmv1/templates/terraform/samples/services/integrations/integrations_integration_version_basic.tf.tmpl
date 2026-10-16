@@ -1,0 +1,7 @@
+resource "google_integrations_integration_version" "{{$.PrimaryResourceId}}" {
+  location = "us-east4"
+  integration = "{{index $.ResourceIdVars "integration_name"}}"
+  description = "Integration version created via terraform"
+  new_integration = true
+  create_sample_integrations = false
+}
