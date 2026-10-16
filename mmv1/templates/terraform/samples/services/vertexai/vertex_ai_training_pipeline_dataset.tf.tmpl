@@ -1,0 +1,57 @@
+resource "google_vertex_ai_training_pipeline" "{{.PrimaryResourceId}}" {
+  display_name             = "{{index $.ResourceIdVars "display_name"}}"
+  region                   = "us-central1"
+  training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
+
+  training_task_inputs = jsonencode({
+    workerPoolSpecs = [
+      {
+        machineSpec = {
+          machineType = "n1-standard-4"
+        }
+        replicaCount = "1"
+        diskSpec = {
+          bootDiskType   = "pd-ssd"
+          bootDiskSizeGb = 100
+        }
+        containerSpec = {
+          imageUri = "gcr.io/cloud-marketplace/google/debian11"
+        }
+      }
+    ]
+  })
+
+  input_data_config {
+    dataset_id             = google_vertex_ai_dataset.dataset.name
+    annotation_schema_uri  = "gs://google-cloud-aiplatform/schema/dataset/annotation/image_classification_1.0.0.yaml"
+    annotations_filter     = "annotation_filter_key:annotation_filter_value"
+    persist_ml_use_assignment = false
+
+    filter_split {
+      training_filter   = "labels.test:training"
+      validation_filter = "labels.test:validation"
+      test_filter       = "labels.test:test"
+    }
+
+    gcs_destination {
+      output_uri_prefix = "gs://${google_storage_bucket.bucket.name}/dataset-export"
+    }
+  }
+
+  labels = {
+    env = "test"
+  }
+}
+
+resource "google_vertex_ai_dataset" "dataset" {
+  display_name        = "{{index $.ResourceIdVars "dataset_name"}}"
+  metadata_schema_uri = "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"
+  region              = "us-central1"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
