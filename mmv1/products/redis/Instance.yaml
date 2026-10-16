@@ -34,6 +34,7 @@ sweeper:
   url_substitutions:
     - region: us-central1
     - region: us-west1
+    - region: us-east1
 custom_diff:
   - customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)
   - tpgresource.DefaultProviderProject
