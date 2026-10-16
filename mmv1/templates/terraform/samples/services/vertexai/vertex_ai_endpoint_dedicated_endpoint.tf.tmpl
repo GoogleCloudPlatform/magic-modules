@@ -8,6 +8,17 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     label-one = "value-one"
   }
   dedicated_endpoint_enabled = true
+  client_connection_config {
+    inference_timeout = "60s"
+  }
+  gdc_config {
+    zone = "us-central1-a"
+  }
+  gen_ai_advanced_features_config {
+    rag_config {
+      enable_rag = true
+    }
+  }
 }
 
 data "google_project" "project" {}
