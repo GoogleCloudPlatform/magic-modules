@@ -518,6 +518,34 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
     Steps: []resource.TestStep{
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(context),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_1",
+              "disks.0.device_name": "boot-disk",
+              "disks.0.boot":        "true",
+              "disks.0.auto_delete": "true",
+              "disks.1.device_name": "additional-disk-with-resource-policy",
+              "disks.1.boot":        "false",
+              "disks.1.auto_delete": "true",
+              "disks.2.device_name": "local-ssd-disk",
+              "disks.2.boot":        "false",
+              "disks.2.auto_delete": "true",
+            },
+          ),
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_2",
+              "disks.0.device_name": "additional-disk",
+              "disks.0.boot":        "false",
+              "disks.0.auto_delete": "true",
+            },
+          ),
+        ),
       },
       {
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -527,6 +555,23 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesUpdate(context),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_1",
+              "disks.0.device_name": "boot-disk",
+              "disks.0.boot":        "true",
+              "disks.0.auto_delete": "true",
+              "disks.1.boot":        "false",
+              "disks.1.auto_delete": "true",
+              "disks.2.device_name": "additional-disk",
+              "disks.2.boot":        "false",
+              "disks.2.auto_delete": "true",
+            },
+          ),
+        ),
       },
       {
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
