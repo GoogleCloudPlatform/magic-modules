@@ -188,7 +188,7 @@ samples:
     steps:
       - name: subnetwork_with_internal_subnet_mode_pdp
         resource_id_vars:
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
+          ip_collection_url: projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp
           network_name: network-byoipv6-internal
           subnetwork_name: internal-subnet-mode-pdp-subnet
         test_vars_overrides:
@@ -199,8 +199,8 @@ samples:
     steps:
       - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
         resource_id_vars:
-          internal_ipv6_prefix: '"2600:1904:9:10::/64"'
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
+          internal_ipv6_prefix: 2600:1904:9:10::/64
+          ip_collection_url: projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp
           network_name: network-byoipv6-internal-prefix
           subnetwork_name: subnet-mode-pdp-subnet-internal-prefix
         test_vars_overrides:
@@ -220,9 +220,9 @@ samples:
     steps:
       - name: subnetwork_with_secondary_ipv6_range
         resource_id_vars:
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
+          ip_collection_url: projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp
           network_name: network-with-secondary-ranges
-          secondary_ipv6_cidr: '"2600:1904:9:60::/64"'
+          secondary_ipv6_cidr: 2600:1904:9:60::/64
           subnetwork_name: subnet-with-secondary-ranges
         test_vars_overrides:
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
