@@ -38,9 +38,11 @@ jobs:
           go mod download
 
 
+      # `make vet` runs `go vet ./...`, which compiles all provider packages and
+      # typechecks all test files without linking an unused binary via `go build`.
       - name: Build Provider
         run: |
-          go build
+          make vet
 
       - name: Run Unit Tests
         run: |
@@ -48,7 +50,7 @@ jobs:
 
       - name: Lint Check
         run: |
-          make lint
+          make fmtcheck
 
       - name: Documentation Check
         run: |
