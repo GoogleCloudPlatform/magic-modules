@@ -36,7 +36,10 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-# Skipping the sweeper since we need to sweep multiple regions
+# Snapshots are children of a volume, so the list URL needs a volume id that the
+# generated sweeper cannot supply. Swept by the handwritten
+# resource_netapp_volume_snapshot_sweeper.go instead, and volumes are deleted
+# with ?force=true, which takes their snapshots with them.
 exclude_sweeper: true
 async:
   type: OpAsync
