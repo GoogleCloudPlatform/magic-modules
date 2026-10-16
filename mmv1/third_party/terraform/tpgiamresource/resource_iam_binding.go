@@ -26,11 +26,11 @@ var iamBindingSchema = map[string]*schema.Schema{
 		Required: true,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			DiffSuppressFunc: tpgresource.CaseDiffSuppress,
+			DiffSuppressFunc: iamMemberCaseDiffSuppress,
 			ValidateFunc:     validateIAMMember,
 		},
 		Set: func(v interface{}) int {
-			return schema.HashString(strings.ToLower(v.(string)))
+			return schema.HashString(iamMemberHashKey(v.(string)))
 		},
 	},
 	"condition": {
@@ -73,6 +73,16 @@ var IamBindingBaseIdentitySchema = map[string]*schema.Schema{
 		Type:              schema.TypeString,
 		OptionalForImport: true,
 	},
+}
+
+// iamMemberHashKey folds the case of a members set entry unless the principal
+// type is case sensitive, so two principals that differ only by case stay
+// distinct set elements instead of collapsing into one.
+func iamMemberHashKey(member string) string {
+	if tpgresource.IamPrincipalIsCaseSensitive(member) {
+		return member
+	}
+	return strings.ToLower(member)
 }
 
 func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {

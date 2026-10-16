@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -868,6 +870,162 @@ func TestIamMember_MemberDiffSuppress(t *testing.T) {
 		areEqual := iamMemberCaseDiffSuppress("", testcase.old, testcase.new, &schema.ResourceData{})
 		if areEqual != testcase.equal {
 			t.Errorf("Testcase %s failed: expected equality to be %t but got %t", testcase.name, testcase.equal, areEqual)
+		}
+	}
+}
+
+const (
+	testCaseSensitivePrincipalUpper = "principal://iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/subject/Alice"
+	testCaseSensitivePrincipalLower = "principal://iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/subject/alice"
+)
+
+// iamTestUpdater is an in-memory ResourceIamUpdater for exercising the generic
+// IAM resources without an API.
+type iamTestUpdater struct {
+	policy *cloudresourcemanager.Policy
+}
+
+func (u *iamTestUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	return u.policy, nil
+}
+
+func (u *iamTestUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	u.policy = policy
+	return nil
+}
+
+func (u *iamTestUpdater) GetMutexKey() string {
+	return "iam-test-resource"
+}
+
+func (u *iamTestUpdater) GetResourceId() string {
+	return "test-resource"
+}
+
+func (u *iamTestUpdater) DescribeResource() string {
+	return "test resource"
+}
+
+func newIamTestUpdaterFunc(updater *iamTestUpdater) NewResourceIamUpdaterFunc {
+	return func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+		return updater, nil
+	}
+}
+
+func TestIamMemberRead_CaseSensitivePrincipal(t *testing.T) {
+	cases := map[string]struct {
+		policyMembers []string
+		// wantMember is the member expected in state afterwards; empty means
+		// the resource should have been removed from state.
+		wantMember string
+	}{
+		"configured principal is bound": {
+			policyMembers: []string{testCaseSensitivePrincipalUpper},
+			wantMember:    testCaseSensitivePrincipalUpper,
+		},
+		"both case variants are bound": {
+			policyMembers: []string{testCaseSensitivePrincipalUpper, testCaseSensitivePrincipalLower},
+			wantMember:    testCaseSensitivePrincipalUpper,
+		},
+		"only a different-cased principal is bound": {
+			policyMembers: []string{testCaseSensitivePrincipalLower},
+			wantMember:    "",
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			updater := &iamTestUpdater{policy: &cloudresourcemanager.Policy{
+				Bindings: []*cloudresourcemanager.Binding{
+					{Role: "roles/viewer", Members: tc.policyMembers},
+				},
+			}}
+			r := ResourceIamMember(map[string]*schema.Schema{}, newIamTestUpdaterFunc(updater), nil)
+			d := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+				"role":   "roles/viewer",
+				"member": testCaseSensitivePrincipalUpper,
+			})
+			d.SetId("test-resource/roles/viewer/" + testCaseSensitivePrincipalUpper)
+
+			if err := r.Read(d, &transport_tpg.Config{}); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tc.wantMember == "" {
+				if d.Id() != "" {
+					t.Fatalf("expected member to be removed from state, got member %q", d.Get("member"))
+				}
+				return
+			}
+			if got := d.Get("member").(string); got != tc.wantMember {
+				t.Fatalf("expected member %q, got %q", tc.wantMember, got)
+			}
+		})
+	}
+}
+
+func TestIamMemberImport_CaseSensitivePrincipal(t *testing.T) {
+	cases := map[string]struct {
+		policyMembers []string
+		wantErr       bool
+	}{
+		"configured principal is bound": {
+			policyMembers: []string{testCaseSensitivePrincipalUpper},
+		},
+		"only a different-cased principal is bound": {
+			policyMembers: []string{testCaseSensitivePrincipalLower},
+			wantErr:       true,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			updater := &iamTestUpdater{policy: &cloudresourcemanager.Policy{
+				Bindings: []*cloudresourcemanager.Binding{
+					{Role: "roles/viewer", Members: tc.policyMembers},
+				},
+			}}
+			noopIdParser := func(d *schema.ResourceData, config *transport_tpg.Config) error { return nil }
+			r := ResourceIamMember(map[string]*schema.Schema{}, newIamTestUpdaterFunc(updater), noopIdParser)
+			d := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{})
+			d.SetId("test-resource roles/viewer " + testCaseSensitivePrincipalUpper)
+
+			_, err := r.Importer.State(d, &transport_tpg.Config{})
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected import to fail when only %q is bound", tc.policyMembers[0])
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got := d.Get("member").(string); got != testCaseSensitivePrincipalUpper {
+				t.Fatalf("expected member %q, got %q", testCaseSensitivePrincipalUpper, got)
+			}
+		})
+	}
+}
+
+func TestIamBinding_MembersSetKeepsCaseSensitivePrincipals(t *testing.T) {
+	d := schema.TestResourceDataRaw(t, iamBindingSchema, map[string]interface{}{
+		"role": "roles/viewer",
+		"members": []interface{}{
+			testCaseSensitivePrincipalUpper,
+			testCaseSensitivePrincipalLower,
+			"user:Foo@example.com",
+			"user:foo@example.com",
+		},
+	})
+
+	members := d.Get("members").(*schema.Set)
+	// The two principals are distinct identities; the two user entries are the
+	// same identity spelled differently.
+	if members.Len() != 3 {
+		t.Fatalf("expected 3 members, got %d: %v", members.Len(), members.List())
+	}
+	for _, want := range []string{testCaseSensitivePrincipalUpper, testCaseSensitivePrincipalLower} {
+		if !members.Contains(want) {
+			t.Errorf("expected members to contain %q, got %v", want, members.List())
 		}
 	}
 }
