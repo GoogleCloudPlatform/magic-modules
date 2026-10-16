@@ -26,7 +26,7 @@ resource "google_vertex_ai_training_pipeline" "{{.PrimaryResourceId}}" {
     description         = "A custom model uploaded from training pipeline"
     version_description = "v1 initial release"
     version_aliases     = ["v1", "latest"]
-    artifact_uri        = "gs://cloud-samples-data/ai-platform/flower_photos"
+    artifact_uri        = "gs://${google_storage_bucket.bucket.name}/model"
 
     container_spec {
       image_uri     = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-8:latest"
@@ -95,4 +95,11 @@ resource "google_vertex_ai_training_pipeline" "{{.PrimaryResourceId}}" {
   labels = {
     env = "test"
   }
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }

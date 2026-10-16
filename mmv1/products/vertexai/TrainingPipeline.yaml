@@ -66,8 +66,9 @@ samples:
           model_name: test-model
           model_id: test-model-id
           parent_model: test-parent-model
+          bucket_name: test-model-bucket
         test_vars_overrides:
-          parent_model: 'bootstrapTestParentModel(t)'
+          parent_model: 'bootstrapTestParentModel(t, "us-central1")'
         ignore_read_extra:
           - start_time
           - state
@@ -95,7 +96,7 @@ samples:
           model_name: test-model-enc
           kms_key_name: kms-key
         test_vars_overrides:
-          kms_key_name: 'bootstrapTestKmsKey(t)'
+          kms_key_name: 'bootstrapTestKmsKey(t, "us-central1")'
         ignore_read_extra:
           - start_time
           - state

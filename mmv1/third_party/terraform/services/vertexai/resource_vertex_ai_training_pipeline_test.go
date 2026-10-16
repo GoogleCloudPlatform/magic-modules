@@ -16,60 +16,54 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func bootstrapTestKmsKey(t *testing.T) string {
+func bootstrapTestKmsKey(t *testing.T, location string) string {
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		return ""
 	}
 	project := envvar.GetTestProjectFromEnv()
-	keyName := fmt.Sprintf("projects/%s/locations/us-central1/keyRings/tftest-shared-keyring-1/cryptoKeys/tf-bootstrap-re-key1", project)
+	keyName := fmt.Sprintf("projects/%s/locations/%s/keyRings/tftest-shared-keyring-1/cryptoKeys/tf-bootstrap-re-key1", project, location)
 	kmsClient := kms.NewClient(config, config.UserAgent)
 	if _, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.Get(keyName).Do(); err == nil {
 		return keyName
 	}
-	return kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name
+	return kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", location, "tf-bootstrap-re-key1").CryptoKey.Name
 }
 
-func bootstrapTestParentModel(t *testing.T) string {
+func bootstrapTestParentModel(t *testing.T, location string) string {
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		return ""
 	}
 	project := envvar.GetTestProjectFromEnv()
-	location := "us-central1"
+	modelId := "tf-bootstrap-parent-model"
+	modelName := fmt.Sprintf("projects/%s/locations/%s/models/%s", project, location, modelId)
 
-	baseUrl := transport_tpg.BaseUrl(vertexai.Product, config)
+	baseUrl := strings.ReplaceAll(transport_tpg.BaseUrl(vertexai.Product, config), "{{region}}", location)
 
-	// Check if a parent model already exists
-	listUrl := fmt.Sprintf("%sprojects/%s/locations/%s/models", baseUrl, project, location)
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	// Check if the shared parent model already exists in the project.
+	getUrl := fmt.Sprintf("%s%s", baseUrl, modelName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   project,
-		RawURL:    listUrl,
+		RawURL:    getUrl,
 		UserAgent: config.UserAgent,
 	})
 	if err == nil {
-		if models, ok := res["models"].([]interface{}); ok {
-			for _, m := range models {
-				if mObj, ok := m.(map[string]interface{}); ok {
-					if name, ok := mObj["name"].(string); ok {
-						if dName, ok := mObj["displayName"].(string); ok && strings.Contains(dName, "parent") {
-							return name
-						}
-					}
-				}
-			}
-		}
+		return modelName
+	}
+	if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		t.Fatalf("Error getting parent model %q: %s", modelName, err)
 	}
 
 	uploadUrl := fmt.Sprintf("%sprojects/%s/locations/%s/models:upload", baseUrl, project, location)
 	uploadBody := map[string]interface{}{
+		"modelId": modelId,
 		"model": map[string]interface{}{
-			"displayName": "tf-test-parent-model",
-			"artifactUri": "gs://cloud-samples-data/vertex-ai/prediction/test-models-requests/tensorflow",
+			"displayName": modelId,
 			"containerSpec": map[string]interface{}{
-				"imageUri": "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-8:latest",
+				"imageUri": "gcr.io/cloud-marketplace/google/debian11",
 			},
 		},
 	}
@@ -82,19 +76,16 @@ func bootstrapTestParentModel(t *testing.T) string {
 		Body:      uploadBody,
 	})
 	if err != nil {
-		return fmt.Sprintf("projects/%s/locations/%s/models/540124641784496128", project, location)
+		t.Fatalf("Error uploading parent model %q: %s", modelName, err)
 	}
 
 	var opResponse map[string]interface{}
 	err = vertexai.VertexAIOperationWaitTimeWithResponse(config, opRes, &opResponse, project, location, "Uploading parent model", config.UserAgent, 5*time.Minute)
 	if err != nil {
-		return fmt.Sprintf("projects/%s/locations/%s/models/540124641784496128", project, location)
-	}
-	if modelName, ok := opResponse["model"].(string); ok && modelName != "" {
-		return modelName
+		t.Fatalf("Error waiting for parent model %q upload: %s", modelName, err)
 	}
 
-	return fmt.Sprintf("projects/%s/locations/%s/models/540124641784496128", project, location)
+	return modelName
 }
 
 func TestAccVertexAITrainingPipeline_labelsForceNew(t *testing.T) {
