@@ -21,8 +21,8 @@ runs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            mmv1/go.mod
-            tpgtools/go.mod
+            mmv1/go.sum
+            ${{ startsWith(inputs.repo, 'terraform-provider-google') && 'mmv1/third_party/terraform/go.sum' || '' }}
 
       - name: Build ${{ inputs.repo  }}
         shell: bash
