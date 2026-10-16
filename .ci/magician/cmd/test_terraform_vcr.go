@@ -191,6 +191,25 @@ func listTTVRequiredEnvironmentVariables() string {
 }
 
 func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester, gcs CloudstorageClient) error {
+	buildStepUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
+
+	if isOutdated, headSha := isCommitOutdated(prNumber, mmCommitSha, gh); isOutdated {
+		if !hasVCRDiffs(workspace, gh, rnr) {
+			fmt.Println("Skipping tests: No diffs generated")
+			return nil
+		}
+		fmt.Printf("Skipping REPLAYING mode: commit %s is not the most recent commit (%s) on PR %s\n", mmCommitSha, headSha, prNumber)
+		statusErr := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha)
+		comment := fmt.Sprintf("## Test report\n\n**Step 1: Replaying Mode**\n\nSkipped REPLAYING mode because a newer commit (%s) was pushed to the PR.", headSha)
+		if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
+			fmt.Printf("Warning: failed to add outdated commit note to PR %s: %v\n", prNumber, err)
+		}
+		if statusErr != nil {
+			return fmt.Errorf("error posting failure status: %w", statusErr)
+		}
+		return nil
+	}
+
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
 
@@ -241,7 +260,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
-	buildStepUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
 	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", buildStepUrl, mmCommitSha); err != nil {
 		return fmt.Errorf("error posting pending status: %w", err)
 	}
@@ -307,6 +325,19 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error appending comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
+		if isOutdated, headSha := isCommitOutdated(prNumber, mmCommitSha, gh); isOutdated {
+			fmt.Printf("Skipping RECORDING mode: commit %s is not the most recent commit (%s) on PR %s\n", mmCommitSha, headSha, prNumber)
+			statusErr := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha)
+			comment := fmt.Sprintf("---\n\n**Step 2: Recording Mode**\n\nSkipped RECORDING mode because a newer commit (%s) was pushed to the PR.", headSha)
+			if err := appendVCRResultToDiffComment(prNumber, comment, workspace, gh, rnr); err != nil {
+				fmt.Printf("Warning: failed to add outdated commit note to PR %s: %v\n", prNumber, err)
+			}
+			if statusErr != nil {
+				return fmt.Errorf("error posting failure status: %w", statusErr)
+			}
+			return nil
+		}
+
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:             vcr.Recording,
 			Version:          provider.Beta,
@@ -574,6 +605,50 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	}
 
 	return result, testDirs, replayingErr
+}
+
+// isCommitOutdated reports whether a newer commit than mmCommitSha has been pushed to the PR,
+// returning the PR's current HEAD SHA when outdated. If the PR can't be fetched, the commit is
+// treated as current so that VCR still runs.
+func isCommitOutdated(prNumber, mmCommitSha string, gh GithubClient) (bool, string) {
+	pr, err := gh.GetPullRequest(prNumber)
+	if err != nil {
+		fmt.Printf("Warning: failed to get pull request %s to check for outdated commit: %v\n", prNumber, err)
+		return false, ""
+	}
+	if pr.HeadSha != "" && mmCommitSha != "" && pr.HeadSha != mmCommitSha {
+		return true, pr.HeadSha
+	}
+	return false, ""
+}
+
+// hasVCRDiffs reports whether the commit generated downstream diffs in
+// terraform-provider-google-beta, based on the workspace SHA files written by
+// generate-downstream and the diff report comment posted by generate-comment.
+func hasVCRDiffs(workspace string, gh GithubClient, rnr ExecRunner) bool {
+	if workspace == "" {
+		workspace = "/workspace"
+	}
+
+	newSha, newErr := rnr.ReadFile(filepath.Join(workspace, "commitSHA_modular-magician_terraform-provider-google-beta.txt"))
+	oldSha, oldErr := rnr.ReadFile(filepath.Join(workspace, "commitSHA_modular-magician_terraform-provider-google-beta-old.txt"))
+	if newErr == nil && oldErr == nil {
+		if trimmedNew := strings.TrimSpace(newSha); trimmedNew != "" && trimmedNew == strings.TrimSpace(oldSha) {
+			return false
+		}
+	}
+
+	if idStr, err := rnr.ReadFile(filepath.Join(workspace, "diff_comment_id.txt")); err == nil {
+		if id, err := strconv.Atoi(strings.TrimSpace(idStr)); err == nil {
+			if comment, err := gh.GetPullRequestComment(id); err == nil {
+				if strings.Contains(comment.Body, "Your PR hasn't generated any diffs") {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
 }
 
 func handlePanics(prNumber, buildID, buildStepUrl, mmCommitSha, workspace string, result vcr.Result, mode vcr.Mode, gh GithubClient, rnr ExecRunner) (bool, error) {

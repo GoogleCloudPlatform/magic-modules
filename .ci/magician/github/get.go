@@ -45,6 +45,7 @@ type PullRequest struct {
 	Body           string  `json:"body"`
 	Labels         []Label `json:"labels"`
 	MergeCommitSha string  `json:"merge_commit_sha"`
+	HeadSha        string  `json:"head_sha"`
 	Merged         bool    `json:"merged"`
 }
 
