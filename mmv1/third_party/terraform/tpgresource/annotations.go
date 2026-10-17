@@ -52,17 +52,6 @@ func SetMetadataAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta 
 		return nil
 	}
 
-	// Fix the bug that the computed and nested "annotations" field disappears from the terraform plan.
-	// https://github.com/hashicorp/terraform-provider-google/issues/17756
-	// The bug is introduced by SetNew on "metadata" field with the object including "effective_annotations".
-	// "effective_annotations" cannot be set directly due to a bug that SetNew doesn't work on nested fields
-	// in terraform sdk.
-	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
-	values := d.GetRawPlan().GetAttr("metadata").AsValueSlice()
-	if len(values) > 0 && !values[0].GetAttr("annotations").IsWhollyKnown() {
-		return nil
-	}
-
 	raw := d.Get("metadata.0.annotations")
 	if raw == nil {
 		return nil
@@ -70,6 +59,22 @@ func SetMetadataAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta 
 
 	if d.Get("metadata.0.effective_annotations") == nil {
 		return fmt.Errorf("`metadata.0.effective_annotations` field is not present in the resource schema.")
+	}
+
+	original := l[0].(map[string]interface{})
+
+	// Fix the bug that the computed and nested "annotations" field disappears from the terraform plan.
+	// https://github.com/hashicorp/terraform-provider-google/issues/17756
+	// The bug is introduced by SetNew on "metadata" field with the object including "effective_annotations".
+	// "effective_annotations" cannot be set directly due to a bug that SetNew doesn't work on nested fields
+	// in terraform sdk.
+	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
+	_, annotationsWhollyKnown := prepareMetadataDiff(d, original)
+	if !annotationsWhollyKnown {
+		if err := d.SetNew("metadata", []interface{}{original}); err != nil {
+			return fmt.Errorf("error setting new metadata diff: %w", err)
+		}
+		return nil
 	}
 
 	o, n := d.GetChange("metadata.0.annotations")
@@ -85,7 +90,6 @@ func SetMetadataAnnotationsDiff(_ context.Context, d *schema.ResourceDiff, meta 
 		}
 	}
 
-	original := l[0].(map[string]interface{})
 	original["effective_annotations"] = effectiveAnnotations
 
 	if err := d.SetNew("metadata", []interface{}{original}); err != nil {
