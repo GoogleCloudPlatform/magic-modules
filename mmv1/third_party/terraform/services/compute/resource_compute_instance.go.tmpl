@@ -2291,14 +2291,20 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if hadNanos {
 		schedulingMap, _ := instance["scheduling"].(map[string]interface{})
 		scheduling := flattenScheduling(schedulingMap)
-		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
-		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
-		max_duration["nanos"] = int64(savedNanos.(int))
+		if len(scheduling) > 0 {
+			if gsList, ok := scheduling[0]["graceful_shutdown"].([]interface{}); ok && len(gsList) > 0 && gsList[0] != nil {
+				graceful_shutdown := gsList[0].(map[string]interface{})
+				if mdList, ok := graceful_shutdown["max_duration"].([]interface{}); ok && len(mdList) > 0 && mdList[0] != nil {
+					max_duration := mdList[0].(map[string]interface{})
+					max_duration["nanos"] = int64(savedNanos.(int))
 
-		graceful_shutdown["max_duration"] = []interface{}{max_duration}
-		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
-		if err := d.Set("scheduling", scheduling); err != nil {
-			return fmt.Errorf("Error setting scheduling: %s", err)
+					graceful_shutdown["max_duration"] = []interface{}{max_duration}
+					scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+					if err := d.Set("scheduling", scheduling); err != nil {
+						return fmt.Errorf("Error setting scheduling: %s", err)
+					}
+				}
+			}
 		}
 	}
 	{{- end }}
@@ -2525,13 +2531,17 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 	// To avoid diff, we need to set the value from the state not from API response.
 	schedulingMap, _ := instance["scheduling"].(map[string]interface{})
 	scheduling := flattenScheduling(schedulingMap)
-	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
-		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
-		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
-		max_duration["nanos"] = int64(nanos.(int))
+	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok && len(scheduling) > 0 {
+		if gsList, ok := scheduling[0]["graceful_shutdown"].([]interface{}); ok && len(gsList) > 0 && gsList[0] != nil {
+			graceful_shutdown := gsList[0].(map[string]interface{})
+			if mdList, ok := graceful_shutdown["max_duration"].([]interface{}); ok && len(mdList) > 0 && mdList[0] != nil {
+				max_duration := mdList[0].(map[string]interface{})
+				max_duration["nanos"] = int64(nanos.(int))
 
-		graceful_shutdown["max_duration"] = []interface{}{max_duration}
-		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+				graceful_shutdown["max_duration"] = []interface{}{max_duration}
+				scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+			}
+		}
 	}
 	if err := d.Set("scheduling", scheduling); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
@@ -3427,7 +3437,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if !updateDuringStop && d.HasChange(prefix+".internal_ipv6_prefix_length") {
 
 			niBody := map[string]interface{}{
-				"internalIpv6PrefixLength": d.Get(prefix+".internal_ipv6_prefix_length").(int64),
+				"internalIpv6PrefixLength": int64(d.Get(prefix + ".internal_ipv6_prefix_length").(int)),
 				"fingerprint":              instNetworkInterface["fingerprint"],
 			}
 			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")
@@ -3477,7 +3487,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 
 			if d.HasChange(prefix+".internal_ipv6_prefix_length") {
-				niPatchMap["ipv6Address"] = networkInterface["ipv6Address"]
+				niPatchMap["internalIpv6PrefixLength"] = networkInterface["internalIpv6PrefixLength"]
 			}
 
 			if d.HasChange(prefix+".ipv6_address") {
@@ -3698,11 +3708,15 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if len(oList) != len(nList) {
 		scopesChange = true
 	} else if len(oList) == 1 {
-		// service_account has MaxItems: 1
-		// scopes is a required field and so will always be set
-		oScopes := oList[0].(map[string]interface{})["scopes"].(*schema.Set)
-		nScopes := nList[0].(map[string]interface{})["scopes"].(*schema.Set)
-		scopesChange = !oScopes.Equal(nScopes)
+		if oList[0] == nil || nList[0] == nil {
+			scopesChange = oList[0] != nList[0]
+		} else {
+			// service_account has MaxItems: 1
+			// scopes is a required field and so will always be set
+			oScopes := oList[0].(map[string]interface{})["scopes"].(*schema.Set)
+			nScopes := nList[0].(map[string]interface{})["scopes"].(*schema.Set)
+			scopesChange = !oScopes.Equal(nScopes)
+		}
 	}
 
 	if d.HasChange("deletion_protection") {
