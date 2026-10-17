@@ -17,7 +17,7 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -61,7 +61,7 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 func TestAccProjectIamCustomRole_importWithIdentity(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -88,7 +88,7 @@ func TestAccProjectIamCustomRole_importWithIdentity(t *testing.T) {
 func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -128,7 +128,7 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
