@@ -2,8 +2,10 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -134,4 +136,98 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   }
 }
 `, org, policyTitle, perimeterTitleName, perimeterTitleName)
+}
+
+func TestUnitAccessContextManagerEncoders_invalidParentFormat(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name     string
+		res      *schema.Resource
+		field    string
+		value    string
+		expected string
+	}{
+		{
+			name:     "ServicePerimeterResource",
+			res:      accesscontextmanager.ResourceAccessContextManagerServicePerimeterResource(),
+			field:    "perimeter_name",
+			value:    "infratest",
+			expected: "unexpected format for perimeter_name (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "ServicePerimeterDryRunResource",
+			res:      accesscontextmanager.ResourceAccessContextManagerServicePerimeterDryRunResource(),
+			field:    "perimeter_name",
+			value:    "infratest",
+			expected: "unexpected format for perimeter_name (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "ServicePerimeterIngressPolicy",
+			res:      accesscontextmanager.ResourceAccessContextManagerServicePerimeterIngressPolicy(),
+			field:    "perimeter",
+			value:    "infratest",
+			expected: "unexpected format for perimeter (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "ServicePerimeterEgressPolicy",
+			res:      accesscontextmanager.ResourceAccessContextManagerServicePerimeterEgressPolicy(),
+			field:    "perimeter",
+			value:    "infratest",
+			expected: "unexpected format for perimeter (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "ServicePerimeterDryRunIngressPolicy",
+			res:      accesscontextmanager.ResourceAccessContextManagerServicePerimeterDryRunIngressPolicy(),
+			field:    "perimeter",
+			value:    "infratest",
+			expected: "unexpected format for perimeter (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "ServicePerimeterDryRunEgressPolicy",
+			res:      accesscontextmanager.ResourceAccessContextManagerServicePerimeterDryRunEgressPolicy(),
+			field:    "perimeter",
+			value:    "infratest",
+			expected: "unexpected format for perimeter (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "AccessLevelCondition",
+			res:      accesscontextmanager.ResourceAccessContextManagerAccessLevelCondition(),
+			field:    "access_level",
+			value:    "infratest",
+			expected: "unexpected format for access_level (infratest), expected accessPolicies/{accessPolicy}/accessLevels/{accessLevel}",
+		},
+		{
+			name:     "EgressPolicy",
+			res:      accesscontextmanager.ResourceAccessContextManagerEgressPolicy(),
+			field:    "egress_policy_name",
+			value:    "infratest",
+			expected: "unexpected format for egress_policy_name (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+		{
+			name:     "IngressPolicy",
+			res:      accesscontextmanager.ResourceAccessContextManagerIngressPolicy(),
+			field:    "ingress_policy_name",
+			value:    "infratest",
+			expected: "unexpected format for ingress_policy_name (infratest), expected accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			d := tc.res.Data(nil)
+			if err := d.Set(tc.field, tc.value); err != nil {
+				t.Fatalf("unexpected error setting %s: %v", tc.field, err)
+			}
+			err := tc.res.Create(d, &transport_tpg.Config{})
+			if err == nil {
+				t.Fatalf("expected error for invalid %s, got nil", tc.field)
+			}
+			if !strings.Contains(err.Error(), tc.expected) {
+				t.Fatalf("expected error containing %q, got %q", tc.expected, err.Error())
+			}
+		})
+	}
 }
