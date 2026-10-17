@@ -42,6 +42,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because listing liens requires a parent query parameter and pre_delete rewrites the delete URL.
+exclude_sweeper: true
 custom_code:
   decoder: templates/terraform/decoders/avoid_meaningless_project_update.tmpl
   constants: templates/terraform/constants/resourcemanager_lien.go.tmpl
