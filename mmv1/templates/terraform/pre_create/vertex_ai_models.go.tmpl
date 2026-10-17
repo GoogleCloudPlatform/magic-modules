@@ -1,0 +1,6 @@
+var postRequestType string
+
+if _, ok := d.GetOk("source_model"); ok {
+	postRequestType = ":copy"
+}
+url = regexp.MustCompile("PRE_CREATE_REPLACE_ME").ReplaceAllLiteralString(url, postRequestType)
