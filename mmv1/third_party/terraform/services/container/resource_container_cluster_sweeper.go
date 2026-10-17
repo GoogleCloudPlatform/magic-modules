@@ -40,7 +40,7 @@ func testSweepContainerClusters(region string) error {
 		return nil
 	}
 
-	clusters := getSlice(found, "clusters")
+	clusters, _ := found["clusters"].([]interface{})
 	if len(clusters) == 0 {
 		log.Printf("No container clusters found.")
 		return nil
@@ -51,12 +51,12 @@ func testSweepContainerClusters(region string) error {
 		if !ok {
 			continue
 		}
-		clusterName := flattenString(cluster["name"])
+		clusterName, _ := cluster["name"].(string)
 		if !sweeper.IsSweepableTestResource(clusterName) {
 			continue
 		}
 
-		if createTime := flattenString(cluster["createTime"]); createTime != "" {
+		if createTime, _ := cluster["createTime"].(string); createTime != "" {
 			createdAt, err := time.Parse(time.RFC3339Nano, createTime)
 			if err != nil {
 				createdAt, err = time.Parse(time.RFC3339, createTime)
@@ -67,14 +67,15 @@ func testSweepContainerClusters(region string) error {
 			}
 		}
 
-		status := flattenString(cluster["status"])
+		status, _ := cluster["status"].(string)
 		if status == "PROVISIONING" || status == "RECONCILING" || status == "STOPPING" {
 			log.Printf("Skipping cluster %s in non-deletable status %s", clusterName, status)
 			continue
 		}
 
 		log.Printf("Sweeping Container Cluster: %s", clusterName)
-		clusterURL := fmt.Sprintf("%sprojects/%s/locations/%s/clusters/%s", transport_tpg.BaseUrl(Product, config), config.Project, flattenString(cluster["location"]), clusterName)
+		clusterLocation, _ := cluster["location"].(string)
+		clusterURL := fmt.Sprintf("%sprojects/%s/locations/%s/clusters/%s", transport_tpg.BaseUrl(Product, config), config.Project, clusterLocation, clusterName)
 		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",

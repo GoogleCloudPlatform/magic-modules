@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -3229,81 +3230,185 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		// default on first creation, which is bad. We edge case that out.
 		if !slices.Equal(allowlistPaths, []string{"gke://*"}) {
 			privilegedAdmissionConfig = map[string]interface{}{}
-			setField(privilegedAdmissionConfig, "allowlistPaths", allowlistPaths)
+			if len(allowlistPaths) > 0 {
+				privilegedAdmissionConfig["allowlistPaths"] = allowlistPaths
+			}
 		}
 	}
 
 	autopilot := map[string]interface{}{
 		"enabled": d.Get("enable_autopilot").(bool),
 	}
-	setField(autopilot, "workloadPolicyConfig", workloadPolicyConfig)
-	setField(autopilot, "privilegedAdmissionConfig", privilegedAdmissionConfig)
-	setField(autopilot, "clusterPolicyConfig", autopilotClusterPolicyConfig)
+	if workloadPolicyConfig != nil {
+		autopilot["workloadPolicyConfig"] = workloadPolicyConfig
+	}
+	if privilegedAdmissionConfig != nil {
+		autopilot["privilegedAdmissionConfig"] = privilegedAdmissionConfig
+	}
+	if autopilotClusterPolicyConfig != nil {
+		autopilot["clusterPolicyConfig"] = autopilotClusterPolicyConfig
+	}
 
 	networkConfig := map[string]interface{}{}
-	setField(networkConfig, "enableIntraNodeVisibility", d.Get("enable_intranode_visibility").(bool))
-	setField(networkConfig, "defaultSnatStatus", expandDefaultSnatStatus(d.Get("default_snat_status")))
-	setField(networkConfig, "datapathProvider", d.Get("datapath_provider").(string))
-	setField(networkConfig, "dataplaneV2Config", expandDataplaneV2Config(d.Get("dataplane_optimization_mode")))
-	setField(networkConfig, "enableCiliumClusterwideNetworkPolicy", d.Get("enable_cilium_clusterwide_network_policy").(bool))
-	setField(networkConfig, "privateIpv6GoogleAccess", d.Get("private_ipv6_google_access").(string))
-	setField(networkConfig, "inTransitEncryptionConfig", d.Get("in_transit_encryption_config").(string))
-	setField(networkConfig, "enableL4ilbSubsetting", d.Get("enable_l4_ilb_subsetting").(bool))
-	setField(networkConfig, "disableL4LbFirewallReconciliation", d.Get("disable_l4_lb_firewall_reconciliation").(bool))
-	setField(networkConfig, "dnsConfig", expandDnsConfig(d.Get("dns_config")))
-	setField(networkConfig, "gatewayApiConfig", expandGatewayApiConfig(d.Get("gateway_api_config")))
-	setField(networkConfig, "enableMultiNetworking", d.Get("enable_multi_networking").(bool))
-	setField(networkConfig, "defaultEnablePrivateNodes", expandDefaultEnablePrivateNodes(d))
-	setField(networkConfig, "enableFqdnNetworkPolicy", d.Get("enable_fqdn_network_policy").(bool))
-	setField(networkConfig, "networkPerformanceConfig", expandNetworkPerformanceConfig(d.Get("network_performance_config")))
+	if v := d.Get("enable_intranode_visibility").(bool); v {
+		networkConfig["enableIntraNodeVisibility"] = v
+	}
+	if v := expandDefaultSnatStatus(d.Get("default_snat_status")); v != nil {
+		networkConfig["defaultSnatStatus"] = v
+	}
+	if v := d.Get("datapath_provider").(string); v != "" {
+		networkConfig["datapathProvider"] = v
+	}
+	if v := expandDataplaneV2Config(d.Get("dataplane_optimization_mode")); v != nil {
+		networkConfig["dataplaneV2Config"] = v
+	}
+	if v := d.Get("enable_cilium_clusterwide_network_policy").(bool); v {
+		networkConfig["enableCiliumClusterwideNetworkPolicy"] = v
+	}
+	if v := d.Get("private_ipv6_google_access").(string); v != "" {
+		networkConfig["privateIpv6GoogleAccess"] = v
+	}
+	if v := d.Get("in_transit_encryption_config").(string); v != "" {
+		networkConfig["inTransitEncryptionConfig"] = v
+	}
+	if v := d.Get("enable_l4_ilb_subsetting").(bool); v {
+		networkConfig["enableL4ilbSubsetting"] = v
+	}
+	if v := d.Get("disable_l4_lb_firewall_reconciliation").(bool); v {
+		networkConfig["disableL4LbFirewallReconciliation"] = v
+	}
+	if v := expandDnsConfig(d.Get("dns_config")); v != nil {
+		networkConfig["dnsConfig"] = v
+	}
+	if v := expandGatewayApiConfig(d.Get("gateway_api_config")); v != nil {
+		networkConfig["gatewayApiConfig"] = v
+	}
+	if v := d.Get("enable_multi_networking").(bool); v {
+		networkConfig["enableMultiNetworking"] = v
+	}
+	if v := expandDefaultEnablePrivateNodes(d); v {
+		networkConfig["defaultEnablePrivateNodes"] = v
+	}
+	if v := d.Get("enable_fqdn_network_policy").(bool); v {
+		networkConfig["enableFqdnNetworkPolicy"] = v
+	}
+	if v := expandNetworkPerformanceConfig(d.Get("network_performance_config")); v != nil {
+		networkConfig["networkPerformanceConfig"] = v
+	}
 
 	cluster := map[string]interface{}{}
-	setField(cluster, "name", clusterName)
-	setField(cluster, "initialNodeCount", int64(d.Get("initial_node_count").(int)))
-	setField(cluster, "maintenancePolicy", expandMaintenancePolicy(d, meta))
-	setField(cluster, "controlPlaneEndpointsConfig", expandControlPlaneEndpointsConfig(d))
-	setField(cluster, "initialClusterVersion", d.Get("min_master_version").(string))
-	setField(cluster, "clusterIpv4Cidr", d.Get("cluster_ipv4_cidr").(string))
-	setField(cluster, "description", d.Get("description").(string))
+	if clusterName != "" {
+		cluster["name"] = clusterName
+	}
+	if v := d.Get("initial_node_count").(int); v != 0 {
+		cluster["initialNodeCount"] = v
+	}
+	if v := expandMaintenancePolicy(d, meta); v != nil {
+		cluster["maintenancePolicy"] = v
+	}
+	if v := expandControlPlaneEndpointsConfig(d); v != nil {
+		cluster["controlPlaneEndpointsConfig"] = v
+	}
+	if v := d.Get("min_master_version").(string); v != "" {
+		cluster["initialClusterVersion"] = v
+	}
+	if v := d.Get("cluster_ipv4_cidr").(string); v != "" {
+		cluster["clusterIpv4Cidr"] = v
+	}
+	if v := d.Get("description").(string); v != "" {
+		cluster["description"] = v
+	}
 	cluster["legacyAbac"] = map[string]interface{}{
 		"enabled": d.Get("enable_legacy_abac").(bool),
 	}
-	setField(cluster, "loggingService", d.Get("logging_service").(string))
-	setField(cluster, "monitoringService", d.Get("monitoring_service").(string))
-	setField(cluster, "networkPolicy", expandNetworkPolicy(d.Get("network_policy")))
-	setField(cluster, "addonsConfig", expandClusterAddonsConfig(d.Get("addons_config")))
+	if v := d.Get("logging_service").(string); v != "" {
+		cluster["loggingService"] = v
+	}
+	if v := d.Get("monitoring_service").(string); v != "" {
+		cluster["monitoringService"] = v
+	}
+	if v := expandNetworkPolicy(d.Get("network_policy")); v != nil {
+		cluster["networkPolicy"] = v
+	}
+	if v := expandClusterAddonsConfig(d.Get("addons_config")); v != nil {
+		cluster["addonsConfig"] = v
+	}
 {{- if ne $.TargetVersionName "ga" }}
-	setField(cluster, "managedMachineLearningDiagnosticsConfig", expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")))
+	if v := expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")); v != nil {
+		cluster["managedMachineLearningDiagnosticsConfig"] = v
+	}
 {{- end }}
-	setField(cluster, "managedOpentelemetryConfig", expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")))
-	setField(cluster, "enableKubernetesAlpha", d.Get("enable_kubernetes_alpha").(bool))
-	setField(cluster, "ipAllocationPolicy", ipAllocationBlock)
+	if v := expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")); v != nil {
+		cluster["managedOpentelemetryConfig"] = v
+	}
+	if v := d.Get("enable_kubernetes_alpha").(bool); v {
+		cluster["enableKubernetesAlpha"] = v
+	}
+	if ipAllocationBlock != nil {
+		cluster["ipAllocationPolicy"] = ipAllocationBlock
+	}
 {{- if ne $.TargetVersionName "ga" }}
-	setField(cluster, "podSecurityPolicyConfig", expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")))
+	if v := expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")); v != nil {
+		cluster["podSecurityPolicyConfig"] = v
+	}
 {{- end }}
-	setField(cluster, "podAutoscaling", expandPodAutoscaling(d.Get("pod_autoscaling")))
-	setField(cluster, "secretManagerConfig", expandSecretManagerConfig(d.Get("secret_manager_config")))
-	setField(cluster, "secretSyncConfig", expandSecretSyncConfig(d.Get("secret_sync_config")))
-	setField(cluster, "autoscaling", expandClusterAutoscaling(d.Get("cluster_autoscaling"), d))
-	setField(cluster, "binaryAuthorization", expandBinaryAuthorization(d.Get("binary_authorization")))
+	if v := expandPodAutoscaling(d.Get("pod_autoscaling")); v != nil {
+		cluster["podAutoscaling"] = v
+	}
+	if v := expandSecretManagerConfig(d.Get("secret_manager_config")); v != nil {
+		cluster["secretManagerConfig"] = v
+	}
+	if v := expandSecretSyncConfig(d.Get("secret_sync_config")); v != nil {
+		cluster["secretSyncConfig"] = v
+	}
+	if v := expandClusterAutoscaling(d.Get("cluster_autoscaling"), d); v != nil {
+		cluster["autoscaling"] = v
+	}
+	if v := expandBinaryAuthorization(d.Get("binary_authorization")); v != nil {
+		cluster["binaryAuthorization"] = v
+	}
 	cluster["autopilot"] = autopilot
-	setField(cluster, "releaseChannel", expandReleaseChannel(d.Get("release_channel")))
-	setField(cluster, "gkeAutoUpgradeConfig", expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")))
+	if v := expandReleaseChannel(d.Get("release_channel")); v != nil {
+		cluster["releaseChannel"] = v
+	}
+	if v := expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")); v != nil {
+		cluster["gkeAutoUpgradeConfig"] = v
+	}
 {{- if ne $.TargetVersionName "ga" }}
-	setField(cluster, "clusterTelemetry", expandClusterTelemetry(d.Get("cluster_telemetry")))
+	if v := expandClusterTelemetry(d.Get("cluster_telemetry")); v != nil {
+		cluster["clusterTelemetry"] = v
+	}
 {{- end }}
-	setField(cluster, "enableTpu", d.Get("enable_tpu").(bool))
+	if v := d.Get("enable_tpu").(bool); v {
+		cluster["enableTpu"] = v
+	}
 	cluster["networkConfig"] = networkConfig
-	setField(cluster, "masterAuth", expandMasterAuth(d.Get("master_auth")))
-	setField(cluster, "notificationConfig", expandNotificationConfig(d.Get("notification_config")))
-	setField(cluster, "confidentialNodes", expandConfidentialNodes(d.Get("confidential_nodes")))
-	setField(cluster, "resourceLabels", tpgresource.ExpandStringMap(d, "effective_labels"))
-	setField(cluster, "nodePoolAutoConfig", expandNodePoolAutoConfig(d.Get("node_pool_auto_config")))
+	if v := expandMasterAuth(d.Get("master_auth")); v != nil {
+		cluster["masterAuth"] = v
+	}
+	if v := expandNotificationConfig(d.Get("notification_config")); v != nil {
+		cluster["notificationConfig"] = v
+	}
+	if v := expandConfidentialNodes(d.Get("confidential_nodes")); v != nil {
+		cluster["confidentialNodes"] = v
+	}
+	if v := tpgresource.ExpandStringMap(d, "effective_labels"); len(v) > 0 {
+		cluster["resourceLabels"] = v
+	}
+	if v := expandNodePoolAutoConfig(d.Get("node_pool_auto_config")); v != nil {
+		cluster["nodePoolAutoConfig"] = v
+	}
 {{- if ne $.TargetVersionName "ga" }}
-	setField(cluster, "protectConfig", expandProtectConfig(d.Get("protect_config")))
+	if v := expandProtectConfig(d.Get("protect_config")); v != nil {
+		cluster["protectConfig"] = v
+	}
 {{- end }}
-	setField(cluster, "costManagementConfig", expandCostManagementConfig(d.Get("cost_management_config")))
-	setField(cluster, "enableK8sBetaApis", expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil))
+	if v := expandCostManagementConfig(d.Get("cost_management_config")); v != nil {
+		cluster["costManagementConfig"] = v
+	}
+	if v := expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil); v != nil {
+		cluster["enableK8sBetaApis"] = v
+	}
 
 	v := d.Get("enable_shielded_nodes")
 	cluster["shieldedNodes"] = map[string]interface{}{
@@ -3311,14 +3416,17 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if v, ok := d.GetOk("default_max_pods_per_node"); ok {
-		setField(cluster, "defaultMaxPodsConstraint", expandDefaultMaxPodsConstraint(v))
+		if sub := expandDefaultMaxPodsConstraint(v); sub != nil {
+			cluster["defaultMaxPodsConstraint"] = sub
+		}
 	}
 
 	// Only allow setting node_version on create if it's set to the equivalent master version,
 	// since `InitialClusterVersion` only accepts valid master-style versions.
 	if v, ok := d.GetOk("node_version"); ok {
 		// ignore -gke.X suffix for now. if it becomes a problem later, we can fix it.
-		mv := strings.Split(flattenString(cluster["initialClusterVersion"]), "-")[0]
+		icv, _ := cluster["initialClusterVersion"].(string)
+		mv := strings.Split(icv, "-")[0]
 		nv := strings.Split(v.(string), "-")[0]
 		if mv != nv {
 			return fmt.Errorf("node_version and min_master_version must be set to equivalent values on create")
@@ -3337,7 +3445,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		if tpgresource.IsZone(location) {
 			locationsSet.Add(location)
 		}
-		setField(cluster, "locations", tpgresource.ConvertStringSet(locationsSet))
+		if locs := tpgresource.ConvertStringSet(locationsSet); len(locs) > 0 {
+			cluster["locations"] = locs
+		}
 	}
 
 	if v, ok := d.GetOk("network"); ok {
@@ -3345,7 +3455,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		if err != nil {
 			return err
 		}
-		setField(cluster, "network", network.RelativeLink())
+		if rel := network.RelativeLink(); rel != "" {
+			cluster["network"] = rel
+		}
 	}
 
 	if v, ok := d.GetOk("subnetwork"); ok {
@@ -3353,7 +3465,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		if err != nil {
 			return err
 		}
-		setField(cluster, "subnetwork", subnetwork.RelativeLink())
+		if rel := subnetwork.RelativeLink(); rel != "" {
+			cluster["subnetwork"] = rel
+		}
 	}
 
 	nodePoolsCount := d.Get("node_pool.#").(int)
@@ -3367,77 +3481,113 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			}
 			nodePools = append(nodePools, nodePool)
 		}
-		setField(cluster, "nodePools", nodePools)
+		if len(nodePools) > 0 {
+			cluster["nodePools"] = nodePools
+		}
 	} else {
 		// Node Configs have default values that are set in the expand function,
 		// but can only be set if node pools are unspecified.
-		setField(cluster, "nodeConfig", expandNodeConfig(d, "", []interface{}{}))
+		if sub := expandNodeConfig(d, "", []interface{}{}); sub != nil {
+			cluster["nodeConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("node_pool_defaults"); ok {
-		setField(cluster, "nodePoolDefaults", expandNodePoolDefaults(v))
+		if sub := expandNodePoolDefaults(v); sub != nil {
+			cluster["nodePoolDefaults"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("node_config"); ok {
-		setField(cluster, "nodeConfig", expandNodeConfig(d, "", v))
+		if sub := expandNodeConfig(d, "", v); sub != nil {
+			cluster["nodeConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("authenticator_groups_config"); ok {
-		setField(cluster, "authenticatorGroupsConfig", expandAuthenticatorGroupsConfig(v))
+		if sub := expandAuthenticatorGroupsConfig(v); sub != nil {
+			cluster["authenticatorGroupsConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("private_cluster_config.0.master_ipv4_cidr_block"); ok {
-		setField(cluster, "privateClusterConfig", expandPrivateClusterConfigMasterIpv4CidrBlock(v, cluster))
+		if sub := expandPrivateClusterConfigMasterIpv4CidrBlock(v, cluster); sub != nil {
+			cluster["privateClusterConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("vertical_pod_autoscaling"); ok {
-		setField(cluster, "verticalPodAutoscaling", expandVerticalPodAutoscaling(v))
+		if sub := expandVerticalPodAutoscaling(v); sub != nil {
+			cluster["verticalPodAutoscaling"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("service_external_ips_config"); ok {
-		setField(networkConfig, "serviceExternalIpsConfig", expandServiceExternalIpsConfig(v))
+		if sub := expandServiceExternalIpsConfig(v); sub != nil {
+			networkConfig["serviceExternalIpsConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("mesh_certificates"); ok {
-		setField(cluster, "meshCertificates", expandMeshCertificates(v))
+		if sub := expandMeshCertificates(v); sub != nil {
+			cluster["meshCertificates"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("database_encryption"); ok {
-		setField(cluster, "databaseEncryption", expandDatabaseEncryption(v))
+		if sub := expandDatabaseEncryption(v); sub != nil {
+			cluster["databaseEncryption"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("workload_identity_config"); ok {
-		setField(cluster, "workloadIdentityConfig", expandWorkloadIdentityConfig(v))
+		if sub := expandWorkloadIdentityConfig(v); sub != nil {
+			cluster["workloadIdentityConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("identity_service_config"); ok {
-		setField(cluster, "identityServiceConfig", expandIdentityServiceConfig(v))
+		if sub := expandIdentityServiceConfig(v); sub != nil {
+			cluster["identityServiceConfig"] = sub
+		}
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("tpu_config"); ok {
-		setField(cluster, "tpuConfig", expandContainerClusterTpuConfig(v))
+		if sub := expandContainerClusterTpuConfig(v); sub != nil {
+			cluster["tpuConfig"] = sub
+		}
 	}
 {{- end }}
 
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
-		setField(cluster, "resourceUsageExportConfig", expandResourceUsageExportConfig(v))
+		if sub := expandResourceUsageExportConfig(v); sub != nil {
+			cluster["resourceUsageExportConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("logging_config"); ok {
-		setField(cluster, "loggingConfig", expandContainerClusterLoggingConfig(v))
+		if sub := expandContainerClusterLoggingConfig(v); sub != nil {
+			cluster["loggingConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("monitoring_config"); ok {
-		setField(cluster, "monitoringConfig", expandMonitoringConfig(v))
+		if sub := expandMonitoringConfig(v); sub != nil {
+			cluster["monitoringConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("fleet"); ok {
-		setField(cluster, "fleet", expandFleet(v))
+		if sub := expandFleet(v); sub != nil {
+			cluster["fleet"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("user_managed_keys_config"); ok {
-		setField(cluster, "userManagedKeysConfig", expandUserManagedKeysConfig(v))
+		if sub := expandUserManagedKeysConfig(v); sub != nil {
+			cluster["userManagedKeysConfig"] = sub
+		}
 	}
 
 	if err := validateNodePoolAutoConfig(cluster); err != nil {
@@ -3445,23 +3595,33 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if v, ok := d.GetOk("security_posture_config"); ok {
-		setField(cluster, "securityPostureConfig", expandSecurityPostureConfig(v))
+		if sub := expandSecurityPostureConfig(v); sub != nil {
+			cluster["securityPostureConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("enterprise_config"); ok {
-		setField(cluster, "enterpriseConfig", expandEnterpriseConfig(v))
+		if sub := expandEnterpriseConfig(v); sub != nil {
+			cluster["enterpriseConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("anonymous_authentication_config"); ok {
-		setField(cluster, "anonymousAuthenticationConfig", expandAnonymousAuthenticationConfig(v))
+		if sub := expandAnonymousAuthenticationConfig(v); sub != nil {
+			cluster["anonymousAuthenticationConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("node_creation_config"); ok {
-		setField(cluster, "nodeCreationConfig", expandNodeCreationConfig(v))
+		if sub := expandNodeCreationConfig(v); sub != nil {
+			cluster["nodeCreationConfig"] = sub
+		}
 	}
 
 	if v, ok := d.GetOk("rbac_binding_config"); ok {
-		setField(cluster, "rbacBindingConfig", expandRBACBindingConfig(v))
+		if sub := expandRBACBindingConfig(v); sub != nil {
+			cluster["rbacBindingConfig"] = sub
+		}
 	}
 
 	needUpdateAfterCreate := false
@@ -3474,7 +3634,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	// If cluster is PSC based and enable_private_endpoint is set to true we will ignore it on `create` call and update cluster right after creation.
 	enablePrivateEndpointPSCCluster := isEnablePrivateEndpointPSCCluster(cluster)
 	if enablePrivateEndpointPSCCluster {
-		if pcc := getMap(cluster, "privateClusterConfig"); pcc != nil {
+		if pcc, ok := cluster["privateClusterConfig"].(map[string]interface{}); ok && pcc != nil {
 			delete(pcc, "enablePrivateEndpoint")
 		}
 		needUpdateAfterCreate = true
@@ -3485,12 +3645,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		// GcePersistentDiskCsiDriver cannot be disabled at cluster create, only on cluster update. Ignore on create then update after creation.
 		// If pdcsi is disabled, the config should be defined. But we will be paranoid and double-check.
 		needUpdateAfterCreate = true
-		addonsConfig := getMap(cluster, "addonsConfig")
+		addonsConfig, _ := cluster["addonsConfig"].(map[string]interface{})
 		if addonsConfig == nil {
 			addonsConfig = map[string]interface{}{}
 			cluster["addonsConfig"] = addonsConfig
 		}
-		gcePd := getMap(addonsConfig, "gcePersistentDiskCsiDriverConfig")
+		gcePd, _ := addonsConfig["gcePersistentDiskCsiDriverConfig"].(map[string]interface{})
 		if gcePd == nil {
 			gcePd = map[string]interface{}{}
 			addonsConfig["gcePersistentDiskCsiDriverConfig"] = gcePd
@@ -3500,12 +3660,16 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("workload_alts_config"); ok {
-		setField(cluster, "workloadAltsConfig", expandWorkloadAltsConfig(v))
+		if sub := expandWorkloadAltsConfig(v); sub != nil {
+			cluster["workloadAltsConfig"] = sub
+		}
 	}
 	{{- end }}
 	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("schedule_upgrade_config"); ok {
-		setField(cluster, "scheduleUpgradeConfig", expandScheduleUpgradeConfig(v))
+		if sub := expandScheduleUpgradeConfig(v); sub != nil {
+			cluster["scheduleUpgradeConfig"] = sub
+		}
 	}
 	{{- end }}
 
@@ -3541,7 +3705,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		// by the upstream Terraform process exiting early such as a sigterm.
 		select {
 		case <-config.Context.Done():
-			opName := flattenString(op["name"])
+			opName, _ := op["name"].(string)
 			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", opName)
 			if err := d.Set("operation", opName); err != nil {
 				return fmt.Errorf("Error setting operation: %s", err)
@@ -3636,7 +3800,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	if names, ok := d.GetOk("ip_allocation_policy.0.additional_pod_ranges_config.0.pod_range_names"); ok {
 		name := containerClusterFullName(project, location, clusterName)
 		additionalPodRangesConfig := map[string]interface{}{}
-		setField(additionalPodRangesConfig, "podRangeNames", tpgresource.ConvertStringSet(names.(*schema.Set)))
+		if prn := tpgresource.ConvertStringSet(names.(*schema.Set)); len(prn) > 0 {
+			additionalPodRangesConfig["podRangeNames"] = prn
+		}
 
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
@@ -3665,7 +3831,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	if linuxNodeConfig, ok := d.GetOk("node_pool_auto_config.0.linux_node_config"); ok {
 		name := containerClusterFullName(project, location, clusterName)
 		update := map[string]interface{}{}
-		setField(update, "desiredNodePoolAutoConfigLinuxNodeConfig", expandLinuxNodeConfig(linuxNodeConfig))
+		if sub := expandLinuxNodeConfig(linuxNodeConfig); sub != nil {
+			update["desiredNodePoolAutoConfigLinuxNodeConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -3767,104 +3935,109 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
 	}
 
-	if err := d.Set("name", flattenString(cluster["name"])); err != nil {
+	if err := d.Set("name", cluster["name"]); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("network_policy", flattenNetworkPolicy(getMap(cluster, "networkPolicy"))); err != nil {
+	if err := d.Set("network_policy", flattenNetworkPolicy(cluster["networkPolicy"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("location", flattenString(cluster["location"])); err != nil {
+	if err := d.Set("location", cluster["location"]); err != nil {
 		return fmt.Errorf("Error setting location: %s", err)
 	}
 
-	locations := schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(flattenStringSlice(cluster["locations"])))
-	locations.Remove(flattenString(cluster["zone"])) // Remove the original zone since we only store additional zones
+	rawLocations, _ := cluster["locations"].([]interface{})
+	locations := schema.NewSet(schema.HashString, rawLocations)
+	if zone, ok := cluster["zone"].(string); ok {
+		locations.Remove(zone) // Remove the original zone since we only store additional zones
+	}
 	if err := d.Set("node_locations", locations); err != nil {
 		return fmt.Errorf("Error setting node_locations: %s", err)
 	}
 
-	if err := d.Set("endpoint", flattenString(cluster["endpoint"])); err != nil {
+	if err := d.Set("endpoint", cluster["endpoint"]); err != nil {
 		return fmt.Errorf("Error setting endpoint: %s", err)
 	}
-	if err := d.Set("self_link", flattenString(cluster["selfLink"])); err != nil {
+	if err := d.Set("self_link", cluster["selfLink"]); err != nil {
 		return fmt.Errorf("Error setting self link: %s", err)
 	}
-	if err := d.Set("maintenance_policy", flattenMaintenancePolicy(getMap(cluster, "maintenancePolicy"))); err != nil {
+	if err := d.Set("maintenance_policy", flattenMaintenancePolicy(cluster["maintenancePolicy"])); err != nil {
 		return err
 	}
-	if err := d.Set("master_auth", flattenMasterAuth(getMap(cluster, "masterAuth"))); err != nil {
+	if err := d.Set("master_auth", flattenMasterAuth(cluster["masterAuth"])); err != nil {
 		return err
 	}
-	if cpec := getMap(cluster, "controlPlaneEndpointsConfig"); cpec != nil {
-		if ipec := getMap(cpec, "ipEndpointsConfig"); ipec != nil {
-			if err := d.Set("master_authorized_networks_config", flattenMasterAuthorizedNetworksConfig(getMap(ipec, "authorizedNetworksConfig"))); err != nil {
+	cpec, _ := cluster["controlPlaneEndpointsConfig"].(map[string]interface{})
+	if cpec != nil {
+		if ipec, ok := cpec["ipEndpointsConfig"].(map[string]interface{}); ok && ipec != nil {
+			if err := d.Set("master_authorized_networks_config", flattenMasterAuthorizedNetworksConfig(ipec["authorizedNetworksConfig"])); err != nil {
 				return err
 			}
 		}
 	}
-	if err := d.Set("initial_node_count", flattenInt(cluster["initialNodeCount"])); err != nil {
+	if err := d.Set("initial_node_count", cluster["initialNodeCount"]); err != nil {
 		return fmt.Errorf("Error setting initial_node_count: %s", err)
 	}
-	if err := d.Set("master_version", flattenString(cluster["currentMasterVersion"])); err != nil {
+	if err := d.Set("master_version", cluster["currentMasterVersion"]); err != nil {
 		return fmt.Errorf("Error setting master_version: %s", err)
 	}
-	if err := d.Set("emulated_version", flattenString(cluster["currentEmulatedVersion"])); err != nil {
+	if err := d.Set("emulated_version", cluster["currentEmulatedVersion"]); err != nil {
 		return fmt.Errorf("Error setting emulated_version: %s", err)
 	}
-	if err := d.Set("node_version", flattenString(cluster["currentNodeVersion"])); err != nil {
+	if err := d.Set("node_version", cluster["currentNodeVersion"]); err != nil {
 		return fmt.Errorf("Error setting node_version: %s", err)
 	}
-	if err := d.Set("cluster_ipv4_cidr", flattenString(cluster["clusterIpv4Cidr"])); err != nil {
+	if err := d.Set("cluster_ipv4_cidr", cluster["clusterIpv4Cidr"]); err != nil {
 		return fmt.Errorf("Error setting cluster_ipv4_cidr: %s", err)
 	}
-	if err := d.Set("services_ipv4_cidr", flattenString(cluster["servicesIpv4Cidr"])); err != nil {
+	if err := d.Set("services_ipv4_cidr", cluster["servicesIpv4Cidr"]); err != nil {
 		return fmt.Errorf("Error setting services_ipv4_cidr: %s", err)
 	}
-	if err := d.Set("description", flattenString(cluster["description"])); err != nil {
+	if err := d.Set("description", cluster["description"]); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
-	if err := d.Set("enable_kubernetes_alpha", flattenBool(cluster["enableKubernetesAlpha"])); err != nil {
+	if err := d.Set("enable_kubernetes_alpha", cluster["enableKubernetesAlpha"]); err != nil {
 		return fmt.Errorf("Error setting enable_kubernetes_alpha: %s", err)
 	}
-	if err := d.Set("enable_legacy_abac", flattenBool(getMap(cluster, "legacyAbac")["enabled"])); err != nil {
+	legacyAbac, _ := cluster["legacyAbac"].(map[string]interface{})
+	if err := d.Set("enable_legacy_abac", legacyAbac["enabled"]); err != nil {
 		return fmt.Errorf("Error setting enable_legacy_abac: %s", err)
 	}
-	if err := d.Set("logging_service", flattenString(cluster["loggingService"])); err != nil {
+	if err := d.Set("logging_service", cluster["loggingService"]); err != nil {
 		return fmt.Errorf("Error setting logging_service: %s", err)
 	}
-	if err := d.Set("monitoring_service", flattenString(cluster["monitoringService"])); err != nil {
+	if err := d.Set("monitoring_service", cluster["monitoringService"]); err != nil {
 		return fmt.Errorf("Error setting monitoring_service: %s", err)
 	}
-	networkConfig := getMap(cluster, "networkConfig")
-	if err := d.Set("network", flattenString(networkConfig["network"])); err != nil {
+	networkConfig, _ := cluster["networkConfig"].(map[string]interface{})
+	if err := d.Set("network", networkConfig["network"]); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
-	if err := d.Set("subnetwork", flattenString(networkConfig["subnetwork"])); err != nil {
+	if err := d.Set("subnetwork", networkConfig["subnetwork"]); err != nil {
 		return fmt.Errorf("Error setting subnetwork: %s", err)
 	}
-	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(getMap(cluster, "autoscaling"))); err != nil {
+	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster["autoscaling"])); err != nil {
 		return err
 	}
-	if err := d.Set("binary_authorization", flattenBinaryAuthorization(getMap(cluster, "binaryAuthorization"))); err != nil {
+	if err := d.Set("binary_authorization", flattenBinaryAuthorization(cluster["binaryAuthorization"])); err != nil {
 		return err
 	}
-	var allowlistPaths []string
-	if autopilot := getMap(cluster, "autopilot"); autopilot != nil {
-		if err := d.Set("enable_autopilot", flattenBool(autopilot["enabled"])); err != nil {
+	var allowlistPaths []interface{}
+	if autopilot, ok := cluster["autopilot"].(map[string]interface{}); ok && autopilot != nil {
+		if err := d.Set("enable_autopilot", autopilot["enabled"]); err != nil {
 			return fmt.Errorf("Error setting enable_autopilot: %s", err)
 		}
-		if wpc := getMap(autopilot, "workloadPolicyConfig"); wpc != nil {
-			if err := d.Set("allow_net_admin", flattenBool(wpc["allowNetAdmin"])); err != nil {
+		if wpc, ok := autopilot["workloadPolicyConfig"].(map[string]interface{}); ok && wpc != nil {
+			if err := d.Set("allow_net_admin", wpc["allowNetAdmin"]); err != nil {
 				return fmt.Errorf("Error setting allow_net_admin: %s", err)
 			}
 		}
-		if pac := getMap(autopilot, "privilegedAdmissionConfig"); pac != nil {
-			if paths := flattenStringSlice(pac["allowlistPaths"]); len(paths) > 0 {
+		if pac, ok := autopilot["privilegedAdmissionConfig"].(map[string]interface{}); ok && pac != nil {
+			if paths, ok := pac["allowlistPaths"].([]interface{}); ok && len(paths) > 0 {
 				allowlistPaths = paths
 			}
 		}
-		if cpc := getMap(autopilot, "clusterPolicyConfig"); cpc != nil {
+		if cpc, ok := autopilot["clusterPolicyConfig"].(map[string]interface{}); ok && cpc != nil {
 			if err := d.Set("autopilot_cluster_policy_config", flattenClusterPolicyConfig(cpc)); err != nil {
 				return err
 			}
@@ -3875,85 +4048,92 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("autopilot_privileged_admission", allowlistPaths); err != nil {
 		return fmt.Errorf("Error setting autopilot_privileged_admission: %w", err)
 	}
-	if sn := getMap(cluster, "shieldedNodes"); sn != nil {
-		if err := d.Set("enable_shielded_nodes", flattenBool(sn["enabled"])); err != nil {
+	if sn, ok := cluster["shieldedNodes"].(map[string]interface{}); ok && sn != nil {
+		if err := d.Set("enable_shielded_nodes", sn["enabled"]); err != nil {
 			return fmt.Errorf("Error setting enable_shielded_nodes: %s", err)
 		}
 	}
-	if err := d.Set("release_channel", flattenReleaseChannel(getMap(cluster, "releaseChannel"))); err != nil {
+	if err := d.Set("release_channel", flattenReleaseChannel(cluster["releaseChannel"])); err != nil {
 		return err
 	}
-	if err := d.Set("gke_auto_upgrade_config", flattenGkeAutoUpgradeConfig(getMap(cluster, "gkeAutoUpgradeConfig"))); err != nil {
+	if err := d.Set("gke_auto_upgrade_config", flattenGkeAutoUpgradeConfig(cluster["gkeAutoUpgradeConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("notification_config", flattenNotificationConfig(getMap(cluster, "notificationConfig"))); err != nil {
+	if err := d.Set("notification_config", flattenNotificationConfig(cluster["notificationConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("enable_l4_ilb_subsetting", flattenBool(networkConfig["enableL4ilbSubsetting"])); err != nil {
+	if err := d.Set("enable_l4_ilb_subsetting", networkConfig["enableL4ilbSubsetting"]); err != nil {
 		return fmt.Errorf("Error setting enable_l4_ilb_subsetting: %s", err)
 	}
-	if err := d.Set("disable_l4_lb_firewall_reconciliation", flattenBool(networkConfig["disableL4LbFirewallReconciliation"])); err != nil {
+	if err := d.Set("disable_l4_lb_firewall_reconciliation", networkConfig["disableL4LbFirewallReconciliation"]); err != nil {
 		return fmt.Errorf("Error setting disable_l4_lb_firewall_reconciliation: %s", err)
 	}
-	if err := d.Set("cost_management_config", flattenManagementConfig(getMap(cluster, "costManagementConfig"))); err != nil {
+	if err := d.Set("cost_management_config", flattenManagementConfig(cluster["costManagementConfig"])); err != nil {
 		return fmt.Errorf("Error setting cost_management_config: %s", err)
 	}
-	if err := d.Set("confidential_nodes", flattenConfidentialNodes(getMap(cluster, "confidentialNodes"))); err != nil {
+	confidentialNodes, _ := cluster["confidentialNodes"].(map[string]interface{})
+	if err := d.Set("confidential_nodes", flattenConfidentialNodes(confidentialNodes)); err != nil {
 		return err
 	}
-	if err := d.Set("enable_tpu", flattenBool(cluster["enableTpu"])); err != nil {
+	if err := d.Set("enable_tpu", cluster["enableTpu"]); err != nil {
 		return fmt.Errorf("Error setting enable_tpu: %s", err)
 	}
-	if err := d.Set("tpu_ipv4_cidr_block", flattenString(cluster["tpuIpv4CidrBlock"])); err != nil {
+	if err := d.Set("tpu_ipv4_cidr_block", cluster["tpuIpv4CidrBlock"]); err != nil {
 		return fmt.Errorf("Error setting tpu_ipv4_cidr_block: %s", err)
 	}
-	if err := d.Set("datapath_provider", flattenString(networkConfig["datapathProvider"])); err != nil {
+	if err := d.Set("datapath_provider", networkConfig["datapathProvider"]); err != nil {
 		return fmt.Errorf("Error setting datapath_provider: %s", err)
 	}
-	if dv2 := getMap(networkConfig, "dataplaneV2Config"); dv2 != nil {
-		if err := d.Set("dataplane_optimization_mode", flattenString(dv2["scalabilityMode"])); err != nil {
+	if dv2, ok := networkConfig["dataplaneV2Config"].(map[string]interface{}); ok && dv2 != nil {
+		if err := d.Set("dataplane_optimization_mode", dv2["scalabilityMode"]); err != nil {
 			return fmt.Errorf("Error setting dataplane_optimization_mode: %s", err)
 		}
 	}
-	if err := d.Set("enable_cilium_clusterwide_network_policy", flattenBool(networkConfig["enableCiliumClusterwideNetworkPolicy"])); err != nil {
+	if err := d.Set("enable_cilium_clusterwide_network_policy", networkConfig["enableCiliumClusterwideNetworkPolicy"]); err != nil {
 		return fmt.Errorf("Error setting enable_cilium_clusterwide_network_policy: %s", err)
 	}
-	if err := d.Set("default_snat_status", flattenDefaultSnatStatus(getMap(networkConfig, "defaultSnatStatus"))); err != nil {
+	if err := d.Set("default_snat_status", flattenDefaultSnatStatus(networkConfig["defaultSnatStatus"])); err != nil {
 		return err
 	}
-	if err := d.Set("enable_intranode_visibility", flattenBool(networkConfig["enableIntraNodeVisibility"])); err != nil {
+	if err := d.Set("enable_intranode_visibility", networkConfig["enableIntraNodeVisibility"]); err != nil {
 		return fmt.Errorf("Error setting enable_intranode_visibility: %s", err)
 	}
-	if err := d.Set("enable_multi_networking", flattenBool(networkConfig["enableMultiNetworking"])); err != nil {
+	if err := d.Set("enable_multi_networking", networkConfig["enableMultiNetworking"]); err != nil {
 		return fmt.Errorf("Error setting enable_multi_networking: %s", err)
 	}
-	if err := d.Set("enable_fqdn_network_policy", flattenBool(networkConfig["enableFqdnNetworkPolicy"])); err != nil {
+	if err := d.Set("enable_fqdn_network_policy", networkConfig["enableFqdnNetworkPolicy"]); err != nil {
 		return fmt.Errorf("Error setting enable_fqdn_network_policy: %s", err)
 	}
-	if err := d.Set("private_ipv6_google_access", flattenString(networkConfig["privateIpv6GoogleAccess"])); err != nil {
+	if err := d.Set("private_ipv6_google_access", networkConfig["privateIpv6GoogleAccess"]); err != nil {
 		return fmt.Errorf("Error setting private_ipv6_google_access: %s", err)
 	}
-	if err := d.Set("in_transit_encryption_config", flattenString(networkConfig["inTransitEncryptionConfig"])); err != nil {
+	if err := d.Set("in_transit_encryption_config", networkConfig["inTransitEncryptionConfig"]); err != nil {
 		return fmt.Errorf("Error setting in_transit_encryption_config: %s", err)
 	}
-	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(getMap(cluster, "authenticatorGroupsConfig"))); err != nil {
+	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster["authenticatorGroupsConfig"])); err != nil {
 		return err
 	}
-	if dmpc := getMap(cluster, "defaultMaxPodsConstraint"); dmpc != nil {
-		if err := d.Set("default_max_pods_per_node", flattenInt(dmpc["maxPodsPerNode"])); err != nil {
+	if dmpc, ok := cluster["defaultMaxPodsConstraint"].(map[string]interface{}); ok && dmpc != nil {
+		var maxPodsPerNode interface{} = dmpc["maxPodsPerNode"]
+		if v, ok := maxPodsPerNode.(string); ok {
+			maxPodsPerNode, _ = strconv.Atoi(v)
+		}
+		if err := d.Set("default_max_pods_per_node", maxPodsPerNode); err != nil {
 			return fmt.Errorf("Error setting default_max_pods_per_node: %s", err)
 		}
 	}
-	if err := d.Set("node_config", flattenNodeConfig(getMap(cluster, "nodeConfig"), d.Get("node_config"))); err != nil {
+	nodeConfig, _ := cluster["nodeConfig"].(map[string]interface{})
+	if err := d.Set("node_config", flattenNodeConfig(nodeConfig, d.Get("node_config"))); err != nil {
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("addons_config", flattenClusterAddonsConfig(getMap(cluster, "addonsConfig"))); err != nil {
+	if err := d.Set("addons_config", flattenClusterAddonsConfig(cluster["addonsConfig"])); err != nil {
 		return err
 	}
-	nps, err := flattenClusterNodePools(d, config, getSlice(cluster, "nodePools"))
+	rawNodePools, _ := cluster["nodePools"].([]interface{})
+	nps, err := flattenClusterNodePools(d, config, rawNodePools)
 	if err != nil {
 		return err
 	}
@@ -3969,153 +4149,161 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	if err := d.Set("control_plane_endpoints_config", flattenControlPlaneEndpointsConfig(getMap(cluster, "controlPlaneEndpointsConfig"))); err != nil {
+	if err := d.Set("control_plane_endpoints_config", flattenControlPlaneEndpointsConfig(cluster["controlPlaneEndpointsConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("private_cluster_config", flattenPrivateClusterConfig(getMap(cluster, "controlPlaneEndpointsConfig"), getMap(cluster, "privateClusterConfig"), networkConfig)); err != nil {
+	pcc, _ := cluster["privateClusterConfig"].(map[string]interface{})
+	if err := d.Set("private_cluster_config", flattenPrivateClusterConfig(cpec, pcc, networkConfig)); err != nil {
 		return err
 	}
 
-	if err := d.Set("vertical_pod_autoscaling", flattenVerticalPodAutoscaling(getMap(cluster, "verticalPodAutoscaling"))); err != nil {
+	if err := d.Set("vertical_pod_autoscaling", flattenVerticalPodAutoscaling(cluster["verticalPodAutoscaling"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(getMap(cluster, "workloadIdentityConfig"), d, config)); err != nil {
+	if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(cluster["workloadIdentityConfig"], d, config)); err != nil {
 		return err
 	}
 
-	if err := d.Set("identity_service_config", flattenIdentityServiceConfig(getMap(cluster, "identityServiceConfig"), d, config)); err != nil {
+	if err := d.Set("identity_service_config", flattenIdentityServiceConfig(cluster["identityServiceConfig"], d, config)); err != nil {
 		return err
 	}
 
-	if err := d.Set("service_external_ips_config", flattenServiceExternalIpsConfig(getMap(networkConfig, "serviceExternalIpsConfig"))); err != nil {
+	if err := d.Set("service_external_ips_config", flattenServiceExternalIpsConfig(networkConfig["serviceExternalIpsConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("mesh_certificates", flattenMeshCertificates(getMap(cluster, "meshCertificates"))); err != nil {
+	if err := d.Set("mesh_certificates", flattenMeshCertificates(cluster["meshCertificates"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("database_encryption", flattenDatabaseEncryption(getMap(cluster, "databaseEncryption"))); err != nil {
+	if err := d.Set("database_encryption", flattenDatabaseEncryption(cluster["databaseEncryption"])); err != nil {
 		return err
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
-	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(getMap(cluster, "podSecurityPolicyConfig"))); err != nil {
+	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster["podSecurityPolicyConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(getMap(cluster, "clusterTelemetry"))); err != nil {
+	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster["clusterTelemetry"])); err != nil {
 		return err
 	}
 {{- end }}
-	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(getMap(cluster, "podAutoscaling"))); err != nil {
+	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster["podAutoscaling"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(getMap(cluster, "secretManagerConfig"))); err != nil {
+	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster["secretManagerConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(getMap(cluster, "secretSyncConfig"))); err != nil {
+	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster["secretSyncConfig"])); err != nil {
 		return err
 	}
-	resourceLabels := flattenStringMap(cluster["resourceLabels"])
+	resourceLabels := map[string]string{}
+	if raw, ok := cluster["resourceLabels"].(map[string]interface{}); ok {
+		for k, v := range raw {
+			resourceLabels[k], _ = v.(string)
+		}
+	}
 	if err := tpgresource.SetLabels(resourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
 	if err := tpgresource.SetLabels(resourceLabels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
-	if err := d.Set("effective_labels", resourceLabels); err != nil {
+	if err := d.Set("effective_labels", cluster["resourceLabels"]); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
-	if err := d.Set("label_fingerprint", flattenString(cluster["labelFingerprint"])); err != nil {
+	if err := d.Set("label_fingerprint", cluster["labelFingerprint"]); err != nil {
 		return fmt.Errorf("Error setting label_fingerprint: %s", err)
 	}
 
-	if err := d.Set("resource_usage_export_config", flattenResourceUsageExportConfig(getMap(cluster, "resourceUsageExportConfig"))); err != nil {
+	if err := d.Set("resource_usage_export_config", flattenResourceUsageExportConfig(cluster["resourceUsageExportConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("dns_config", flattenDnsConfig(getMap(networkConfig, "dnsConfig"))); err != nil {
+	if err := d.Set("dns_config", flattenDnsConfig(networkConfig["dnsConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("gateway_api_config", flattenGatewayApiConfig(getMap(networkConfig, "gatewayApiConfig"))); err != nil {
+	if err := d.Set("gateway_api_config", flattenGatewayApiConfig(networkConfig["gatewayApiConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(getMap(networkConfig, "networkPerformanceConfig"))); err != nil {
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(networkConfig["networkPerformanceConfig"])); err != nil {
 		return err
 	}
-	if err := d.Set("fleet", flattenFleet(getMap(cluster, "fleet"))); err != nil {
+	if err := d.Set("fleet", flattenFleet(cluster["fleet"])); err != nil {
 		return err
 	}
-	if err := d.Set("user_managed_keys_config", flattenUserManagedKeysConfig(getMap(cluster, "userManagedKeysConfig"))); err != nil {
+	umkc, _ := cluster["userManagedKeysConfig"].(map[string]interface{})
+	if err := d.Set("user_managed_keys_config", flattenUserManagedKeysConfig(umkc)); err != nil {
 		return err
 	}
-	if err := d.Set("enable_k8s_beta_apis", flattenEnableK8sBetaApis(getMap(cluster, "enableK8sBetaApis"))); err != nil {
+	if err := d.Set("enable_k8s_beta_apis", flattenEnableK8sBetaApis(cluster["enableK8sBetaApis"])); err != nil {
 		return err
 	}
-	if err := d.Set("logging_config", flattenContainerClusterLoggingConfig(getMap(cluster, "loggingConfig"))); err != nil {
+	if err := d.Set("logging_config", flattenContainerClusterLoggingConfig(cluster["loggingConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("monitoring_config", flattenMonitoringConfig(getMap(cluster, "monitoringConfig"))); err != nil {
+	if err := d.Set("monitoring_config", flattenMonitoringConfig(cluster["monitoringConfig"])); err != nil {
 		return err
 	}
 
 {{ if ne $.TargetVersionName "ga" }}
-	if err := d.Set("managed_machine_learning_diagnostics_config", flattenManagedMachineLearningDiagnosticsConfig(getMap(cluster, "managedMachineLearningDiagnosticsConfig"))); err != nil {
+	if err := d.Set("managed_machine_learning_diagnostics_config", flattenManagedMachineLearningDiagnosticsConfig(cluster["managedMachineLearningDiagnosticsConfig"])); err != nil {
 		return err
 	}
 {{- end }}
 
-	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(getMap(cluster, "managedOpentelemetryConfig"))); err != nil {
+	motc, _ := cluster["managedOpentelemetryConfig"].(map[string]interface{})
+	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(motc)); err != nil {
 		return err
 	}
 
-	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(getMap(cluster, "nodePoolAutoConfig"))); err != nil {
+	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster["nodePoolAutoConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(getMap(cluster, "nodePoolDefaults"))); err != nil {
+	if err := d.Set("node_pool_defaults", flattenNodePoolDefaults(cluster["nodePoolDefaults"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("security_posture_config", flattenSecurityPostureConfig(getMap(cluster, "securityPostureConfig"))); err != nil {
+	if err := d.Set("security_posture_config", flattenSecurityPostureConfig(cluster["securityPostureConfig"])); err != nil {
 		return err
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
-	if err := d.Set("protect_config", flattenProtectConfig(getMap(cluster, "protectConfig"))); err != nil {
-		return err
-	}
-{{- end }}
-
-{{ if ne $.TargetVersionName `ga` -}}
-	if err := d.Set("workload_alts_config", flattenWorkloadAltsConfig(getMap(cluster, "workloadAltsConfig"))); err != nil {
+	if err := d.Set("protect_config", flattenProtectConfig(cluster["protectConfig"])); err != nil {
 		return err
 	}
 {{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
-	if err := d.Set("schedule_upgrade_config", flattenScheduleUpgradeConfig(getMap(cluster, "scheduleUpgradeConfig"))); err != nil {
+	if err := d.Set("workload_alts_config", flattenWorkloadAltsConfig(cluster["workloadAltsConfig"])); err != nil {
 		return err
 	}
 {{- end }}
 
-	if err := d.Set("enterprise_config", flattenEnterpriseConfig(getMap(cluster, "enterpriseConfig"))); err != nil {
+{{ if ne $.TargetVersionName `ga` -}}
+	if err := d.Set("schedule_upgrade_config", flattenScheduleUpgradeConfig(cluster["scheduleUpgradeConfig"])); err != nil {
+		return err
+	}
+{{- end }}
+
+	if err := d.Set("enterprise_config", flattenEnterpriseConfig(cluster["enterpriseConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("anonymous_authentication_config", flattenAnonymousAuthenticationConfig(getMap(cluster, "anonymousAuthenticationConfig"))); err != nil {
+	if err := d.Set("anonymous_authentication_config", flattenAnonymousAuthenticationConfig(cluster["anonymousAuthenticationConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("node_creation_config", flattenNodeCreationConfig(getMap(cluster, "nodeCreationConfig"))); err != nil {
+	if err := d.Set("node_creation_config", flattenNodeCreationConfig(cluster["nodeCreationConfig"])); err != nil {
 		return err
 	}
 
-	if err := d.Set("rbac_binding_config", flattenRBACBindingConfig(getMap(cluster, "rbacBindingConfig"))); err != nil {
+	if err := d.Set("rbac_binding_config", flattenRBACBindingConfig(cluster["rbacBindingConfig"])); err != nil {
 		return err
 	}
 
@@ -4220,7 +4408,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.HasChange("private_cluster_config.0.enable_private_endpoint") ||
 		d.HasChange("private_cluster_config.0.master_global_access_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredControlPlaneEndpointsConfig", expandControlPlaneEndpointsConfig(d))
+		if sub := expandControlPlaneEndpointsConfig(d); sub != nil {
+			update["desiredControlPlaneEndpointsConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4252,7 +4442,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("ip_allocation_policy.0.stack_type") {
 		if stackType, ok := d.GetOk("ip_allocation_policy.0.stack_type"); ok {
 			update := map[string]interface{}{}
-			setField(update, "desiredStackType", stackType.(string))
+			if v := stackType.(string); v != "" {
+				update["desiredStackType"] = v
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -4270,7 +4462,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("addons_config") {
 		if ac, ok := d.GetOk("addons_config"); ok {
 			update := map[string]interface{}{}
-			setField(update, "desiredAddonsConfig", expandClusterAddonsConfig(ac))
+			if sub := expandClusterAddonsConfig(ac); sub != nil {
+				update["desiredAddonsConfig"] = sub
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -4287,7 +4481,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("cluster_autoscaling") {
 		update := map[string]interface{}{}
-		setField(update, "desiredClusterAutoscaling", expandClusterAutoscaling(d.Get("cluster_autoscaling"), d))
+		if sub := expandClusterAutoscaling(d.Get("cluster_autoscaling"), d); sub != nil {
+			update["desiredClusterAutoscaling"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4303,7 +4499,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("dns_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredDnsConfig", expandDnsConfig(d.Get("dns_config")))
+		if sub := expandDnsConfig(d.Get("dns_config")); sub != nil {
+			update["desiredDnsConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4320,7 +4518,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("allow_net_admin") {
 		allowed := d.Get("allow_net_admin").(bool)
 		wpc := map[string]interface{}{}
-		setField(wpc, "allowNetAdmin", allowed)
+		if allowed {
+			wpc["allowNetAdmin"] = allowed
+		}
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredAutopilotWorkloadPolicyConfig": wpc,
@@ -4345,7 +4545,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		pac := map[string]interface{}{}
-		setField(pac, "allowlistPaths", allowlistPaths)
+		if len(allowlistPaths) > 0 {
+			pac["allowlistPaths"] = allowlistPaths
+		}
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredPrivilegedAdmissionConfig": pac,
@@ -4364,7 +4566,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("binary_authorization") {
 		desiredBinAuth := expandBinaryAuthorization(d.Get("binary_authorization"))
 		update := map[string]interface{}{}
-		setField(update, "desiredBinaryAuthorization", desiredBinAuth)
+		if desiredBinAuth != nil {
+			update["desiredBinaryAuthorization"] = desiredBinAuth
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4400,7 +4604,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("release_channel") {
 		desiredReleaseChannel := expandReleaseChannel(d.Get("release_channel"))
 		update := map[string]interface{}{}
-		setField(update, "desiredReleaseChannel", desiredReleaseChannel)
+		if desiredReleaseChannel != nil {
+			update["desiredReleaseChannel"] = desiredReleaseChannel
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4415,7 +4621,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("gke_auto_upgrade_config") {
 		gkeAutoUpgradeConfig := expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config"))
 		update := map[string]interface{}{}
-		setField(update, "gkeAutoUpgradeConfig", gkeAutoUpgradeConfig)
+		if gkeAutoUpgradeConfig != nil {
+			update["gkeAutoUpgradeConfig"] = gkeAutoUpgradeConfig
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4446,7 +4654,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("private_ipv6_google_access") {
 		update := map[string]interface{}{}
-		setField(update, "desiredPrivateIpv6GoogleAccess", d.Get("private_ipv6_google_access").(string))
+		if v := d.Get("private_ipv6_google_access").(string); v != "" {
+			update["desiredPrivateIpv6GoogleAccess"] = v
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4524,7 +4734,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("enable_fqdn_network_policy") {
 		enabled := d.Get("enable_fqdn_network_policy").(bool)
 		update := map[string]interface{}{}
-		setField(update, "desiredEnableFqdnNetworkPolicy", enabled)
+		if enabled {
+			update["desiredEnableFqdnNetworkPolicy"] = enabled
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4556,7 +4768,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("cost_management_config") {
 		c := d.Get("cost_management_config")
 		update := map[string]interface{}{}
-		setField(update, "desiredCostManagementConfig", expandCostManagementConfig(c))
+		if sub := expandCostManagementConfig(c); sub != nil {
+			update["desiredCostManagementConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4572,7 +4786,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("authenticator_groups_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredAuthenticatorGroupsConfig", expandContainerClusterAuthenticatorGroupsConfig(d.Get("authenticator_groups_config")))
+		if sub := expandContainerClusterAuthenticatorGroupsConfig(d.Get("authenticator_groups_config")); sub != nil {
+			update["desiredAuthenticatorGroupsConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4587,7 +4803,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("default_snat_status") {
 		update := map[string]interface{}{}
-		setField(update, "desiredDefaultSnatStatus", expandDefaultSnatStatus(d.Get("default_snat_status")))
+		if sub := expandDefaultSnatStatus(d.Get("default_snat_status")); sub != nil {
+			update["desiredDefaultSnatStatus"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4615,7 +4833,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		update := map[string]interface{}{}
-		setField(update, "desiredLocations", tpgresource.ConvertStringSet(azSet))
+		if locs := tpgresource.ConvertStringSet(azSet); len(locs) > 0 {
+			update["desiredLocations"] = locs
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4631,7 +4851,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		if !azSet.Equal(azSetNew) {
 			update = map[string]interface{}{}
-			setField(update, "desiredLocations", tpgresource.ConvertStringSet(azSetNew))
+			if locs := tpgresource.ConvertStringSet(azSetNew); len(locs) > 0 {
+				update["desiredLocations"] = locs
+			}
 			req = map[string]interface{}{
 				"update": update,
 			}
@@ -4678,8 +4900,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("desired_emulated_version") {
 		emulatedVersion := d.Get("desired_emulated_version").(string)
 		if emulatedVersion != "" {
-			update := map[string]interface{}{}
-			setField(update, "desiredEmulatedVersion", emulatedVersion)
+			update := map[string]interface{}{
+				"desiredEmulatedVersion": emulatedVersion,
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -4698,8 +4921,12 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		monitoring := d.Get("monitoring_service").(string)
 
 		update := map[string]interface{}{}
-		setField(update, "desiredMonitoringService", monitoring)
-		setField(update, "desiredLoggingService", logging)
+		if monitoring != "" {
+			update["desiredMonitoringService"] = monitoring
+		}
+		if logging != "" {
+			update["desiredLoggingService"] = logging
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4715,7 +4942,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("network_policy") {
 		np := d.Get("network_policy")
 		req := map[string]interface{}{}
-		setField(req, "networkPolicy", expandNetworkPolicy(np))
+		if sub := expandNetworkPolicy(np); sub != nil {
+			req["networkPolicy"] = sub
+		}
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
@@ -4758,7 +4987,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				names = append(names, name.(string))
 			}
 			additional_config = map[string]interface{}{}
-			setField(additional_config, "podRangeNames", names)
+			if len(names) > 0 {
+				additional_config["podRangeNames"] = names
+			}
 		}
 		if removed_names.Len() > 0 {
 			var names []string
@@ -4766,11 +4997,17 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				names = append(names, name.(string))
 			}
 			removed_config = map[string]interface{}{}
-			setField(removed_config, "podRangeNames", names)
+			if len(names) > 0 {
+				removed_config["podRangeNames"] = names
+			}
 		}
 		update := map[string]interface{}{}
-		setField(update, "additionalPodRangesConfig", additional_config)
-		setField(update, "removedAdditionalPodRangesConfig", removed_config)
+		if additional_config != nil {
+			update["additionalPodRangesConfig"] = additional_config
+		}
+		if removed_config != nil {
+			update["removedAdditionalPodRangesConfig"] = removed_config
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4792,7 +5029,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		desiredAirc := map[string]interface{}{}
-		setField(desiredAirc, "additionalIpRangesConfigs", aircs)
+		if len(aircs) > 0 {
+			desiredAirc["additionalIpRangesConfigs"] = aircs
+		}
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredAdditionalIpRangesConfig": desiredAirc,
@@ -4810,7 +5049,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("ip_allocation_policy.0.auto_ipam_config") {
 		autoIpam := map[string]interface{}{}
-		setField(autoIpam, "enabled", d.Get("ip_allocation_policy.0.auto_ipam_config.0.enabled").(bool))
+		if v := d.Get("ip_allocation_policy.0.auto_ipam_config.0.enabled").(bool); v {
+			autoIpam["enabled"] = v
+		}
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredAutoIpamConfig": autoIpam,
@@ -4827,7 +5068,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("ip_allocation_policy.0.network_tier_config.0.network_tier") {
 		ntc := map[string]interface{}{}
-		setField(ntc, "networkTier", d.Get("ip_allocation_policy.0.network_tier_config.0.network_tier").(string))
+		if v := d.Get("ip_allocation_policy.0.network_tier_config.0.network_tier").(string); v != "" {
+			ntc["networkTier"] = v
+		}
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredNetworkTierConfig": ntc,
@@ -4872,8 +5115,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		// Only upgrade the master if the current version is lower than the desired version
 		if cur.LessThan(des) {
-			update := map[string]interface{}{}
-			setField(update, "desiredMasterVersion", ver)
+			update := map[string]interface{}{
+				"desiredMasterVersion": ver,
+			}
 
 			if r, ok := d.GetOk("rollback_safe_upgrade"); ok {
 				rls := r.([]interface{})
@@ -4910,8 +5154,10 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				if d.Get(key+"name").(string) == "default-pool" {
 					desiredNodeVersion := d.Get("node_version").(string)
 					update := map[string]interface{}{}
-					setField(update, "desiredNodeVersion", desiredNodeVersion)
-					setField(update, "desiredNodePoolId", "default-pool")
+					if desiredNodeVersion != "" {
+						update["desiredNodeVersion"] = desiredNodeVersion
+					}
+					update["desiredNodePoolId"] = "default-pool"
 					req := map[string]interface{}{
 						"update": update,
 					}
@@ -4935,7 +5181,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	// Set maintenance policy after upgrade so validation will use the new versions.
 	if d.HasChange("maintenance_policy") {
 		req := map[string]interface{}{}
-		setField(req, "maintenancePolicy", expandMaintenancePolicy(d, meta))
+		if sub := expandMaintenancePolicy(d, meta); sub != nil {
+			req["maintenancePolicy"] = sub
+		}
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
@@ -4977,7 +5225,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("notification_config") {
 		desiredNotif := expandNotificationConfig(d.Get("notification_config"))
 		update := map[string]interface{}{}
-		setField(update, "desiredNotificationConfig", desiredNotif)
+		if desiredNotif != nil {
+			update["desiredNotificationConfig"] = desiredNotif
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -4993,7 +5243,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("vertical_pod_autoscaling") {
 		if ac, ok := d.GetOk("vertical_pod_autoscaling"); ok {
 			update := map[string]interface{}{}
-			setField(update, "desiredVerticalPodAutoscaling", expandVerticalPodAutoscaling(ac))
+			if sub := expandVerticalPodAutoscaling(ac); sub != nil {
+				update["desiredVerticalPodAutoscaling"] = sub
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -5011,7 +5263,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("service_external_ips_config") {
 		c := d.Get("service_external_ips_config")
 		update := map[string]interface{}{}
-		setField(update, "desiredServiceExternalIpsConfig", expandServiceExternalIpsConfig(c))
+		if sub := expandServiceExternalIpsConfig(c); sub != nil {
+			update["desiredServiceExternalIpsConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5026,7 +5280,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("mesh_certificates") {
 		c := d.Get("mesh_certificates")
 		update := map[string]interface{}{}
-		setField(update, "desiredMeshCertificates", expandMeshCertificates(c))
+		if sub := expandMeshCertificates(c); sub != nil {
+			update["desiredMeshCertificates"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5041,7 +5297,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("database_encryption") {
 		c := d.Get("database_encryption")
 		update := map[string]interface{}{}
-		setField(update, "desiredDatabaseEncryption", expandDatabaseEncryption(c))
+		if sub := expandDatabaseEncryption(c); sub != nil {
+			update["desiredDatabaseEncryption"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5057,7 +5315,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("pod_security_policy_config") {
 		c := d.Get("pod_security_policy_config")
 		update := map[string]interface{}{}
-		setField(update, "desiredPodSecurityPolicyConfig", expandPodSecurityPolicyConfig(c))
+		if sub := expandPodSecurityPolicyConfig(c); sub != nil {
+			update["desiredPodSecurityPolicyConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5073,7 +5333,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("pod_autoscaling") {
 		c := d.Get("pod_autoscaling")
 		update := map[string]interface{}{}
-		setField(update, "desiredPodAutoscaling", expandPodAutoscaling(c))
+		if sub := expandPodAutoscaling(c); sub != nil {
+			update["desiredPodAutoscaling"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5088,7 +5350,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("secret_manager_config") {
 		c := d.Get("secret_manager_config")
 		update := map[string]interface{}{}
-		setField(update, "desiredSecretManagerConfig", expandSecretManagerConfig(c))
+		if sub := expandSecretManagerConfig(c); sub != nil {
+			update["desiredSecretManagerConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5105,7 +5369,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if c, ok := d.GetOk("secret_sync_config"); !ok {
 			update["desiredSecretSyncConfig"] = map[string]interface{}{}
 		} else {
-			setField(update, "desiredSecretSyncConfig", expandSecretSyncConfig(c))
+			if sub := expandSecretSyncConfig(c); sub != nil {
+				update["desiredSecretSyncConfig"] = sub
+			}
 		}
 		req := map[string]interface{}{
 			"update": update,
@@ -5127,7 +5393,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				"workloadPool": "",
 			}
 		} else {
-			setField(update, "desiredWorkloadIdentityConfig", expandWorkloadIdentityConfig(v))
+			if sub := expandWorkloadIdentityConfig(v); sub != nil {
+				update["desiredWorkloadIdentityConfig"] = sub
+			}
 		}
 		req := map[string]interface{}{
 			"update": update,
@@ -5147,7 +5415,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if v, ok := d.GetOk("identity_service_config"); !ok {
 			update["desiredIdentityServiceConfig"] = map[string]interface{}{}
 		} else {
-			setField(update, "desiredIdentityServiceConfig", expandIdentityServiceConfig(v))
+			if sub := expandIdentityServiceConfig(v); sub != nil {
+				update["desiredIdentityServiceConfig"] = sub
+			}
 		}
 		req := map[string]interface{}{
 			"update": update,
@@ -5164,7 +5434,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("logging_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredLoggingConfig", expandContainerClusterLoggingConfig(d.Get("logging_config")))
+		if sub := expandContainerClusterLoggingConfig(d.Get("logging_config")); sub != nil {
+			update["desiredLoggingConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5179,7 +5451,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("monitoring_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredMonitoringConfig", expandMonitoringConfig(d.Get("monitoring_config")))
+		if sub := expandMonitoringConfig(d.Get("monitoring_config")); sub != nil {
+			update["desiredMonitoringConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5195,7 +5469,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 {{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("managed_machine_learning_diagnostics_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredManagedMachineLearningDiagnosticsConfig", expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")))
+		if sub := expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")); sub != nil {
+			update["desiredManagedMachineLearningDiagnosticsConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5211,7 +5487,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("managed_opentelemetry_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredManagedOpentelemetryConfig", expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")))
+		if sub := expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")); sub != nil {
+			update["desiredManagedOpentelemetryConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5228,8 +5506,12 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		resourceLabels := d.Get("effective_labels").(map[string]interface{})
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := map[string]interface{}{}
-		setField(req, "resourceLabels", tpgresource.ConvertStringMap(resourceLabels))
-		setField(req, "labelFingerprint", labelFingerprint)
+		if rl := tpgresource.ConvertStringMap(resourceLabels); len(rl) > 0 {
+			req["resourceLabels"] = rl
+		}
+		if labelFingerprint != "" {
+			req["labelFingerprint"] = labelFingerprint
+		}
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
 			labelsUrl := fmt.Sprintf("%s%s:setResourceLabels", transport_tpg.BaseUrl(Product, config), name)
@@ -5277,7 +5559,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("resource_usage_export_config") {
 		c := d.Get("resource_usage_export_config")
 		update := map[string]interface{}{}
-		setField(update, "desiredResourceUsageExportConfig", expandResourceUsageExportConfig(c))
+		if sub := expandResourceUsageExportConfig(c); sub != nil {
+			update["desiredResourceUsageExportConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5292,7 +5576,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("network_performance_config") {
 		if npc, ok := d.GetOk("network_performance_config"); ok {
 			update := map[string]interface{}{}
-			setField(update, "desiredNetworkPerformanceConfig", expandNetworkPerformanceConfig(npc))
+			if sub := expandNetworkPerformanceConfig(npc); sub != nil {
+				update["desiredNetworkPerformanceConfig"] = sub
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -5310,7 +5596,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("gateway_api_config") {
 		if gac, ok := d.GetOk("gateway_api_config"); ok {
 			update := map[string]interface{}{}
-			setField(update, "desiredGatewayApiConfig", expandGatewayApiConfig(gac))
+			if sub := expandGatewayApiConfig(gac); sub != nil {
+				update["desiredGatewayApiConfig"] = sub
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -5333,7 +5621,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if v, ok := d.GetOk("fleet"); !ok {
 			update["desiredFleet"] = map[string]interface{}{}
 		} else {
-			setField(update, "desiredFleet", expandFleet(v))
+			if sub := expandFleet(v); sub != nil {
+				update["desiredFleet"] = sub
+			}
 		}
 		req := map[string]interface{}{
 			"update": update,
@@ -5366,15 +5656,19 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			// To avoid an already enabled Beta APIs error, we need to deduplicate the requested APIs
 			// with those that are already enabled.
 			var enabledAPIs []string
-			if k8sBeta := getMap(cluster, "enableK8sBetaApis"); k8sBeta != nil {
-				if apis := flattenStringSlice(k8sBeta["enabledApis"]); len(apis) > 0 {
-					enabledAPIs = apis
+			if k8sBeta, ok := cluster["enableK8sBetaApis"].(map[string]interface{}); ok && k8sBeta != nil {
+				if rawApis, ok := k8sBeta["enabledApis"].([]interface{}); ok {
+					if apis := tpgresource.ConvertStringArr(rawApis); len(apis) > 0 {
+						enabledAPIs = apis
+					}
 				}
 			}
 			enableK8sBetaAPIs := expandEnableK8sBetaApis(v, enabledAPIs)
 
 			update := map[string]interface{}{}
-			setField(update, "desiredK8sBetaApis", enableK8sBetaAPIs)
+			if enableK8sBetaAPIs != nil {
+				update["desiredK8sBetaApis"] = enableK8sBetaAPIs
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -5414,7 +5708,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.logging_variant"); ok {
 			loggingVariant := v.(string)
 			vc := map[string]interface{}{}
-			setField(vc, "variant", loggingVariant)
+			if loggingVariant != "" {
+				vc["variant"] = loggingVariant
+			}
 			req := map[string]interface{}{
 				"update": map[string]interface{}{
 					"desiredNodePoolLoggingConfig": map[string]interface{}{
@@ -5437,7 +5733,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.gcfs_config"); ok {
 			gcfsConfig := v.([]interface{})[0].(map[string]interface{})
 			gcfs := map[string]interface{}{}
-			setField(gcfs, "enabled", gcfsConfig["enabled"].(bool))
+			if enabled, ok := gcfsConfig["enabled"].(bool); ok && enabled {
+				gcfs["enabled"] = enabled
+			}
 			req := map[string]interface{}{
 				"update": map[string]interface{}{
 					"desiredGcfsConfig": gcfs,
@@ -5457,7 +5755,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("security_posture_config") {
 		desiredSpc := expandSecurityPostureConfig(d.Get("security_posture_config"))
 		update := map[string]interface{}{}
-		setField(update, "desiredSecurityPostureConfig", desiredSpc)
+		if desiredSpc != nil {
+			update["desiredSecurityPostureConfig"] = desiredSpc
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5473,7 +5773,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.containerd_config"); ok {
 			desiredCd := expandContainerdConfig(v)
 			update := map[string]interface{}{}
-			setField(update, "desiredContainerdConfig", desiredCd)
+			if desiredCd != nil {
+				update["desiredContainerdConfig"] = desiredCd
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -5487,9 +5789,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("node_pool_auto_config.0.node_kubelet_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredNodePoolAutoConfigKubeletConfig", expandKubeletConfig(
-			d.Get("node_pool_auto_config.0.node_kubelet_config"),
-		))
+		if sub := expandKubeletConfig(d.Get("node_pool_auto_config.0.node_kubelet_config")); sub != nil {
+			update["desiredNodePoolAutoConfigKubeletConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5527,7 +5829,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		rmtags := d.Get("node_pool_auto_config.0.resource_manager_tags")
 
 		update := map[string]interface{}{}
-		setField(update, "desiredNodePoolAutoConfigResourceManagerTags", expandResourceManagerTags(rmtags))
+		if sub := expandResourceManagerTags(rmtags); sub != nil {
+			update["desiredNodePoolAutoConfigResourceManagerTags"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5543,9 +5847,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("node_pool_auto_config.0.linux_node_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredNodePoolAutoConfigLinuxNodeConfig", expandLinuxNodeConfig(
-			d.Get("node_pool_auto_config.0.linux_node_config"),
-		))
+		if sub := expandLinuxNodeConfig(d.Get("node_pool_auto_config.0.linux_node_config")); sub != nil {
+			update["desiredNodePoolAutoConfigLinuxNodeConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5561,7 +5865,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("enterprise_config") && d.HasChange("enterprise_config.0.desired_tier") {
 		dec := map[string]interface{}{}
-		setField(dec, "desiredTier", d.Get("enterprise_config.0.desired_tier").(string))
+		if dt := d.Get("enterprise_config.0.desired_tier").(string); dt != "" {
+			dec["desiredTier"] = dt
+		}
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredEnterpriseConfig": dec,
@@ -5578,9 +5884,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("anonymous_authentication_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredAnonymousAuthenticationConfig", expandAnonymousAuthenticationConfig(
-			d.Get("anonymous_authentication_config"),
-		))
+		if sub := expandAnonymousAuthenticationConfig(d.Get("anonymous_authentication_config")); sub != nil {
+			update["desiredAnonymousAuthenticationConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5593,9 +5899,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("node_creation_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredNodeCreationConfig", expandNodeCreationConfig(
-			d.Get("node_creation_config"),
-		))
+		if sub := expandNodeCreationConfig(d.Get("node_creation_config")); sub != nil {
+			update["desiredNodeCreationConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5608,7 +5914,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("rbac_binding_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredRbacBindingConfig", expandRBACBindingConfig(d.Get("rbac_binding_config")))
+		if sub := expandRBACBindingConfig(d.Get("rbac_binding_config")); sub != nil {
+			update["desiredRbacBindingConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5625,7 +5933,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("autopilot_cluster_policy_config") {
 		if v, ok := d.GetOk("autopilot_cluster_policy_config"); ok {
 			update := map[string]interface{}{}
-			setField(update, "desiredAutopilotClusterPolicyConfig", expandAutopilotClusterPolicyConfig(v))
+			if sub := expandAutopilotClusterPolicyConfig(v); sub != nil {
+				update["desiredAutopilotClusterPolicyConfig"] = sub
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -5643,7 +5953,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("cluster_telemetry") {
 		desiredCt := expandClusterTelemetry(d.Get("cluster_telemetry"))
 		update := map[string]interface{}{}
-		setField(update, "desiredClusterTelemetry", desiredCt)
+		if desiredCt != nil {
+			update["desiredClusterTelemetry"] = desiredCt
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5661,7 +5973,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("protect_config") {
 		desiredPc := expandProtectConfig(d.Get("protect_config"))
 		update := map[string]interface{}{}
-		setField(update, "desiredProtectConfig", desiredPc)
+		if desiredPc != nil {
+			update["desiredProtectConfig"] = desiredPc
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5676,7 +5990,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 {{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("workload_alts_config") {
 		update := map[string]interface{}{}
-		setField(update, "desiredWorkloadAltsConfig", expandWorkloadAltsConfig(d.Get("workload_alts_config")))
+		if sub := expandWorkloadAltsConfig(d.Get("workload_alts_config")); sub != nil {
+			update["desiredWorkloadAltsConfig"] = sub
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5697,8 +6013,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				"enabled": false,
 			}
 		}
-		update := map[string]interface{}{}
-		setField(update, "desiredScheduleUpgradeConfig", suc)
+		update := map[string]interface{}{
+			"desiredScheduleUpgradeConfig": suc,
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5715,7 +6032,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("user_managed_keys_config") {
 		desiredUmkc := expandUserManagedKeysConfig(d.Get("user_managed_keys_config"))
 		update := map[string]interface{}{}
-		setField(update, "desiredUserManagedKeysConfig", desiredUmkc)
+		if desiredUmkc != nil {
+			update["desiredUserManagedKeysConfig"] = desiredUmkc
+		}
 		req := map[string]interface{}{
 			"update": update,
 		}
@@ -5837,8 +6156,8 @@ func containerClusterAwaitRestingState(config *transport_tpg.Config, project, lo
 			return retry.NonRetryableError(gErr)
 		}
 
-		state = flattenString(cluster["status"])
-		statusMessage := flattenString(cluster["statusMessage"])
+		state, _ = cluster["status"].(string)
+		statusMessage, _ := cluster["statusMessage"].(string)
 
 		switch stateType := containerClusterRestingStates[state]; stateType {
 		case ReadyState:
@@ -6035,7 +6354,9 @@ func expandClusterAddonsConfig(configured interface{}) map[string]interface{} {
 		ic := map[string]interface{}{
 			"disabled": addon["disabled"].(bool),
 		}
-		setField(ic, "auth", addon["auth"].(string))
+		if auth, ok := addon["auth"].(string); ok && auth != "" {
+			ic["auth"] = auth
+		}
 		ac["istioConfig"] = ic
 	}
 
@@ -6086,9 +6407,15 @@ func expandAdditionalIpRangesConfigs(configured interface{}, d *schema.ResourceD
 			return nil, err
 		}
 		item := map[string]interface{}{}
-		setField(item, "subnetwork", subnetwork.RelativeLink())
-		setField(item, "podIpv4RangeNames", expandPodIpv4RangeNames(config["pod_ipv4_range_names"]))
-		setField(item, "status", config["status"].(string))
+		if rel := subnetwork.RelativeLink(); rel != "" {
+			item["subnetwork"] = rel
+		}
+		if prn := expandPodIpv4RangeNames(config["pod_ipv4_range_names"]); len(prn) > 0 {
+			item["podIpv4RangeNames"] = prn
+		}
+		if status, ok := config["status"].(string); ok && status != "" {
+			item["status"] = status
+		}
 		additionalIpRangesConfig = append(additionalIpRangesConfig, item)
 	}
 
@@ -6124,15 +6451,33 @@ func expandIPAllocationPolicy(configured interface{}, d *schema.ResourceData, ne
 	res := map[string]interface{}{
 		"useIpAliases": networkingMode == "VPC_NATIVE" || networkingMode == "",
 	}
-	setField(res, "clusterIpv4CidrBlock", config["cluster_ipv4_cidr_block"].(string))
-	setField(res, "servicesIpv4CidrBlock", config["services_ipv4_cidr_block"].(string))
-	setField(res, "clusterSecondaryRangeName", config["cluster_secondary_range_name"].(string))
-	setField(res, "servicesSecondaryRangeName", config["services_secondary_range_name"].(string))
-	setField(res, "useRoutes", networkingMode == "ROUTES")
-	setField(res, "stackType", stackType)
-	setField(res, "podCidrOverprovisionConfig", expandPodCidrOverprovisionConfig(config["pod_cidr_overprovision_config"]))
-	setField(res, "autoIpamConfig", expandAutoIpamConfig(config["auto_ipam_config"]))
-	setField(res, "networkTierConfig", expandNetworkTierConfig(config["network_tier_config"]))
+	if v, ok := config["cluster_ipv4_cidr_block"].(string); ok && v != "" {
+		res["clusterIpv4CidrBlock"] = v
+	}
+	if v, ok := config["services_ipv4_cidr_block"].(string); ok && v != "" {
+		res["servicesIpv4CidrBlock"] = v
+	}
+	if v, ok := config["cluster_secondary_range_name"].(string); ok && v != "" {
+		res["clusterSecondaryRangeName"] = v
+	}
+	if v, ok := config["services_secondary_range_name"].(string); ok && v != "" {
+		res["servicesSecondaryRangeName"] = v
+	}
+	if networkingMode == "ROUTES" {
+		res["useRoutes"] = true
+	}
+	if stackType != "" {
+		res["stackType"] = stackType
+	}
+	if sub := expandPodCidrOverprovisionConfig(config["pod_cidr_overprovision_config"]); sub != nil {
+		res["podCidrOverprovisionConfig"] = sub
+	}
+	if sub := expandAutoIpamConfig(config["auto_ipam_config"]); sub != nil {
+		res["autoIpamConfig"] = sub
+	}
+	if sub := expandNetworkTierConfig(config["network_tier_config"]); sub != nil {
+		res["networkTierConfig"] = sub
+	}
 	return res, additionalIpRangesConfigs, nil
 }
 
@@ -6144,7 +6489,9 @@ func expandNetworkTierConfig(configured interface{}) map[string]interface{} {
 
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "networkTier", config["network_tier"].(string))
+	if v, ok := config["network_tier"].(string); ok && v != "" {
+		res["networkTier"] = v
+	}
 	return res
 }
 
@@ -6155,7 +6502,9 @@ func expandAutoIpamConfig(configured interface{}) map[string]interface{} {
 	}
 
 	res := map[string]interface{}{}
-	setField(res, "enabled", l[0].(map[string]interface{})["enabled"].(bool))
+	if v, ok := l[0].(map[string]interface{})["enabled"].(bool); ok && v {
+		res["enabled"] = v
+	}
 	return res
 }
 
@@ -6183,17 +6532,17 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 	resourceVersion := ""
 	exclusions := make(map[string]interface{})
 	if cluster != nil {
-		if mp := getMap(cluster, "maintenancePolicy"); mp != nil {
+		if mp, ok := cluster["maintenancePolicy"].(map[string]interface{}); ok && mp != nil {
 			// If the cluster doesn't exist or if there is a read error of any kind, we will pass in an empty
 			// resourceVersion.  If there happens to be a change to maintenance policy, we will fail at that
 			// point.  This is a compromise between code cleanliness and a slightly worse user experience in
 			// an unlikely error case - we choose code cleanliness.
-			resourceVersion = flattenString(mp["resourceVersion"])
+			resourceVersion, _ = mp["resourceVersion"].(string)
 
 			// Having a MaintenancePolicy doesn't mean that you need MaintenanceExclusions, but if they were set,
 			// they need to be assigned to exclusions.
-			if win := getMap(mp, "window"); win != nil {
-				if mex := getMap(win, "maintenanceExclusions"); mex != nil {
+			if win, ok := mp["window"].(map[string]interface{}); ok && win != nil {
+				if mex, ok := win["maintenanceExclusions"].(map[string]interface{}); ok && mex != nil {
 					for k, v := range mex {
 						exclusions[k] = v
 					}
@@ -6206,11 +6555,15 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		window := map[string]interface{}{}
-		setMapField(window, "maintenanceExclusions", exclusions)
+		if len(exclusions) > 0 {
+			window["maintenanceExclusions"] = exclusions
+		}
 		res := map[string]interface{}{
 			"window": window,
 		}
-		setField(res, "resourceVersion", resourceVersion)
+		if resourceVersion != "" {
+			res["resourceVersion"] = resourceVersion
+		}
 		return res
 	}
 	maintenancePolicy := l[0].(map[string]interface{})
@@ -6222,8 +6575,12 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 		for _, me := range maintenanceExclusions.(*schema.Set).List() {
 			exclusion := me.(map[string]interface{})
 			mex := map[string]interface{}{}
-			setField(mex, "startTime", exclusion["start_time"].(string))
-			setField(mex, "endTime", exclusion["end_time"].(string))
+			if v, ok := exclusion["start_time"].(string); ok && v != "" {
+				mex["startTime"] = v
+			}
+			if v, ok := exclusion["end_time"].(string); ok && v != "" {
+				mex["endTime"] = v
+			}
 			if exclusionOptions, ok := exclusion["exclusion_options"]; ok && len(exclusionOptions.([]interface{})) > 0 {
 				meo := exclusionOptions.([]interface{})[0].(map[string]interface{})
 				meoMap := map[string]interface{}{
@@ -6243,11 +6600,11 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 	if disruptionBudget, ok := maintenancePolicy["disruption_budget"]; ok && len(disruptionBudget.([]interface{})) > 0 {
 		db := disruptionBudget.([]interface{})[0].(map[string]interface{})
 		budget = map[string]interface{}{}
-		if _, ok := db["minor_version_disruption_interval"]; ok {
-			setField(budget, "minorVersionDisruptionInterval", db["minor_version_disruption_interval"].(string))
+		if v, ok := db["minor_version_disruption_interval"].(string); ok && v != "" {
+			budget["minorVersionDisruptionInterval"] = v
 		}
-		if _, ok := db["patch_version_disruption_interval"]; ok {
-			setField(budget, "patchVersionDisruptionInterval", db["patch_version_disruption_interval"].(string))
+		if v, ok := db["patch_version_disruption_interval"].(string); ok && v != "" {
+			budget["patchVersionDisruptionInterval"] = v
 		}
 	}
 
@@ -6255,36 +6612,56 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 		dmw := dailyMaintenanceWindow.([]interface{})[0].(map[string]interface{})
 		startTime := dmw["start_time"].(string)
 		dmwMap := map[string]interface{}{}
-		setField(dmwMap, "startTime", startTime)
+		if startTime != "" {
+			dmwMap["startTime"] = startTime
+		}
 		window := map[string]interface{}{
 			"dailyMaintenanceWindow": dmwMap,
 		}
-		setMapField(window, "maintenanceExclusions", exclusions)
+		if len(exclusions) > 0 {
+			window["maintenanceExclusions"] = exclusions
+		}
 		res := map[string]interface{}{
 			"window": window,
 		}
-		setField(res, "disruptionBudget", budget)
-		setField(res, "resourceVersion", resourceVersion)
+		if budget != nil {
+			res["disruptionBudget"] = budget
+		}
+		if resourceVersion != "" {
+			res["resourceVersion"] = resourceVersion
+		}
 		return res
 	}
 	if recurringWindow, ok := maintenancePolicy["recurring_window"]; ok && len(recurringWindow.([]interface{})) > 0 {
 		rw := recurringWindow.([]interface{})[0].(map[string]interface{})
 		tw := map[string]interface{}{}
-		setField(tw, "startTime", rw["start_time"].(string))
-		setField(tw, "endTime", rw["end_time"].(string))
+		if v, ok := rw["start_time"].(string); ok && v != "" {
+			tw["startTime"] = v
+		}
+		if v, ok := rw["end_time"].(string); ok && v != "" {
+			tw["endTime"] = v
+		}
 		rwMap := map[string]interface{}{
 			"window": tw,
 		}
-		setField(rwMap, "recurrence", rw["recurrence"].(string))
+		if v, ok := rw["recurrence"].(string); ok && v != "" {
+			rwMap["recurrence"] = v
+		}
 		window := map[string]interface{}{
 			"recurringWindow": rwMap,
 		}
-		setMapField(window, "maintenanceExclusions", exclusions)
+		if len(exclusions) > 0 {
+			window["maintenanceExclusions"] = exclusions
+		}
 		res := map[string]interface{}{
 			"window": window,
 		}
-		setField(res, "disruptionBudget", budget)
-		setField(res, "resourceVersion", resourceVersion)
+		if budget != nil {
+			res["disruptionBudget"] = budget
+		}
+		if resourceVersion != "" {
+			res["resourceVersion"] = resourceVersion
+		}
 		return res
 	}
 	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
@@ -6293,33 +6670,51 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 
 		wstCfg := rmw["window_start_time"].([]interface{})[0].(map[string]interface{})
 		wst := map[string]interface{}{}
-		setField(wst, "hours", int64(wstCfg["hours"].(int)))
-		setField(wst, "minutes", int64(wstCfg["minutes"].(int)))
-		setField(wst, "seconds", int64(wstCfg["seconds"].(int)))
+		if v, ok := wstCfg["hours"].(int); ok && v != 0 {
+			wst["hours"] = v
+		}
+		if v, ok := wstCfg["minutes"].(int); ok && v != 0 {
+			wst["minutes"] = v
+		}
+		if v, ok := wstCfg["seconds"].(int); ok && v != 0 {
+			wst["seconds"] = v
+		}
 
 		rmwMap := map[string]interface{}{
 			"windowStartTime": wst,
+			"windowDuration":  fmt.Sprintf("%ds", int(duration.Seconds())),
 		}
-		setField(rmwMap, "windowDuration", fmt.Sprintf("%ds", int(duration.Seconds())))
-		setField(rmwMap, "recurrence", rmw["recurrence"].(string))
+		if v, ok := rmw["recurrence"].(string); ok && v != "" {
+			rmwMap["recurrence"] = v
+		}
 
 		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
 			duCfg := rmw["delay_until"].([]interface{})[0].(map[string]interface{})
 			du := map[string]interface{}{}
-			setField(du, "year", int64(duCfg["year"].(int)))
-			setField(du, "month", int64(duCfg["month"].(int)))
-			setField(du, "day", int64(duCfg["day"].(int)))
+			if v, ok := duCfg["year"].(int); ok && v != 0 {
+				du["year"] = v
+			}
+			if v, ok := duCfg["month"].(int); ok && v != 0 {
+				du["month"] = v
+			}
+			if v, ok := duCfg["day"].(int); ok && v != 0 {
+				du["day"] = v
+			}
 			rmwMap["delayUntil"] = du
 		}
 
 		window := map[string]interface{}{
 			"recurringMaintenanceWindow": rmwMap,
 		}
-		setMapField(window, "maintenanceExclusions", exclusions)
+		if len(exclusions) > 0 {
+			window["maintenanceExclusions"] = exclusions
+		}
 		policy := map[string]interface{}{
 			"window": window,
 		}
-		setField(policy, "resourceVersion", resourceVersion)
+		if resourceVersion != "" {
+			policy["resourceVersion"] = resourceVersion
+		}
 		return policy
 	}
 	return nil
@@ -6349,10 +6744,16 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) ma
 			for _, v := range lmts {
 				limit := v.(map[string]interface{})
 				rl := map[string]interface{}{}
-				setField(rl, "resourceType", limit["resource_type"].(string))
+				if rt, ok := limit["resource_type"].(string); ok && rt != "" {
+					rl["resourceType"] = rt
+				}
 				// Here we're relying on *not* setting ForceSendFields for 0-values.
-				setStringIntField(rl, "minimum", int64(limit["minimum"].(int)))
-				setStringIntField(rl, "maximum", int64(limit["maximum"].(int)))
+				if v, ok := limit["minimum"].(int); ok && v != 0 {
+					rl["minimum"] = strconv.Itoa(v)
+				}
+				if v, ok := limit["maximum"].(int); ok && v != 0 {
+					rl["maximum"] = strconv.Itoa(v)
+				}
 				resourceLimits = append(resourceLimits, rl)
 			}
 		}
@@ -6360,19 +6761,33 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) ma
 	var defaultCCConfig map[string]interface{}
 	if defaultCCEnabled, ok := config["default_compute_class_enabled"]; ok {
 		defaultCCConfig = map[string]interface{}{}
-		setField(defaultCCConfig, "enabled", defaultCCEnabled.(bool))
+		if v, ok := defaultCCEnabled.(bool); ok && v {
+			defaultCCConfig["enabled"] = v
+		}
 	}
 	var defaults map[string]interface{}
 	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults") {
 		defaults = expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d)
 	}
 	res := map[string]interface{}{}
-	setField(res, "enableNodeAutoprovisioning", config["enabled"].(bool))
-	setField(res, "resourceLimits", resourceLimits)
-	setField(res, "defaultComputeClassConfig", defaultCCConfig)
-	setField(res, "autoscalingProfile", config["autoscaling_profile"].(string))
-	setField(res, "autoprovisioningNodePoolDefaults", defaults)
-	setField(res, "autoprovisioningLocations", tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})))
+	if v, ok := config["enabled"].(bool); ok && v {
+		res["enableNodeAutoprovisioning"] = v
+	}
+	if len(resourceLimits) > 0 {
+		res["resourceLimits"] = resourceLimits
+	}
+	if defaultCCConfig != nil {
+		res["defaultComputeClassConfig"] = defaultCCConfig
+	}
+	if v, ok := config["autoscaling_profile"].(string); ok && v != "" {
+		res["autoscalingProfile"] = v
+	}
+	if defaults != nil {
+		res["autoprovisioningNodePoolDefaults"] = defaults
+	}
+	if locs := tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})); len(locs) > 0 {
+		res["autoprovisioningLocations"] = locs
+	}
 	return res
 }
 
@@ -6392,20 +6807,40 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 		upgradeSettings = expandUpgradeSettings(config["upgrade_settings"], d)
 	}
 	npd := map[string]interface{}{}
-	setField(npd, "oauthScopes", tpgresource.ConvertStringArr(config["oauth_scopes"].([]interface{})))
-	setField(npd, "serviceAccount", config["service_account"].(string))
-	setField(npd, "diskSizeGb", int64(config["disk_size"].(int)))
-	setField(npd, "diskType", config["disk_type"].(string))
-	setField(npd, "imageType", config["image_type"].(string))
-	setField(npd, "bootDiskKmsKey", config["boot_disk_kms_key"].(string))
-	setField(npd, "management", management)
-	setField(npd, "upgradeSettings", upgradeSettings)
+	if scopes := tpgresource.ConvertStringArr(config["oauth_scopes"].([]interface{})); len(scopes) > 0 {
+		npd["oauthScopes"] = scopes
+	}
+	if v, ok := config["service_account"].(string); ok && v != "" {
+		npd["serviceAccount"] = v
+	}
+	if v, ok := config["disk_size"].(int); ok && v != 0 {
+		npd["diskSizeGb"] = v
+	}
+	if v, ok := config["disk_type"].(string); ok && v != "" {
+		npd["diskType"] = v
+	}
+	if v, ok := config["image_type"].(string); ok && v != "" {
+		npd["imageType"] = v
+	}
+	if v, ok := config["boot_disk_kms_key"].(string); ok && v != "" {
+		npd["bootDiskKmsKey"] = v
+	}
+	if management != nil {
+		npd["management"] = management
+	}
+	if upgradeSettings != nil {
+		npd["upgradeSettings"] = upgradeSettings
+	}
 
 	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		sic := map[string]interface{}{}
-		setField(sic, "enableSecureBoot", conf["enable_secure_boot"].(bool))
-		setField(sic, "enableIntegrityMonitoring", conf["enable_integrity_monitoring"].(bool))
+		if v, ok := conf["enable_secure_boot"].(bool); ok && v {
+			sic["enableSecureBoot"] = v
+		}
+		if v, ok := conf["enable_integrity_monitoring"].(bool); ok && v {
+			sic["enableIntegrityMonitoring"] = v
+		}
 		npd["shieldedInstanceConfig"] = sic
 	}
 
@@ -6414,7 +6849,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	if cpu == "" {
 		cpu = "automatic"
 	}
-	setField(npd, "minCpuPlatform", cpu)
+	npd["minCpuPlatform"] = cpu
 
 	return npd
 }
@@ -6426,10 +6861,18 @@ func expandAutopilotClusterPolicyConfig(configured interface{}) map[string]inter
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "noSystemMutation", config["no_system_mutation"].(bool))
-	setField(res, "noSystemImpersonation", config["no_system_impersonation"].(bool))
-	setField(res, "noUnsafeWebhooks", config["no_unsafe_webhooks"].(bool))
-	setField(res, "noStandardNodePools", config["no_standard_node_pools"].(bool))
+	if v, ok := config["no_system_mutation"].(bool); ok && v {
+		res["noSystemMutation"] = v
+	}
+	if v, ok := config["no_system_impersonation"].(bool); ok && v {
+		res["noSystemImpersonation"] = v
+	}
+	if v, ok := config["no_unsafe_webhooks"].(bool); ok && v {
+		res["noUnsafeWebhooks"] = v
+	}
+	if v, ok := config["no_standard_node_pools"].(bool); ok && v {
+		res["noStandardNodePools"] = v
+	}
 	return res
 }
 
@@ -6445,10 +6888,18 @@ func expandUpgradeSettings(configured interface{}, d *schema.ResourceData) map[s
 		blueGreenSettings = expandBlueGreenSettings(config["blue_green_settings"])
 	}
 	upgradeSettings := map[string]interface{}{}
-	setField(upgradeSettings, "maxSurge", int64(config["max_surge"].(int)))
-	setField(upgradeSettings, "maxUnavailable", int64(config["max_unavailable"].(int)))
-	setField(upgradeSettings, "strategy", config["strategy"].(string))
-	setField(upgradeSettings, "blueGreenSettings", blueGreenSettings)
+	if v, ok := config["max_surge"].(int); ok && v != 0 {
+		upgradeSettings["maxSurge"] = v
+	}
+	if v, ok := config["max_unavailable"].(int); ok && v != 0 {
+		upgradeSettings["maxUnavailable"] = v
+	}
+	if v, ok := config["strategy"].(string); ok && v != "" {
+		upgradeSettings["strategy"] = v
+	}
+	if blueGreenSettings != nil {
+		upgradeSettings["blueGreenSettings"] = blueGreenSettings
+	}
 
 	return upgradeSettings
 }
@@ -6461,8 +6912,12 @@ func expandBlueGreenSettings(configured interface{}) map[string]interface{} {
 	config := l[0].(map[string]interface{})
 
 	blueGreenSettings := map[string]interface{}{}
-	setField(blueGreenSettings, "nodePoolSoakDuration", config["node_pool_soak_duration"].(string))
-	setField(blueGreenSettings, "standardRolloutPolicy", expandStandardRolloutPolicy(config["standard_rollout_policy"]))
+	if v, ok := config["node_pool_soak_duration"].(string); ok && v != "" {
+		blueGreenSettings["nodePoolSoakDuration"] = v
+	}
+	if sub := expandStandardRolloutPolicy(config["standard_rollout_policy"]); sub != nil {
+		blueGreenSettings["standardRolloutPolicy"] = sub
+	}
 
 	return blueGreenSettings
 }
@@ -6475,9 +6930,15 @@ func expandStandardRolloutPolicy(configured interface{}) map[string]interface{} 
 
 	config := l[0].(map[string]interface{})
 	standardRolloutPolicy := map[string]interface{}{}
-	setField(standardRolloutPolicy, "batchPercentage", config["batch_percentage"].(float64))
-	setField(standardRolloutPolicy, "batchNodeCount", int64(config["batch_node_count"].(int)))
-	setField(standardRolloutPolicy, "batchSoakDuration", config["batch_soak_duration"].(string))
+	if v, ok := config["batch_percentage"].(float64); ok && v != 0 {
+		standardRolloutPolicy["batchPercentage"] = v
+	}
+	if v, ok := config["batch_node_count"].(int); ok && v != 0 {
+		standardRolloutPolicy["batchNodeCount"] = v
+	}
+	if v, ok := config["batch_soak_duration"].(string); ok && v != "" {
+		standardRolloutPolicy["batchSoakDuration"] = v
+	}
 
 	return standardRolloutPolicy
 }
@@ -6490,9 +6951,15 @@ func expandManagement(configured interface{}) map[string]interface{} {
 	config := l[0].(map[string]interface{})
 
 	mng := map[string]interface{}{}
-	setField(mng, "autoUpgrade", config["auto_upgrade"].(bool))
-	setField(mng, "autoRepair", config["auto_repair"].(bool))
-	setField(mng, "upgradeOptions", expandUpgradeOptions(config["upgrade_options"]))
+	if v, ok := config["auto_upgrade"].(bool); ok && v {
+		mng["autoUpgrade"] = v
+	}
+	if v, ok := config["auto_repair"].(bool); ok && v {
+		mng["autoRepair"] = v
+	}
+	if sub := expandUpgradeOptions(config["upgrade_options"]); sub != nil {
+		mng["upgradeOptions"] = sub
+	}
 
 	return mng
 }
@@ -6505,8 +6972,12 @@ func expandUpgradeOptions(configured interface{}) map[string]interface{} {
 	config := l[0].(map[string]interface{})
 
 	upgradeOptions := map[string]interface{}{}
-	setField(upgradeOptions, "autoUpgradeStartTime", config["auto_upgrade_start_time"].(string))
-	setField(upgradeOptions, "description", config["description"].(string))
+	if v, ok := config["auto_upgrade_start_time"].(string); ok && v != "" {
+		upgradeOptions["autoUpgradeStartTime"] = v
+	}
+	if v, ok := config["description"].(string); ok && v != "" {
+		upgradeOptions["description"] = v
+	}
 
 	return upgradeOptions
 }
@@ -6523,8 +6994,10 @@ func expandAuthenticatorGroupsConfig(configured interface{}) map[string]interfac
 	result := map[string]interface{}{}
 	config := l[0].(map[string]interface{})
 	if securityGroup, ok := config["security_group"]; ok {
-		setField(result, "enabled", true)
-		setField(result, "securityGroup", securityGroup.(string))
+		result["enabled"] = true
+		if sg, ok := securityGroup.(string); ok && sg != "" {
+			result["securityGroup"] = sg
+		}
 	}
 	return result
 }
@@ -6538,9 +7011,11 @@ func expandProtectConfig(configured interface{}) map[string]interface{} {
 
 	pc := map[string]interface{}{}
 	protectConfig := l[0].(map[string]interface{})
-	setField(pc, "workloadConfig", expandProtectConfigWorkloadConfig(protectConfig["workload_config"]))
-	if v, ok := protectConfig["workload_vulnerability_mode"]; ok {
-		setField(pc, "workloadVulnerabilityMode", v.(string))
+	if sub := expandProtectConfigWorkloadConfig(protectConfig["workload_config"]); sub != nil {
+		pc["workloadConfig"] = sub
+	}
+	if v, ok := protectConfig["workload_vulnerability_mode"].(string); ok && v != "" {
+		pc["workloadVulnerabilityMode"] = v
 	}
 	return pc
 }
@@ -6552,30 +7027,34 @@ func expandProtectConfigWorkloadConfig(configured interface{}) map[string]interf
 	}
 	workloadConfig := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "auditMode", workloadConfig["audit_mode"].(string))
+	if v, ok := workloadConfig["audit_mode"].(string); ok && v != "" {
+		res["auditMode"] = v
+	}
 	return res
 }
 
-func flattenProtectConfig(pc map[string]interface{}) []map[string]interface{} {
+func flattenProtectConfig(v interface{}) []map[string]interface{} {
+	pc, _ := v.(map[string]interface{})
 	if pc == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
 
-	result["workload_config"] = flattenProtectConfigWorkloadConfig(getMap(pc, "workloadConfig"))
-	result["workload_vulnerability_mode"] = flattenString(pc["workloadVulnerabilityMode"])
+	result["workload_config"] = flattenProtectConfigWorkloadConfig(pc["workloadConfig"])
+	result["workload_vulnerability_mode"] = pc["workloadVulnerabilityMode"]
 
 	return []map[string]interface{}{result}
 }
 
-func flattenProtectConfigWorkloadConfig(wc map[string]interface{}) []map[string]interface{} {
+func flattenProtectConfigWorkloadConfig(v interface{}) []map[string]interface{} {
+	wc, _ := v.(map[string]interface{})
 	if wc == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
-	result["audit_mode"] = flattenString(wc["auditMode"])
+	result["audit_mode"] = wc["auditMode"]
 
 	return []map[string]interface{}{result}
 }
@@ -6589,24 +7068,25 @@ func expandSecurityPostureConfig(configured interface{}) map[string]interface{} 
 
 	spc := map[string]interface{}{}
 	spConfig := l[0].(map[string]interface{})
-	if v, ok := spConfig["mode"]; ok {
-		setField(spc, "mode", v.(string))
+	if v, ok := spConfig["mode"].(string); ok && v != "" {
+		spc["mode"] = v
 	}
 
-	if v, ok := spConfig["vulnerability_mode"]; ok {
-		setField(spc, "vulnerabilityMode", v.(string))
+	if v, ok := spConfig["vulnerability_mode"].(string); ok && v != "" {
+		spc["vulnerabilityMode"] = v
 	}
 	return spc
 }
 
-func flattenSecurityPostureConfig(spc map[string]interface{}) []map[string]interface{} {
+func flattenSecurityPostureConfig(v interface{}) []map[string]interface{} {
+	spc, _ := v.(map[string]interface{})
 	if spc == nil {
 		return nil
 	}
 	result := make(map[string]interface{})
 
-	result["mode"] = flattenString(spc["mode"])
-	result["vulnerability_mode"] = flattenString(spc["vulnerabilityMode"])
+	result["mode"] = spc["mode"]
+	result["vulnerability_mode"] = spc["vulnerabilityMode"]
 
 	return []map[string]interface{}{result}
 }
@@ -6619,43 +7099,46 @@ func expandEnterpriseConfig(configured interface{}) map[string]interface{} {
 
 	ec := map[string]interface{}{}
 	enterpriseConfig := l[0].(map[string]interface{})
-	if v, ok := enterpriseConfig["cluster_tier"]; ok {
-		setField(ec, "clusterTier", v.(string))
+	if v, ok := enterpriseConfig["cluster_tier"].(string); ok && v != "" {
+		ec["clusterTier"] = v
 	}
 
-	if v, ok := enterpriseConfig["desired_tier"]; ok {
-		setField(ec, "desiredTier", v.(string))
+	if v, ok := enterpriseConfig["desired_tier"].(string); ok && v != "" {
+		ec["desiredTier"] = v
 	}
 	return ec
 }
 
-func flattenEnterpriseConfig(ec map[string]interface{}) []map[string]interface{} {
+func flattenEnterpriseConfig(v interface{}) []map[string]interface{} {
+	ec, _ := v.(map[string]interface{})
 	if ec == nil {
 		return nil
 	}
 	result := make(map[string]interface{})
 
-	result["cluster_tier"] = flattenString(ec["clusterTier"])
-	result["desired_tier"] = flattenString(ec["desiredTier"])
+	result["cluster_tier"] = ec["clusterTier"]
+	result["desired_tier"] = ec["desiredTier"]
 
 	return []map[string]interface{}{result}
 }
 
-func flattenAnonymousAuthenticationConfig(aac map[string]interface{}) []map[string]interface{} {
+func flattenAnonymousAuthenticationConfig(v interface{}) []map[string]interface{} {
+	aac, _ := v.(map[string]interface{})
 	if aac == nil {
 		return nil
 	}
 	result := make(map[string]interface{})
-	result["mode"] = flattenString(aac["mode"])
+	result["mode"] = aac["mode"]
 	return []map[string]interface{}{result}
 }
 
-func flattenNodeCreationConfig(ncc map[string]interface{}) []map[string]interface{} {
+func flattenNodeCreationConfig(v interface{}) []map[string]interface{} {
+	ncc, _ := v.(map[string]interface{})
 	if ncc == nil {
 		return nil
 	}
 	result := make(map[string]interface{})
-	result["node_creation_mode"] = flattenString(ncc["nodeCreationMode"])
+	result["node_creation_mode"] = ncc["nodeCreationMode"]
 	return []map[string]interface{}{result}
 }
 
@@ -6665,8 +7148,8 @@ func flattenAdditionalPodRangesConfig(ipAllocationPolicy map[string]interface{})
 	}
 	result := make(map[string]interface{})
 
-	if aprc := getMap(ipAllocationPolicy, "additionalPodRangesConfig"); aprc != nil {
-		if podRangeNames := flattenStringSlice(aprc["podRangeNames"]); len(podRangeNames) > 0 {
+	if aprc, ok := ipAllocationPolicy["additionalPodRangesConfig"].(map[string]interface{}); ok && aprc != nil {
+		if podRangeNames, ok := aprc["podRangeNames"].([]interface{}); ok && len(podRangeNames) > 0 {
 			result["pod_range_names"] = podRangeNames
 		} else {
 			return nil
@@ -6692,14 +7175,20 @@ func expandNotificationConfig(configured interface{}) map[string]interface{} {
 			pubsub := notificationConfig["pubsub"].([]interface{})[0].(map[string]interface{})
 
 			pubsubMap := map[string]interface{}{}
-			setField(pubsubMap, "enabled", pubsub["enabled"].(bool))
-			setField(pubsubMap, "topic", pubsub["topic"].(string))
+			if enabled, ok := pubsub["enabled"].(bool); ok && enabled {
+				pubsubMap["enabled"] = enabled
+			}
+			if topic, ok := pubsub["topic"].(string); ok && topic != "" {
+				pubsubMap["topic"] = topic
+			}
 
 			if vv, ok := pubsub["filter"]; ok && len(vv.([]interface{})) > 0 && vv.([]interface{})[0] != nil {
 				filter := vv.([]interface{})[0].(map[string]interface{})
 				eventType := filter["event_type"].([]interface{})
 				filterMap := map[string]interface{}{}
-				setField(filterMap, "eventType", tpgresource.ConvertStringArr(eventType))
+				if et := tpgresource.ConvertStringArr(eventType); len(et) > 0 {
+					filterMap["eventType"] = et
+				}
 				pubsubMap["filter"] = filterMap
 			}
 
@@ -6723,8 +7212,12 @@ func expandBinaryAuthorization(configured interface{}) map[string]interface{} {
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "enabled", config["enabled"].(bool))
-	setField(res, "evaluationMode", config["evaluation_mode"].(string))
+	if v, ok := config["enabled"].(bool); ok && v {
+		res["enabled"] = v
+	}
+	if v, ok := config["evaluation_mode"].(string); ok && v != "" {
+		res["evaluationMode"] = v
+	}
 	return res
 }
 
@@ -6742,7 +7235,9 @@ func expandMasterAuth(configured interface{}) map[string]interface{} {
 			clientCertificateConfig := masterAuth["client_certificate_config"].([]interface{})[0].(map[string]interface{})
 
 			ccc := map[string]interface{}{}
-			setField(ccc, "issueClientCertificate", clientCertificateConfig["issue_client_certificate"].(bool))
+			if icc, ok := clientCertificateConfig["issue_client_certificate"].(bool); ok && icc {
+				ccc["issueClientCertificate"] = icc
+			}
 			result["clientCertificateConfig"] = ccc
 		}
 	}
@@ -6764,7 +7259,9 @@ func expandMasterAuthorizedNetworksConfig(d *schema.ResourceData) map[string]int
 		"enabled": true,
 	}
 	if v, ok := d.GetOk("master_authorized_networks_config.0.cidr_blocks"); ok {
-		setField(result, "cidrBlocks", expandManCidrBlocks(v))
+		if cbs := expandManCidrBlocks(v); len(cbs) > 0 {
+			result["cidrBlocks"] = cbs
+		}
 	}
 	if v, ok := d.GetOkExists("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
 		result["gcpPublicCidrsAccessEnabled"] = v.(bool)
@@ -6819,8 +7316,12 @@ func expandManCidrBlocks(configured interface{}) []map[string]interface{} {
 	for _, v := range cidrBlocks {
 		cidrBlock := v.(map[string]interface{})
 		cb := map[string]interface{}{}
-		setField(cb, "cidrBlock", cidrBlock["cidr_block"].(string))
-		setField(cb, "displayName", cidrBlock["display_name"].(string))
+		if v, ok := cidrBlock["cidr_block"].(string); ok && v != "" {
+			cb["cidrBlock"] = v
+		}
+		if v, ok := cidrBlock["display_name"].(string); ok && v != "" {
+			cb["displayName"] = v
+		}
 		result = append(result, cb)
 	}
 	return result
@@ -6834,17 +7335,20 @@ func expandManagedMachineLearningDiagnosticsConfig(configured interface{}) map[s
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "enabled", config["enabled"].(bool))
+	if v, ok := config["enabled"].(bool); ok && v {
+		res["enabled"] = v
+	}
 	return res
 }
 
-func flattenManagedMachineLearningDiagnosticsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenManagedMachineLearningDiagnosticsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
@@ -6866,7 +7370,9 @@ func expandManagedOpenTelemetryConfig(configured interface{}) map[string]interfa
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "scope", config["scope"].(string))
+	if v, ok := config["scope"].(string); ok && v != "" {
+		res["scope"] = v
+	}
 	return res
 }
 
@@ -6874,9 +7380,10 @@ func flattenManagedOpenTelemetryConfig(c map[string]interface{}) []map[string]in
 	if c == nil {
 		return nil
 	}
+	scope, _ := c["scope"].(string)
 	return []map[string]interface{}{
 		{
-			"scope": flattenString(c["scope"]),
+			"scope": scope,
 		},
 	}
 }
@@ -6890,40 +7397,43 @@ func expandNetworkPolicy(configured interface{}) map[string]interface{} {
 	config := l[0].(map[string]interface{})
 	if enabled, ok := config["enabled"]; ok && enabled.(bool) {
 		result["enabled"] = true
-		if provider, ok := config["provider"]; ok {
-			setField(result, "provider", provider.(string))
+		if provider, ok := config["provider"].(string); ok && provider != "" {
+			result["provider"] = provider
 		}
 	}
 	return result
 }
 
 func isEnablePrivateEndpointPSCCluster(cluster map[string]interface{}) bool {
-	pcc := getMap(cluster, "privateClusterConfig")
+	pcc, _ := cluster["privateClusterConfig"].(map[string]interface{})
 	// EnablePrivateEndpoint not provided
 	if cluster == nil || pcc == nil {
 		return false
 	}
 	// Not a PSC cluster
-	if flattenBool(pcc["enablePrivateNodes"]) || len(flattenString(pcc["masterIpv4CidrBlock"])) > 0 {
+	enablePrivateNodes, _ := pcc["enablePrivateNodes"].(bool)
+	masterIpv4CidrBlock, _ := pcc["masterIpv4CidrBlock"].(string)
+	if enablePrivateNodes || len(masterIpv4CidrBlock) > 0 {
 		return false
 	}
 	// PSC Cluster with EnablePrivateEndpoint
-	if flattenBool(pcc["enablePrivateEndpoint"]) {
+	if enablePrivateEndpoint, _ := pcc["enablePrivateEndpoint"].(bool); enablePrivateEndpoint {
 		return true
 	}
 	return false
 }
 
 func isEnablePDCSI(cluster map[string]interface{}) bool {
-	ac := getMap(cluster, "addonsConfig")
+	ac, _ := cluster["addonsConfig"].(map[string]interface{})
 	if ac == nil {
 		return true // PDCSI is enabled by default.
 	}
-	gcePd := getMap(ac, "gcePersistentDiskCsiDriverConfig")
+	gcePd, _ := ac["gcePersistentDiskCsiDriverConfig"].(map[string]interface{})
 	if gcePd == nil {
 		return true // PDCSI is enabled by default.
 	}
-	return flattenBool(gcePd["enabled"])
+	enabled, _ := gcePd["enabled"].(bool)
+	return enabled
 }
 
 // Most of the contents of PrivateClusterConfig have been deprecated in the underlying API and replaced by ControlPlaneEndpointsConfig.
@@ -6938,8 +7448,10 @@ func expandPrivateClusterConfigMasterIpv4CidrBlock(configured interface{}, c map
 	res := map[string]interface{}{
 		"masterIpv4CidrBlock": v,
 	}
-	if nc := getMap(c, "networkConfig"); nc != nil {
-		setField(res, "enablePrivateNodes", flattenBool(nc["defaultEnablePrivateNodes"]))
+	if nc, ok := c["networkConfig"].(map[string]interface{}); ok && nc != nil {
+		if depn, ok := nc["defaultEnablePrivateNodes"].(bool); ok && depn {
+			res["enablePrivateNodes"] = depn
+		}
 	}
 	return res
 }
@@ -6990,7 +7502,9 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) map[string]interf
 	if v := d.Get("private_cluster_config.0.master_global_access_config.0.enabled"); v != nil {
 		ip["globalAccess"] = v.(bool)
 	}
-	setField(ip, "authorizedNetworksConfig", expandMasterAuthorizedNetworksConfig(d))
+	if sub := expandMasterAuthorizedNetworksConfig(d); sub != nil {
+		ip["authorizedNetworksConfig"] = sub
+	}
 
 	return map[string]interface{}{
 		"dnsEndpointConfig": dns,
@@ -7005,7 +7519,9 @@ func expandVerticalPodAutoscaling(configured interface{}) map[string]interface{}
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "enabled", config["enabled"].(bool))
+	if v, ok := config["enabled"].(bool); ok && v {
+		res["enabled"] = v
+	}
 	return res
 }
 
@@ -7038,8 +7554,12 @@ func expandDatabaseEncryption(configured interface{}) map[string]interface{} {
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "state", config["state"].(string))
-	setField(res, "keyName", config["key_name"].(string))
+	if v, ok := config["state"].(string); ok && v != "" {
+		res["state"] = v
+	}
+	if v, ok := config["key_name"].(string); ok && v != "" {
+		res["keyName"] = v
+	}
 	return res
 }
 
@@ -7050,7 +7570,9 @@ func expandReleaseChannel(configured interface{}) map[string]interface{} {
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "channel", config["channel"].(string))
+	if v, ok := config["channel"].(string); ok && v != "" {
+		res["channel"] = v
+	}
 	return res
 }
 
@@ -7061,7 +7583,9 @@ func expandGkeAutoUpgradeConfig(configured interface{}) map[string]interface{} {
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "patchMode", config["patch_mode"].(string))
+	if v, ok := config["patch_mode"].(string); ok && v != "" {
+		res["patchMode"] = v
+	}
 	return res
 }
 
@@ -7073,7 +7597,9 @@ func expandClusterTelemetry(configured interface{}) map[string]interface{} {
 	}
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "type", config["type"].(string))
+	if v, ok := config["type"].(string); ok && v != "" {
+		res["type"] = v
+	}
 	return res
 }
 
@@ -7114,7 +7640,9 @@ func expandWorkloadIdentityConfig(configured interface{}) map[string]interface{}
 	}
 
 	config := l[0].(map[string]interface{})
-	setField(v, "workloadPool", config["workload_pool"].(string))
+	if wp, ok := config["workload_pool"].(string); ok && wp != "" {
+		v["workloadPool"] = wp
+	}
 
 	return v
 }
@@ -7124,7 +7652,9 @@ func expandIdentityServiceConfig(configured interface{}) map[string]interface{} 
 	v := map[string]interface{}{}
 
 	config := l[0].(map[string]interface{})
-	setField(v, "enabled", config["enabled"].(bool))
+	if enabled, ok := config["enabled"].(bool); ok && enabled {
+		v["enabled"] = enabled
+	}
 
 	return v
 }
@@ -7157,8 +7687,8 @@ func expandPodAutoscaling(configured interface{}) map[string]interface{} {
 
 	config := configs[0].(map[string]interface{})
 
-	if v, ok := config["hpa_profile"]; ok {
-		setField(podAutoscaling, "hpaProfile", v.(string))
+	if v, ok := config["hpa_profile"].(string); ok && v != "" {
+		podAutoscaling["hpaProfile"] = v
 	}
 
 	return podAutoscaling
@@ -7179,9 +7709,11 @@ func expandSecretManagerConfig(configured interface{}) map[string]interface{} {
 			if len(autoRotationList) > 0 {
 				autoRotationConfig := autoRotationList[0].(map[string]interface{})
 				rc := map[string]interface{}{}
-				setField(rc, "enabled", autoRotationConfig["enabled"].(bool))
+				if enabled, ok := autoRotationConfig["enabled"].(bool); ok && enabled {
+					rc["enabled"] = enabled
+				}
 				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
-					setField(rc, "rotationInterval", rotationInterval)
+					rc["rotationInterval"] = rotationInterval
 				}
 				sc["rotationConfig"] = rc
 			}
@@ -7205,9 +7737,11 @@ func expandSecretSyncConfig(configured interface{}) map[string]interface{} {
 			if len(autoRotationList) > 0 {
 				autoRotationConfig := autoRotationList[0].(map[string]interface{})
 				rc := map[string]interface{}{}
-				setField(rc, "enabled", autoRotationConfig["enabled"].(bool))
+				if enabled, ok := autoRotationConfig["enabled"].(bool); ok && enabled {
+					rc["enabled"] = enabled
+				}
 				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
-					setField(rc, "rotationInterval", rotationInterval)
+					rc["rotationInterval"] = rotationInterval
 				}
 				sc["rotationConfig"] = rc
 			}
@@ -7222,7 +7756,9 @@ func expandDefaultMaxPodsConstraint(v interface{}) map[string]interface{} {
 	}
 
 	res := map[string]interface{}{}
-	setStringIntField(res, "maxPodsPerNode", int64(v.(int)))
+	if mp := v.(int); mp != 0 {
+		res["maxPodsPerNode"] = strconv.Itoa(mp)
+	}
 	return res
 }
 
@@ -7258,7 +7794,9 @@ func expandResourceUsageExportConfig(configured interface{}) map[string]interfac
 			bigqueryDestination := destinationArr[0].(map[string]interface{})
 			if _, ok := bigqueryDestination["dataset_id"]; ok {
 				bqd := map[string]interface{}{}
-				setField(bqd, "datasetId", bigqueryDestination["dataset_id"].(string))
+				if dsId, ok := bigqueryDestination["dataset_id"].(string); ok && dsId != "" {
+					bqd["datasetId"] = dsId
+				}
 				result["bigqueryDestination"] = bqd
 			}
 		}
@@ -7278,10 +7816,18 @@ func expandDnsConfig(configured interface{}) map[string]interface{} {
 
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "additiveVpcScopeDnsDomain", config["additive_vpc_scope_dns_domain"].(string))
-	setField(res, "clusterDns", config["cluster_dns"].(string))
-	setField(res, "clusterDnsScope", config["cluster_dns_scope"].(string))
-	setField(res, "clusterDnsDomain", config["cluster_dns_domain"].(string))
+	if v, ok := config["additive_vpc_scope_dns_domain"].(string); ok && v != "" {
+		res["additiveVpcScopeDnsDomain"] = v
+	}
+	if v, ok := config["cluster_dns"].(string); ok && v != "" {
+		res["clusterDns"] = v
+	}
+	if v, ok := config["cluster_dns_scope"].(string); ok && v != "" {
+		res["clusterDnsScope"] = v
+	}
+	if v, ok := config["cluster_dns_domain"].(string); ok && v != "" {
+		res["clusterDnsDomain"] = v
+	}
 	return res
 }
 
@@ -7293,7 +7839,9 @@ func expandNetworkPerformanceConfig(configured interface{}) map[string]interface
 
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "totalEgressBandwidthTier", config["total_egress_bandwidth_tier"].(string))
+	if v, ok := config["total_egress_bandwidth_tier"].(string); ok && v != "" {
+		res["totalEgressBandwidthTier"] = v
+	}
 	return res
 }
 
@@ -7305,7 +7853,9 @@ func expandGatewayApiConfig(configured interface{}) map[string]interface{} {
 
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "channel", config["channel"].(string))
+	if v, ok := config["channel"].(string); ok && v != "" {
+		res["channel"] = v
+	}
 	return res
 }
 
@@ -7317,8 +7867,12 @@ func expandFleet(configured interface{}) map[string]interface{} {
 
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "project", config["project"].(string))
-	setField(res, "membershipType", config["membership_type"].(string))
+	if v, ok := config["project"].(string); ok && v != "" {
+		res["project"] = v
+	}
+	if v, ok := config["membership_type"].(string); ok && v != "" {
+		res["membershipType"] = v
+	}
 	return res
 }
 
@@ -7330,24 +7884,36 @@ func expandUserManagedKeysConfig(configured interface{}) map[string]interface{} 
 
 	config := l[0].(map[string]interface{})
 	umkc := map[string]interface{}{}
-	setField(umkc, "clusterCa", config["cluster_ca"].(string))
-	setField(umkc, "etcdApiCa", config["etcd_api_ca"].(string))
-	setField(umkc, "etcdPeerCa", config["etcd_peer_ca"].(string))
-	setField(umkc, "aggregationCa", config["aggregation_ca"].(string))
-	setField(umkc, "controlPlaneDiskEncryptionKey", config["control_plane_disk_encryption_key"].(string))
-	setField(umkc, "gkeopsEtcdBackupEncryptionKey", config["gkeops_etcd_backup_encryption_key"].(string))
+	if v, ok := config["cluster_ca"].(string); ok && v != "" {
+		umkc["clusterCa"] = v
+	}
+	if v, ok := config["etcd_api_ca"].(string); ok && v != "" {
+		umkc["etcdApiCa"] = v
+	}
+	if v, ok := config["etcd_peer_ca"].(string); ok && v != "" {
+		umkc["etcdPeerCa"] = v
+	}
+	if v, ok := config["aggregation_ca"].(string); ok && v != "" {
+		umkc["aggregationCa"] = v
+	}
+	if v, ok := config["control_plane_disk_encryption_key"].(string); ok && v != "" {
+		umkc["controlPlaneDiskEncryptionKey"] = v
+	}
+	if v, ok := config["gkeops_etcd_backup_encryption_key"].(string); ok && v != "" {
+		umkc["gkeopsEtcdBackupEncryptionKey"] = v
+	}
 	if v, ok := config["service_account_signing_keys"]; ok {
 		sk := v.(*schema.Set)
 		skss := tpgresource.ConvertStringSet(sk)
 		if len(skss) > 0 {
-			setField(umkc, "serviceAccountSigningKeys", skss)
+			umkc["serviceAccountSigningKeys"] = skss
 		}
 	}
 	if v, ok := config["service_account_verification_keys"]; ok {
 		vk := v.(*schema.Set)
 		vkss := tpgresource.ConvertStringSet(vk)
 		if len(vkss) > 0 {
-			setField(umkc, "serviceAccountVerificationKeys", vkss)
+			umkc["serviceAccountVerificationKeys"] = vkss
 		}
 	}
 	return umkc
@@ -7369,7 +7935,9 @@ func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) map[s
 			}
 		}
 
-		setField(result, "enabledApis", tpgresource.ConvertStringSet(notEnabledAPIsSet))
+		if apis := tpgresource.ConvertStringSet(notEnabledAPIsSet); len(apis) > 0 {
+			result["enabledApis"] = apis
+		}
 	}
 
 	return result
@@ -7388,7 +7956,9 @@ func expandContainerClusterLoggingConfig(configured interface{}) map[string]inte
 	}
 
 	cc := map[string]interface{}{}
-	setField(cc, "enableComponents", components)
+	if len(components) > 0 {
+		cc["enableComponents"] = components
+	}
 	return map[string]interface{}{
 		"componentConfig": cc,
 	}
@@ -7405,13 +7975,17 @@ func expandMonitoringConfig(configured interface{}) map[string]interface{} {
 	if v, ok := config["enable_components"]; ok {
 		enable_components := v.(*schema.Set)
 		cc := map[string]interface{}{}
-		setField(cc, "enableComponents", tpgresource.ConvertStringSet(enable_components))
+		if ec := tpgresource.ConvertStringSet(enable_components); len(ec) > 0 {
+			cc["enableComponents"] = ec
+		}
 		mc["componentConfig"] = cc
 	}
 	if v, ok := config["managed_prometheus"]; ok && len(v.([]interface{})) > 0 {
 		managed_prometheus := v.([]interface{})[0].(map[string]interface{})
 		mpc := map[string]interface{}{}
-		setField(mpc, "enabled", managed_prometheus["enabled"].(bool))
+		if enabled, ok := managed_prometheus["enabled"].(bool); ok && enabled {
+			mpc["enabled"] = enabled
+		}
 		if autoMonitoring, ok := managed_prometheus["auto_monitoring_config"]; ok {
 			if autoMonitoringList, ok := autoMonitoring.([]interface{}); ok {
 				if len(autoMonitoringList) > 0 {
@@ -7432,7 +8006,9 @@ func expandMonitoringConfig(configured interface{}) map[string]interface{} {
 		adoc := map[string]interface{}{
 			"enableRelay": advanced_datapath_observability_config["enable_relay"].(bool),
 		}
-		setField(adoc, "enableMetrics", advanced_datapath_observability_config["enable_metrics"].(bool))
+		if em, ok := advanced_datapath_observability_config["enable_metrics"].(bool); ok && em {
+			adoc["enableMetrics"] = em
+		}
 		mc["advancedDatapathObservabilityConfig"] = adoc
 	}
 
@@ -7448,8 +8024,12 @@ func expandContainerClusterTpuConfig(configured interface{}) map[string]interfac
 
 	config := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "enabled", config["enabled"].(bool))
-	setField(res, "useServiceNetworking", config["use_service_networking"].(bool))
+	if v, ok := config["enabled"].(bool); ok && v {
+		res["enabled"] = v
+	}
+	if v, ok := config["use_service_networking"].(bool); ok && v {
+		res["useServiceNetworking"] = v
+	}
 	return res
 }
 {{- end }}
@@ -7463,11 +8043,9 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) map
 	config := l[0].(map[string]interface{})
 	result := map[string]interface{}{}
 	if securityGroup, ok := config["security_group"]; ok {
-		if securityGroup == nil || securityGroup.(string) == "" {
-			setField(result, "enabled", false)
-		} else {
-			setField(result, "enabled", true)
-			setField(result, "securityGroup", securityGroup.(string))
+		if sg, ok := securityGroup.(string); ok && sg != "" {
+			result["enabled"] = true
+			result["securityGroup"] = sg
 		}
 	}
 	return result
@@ -7481,18 +8059,21 @@ func expandNodePoolDefaults(configured interface{}) map[string]interface{} {
 	nodePoolDefaults := map[string]interface{}{}
 	config := l[0].(map[string]interface{})
 	if v, ok := config["node_config_defaults"]; ok && len(v.([]interface{})) > 0 {
-		setField(nodePoolDefaults, "nodeConfigDefaults", expandNodeConfigDefaults(v))
+		if ncd := expandNodeConfigDefaults(v); ncd != nil {
+			nodePoolDefaults["nodeConfigDefaults"] = ncd
+		}
 	}
 	return nodePoolDefaults
 }
 
-func flattenNodePoolDefaults(c map[string]interface{}) []map[string]interface{} {
+func flattenNodePoolDefaults(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
-	if ncd := getMap(c, "nodeConfigDefaults"); ncd != nil {
+	if ncd, ok := c["nodeConfigDefaults"].(map[string]interface{}); ok && ncd != nil {
 		result["node_config_defaults"] = flattenNodeConfigDefaults(ncd)
 	}
 
@@ -7509,19 +8090,27 @@ func expandNodePoolAutoConfig(configured interface{}) map[string]interface{} {
 	config := l[0].(map[string]interface{})
 
 	if v, ok := config["node_kubelet_config"]; ok {
-		setField(npac, "nodeKubeletConfig", expandKubeletConfig(v))
+		if nkc := expandKubeletConfig(v); nkc != nil {
+			npac["nodeKubeletConfig"] = nkc
+		}
 	}
 
 	if v, ok := config["network_tags"]; ok && len(v.([]interface{})) > 0 {
-		setField(npac, "networkTags", expandNodePoolAutoConfigNetworkTags(v))
+		if nt := expandNodePoolAutoConfigNetworkTags(v); nt != nil {
+			npac["networkTags"] = nt
+		}
 	}
 
 	if v, ok := config["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
-		setField(npac, "resourceManagerTags", expandResourceManagerTags(v))
+		if rmt := expandResourceManagerTags(v); rmt != nil {
+			npac["resourceManagerTags"] = rmt
+		}
 	}
 
 	if v, ok := config["linux_node_config"]; ok {
-		setField(npac, "linuxNodeConfig", expandNodePoolAutoConfigLinuxNodeConfig(v))
+		if lnc := expandNodePoolAutoConfigLinuxNodeConfig(v); lnc != nil {
+			npac["linuxNodeConfig"] = lnc
+		}
 	}
 
 	return npac
@@ -7541,7 +8130,9 @@ func expandNodePoolAutoConfigLinuxNodeConfig(configured interface{}) map[string]
 	config := ls[0].(map[string]interface{})
 	linuxNodeConfig := map[string]interface{}{}
 	if v, ok := config["node_kernel_module_loading"]; ok {
-		setField(linuxNodeConfig, "nodeKernelModuleLoading", expandNodeKernelModuleLoading(v))
+		if nkml := expandNodeKernelModuleLoading(v); nkml != nil {
+			linuxNodeConfig["nodeKernelModuleLoading"] = nkml
+		}
 	}
 	return linuxNodeConfig
 }
@@ -7555,7 +8146,7 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) map[string]inte
 	config := l[0].(map[string]interface{})
 
 	if v, ok := config["tags"]; ok && len(v.([]interface{})) > 0 {
-		setField(nt, "tags", tpgresource.ConvertStringArr(v.([]interface{})))
+		nt["tags"] = tpgresource.ConvertStringArr(v.([]interface{}))
 	}
 	return nt
 }
@@ -7601,15 +8192,16 @@ func expandRBACBindingConfig(configured interface{}) map[string]interface{} {
 	}
 }
 
-func flattenNotificationConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenNotificationConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
-	pubsub := getMap(c, "pubsub")
-	if pubsubFilter := getMap(pubsub, "filter"); pubsubFilter != nil {
+	pubsub, _ := c["pubsub"].(map[string]interface{})
+	if pubsubFilter, ok := pubsub["filter"].(map[string]interface{}); ok && pubsubFilter != nil {
 		filter := []map[string]interface{}{}
-		if eventType := flattenStringSlice(pubsubFilter["eventType"]); len(eventType) > 0 {
+		if eventType, ok := pubsubFilter["eventType"].([]interface{}); ok && len(eventType) > 0 {
 			filter = append(filter, map[string]interface{}{
 				"event_type": eventType,
 			})
@@ -7619,8 +8211,8 @@ func flattenNotificationConfig(c map[string]interface{}) []map[string]interface{
 			{
 				"pubsub": []map[string]interface{}{
 					{
-						"enabled": flattenBool(pubsub["enabled"]),
-						"topic":   flattenString(pubsub["topic"]),
+						"enabled": pubsub["enabled"],
+						"topic":   pubsub["topic"],
 						"filter":  filter,
 					},
 				},
@@ -7632,31 +8224,33 @@ func flattenNotificationConfig(c map[string]interface{}) []map[string]interface{
 		{
 			"pubsub": []map[string]interface{}{
 				{
-					"enabled": flattenBool(pubsub["enabled"]),
-					"topic":   flattenString(pubsub["topic"]),
+					"enabled": pubsub["enabled"],
+					"topic":   pubsub["topic"],
 				},
 			},
 		},
 	}
 }
 
-func flattenBinaryAuthorization(c map[string]interface{}) []map[string]interface{} {
+func flattenBinaryAuthorization(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled":         flattenBool(c["enabled"]),
-			"evaluation_mode": flattenString(c["evaluationMode"]),
+			"enabled":         c["enabled"],
+			"evaluation_mode": c["evaluationMode"],
 		})
 	}
 	return result
 }
 
-func flattenNetworkPolicy(c map[string]interface{}) []map[string]interface{} {
+func flattenNetworkPolicy(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled":  flattenBool(c["enabled"]),
-			"provider": flattenString(c["provider"]),
+			"enabled":  c["enabled"],
+			"provider": c["provider"],
 		})
 	} else {
 		// Explicitly set the network policy to the default.
@@ -7668,189 +8262,190 @@ func flattenNetworkPolicy(c map[string]interface{}) []map[string]interface{} {
 	return result
 }
 
-func flattenClusterAddonsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenClusterAddonsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	result := make(map[string]interface{})
 	if c == nil {
 		return nil
 	}
-	if hpa := getMap(c, "horizontalPodAutoscaling"); hpa != nil {
+	if hpa, ok := c["horizontalPodAutoscaling"].(map[string]interface{}); ok && hpa != nil {
 		result["horizontal_pod_autoscaling"] = []map[string]interface{}{
 			{
-				"disabled": flattenBool(hpa["disabled"]),
+				"disabled": hpa["disabled"],
 			},
 		}
 	}
-	if hlb := getMap(c, "httpLoadBalancing"); hlb != nil {
+	if hlb, ok := c["httpLoadBalancing"].(map[string]interface{}); ok && hlb != nil {
 		result["http_load_balancing"] = []map[string]interface{}{
 			{
-				"disabled": flattenBool(hlb["disabled"]),
+				"disabled": hlb["disabled"],
 			},
 		}
 	}
-	if npc := getMap(c, "networkPolicyConfig"); npc != nil {
+	if npc, ok := c["networkPolicyConfig"].(map[string]interface{}); ok && npc != nil {
 		result["network_policy_config"] = []map[string]interface{}{
 			{
-				"disabled": flattenBool(npc["disabled"]),
+				"disabled": npc["disabled"],
 			},
 		}
 	}
 
-	if gf := getMap(c, "gcpFilestoreCsiDriverConfig"); gf != nil {
+	if gf, ok := c["gcpFilestoreCsiDriverConfig"].(map[string]interface{}); ok && gf != nil {
 		result["gcp_filestore_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(gf["enabled"]),
+				"enabled": gf["enabled"],
 			},
 		}
 	}
 
-	if cr := getMap(c, "cloudRunConfig"); cr != nil {
+	if cr, ok := c["cloudRunConfig"].(map[string]interface{}); ok && cr != nil {
 		cloudRunConfig := map[string]interface{}{
-			"disabled": flattenBool(cr["disabled"]),
+			"disabled": cr["disabled"],
 		}
-		if flattenString(cr["loadBalancerType"]) == "LOAD_BALANCER_TYPE_INTERNAL" {
+		if cr["loadBalancerType"] == "LOAD_BALANCER_TYPE_INTERNAL" {
 			// Currently we only allow setting load_balancer_type to LOAD_BALANCER_TYPE_INTERNAL
 			cloudRunConfig["load_balancer_type"] = "LOAD_BALANCER_TYPE_INTERNAL"
 		}
 		result["cloudrun_config"] = []map[string]interface{}{cloudRunConfig}
 	}
 
-	if dc := getMap(c, "dnsCacheConfig"); dc != nil {
+	if dc, ok := c["dnsCacheConfig"].(map[string]interface{}); ok && dc != nil {
 		result["dns_cache_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(dc["enabled"]),
+				"enabled": dc["enabled"],
 			},
 		}
 	}
 
-	if hsc := getMap(c, "highScaleCheckpointingConfig"); hsc != nil {
+	if hsc, ok := c["highScaleCheckpointingConfig"].(map[string]interface{}); ok && hsc != nil {
 		result["high_scale_checkpointing_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(hsc["enabled"]),
+				"enabled": hsc["enabled"],
 			},
 		}
 	}
 
-	if gcePd := getMap(c, "gcePersistentDiskCsiDriverConfig"); gcePd != nil {
+	if gcePd, ok := c["gcePersistentDiskCsiDriverConfig"].(map[string]interface{}); ok && gcePd != nil {
 		result["gce_persistent_disk_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(gcePd["enabled"]),
+				"enabled": gcePd["enabled"],
 			},
 		}
 	}
-	if gba := getMap(c, "gkeBackupAgentConfig"); gba != nil {
+	if gba, ok := c["gkeBackupAgentConfig"].(map[string]interface{}); ok && gba != nil {
 		result["gke_backup_agent_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(gba["enabled"]),
+				"enabled": gba["enabled"],
 			},
 		}
 	}
-	if cc := getMap(c, "configConnectorConfig"); cc != nil {
+	if cc, ok := c["configConnectorConfig"].(map[string]interface{}); ok && cc != nil {
 		result["config_connector_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(cc["enabled"]),
+				"enabled": cc["enabled"],
 			},
 		}
 	}
-	if gcsf := getMap(c, "gcsFuseCsiDriverConfig"); gcsf != nil {
+	if gcsf, ok := c["gcsFuseCsiDriverConfig"].(map[string]interface{}); ok && gcsf != nil {
 		result["gcs_fuse_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(gcsf["enabled"]),
+				"enabled": gcsf["enabled"],
 			},
 		}
 	}
-	if sha := getMap(c, "statefulHaConfig"); sha != nil {
+	if sha, ok := c["statefulHaConfig"].(map[string]interface{}); ok && sha != nil {
 		result["stateful_ha_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(sha["enabled"]),
+				"enabled": sha["enabled"],
 			},
 		}
 	}
-	if scc := getMap(c, "sliceControllerConfig"); scc != nil {
+	if scc, ok := c["sliceControllerConfig"].(map[string]interface{}); ok && scc != nil {
 		result["slice_controller_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(scc["enabled"]),
+				"enabled": scc["enabled"],
 			},
 		}
 	}
-	if rayConfig := getMap(c, "rayOperatorConfig"); rayConfig != nil {
+	if rayConfig, ok := c["rayOperatorConfig"].(map[string]interface{}); ok && rayConfig != nil {
 		result["ray_operator_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(rayConfig["enabled"]),
+				"enabled": rayConfig["enabled"],
 			},
 		}
-		if rclc := getMap(rayConfig, "rayClusterLoggingConfig"); rclc != nil {
+		if rclc, ok := rayConfig["rayClusterLoggingConfig"].(map[string]interface{}); ok && rclc != nil {
 			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_logging_config"] = []map[string]interface{}{{"{{"}}
-				"enabled": flattenBool(rclc["enabled"]),
+				"enabled": rclc["enabled"],
 			{{"}}"}}
 		}
-		if rcmc := getMap(rayConfig, "rayClusterMonitoringConfig"); rcmc != nil {
+		if rcmc, ok := rayConfig["rayClusterMonitoringConfig"].(map[string]interface{}); ok && rcmc != nil {
 			result["ray_operator_config"].([]map[string]any)[0]["ray_cluster_monitoring_config"] = []map[string]interface{}{{"{{"}}
-				"enabled": flattenBool(rcmc["enabled"]),
+				"enabled": rcmc["enabled"],
 			{{"}}"}}
 		}
 	}
-	if psc := getMap(c, "parallelstoreCsiDriverConfig"); psc != nil {
+	if psc, ok := c["parallelstoreCsiDriverConfig"].(map[string]interface{}); ok && psc != nil {
 		result["parallelstore_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(psc["enabled"]),
+				"enabled": psc["enabled"],
 			},
 		}
 	}
-	if lustreConfig := getMap(c, "lustreCsiDriverConfig"); lustreConfig != nil {
+	if lustreConfig, ok := c["lustreCsiDriverConfig"].(map[string]interface{}); ok && lustreConfig != nil {
 		result["lustre_csi_driver_config"] = []map[string]interface{}{
 			{
-				"enabled":                   flattenBool(lustreConfig["enabled"]),
-				"enable_legacy_lustre_port": flattenBool(lustreConfig["enableLegacyLustrePort"]),
-				"disable_multi_nic":         flattenBool(lustreConfig["disableMultiNic"]),
+				"enabled":                   lustreConfig["enabled"],
+				"enable_legacy_lustre_port": lustreConfig["enableLegacyLustrePort"],
+				"disable_multi_nic":         lustreConfig["disableMultiNic"],
 			},
 		}
 	}
-	if ps := getMap(c, "podSnapshotConfig"); ps != nil {
+	if ps, ok := c["podSnapshotConfig"].(map[string]interface{}); ok && ps != nil {
 		result["pod_snapshot_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(ps["enabled"]),
+				"enabled": ps["enabled"],
 			},
 		}
 	}
 
-	if soc := getMap(c, "slurmOperatorConfig"); soc != nil {
+	if soc, ok := c["slurmOperatorConfig"].(map[string]interface{}); ok && soc != nil {
 		result["slurm_operator_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(soc["enabled"]),
+				"enabled": soc["enabled"],
 			},
 		}
 	}
 
-	if nrc := getMap(c, "nodeReadinessConfig"); nrc != nil {
+	if nrc, ok := c["nodeReadinessConfig"].(map[string]interface{}); ok && nrc != nil {
 		result["node_readiness_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(nrc["enabled"]),
+				"enabled": nrc["enabled"],
 			},
 		}
 	}
 
-	if asc := getMap(c, "agentSandboxConfig"); asc != nil {
+	if asc, ok := c["agentSandboxConfig"].(map[string]interface{}); ok && asc != nil {
 		result["agent_sandbox_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(asc["enabled"]),
+				"enabled": asc["enabled"],
 			},
 		}
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
-	if ic := getMap(c, "istioConfig"); ic != nil {
+	if ic, ok := c["istioConfig"].(map[string]interface{}); ok && ic != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
-				"disabled": flattenBool(ic["disabled"]),
-				"auth":     flattenString(ic["auth"]),
+				"disabled": ic["disabled"],
+				"auth":     ic["auth"],
 			},
 		}
 	}
 
-	if kc := getMap(c, "kalmConfig"); kc != nil {
+	if kc, ok := c["kalmConfig"].(map[string]interface{}); ok && kc != nil {
 		result["kalm_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(kc["enabled"]),
+				"enabled": kc["enabled"],
 			},
 		}
 	}
@@ -7886,50 +8481,54 @@ func flattenClusterNodePools(d *schema.ResourceData, config *transport_tpg.Confi
 	return nodePools, nil
 }
 
-func flattenAuthenticatorGroupsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenAuthenticatorGroupsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"security_group": flattenString(c["securityGroup"]),
+			"security_group": c["securityGroup"],
 		},
 	}
 }
 
-func flattenControlPlaneEndpointsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenControlPlaneEndpointsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"dns_endpoint_config": flattenDnsEndpointConfig(getMap(c, "dnsEndpointConfig")),
-			"ip_endpoints_config": flattenIpEndpointsConfig(getMap(c, "ipEndpointsConfig")),
+			"dns_endpoint_config": flattenDnsEndpointConfig(c["dnsEndpointConfig"]),
+			"ip_endpoints_config": flattenIpEndpointsConfig(c["ipEndpointsConfig"]),
 		},
 	}
 }
 
-func flattenDnsEndpointConfig(dns map[string]interface{}) []map[string]interface{} {
+func flattenDnsEndpointConfig(v interface{}) []map[string]interface{} {
+	dns, _ := v.(map[string]interface{})
 	if dns == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"endpoint":                  flattenString(dns["endpoint"]),
-			"allow_external_traffic":    flattenBool(dns["allowExternalTraffic"]),
-			"enable_k8s_tokens_via_dns": flattenBool(dns["enableK8sTokensViaDns"]),
-			"enable_k8s_certs_via_dns":  flattenBool(dns["enableK8sCertsViaDns"]),
+			"endpoint":                  dns["endpoint"],
+			"allow_external_traffic":    dns["allowExternalTraffic"],
+			"enable_k8s_tokens_via_dns": dns["enableK8sTokensViaDns"],
+			"enable_k8s_certs_via_dns":  dns["enableK8sCertsViaDns"],
 		},
 	}
 }
 
-func flattenIpEndpointsConfig(ip map[string]interface{}) []map[string]interface{} {
+func flattenIpEndpointsConfig(v interface{}) []map[string]interface{} {
+	ip, _ := v.(map[string]interface{})
 	if ip == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(ip["enabled"]),
+			"enabled": ip["enabled"],
 		},
 	}
 }
@@ -7942,46 +8541,49 @@ func flattenPrivateClusterConfig(cpec map[string]interface{}, pcc map[string]int
 
 	r := map[string]interface{}{}
 	if cpec != nil {
-		ip := getMap(cpec, "ipEndpointsConfig")
+		ip, _ := cpec["ipEndpointsConfig"].(map[string]interface{})
 		// Note the change in semantics from private to public endpoint.
-		r["enable_private_endpoint"] = !flattenBool(ip["enablePublicEndpoint"])
-		r["private_endpoint"] = flattenString(ip["privateEndpoint"])
-		r["private_endpoint_subnetwork"] = flattenString(ip["privateEndpointSubnetwork"])
-		r["public_endpoint"] = flattenString(ip["publicEndpoint"])
+		enablePublicEndpoint, _ := ip["enablePublicEndpoint"].(bool)
+		r["enable_private_endpoint"] = !enablePublicEndpoint
+		r["private_endpoint"] = ip["privateEndpoint"]
+		r["private_endpoint_subnetwork"] = ip["privateEndpointSubnetwork"]
+		r["public_endpoint"] = ip["publicEndpoint"]
 		r["master_global_access_config"] = []map[string]interface{}{
 			{
-				"enabled": flattenBool(ip["globalAccess"]),
+				"enabled": ip["globalAccess"],
 			},
 		}
 	}
 	// This is the only field that is canonically still in the PrivateClusterConfig message.
 	if pcc != nil {
-		r["peering_name"] = flattenString(pcc["peeringName"])
-		r["master_ipv4_cidr_block"] = flattenString(pcc["masterIpv4CidrBlock"])
+		r["peering_name"] = pcc["peeringName"]
+		r["master_ipv4_cidr_block"] = pcc["masterIpv4CidrBlock"]
 	}
 	if nc != nil {
-		r["enable_private_nodes"] = flattenBool(nc["defaultEnablePrivateNodes"])
+		r["enable_private_nodes"] = nc["defaultEnablePrivateNodes"]
 	}
 
 	return []map[string]interface{}{r}
 }
 
-func flattenVerticalPodAutoscaling(c map[string]interface{}) []map[string]interface{} {
+func flattenVerticalPodAutoscaling(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
 
-func flattenReleaseChannel(c map[string]interface{}) []map[string]interface{} {
+func flattenReleaseChannel(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	result := []map[string]interface{}{}
-	if c != nil && flattenString(c["channel"]) != "" {
+	if channel, ok := c["channel"].(string); c != nil && ok && channel != "" {
 		result = append(result, map[string]interface{}{
-			"channel": flattenString(c["channel"]),
+			"channel": channel,
 		})
 	} else {
 		// Explicitly set the release channel to the UNSPECIFIED.
@@ -7992,13 +8594,14 @@ func flattenReleaseChannel(c map[string]interface{}) []map[string]interface{} {
 	return result
 }
 
-func flattenGkeAutoUpgradeConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenGkeAutoUpgradeConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	result := []map[string]interface{}{}
-	if patchMode := flattenString(c["patchMode"]); patchMode != "" {
+	if patchMode, ok := c["patchMode"].(string); ok && patchMode != "" {
 		result = append(result, map[string]interface{}{
 			"patch_mode": patchMode,
 		})
@@ -8009,11 +8612,12 @@ func flattenGkeAutoUpgradeConfig(c map[string]interface{}) []map[string]interfac
 
 {{ if ne $.TargetVersionName `ga` -}}
 
-func flattenClusterTelemetry(c map[string]interface{}) []map[string]interface{} {
+func flattenClusterTelemetry(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"type": flattenString(c["type"]),
+			"type": c["type"],
 		})
 	}
 	return result
@@ -8021,53 +8625,58 @@ func flattenClusterTelemetry(c map[string]interface{}) []map[string]interface{} 
 
 {{ end }}
 
-func flattenDefaultSnatStatus(c map[string]interface{}) []map[string]interface{} {
+func flattenDefaultSnatStatus(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"disabled": flattenBool(c["disabled"]),
+			"disabled": c["disabled"],
 		})
 	}
 	return result
 }
 
-func flattenWorkloadIdentityConfig(c map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+func flattenWorkloadIdentityConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"workload_pool": flattenString(c["workloadPool"]),
+			"workload_pool": c["workloadPool"],
 		},
 	}
 }
 
-func flattenIdentityServiceConfig(c map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+func flattenIdentityServiceConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
 
-func flattenPodCidrOverprovisionConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenPodCidrOverprovisionConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"disabled": flattenBool(c["disable"]),
+			"disabled": c["disable"],
 		},
 	}
 }
 
-func flattenAdditionalIpRangesConfigs(c []interface{}) []map[string]interface{} {
+func flattenAdditionalIpRangesConfigs(v interface{}) []map[string]interface{} {
+	c, _ := v.([]interface{})
 	if len(c) == 0 {
 		return nil
 	}
@@ -8079,9 +8688,9 @@ func flattenAdditionalIpRangesConfigs(c []interface{}) []map[string]interface{} 
 			continue
 		}
 		outRangeConfig := map[string]interface{}{
-			"subnetwork":           flattenString(rangeConfig["subnetwork"]),
-			"pod_ipv4_range_names": flattenStringSlice(rangeConfig["podIpv4RangeNames"]),
-			"status":               flattenString(rangeConfig["status"]),
+			"subnetwork":           rangeConfig["subnetwork"],
+			"pod_ipv4_range_names": rangeConfig["podIpv4RangeNames"],
+			"status":               rangeConfig["status"],
 		}
 		outRanges = append(outRanges, outRangeConfig)
 	}
@@ -8089,22 +8698,23 @@ func flattenAdditionalIpRangesConfigs(c []interface{}) []map[string]interface{} 
 	return outRanges
 }
 
-func flattenNetworkTierConfig(ntc map[string]interface{}) []map[string]interface{} {
+func flattenNetworkTierConfig(v interface{}) []map[string]interface{} {
+	ntc, _ := v.(map[string]interface{})
 	if ntc == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"network_tier": flattenString(ntc["networkTier"]),
+			"network_tier": ntc["networkTier"],
 		},
 	}
 }
 
 func flattenIPAllocationPolicy(c map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
-	p := getMap(c, "ipAllocationPolicy")
+	p, _ := c["ipAllocationPolicy"].(map[string]interface{})
 	// If IP aliasing isn't enabled, none of the values in this block can be set.
-	if c == nil || p == nil || !flattenBool(p["useIpAliases"]) {
+	if useIpAliases, ok := p["useIpAliases"].(bool); c == nil || p == nil || !ok || !useIpAliases {
 		if err := d.Set("networking_mode", "ROUTES"); err != nil {
 			return nil, fmt.Errorf("Error setting networking_mode: %s", err)
 		}
@@ -8117,62 +8727,64 @@ func flattenIPAllocationPolicy(c map[string]interface{}, d *schema.ResourceData,
 	// handle older clusters that return JSON null
 	// corresponding to "STACK_TYPE_UNSPECIFIED" due to GKE declining to backfill
 	// equivalent to default_if_empty
-	stackType := flattenString(p["stackType"])
+	stackType, _ := p["stackType"].(string)
 	if stackType == "" {
 		stackType = "IPV4"
 	}
 
 	return []map[string]interface{}{
 		{
-			"cluster_ipv4_cidr_block":       flattenString(p["clusterIpv4CidrBlock"]),
-			"services_ipv4_cidr_block":      flattenString(p["servicesIpv4CidrBlock"]),
-			"cluster_secondary_range_name":  flattenString(p["clusterSecondaryRangeName"]),
-			"services_secondary_range_name": flattenString(p["servicesSecondaryRangeName"]),
+			"cluster_ipv4_cidr_block":       p["clusterIpv4CidrBlock"],
+			"services_ipv4_cidr_block":      p["servicesIpv4CidrBlock"],
+			"cluster_secondary_range_name":  p["clusterSecondaryRangeName"],
+			"services_secondary_range_name": p["servicesSecondaryRangeName"],
 			"stack_type":                    stackType,
-			"pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(getMap(p, "podCidrOverprovisionConfig")),
+			"pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(p["podCidrOverprovisionConfig"]),
 			"additional_pod_ranges_config":  flattenAdditionalPodRangesConfig(p),
-			"additional_ip_ranges_config":   flattenAdditionalIpRangesConfigs(getSlice(p, "additionalIpRangesConfigs")),
-			"auto_ipam_config":              flattenAutoIpamConfig(getMap(p, "autoIpamConfig")),
-			"network_tier_config":           flattenNetworkTierConfig(getMap(p, "networkTierConfig")),
+			"additional_ip_ranges_config":   flattenAdditionalIpRangesConfigs(p["additionalIpRangesConfigs"]),
+			"auto_ipam_config":              flattenAutoIpamConfig(p["autoIpamConfig"]),
+			"network_tier_config":           flattenNetworkTierConfig(p["networkTierConfig"]),
 		},
 	}, nil
 }
 
-func flattenAutoIpamConfig(aic map[string]interface{}) []map[string]interface{} {
+func flattenAutoIpamConfig(v interface{}) []map[string]interface{} {
+	aic, _ := v.(map[string]interface{})
 	if aic == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(aic["enabled"]),
+			"enabled": aic["enabled"],
 		},
 	}
 }
 
-func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{} {
-	mpWindow := getMap(mp, "window")
+func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
+	mp, _ := v.(map[string]interface{})
+	mpWindow, _ := mp["window"].(map[string]interface{})
 	if mp == nil || mpWindow == nil {
 		return nil
 	}
 
 	exclusions := []map[string]interface{}{}
-	if maintExclusions := getMap(mpWindow, "maintenanceExclusions"); maintExclusions != nil {
-		for wName := range maintExclusions {
-			window := getMap(maintExclusions, wName)
+	if maintExclusions, ok := mpWindow["maintenanceExclusions"].(map[string]interface{}); ok && maintExclusions != nil {
+		for wName, rawWin := range maintExclusions {
+			window, _ := rawWin.(map[string]interface{})
 			exclusion := map[string]interface{}{
-				"start_time":     flattenString(window["startTime"]),
+				"start_time":     window["startTime"],
 				"exclusion_name": wName,
 			}
-			if meo := getMap(window, "maintenanceExclusionOptions"); meo != nil {
+			if meo, ok := window["maintenanceExclusionOptions"].(map[string]interface{}); ok && meo != nil {
 				// When the scope is set to NO_UPGRADES which is the default value,
 				// the maintenance exclusion returned by GCP will be empty.
 				// This seems like a bug. To workaround this, assign NO_UPGRADES to the scope explicitly
 				scope := "NO_UPGRADES"
-				if s := flattenString(meo["scope"]); s != "" {
+				if s, ok := meo["scope"].(string); ok && s != "" {
 					scope = s
 				}
-				if etb := flattenString(meo["endTimeBehavior"]); etb != "" {
+				if etb, ok := meo["endTimeBehavior"].(string); ok && etb != "" {
 					exclusion["exclusion_options"] = []map[string]interface{}{
 						{
 							"scope":             scope,
@@ -8185,12 +8797,12 @@ func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{
 							"scope": scope,
 						},
 					}
-					if et := flattenString(window["endTime"]); et != "" {
+					if et, ok := window["endTime"].(string); ok && et != "" {
 						exclusion["end_time"] = et
 					}
 				}
 			} else {
-				if et := flattenString(window["endTime"]); et != "" {
+				if et, ok := window["endTime"].(string); ok && et != "" {
 					exclusion["end_time"] = et
 				}
 			}
@@ -8198,18 +8810,18 @@ func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{
 		}
 	}
 	var budget []map[string]interface{}
-	if db := getMap(mp, "disruptionBudget"); db != nil {
+	if db, ok := mp["disruptionBudget"].(map[string]interface{}); ok && db != nil {
 		m := make(map[string]interface{})
-		if v := flattenString(db["minorVersionDisruptionInterval"]); v != "" {
+		if v, ok := db["minorVersionDisruptionInterval"].(string); ok && v != "" {
 			m["minor_version_disruption_interval"] = v
 		}
-		if v := flattenString(db["patchVersionDisruptionInterval"]); v != "" {
+		if v, ok := db["patchVersionDisruptionInterval"].(string); ok && v != "" {
 			m["patch_version_disruption_interval"] = v
 		}
-		if v := flattenString(db["lastMinorVersionDisruptionTime"]); v != "" {
+		if v, ok := db["lastMinorVersionDisruptionTime"].(string); ok && v != "" {
 			m["last_minor_version_disruption_time"] = v
 		}
-		if v := flattenString(db["lastDisruptionTime"]); v != "" {
+		if v, ok := db["lastDisruptionTime"].(string); ok && v != "" {
 			m["last_disruption_time"] = v
 		}
 		if len(m) > 0 {
@@ -8217,13 +8829,13 @@ func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{
 		}
 	}
 
-	if dmw := getMap(mpWindow, "dailyMaintenanceWindow"); dmw != nil {
+	if dmw, ok := mpWindow["dailyMaintenanceWindow"].(map[string]interface{}); ok && dmw != nil {
 		return []map[string]interface{}{
 			{
 				"daily_maintenance_window": []map[string]interface{}{
 					{
-						"start_time": flattenString(dmw["startTime"]),
-						"duration":   flattenString(dmw["duration"]),
+						"start_time": dmw["startTime"],
+						"duration":   dmw["duration"],
 					},
 				},
 				"maintenance_exclusion": exclusions,
@@ -8231,15 +8843,15 @@ func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{
 			},
 		}
 	}
-	if rw := getMap(mpWindow, "recurringWindow"); rw != nil {
-		rwWin := getMap(rw, "window")
+	if rw, ok := mpWindow["recurringWindow"].(map[string]interface{}); ok && rw != nil {
+		rwWin, _ := rw["window"].(map[string]interface{})
 		return []map[string]interface{}{
 			{
 				"recurring_window": []map[string]interface{}{
 					{
-						"start_time": flattenString(rwWin["startTime"]),
-						"end_time":   flattenString(rwWin["endTime"]),
-						"recurrence": flattenString(rw["recurrence"]),
+						"start_time": rwWin["startTime"],
+						"end_time":   rwWin["endTime"],
+						"recurrence": rw["recurrence"],
 					},
 				},
 				"maintenance_exclusion": exclusions,
@@ -8247,33 +8859,33 @@ func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{
 			},
 		}
 	}
-	if rmw := getMap(mpWindow, "recurringMaintenanceWindow"); rmw != nil {
-		wst := getMap(rmw, "windowStartTime")
+	if rmw, ok := mpWindow["recurringMaintenanceWindow"].(map[string]interface{}); ok && rmw != nil {
+		wst, _ := rmw["windowStartTime"].(map[string]interface{})
 		window := []map[string]interface{}{
 			{
 				"recurring_maintenance_window": []map[string]interface{}{
 					{
 						"window_start_time": []map[string]interface{}{
 							{
-								"hours":   flattenInt(wst["hours"]),
-								"minutes": flattenInt(wst["minutes"]),
-								"seconds": flattenInt(wst["seconds"]),
+								"hours":   wst["hours"],
+								"minutes": wst["minutes"],
+								"seconds": wst["seconds"],
 							},
 						},
-						"window_duration": flattenString(rmw["windowDuration"]),
-						"recurrence":      flattenString(rmw["recurrence"]),
+						"window_duration": rmw["windowDuration"],
+						"recurrence":      rmw["recurrence"],
 					},
 				},
 				"maintenance_exclusion": exclusions,
 			},
 		}
 
-		if du := getMap(rmw, "delayUntil"); du != nil {
+		if du, ok := rmw["delayUntil"].(map[string]interface{}); ok && du != nil {
 			window[0]["recurring_maintenance_window"].([]map[string]interface{})[0]["delay_until"] = []map[string]interface{}{
 				{
-					"year":  flattenInt(du["year"]),
-					"month": flattenInt(du["month"]),
-					"day":   flattenInt(du["day"]),
+					"year":  du["year"],
+					"month": du["month"],
+					"day":   du["day"],
 				},
 			}
 		}
@@ -8282,16 +8894,17 @@ func flattenMaintenancePolicy(mp map[string]interface{}) []map[string]interface{
 	return nil
 }
 
-func flattenMasterAuth(ma map[string]interface{}) []map[string]interface{} {
+func flattenMasterAuth(v interface{}) []map[string]interface{} {
+	ma, _ := v.(map[string]interface{})
 	if ma == nil {
 		return nil
 	}
-	clientCert := flattenString(ma["clientCertificate"])
+	clientCert, _ := ma["clientCertificate"].(string)
 	masterAuth := []map[string]interface{}{
 		{
 			"client_certificate":     clientCert,
-			"client_key":             flattenString(ma["clientKey"]),
-			"cluster_ca_certificate": flattenString(ma["clusterCaCertificate"]),
+			"client_key":             ma["clientKey"],
+			"cluster_ca_certificate": ma["clusterCaCertificate"],
 		},
 	}
 
@@ -8309,139 +8922,159 @@ func flattenMasterAuth(ma map[string]interface{}) []map[string]interface{} {
 	return masterAuth
 }
 
-func flattenClusterAutoscaling(a map[string]interface{}) []map[string]interface{} {
+func flattenClusterAutoscaling(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
 	r := make(map[string]interface{})
 	if a == nil {
 		r["enabled"] = false
 		return []map[string]interface{}{r}
 	}
 
-	r["enabled"] = flattenBool(a["enableNodeAutoprovisioning"])
-	rawLimits := getSlice(a, "resourceLimits")
+	r["enabled"] = a["enableNodeAutoprovisioning"]
+	rawLimits, _ := a["resourceLimits"].([]interface{})
 	resourceLimits := make([]interface{}, 0, len(rawLimits))
 	for _, rawRl := range rawLimits {
 		rl, ok := rawRl.(map[string]interface{})
 		if !ok || rl == nil {
 			continue
 		}
+		var minimum, maximum interface{} = rl["minimum"], rl["maximum"]
+		if v, ok := minimum.(string); ok {
+			minimum, _ = strconv.Atoi(v)
+		}
+		if v, ok := maximum.(string); ok {
+			maximum, _ = strconv.Atoi(v)
+		}
 		resourceLimits = append(resourceLimits, map[string]interface{}{
-			"resource_type": flattenString(rl["resourceType"]),
-			"minimum":       flattenInt(rl["minimum"]),
-			"maximum":       flattenInt(rl["maximum"]),
+			"resource_type": rl["resourceType"],
+			"minimum":       minimum,
+			"maximum":       maximum,
 		})
 	}
 	r["resource_limits"] = resourceLimits
-	r["autoscaling_profile"] = flattenString(a["autoscalingProfile"])
-	if npd := getMap(a, "autoprovisioningNodePoolDefaults"); npd != nil {
+	r["autoscaling_profile"] = a["autoscalingProfile"]
+	if npd, ok := a["autoprovisioningNodePoolDefaults"].(map[string]interface{}); ok && npd != nil {
 		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(npd)
 	}
-	r["auto_provisioning_locations"] = flattenStringSlice(a["autoprovisioningLocations"])
+	r["auto_provisioning_locations"] = a["autoprovisioningLocations"]
 
-	if dccc := getMap(a, "defaultComputeClassConfig"); dccc != nil {
-		r["default_compute_class_enabled"] = flattenBool(dccc["enabled"])
+	if dccc, ok := a["defaultComputeClassConfig"].(map[string]interface{}); ok && dccc != nil {
+		r["default_compute_class_enabled"] = dccc["enabled"]
 	}
 
 	return []map[string]interface{}{r}
 }
 
-func flattenAutoProvisioningDefaults(a map[string]interface{}) []map[string]interface{} {
+func flattenAutoProvisioningDefaults(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
+	if a == nil {
+		return nil
+	}
+	sic, _ := a["shieldedInstanceConfig"].(map[string]interface{})
 	r := make(map[string]interface{})
-	r["oauth_scopes"] = flattenStringSlice(a["oauthScopes"])
-	r["service_account"] = flattenString(a["serviceAccount"])
-	r["disk_size"] = flattenInt(a["diskSizeGb"])
-	r["disk_type"] = flattenString(a["diskType"])
-	r["image_type"] = flattenString(a["imageType"])
-	r["min_cpu_platform"] = flattenString(a["minCpuPlatform"])
-	r["boot_disk_kms_key"] = flattenString(a["bootDiskKmsKey"])
-	r["shielded_instance_config"] = flattenShieldedInstanceConfig(getMap(a, "shieldedInstanceConfig"))
-	r["management"] = flattenManagement(getMap(a, "management"))
-	r["upgrade_settings"] = flattenUpgradeSettings(getMap(a, "upgradeSettings"))
+	r["oauth_scopes"] = a["oauthScopes"]
+	r["service_account"] = a["serviceAccount"]
+	r["disk_size"] = a["diskSizeGb"]
+	r["disk_type"] = a["diskType"]
+	r["image_type"] = a["imageType"]
+	r["min_cpu_platform"] = a["minCpuPlatform"]
+	r["boot_disk_kms_key"] = a["bootDiskKmsKey"]
+	r["shielded_instance_config"] = flattenShieldedInstanceConfig(sic)
+	r["management"] = flattenManagement(a["management"])
+	r["upgrade_settings"] = flattenUpgradeSettings(a["upgradeSettings"])
 
 	return []map[string]interface{}{r}
 }
 
-func flattenUpgradeSettings(a map[string]interface{}) []map[string]interface{} {
+func flattenUpgradeSettings(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
 	if a == nil {
 		return nil
 	}
 	r := make(map[string]interface{})
-	r["max_surge"] = flattenInt(a["maxSurge"])
-	r["max_unavailable"] = flattenInt(a["maxUnavailable"])
-	r["strategy"] = flattenString(a["strategy"])
-	r["blue_green_settings"] = flattenBlueGreenSettings(getMap(a, "blueGreenSettings"))
+	r["max_surge"] = a["maxSurge"]
+	r["max_unavailable"] = a["maxUnavailable"]
+	r["strategy"] = a["strategy"]
+	r["blue_green_settings"] = flattenBlueGreenSettings(a["blueGreenSettings"])
 
 	return []map[string]interface{}{r}
 }
 
-func flattenClusterPolicyConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenClusterPolicyConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"no_system_mutation":      flattenBool(c["noSystemMutation"]),
-			"no_system_impersonation": flattenBool(c["noSystemImpersonation"]),
-			"no_unsafe_webhooks":      flattenBool(c["noUnsafeWebhooks"]),
-			"no_standard_node_pools":  flattenBool(c["noStandardNodePools"]),
+			"no_system_mutation":      c["noSystemMutation"],
+			"no_system_impersonation": c["noSystemImpersonation"],
+			"no_unsafe_webhooks":      c["noUnsafeWebhooks"],
+			"no_standard_node_pools":  c["noStandardNodePools"],
 		},
 	}
 }
 
-func flattenBlueGreenSettings(a map[string]interface{}) []map[string]interface{} {
+func flattenBlueGreenSettings(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
 	if a == nil {
 		return nil
 	}
 
 	r := make(map[string]interface{})
-	r["node_pool_soak_duration"] = flattenString(a["nodePoolSoakDuration"])
-	r["standard_rollout_policy"] = flattenStandardRolloutPolicy(getMap(a, "standardRolloutPolicy"))
+	r["node_pool_soak_duration"] = a["nodePoolSoakDuration"]
+	r["standard_rollout_policy"] = flattenStandardRolloutPolicy(a["standardRolloutPolicy"])
 
 	return []map[string]interface{}{r}
 }
 
-func flattenStandardRolloutPolicy(a map[string]interface{}) []map[string]interface{} {
+func flattenStandardRolloutPolicy(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
 	if a == nil {
 		return nil
 	}
 
 	r := make(map[string]interface{})
-	r["batch_percentage"] = flattenFloat(a["batchPercentage"])
-	r["batch_node_count"] = flattenInt(a["batchNodeCount"])
-	r["batch_soak_duration"] = flattenString(a["batchSoakDuration"])
+	r["batch_percentage"] = a["batchPercentage"]
+	r["batch_node_count"] = a["batchNodeCount"]
+	r["batch_soak_duration"] = a["batchSoakDuration"]
 
 	return []map[string]interface{}{r}
 }
 
-func flattenManagement(a map[string]interface{}) []map[string]interface{} {
+func flattenManagement(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
 	if a == nil {
 		return nil
 	}
 	r := make(map[string]interface{})
-	r["auto_upgrade"] = flattenBool(a["autoUpgrade"])
-	r["auto_repair"] = flattenBool(a["autoRepair"])
-	r["upgrade_options"] = flattenUpgradeOptions(getMap(a, "upgradeOptions"))
+	r["auto_upgrade"] = a["autoUpgrade"]
+	r["auto_repair"] = a["autoRepair"]
+	r["upgrade_options"] = flattenUpgradeOptions(a["upgradeOptions"])
 
 	return []map[string]interface{}{r}
 }
 
-func flattenUpgradeOptions(a map[string]interface{}) []map[string]interface{} {
+func flattenUpgradeOptions(v interface{}) []map[string]interface{} {
+	a, _ := v.(map[string]interface{})
 	if a == nil {
 		return nil
 	}
 
 	r := make(map[string]interface{})
-	r["auto_upgrade_start_time"] = flattenString(a["autoUpgradeStartTime"])
-	r["description"] = flattenString(a["description"])
+	r["auto_upgrade_start_time"] = a["autoUpgradeStartTime"]
+	r["description"] = a["description"]
 
 	return []map[string]interface{}{r}
 }
 
-func flattenMasterAuthorizedNetworksConfig(c map[string]interface{}) []map[string]interface{} {
-	if c == nil || !flattenBool(c["enabled"]) {
+func flattenMasterAuthorizedNetworksConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
+	if enabled, ok := c["enabled"].(bool); c == nil || !ok || !enabled {
 		return nil
 	}
 	result := make(map[string]interface{})
-	rawCidrBlocks := getSlice(c, "cidrBlocks")
+	rawCidrBlocks, _ := c["cidrBlocks"].([]interface{})
 	cidrBlocks := make([]interface{}, 0, len(rawCidrBlocks))
 	for _, rawV := range rawCidrBlocks {
 		v, ok := rawV.(map[string]interface{})
@@ -8449,18 +9082,19 @@ func flattenMasterAuthorizedNetworksConfig(c map[string]interface{}) []map[strin
 			continue
 		}
 		cidrBlocks = append(cidrBlocks, map[string]interface{}{
-			"cidr_block":   flattenString(v["cidrBlock"]),
-			"display_name": flattenString(v["displayName"]),
+			"cidr_block":   v["cidrBlock"],
+			"display_name": v["displayName"],
 		})
 	}
 	result["cidr_blocks"] = schema.NewSet(schema.HashResource(cidrBlockConfig), cidrBlocks)
-	result["gcp_public_cidrs_access_enabled"] = flattenBool(c["gcpPublicCidrsAccessEnabled"])
-	result["private_endpoint_enforcement_enabled"] = flattenBool(c["privateEndpointEnforcementEnabled"])
+	result["gcp_public_cidrs_access_enabled"] = c["gcpPublicCidrsAccessEnabled"]
+	result["private_endpoint_enforcement_enabled"] = c["privateEndpointEnforcementEnabled"]
 	return []map[string]interface{}{result}
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenPodSecurityPolicyConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenPodSecurityPolicyConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return []map[string]interface{}{
 			{
@@ -8470,12 +9104,13 @@ func flattenPodSecurityPolicyConfig(c map[string]interface{}) []map[string]inter
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
 {{ end }}
-func flattenPodAutoscaling(c map[string]interface{}) []map[string]interface{} {
+func flattenPodAutoscaling(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	config := make([]map[string]interface{}, 0, 1)
 
 	if c == nil {
@@ -8483,12 +9118,13 @@ func flattenPodAutoscaling(c map[string]interface{}) []map[string]interface{} {
 	}
 
 	config = append(config, map[string]interface{}{
-		"hpa_profile": flattenString(c["hpaProfile"]),
+		"hpa_profile": c["hpaProfile"],
 	})
 	return config
 }
 
-func flattenSecretManagerConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenSecretManagerConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return []map[string]interface{}{
 			{
@@ -8499,14 +9135,14 @@ func flattenSecretManagerConfig(c map[string]interface{}) []map[string]interface
 
 	result := make(map[string]interface{})
 
-	result["enabled"] = flattenBool(c["enabled"])
+	result["enabled"] = c["enabled"]
 
 	rotationList := []map[string]interface{}{}
-	if rc := getMap(c, "rotationConfig"); rc != nil {
+	if rc, ok := c["rotationConfig"].(map[string]interface{}); ok && rc != nil {
 		rotationConfigMap := map[string]interface{}{
-			"enabled": flattenBool(rc["enabled"]),
+			"enabled": rc["enabled"],
 		}
-		if ri := flattenString(rc["rotationInterval"]); ri != "" {
+		if ri, ok := rc["rotationInterval"].(string); ok && ri != "" {
 			rotationConfigMap["rotation_interval"] = ri
 		}
 		rotationList = append(rotationList, rotationConfigMap)
@@ -8515,7 +9151,8 @@ func flattenSecretManagerConfig(c map[string]interface{}) []map[string]interface
 	return []map[string]interface{}{result}
 }
 
-func flattenSecretSyncConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenSecretSyncConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return []map[string]interface{}{
 			{
@@ -8526,14 +9163,14 @@ func flattenSecretSyncConfig(c map[string]interface{}) []map[string]interface{} 
 
 	result := make(map[string]interface{})
 
-	result["enabled"] = flattenBool(c["enabled"])
+	result["enabled"] = c["enabled"]
 
 	rotationList := []map[string]interface{}{}
-	if rc := getMap(c, "rotationConfig"); rc != nil {
+	if rc, ok := c["rotationConfig"].(map[string]interface{}); ok && rc != nil {
 		rotationConfigMap := map[string]interface{}{
-			"enabled": flattenBool(rc["enabled"]),
+			"enabled": rc["enabled"],
 		}
-		if ri := flattenString(rc["rotationInterval"]); ri != "" {
+		if ri, ok := rc["rotationInterval"].(string); ok && ri != "" {
 			rotationConfigMap["rotation_interval"] = ri
 		}
 		rotationList = append(rotationList, rotationConfigMap)
@@ -8542,24 +9179,27 @@ func flattenSecretSyncConfig(c map[string]interface{}) []map[string]interface{} 
 	return []map[string]interface{}{result}
 }
 
-func flattenResourceUsageExportConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenResourceUsageExportConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	enableResourceConsumptionMetering := false
-	if cmc := getMap(c, "consumptionMeteringConfig"); cmc != nil && flattenBool(cmc["enabled"]) {
-		enableResourceConsumptionMetering = true
+	if cmc, ok := c["consumptionMeteringConfig"].(map[string]interface{}); ok && cmc != nil {
+		if enabled, ok := cmc["enabled"].(bool); ok && enabled {
+			enableResourceConsumptionMetering = true
+		}
 	}
 
-	var datasetId string
-	if bqd := getMap(c, "bigqueryDestination"); bqd != nil {
-		datasetId = flattenString(bqd["datasetId"])
+	var datasetId interface{}
+	if bqd, ok := c["bigqueryDestination"].(map[string]interface{}); ok && bqd != nil {
+		datasetId = bqd["datasetId"]
 	}
 
 	return []map[string]interface{}{
 		{
-			"enable_network_egress_metering":       flattenBool(c["enableNetworkEgressMetering"]),
+			"enable_network_egress_metering":       c["enableNetworkEgressMetering"],
 			"enable_resource_consumption_metering": enableResourceConsumptionMetering,
 			"bigquery_destination": []map[string]interface{}{
 				{"dataset_id": datasetId},
@@ -8568,95 +9208,103 @@ func flattenResourceUsageExportConfig(c map[string]interface{}) []map[string]int
 	}
 }
 
-func flattenServiceExternalIpsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenServiceExternalIpsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
 
-func flattenMeshCertificates(c map[string]interface{}) []map[string]interface{} {
+func flattenMeshCertificates(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enable_certificates": flattenBool(c["enableCertificates"]),
+			"enable_certificates": c["enableCertificates"],
 		},
 	}
 }
 
-func flattenManagementConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenManagementConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
 
-func flattenDatabaseEncryption(c map[string]interface{}) []map[string]interface{} {
+func flattenDatabaseEncryption(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"state":    flattenString(c["state"]),
-			"key_name": flattenString(c["keyName"]),
+			"state":    c["state"],
+			"key_name": c["keyName"],
 		},
 	}
 }
 
-func flattenDnsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenDnsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"additive_vpc_scope_dns_domain": flattenString(c["additiveVpcScopeDnsDomain"]),
-			"cluster_dns":                   flattenString(c["clusterDns"]),
-			"cluster_dns_scope":             flattenString(c["clusterDnsScope"]),
-			"cluster_dns_domain":            flattenString(c["clusterDnsDomain"]),
+			"additive_vpc_scope_dns_domain": c["additiveVpcScopeDnsDomain"],
+			"cluster_dns":                   c["clusterDns"],
+			"cluster_dns_scope":             c["clusterDnsScope"],
+			"cluster_dns_domain":            c["clusterDnsDomain"],
 		},
 	}
 }
 
-func flattenNetworkPerformanceConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenNetworkPerformanceConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"total_egress_bandwidth_tier": flattenString(c["totalEgressBandwidthTier"]),
+			"total_egress_bandwidth_tier": c["totalEgressBandwidthTier"],
 		},
 	}
 }
 
-func flattenGatewayApiConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenGatewayApiConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"channel": flattenString(c["channel"]),
+			"channel": c["channel"],
 		},
 	}
 }
 
-func flattenFleet(c map[string]interface{}) []map[string]interface{} {
+func flattenFleet(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	// Parse membership_id and membership_location from full membership name.
 	var membership_id, membership_location string
-	membership := flattenString(c["membership"])
+	membership, _ := c["membership"].(string)
 	membershipRE := regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
 	if match := membershipRE.FindStringSubmatch(membership); match != nil {
 		membership_id = match[4]
@@ -8665,12 +9313,12 @@ func flattenFleet(c map[string]interface{}) []map[string]interface{} {
 
 	return []map[string]interface{}{
 		{
-			"project":             flattenString(c["project"]),
+			"project":             c["project"],
 			"membership":          membership,
 			"membership_id":       membership_id,
 			"membership_location": membership_location,
-			"pre_registered":      flattenBool(c["preRegistered"]),
-			"membership_type":     flattenString(c["membershipType"]),
+			"pre_registered":      c["preRegistered"],
+			"membership_type":     c["membershipType"],
 		},
 	}
 }
@@ -8679,13 +9327,19 @@ func flattenUserManagedKeysConfig(c map[string]interface{}) []map[string]interfa
 	if c == nil {
 		return nil
 	}
+	clusterCa, _ := c["clusterCa"].(string)
+	etcdApiCa, _ := c["etcdApiCa"].(string)
+	etcdPeerCa, _ := c["etcdPeerCa"].(string)
+	aggregationCa, _ := c["aggregationCa"].(string)
+	controlPlaneDiskEncryptionKey, _ := c["controlPlaneDiskEncryptionKey"].(string)
+	gkeopsEtcdBackupEncryptionKey, _ := c["gkeopsEtcdBackupEncryptionKey"].(string)
 	f := map[string]interface{}{
-		"cluster_ca":                        flattenString(c["clusterCa"]),
-		"etcd_api_ca":                       flattenString(c["etcdApiCa"]),
-		"etcd_peer_ca":                      flattenString(c["etcdPeerCa"]),
-		"aggregation_ca":                    flattenString(c["aggregationCa"]),
-		"control_plane_disk_encryption_key": flattenString(c["controlPlaneDiskEncryptionKey"]),
-		"gkeops_etcd_backup_encryption_key": flattenString(c["gkeopsEtcdBackupEncryptionKey"]),
+		"cluster_ca":                        clusterCa,
+		"etcd_api_ca":                       etcdApiCa,
+		"etcd_peer_ca":                      etcdPeerCa,
+		"aggregation_ca":                    aggregationCa,
+		"control_plane_disk_encryption_key": controlPlaneDiskEncryptionKey,
+		"gkeops_etcd_backup_encryption_key": gkeopsEtcdBackupEncryptionKey,
 	}
 	allEmpty := true
 	for _, v := range f {
@@ -8693,15 +9347,24 @@ func flattenUserManagedKeysConfig(c map[string]interface{}) []map[string]interfa
 			allEmpty = false
 		}
 	}
-	if sk := flattenStringSlice(c["serviceAccountSigningKeys"]); len(sk) != 0 {
+	if sk, ok := c["serviceAccountSigningKeys"].([]interface{}); ok && len(sk) != 0 {
+		f["service_account_signing_keys"] = schema.NewSet(schema.HashString, sk)
+		allEmpty = false
+	} else if sk, ok := c["serviceAccountSigningKeys"].([]string); ok && len(sk) != 0 {
 		f["service_account_signing_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(sk))
 		allEmpty = false
 	}
-	if vk := flattenStringSlice(c["serviceAccountVerificationKeys"]); len(vk) != 0 {
+	if vk, ok := c["serviceAccountVerificationKeys"].([]interface{}); ok && len(vk) != 0 {
+		f["service_account_verification_keys"] = schema.NewSet(schema.HashString, vk)
+		allEmpty = false
+	} else if vk, ok := c["serviceAccountVerificationKeys"].([]string); ok && len(vk) != 0 {
 		f["service_account_verification_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(vk))
 		allEmpty = false
 	}
-	if kv := flattenStringSlice(c["controlPlaneDiskEncryptionKeyVersions"]); len(kv) != 0 {
+	if kv, ok := c["controlPlaneDiskEncryptionKeyVersions"].([]interface{}); ok && len(kv) != 0 {
+		f["control_plane_disk_encryption_key_versions"] = schema.NewSet(schema.HashString, kv)
+		allEmpty = false
+	} else if kv, ok := c["controlPlaneDiskEncryptionKeyVersions"].([]string); ok && len(kv) != 0 {
 		f["control_plane_disk_encryption_key_versions"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(kv))
 		allEmpty = false
 	}
@@ -8711,76 +9374,83 @@ func flattenUserManagedKeysConfig(c map[string]interface{}) []map[string]interfa
 	return []map[string]interface{}{f}
 }
 
-func flattenEnableK8sBetaApis(c map[string]interface{}) []map[string]interface{} {
+func flattenEnableK8sBetaApis(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled_apis": flattenStringSlice(c["enabledApis"]),
+			"enabled_apis": c["enabledApis"],
 		},
 	}
 }
 
-func flattenContainerClusterLoggingConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenContainerClusterLoggingConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
-	cc := getMap(c, "componentConfig")
+	cc, _ := c["componentConfig"].(map[string]interface{})
 	return []map[string]interface{}{
 		{
-			"enable_components": flattenStringSlice(cc["enableComponents"]),
+			"enable_components": cc["enableComponents"],
 		},
 	}
 }
 
-func flattenMonitoringConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenMonitoringConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
-	if cc := getMap(c, "componentConfig"); cc != nil {
-		result["enable_components"] = flattenStringSlice(cc["enableComponents"])
+	if cc, ok := c["componentConfig"].(map[string]interface{}); ok && cc != nil {
+		result["enable_components"] = cc["enableComponents"]
 	}
-	if mpc := getMap(c, "managedPrometheusConfig"); mpc != nil {
+	if mpc, ok := c["managedPrometheusConfig"].(map[string]interface{}); ok && mpc != nil {
 		result["managed_prometheus"] = flattenManagedPrometheusConfig(mpc)
 	}
-	if adoc := getMap(c, "advancedDatapathObservabilityConfig"); adoc != nil {
+	if adoc, ok := c["advancedDatapathObservabilityConfig"].(map[string]interface{}); ok && adoc != nil {
 		result["advanced_datapath_observability_config"] = flattenAdvancedDatapathObservabilityConfig(adoc)
 	}
 
 	return []map[string]interface{}{result}
 }
 
-func flattenAdvancedDatapathObservabilityConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenAdvancedDatapathObservabilityConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"enable_metrics": flattenBool(c["enableMetrics"]),
-			"enable_relay":   flattenBool(c["enableRelay"]),
+			"enable_metrics": c["enableMetrics"],
+			"enable_relay":   c["enableRelay"],
 		},
 	}
 }
 
-func flattenManagedPrometheusConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenManagedPrometheusConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
-	result["enabled"] = flattenBool(c["enabled"])
+	result["enabled"] = c["enabled"]
 
 	autoMonitoringList := []map[string]interface{}{}
-	if amc := getMap(c, "autoMonitoringConfig"); amc != nil && flattenString(amc["scope"]) != "" {
-		autoMonitoringMap := map[string]interface{}{
-			"scope": flattenString(amc["scope"]),
+	if amc, ok := c["autoMonitoringConfig"].(map[string]interface{}); ok && amc != nil {
+		if scope, ok := amc["scope"].(string); ok && scope != "" {
+			autoMonitoringMap := map[string]interface{}{
+				"scope": scope,
+			}
+			autoMonitoringList = append(autoMonitoringList, autoMonitoringMap)
 		}
-		autoMonitoringList = append(autoMonitoringList, autoMonitoringMap)
 	}
 
 	result["auto_monitoring_config"] = autoMonitoringList
@@ -8788,26 +9458,27 @@ func flattenManagedPrometheusConfig(c map[string]interface{}) []map[string]inter
 	return []map[string]interface{}{result}
 }
 
-func flattenNodePoolAutoConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenNodePoolAutoConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
-	if nkc := getMap(c, "nodeKubeletConfig"); nkc != nil {
+	if nkc, ok := c["nodeKubeletConfig"].(map[string]interface{}); ok && nkc != nil {
 		result["node_kubelet_config"] = flattenNodePoolAutoConfigNodeKubeletConfig(nkc)
 	}
-	if nt := getMap(c, "networkTags"); nt != nil {
+	if nt, ok := c["networkTags"].(map[string]interface{}); ok && nt != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(nt)
 	}
-	if rmt := getMap(c, "resourceManagerTags"); rmt != nil {
+	if rmt, ok := c["resourceManagerTags"].(map[string]interface{}); ok && rmt != nil {
 		result["resource_manager_tags"] = flattenResourceManagerTags(rmt)
 	}
-	if lnc := getMap(c, "linuxNodeConfig"); lnc != nil {
+	if lnc, ok := c["linuxNodeConfig"].(map[string]interface{}); ok && lnc != nil {
 		linuxNodeConfig := map[string]interface{}{
-			"cgroup_mode": flattenString(lnc["cgroupMode"]),
+			"cgroup_mode": lnc["cgroupMode"],
 		}
-		if nkml := getMap(lnc, "nodeKernelModuleLoading"); nkml != nil {
+		if nkml, ok := lnc["nodeKernelModuleLoading"].(map[string]interface{}); ok && nkml != nil {
 			linuxNodeConfig["node_kernel_module_loading"] = flattenNodeKernelModuleLoading(nkml)
 		}
 		result["linux_node_config"] = []map[string]interface{}{linuxNodeConfig}
@@ -8816,52 +9487,56 @@ func flattenNodePoolAutoConfig(c map[string]interface{}) []map[string]interface{
 	return []map[string]interface{}{result}
 }
 
-func flattenNodePoolAutoConfigNetworkTags(c map[string]interface{}) []map[string]interface{} {
+func flattenNodePoolAutoConfigNetworkTags(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 
 	result := make(map[string]interface{})
 	if c["tags"] != nil {
-		result["tags"] = flattenStringSlice(c["tags"])
+		result["tags"] = c["tags"]
 	}
 	return []map[string]interface{}{result}
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenWorkloadAltsConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenWorkloadAltsConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enable_alts": flattenBool(c["enableAlts"]),
+			"enable_alts": c["enableAlts"],
 		},
 	}
 }
 {{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenScheduleUpgradeConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenScheduleUpgradeConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }
 {{- end }}
 
-func flattenRBACBindingConfig(c map[string]interface{}) []map[string]interface{} {
+func flattenRBACBindingConfig(v interface{}) []map[string]interface{} {
+	c, _ := v.(map[string]interface{})
 	if c == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enable_insecure_binding_system_authenticated":   flattenBool(c["enableInsecureBindingSystemAuthenticated"]),
-			"enable_insecure_binding_system_unauthenticated": flattenBool(c["enableInsecureBindingSystemUnauthenticated"]),
+			"enable_insecure_binding_system_authenticated":   c["enableInsecureBindingSystemAuthenticated"],
+			"enable_insecure_binding_system_unauthenticated": c["enableInsecureBindingSystemUnauthenticated"],
 		},
 	}
 }
@@ -9193,15 +9868,19 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 }
 
 func validateNodePoolAutoConfig(cluster map[string]interface{}) error {
-	npac := getMap(cluster, "nodePoolAutoConfig")
+	npac, _ := cluster["nodePoolAutoConfig"].(map[string]interface{})
 	if cluster == nil || npac == nil {
 		return nil
 	}
-	nt := getMap(npac, "networkTags")
-	if nt != nil && len(flattenStringSlice(nt["tags"])) > 0 {
-		autopilot := getMap(cluster, "autopilot")
-		autoscaling := getMap(cluster, "autoscaling")
-		if (autopilot == nil || !flattenBool(autopilot["enabled"])) && (autoscaling == nil || !flattenBool(autoscaling["enableNodeAutoprovisioning"])) {
+	nt, _ := npac["networkTags"].(map[string]interface{})
+	strTags, _ := nt["tags"].([]string)
+	ifaceTags, _ := nt["tags"].([]interface{})
+	if len(strTags) > 0 || len(ifaceTags) > 0 {
+		autopilot, _ := cluster["autopilot"].(map[string]interface{})
+		autoscaling, _ := cluster["autoscaling"].(map[string]interface{})
+		autopilotEnabled, _ := autopilot["enabled"].(bool)
+		autoscalingEnabled, _ := autoscaling["enableNodeAutoprovisioning"].(bool)
+		if !autopilotEnabled && !autoscalingEnabled {
 			return fmt.Errorf("node_pool_auto_config network tags can only be set if enable_autopilot or cluster_autoscaling is enabled")
 		}
 	}
@@ -9475,17 +10154,18 @@ func expandAgentSandboxConfig(v interface{}) map[string]interface{} {
 	}
 	raw := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	setField(res, "enabled", raw["enabled"].(bool))
+	res["enabled"] = raw["enabled"].(bool)
 	return res
 }
 
-func flattenAgentSandboxConfig(v map[string]interface{}) []interface{} {
-	if v == nil {
+func flattenAgentSandboxConfig(v interface{}) []interface{} {
+	c, _ := v.(map[string]interface{})
+	if c == nil {
 		return nil
 	}
 	return []interface{}{
 		map[string]interface{}{
-			"enabled": flattenBool(v["enabled"]),
+			"enabled": c["enabled"],
 		},
 	}
 }

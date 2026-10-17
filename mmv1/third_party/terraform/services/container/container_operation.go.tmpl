@@ -3,12 +3,9 @@ package container
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -29,7 +26,8 @@ func (w *ContainerOperationWaiter) State() string {
 	if w == nil || w.Op == nil {
 		return "<nil>"
 	}
-	return flattenString(w.Op["status"])
+	status, _ := w.Op["status"].(string)
+	return status
 }
 
 func (w *ContainerOperationWaiter) Error() error {
@@ -40,14 +38,14 @@ func (w *ContainerOperationWaiter) Error() error {
 	// Error gets called during operation polling to see if there is an error.
 	// Since container's operation doesn't have an "error" field, we must wait
 	// until it's done and check the status message
-	status := flattenString(w.Op["status"])
+	status, _ := w.Op["status"].(string)
 	for _, pending := range w.PendingStates() {
 		if status == pending {
 			return nil
 		}
 	}
 
-	if statusMessage := flattenString(w.Op["statusMessage"]); statusMessage != "" {
+	if statusMessage, _ := w.Op["statusMessage"].(string); statusMessage != "" {
 		return fmt.Errorf("%s", statusMessage)
 	}
 
@@ -71,8 +69,9 @@ func (w *ContainerOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil || w.Op == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
+	opName, _ := w.Op["name"].(string)
 	name := fmt.Sprintf("projects/%s/locations/%s/operations/%s",
-		w.Project, w.Location, flattenString(w.Op["name"]))
+		w.Project, w.Location, opName)
 
 	var op map[string]interface{}
 	select {
@@ -104,7 +103,8 @@ func (w *ContainerOperationWaiter) OpName() string {
 	if w == nil || w.Op == nil {
 		return "<nil>"
 	}
-	return flattenString(w.Op["name"])
+	opName, _ := w.Op["name"].(string)
+	return opName
 }
 
 func (w *ContainerOperationWaiter) PendingStates() []string {
@@ -131,250 +131,4 @@ func ContainerOperationWait(config *transport_tpg.Config, op map[string]interfac
 	}
 
 	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
-}
-
-// setField sets m[key] = val unless val is a zero value that Apiary's `omitempty`
-// struct tag would omit. Non-nil map[string]interface{}{} (representing a non-nil
-// pointer to an Apiary struct whose fields are all omitted) is preserved so it
-// serializes as `{}`. Nil maps and empty slices/string-maps are omitted.
-func setField(m map[string]interface{}, key string, val interface{}) {
-	if val == nil {
-		return
-	}
-	switch v := val.(type) {
-	case string:
-		if v == "" {
-			return
-		}
-	case bool:
-		if !v {
-			return
-		}
-	case int:
-		if v == 0 {
-			return
-		}
-	case int64:
-		if v == 0 {
-			return
-		}
-	case float64:
-		if v == 0 {
-			return
-		}
-	case []string:
-		if len(v) == 0 {
-			return
-		}
-	case []int64:
-		if len(v) == 0 {
-			return
-		}
-	case []interface{}:
-		if len(v) == 0 {
-			return
-		}
-	case []map[string]interface{}:
-		if len(v) == 0 {
-			return
-		}
-	case map[string]string:
-		if len(v) == 0 {
-			return
-		}
-	case map[string]bool:
-		if len(v) == 0 {
-			return
-		}
-	case map[string]interface{}:
-		if v == nil {
-			return
-		}
-		// Non-nil map[string]interface{}{} is intentionally kept (serializes as `{}`).
-	default:
-		rv := reflect.ValueOf(val)
-		if (rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Slice || rv.Kind() == reflect.Map) && rv.IsNil() {
-			return
-		}
-	}
-	m[key] = val
-}
-
-// setStringIntField sets m[key] = strconv.FormatInt(val, 10) when val != 0,
-// matching Apiary `int64` fields tagged with `,omitempty,string`.
-func setStringIntField(m map[string]interface{}, key string, val int64) {
-	if val != 0 {
-		m[key] = strconv.FormatInt(val, 10)
-	}
-}
-
-// setMapField sets m[key] = val only when len(val) > 0, for map<string, Object>
-// fields that had `,omitempty` in Apiary.
-func setMapField(m map[string]interface{}, key string, val map[string]interface{}) {
-	if len(val) > 0 {
-		m[key] = val
-	}
-}
-
-func flattenString(v interface{}) string {
-	if s, ok := v.(string); ok {
-		return s
-	}
-	return ""
-}
-
-func flattenBool(v interface{}) bool {
-	if b, ok := v.(bool); ok {
-		return b
-	}
-	return false
-}
-
-func flattenInt(v interface{}) int {
-	return int(flattenInt64(v))
-}
-
-func flattenInt64(v interface{}) int64 {
-	switch n := v.(type) {
-	case float64:
-		return int64(n)
-	case int64:
-		return n
-	case int:
-		return int64(n)
-	case string:
-		if i, err := strconv.ParseInt(n, 10, 64); err == nil {
-			return i
-		}
-	case json.Number:
-		if i, err := n.Int64(); err == nil {
-			return i
-		}
-	}
-	return 0
-}
-
-func flattenFloat(v interface{}) float64 {
-	switch n := v.(type) {
-	case float64:
-		return n
-	case int:
-		return float64(n)
-	case int64:
-		return float64(n)
-	case string:
-		if f, err := strconv.ParseFloat(n, 64); err == nil {
-			return f
-		}
-	case json.Number:
-		if f, err := n.Float64(); err == nil {
-			return f
-		}
-	}
-	return 0
-}
-
-func flattenStringSlice(v interface{}) []string {
-	if v == nil {
-		return nil
-	}
-	if s, ok := v.([]string); ok {
-		return s
-	}
-	raw, ok := v.([]interface{})
-	if !ok {
-		return nil
-	}
-	res := make([]string, 0, len(raw))
-	for _, item := range raw {
-		if str, ok := item.(string); ok {
-			res = append(res, str)
-		}
-	}
-	return res
-}
-
-func flattenInt64Slice(v interface{}) []int64 {
-	if v == nil {
-		return nil
-	}
-	if s, ok := v.([]int64); ok {
-		return s
-	}
-	raw, ok := v.([]interface{})
-	if !ok {
-		return nil
-	}
-	res := make([]int64, 0, len(raw))
-	for _, item := range raw {
-		res = append(res, flattenInt64(item))
-	}
-	return res
-}
-
-func flattenStringMap(v interface{}) map[string]string {
-	if v == nil {
-		return nil
-	}
-	if m, ok := v.(map[string]string); ok {
-		return m
-	}
-	raw, ok := v.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	res := make(map[string]string, len(raw))
-	for k, val := range raw {
-		if str, ok := val.(string); ok {
-			res[k] = str
-		}
-	}
-	return res
-}
-
-func flattenBoolMap(v interface{}) map[string]bool {
-	if v == nil {
-		return nil
-	}
-	if m, ok := v.(map[string]bool); ok {
-		return m
-	}
-	raw, ok := v.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	res := make(map[string]bool, len(raw))
-	for k, val := range raw {
-		if b, ok := val.(bool); ok {
-			res[k] = b
-		}
-	}
-	return res
-}
-
-func getMap(m map[string]interface{}, key string) map[string]interface{} {
-	if m == nil {
-		return nil
-	}
-	if v, ok := m[key].(map[string]interface{}); ok {
-		return v
-	}
-	return nil
-}
-
-func getSlice(m map[string]interface{}, key string) []interface{} {
-	if m == nil {
-		return nil
-	}
-	if v, ok := m[key].([]interface{}); ok {
-		return v
-	}
-	if s, ok := m[key].([]map[string]interface{}); ok {
-		res := make([]interface{}, len(s))
-		for i, item := range s {
-			res[i] = item
-		}
-		return res
-	}
-	return nil
 }

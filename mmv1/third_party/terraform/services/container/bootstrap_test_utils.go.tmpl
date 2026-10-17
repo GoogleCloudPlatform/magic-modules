@@ -44,8 +44,8 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 
 	log.Printf("[DEBUG] Getting shared test GKE cluster %q", clusterId)
 	cluster, err := getCluster()
-	if err == nil && cluster != nil && (flattenString(cluster["status"]) == "ERROR" || flattenString(cluster["status"]) == "DEGRADED") {
-		log.Printf("[DEBUG] Shared test GKE cluster %q is in %s state (%s), deleting before recreating", clusterId, flattenString(cluster["status"]), flattenString(cluster["statusMessage"]))
+	if err == nil && cluster != nil && (cluster["status"] == "ERROR" || cluster["status"] == "DEGRADED") {
+		log.Printf("[DEBUG] Shared test GKE cluster %q is in %v state (%v), deleting before recreating", clusterId, cluster["status"], cluster["statusMessage"])
 		delOp, delErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -65,7 +65,7 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 	}
 
 	stopDeadline := time.Now().Add(30 * time.Minute)
-	for err == nil && cluster != nil && flattenString(cluster["status"]) == "STOPPING" {
+	for err == nil && cluster != nil && cluster["status"] == "STOPPING" {
 		if time.Now().After(stopDeadline) {
 			t.Fatalf("Timed out waiting for shared test GKE cluster %q deletion to finish", clusterId)
 		}
@@ -133,11 +133,11 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 	}
 
 	deadline := time.Now().Add(30 * time.Minute)
-	for flattenString(cluster["status"]) == "PROVISIONING" || flattenString(cluster["status"]) == "RECONCILING" {
+	for cluster["status"] == "PROVISIONING" || cluster["status"] == "RECONCILING" {
 		if time.Now().After(deadline) {
-			t.Fatalf("Timed out waiting for shared test GKE cluster %q to leave status %s", clusterId, flattenString(cluster["status"]))
+			t.Fatalf("Timed out waiting for shared test GKE cluster %q to leave status %v", clusterId, cluster["status"])
 		}
-		log.Printf("[DEBUG] Shared test GKE cluster %q is in status %s, waiting 15s...", clusterId, flattenString(cluster["status"]))
+		log.Printf("[DEBUG] Shared test GKE cluster %q is in status %v, waiting 15s...", clusterId, cluster["status"])
 		time.Sleep(15 * time.Second)
 		cluster, err = getCluster()
 		if err != nil {
@@ -145,8 +145,8 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 		}
 	}
 
-	if flattenString(cluster["status"]) != "RUNNING" {
-		t.Fatalf("Shared test GKE cluster %q is in unexpected status %s: %s", clusterId, flattenString(cluster["status"]), flattenString(cluster["statusMessage"]))
+	if cluster["status"] != "RUNNING" {
+		t.Fatalf("Shared test GKE cluster %q is in unexpected status %v: %v", clusterId, cluster["status"], cluster["statusMessage"])
 	}
 
 	return clusterId

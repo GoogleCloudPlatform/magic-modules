@@ -1612,7 +1612,9 @@ func expandNodeConfigDefaults(configured interface{}) map[string]interface{} {
 	config := configs[0].(map[string]interface{})
 
 	nodeConfigDefaults := map[string]interface{}{}
-	setField(nodeConfigDefaults, "containerdConfig", expandContainerdConfig(config["containerd_config"]))
+	if sub := expandContainerdConfig(config["containerd_config"]); sub != nil {
+		nodeConfigDefaults["containerdConfig"] = sub
+	}
 	if v, ok := config["insecure_kubelet_readonly_port_enabled"]; ok {
 		nodeConfigDefaults["nodeKubeletConfig"] = map[string]interface{}{
 			"insecureKubeletReadonlyPortEnabled": expandInsecureKubeletReadonlyPortEnabled(v),
@@ -1620,7 +1622,9 @@ func expandNodeConfigDefaults(configured interface{}) map[string]interface{} {
 	}
 	if variant, ok := config["logging_variant"]; ok {
 		variantConfig := map[string]interface{}{}
-		setField(variantConfig, "variant", variant.(string))
+		if v := variant.(string); v != "" {
+			variantConfig["variant"] = v
+		}
 		nodeConfigDefaults["loggingConfig"] = map[string]interface{}{
 			"variantConfig": variantConfig,
 		}
@@ -1629,7 +1633,9 @@ func expandNodeConfigDefaults(configured interface{}) map[string]interface{} {
 	if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		gcfsConfig := v.([]interface{})[0].(map[string]interface{})
 		gcfs := map[string]interface{}{}
-		setField(gcfs, "enabled", gcfsConfig["enabled"].(bool))
+		if enabled := gcfsConfig["enabled"].(bool); enabled {
+			gcfs["enabled"] = enabled
+		}
 		nodeConfigDefaults["gcfsConfig"] = gcfs
 	}
 
@@ -1654,19 +1660,25 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 	nodeConfig := nodeConfigs[0].(map[string]interface{})
 
 	if v, ok := nodeConfig["taint_config"]; ok {
-		setField(nc, "taintConfig", expandTaintConfig(v))
+		if sub := expandTaintConfig(v); sub != nil {
+			nc["taintConfig"] = sub
+		}
 	}
 
 	if v, ok := nodeConfig["containerd_config"]; ok {
-		setField(nc, "containerdConfig", expandContainerdConfig(v))
+		if sub := expandContainerdConfig(v); sub != nil {
+			nc["containerdConfig"] = sub
+		}
 	}
 
-	if v, ok := nodeConfig["machine_type"]; ok {
-		setField(nc, "machineType", v.(string))
+	if v, ok := nodeConfig["machine_type"].(string); ok && v != "" {
+		nc["machineType"] = v
 	}
 
 	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
-		setField(nc, "gpuDirectConfig", expandGpuDirectConfig(v))
+		if sub := expandGpuDirectConfig(v); sub != nil {
+			nc["gpuDirectConfig"] = sub
+		}
 	}
 
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
@@ -1678,49 +1690,67 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 				continue
 			}
 			guestAcceleratorConfig := map[string]interface{}{}
-			setStringIntField(guestAcceleratorConfig, "acceleratorCount", int64(data["count"].(int)))
-			setField(guestAcceleratorConfig, "acceleratorType", data["type"].(string))
-			setField(guestAcceleratorConfig, "gpuPartitionSize", data["gpu_partition_size"].(string))
+			if count := data["count"].(int); count != 0 {
+				guestAcceleratorConfig["acceleratorCount"] = strconv.Itoa(count)
+			}
+			if v, ok := data["type"].(string); ok && v != "" {
+				guestAcceleratorConfig["acceleratorType"] = v
+			}
+			if v, ok := data["gpu_partition_size"].(string); ok && v != "" {
+				guestAcceleratorConfig["gpuPartitionSize"] = v
+			}
 
 			if v, ok := data["gpu_driver_installation_config"]; ok && len(v.([]interface{})) > 0 {
 				gpuDriverInstallationConfig := data["gpu_driver_installation_config"].([]interface{})[0].(map[string]interface{})
 				gpuDriverCfg := map[string]interface{}{}
-				setField(gpuDriverCfg, "gpuDriverVersion", gpuDriverInstallationConfig["gpu_driver_version"].(string))
+				if v, ok := gpuDriverInstallationConfig["gpu_driver_version"].(string); ok && v != "" {
+					gpuDriverCfg["gpuDriverVersion"] = v
+				}
 				guestAcceleratorConfig["gpuDriverInstallationConfig"] = gpuDriverCfg
 			}
 
 			if v, ok := data["gpu_sharing_config"]; ok && len(v.([]interface{})) > 0 {
 				gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
 				gpuSharingCfg := map[string]interface{}{}
-				setField(gpuSharingCfg, "gpuSharingStrategy", gpuSharingConfig["gpu_sharing_strategy"].(string))
-				setStringIntField(gpuSharingCfg, "maxSharedClientsPerGpu", int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)))
+				if v, ok := gpuSharingConfig["gpu_sharing_strategy"].(string); ok && v != "" {
+					gpuSharingCfg["gpuSharingStrategy"] = v
+				}
+				if v, ok := gpuSharingConfig["max_shared_clients_per_gpu"].(int); ok && v != 0 {
+					gpuSharingCfg["maxSharedClientsPerGpu"] = strconv.Itoa(v)
+				}
 				guestAcceleratorConfig["gpuSharingConfig"] = gpuSharingCfg
 			}
 
 			guestAccelerators = append(guestAccelerators, guestAcceleratorConfig)
 		}
-		setField(nc, "accelerators", guestAccelerators)
+		if len(guestAccelerators) > 0 {
+			nc["accelerators"] = guestAccelerators
+		}
 	}
 
-	if v, ok := nodeConfig["disk_size_gb"]; ok {
-		setField(nc, "diskSizeGb", int64(v.(int)))
+	if v, ok := nodeConfig["disk_size_gb"].(int); ok && v != 0 {
+		nc["diskSizeGb"] = v
 	}
 
-	if v, ok := nodeConfig["disk_type"]; ok {
-		setField(nc, "diskType", v.(string))
+	if v, ok := nodeConfig["disk_type"].(string); ok && v != "" {
+		nc["diskType"] = v
 	}
 
 	if v, ok := nodeConfig["boot_disk"]; ok {
-		setField(nc, "bootDisk", expandBootDiskConfig(v))
+		if sub := expandBootDiskConfig(v); sub != nil {
+			nc["bootDisk"] = sub
+		}
 	}
 
-	if v, ok := nodeConfig["local_ssd_count"]; ok {
-		setField(nc, "localSsdCount", int64(v.(int)))
+	if v, ok := nodeConfig["local_ssd_count"].(int); ok && v != 0 {
+		nc["localSsdCount"] = v
 	}
 
 	if v, ok := nodeConfig["logging_variant"]; ok {
 		variantConfig := map[string]interface{}{}
-		setField(variantConfig, "variant", v.(string))
+		if variant := v.(string); variant != "" {
+			variantConfig["variant"] = variant
+		}
 		nc["loggingConfig"] = map[string]interface{}{
 			"variantConfig": variantConfig,
 		}
@@ -1730,24 +1760,29 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		esc := map[string]interface{}{}
-		setField(esc, "localSsdCount", int64(conf["local_ssd_count"].(int)))
+		if v, ok := conf["local_ssd_count"].(int); ok && v != 0 {
+			esc["localSsdCount"] = v
+		}
 		nc["ephemeralStorageConfig"] = esc
 	}
 {{- end }}
 	if v, ok := nodeConfig["local_nvme_ssd_block_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		lnsbc := map[string]interface{}{}
-		setField(lnsbc, "localSsdCount", int64(conf["local_ssd_count"].(int)))
+		if v, ok := conf["local_ssd_count"].(int); ok && v != 0 {
+			lnsbc["localSsdCount"] = v
+		}
 		nc["localNvmeSsdBlockConfig"] = lnsbc
 	}
 
 	if v, ok := nodeConfig["ephemeral_storage_local_ssd_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		eslsc := map[string]interface{}{}
-		setField(eslsc, "localSsdCount", int64(conf["local_ssd_count"].(int)))
-		dataCacheCount, ok := conf["data_cache_count"]
-		if ok {
-			setField(eslsc, "dataCacheCount", int64(dataCacheCount.(int)))
+		if v, ok := conf["local_ssd_count"].(int); ok && v != 0 {
+			eslsc["localSsdCount"] = v
+		}
+		if dataCacheCount, ok := conf["data_cache_count"].(int); ok && dataCacheCount != 0 {
+			eslsc["dataCacheCount"] = dataCacheCount
 		}
 		nc["ephemeralStorageLocalSsdConfig"] = eslsc
 	}
@@ -1757,35 +1792,45 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		conf, confOK := v.([]interface{})[0].(map[string]interface{})
 		if confOK {
 			sbd := map[string]interface{}{}
-			setField(sbd, "diskImage", conf["disk_image"].(string))
-			if modeValue, modeOK := conf["mode"]; modeOK {
-				setField(sbd, "mode", modeValue.(string))
+			if diskImage := conf["disk_image"].(string); diskImage != "" {
+				sbd["diskImage"] = diskImage
+			}
+			if modeValue, modeOK := conf["mode"].(string); modeOK && modeValue != "" {
+				sbd["mode"] = modeValue
 			}
 			secondaryBootDisks = append(secondaryBootDisks, sbd)
 		} else {
 			secondaryBootDisks = append(secondaryBootDisks, map[string]interface{}{})
 		}
-		setField(nc, "secondaryBootDisks", secondaryBootDisks)
+		if len(secondaryBootDisks) > 0 {
+			nc["secondaryBootDisks"] = secondaryBootDisks
+		}
 	}
 
 	if v, ok := nodeConfig["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		gcfs := map[string]interface{}{}
-		setField(gcfs, "enabled", conf["enabled"].(bool))
+		if enabled := conf["enabled"].(bool); enabled {
+			gcfs["enabled"] = enabled
+		}
 		nc["gcfsConfig"] = gcfs
 	}
 
 	if v, ok := nodeConfig["gvnic"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		gvnic := map[string]interface{}{}
-		setField(gvnic, "enabled", conf["enabled"].(bool))
+		if enabled := conf["enabled"].(bool); enabled {
+			gvnic["enabled"] = enabled
+		}
 		nc["gvnic"] = gvnic
 	}
 
 	if v, ok := nodeConfig["fast_socket"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		fastSocket := map[string]interface{}{}
-		setField(fastSocket, "enabled", conf["enabled"].(bool))
+		if enabled := conf["enabled"].(bool); enabled {
+			fastSocket["enabled"] = enabled
+		}
 		nc["fastSocket"] = fastSocket
 	}
 
@@ -1798,9 +1843,15 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		}
 
 		ra := map[string]interface{}{}
-		setField(ra, "consumeReservationType", conf["consume_reservation_type"].(string))
-		setField(ra, "key", conf["key"].(string))
-		setField(ra, "values", values)
+		if v, ok := conf["consume_reservation_type"].(string); ok && v != "" {
+			ra["consumeReservationType"] = v
+		}
+		if v, ok := conf["key"].(string); ok && v != "" {
+			ra["key"] = v
+		}
+		if len(values) > 0 {
+			ra["values"] = values
+		}
 		nc["reservationAffinity"] = ra
 	}
 
@@ -1818,8 +1869,8 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		}
 	}
 
-	if v, ok := nodeConfig["service_account"]; ok {
-		setField(nc, "serviceAccount", v.(string))
+	if v, ok := nodeConfig["service_account"].(string); ok && v != "" {
+		nc["serviceAccount"] = v
 	}
 
 	if v, ok := nodeConfig["metadata"]; ok {
@@ -1827,11 +1878,13 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
 		}
-		setField(nc, "metadata", m)
+		if len(m) > 0 {
+			nc["metadata"] = m
+		}
 	}
 
-	if v, ok := nodeConfig["image_type"]; ok {
-		setField(nc, "imageType", v.(string))
+	if v, ok := nodeConfig["image_type"].(string); ok && v != "" {
+		nc["imageType"] = v
 	}
 
 	if v, ok := nodeConfig["labels"]; ok {
@@ -1839,7 +1892,9 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
 		}
-		setField(nc, "labels", m)
+		if len(m) > 0 {
+			nc["labels"] = m
+		}
 	}
 
 	if v, ok := nodeConfig["resource_labels"]; ok {
@@ -1847,11 +1902,15 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
 		}
-		setField(nc, "resourceLabels", m)
+		if len(m) > 0 {
+			nc["resourceLabels"] = m
+		}
 	}
 
 	if v, ok := nodeConfig["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
-		setField(nc, "resourceManagerTags", expandResourceManagerTags(v))
+		if sub := expandResourceManagerTags(v); sub != nil {
+			nc["resourceManagerTags"] = sub
+		}
 	}
 
 	if v, ok := nodeConfig["tags"]; ok {
@@ -1862,7 +1921,9 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 				tags = append(tags, v.(string))
 			}
 		}
-		setField(nc, "tags", tags)
+		if len(tags) > 0 {
+			nc["tags"] = tags
+		}
 	}
 
 	if v, ok := nodeConfig["storage_pools"]; ok {
@@ -1873,24 +1934,34 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 				storagePools = append(storagePools, v.(string))
 			}
 		}
-		setField(nc, "storagePools", storagePools)
+		if len(storagePools) > 0 {
+			nc["storagePools"] = storagePools
+		}
 	}
 	if v, ok := nodeConfig["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		sic := map[string]interface{}{}
-		setField(sic, "enableSecureBoot", conf["enable_secure_boot"].(bool))
-		setField(sic, "enableIntegrityMonitoring", conf["enable_integrity_monitoring"].(bool))
+		if v, ok := conf["enable_secure_boot"].(bool); ok && v {
+			sic["enableSecureBoot"] = v
+		}
+		if v, ok := conf["enable_integrity_monitoring"].(bool); ok && v {
+			sic["enableIntegrityMonitoring"] = v
+		}
 		nc["shieldedInstanceConfig"] = sic
 	}
 
 	// Preemptible Is Optional+Default, so it always has a value
-	setField(nc, "preemptible", nodeConfig["preemptible"].(bool))
+	if v, ok := nodeConfig["preemptible"].(bool); ok && v {
+		nc["preemptible"] = v
+	}
 
 	// Spot Is Optional+Default, so it always has a value
-	setField(nc, "spot", nodeConfig["spot"].(bool))
+	if v, ok := nodeConfig["spot"].(bool); ok && v {
+		nc["spot"] = v
+	}
 
-	if v, ok := nodeConfig["min_cpu_platform"]; ok {
-		setField(nc, "minCpuPlatform", v.(string))
+	if v, ok := nodeConfig["min_cpu_platform"].(string); ok && v != "" {
+		nc["minCpuPlatform"] = v
 	}
 
 	if v, ok := nodeConfig["taint"]; ok && len(v.([]interface{})) > 0 {
@@ -1899,38 +1970,48 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		for _, raw := range taints {
 			data := raw.(map[string]interface{})
 			taint := map[string]interface{}{}
-			setField(taint, "key", data["key"].(string))
-			setField(taint, "value", data["value"].(string))
-			setField(taint, "effect", data["effect"].(string))
+			if v, ok := data["key"].(string); ok && v != "" {
+				taint["key"] = v
+			}
+			if v, ok := data["value"].(string); ok && v != "" {
+				taint["value"] = v
+			}
+			if v, ok := data["effect"].(string); ok && v != "" {
+				taint["effect"] = v
+			}
 
 			nodeTaints = append(nodeTaints, taint)
 		}
 
-		setField(nc, "taints", nodeTaints)
+		if len(nodeTaints) > 0 {
+			nc["taints"] = nodeTaints
+		}
 	}
 
 	if v, ok := nodeConfig["workload_metadata_config"]; ok {
-		setField(nc, "workloadMetadataConfig", expandWorkloadMetadataConfig(v))
+		if sub := expandWorkloadMetadataConfig(v); sub != nil {
+			nc["workloadMetadataConfig"] = sub
+		}
 	}
 
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		sc := map[string]interface{}{}
 {{ if ne $.TargetVersionName `ga` -}}
-		if st, ok := conf["sandbox_type"]; ok && st != "" {
-			setField(sc, "sandboxType", st.(string))
-		} else if t, ok := conf["type"]; ok {
-			setField(sc, "type", t.(string))
+		if st, ok := conf["sandbox_type"].(string); ok && st != "" {
+			sc["sandboxType"] = st
+		} else if t, ok := conf["type"].(string); ok && t != "" {
+			sc["type"] = t
 		}
 {{- else -}}
-		if v, ok := conf["type"]; ok {
-			setField(sc, "type", v.(string))
+		if v, ok := conf["type"].(string); ok && v != "" {
+			sc["type"] = v
 		}
 {{- end }}
 		nc["sandboxConfig"] = sc
 	}
-	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
-		setField(nc, "bootDiskKmsKey", v.(string))
+	if v, ok := nodeConfig["boot_disk_kms_key"].(string); ok && v != "" {
+		nc["bootDiskKmsKey"] = v
 	}
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
@@ -1980,62 +2061,82 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[
 		}
 		// end shutdown_grace_period ForceSendFields fix
 
-		setField(nc, "kubeletConfig", kubeletConfig)
+		if kubeletConfig != nil {
+			nc["kubeletConfig"] = kubeletConfig
+		}
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
-		setField(nc, "linuxNodeConfig", expandLinuxNodeConfig(v))
+		if sub := expandLinuxNodeConfig(v); sub != nil {
+			nc["linuxNodeConfig"] = sub
+		}
 	}
 
 	if v, ok := nodeConfig["windows_node_config"]; ok {
-		setField(nc, "windowsNodeConfig", expandWindowsNodeConfig(v))
+		if sub := expandWindowsNodeConfig(v); sub != nil {
+			nc["windowsNodeConfig"] = sub
+		}
 	}
 
-	if v, ok := nodeConfig["node_group"]; ok {
-		setField(nc, "nodeGroup", v.(string))
+	if v, ok := nodeConfig["node_group"].(string); ok && v != "" {
+		nc["nodeGroup"] = v
 	}
 
 	if v, ok := nodeConfig["node_image_config"]; ok {
-		setField(nc, "nodeImageConfig", expandNodeImageConfig(v))
+		if sub := expandNodeImageConfig(v); sub != nil {
+			nc["nodeImageConfig"] = sub
+		}
 	}
 
 	if v, ok := nodeConfig["advanced_machine_features"]; ok && len(v.([]interface{})) > 0 {
 		advanced_machine_features := v.([]interface{})[0].(map[string]interface{})
 		amf := map[string]interface{}{}
-		setStringIntField(amf, "threadsPerCore", int64(advanced_machine_features["threads_per_core"].(int)))
-		setField(amf, "enableNestedVirtualization", advanced_machine_features["enable_nested_virtualization"].(bool))
-		setField(amf, "performanceMonitoringUnit", advanced_machine_features["performance_monitoring_unit"].(string))
+		if v, ok := advanced_machine_features["threads_per_core"].(int); ok && v != 0 {
+			amf["threadsPerCore"] = strconv.Itoa(v)
+		}
+		if v, ok := advanced_machine_features["enable_nested_virtualization"].(bool); ok && v {
+			amf["enableNestedVirtualization"] = v
+		}
+		if v, ok := advanced_machine_features["performance_monitoring_unit"].(string); ok && v != "" {
+			amf["performanceMonitoringUnit"] = v
+		}
 		nc["advancedMachineFeatures"] = amf
 	}
 
 	if v, ok := nodeConfig["sole_tenant_config"]; ok && len(v.([]interface{})) > 0 {
-		setField(nc, "soleTenantConfig", expandSoleTenantConfig(v))
+		if sub := expandSoleTenantConfig(v); sub != nil {
+			nc["soleTenantConfig"] = sub
+		}
 	}
 
-	if v, ok := nodeConfig["enable_confidential_storage"]; ok {
-		setField(nc, "enableConfidentialStorage", v.(bool))
+	if v, ok := nodeConfig["enable_confidential_storage"].(bool); ok && v {
+		nc["enableConfidentialStorage"] = v
 	}
 
-	if v, ok := nodeConfig["local_ssd_encryption_mode"]; ok {
-		setField(nc, "localSsdEncryptionMode", v.(string))
+	if v, ok := nodeConfig["local_ssd_encryption_mode"].(string); ok && v != "" {
+		nc["localSsdEncryptionMode"] = v
 	}
 
-	if v, ok := nodeConfig["max_run_duration"]; ok {
-		setField(nc, "maxRunDuration", v.(string))
+	if v, ok := nodeConfig["max_run_duration"].(string); ok && v != "" {
+		nc["maxRunDuration"] = v
 	}
 
-	if v, ok := nodeConfig["flex_start"]; ok {
-		setField(nc, "flexStart", v.(bool))
+	if v, ok := nodeConfig["flex_start"].(bool); ok && v {
+		nc["flexStart"] = v
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
-		setField(nc, "hostMaintenancePolicy", expandHostMaintenancePolicy(v))
+		if sub := expandHostMaintenancePolicy(v); sub != nil {
+			nc["hostMaintenancePolicy"] = sub
+		}
 	}
 	{{- end }}
 
 	if v, ok := nodeConfig["confidential_nodes"]; ok {
-		setField(nc, "confidentialNodes", expandConfidentialNodes(v))
+		if sub := expandConfidentialNodes(v); sub != nil {
+			nc["confidentialNodes"] = sub
+		}
 	}
 
 	return nc
@@ -2063,20 +2164,20 @@ func expandBootDiskConfig(v interface{}) map[string]interface{} {
 	cfg := ls[0].(map[string]interface{})
 	bd := map[string]interface{}{}
 
-	if v, ok := cfg["disk_type"]; ok {
-		setField(bd, "diskType", v.(string))
+	if v, ok := cfg["disk_type"].(string); ok && v != "" {
+		bd["diskType"] = v
 	}
 
-	if v, ok := cfg["size_gb"]; ok {
-		setStringIntField(bd, "sizeGb", int64(v.(int)))
+	if v, ok := cfg["size_gb"].(int); ok && v != 0 {
+		bd["sizeGb"] = strconv.Itoa(v)
 	}
 
-	if v, ok := cfg["provisioned_iops"]; ok {
-		setStringIntField(bd, "provisionedIops", int64(v.(int)))
+	if v, ok := cfg["provisioned_iops"].(int); ok && v != 0 {
+		bd["provisionedIops"] = strconv.Itoa(v)
 	}
 
-	if v, ok := cfg["provisioned_throughput"]; ok {
-		setStringIntField(bd, "provisionedThroughput", int64(v.(int)))
+	if v, ok := cfg["provisioned_throughput"].(int); ok && v != 0 {
+		bd["provisionedThroughput"] = strconv.Itoa(v)
 	}
 
 	return bd
@@ -2113,8 +2214,8 @@ func expandWorkloadMetadataConfig(v interface{}) map[string]interface{} {
 
 	cfg := ls[0].(map[string]interface{})
 
-	if v, ok := cfg["mode"]; ok {
-		setField(wmc, "mode", v.(string))
+	if v, ok := cfg["mode"].(string); ok && v != "" {
+		wmc["mode"] = v
 	}
 
 	return wmc
@@ -2137,41 +2238,41 @@ func expandKubeletConfig(v interface{}) map[string]interface{} {
 	}
 	cfg := ls[0].(map[string]interface{})
 	kConfig := map[string]interface{}{}
-	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"]; ok {
-		setField(kConfig, "cpuManagerPolicy", cpuManagerPolicy.(string))
+	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"].(string); ok && cpuManagerPolicy != "" {
+		kConfig["cpuManagerPolicy"] = cpuManagerPolicy
 	}
-	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
-		setField(kConfig, "cpuCfsQuota", cpuCfsQuota.(bool))
+	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"].(bool); ok && cpuCfsQuota {
+		kConfig["cpuCfsQuota"] = cpuCfsQuota
 	}
-	if cpuCfsQuotaPeriod, ok := cfg["cpu_cfs_quota_period"]; ok {
-		setField(kConfig, "cpuCfsQuotaPeriod", cpuCfsQuotaPeriod.(string))
+	if cpuCfsQuotaPeriod, ok := cfg["cpu_cfs_quota_period"].(string); ok && cpuCfsQuotaPeriod != "" {
+		kConfig["cpuCfsQuotaPeriod"] = cpuCfsQuotaPeriod
 	}
 	if insecureKubeletReadonlyPortEnabled, ok := cfg["insecure_kubelet_readonly_port_enabled"]; ok {
 		kConfig["insecureKubeletReadonlyPortEnabled"] = expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled)
 	}
-	if podPidsLimit, ok := cfg["pod_pids_limit"]; ok {
-		setStringIntField(kConfig, "podPidsLimit", int64(podPidsLimit.(int)))
+	if podPidsLimit, ok := cfg["pod_pids_limit"].(int); ok && podPidsLimit != 0 {
+		kConfig["podPidsLimit"] = strconv.Itoa(podPidsLimit)
 	}
-	if maxParallelImagePulls, ok := cfg["max_parallel_image_pulls"]; ok {
-		setField(kConfig, "maxParallelImagePulls", int64(maxParallelImagePulls.(int)))
+	if maxParallelImagePulls, ok := cfg["max_parallel_image_pulls"].(int); ok && maxParallelImagePulls != 0 {
+		kConfig["maxParallelImagePulls"] = maxParallelImagePulls
 	}
-	if containerLogMaxSize, ok := cfg["container_log_max_size"]; ok {
-		setField(kConfig, "containerLogMaxSize", containerLogMaxSize.(string))
+	if containerLogMaxSize, ok := cfg["container_log_max_size"].(string); ok && containerLogMaxSize != "" {
+		kConfig["containerLogMaxSize"] = containerLogMaxSize
 	}
-	if containerLogMaxFiles, ok := cfg["container_log_max_files"]; ok {
-		setField(kConfig, "containerLogMaxFiles", int64(containerLogMaxFiles.(int)))
+	if containerLogMaxFiles, ok := cfg["container_log_max_files"].(int); ok && containerLogMaxFiles != 0 {
+		kConfig["containerLogMaxFiles"] = containerLogMaxFiles
 	}
-	if imageGcLowThresholdPercent, ok := cfg["image_gc_low_threshold_percent"]; ok {
-		setField(kConfig, "imageGcLowThresholdPercent", int64(imageGcLowThresholdPercent.(int)))
+	if imageGcLowThresholdPercent, ok := cfg["image_gc_low_threshold_percent"].(int); ok && imageGcLowThresholdPercent != 0 {
+		kConfig["imageGcLowThresholdPercent"] = imageGcLowThresholdPercent
 	}
-	if imageGcHighThresholdPercent, ok := cfg["image_gc_high_threshold_percent"]; ok {
-		setField(kConfig, "imageGcHighThresholdPercent", int64(imageGcHighThresholdPercent.(int)))
+	if imageGcHighThresholdPercent, ok := cfg["image_gc_high_threshold_percent"].(int); ok && imageGcHighThresholdPercent != 0 {
+		kConfig["imageGcHighThresholdPercent"] = imageGcHighThresholdPercent
 	}
-	if imageMinimumGcAge, ok := cfg["image_minimum_gc_age"]; ok {
-		setField(kConfig, "imageMinimumGcAge", imageMinimumGcAge.(string))
+	if imageMinimumGcAge, ok := cfg["image_minimum_gc_age"].(string); ok && imageMinimumGcAge != "" {
+		kConfig["imageMinimumGcAge"] = imageMinimumGcAge
 	}
-	if imageMaximumGcAge, ok := cfg["image_maximum_gc_age"]; ok {
-		setField(kConfig, "imageMaximumGcAge", imageMaximumGcAge.(string))
+	if imageMaximumGcAge, ok := cfg["image_maximum_gc_age"].(string); ok && imageMaximumGcAge != "" {
+		kConfig["imageMaximumGcAge"] = imageMaximumGcAge
 	}
 	if allowedUnsafeSysctls, ok := cfg["allowed_unsafe_sysctls"]; ok {
 		sysctls := allowedUnsafeSysctls.([]interface{})
@@ -2179,102 +2280,108 @@ func expandKubeletConfig(v interface{}) map[string]interface{} {
 		for i, s := range sysctls {
 			allowed[i] = s.(string)
 		}
-		setField(kConfig, "allowedUnsafeSysctls", allowed)
+		if len(allowed) > 0 {
+			kConfig["allowedUnsafeSysctls"] = allowed
+		}
 	}
-	if singleProcessOomKill, ok := cfg["single_process_oom_kill"]; ok {
-		setField(kConfig, "singleProcessOomKill", singleProcessOomKill.(bool))
+	if singleProcessOomKill, ok := cfg["single_process_oom_kill"].(bool); ok && singleProcessOomKill {
+		kConfig["singleProcessOomKill"] = singleProcessOomKill
 	}
-	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
-		setField(kConfig, "evictionMaxPodGracePeriodSeconds", int64(evictionMaxPodGracePeriodSeconds.(int)))
+	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"].(int); ok && evictionMaxPodGracePeriodSeconds != 0 {
+		kConfig["evictionMaxPodGracePeriodSeconds"] = evictionMaxPodGracePeriodSeconds
 	}
-	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
-		setField(kConfig, "shutdownGracePeriodSeconds", int64(shutdownGracePeriodSeconds.(int)))
+	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"].(int); ok && shutdownGracePeriodSeconds != 0 {
+		kConfig["shutdownGracePeriodSeconds"] = shutdownGracePeriodSeconds
 	}
-	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
-		setField(kConfig, "shutdownGracePeriodCriticalPodsSeconds", int64(shutdownGracePeriodCriticalPodsSeconds.(int)))
+	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"].(int); ok && shutdownGracePeriodCriticalPodsSeconds != 0 {
+		kConfig["shutdownGracePeriodCriticalPodsSeconds"] = shutdownGracePeriodCriticalPodsSeconds
 	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
 		evictionSoft := map[string]interface{}{}
-		if val, ok := es["memory_available"]; ok {
-			setField(evictionSoft, "memoryAvailable", val.(string))
+		if val, ok := es["memory_available"].(string); ok && val != "" {
+			evictionSoft["memoryAvailable"] = val
 		}
-		if val, ok := es["nodefs_available"]; ok {
-			setField(evictionSoft, "nodefsAvailable", val.(string))
+		if val, ok := es["nodefs_available"].(string); ok && val != "" {
+			evictionSoft["nodefsAvailable"] = val
 		}
-		if val, ok := es["imagefs_available"]; ok {
-			setField(evictionSoft, "imagefsAvailable", val.(string))
+		if val, ok := es["imagefs_available"].(string); ok && val != "" {
+			evictionSoft["imagefsAvailable"] = val
 		}
-		if val, ok := es["imagefs_inodes_free"]; ok {
-			setField(evictionSoft, "imagefsInodesFree", val.(string))
+		if val, ok := es["imagefs_inodes_free"].(string); ok && val != "" {
+			evictionSoft["imagefsInodesFree"] = val
 		}
-		if val, ok := es["nodefs_inodes_free"]; ok {
-			setField(evictionSoft, "nodefsInodesFree", val.(string))
+		if val, ok := es["nodefs_inodes_free"].(string); ok && val != "" {
+			evictionSoft["nodefsInodesFree"] = val
 		}
-		if val, ok := es["pid_available"]; ok {
-			setField(evictionSoft, "pidAvailable", val.(string))
+		if val, ok := es["pid_available"].(string); ok && val != "" {
+			evictionSoft["pidAvailable"] = val
 		}
 		kConfig["evictionSoft"] = evictionSoft
 	}
 
 	if v, ok := cfg["memory_manager"]; ok {
-		setField(kConfig, "memoryManager", expandMemoryManager(v))
+		if sub := expandMemoryManager(v); sub != nil {
+			kConfig["memoryManager"] = sub
+		}
 	}
 	if v, ok := cfg["topology_manager"]; ok {
-		setField(kConfig, "topologyManager", expandTopologyManager(v))
+		if sub := expandTopologyManager(v); sub != nil {
+			kConfig["topologyManager"] = sub
+		}
 	}
 
 	if v, ok := cfg["eviction_soft_grace_period"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
 		periods := map[string]interface{}{}
-		if val, ok := es["memory_available"]; ok {
-			setField(periods, "memoryAvailable", val.(string))
+		if val, ok := es["memory_available"].(string); ok && val != "" {
+			periods["memoryAvailable"] = val
 		}
-		if val, ok := es["nodefs_available"]; ok {
-			setField(periods, "nodefsAvailable", val.(string))
+		if val, ok := es["nodefs_available"].(string); ok && val != "" {
+			periods["nodefsAvailable"] = val
 		}
-		if val, ok := es["imagefs_available"]; ok {
-			setField(periods, "imagefsAvailable", val.(string))
+		if val, ok := es["imagefs_available"].(string); ok && val != "" {
+			periods["imagefsAvailable"] = val
 		}
-		if val, ok := es["imagefs_inodes_free"]; ok {
-			setField(periods, "imagefsInodesFree", val.(string))
+		if val, ok := es["imagefs_inodes_free"].(string); ok && val != "" {
+			periods["imagefsInodesFree"] = val
 		}
-		if val, ok := es["nodefs_inodes_free"]; ok {
-			setField(periods, "nodefsInodesFree", val.(string))
+		if val, ok := es["nodefs_inodes_free"].(string); ok && val != "" {
+			periods["nodefsInodesFree"] = val
 		}
-		if val, ok := es["pid_available"]; ok {
-			setField(periods, "pidAvailable", val.(string))
+		if val, ok := es["pid_available"].(string); ok && val != "" {
+			periods["pidAvailable"] = val
 		}
 		kConfig["evictionSoftGracePeriod"] = periods
 	}
 	if v, ok := cfg["eviction_minimum_reclaim"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
 		reclaim := map[string]interface{}{}
-		if val, ok := es["memory_available"]; ok {
-			setField(reclaim, "memoryAvailable", val.(string))
+		if val, ok := es["memory_available"].(string); ok && val != "" {
+			reclaim["memoryAvailable"] = val
 		}
-		if val, ok := es["nodefs_available"]; ok {
-			setField(reclaim, "nodefsAvailable", val.(string))
+		if val, ok := es["nodefs_available"].(string); ok && val != "" {
+			reclaim["nodefsAvailable"] = val
 		}
-		if val, ok := es["imagefs_available"]; ok {
-			setField(reclaim, "imagefsAvailable", val.(string))
+		if val, ok := es["imagefs_available"].(string); ok && val != "" {
+			reclaim["imagefsAvailable"] = val
 		}
-		if val, ok := es["imagefs_inodes_free"]; ok {
-			setField(reclaim, "imagefsInodesFree", val.(string))
+		if val, ok := es["imagefs_inodes_free"].(string); ok && val != "" {
+			reclaim["imagefsInodesFree"] = val
 		}
-		if val, ok := es["nodefs_inodes_free"]; ok {
-			setField(reclaim, "nodefsInodesFree", val.(string))
+		if val, ok := es["nodefs_inodes_free"].(string); ok && val != "" {
+			reclaim["nodefsInodesFree"] = val
 		}
-		if val, ok := es["pid_available"]; ok {
-			setField(reclaim, "pidAvailable", val.(string))
+		if val, ok := es["pid_available"].(string); ok && val != "" {
+			reclaim["pidAvailable"] = val
 		}
 		kConfig["evictionMinimumReclaim"] = reclaim
 	}
 	if v, ok := cfg["crash_loop_back_off"]; ok && len(v.([]interface{})) > 0 {
 		clb := v.([]interface{})[0].(map[string]interface{})
 		crashLoopBackOff := map[string]interface{}{}
-		if val, ok := clb["max_container_restart_period"]; ok {
-			setField(crashLoopBackOff, "maxContainerRestartPeriod", val.(string))
+		if val, ok := clb["max_container_restart_period"].(string); ok && val != "" {
+			crashLoopBackOff["maxContainerRestartPeriod"] = val
 		}
 		kConfig["crashLoopBackOff"] = crashLoopBackOff
 	}
@@ -2296,12 +2403,12 @@ func expandTopologyManager(v interface{}) map[string]interface{} {
 
 	topologyManager := map[string]interface{}{}
 
-	if v, ok := cfg["policy"]; ok {
-		setField(topologyManager, "policy", v.(string))
+	if v, ok := cfg["policy"].(string); ok && v != "" {
+		topologyManager["policy"] = v
 	}
 
-	if v, ok := cfg["scope"]; ok {
-		setField(topologyManager, "scope", v.(string))
+	if v, ok := cfg["scope"].(string); ok && v != "" {
+		topologyManager["scope"] = v
 	}
 
 	return topologyManager
@@ -2322,8 +2429,8 @@ func expandMemoryManager(v interface{}) map[string]interface{} {
 
 	memoryManager := map[string]interface{}{}
 
-	if v, ok := cfg["policy"]; ok {
-		setField(memoryManager, "policy", v.(string))
+	if v, ok := cfg["policy"].(string); ok && v != "" {
+		memoryManager["policy"] = v
 	}
 
 	return memoryManager
@@ -2344,39 +2451,49 @@ func expandLinuxNodeConfig(v interface{}) map[string]interface{} {
 
 	linuxNodeConfig := map[string]interface{}{}
 	sysctls := expandSysctls(cfg)
-	if sysctls != nil {
-		setField(linuxNodeConfig, "sysctls", sysctls)
+	if len(sysctls) > 0 {
+		linuxNodeConfig["sysctls"] = sysctls
 	}
 	cgroupMode := expandCgroupMode(cfg)
 	if len(cgroupMode) != 0 {
-		setField(linuxNodeConfig, "cgroupMode", cgroupMode)
+		linuxNodeConfig["cgroupMode"] = cgroupMode
 	}
 
-	if v, ok := cfg["transparent_hugepage_enabled"]; ok {
-		setField(linuxNodeConfig, "transparentHugepageEnabled", v.(string))
+	if v, ok := cfg["transparent_hugepage_enabled"].(string); ok && v != "" {
+		linuxNodeConfig["transparentHugepageEnabled"] = v
 	}
-	if v, ok := cfg["transparent_hugepage_defrag"]; ok {
-		setField(linuxNodeConfig, "transparentHugepageDefrag", v.(string))
+	if v, ok := cfg["transparent_hugepage_defrag"].(string); ok && v != "" {
+		linuxNodeConfig["transparentHugepageDefrag"] = v
 	}
 
 	if v, ok := cfg["hugepages_config"]; ok {
-		setField(linuxNodeConfig, "hugepages", expandHugepagesConfig(v))
+		if sub := expandHugepagesConfig(v); sub != nil {
+			linuxNodeConfig["hugepages"] = sub
+		}
 	}
 
 	if v, ok := cfg["node_kernel_module_loading"]; ok {
-		setField(linuxNodeConfig, "nodeKernelModuleLoading", expandNodeKernelModuleLoading(v))
+		if sub := expandNodeKernelModuleLoading(v); sub != nil {
+			linuxNodeConfig["nodeKernelModuleLoading"] = sub
+		}
 	}
 
 	if v, ok := cfg["swap_config"]; ok {
-		setField(linuxNodeConfig, "swapConfig", expandSwapConfig(v))
+		if sub := expandSwapConfig(v); sub != nil {
+			linuxNodeConfig["swapConfig"] = sub
+		}
 	}
 
 	if v, ok := cfg["accurate_time_config"]; ok {
-		setField(linuxNodeConfig, "accurateTimeConfig", expandAccurateTimeConfig(v))
+		if sub := expandAccurateTimeConfig(v); sub != nil {
+			linuxNodeConfig["accurateTimeConfig"] = sub
+		}
 	}
 
 	if v, ok := cfg["custom_node_init"]; ok {
-		setField(linuxNodeConfig, "customNodeInit", expandCustomNodeInit(v))
+		if sub := expandCustomNodeInit(v); sub != nil {
+			linuxNodeConfig["customNodeInit"] = sub
+		}
 	}
 
 	return linuxNodeConfig
@@ -2396,7 +2513,9 @@ func expandWindowsNodeConfig(v interface{}) map[string]interface{} {
 		return nil
 	}
 	wnc := map[string]interface{}{}
-	setField(wnc, "osVersion", osversionRaw.(string))
+	if v := osversionRaw.(string); v != "" {
+		wnc["osVersion"] = v
+	}
 	return wnc
 }
 
@@ -2412,12 +2531,12 @@ func expandNodeImageConfig(v interface{}) map[string]interface{} {
 
 	nodeImageConfig := map[string]interface{}{}
 
-	if v, ok := cfg["image_project"]; ok {
-		setField(nodeImageConfig, "imageProject", v.(string))
+	if v, ok := cfg["image_project"].(string); ok && v != "" {
+		nodeImageConfig["imageProject"] = v
 	}
 
-	if v, ok := cfg["image"]; ok {
-		setField(nodeImageConfig, "image", v.(string))
+	if v, ok := cfg["image"].(string); ok && v != "" {
+		nodeImageConfig["image"] = v
 	}
 	return nodeImageConfig
 }
@@ -2458,12 +2577,12 @@ func expandHugepagesConfig(v interface{}) map[string]interface{} {
 
 	hugepagesConfig := map[string]interface{}{}
 
-	if v, ok := cfg["hugepage_size_2m"]; ok {
-		setField(hugepagesConfig, "hugepageSize2m", int64(v.(int)))
+	if v, ok := cfg["hugepage_size_2m"].(int); ok && v != 0 {
+		hugepagesConfig["hugepageSize2m"] = v
 	}
 
-	if v, ok := cfg["hugepage_size_1g"]; ok {
-		setField(hugepagesConfig, "hugepageSize1g", int64(v.(int)))
+	if v, ok := cfg["hugepage_size_1g"].(int); ok && v != 0 {
+		hugepagesConfig["hugepageSize1g"] = v
 	}
 
 	return hugepagesConfig
@@ -2484,8 +2603,8 @@ func expandNodeKernelModuleLoading(v interface{}) map[string]interface{} {
 
 	nodeKernelModuleLoading := map[string]interface{}{}
 
-	if v, ok := cfg["policy"]; ok {
-		setField(nodeKernelModuleLoading, "policy", v.(string))
+	if v, ok := cfg["policy"].(string); ok && v != "" {
+		nodeKernelModuleLoading["policy"] = v
 	}
 
 	return nodeKernelModuleLoading
@@ -2506,8 +2625,8 @@ func expandAccurateTimeConfig(v interface{}) map[string]interface{} {
 
 	accurateTimeConfig := map[string]interface{}{}
 
-	if v, ok := cfg["enable_ptp_kvm_time_sync"]; ok {
-		setField(accurateTimeConfig, "enablePtpKvmTimeSync", v.(bool))
+	if v, ok := cfg["enable_ptp_kvm_time_sync"].(bool); ok && v {
+		accurateTimeConfig["enablePtpKvmTimeSync"] = v
 	}
 
 	return accurateTimeConfig
@@ -2528,7 +2647,9 @@ func expandCustomNodeInit(v interface{}) map[string]interface{} {
 
 	customNodeInit := map[string]interface{}{}
 	if v, ok := cfg["init_script"]; ok {
-		setField(customNodeInit, "initScript", expandInitScript(v))
+		if sub := expandInitScript(v); sub != nil {
+			customNodeInit["initScript"] = sub
+		}
 	}
 	return customNodeInit
 }
@@ -2547,14 +2668,14 @@ func expandInitScript(v interface{}) map[string]interface{} {
 	cfg := ls[0].(map[string]interface{})
 
 	initScript := map[string]interface{}{}
-	if v, ok := cfg["gcs_uri"]; ok {
-		setField(initScript, "gcsUri", v.(string))
+	if v, ok := cfg["gcs_uri"].(string); ok && v != "" {
+		initScript["gcsUri"] = v
 	}
-	if v, ok := cfg["gcs_generation"]; ok {
-		setStringIntField(initScript, "gcsGeneration", int64(v.(int)))
+	if v, ok := cfg["gcs_generation"].(int); ok && v != 0 {
+		initScript["gcsGeneration"] = strconv.Itoa(v)
 	}
-	if v, ok := cfg["gcp_secret_manager_secret_uri"]; ok {
-		setField(initScript, "gcpSecretManagerSecretUri", v.(string))
+	if v, ok := cfg["gcp_secret_manager_secret_uri"].(string); ok && v != "" {
+		initScript["gcpSecretManagerSecretUri"] = v
 	}
 	return initScript
 }
@@ -2575,11 +2696,15 @@ func expandSwapConfig(v interface{}) map[string]interface{} {
 	swapConfig := map[string]interface{}{}
 
 	if v, ok := cfg["boot_disk_profile"]; ok && len(v.([]interface{})) > 0 {
-		setField(swapConfig, "bootDiskProfile", expandBootDiskProfile(v))
+		if sub := expandBootDiskProfile(v); sub != nil {
+			swapConfig["bootDiskProfile"] = sub
+		}
 	}
 
 	if v, ok := cfg["dedicated_local_ssd_profile"]; ok && len(v.([]interface{})) > 0 {
-		setField(swapConfig, "dedicatedLocalSsdProfile", expandDedicatedLocalSsdProfile(v))
+		if sub := expandDedicatedLocalSsdProfile(v); sub != nil {
+			swapConfig["dedicatedLocalSsdProfile"] = sub
+		}
 	}
 
 	if v, ok := cfg["enabled"]; ok {
@@ -2587,11 +2712,15 @@ func expandSwapConfig(v interface{}) map[string]interface{} {
 	}
 
 	if v, ok := cfg["encryption_config"]; ok && len(v.([]interface{})) > 0 {
-		setField(swapConfig, "encryptionConfig", expandSwapEncryptionConfig(v))
+		if sub := expandSwapEncryptionConfig(v); sub != nil {
+			swapConfig["encryptionConfig"] = sub
+		}
 	}
 
 	if v, ok := cfg["ephemeral_local_ssd_profile"]; ok && len(v.([]interface{})) > 0 {
-		setField(swapConfig, "ephemeralLocalSsdProfile", expandEphemeralLocalSsdProfile(v))
+		if sub := expandEphemeralLocalSsdProfile(v); sub != nil {
+			swapConfig["ephemeralLocalSsdProfile"] = sub
+		}
 	}
 
 	return swapConfig
@@ -2612,12 +2741,12 @@ func expandBootDiskProfile(v interface{}) map[string]interface{} {
 
 	profile := map[string]interface{}{}
 
-	if v, ok := cfg["swap_size_gib"]; ok {
-		setStringIntField(profile, "swapSizeGib", int64(v.(int)))
+	if v, ok := cfg["swap_size_gib"].(int); ok && v != 0 {
+		profile["swapSizeGib"] = strconv.Itoa(v)
 	}
 
-	if v, ok := cfg["swap_size_percent"]; ok {
-		setField(profile, "swapSizePercent", int64(v.(int)))
+	if v, ok := cfg["swap_size_percent"].(int); ok && v != 0 {
+		profile["swapSizePercent"] = v
 	}
 
 	return profile
@@ -2638,8 +2767,8 @@ func expandDedicatedLocalSsdProfile(v interface{}) map[string]interface{} {
 
 	profile := map[string]interface{}{}
 
-	if v, ok := cfg["disk_count"]; ok {
-		setStringIntField(profile, "diskCount", int64(v.(int)))
+	if v, ok := cfg["disk_count"].(int); ok && v != 0 {
+		profile["diskCount"] = strconv.Itoa(v)
 	}
 
 	return profile
@@ -2682,12 +2811,12 @@ func expandEphemeralLocalSsdProfile(v interface{}) map[string]interface{} {
 
 	profile := map[string]interface{}{}
 
-	if v, ok := cfg["swap_size_gib"]; ok {
-		setStringIntField(profile, "swapSizeGib", int64(v.(int)))
+	if v, ok := cfg["swap_size_gib"].(int); ok && v != 0 {
+		profile["swapSizeGib"] = strconv.Itoa(v)
 	}
 
-	if v, ok := cfg["swap_size_percent"]; ok {
-		setField(profile, "swapSizePercent", int64(v.(int)))
+	if v, ok := cfg["swap_size_percent"].(int); ok && v != 0 {
+		profile["swapSizePercent"] = v
 	}
 
 	return profile
@@ -2707,9 +2836,15 @@ func expandContainerdConfig(v interface{}) map[string]interface{} {
 	cfg := ls[0].(map[string]interface{})
 
 	cc := map[string]interface{}{}
-	setField(cc, "privateRegistryAccessConfig", expandPrivateRegistryAccessConfig(cfg["private_registry_access_config"]))
-	setField(cc, "writableCgroups", expandWritableCgroups(cfg["writable_cgroups"]))
-	setField(cc, "registryHosts", expandRegistryHosts(cfg["registry_hosts"]))
+	if sub := expandPrivateRegistryAccessConfig(cfg["private_registry_access_config"]); sub != nil {
+		cc["privateRegistryAccessConfig"] = sub
+	}
+	if sub := expandWritableCgroups(cfg["writable_cgroups"]); sub != nil {
+		cc["writableCgroups"] = sub
+	}
+	if sub := expandRegistryHosts(cfg["registry_hosts"]); len(sub) > 0 {
+		cc["registryHosts"] = sub
+	}
 	return cc
 }
 
@@ -2727,8 +2862,8 @@ func expandPrivateRegistryAccessConfig(v interface{}) map[string]interface{} {
 	cfg := ls[0].(map[string]interface{})
 
 	pracc := map[string]interface{}{}
-	if enabled, ok := cfg["enabled"]; ok {
-		setField(pracc, "enabled", enabled.(bool))
+	if enabled, ok := cfg["enabled"].(bool); ok && enabled {
+		pracc["enabled"] = enabled
 	}
 	if caCfgRaw, ok := cfg["certificate_authority_domain_config"]; ok {
 		ls := caCfgRaw.([]interface{})
@@ -2736,7 +2871,9 @@ func expandPrivateRegistryAccessConfig(v interface{}) map[string]interface{} {
 		for i, caCfg := range ls {
 			caConfigs[i] = expandCADomainConfig(caCfg)
 		}
-		setField(pracc, "certificateAuthorityDomainConfig", caConfigs)
+		if len(caConfigs) > 0 {
+			pracc["certificateAuthorityDomainConfig"] = caConfigs
+		}
 	}
 
 	return pracc
@@ -2755,10 +2892,14 @@ func expandCADomainConfig(v interface{}) map[string]interface{} {
 		for i, dn := range fqdns {
 			fqdnsSlice[i] = dn.(string)
 		}
-		setField(caConfig, "fqdns", fqdnsSlice)
+		if len(fqdnsSlice) > 0 {
+			caConfig["fqdns"] = fqdnsSlice
+		}
 	}
 
-	setField(caConfig, "gcpSecretManagerCertificateConfig", expandGCPSecretManagerCertificateConfig(cfg["gcp_secret_manager_certificate_config"]))
+	if sub := expandGCPSecretManagerCertificateConfig(cfg["gcp_secret_manager_certificate_config"]); sub != nil {
+		caConfig["gcpSecretManagerCertificateConfig"] = sub
+	}
 
 	return caConfig
 }
@@ -2777,8 +2918,8 @@ func expandGCPSecretManagerCertificateConfig(v interface{}) map[string]interface
 	cfg := ls[0].(map[string]interface{})
 
 	gcpSMConfig := map[string]interface{}{}
-	if v, ok := cfg["secret_uri"]; ok {
-		setField(gcpSMConfig, "secretUri", v.(string))
+	if v, ok := cfg["secret_uri"].(string); ok && v != "" {
+		gcpSMConfig["secretUri"] = v
 	}
 	return gcpSMConfig
 }
@@ -2797,8 +2938,8 @@ func expandWritableCgroups(v interface{}) map[string]interface{} {
 	cfg := ls[0].(map[string]interface{})
 
 	wcg := map[string]interface{}{}
-	if enabled, ok := cfg["enabled"]; ok {
-		setField(wcg, "enabled", enabled.(bool))
+	if enabled, ok := cfg["enabled"].(bool); ok && enabled {
+		wcg["enabled"] = enabled
 	}
 	return wcg
 }
@@ -2815,19 +2956,23 @@ func expandRegistryHosts(v interface{}) []map[string]interface{} {
 	for _, raw := range ls {
 		data := raw.(map[string]interface{})
 		rh := map[string]interface{}{}
-		setField(rh, "server", data["server"].(string))
+		if v, ok := data["server"].(string); ok && v != "" {
+			rh["server"] = v
+		}
 		if v, ok := data["hosts"]; ok {
 			hosts := v.([]interface{})
 			hostsSlice := make([]map[string]interface{}, 0, len(hosts))
 			for _, rawHost := range hosts {
 				hostData := rawHost.(map[string]interface{})
 				h := map[string]interface{}{}
-				setField(h, "host", hostData["host"].(string))
-				if v, ok := hostData["override_path"]; ok {
-					setField(h, "overridePath", v.(bool))
+				if v, ok := hostData["host"].(string); ok && v != "" {
+					h["host"] = v
 				}
-				if v, ok := hostData["dial_timeout"]; ok {
-					setField(h, "dialTimeout", v.(string))
+				if v, ok := hostData["override_path"].(bool); ok && v {
+					h["overridePath"] = v
+				}
+				if v, ok := hostData["dial_timeout"].(string); ok && v != "" {
+					h["dialTimeout"] = v
 				}
 				if v, ok := hostData["capabilities"]; ok {
 					cap := v.([]interface{})
@@ -2835,7 +2980,9 @@ func expandRegistryHosts(v interface{}) []map[string]interface{} {
 					for i, c := range cap {
 						caps[i] = c.(string)
 					}
-					setField(h, "capabilities", caps)
+					if len(caps) > 0 {
+						h["capabilities"] = caps
+					}
 				}
 				if v, ok := hostData["header"]; ok {
 					headers := v.([]interface{})
@@ -2843,7 +2990,9 @@ func expandRegistryHosts(v interface{}) []map[string]interface{} {
 					for i, headerRaw := range headers {
 						headerSlice[i] = expandRegistryHeader(headerRaw)
 					}
-					setField(h, "header", headerSlice)
+					if len(headerSlice) > 0 {
+						h["header"] = headerSlice
+					}
 				}
 				if v, ok := hostData["ca"]; ok {
 					ca := v.([]interface{})
@@ -2851,7 +3000,9 @@ func expandRegistryHosts(v interface{}) []map[string]interface{} {
 					for i, caRaw := range ca {
 						caSlice[i] = expandRegistryCertificateConfig(caRaw)
 					}
-					setField(h, "ca", caSlice)
+					if len(caSlice) > 0 {
+						h["ca"] = caSlice
+					}
 				}
 				if v, ok := hostData["client"]; ok {
 					client := v.([]interface{})
@@ -2859,11 +3010,15 @@ func expandRegistryHosts(v interface{}) []map[string]interface{} {
 					for i, clientRaw := range client {
 						clientSlice[i] = expandRegistryCertificateConfigPair(clientRaw)
 					}
-					setField(h, "client", clientSlice)
+					if len(clientSlice) > 0 {
+						h["client"] = clientSlice
+					}
 				}
 				hostsSlice = append(hostsSlice, h)
 			}
-			setField(rh, "hosts", hostsSlice)
+			if len(hostsSlice) > 0 {
+				rh["hosts"] = hostsSlice
+			}
 		}
 		registryHosts = append(registryHosts, rh)
 	}
@@ -2876,8 +3031,8 @@ func expandRegistryHeader(v interface{}) map[string]interface{} {
 		return header
 	}
 	ls := v.(map[string]interface{})
-	if val, ok := ls["key"]; ok {
-		setField(header, "key", val.(string))
+	if val, ok := ls["key"].(string); ok && val != "" {
+		header["key"] = val
 	}
 	if val, ok := ls["value"]; ok {
 		headerVal := val.([]interface{})
@@ -2885,7 +3040,9 @@ func expandRegistryHeader(v interface{}) map[string]interface{} {
 		for i, hv := range headerVal {
 			vals[i] = hv.(string)
 		}
-		setField(header, "value", vals)
+		if len(vals) > 0 {
+			header["value"] = vals
+		}
 	}
 	return header
 }
@@ -2896,8 +3053,8 @@ func expandRegistryCertificateConfig(v interface{}) map[string]interface{} {
 		return cfg
 	}
 	ls := v.(map[string]interface{})
-	if val, ok := ls["gcp_secret_manager_secret_uri"]; ok {
-		setField(cfg, "gcpSecretManagerSecretUri", val.(string))
+	if val, ok := ls["gcp_secret_manager_secret_uri"].(string); ok && val != "" {
+		cfg["gcpSecretManagerSecretUri"] = val
 	}
 	return cfg
 }
@@ -2911,13 +3068,17 @@ func expandRegistryCertificateConfigPair(v interface{}) map[string]interface{} {
 	if val, ok := ls["cert"]; ok {
 		certRaw := val.([]interface{})
 		if len(certRaw) > 0 {
-			setField(cfg, "cert", expandRegistryCertificateConfig(certRaw[0]))
+			if sub := expandRegistryCertificateConfig(certRaw[0]); sub != nil {
+				cfg["cert"] = sub
+			}
 		}
 	}
 	if val, ok := ls["key"]; ok {
 		keyRaw := val.([]interface{})
 		if len(keyRaw) > 0 {
-			setField(cfg, "key", expandRegistryCertificateConfig(keyRaw[0]))
+			if sub := expandRegistryCertificateConfig(keyRaw[0]); sub != nil {
+				cfg["key"] = sub
+			}
 		}
 	}
 	return cfg
@@ -2938,15 +3099,23 @@ func expandSoleTenantConfig(v interface{}) map[string]interface{} {
 		for _, v := range affinitiesRaw.(*schema.Set).List() {
 			na := v.(map[string]interface{})
 			naMap := map[string]interface{}{}
-			setField(naMap, "key", na["key"].(string))
-			setField(naMap, "operator", na["operator"].(string))
-			setField(naMap, "values", tpgresource.ConvertStringArr(na["values"].([]interface{})))
+			if k, ok := na["key"].(string); ok && k != "" {
+				naMap["key"] = k
+			}
+			if op, ok := na["operator"].(string); ok && op != "" {
+				naMap["operator"] = op
+			}
+			if values := tpgresource.ConvertStringArr(na["values"].([]interface{})); len(values) > 0 {
+				naMap["values"] = values
+			}
 			affinities = append(affinities, naMap)
 		}
-		setField(stConfig, "nodeAffinities", affinities)
+		if len(affinities) > 0 {
+			stConfig["nodeAffinities"] = affinities
+		}
 	}
-	if v, ok := cfg["min_node_cpus"]; ok {
-		setField(stConfig, "minNodeCpus", int64(v.(int)))
+	if v, ok := cfg["min_node_cpus"].(int); ok && v != 0 {
+		stConfig["minNodeCpus"] = v
 	}
 	return stConfig
 }
@@ -2966,8 +3135,8 @@ func expandTaintConfig(v interface{}) map[string]interface{} {
 
 	taintConfig := map[string]interface{}{}
 
-	if v, ok := cfg["architecture_taint_behavior"]; ok {
-		setField(taintConfig, "architectureTaintBehavior", v.(string))
+	if v, ok := cfg["architecture_taint_behavior"].(string); ok && v != "" {
+		taintConfig["architectureTaintBehavior"] = v
 	}
 
 	return taintConfig
@@ -2984,11 +3153,13 @@ func expandHostMaintenancePolicy(v interface{}) map[string]interface{} {
 	}
 	cfg := ls[0].(map[string]interface{})
 	mPolicy := map[string]interface{}{}
-	if maintenanceInterval, ok := cfg["maintenance_interval"]; ok {
-		setField(mPolicy, "maintenanceInterval", maintenanceInterval.(string))
+	if maintenanceInterval, ok := cfg["maintenance_interval"].(string); ok && maintenanceInterval != "" {
+		mPolicy["maintenanceInterval"] = maintenanceInterval
 	}
 	if v, ok := cfg["opportunistic_maintenance_strategy"]; ok {
-		setField(mPolicy, "opportunisticMaintenanceStrategy", expandOpportunisticMaintenanceStrategy(v))
+		if sub := expandOpportunisticMaintenanceStrategy(v); sub != nil {
+			mPolicy["opportunisticMaintenanceStrategy"] = sub
+		}
 	}
 
 	return mPolicy
@@ -3010,11 +3181,11 @@ func expandOpportunisticMaintenanceStrategy(v interface{}) map[string]interface{
 	strategy := map[string]interface{}{
 		"minNodesPerPool": strconv.FormatInt(minNodes, 10),
 	}
-	if nodeIdleTimeWindow, ok := cfg["node_idle_time_window"]; ok {
-		setField(strategy, "nodeIdleTimeWindow", nodeIdleTimeWindow.(string))
+	if nodeIdleTimeWindow, ok := cfg["node_idle_time_window"].(string); ok && nodeIdleTimeWindow != "" {
+		strategy["nodeIdleTimeWindow"] = nodeIdleTimeWindow
 	}
-	if maintenanceAvailabilityWindow, ok := cfg["maintenance_availability_window"]; ok {
-		setField(strategy, "maintenanceAvailabilityWindow", maintenanceAvailabilityWindow.(string))
+	if maintenanceAvailabilityWindow, ok := cfg["maintenance_availability_window"].(string); ok && maintenanceAvailabilityWindow != "" {
+		strategy["maintenanceAvailabilityWindow"] = maintenanceAvailabilityWindow
 	}
 
 	return strategy
@@ -3028,8 +3199,12 @@ func expandConfidentialNodes(configured interface{}) map[string]interface{} {
 	}
 	config := l[0].(map[string]interface{})
 	cn := map[string]interface{}{}
-	setField(cn, "enabled", config["enabled"].(bool))
-	setField(cn, "confidentialInstanceType", config["confidential_instance_type"].(string))
+	if v, ok := config["enabled"].(bool); ok && v {
+		cn["enabled"] = v
+	}
+	if v, ok := config["confidential_instance_type"].(string); ok && v != "" {
+		cn["confidentialInstanceType"] = v
+	}
 	return cn
 }
 
@@ -3042,13 +3217,17 @@ func flattenNodeConfigDefaults(c map[string]interface{}) []map[string]interface{
 
 	result = append(result, map[string]interface{}{})
 
-	result[0]["containerd_config"] = flattenContainerdConfig(getMap(c, "containerdConfig"))
+	containerdConfig, _ := c["containerdConfig"].(map[string]interface{})
+	result[0]["containerd_config"] = flattenContainerdConfig(containerdConfig)
 
-	result[0]["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(getMap(c, "nodeKubeletConfig"))
+	nodeKubeletConfig, _ := c["nodeKubeletConfig"].(map[string]interface{})
+	result[0]["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(nodeKubeletConfig)
 
-	result[0]["logging_variant"] = flattenLoggingVariant(getMap(c, "loggingConfig"))
+	loggingConfig, _ := c["loggingConfig"].(map[string]interface{})
+	result[0]["logging_variant"] = flattenLoggingVariant(loggingConfig)
 
-	result[0]["gcfs_config"] = flattenGcfsConfig(getMap(c, "gcfsConfig"))
+	gcfsConfig, _ := c["gcfsConfig"].(map[string]interface{})
+	result[0]["gcfs_config"] = flattenGcfsConfig(gcfsConfig)
 
 	return result
 }
@@ -3071,63 +3250,95 @@ func flattenNodeConfig(c map[string]interface{}, v interface{}) []map[string]int
 		}
 	}
 
+	taintConfig, _ := c["taintConfig"].(map[string]interface{})
+	containerdConfig, _ := c["containerdConfig"].(map[string]interface{})
+	bootDisk, _ := c["bootDisk"].(map[string]interface{})
+	gpuDirectConfig, _ := c["gpuDirectConfig"].(map[string]interface{})
+	accelerators, _ := c["accelerators"].([]interface{})
+	loggingConfig, _ := c["loggingConfig"].(map[string]interface{})
+{{- if ne $.TargetVersionName "ga" }}
+	ephemeralStorageConfig, _ := c["ephemeralStorageConfig"].(map[string]interface{})
+{{- end }}
+	localNvmeSsdBlockConfig, _ := c["localNvmeSsdBlockConfig"].(map[string]interface{})
+	ephemeralStorageLocalSsdConfig, _ := c["ephemeralStorageLocalSsdConfig"].(map[string]interface{})
+	gcfsConfig, _ := c["gcfsConfig"].(map[string]interface{})
+	gvnic, _ := c["gvnic"].(map[string]interface{})
+	reservationAffinity, _ := c["reservationAffinity"].(map[string]interface{})
+	secondaryBootDisks, _ := c["secondaryBootDisks"].([]interface{})
+	shieldedInstanceConfig, _ := c["shieldedInstanceConfig"].(map[string]interface{})
+	taints, _ := c["taints"].([]interface{})
+	workloadMetadataConfig, _ := c["workloadMetadataConfig"].(map[string]interface{})
+	sandboxConfig, _ := c["sandboxConfig"].(map[string]interface{})
+{{- if ne $.TargetVersionName "ga" }}
+	hostMaintenancePolicy, _ := c["hostMaintenancePolicy"].(map[string]interface{})
+{{- end }}
+	confidentialNodes, _ := c["confidentialNodes"].(map[string]interface{})
+	kubeletConfig, _ := c["kubeletConfig"].(map[string]interface{})
+	linuxNodeConfig, _ := c["linuxNodeConfig"].(map[string]interface{})
+	windowsNodeConfig, _ := c["windowsNodeConfig"].(map[string]interface{})
+	nodeImageConfig, _ := c["nodeImageConfig"].(map[string]interface{})
+	advancedMachineFeatures, _ := c["advancedMachineFeatures"].(map[string]interface{})
+	soleTenantConfig, _ := c["soleTenantConfig"].(map[string]interface{})
+	fastSocket, _ := c["fastSocket"].(map[string]interface{})
+	resourceManagerTags, _ := c["resourceManagerTags"].(map[string]interface{})
+
 	config = append(config, map[string]interface{}{
-		"machine_type":             flattenString(c["machineType"]),
-		"taint_config":             flattenTaintConfig(getMap(c, "taintConfig")),
-		"containerd_config":        flattenContainerdConfig(getMap(c, "containerdConfig")),
-		"disk_size_gb":             flattenInt(c["diskSizeGb"]),
-		"disk_type":                flattenString(c["diskType"]),
-		"boot_disk":                flattenBootDiskConfig(getMap(c, "bootDisk")),
-		"gpudirect_strategy":       flattenGpuDirectConfig(getMap(c, "gpuDirectConfig")),
-		"guest_accelerator":        flattenContainerGuestAccelerators(getSlice(c, "accelerators")),
-		"local_ssd_count":          flattenInt(c["localSsdCount"]),
-		"logging_variant":          flattenLoggingVariant(getMap(c, "loggingConfig")),
+		"machine_type":             c["machineType"],
+		"taint_config":             flattenTaintConfig(taintConfig),
+		"containerd_config":        flattenContainerdConfig(containerdConfig),
+		"disk_size_gb":             c["diskSizeGb"],
+		"disk_type":                c["diskType"],
+		"boot_disk":                flattenBootDiskConfig(bootDisk),
+		"gpudirect_strategy":       flattenGpuDirectConfig(gpuDirectConfig),
+		"guest_accelerator":        flattenContainerGuestAccelerators(accelerators),
+		"local_ssd_count":          c["localSsdCount"],
+		"logging_variant":          flattenLoggingVariant(loggingConfig),
 {{- if ne $.TargetVersionName "ga" }}
-		"ephemeral_storage_config": flattenEphemeralStorageConfig(getMap(c, "ephemeralStorageConfig")),
+		"ephemeral_storage_config": flattenEphemeralStorageConfig(ephemeralStorageConfig),
 {{- end }}
-		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(getMap(c, "localNvmeSsdBlockConfig")),
-		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(getMap(c, "ephemeralStorageLocalSsdConfig")),
-		"gcfs_config":                        flattenGcfsConfig(getMap(c, "gcfsConfig")),
-		"gvnic":                              flattenGvnic(getMap(c, "gvnic")),
-		"reservation_affinity":               flattenGKEReservationAffinity(getMap(c, "reservationAffinity")),
-		"service_account":                    flattenString(c["serviceAccount"]),
-		"metadata":                           flattenStringMap(c["metadata"]),
-		"image_type":                         flattenString(c["imageType"]),
-		"labels":                             flattenStringMap(c["labels"]),
-		"resource_labels":                    flattenStringMap(c["resourceLabels"]),
-		"tags":                               flattenStringSlice(c["tags"]),
-		"preemptible":                        flattenBool(c["preemptible"]),
-		"secondary_boot_disks":               flattenSecondaryBootDisks(getSlice(c, "secondaryBootDisks")),
-		"storage_pools":                      flattenStringSlice(c["storagePools"]),
-		"spot":                               flattenBool(c["spot"]),
-		"min_cpu_platform":                   flattenString(c["minCpuPlatform"]),
-		"shielded_instance_config":           flattenShieldedInstanceConfig(getMap(c, "shieldedInstanceConfig")),
-		"taint":                              flattenTaints(getSlice(c, "taints"), oldTaints),
-		"effective_taints":                   flattenEffectiveTaints(getSlice(c, "taints")),
-		"workload_metadata_config":           flattenWorkloadMetadataConfig(getMap(c, "workloadMetadataConfig")),
-		"sandbox_config":                     flattenSandboxConfig(getMap(c, "sandboxConfig")),
+		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(localNvmeSsdBlockConfig),
+		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(ephemeralStorageLocalSsdConfig),
+		"gcfs_config":                        flattenGcfsConfig(gcfsConfig),
+		"gvnic":                              flattenGvnic(gvnic),
+		"reservation_affinity":               flattenGKEReservationAffinity(reservationAffinity),
+		"service_account":                    c["serviceAccount"],
+		"metadata":                           c["metadata"],
+		"image_type":                         c["imageType"],
+		"labels":                             c["labels"],
+		"resource_labels":                    c["resourceLabels"],
+		"tags":                               c["tags"],
+		"preemptible":                        c["preemptible"],
+		"secondary_boot_disks":               flattenSecondaryBootDisks(secondaryBootDisks),
+		"storage_pools":                      c["storagePools"],
+		"spot":                               c["spot"],
+		"min_cpu_platform":                   c["minCpuPlatform"],
+		"shielded_instance_config":           flattenShieldedInstanceConfig(shieldedInstanceConfig),
+		"taint":                              flattenTaints(taints, oldTaints),
+		"effective_taints":                   flattenEffectiveTaints(taints),
+		"workload_metadata_config":           flattenWorkloadMetadataConfig(workloadMetadataConfig),
+		"sandbox_config":                     flattenSandboxConfig(sandboxConfig),
 {{- if ne $.TargetVersionName "ga" }}
-		"host_maintenance_policy":  flattenHostMaintenancePolicy(getMap(c, "hostMaintenancePolicy")),
+		"host_maintenance_policy":  flattenHostMaintenancePolicy(hostMaintenancePolicy),
 {{- end }}
-		"confidential_nodes":          flattenConfidentialNodes(getMap(c, "confidentialNodes")),
-		"boot_disk_kms_key":           flattenString(c["bootDiskKmsKey"]),
-		"kubelet_config":              flattenKubeletConfig(getMap(c, "kubeletConfig")),
-		"linux_node_config":           flattenLinuxNodeConfig(getMap(c, "linuxNodeConfig")),
-		"windows_node_config":         flattenWindowsNodeConfig(getMap(c, "windowsNodeConfig")),
-		"node_group":                  flattenString(c["nodeGroup"]),
-		"node_image_config":           flattenNodeImageConfig(getMap(c, "nodeImageConfig")),
-		"advanced_machine_features":   flattenAdvancedMachineFeaturesConfig(getMap(c, "advancedMachineFeatures")),
-		"max_run_duration":            flattenString(c["maxRunDuration"]),
-		"flex_start":                  flattenBool(c["flexStart"]),
-		"sole_tenant_config":          flattenSoleTenantConfig(getMap(c, "soleTenantConfig")),
-		"fast_socket":                 flattenFastSocket(getMap(c, "fastSocket")),
-		"resource_manager_tags":       flattenResourceManagerTags(getMap(c, "resourceManagerTags")),
-		"enable_confidential_storage": flattenBool(c["enableConfidentialStorage"]),
-		"local_ssd_encryption_mode":   flattenString(c["localSsdEncryptionMode"]),
+		"confidential_nodes":          flattenConfidentialNodes(confidentialNodes),
+		"boot_disk_kms_key":           c["bootDiskKmsKey"],
+		"kubelet_config":              flattenKubeletConfig(kubeletConfig),
+		"linux_node_config":           flattenLinuxNodeConfig(linuxNodeConfig),
+		"windows_node_config":         flattenWindowsNodeConfig(windowsNodeConfig),
+		"node_group":                  c["nodeGroup"],
+		"node_image_config":           flattenNodeImageConfig(nodeImageConfig),
+		"advanced_machine_features":   flattenAdvancedMachineFeaturesConfig(advancedMachineFeatures),
+		"max_run_duration":            c["maxRunDuration"],
+		"flex_start":                  c["flexStart"],
+		"sole_tenant_config":          flattenSoleTenantConfig(soleTenantConfig),
+		"fast_socket":                 flattenFastSocket(fastSocket),
+		"resource_manager_tags":       flattenResourceManagerTags(resourceManagerTags),
+		"enable_confidential_storage": c["enableConfidentialStorage"],
+		"local_ssd_encryption_mode":   c["localSsdEncryptionMode"],
 	})
 
-	if oauthScopes := flattenStringSlice(c["oauthScopes"]); len(oauthScopes) > 0 {
-		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(oauthScopes))
+	if oauthScopes, ok := c["oauthScopes"].([]interface{}); ok && len(oauthScopes) > 0 {
+		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, oauthScopes)
 	}
 
 	return config
@@ -3140,11 +3351,24 @@ func flattenBootDiskConfig(c map[string]interface{}) []map[string]interface{} {
 		return config
 	}
 
+	var sizeGb interface{} = c["sizeGb"]
+	if v, ok := sizeGb.(string); ok {
+		sizeGb, _ = strconv.Atoi(v)
+	}
+	var provisionedIops interface{} = c["provisionedIops"]
+	if v, ok := provisionedIops.(string); ok {
+		provisionedIops, _ = strconv.Atoi(v)
+	}
+	var provisionedThroughput interface{} = c["provisionedThroughput"]
+	if v, ok := provisionedThroughput.(string); ok {
+		provisionedThroughput, _ = strconv.Atoi(v)
+	}
+
 	config = append(config, map[string]interface{}{
-		"disk_type":              flattenString(c["diskType"]),
-		"size_gb":                flattenInt(c["sizeGb"]),
-		"provisioned_iops":       flattenInt(c["provisionedIops"]),
-		"provisioned_throughput": flattenInt(c["provisionedThroughput"]),
+		"disk_type":              c["diskType"],
+		"size_gb":                sizeGb,
+		"provisioned_iops":       provisionedIops,
+		"provisioned_throughput": provisionedThroughput,
 	})
 
 	return config
@@ -3157,8 +3381,10 @@ func flattenResourceManagerTags(c map[string]interface{}) map[string]interface{}
 
 	rmt := make(map[string]interface{})
 
-	for k, v := range flattenStringMap(c["tags"]) {
-		rmt[k] = v
+	if tags, ok := c["tags"].(map[string]interface{}); ok {
+		for k, v := range tags {
+			rmt[k] = v
+		}
 	}
 
 	return rmt
@@ -3170,16 +3396,21 @@ func flattenGpuDirectConfig(c map[string]interface{}) string {
 		return ""
 	}
 
-	return flattenString(c["gpuDirectStrategy"])
+	v, _ := c["gpuDirectStrategy"].(string)
+	return v
 }
 
 func flattenAdvancedMachineFeaturesConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		var threadsPerCore interface{} = c["threadsPerCore"]
+		if v, ok := threadsPerCore.(string); ok {
+			threadsPerCore, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"threads_per_core":             flattenInt(c["threadsPerCore"]),
-			"enable_nested_virtualization": flattenBool(c["enableNestedVirtualization"]),
-			"performance_monitoring_unit":  flattenString(c["performanceMonitoringUnit"]),
+			"threads_per_core":             threadsPerCore,
+			"enable_nested_virtualization": c["enableNestedVirtualization"],
+			"performance_monitoring_unit":  c["performanceMonitoringUnit"],
 		})
 	}
 	return result
@@ -3192,23 +3423,31 @@ func flattenContainerGuestAccelerators(c []interface{}) []map[string]interface{}
 		if !ok || accel == nil {
 			continue
 		}
-		accelerator := map[string]interface{}{
-			"count":              flattenInt(accel["acceleratorCount"]),
-			"type":               flattenString(accel["acceleratorType"]),
-			"gpu_partition_size": flattenString(accel["gpuPartitionSize"]),
+		var count interface{} = accel["acceleratorCount"]
+		if v, ok := count.(string); ok {
+			count, _ = strconv.Atoi(v)
 		}
-		if gpuDriverInstallationConfig := getMap(accel, "gpuDriverInstallationConfig"); gpuDriverInstallationConfig != nil {
+		accelerator := map[string]interface{}{
+			"count":              count,
+			"type":               accel["acceleratorType"],
+			"gpu_partition_size": accel["gpuPartitionSize"],
+		}
+		if gpuDriverInstallationConfig, ok := accel["gpuDriverInstallationConfig"].(map[string]interface{}); ok && gpuDriverInstallationConfig != nil {
 			accelerator["gpu_driver_installation_config"] = []map[string]interface{}{
 				{
-					"gpu_driver_version": flattenString(gpuDriverInstallationConfig["gpuDriverVersion"]),
+					"gpu_driver_version": gpuDriverInstallationConfig["gpuDriverVersion"],
 				},
 			}
 		}
-		if gpuSharingConfig := getMap(accel, "gpuSharingConfig"); gpuSharingConfig != nil {
+		if gpuSharingConfig, ok := accel["gpuSharingConfig"].(map[string]interface{}); ok && gpuSharingConfig != nil {
+			var maxSharedClientsPerGpu interface{} = gpuSharingConfig["maxSharedClientsPerGpu"]
+			if v, ok := maxSharedClientsPerGpu.(string); ok {
+				maxSharedClientsPerGpu, _ = strconv.Atoi(v)
+			}
 			accelerator["gpu_sharing_config"] = []map[string]interface{}{
 				{
-					"gpu_sharing_strategy":       flattenString(gpuSharingConfig["gpuSharingStrategy"]),
-					"max_shared_clients_per_gpu": flattenInt(gpuSharingConfig["maxSharedClientsPerGpu"]),
+					"gpu_sharing_strategy":       gpuSharingConfig["gpuSharingStrategy"],
+					"max_shared_clients_per_gpu": maxSharedClientsPerGpu,
 				},
 			}
 		}
@@ -3221,8 +3460,8 @@ func flattenShieldedInstanceConfig(c map[string]interface{}) []map[string]interf
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enable_secure_boot":          flattenBool(c["enableSecureBoot"]),
-			"enable_integrity_monitoring": flattenBool(c["enableIntegrityMonitoring"]),
+			"enable_secure_boot":          c["enableSecureBoot"],
+			"enable_integrity_monitoring": c["enableIntegrityMonitoring"],
 		})
 	}
 	return result
@@ -3233,7 +3472,7 @@ func flattenEphemeralStorageConfig(c map[string]interface{}) []map[string]interf
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count": flattenInt(c["localSsdCount"]),
+			"local_ssd_count": c["localSsdCount"],
 		})
 	}
 	return result
@@ -3244,7 +3483,7 @@ func flattenLocalNvmeSsdBlockConfig(c map[string]interface{}) []map[string]inter
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count": flattenInt(c["localSsdCount"]),
+			"local_ssd_count": c["localSsdCount"],
 		})
 	}
 	return result
@@ -3254,8 +3493,8 @@ func flattenEphemeralStorageLocalSsdConfig(c map[string]interface{}) []map[strin
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count":  flattenInt(c["localSsdCount"]),
-			"data_cache_count": flattenInt(c["dataCacheCount"]),
+			"local_ssd_count":  c["localSsdCount"],
+			"data_cache_count": c["dataCacheCount"],
 		})
 	}
 	return result
@@ -3270,8 +3509,8 @@ func flattenSecondaryBootDisks(c []interface{}) []map[string]interface{} {
 				continue
 			}
 			secondaryBootDisk := map[string]interface{}{
-				"disk_image": flattenString(disk["diskImage"]),
-				"mode":       flattenString(disk["mode"]),
+				"disk_image": disk["diskImage"],
+				"mode":       disk["mode"],
 			}
 			result = append(result, secondaryBootDisk)
 		}
@@ -3281,16 +3520,18 @@ func flattenSecondaryBootDisks(c []interface{}) []map[string]interface{} {
 
 func flattenInsecureKubeletReadonlyPortEnabled(c map[string]interface{}) string {
 	// Convert bool from the API to the enum values used internally
-	if c != nil && flattenBool(c["insecureKubeletReadonlyPortEnabled"]) {
-		return "TRUE"
+	if c != nil {
+		if enabled, _ := c["insecureKubeletReadonlyPortEnabled"].(bool); enabled {
+			return "TRUE"
+		}
 	}
 	return "FALSE"
 }
 
 func flattenLoggingVariant(c map[string]interface{}) string {
 	variant := "DEFAULT"
-	if variantConfig := getMap(c, "variantConfig"); variantConfig != nil {
-		if v := flattenString(variantConfig["variant"]); v != "" {
+	if variantConfig, ok := c["variantConfig"].(map[string]interface{}); ok && variantConfig != nil {
+		if v, ok := variantConfig["variant"].(string); ok && v != "" {
 			variant = v
 		}
 	}
@@ -3301,7 +3542,7 @@ func flattenGcfsConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		})
 	}
 	return result
@@ -3311,7 +3552,7 @@ func flattenGvnic(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		})
 	}
 	return result
@@ -3321,9 +3562,9 @@ func flattenGKEReservationAffinity(c map[string]interface{}) []map[string]interf
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"consume_reservation_type": flattenString(c["consumeReservationType"]),
-			"key":                      flattenString(c["key"]),
-			"values":                   flattenStringSlice(c["values"]),
+			"consume_reservation_type": c["consumeReservationType"],
+			"key":                      c["key"],
+			"values":                   c["values"],
 		})
 	}
 	return result
@@ -3344,12 +3585,12 @@ func flattenTaints(c []interface{}, oldTaints []interface{}) []map[string]interf
 		if !ok || taint == nil {
 			continue
 		}
-		key := flattenString(taint["key"])
+		key, _ := taint["key"].(string)
 		if _, ok := taintKeys[key]; ok {
 			result = append(result, map[string]interface{}{
 				"key":    key,
-				"value":  flattenString(taint["value"]),
-				"effect": flattenString(taint["effect"]),
+				"value":  taint["value"],
+				"effect": taint["effect"],
 			})
 		}
 	}
@@ -3366,9 +3607,9 @@ func flattenEffectiveTaints(c []interface{}) []map[string]interface{} {
 			continue
 		}
 		result = append(result, map[string]interface{}{
-			"key":    flattenString(taint["key"]),
-			"value":  flattenString(taint["value"]),
-			"effect": flattenString(taint["effect"]),
+			"key":    taint["key"],
+			"value":  taint["value"],
+			"effect": taint["effect"],
 		})
 	}
 
@@ -3379,7 +3620,7 @@ func flattenWorkloadMetadataConfig(c map[string]interface{}) []map[string]interf
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"mode": flattenString(c["mode"]),
+			"mode": c["mode"],
 		})
 	}
 	return result
@@ -3390,11 +3631,11 @@ func flattenSandboxConfig(c map[string]interface{}) []map[string]interface{} {
 	if c != nil {
 		sandboxConfig := map[string]interface{}{}
 {{ if ne $.TargetVersionName `ga` -}}
-		if sandboxType := flattenString(c["sandboxType"]); sandboxType != "" {
+		if sandboxType, ok := c["sandboxType"].(string); ok && sandboxType != "" {
 			sandboxConfig["sandbox_type"] = sandboxType
 		}
 {{- end }}
-		if t := flattenString(c["type"]); t != "" {
+		if t, ok := c["type"].(string); ok && t != "" {
 			sandboxConfig["type"] = t
 		}
 		if len(sandboxConfig) > 0 {
@@ -3517,30 +3758,40 @@ func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.R
 func flattenKubeletConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		memoryManager, _ := c["memoryManager"].(map[string]interface{})
+		topologyManager, _ := c["topologyManager"].(map[string]interface{})
+		evictionSoft, _ := c["evictionSoft"].(map[string]interface{})
+		evictionSoftGracePeriod, _ := c["evictionSoftGracePeriod"].(map[string]interface{})
+		evictionMinimumReclaim, _ := c["evictionMinimumReclaim"].(map[string]interface{})
+		crashLoopBackOff, _ := c["crashLoopBackOff"].(map[string]interface{})
+		var podPidsLimit interface{} = c["podPidsLimit"]
+		if v, ok := podPidsLimit.(string); ok {
+			podPidsLimit, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"cpu_cfs_quota":                               flattenBool(c["cpuCfsQuota"]),
-			"cpu_cfs_quota_period":                        flattenString(c["cpuCfsQuotaPeriod"]),
-			"cpu_manager_policy":                          flattenString(c["cpuManagerPolicy"]),
-			"memory_manager":                              flattenMemoryManager(getMap(c, "memoryManager")),
-			"topology_manager":                            flattenTopologyManager(getMap(c, "topologyManager")),
+			"cpu_cfs_quota":                               c["cpuCfsQuota"],
+			"cpu_cfs_quota_period":                        c["cpuCfsQuotaPeriod"],
+			"cpu_manager_policy":                          c["cpuManagerPolicy"],
+			"memory_manager":                              flattenMemoryManager(memoryManager),
+			"topology_manager":                            flattenTopologyManager(topologyManager),
 			"insecure_kubelet_readonly_port_enabled":      flattenInsecureKubeletReadonlyPortEnabled(c),
-			"pod_pids_limit":                              flattenInt(c["podPidsLimit"]),
-			"container_log_max_size":                      flattenString(c["containerLogMaxSize"]),
-			"container_log_max_files":                     flattenInt(c["containerLogMaxFiles"]),
-			"image_gc_low_threshold_percent":              flattenInt(c["imageGcLowThresholdPercent"]),
-			"image_gc_high_threshold_percent":             flattenInt(c["imageGcHighThresholdPercent"]),
-			"image_minimum_gc_age":                        flattenString(c["imageMinimumGcAge"]),
-			"image_maximum_gc_age":                        flattenString(c["imageMaximumGcAge"]),
-			"allowed_unsafe_sysctls":                      flattenStringSlice(c["allowedUnsafeSysctls"]),
-			"single_process_oom_kill":                     flattenBool(c["singleProcessOomKill"]),
-			"max_parallel_image_pulls":                    flattenInt(c["maxParallelImagePulls"]),
-			"eviction_max_pod_grace_period_seconds":       flattenInt(c["evictionMaxPodGracePeriodSeconds"]),
-			"shutdown_grace_period_seconds":               flattenInt(c["shutdownGracePeriodSeconds"]),
-			"shutdown_grace_period_critical_pods_seconds": flattenInt(c["shutdownGracePeriodCriticalPodsSeconds"]),
-			"eviction_soft":                               flattenEvictionSignals(getMap(c, "evictionSoft")),
-			"eviction_soft_grace_period":                  flattenEvictionGracePeriod(getMap(c, "evictionSoftGracePeriod")),
-			"eviction_minimum_reclaim":                    flattenEvictionMinimumReclaim(getMap(c, "evictionMinimumReclaim")),
-			"crash_loop_back_off":                         flattenCrashLoopBackOffConfig(getMap(c, "crashLoopBackOff")),
+			"pod_pids_limit":                              podPidsLimit,
+			"container_log_max_size":                      c["containerLogMaxSize"],
+			"container_log_max_files":                     c["containerLogMaxFiles"],
+			"image_gc_low_threshold_percent":              c["imageGcLowThresholdPercent"],
+			"image_gc_high_threshold_percent":             c["imageGcHighThresholdPercent"],
+			"image_minimum_gc_age":                        c["imageMinimumGcAge"],
+			"image_maximum_gc_age":                        c["imageMaximumGcAge"],
+			"allowed_unsafe_sysctls":                      c["allowedUnsafeSysctls"],
+			"single_process_oom_kill":                     c["singleProcessOomKill"],
+			"max_parallel_image_pulls":                    c["maxParallelImagePulls"],
+			"eviction_max_pod_grace_period_seconds":       c["evictionMaxPodGracePeriodSeconds"],
+			"shutdown_grace_period_seconds":               c["shutdownGracePeriodSeconds"],
+			"shutdown_grace_period_critical_pods_seconds": c["shutdownGracePeriodCriticalPodsSeconds"],
+			"eviction_soft":                               flattenEvictionSignals(evictionSoft),
+			"eviction_soft_grace_period":                  flattenEvictionGracePeriod(evictionSoftGracePeriod),
+			"eviction_minimum_reclaim":                    flattenEvictionMinimumReclaim(evictionMinimumReclaim),
+			"crash_loop_back_off":                         flattenCrashLoopBackOffConfig(crashLoopBackOff),
 		})
 	}
 	return result
@@ -3550,8 +3801,8 @@ func flattenTopologyManager(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"policy": flattenString(c["policy"]),
-			"scope":  flattenString(c["scope"]),
+			"policy": c["policy"],
+			"scope":  c["scope"],
 		})
 	}
 	return result
@@ -3561,7 +3812,7 @@ func flattenMemoryManager(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"policy": flattenString(c["policy"]),
+			"policy": c["policy"],
 		})
 	}
 	return result
@@ -3581,7 +3832,7 @@ func flattenCrashLoopBackOffConfig(c map[string]interface{}) []map[string]interf
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"max_container_restart_period": flattenString(c["maxContainerRestartPeriod"]),
+			"max_container_restart_period": c["maxContainerRestartPeriod"],
 		})
 	}
 	return result
@@ -3591,12 +3842,12 @@ func flattenEvictionSignals(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"memory_available":    flattenString(c["memoryAvailable"]),
-			"nodefs_available":    flattenString(c["nodefsAvailable"]),
-			"nodefs_inodes_free":  flattenString(c["nodefsInodesFree"]),
-			"imagefs_available":   flattenString(c["imagefsAvailable"]),
-			"imagefs_inodes_free": flattenString(c["imagefsInodesFree"]),
-			"pid_available":       flattenString(c["pidAvailable"]),
+			"memory_available":    c["memoryAvailable"],
+			"nodefs_available":    c["nodefsAvailable"],
+			"nodefs_inodes_free":  c["nodefsInodesFree"],
+			"imagefs_available":   c["imagefsAvailable"],
+			"imagefs_inodes_free": c["imagefsInodesFree"],
+			"pid_available":       c["pidAvailable"],
 		})
 	}
 	return result
@@ -3606,12 +3857,12 @@ func flattenEvictionGracePeriod(c map[string]interface{}) []map[string]interface
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"memory_available":    flattenString(c["memoryAvailable"]),
-			"nodefs_available":    flattenString(c["nodefsAvailable"]),
-			"nodefs_inodes_free":  flattenString(c["nodefsInodesFree"]),
-			"imagefs_available":   flattenString(c["imagefsAvailable"]),
-			"imagefs_inodes_free": flattenString(c["imagefsInodesFree"]),
-			"pid_available":       flattenString(c["pidAvailable"]),
+			"memory_available":    c["memoryAvailable"],
+			"nodefs_available":    c["nodefsAvailable"],
+			"nodefs_inodes_free":  c["nodefsInodesFree"],
+			"imagefs_available":   c["imagefsAvailable"],
+			"imagefs_inodes_free": c["imagefsInodesFree"],
+			"pid_available":       c["pidAvailable"],
 		})
 	}
 	return result
@@ -3621,12 +3872,12 @@ func flattenEvictionMinimumReclaim(c map[string]interface{}) []map[string]interf
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"memory_available":    flattenString(c["memoryAvailable"]),
-			"nodefs_available":    flattenString(c["nodefsAvailable"]),
-			"nodefs_inodes_free":  flattenString(c["nodefsInodesFree"]),
-			"imagefs_available":   flattenString(c["imagefsAvailable"]),
-			"imagefs_inodes_free": flattenString(c["imagefsInodesFree"]),
-			"pid_available":       flattenString(c["pidAvailable"]),
+			"memory_available":    c["memoryAvailable"],
+			"nodefs_available":    c["nodefsAvailable"],
+			"nodefs_inodes_free":  c["nodefsInodesFree"],
+			"imagefs_available":   c["imagefsAvailable"],
+			"imagefs_inodes_free": c["imagefsInodesFree"],
+			"pid_available":       c["pidAvailable"],
 		})
 	}
 	return result
@@ -3635,16 +3886,21 @@ func flattenEvictionMinimumReclaim(c map[string]interface{}) []map[string]interf
 func flattenLinuxNodeConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		hugepages, _ := c["hugepages"].(map[string]interface{})
+		nodeKernelModuleLoading, _ := c["nodeKernelModuleLoading"].(map[string]interface{})
+		swapConfig, _ := c["swapConfig"].(map[string]interface{})
+		accurateTimeConfig, _ := c["accurateTimeConfig"].(map[string]interface{})
+		customNodeInit, _ := c["customNodeInit"].(map[string]interface{})
 		result = append(result, map[string]interface{}{
-			"sysctls":                      flattenStringMap(c["sysctls"]),
-			"cgroup_mode":                  flattenString(c["cgroupMode"]),
-			"hugepages_config":             flattenHugepagesConfig(getMap(c, "hugepages")),
-			"transparent_hugepage_enabled": flattenString(c["transparentHugepageEnabled"]),
-			"transparent_hugepage_defrag":  flattenString(c["transparentHugepageDefrag"]),
-			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(getMap(c, "nodeKernelModuleLoading")),
-			"swap_config":                  flattenSwapConfig(getMap(c, "swapConfig")),
-			"accurate_time_config":         flattenAccurateTimeConfig(getMap(c, "accurateTimeConfig")),
-			"custom_node_init":             flattenCustomNodeInit(getMap(c, "customNodeInit")),
+			"sysctls":                      c["sysctls"],
+			"cgroup_mode":                  c["cgroupMode"],
+			"hugepages_config":             flattenHugepagesConfig(hugepages),
+			"transparent_hugepage_enabled": c["transparentHugepageEnabled"],
+			"transparent_hugepage_defrag":  c["transparentHugepageDefrag"],
+			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(nodeKernelModuleLoading),
+			"swap_config":                  flattenSwapConfig(swapConfig),
+			"accurate_time_config":         flattenAccurateTimeConfig(accurateTimeConfig),
+			"custom_node_init":             flattenCustomNodeInit(customNodeInit),
 		})
 	}
 	return result
@@ -3654,7 +3910,7 @@ func flattenAccurateTimeConfig(c map[string]interface{}) []map[string]interface{
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enable_ptp_kvm_time_sync": flattenBool(c["enablePtpKvmTimeSync"]),
+			"enable_ptp_kvm_time_sync": c["enablePtpKvmTimeSync"],
 		})
 	}
 	return result
@@ -3663,8 +3919,9 @@ func flattenAccurateTimeConfig(c map[string]interface{}) []map[string]interface{
 func flattenCustomNodeInit(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		initScript, _ := c["initScript"].(map[string]interface{})
 		result = append(result, map[string]interface{}{
-			"init_script": flattenInitScript(getMap(c, "initScript")),
+			"init_script": flattenInitScript(initScript),
 		})
 	}
 	return result
@@ -3673,10 +3930,14 @@ func flattenCustomNodeInit(c map[string]interface{}) []map[string]interface{} {
 func flattenInitScript(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		var gcsGeneration interface{} = c["gcsGeneration"]
+		if v, ok := gcsGeneration.(string); ok {
+			gcsGeneration, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"gcs_uri":                       flattenString(c["gcsUri"]),
-			"gcs_generation":                flattenInt(c["gcsGeneration"]),
-			"gcp_secret_manager_secret_uri": flattenString(c["gcpSecretManagerSecretUri"]),
+			"gcs_uri":                       c["gcsUri"],
+			"gcs_generation":                gcsGeneration,
+			"gcp_secret_manager_secret_uri": c["gcpSecretManagerSecretUri"],
 		})
 	}
 	return result
@@ -3685,12 +3946,16 @@ func flattenInitScript(c map[string]interface{}) []map[string]interface{} {
 func flattenSwapConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		bootDiskProfile, _ := c["bootDiskProfile"].(map[string]interface{})
+		dedicatedLocalSsdProfile, _ := c["dedicatedLocalSsdProfile"].(map[string]interface{})
+		ephemeralLocalSsdProfile, _ := c["ephemeralLocalSsdProfile"].(map[string]interface{})
+		encryptionConfig, _ := c["encryptionConfig"].(map[string]interface{})
 		result = append(result, map[string]interface{}{
-			"enabled":                     flattenBool(c["enabled"]),
-			"boot_disk_profile":           flattenBootDiskProfile(getMap(c, "bootDiskProfile")),
-			"dedicated_local_ssd_profile": flattenDedicatedLocalSsdProfile(getMap(c, "dedicatedLocalSsdProfile")),
-			"ephemeral_local_ssd_profile": flattenEphemeralLocalSsdProfile(getMap(c, "ephemeralLocalSsdProfile")),
-			"encryption_config":           flattenSwapEncryptionConfig(getMap(c, "encryptionConfig")),
+			"enabled":                     c["enabled"],
+			"boot_disk_profile":           flattenBootDiskProfile(bootDiskProfile),
+			"dedicated_local_ssd_profile": flattenDedicatedLocalSsdProfile(dedicatedLocalSsdProfile),
+			"ephemeral_local_ssd_profile": flattenEphemeralLocalSsdProfile(ephemeralLocalSsdProfile),
+			"encryption_config":           flattenSwapEncryptionConfig(encryptionConfig),
 		})
 	}
 	return result
@@ -3699,9 +3964,13 @@ func flattenSwapConfig(c map[string]interface{}) []map[string]interface{} {
 func flattenBootDiskProfile(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		var swapSizeGib interface{} = c["swapSizeGib"]
+		if v, ok := swapSizeGib.(string); ok {
+			swapSizeGib, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"swap_size_gib":     flattenInt(c["swapSizeGib"]),
-			"swap_size_percent": flattenInt(c["swapSizePercent"]),
+			"swap_size_gib":     swapSizeGib,
+			"swap_size_percent": c["swapSizePercent"],
 		})
 	}
 	return result
@@ -3710,8 +3979,12 @@ func flattenBootDiskProfile(c map[string]interface{}) []map[string]interface{} {
 func flattenDedicatedLocalSsdProfile(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		var diskCount interface{} = c["diskCount"]
+		if v, ok := diskCount.(string); ok {
+			diskCount, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"disk_count": flattenInt(c["diskCount"]),
+			"disk_count": diskCount,
 		})
 	}
 	return result
@@ -3720,9 +3993,13 @@ func flattenDedicatedLocalSsdProfile(c map[string]interface{}) []map[string]inte
 func flattenEphemeralLocalSsdProfile(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		var swapSizeGib interface{} = c["swapSizeGib"]
+		if v, ok := swapSizeGib.(string); ok {
+			swapSizeGib, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"swap_size_gib":     flattenInt(c["swapSizeGib"]),
-			"swap_size_percent": flattenInt(c["swapSizePercent"]),
+			"swap_size_gib":     swapSizeGib,
+			"swap_size_percent": c["swapSizePercent"],
 		})
 	}
 	return result
@@ -3732,7 +4009,7 @@ func flattenSwapEncryptionConfig(c map[string]interface{}) []map[string]interfac
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"disabled": flattenBool(c["disabled"]),
+			"disabled": c["disabled"],
 		})
 	}
 	return result
@@ -3742,7 +4019,7 @@ func flattenWindowsNodeConfig(c map[string]interface{}) []map[string]interface{}
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"osversion": flattenString(c["osVersion"]),
+			"osversion": c["osVersion"],
 		})
 	}
 	return result
@@ -3752,8 +4029,8 @@ func flattenNodeImageConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"image":         flattenString(c["image"]),
-			"image_project": flattenString(c["imageProject"]),
+			"image":         c["image"],
+			"image_project": c["imageProject"],
 		})
 	}
 	return result
@@ -3763,8 +4040,8 @@ func flattenHugepagesConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"hugepage_size_2m": flattenInt(c["hugepageSize2m"]),
-			"hugepage_size_1g": flattenInt(c["hugepageSize1g"]),
+			"hugepage_size_2m": c["hugepageSize2m"],
+			"hugepage_size_1g": c["hugepageSize1g"],
 		})
 	}
 	return result
@@ -3774,7 +4051,7 @@ func flattenNodeKernelModuleLoading(c map[string]interface{}) []map[string]inter
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"policy": flattenString(c["policy"]),
+			"policy": c["policy"],
 		})
 	}
 	return result
@@ -3786,7 +4063,7 @@ func flattenTaintConfig(c map[string]interface{}) []map[string]interface{} {
 		return result
 	}
 	r := map[string]interface{}{
-		"architecture_taint_behavior": flattenString(c["architectureTaintBehavior"]),
+		"architecture_taint_behavior": c["architectureTaintBehavior"],
 	}
 	return append(result, r)
 }
@@ -3797,13 +4074,13 @@ func flattenContainerdConfig(c map[string]interface{}) []map[string]interface{} 
 		return result
 	}
 	r := map[string]interface{}{}
-	if prac := getMap(c, "privateRegistryAccessConfig"); prac != nil {
+	if prac, ok := c["privateRegistryAccessConfig"].(map[string]interface{}); ok && prac != nil {
 		r["private_registry_access_config"] = flattenPrivateRegistryAccessConfig(prac)
 	}
-	if wc := getMap(c, "writableCgroups"); wc != nil {
+	if wc, ok := c["writableCgroups"].(map[string]interface{}); ok && wc != nil {
 		r["writable_cgroups"] = flattenWritableCgroups(wc)
 	}
-	if rh := getSlice(c, "registryHosts"); rh != nil {
+	if rh, ok := c["registryHosts"].([]interface{}); ok && rh != nil {
 		r["registry_hosts"] = flattenRegistryHosts(rh)
 	}
 	return append(result, r)
@@ -3821,8 +4098,9 @@ func flattenRegistryHosts(registryHosts []interface{}) []map[string]interface{} 
 			continue
 		}
 		item := make(map[string]interface{})
-		item["server"] = flattenString(host["server"])
-		item["hosts"] = flattenHostInRegistryHosts(getSlice(host, "hosts"))
+		item["server"] = host["server"]
+		hosts, _ := host["hosts"].([]interface{})
+		item["hosts"] = flattenHostInRegistryHosts(hosts)
 		items = append(items, item)
 	}
 	return items
@@ -3839,53 +4117,59 @@ func flattenHostInRegistryHosts(hosts []interface{}) []map[string]interface{} {
 			continue
 		}
 		item := make(map[string]interface{})
-		item["host"] = flattenString(h["host"])
-		item["capabilities"] = flattenStringSlice(h["capabilities"])
-		item["override_path"] = flattenBool(h["overridePath"])
-		item["dial_timeout"] = flattenString(h["dialTimeout"])
+		item["host"] = h["host"]
+		item["capabilities"] = h["capabilities"]
+		item["override_path"] = h["overridePath"]
+		item["dial_timeout"] = h["dialTimeout"]
 
-		if headers := getSlice(h, "header"); headers != nil {
+		if headers, ok := h["header"].([]interface{}); ok && headers != nil {
 			tmp := make([]interface{}, len(headers))
 			for i, rawVal := range headers {
 				val, _ := rawVal.(map[string]interface{})
 				tmp[i] = map[string]interface{}{
-					"key":   flattenString(val["key"]),
-					"value": flattenStringSlice(val["value"]),
+					"key":   val["key"],
+					"value": val["value"],
 				}
 			}
 			item["header"] = tmp
 		}
 
-		if cas := getSlice(h, "ca"); cas != nil {
+		if cas, ok := h["ca"].([]interface{}); ok && cas != nil {
 			tmp := make([]interface{}, len(cas))
 			for i, rawVal := range cas {
 				val, _ := rawVal.(map[string]interface{})
-				if val != nil && flattenString(val["gcpSecretManagerSecretUri"]) != "" {
-					tmp[i] = map[string]interface{}{
-						"gcp_secret_manager_secret_uri": flattenString(val["gcpSecretManagerSecretUri"]),
+				if val != nil {
+					if uri, ok := val["gcpSecretManagerSecretUri"].(string); ok && uri != "" {
+						tmp[i] = map[string]interface{}{
+							"gcp_secret_manager_secret_uri": uri,
+						}
 					}
 				}
 			}
 			item["ca"] = tmp
 		}
 
-		if clients := getSlice(h, "client"); clients != nil {
+		if clients, ok := h["client"].([]interface{}); ok && clients != nil {
 			tmp := make([]interface{}, len(clients))
 			for i, rawVal := range clients {
 				val, _ := rawVal.(map[string]interface{})
 				currentClient := map[string]interface{}{}
-				if cert := getMap(val, "cert"); cert != nil && flattenString(cert["gcpSecretManagerSecretUri"]) != "" {
-					currentClient["cert"] = []interface{}{
-						map[string]interface{}{
-							"gcp_secret_manager_secret_uri": flattenString(cert["gcpSecretManagerSecretUri"]),
-						},
+				if cert, ok := val["cert"].(map[string]interface{}); ok && cert != nil {
+					if uri, ok := cert["gcpSecretManagerSecretUri"].(string); ok && uri != "" {
+						currentClient["cert"] = []interface{}{
+							map[string]interface{}{
+								"gcp_secret_manager_secret_uri": uri,
+							},
+						}
 					}
 				}
-				if key := getMap(val, "key"); key != nil && flattenString(key["gcpSecretManagerSecretUri"]) != "" {
-					currentClient["key"] = []interface{}{
-						map[string]interface{}{
-							"gcp_secret_manager_secret_uri": flattenString(key["gcpSecretManagerSecretUri"]),
-						},
+				if key, ok := val["key"].(map[string]interface{}); ok && key != nil {
+					if uri, ok := key["gcpSecretManagerSecretUri"].(string); ok && uri != "" {
+						currentClient["key"] = []interface{}{
+							map[string]interface{}{
+								"gcp_secret_manager_secret_uri": uri,
+							},
+						}
 					}
 				}
 				tmp[i] = currentClient
@@ -3903,9 +4187,9 @@ func flattenPrivateRegistryAccessConfig(c map[string]interface{}) []map[string]i
 		return result
 	}
 	r := map[string]interface{}{
-		"enabled": flattenBool(c["enabled"]),
+		"enabled": c["enabled"],
 	}
-	if caConfigsSlice := getSlice(c, "certificateAuthorityDomainConfig"); caConfigsSlice != nil {
+	if caConfigsSlice, ok := c["certificateAuthorityDomainConfig"].([]interface{}); ok && caConfigsSlice != nil {
 		caConfigs := make([]interface{}, len(caConfigsSlice))
 		for i, caCfgRaw := range caConfigsSlice {
 			caCfg, _ := caCfgRaw.(map[string]interface{})
@@ -3921,9 +4205,9 @@ func flattenCADomainConfig(c map[string]interface{}) map[string]interface{} {
 		return nil
 	}
 	r := map[string]interface{}{
-		"fqdns": flattenStringSlice(c["fqdns"]),
+		"fqdns": c["fqdns"],
 	}
-	if gcpSM := getMap(c, "gcpSecretManagerCertificateConfig"); gcpSM != nil {
+	if gcpSM, ok := c["gcpSecretManagerCertificateConfig"].(map[string]interface{}); ok && gcpSM != nil {
 		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(gcpSM)
 	}
 	return r
@@ -3935,7 +4219,7 @@ func flattenGCPSecretManagerCertificateConfig(c map[string]interface{}) []map[st
 		return result
 	}
 	r := map[string]interface{}{
-		"secret_uri": flattenString(c["secretUri"]),
+		"secret_uri": c["secretUri"],
 	}
 	return append(result, r)
 }
@@ -3946,7 +4230,7 @@ func flattenWritableCgroups(c map[string]interface{}) []map[string]interface{} {
 		return result
 	}
 	r := map[string]interface{}{
-		"enabled": flattenBool(c["enabled"]),
+		"enabled": c["enabled"],
 	}
 	return append(result, r)
 }
@@ -3955,8 +4239,8 @@ func flattenConfidentialNodes(c map[string]interface{}) []map[string]interface{}
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled":                    flattenBool(c["enabled"]),
-			"confidential_instance_type": flattenString(c["confidentialInstanceType"]),
+			"enabled":                    c["enabled"],
+			"confidential_instance_type": c["confidentialInstanceType"],
 		})
 	}
 	return result
@@ -3968,20 +4252,21 @@ func flattenSoleTenantConfig(c map[string]interface{}) []map[string]interface{} 
 		return result
 	}
 	affinities := []map[string]interface{}{}
-	for _, raw := range getSlice(c, "nodeAffinities") {
+	nodeAffinities, _ := c["nodeAffinities"].([]interface{})
+	for _, raw := range nodeAffinities {
 		affinity, ok := raw.(map[string]interface{})
 		if !ok || affinity == nil {
 			continue
 		}
 		affinities = append(affinities, map[string]interface{}{
-			"key":      flattenString(affinity["key"]),
-			"operator": flattenString(affinity["operator"]),
-			"values":   flattenStringSlice(affinity["values"]),
+			"key":      affinity["key"],
+			"operator": affinity["operator"],
+			"values":   affinity["values"],
 		})
 	}
 	return append(result, map[string]interface{}{
 		"node_affinity": affinities,
-		"min_node_cpus": flattenInt(c["minNodeCpus"]),
+		"min_node_cpus": c["minNodeCpus"],
 	})
 }
 
@@ -3989,7 +4274,7 @@ func flattenFastSocket(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": flattenBool(c["enabled"]),
+			"enabled": c["enabled"],
 		})
 	}
 	return result
@@ -3999,9 +4284,10 @@ func flattenFastSocket(c map[string]interface{}) []map[string]interface{} {
 func flattenHostMaintenancePolicy(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		opportunisticMaintenanceStrategy, _ := c["opportunisticMaintenanceStrategy"].(map[string]interface{})
 		result = append(result, map[string]interface{}{
-			"maintenance_interval":               flattenString(c["maintenanceInterval"]),
-			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(getMap(c, "opportunisticMaintenanceStrategy")),
+			"maintenance_interval":               c["maintenanceInterval"],
+			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(opportunisticMaintenanceStrategy),
 		})
 	}
 
@@ -4011,10 +4297,14 @@ func flattenHostMaintenancePolicy(c map[string]interface{}) []map[string]interfa
 func flattenOpportunisticMaintenanceStrategy(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
+		var minNodesPerPool interface{} = c["minNodesPerPool"]
+		if v, ok := minNodesPerPool.(string); ok {
+			minNodesPerPool, _ = strconv.Atoi(v)
+		}
 		result = append(result, map[string]interface{}{
-			"node_idle_time_window":           flattenString(c["nodeIdleTimeWindow"]),
-			"maintenance_availability_window": flattenString(c["maintenanceAvailabilityWindow"]),
-			"min_nodes_per_pool":              flattenInt(c["minNodesPerPool"]),
+			"node_idle_time_window":           c["nodeIdleTimeWindow"],
+			"maintenance_availability_window": c["maintenanceAvailabilityWindow"],
+			"min_nodes_per_pool":              minNodesPerPool,
 		})
 	}
 
@@ -4040,12 +4330,18 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			if v, ok := d.GetOk(prefix + "node_config.0.logging_variant"); ok {
 				loggingVariant := v.(string)
 				variantConfig := map[string]interface{}{}
-				setField(variantConfig, "variant", loggingVariant)
-				loggingConfig := map[string]interface{}{}
-				setField(loggingConfig, "variantConfig", variantConfig)
-				req := map[string]interface{}{}
-				setField(req, "name", name)
-				setField(req, "loggingConfig", loggingConfig)
+				if loggingVariant != "" {
+					variantConfig["variant"] = loggingVariant
+				}
+				loggingConfig := map[string]interface{}{
+					"variantConfig": variantConfig,
+				}
+				req := map[string]interface{}{
+					"loggingConfig": loggingConfig,
+				}
+				if name != "" {
+					req["name"] = name
+				}
 
 				updateF := func() error {
 					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
@@ -4086,7 +4382,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req := map[string]interface{}{
 					"taintConfig": taintConfig,
 				}
-				setField(req, "name", name)
+				if name != "" {
+					req["name"] = name
+				}
 
 				updateF := func() error {
 					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
@@ -4127,7 +4425,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req := map[string]interface{}{
 					"containerdConfig": containerdConfig,
 				}
-				setField(req, "name", name)
+				if name != "" {
+					req["name"] = name
+				}
 				updateF := func() error {
 					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4167,7 +4467,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req := map[string]interface{}{
 					"confidentialNodes": confidentialNodes,
 				}
-				setField(req, "name", name)
+				if name != "" {
+					req["name"] = name
+				}
 				updateF := func() error {
 					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4205,10 +4507,18 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			d.HasChange("node_config.0.boot_disk") {
 
 			req := map[string]interface{}{}
-			setField(req, "name", name)
-			setStringIntField(req, "diskSizeGb", int64(d.Get("node_config.0.disk_size_gb").(int)))
-			setField(req, "diskType", d.Get("node_config.0.disk_type").(string))
-			setField(req, "machineType", d.Get("node_config.0.machine_type").(string))
+			if name != "" {
+				req["name"] = name
+			}
+			if v := d.Get("node_config.0.disk_size_gb").(int); v != 0 {
+				req["diskSizeGb"] = strconv.Itoa(v)
+			}
+			if v := d.Get("node_config.0.disk_type").(string); v != "" {
+				req["diskType"] = v
+			}
+			if v := d.Get("node_config.0.machine_type").(string); v != "" {
+				req["machineType"] = v
+			}
 			if v, ok := d.GetOk("node_config.0.storage_pools"); ok {
 				spList := v.([]interface{})
 				storagePools := []string{}
@@ -4217,12 +4527,16 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 						storagePools = append(storagePools, v.(string))
 					}
 				}
-				setField(req, "storagePools", storagePools)
+				if len(storagePools) > 0 {
+					req["storagePools"] = storagePools
+				}
 			}
 
 			if v, ok := d.GetOk("node_config.0.boot_disk"); ok {
 				bd := expandBootDiskConfig(v)
-				setField(req, "bootDisk", bd)
+				if bd != nil {
+					req["bootDisk"] = bd
+				}
 
 				// The following checks are to ensure that the migrating fields are handled properly.
 				// Migrating fields are disk_type -> boot_disk.disk_type and disk_size_gb -> boot_disk.size_gb
@@ -4278,7 +4592,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.taint") {
 			req := map[string]interface{}{}
-			setField(req, "name", name)
+			if name != "" {
+				req["name"] = name
+			}
 			ntaints := map[string]interface{}{}
 			if v, ok := d.GetOk(prefix + "node_config.0.taint"); ok {
 				taintsList := v.([]interface{})
@@ -4287,13 +4603,21 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 					if v != nil {
 						data := v.(map[string]interface{})
 						taint := map[string]interface{}{}
-						setField(taint, "key", data["key"].(string))
-						setField(taint, "value", data["value"].(string))
-						setField(taint, "effect", data["effect"].(string))
+						if k, ok := data["key"].(string); ok && k != "" {
+							taint["key"] = k
+						}
+						if val, ok := data["value"].(string); ok && val != "" {
+							taint["value"] = val
+						}
+						if eff, ok := data["effect"].(string); ok && eff != "" {
+							taint["effect"] = eff
+						}
 						taints = append(taints, taint)
 					}
 				}
-				setField(ntaints, "taints", taints)
+				if len(taints) > 0 {
+					ntaints["taints"] = taints
+				}
 			}
 			req["taints"] = ntaints
 
@@ -4327,7 +4651,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.tags") {
 			req := map[string]interface{}{}
-			setField(req, "name", name)
+			if name != "" {
+				req["name"] = name
+			}
 			ntags := map[string]interface{}{}
 			if v, ok := d.GetOk(prefix + "node_config.0.tags"); ok {
 				tagsList := v.([]interface{})
@@ -4337,7 +4663,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 						tags = append(tags, v.(string))
 					}
 				}
-				setField(ntags, "tags", tags)
+				if len(tags) > 0 {
+					ntags["tags"] = tags
+				}
 			}
 
 			// sets tags to the empty list when user removes a previously defined list of tags entriely
@@ -4374,7 +4702,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.resource_manager_tags") {
 			req := map[string]interface{}{}
-			setField(req, "name", name)
+			if name != "" {
+				req["name"] = name
+			}
 			var rmTags map[string]interface{}
 			if v, ok := d.GetOk(prefix + "node_config.0.resource_manager_tags"); ok {
 				rmTags = expandResourceManagerTags(v)
@@ -4417,12 +4747,16 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.resource_labels") {
 			req := map[string]interface{}{}
-			setField(req, "name", name)
+			if name != "" {
+				req["name"] = name
+			}
 
 			if v, ok := d.GetOk(prefix + "node_config.0.resource_labels"); ok {
 				resourceLabels := v.(map[string]interface{})
 				rl := map[string]interface{}{}
-				setField(rl, "labels", tpgresource.ConvertStringMap(resourceLabels))
+				if labels := tpgresource.ConvertStringMap(resourceLabels); len(labels) > 0 {
+					rl["labels"] = labels
+				}
 				req["resourceLabels"] = rl
 			}
 
@@ -4458,12 +4792,16 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.labels") {
 			req := map[string]interface{}{}
-			setField(req, "name", name)
+			if name != "" {
+				req["name"] = name
+			}
 
 			if v, ok := d.GetOk(prefix + "node_config.0.labels"); ok {
 				labels := v.(map[string]interface{})
 				nl := map[string]interface{}{}
-				setField(nl, "labels", tpgresource.ConvertStringMap(labels))
+				if converted := tpgresource.ConvertStringMap(labels); len(converted) > 0 {
+					nl["labels"] = converted
+				}
 				req["labels"] = nl
 			}
 
@@ -4500,8 +4838,12 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		// The case updating both image_type and node_image_config will be handled in the node_image_config section.
 		if d.HasChange(prefix+"node_config.0.image_type") && !d.HasChange(prefix+"node_config.0.node_image_config") {
 			update := map[string]interface{}{}
-			setField(update, "desiredNodePoolId", name)
-			setField(update, "desiredImageType", d.Get(prefix+"node_config.0.image_type").(string))
+			if name != "" {
+				update["desiredNodePoolId"] = name
+			}
+			if v := d.Get(prefix + "node_config.0.image_type").(string); v != "" {
+				update["desiredImageType"] = v
+			}
 			req := map[string]interface{}{
 				"update": update,
 			}
@@ -4542,7 +4884,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			req := map[string]interface{}{
 				"workloadMetadataConfig": wmc,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4575,11 +4919,15 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		if d.HasChange(prefix + "node_config.0.gcfs_config") {
 			gcfsEnabled := bool(d.Get(prefix + "node_config.0.gcfs_config.0.enabled").(bool))
 			gcfsConfig := map[string]interface{}{}
-			setField(gcfsConfig, "enabled", gcfsEnabled)
+			if gcfsEnabled {
+				gcfsConfig["enabled"] = gcfsEnabled
+			}
 			req := map[string]interface{}{
 				"gcfsConfig": gcfsConfig,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4612,11 +4960,15 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		if d.HasChange(prefix + "node_config.0.gvnic") {
 			gvnicEnabled := bool(d.Get(prefix + "node_config.0.gvnic.0.enabled").(bool))
 			gvnic := map[string]interface{}{}
-			setField(gvnic, "enabled", gvnicEnabled)
+			if gvnicEnabled {
+				gvnic["enabled"] = gvnicEnabled
+			}
 			req := map[string]interface{}{
 				"gvnic": gvnic,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4655,7 +5007,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			req := map[string]interface{}{
 				"kubeletConfig": kubeletConfig,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4693,7 +5047,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			req := map[string]interface{}{
 				"linuxNodeConfig": linuxNodeConfig,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4731,7 +5087,9 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			req := map[string]interface{}{
 				"windowsNodeConfig": windowsNodeConfig,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -4762,19 +5120,27 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		}
 		if d.HasChange(prefix + "node_config.0.node_image_config") {
 			update := map[string]interface{}{}
-			setField(update, "desiredNodePoolId", name)
+			if name != "" {
+				update["desiredNodePoolId"] = name
+			}
 			if imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config")); imageConfig != nil {
-				setField(update, "desiredImage", flattenString(imageConfig["image"]))
-				setField(update, "desiredImageProject", flattenString(imageConfig["imageProject"]))
+				if v, ok := imageConfig["image"].(string); ok && v != "" {
+					update["desiredImage"] = v
+				}
+				if v, ok := imageConfig["imageProject"].(string); ok && v != "" {
+					update["desiredImageProject"] = v
+				}
 			}
 
 			if d.HasChange(prefix + "node_config.0.image_type") {
-				setField(update, "desiredImageType", d.Get(prefix+"node_config.0.image_type").(string))
+				if v := d.Get(prefix + "node_config.0.image_type").(string); v != "" {
+					update["desiredImageType"] = v
+				}
 			} else {
 				// If only updating the node_image_config (DesiredImage and/or DesiredImage) and
 				// the image_type unspecified, then it is an use case of custom image feature, where
 				// the DesiredImageType should be CUSTOM_CONTAINERD (go/gke-custom-image-builder-ug-edit)
-				setField(update, "desiredImageType", "CUSTOM_CONTAINERD")
+				update["desiredImageType"] = "CUSTOM_CONTAINERD"
 			}
 			req := map[string]interface{}{
 				"update": update,
@@ -4811,12 +5177,16 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			fs := map[string]interface{}{}
 			if v, ok := d.GetOk(prefix + "node_config.0.fast_socket"); ok {
 				fastSocket := v.([]interface{})[0].(map[string]interface{})
-				setField(fs, "enabled", fastSocket["enabled"].(bool))
+				if enabled, ok := fastSocket["enabled"].(bool); ok && enabled {
+					fs["enabled"] = enabled
+				}
 			}
 			req := map[string]interface{}{
 				"fastSocket": fs,
 			}
-			setField(req, "nodePoolId", name)
+			if name != "" {
+				req["nodePoolId"] = name
+			}
 			updateF := func() error {
 				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
