@@ -680,6 +680,34 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
+	t.Run("KeyValueLabels and KeyValueAnnotations with metadata parent consolidates CustomDiff", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource", "terraform")
+		parent := &api.Type{Name: "metadata"}
+
+		labelsType := &api.Type{
+			Name: "labels",
+			Type: "KeyValueLabels",
+		}
+		annotationsType := &api.Type{
+			Name: "annotations",
+			Type: "KeyValueAnnotations",
+		}
+
+		props := []*api.Type{labelsType, annotationsType}
+		resource.AddExtraFields(props, parent)
+
+		expectedDiff := "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		if !slices.Contains(resource.CustomDiff, expectedDiff) {
+			t.Errorf("Expected CustomDiff to contain %s, got %v", expectedDiff, resource.CustomDiff)
+		}
+		if slices.Contains(resource.CustomDiff, "tpgresource.SetMetadataLabelsDiff") ||
+			slices.Contains(resource.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff") {
+			t.Errorf("Expected individual metadata CustomDiffs to be replaced by consolidated CustomDiff, got %v", resource.CustomDiff)
+		}
+	})
+
 	t.Run("KeyValueAnnotations property adds effective annotations", func(t *testing.T) {
 		t.Parallel()
 
