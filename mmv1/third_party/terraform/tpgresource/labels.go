@@ -4,11 +4,109 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
+	"unsafe"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+// unknownVariableValue is the sentinel UUID defined as hcl2shim.UnknownVariableValue in
+// github.com/hashicorp/terraform-plugin-sdk/v2/internal/configs/hcl2shim (an internal package).
+// terraform-plugin-sdk/v2 uses this placeholder string when converting between cty.UnknownVal
+// and legacy flatmap/ResourceDiff map entries, and converts it back to cty.UnknownVal(cty.String)
+// when building the planned state value.
+const unknownVariableValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
+
+// ctyMapWithUnknowns converts a known cty.Value map of strings into a map[string]interface{}
+// suitable for ResourceDiff.SetNew, replacing any unknown element values with unknownVariableValue
+// so they are preserved as unknown in the planned diff rather than dropped by ConfigFieldReader.
+func ctyMapWithUnknowns(val cty.Value) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range val.AsValueMap() {
+		if !v.IsKnown() {
+			res[k] = unknownVariableValue
+		} else if !v.IsNull() {
+			res[k] = v.AsString()
+		}
+	}
+	return res
+}
+
+// setNestedNewComputed marks a nested key (such as "metadata.0.terraform_labels") as computed
+// in ResourceDiff's internal newValueWriter. ResourceDiff.SetNewComputed cannot be called on
+// paths inside a TypeList because checkKey only inspects top-level schema keys and
+// MapFieldWriter.WriteField only allows setting a full list.
+func setNestedNewComputed(d *schema.ResourceDiff, key string) {
+	v := reflect.ValueOf(d)
+	if v.Kind() != reflect.Ptr || v.IsNil() {
+		return
+	}
+	nwField := v.Elem().FieldByName("newWriter")
+	if !nwField.IsValid() || nwField.IsNil() {
+		return
+	}
+	nw := reflect.NewAt(nwField.Type(), unsafe.Pointer(nwField.UnsafeAddr())).Elem().Interface()
+	if cm, ok := nw.(interface{ ComputedKeysMap() map[string]bool }); ok {
+		cm.ComputedKeysMap()[key] = true
+	}
+}
+
+// prepareMetadataDiff inspects the raw plan for metadata.0 and preserves unknown values in
+// "labels", "annotations", and "namespace" on the map passed to d.SetNew("metadata", ...).
+// When "labels" or "annotations" is not wholly known, it also removes the corresponding
+// computed maps ("terraform_labels", "effective_labels", "effective_annotations") from
+// original and marks them as NewComputed so they become (known after apply).
+// It returns whether "labels" and "annotations" are wholly known.
+func prepareMetadataDiff(d *schema.ResourceDiff, original map[string]interface{}) (bool, bool) {
+	labelsWhollyKnown := true
+	annotationsWhollyKnown := true
+
+	if rawPlan := d.GetRawPlan(); !rawPlan.IsNull() && rawPlan.IsKnown() {
+		if metadataAttr := rawPlan.GetAttr("metadata"); !metadataAttr.IsNull() && metadataAttr.IsKnown() {
+			values := metadataAttr.AsValueSlice()
+			if len(values) > 0 && !values[0].IsNull() && values[0].IsKnown() {
+				if values[0].Type().HasAttribute("labels") {
+					labelsVal := values[0].GetAttr("labels")
+					if !labelsVal.IsWhollyKnown() {
+						labelsWhollyKnown = false
+						if labelsVal.IsKnown() {
+							original["labels"] = ctyMapWithUnknowns(labelsVal)
+						} else {
+							delete(original, "labels")
+							setNestedNewComputed(d, "metadata.0.labels")
+						}
+						delete(original, "terraform_labels")
+						delete(original, "effective_labels")
+						setNestedNewComputed(d, "metadata.0.terraform_labels")
+						setNestedNewComputed(d, "metadata.0.effective_labels")
+					}
+				}
+				if values[0].Type().HasAttribute("annotations") {
+					annotationsVal := values[0].GetAttr("annotations")
+					if !annotationsVal.IsWhollyKnown() {
+						annotationsWhollyKnown = false
+						if annotationsVal.IsKnown() {
+							original["annotations"] = ctyMapWithUnknowns(annotationsVal)
+						} else {
+							delete(original, "annotations")
+							setNestedNewComputed(d, "metadata.0.annotations")
+						}
+						delete(original, "effective_annotations")
+						setNestedNewComputed(d, "metadata.0.effective_annotations")
+					}
+				}
+				if values[0].Type().HasAttribute("namespace") && !values[0].GetAttr("namespace").IsKnown() {
+					original["namespace"] = unknownVariableValue
+				}
+			}
+		}
+	}
+
+	return labelsWhollyKnown, annotationsWhollyKnown
+}
 
 // SetLabels is called in the READ method of the resources to set
 // the field "labels" and "terraform_labels" in the state based on the labels field in the configuration.
@@ -156,17 +254,6 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		return nil
 	}
 
-	// Fix the bug that the computed and nested "labels" field disappears from the terraform plan.
-	// https://github.com/hashicorp/terraform-provider-google/issues/17756
-	// The bug is introduced by SetNew on "metadata" field with the object including terraform_labels and effective_labels.
-	// "terraform_labels" and "effective_labels" cannot be set directly due to a bug that SetNew doesn't work on nested fields
-	// in terraform sdk.
-	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
-	values := d.GetRawPlan().GetAttr("metadata").AsValueSlice()
-	if len(values) > 0 && !values[0].GetAttr("labels").IsWhollyKnown() {
-		return nil
-	}
-
 	raw := d.Get("metadata.0.labels")
 	if raw == nil {
 		return nil
@@ -180,6 +267,23 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		return fmt.Errorf("`metadata.0.effective_labels` field is not present in the resource schema.")
 	}
 
+	original := l[0].(map[string]interface{})
+
+	// Fix the bug that the computed and nested "labels" field disappears from the terraform plan.
+	// https://github.com/hashicorp/terraform-provider-google/issues/17756
+	// The bug is introduced by SetNew on "metadata" field with the object including terraform_labels and effective_labels.
+	// "terraform_labels" and "effective_labels" cannot be set directly due to a bug that SetNew doesn't work on nested fields
+	// in terraform sdk.
+	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
+	labelsWhollyKnown, _ := prepareMetadataDiff(d, original)
+	if !labelsWhollyKnown {
+		if err := d.SetNew("metadata", []interface{}{original}); err != nil {
+			return fmt.Errorf("error setting new metadata diff: %w", err)
+		}
+		return nil
+	}
+
+	labels := raw.(map[string]interface{})
 	config := meta.(*transport_tpg.Config)
 
 	// Merge provider default labels with the user defined labels in the resource to get terraform managed labels
@@ -200,12 +304,9 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 		}
 	}
 
-	labels := raw.(map[string]interface{})
 	for k, v := range labels {
 		terraformLabels[k] = v.(string)
 	}
-
-	original := l[0].(map[string]interface{})
 
 	original["terraform_labels"] = terraformLabels
 	if err := d.SetNew("metadata", []interface{}{original}); err != nil {
