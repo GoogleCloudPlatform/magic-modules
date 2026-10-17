@@ -966,7 +966,7 @@ func expandUpgradeOptions(configured interface{}) *container.AutoUpgradeOptions 
 
 func expandAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	result := &container.AuthenticatorGroupsConfig{}
@@ -1137,7 +1137,7 @@ func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
 	result := &container.NetworkPolicy{}
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return result
 	}
 	config := l[0].(map[string]interface{})
@@ -1228,7 +1228,7 @@ func expandControlPlaneEndpointsConfig(d tpgresource.TerraformResourceData) *con
 
 func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPodAutoscaling {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1239,7 +1239,7 @@ func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPod
 
 func expandServiceExternalIpsConfig(configured interface{}) *container.ServiceExternalIPsConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1251,7 +1251,7 @@ func expandServiceExternalIpsConfig(configured interface{}) *container.ServiceEx
 
 func expandMeshCertificates(configured interface{}) *container.MeshCertificates {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1263,7 +1263,7 @@ func expandMeshCertificates(configured interface{}) *container.MeshCertificates 
 
 func expandDatabaseEncryption(configured interface{}) *container.DatabaseEncryption {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1332,6 +1332,9 @@ func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIde
 func expandIdentityServiceConfig(configured interface{}) *container.IdentityServiceConfig {
 	l := configured.([]interface{})
 	v := &container.IdentityServiceConfig{}
+	if len(l) == 0 || l[0] == nil {
+		return v
+	}
 
 	config := l[0].(map[string]interface{})
 	v.Enabled = config["enabled"].(bool)
@@ -1441,7 +1444,7 @@ func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint 
 
 func expandCostManagementConfig(configured interface{}) *container.CostManagementConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return &container.CostManagementConfig{}
 	}
 

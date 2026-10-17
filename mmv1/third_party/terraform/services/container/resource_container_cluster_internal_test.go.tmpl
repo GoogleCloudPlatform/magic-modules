@@ -1298,3 +1298,78 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 		})
 	}
 }
+
+func TestUnitContainerCluster_expandersNilElement(t *testing.T) {
+	t.Parallel()
+
+	nilSlice := []interface{}{nil}
+
+	if got := expandAuthenticatorGroupsConfig(nilSlice); got != nil {
+		t.Errorf("expandAuthenticatorGroupsConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandEnterpriseConfig(nilSlice); got != nil {
+		t.Errorf("expandEnterpriseConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandNetworkPolicy(nilSlice); got == nil || got.Enabled {
+		t.Errorf("expandNetworkPolicy([nil]) = %v, want empty NetworkPolicy", got)
+	}
+	if got := expandVerticalPodAutoscaling(nilSlice); got != nil {
+		t.Errorf("expandVerticalPodAutoscaling([nil]) = %v, want nil", got)
+	}
+	if got := expandServiceExternalIpsConfig(nilSlice); got != nil {
+		t.Errorf("expandServiceExternalIpsConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandMeshCertificates(nilSlice); got != nil {
+		t.Errorf("expandMeshCertificates([nil]) = %v, want nil", got)
+	}
+	if got := expandDatabaseEncryption(nilSlice); got != nil {
+		t.Errorf("expandDatabaseEncryption([nil]) = %v, want nil", got)
+	}
+	if got := expandIdentityServiceConfig(nilSlice); got == nil || got.Enabled {
+		t.Errorf("expandIdentityServiceConfig([nil]) = %v, want disabled IdentityServiceConfig", got)
+	}
+	if got := expandCostManagementConfig(nilSlice); got != nil {
+		t.Errorf("expandCostManagementConfig([nil]) = %v, want nil", got)
+	}
+
+	d := ResourceContainerCluster().TestResourceData()
+	if got := expandNodeConfig(d, "", nilSlice); got == nil {
+		t.Errorf("expandNodeConfig([nil]) = nil, want default NodeConfig")
+	}
+	if got := expandBootDiskConfig(nilSlice); got != nil {
+		t.Errorf("expandBootDiskConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandWorkloadMetadataConfig(nilSlice); got != nil {
+		t.Errorf("expandWorkloadMetadataConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandKubeletConfig(nilSlice); got != nil {
+		t.Errorf("expandKubeletConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandKubeletConfig([]interface{}{
+		map[string]interface{}{
+			"eviction_soft":              nilSlice,
+			"eviction_soft_grace_period": nilSlice,
+			"eviction_minimum_reclaim":   nilSlice,
+			"crash_loop_back_off":        nilSlice,
+		},
+	}); got == nil {
+		t.Errorf("expandKubeletConfig with nil sub-blocks = nil, want non-nil")
+	}
+	if got := expandWindowsNodeConfig(nilSlice); got != nil {
+		t.Errorf("expandWindowsNodeConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandNodeImageConfig(nilSlice); got != nil {
+		t.Errorf("expandNodeImageConfig([nil]) = %v, want nil", got)
+	}
+	if got := expandSoleTenantConfig(nilSlice); got != nil {
+		t.Errorf("expandSoleTenantConfig([nil]) = %v, want nil", got)
+	}
+{{ if ne $.TargetVersionName `ga` -}}
+	if got := expandHostMaintenancePolicy(nilSlice); got != nil {
+		t.Errorf("expandHostMaintenancePolicy([nil]) = %v, want nil", got)
+	}
+{{- end }}
+	if got := expandNodeNetworkConfig(nilSlice); got == nil {
+		t.Errorf("expandNodeNetworkConfig([nil]) = nil, want empty NodeNetworkConfig")
+	}
+}
