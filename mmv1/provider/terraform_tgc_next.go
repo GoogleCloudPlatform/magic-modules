@@ -197,7 +197,6 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/services/compute/compute_instance_helpers.go":      "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/services/compute/compute_instance_http_helpers.go": "third_party/terraform/services/compute/compute_instance_http_helpers.go.tmpl",
 		"pkg/services/compute/metadata.go":                      "third_party/terraform/services/compute/metadata.go.tmpl",
-		"pkg/services/container/client.go":                      "third_party/terraform/services/container/client.go.tmpl",
 
 		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go": "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
