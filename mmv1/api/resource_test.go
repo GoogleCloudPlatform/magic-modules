@@ -1255,3 +1255,71 @@ func TestResourceFirstRunnableTestConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceShouldGenerateSweepers(t *testing.T) {
+	t.Parallel()
+	p := &api.Product{
+		Name: "test",
+		Version: &product.Version{
+			Name:    "ga",
+			BaseUrl: "https://example.googleapis.com/v1/",
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		want        bool
+	}{
+		{
+			description: "standard resource with DELETE verb generates sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb:      "DELETE",
+				ProductMetadata: p,
+			},
+			want: true,
+		},
+		{
+			description: "resource with pre_delete still generates sweeper",
+			resource: api.Resource{
+				BaseUrl:    "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb: "DELETE",
+				CustomCode: resource.CustomCode{
+					PreDelete: "templates/terraform/pre_delete/some_pre_delete.go.tmpl",
+				},
+				ProductMetadata: p,
+			},
+			want: true,
+		},
+		{
+			description: "resource with non-DELETE delete_verb does not generate sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/policy",
+				DeleteVerb:      "PUT",
+				ProductMetadata: p,
+			},
+			want: false,
+		},
+		{
+			description: "resource with exclude_sweeper does not generate sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb:      "DELETE",
+				ExcludeSweeper:  true,
+				ProductMetadata: p,
+			},
+			want: false,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateSweepers(); got != tc.want {
+				t.Errorf("ShouldGenerateSweepers() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
