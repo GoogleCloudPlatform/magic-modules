@@ -56,14 +56,19 @@ type PullRequestComment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// GetPullRequest fetches a single pull request
+// GetPullRequest fetches a single pull request from the default repository
 func (c *Client) GetPullRequest(prNumber string) (PullRequest, error) {
+	return c.GetPullRequestFromRepo(defaultOwner, defaultRepo, prNumber)
+}
+
+// GetPullRequestFromRepo fetches a single pull request from the specified repository
+func (c *Client) GetPullRequestFromRepo(owner, repo, prNumber string) (PullRequest, error) {
 	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return PullRequest{}, err
 	}
 
-	pr, _, err := c.gh.PullRequests.Get(c.ctx, defaultOwner, defaultRepo, num)
+	pr, _, err := c.gh.PullRequests.Get(c.ctx, owner, repo, num)
 	if err != nil {
 		return PullRequest{}, err
 	}
