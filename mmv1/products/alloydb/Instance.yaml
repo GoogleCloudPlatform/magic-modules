@@ -268,10 +268,35 @@ properties:
       - name: queryPlansPerMinute
         type: Integer
         description: Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.
+  - name: queryInsightsInfo
+    type: NestedObject
+    description: |
+      Instance level Query Insights information, which is read-only and available in the output only. Contains the effective query insights settings for this instance, by merging customer's provided QueryInsightsInstanceConfig with the Query Insights defaults.
+    output: true
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Output only. Whether Query Insights is enabled.
+        output: true
+      - name: queryPlansPerMinute
+        type: Integer
+        description: Output only. Number of query execution plans captured per minute.
+        output: true
+      - name: queryStringLength
+        type: Integer
+        description: Output only. Maximum query string length.
+        output: true
+      - name: recordApplicationTags
+        type: Boolean
+        description: Output only. Whether to record application tags.
+        output: true
+      - name: recordClientAddress
+        type: Boolean
+        description: Output only. Whether to record client address.
+        output: true
   - name: observabilityConfig
     type: NestedObject
     description: Configuration for enhanced query insights.
-    min_version: beta
     default_from_api: true
     custom_expand: templates/terraform/custom_expand/alloydb_instance_observability_config.go.tmpl
     properties:
@@ -320,14 +345,64 @@ properties:
       - name: trackClientAddress
         type: Boolean
         description: Track client address for an instance. If not set, default value is "off".
+        min_version: beta
         include_empty_value_in_cai: true # Default value is false in CAI asset
         send_empty_value: true
         default_from_api: true
       - name: assistiveExperiencesEnabled
         type: Boolean
         description: Whether assistive experiences are enabled for this AlloyDB instance.
+        min_version: beta
         send_empty_value: true
         default_from_api: true
+  - name: observabilityInstanceInfo
+    type: NestedObject
+    description: |
+      Instance level observability information, contains the effective values of observability settings for this instance, by merging customer's provided ObservabilityInstanceConfig with the Observability defaults.
+    output: true
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Output only. Observability feature status for an instance.
+        output: true
+      - name: maxQueryStringLength
+        type: Integer
+        description: Output only. Query string length. The default value is 10k.
+        output: true
+      - name: preserveComments
+        type: Boolean
+        description: Output only. Preserve comments in query string for an instance.
+        output: true
+      - name: queryPlansPerMinute
+        type: Integer
+        description: Output only. Number of query execution plans captured by Insights per minute for all queries combined.
+        output: true
+      - name: recordApplicationTags
+        type: Boolean
+        description: Output only. Record application tags for an instance.
+        output: true
+      - name: trackActiveQueries
+        type: Boolean
+        description: Output only. Track actively running queries on the instance.
+        output: true
+      - name: trackWaitEventTypes
+        type: Boolean
+        description: Output only. Track wait event types during query execution for an instance.
+        output: true
+      - name: trackWaitEvents
+        type: Boolean
+        description: Output only. Track wait events during query execution for an instance.
+        output: true
+      - name: trackClientAddress
+        type: Boolean
+        description: Output only. Track client address for an instance.
+        min_version: beta
+        output: true
+      - name: assistiveExperiencesEnabled
+        type: Boolean
+        description: Output only. Whether assistive experiences are enabled for this AlloyDB instance.
+        min_version: beta
+        output: true
   - name: readPoolConfig
     type: NestedObject
     description: Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.
