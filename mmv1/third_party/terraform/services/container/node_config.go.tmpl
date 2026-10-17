@@ -15,11 +15,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/container/v1"
-{{- else }}
-	container "google.golang.org/api/container/v1beta1"
-{{- end }}
 )
 
 // Matches gke-default scope from https://cloud.google.com/sdk/gcloud/reference/container/clusters/create
@@ -1609,44 +1604,48 @@ func schemaNodePoolAutoConfigLinuxNodeConfig() *schema.Schema {
 	}
 }
 
-func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefaults {
+func expandNodeConfigDefaults(configured interface{}) map[string]interface{} {
 	configs := configured.([]interface{})
 	if len(configs) == 0 || configs[0] == nil {
 		return nil
 	}
 	config := configs[0].(map[string]interface{})
 
-	nodeConfigDefaults := &container.NodeConfigDefaults{}
-	nodeConfigDefaults.ContainerdConfig = expandContainerdConfig(config["containerd_config"])
+	nodeConfigDefaults := map[string]interface{}{}
+	setField(nodeConfigDefaults, "containerdConfig", expandContainerdConfig(config["containerd_config"]))
 	if v, ok := config["insecure_kubelet_readonly_port_enabled"]; ok {
-		nodeConfigDefaults.NodeKubeletConfig = &container.NodeKubeletConfig{
-			InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(v),
-			ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
+		nodeConfigDefaults["nodeKubeletConfig"] = map[string]interface{}{
+			"insecureKubeletReadonlyPortEnabled": expandInsecureKubeletReadonlyPortEnabled(v),
 		}
 	}
 	if variant, ok := config["logging_variant"]; ok {
-		nodeConfigDefaults.LoggingConfig = &container.NodePoolLoggingConfig{
-			VariantConfig: &container.LoggingVariantConfig{
-				Variant: variant.(string),
-			},
+		variantConfig := map[string]interface{}{}
+		setField(variantConfig, "variant", variant.(string))
+		nodeConfigDefaults["loggingConfig"] = map[string]interface{}{
+			"variantConfig": variantConfig,
 		}
 	}
 
 	if v, ok := config["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		gcfsConfig := v.([]interface{})[0].(map[string]interface{})
-		nodeConfigDefaults.GcfsConfig = &container.GcfsConfig{
-			Enabled: gcfsConfig["enabled"].(bool),
-		}
+		gcfs := map[string]interface{}{}
+		setField(gcfs, "enabled", gcfsConfig["enabled"].(bool))
+		nodeConfigDefaults["gcfsConfig"] = gcfs
 	}
 
 	return nodeConfigDefaults
 }
 
-func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *container.NodeConfig {
+func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) map[string]interface{} {
+	if v == nil {
+		return map[string]interface{}{
+			"oauthScopes": defaultOauthScopes,
+		}
+	}
 	nodeConfigs := v.([]interface{})
-	nc := &container.NodeConfig{
+	nc := map[string]interface{}{
 		// Defaults can't be set on a list/set in the schema, so set the default on create here.
-		OauthScopes: defaultOauthScopes,
+		"oauthScopes": defaultOauthScopes,
 	}
 	if len(nodeConfigs) == 0 {
 		return nc
@@ -1655,147 +1654,139 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	nodeConfig := nodeConfigs[0].(map[string]interface{})
 
 	if v, ok := nodeConfig["taint_config"]; ok {
-		nc.TaintConfig = expandTaintConfig(v)
+		setField(nc, "taintConfig", expandTaintConfig(v))
 	}
 
 	if v, ok := nodeConfig["containerd_config"]; ok {
-		nc.ContainerdConfig = expandContainerdConfig(v)
+		setField(nc, "containerdConfig", expandContainerdConfig(v))
 	}
 
 	if v, ok := nodeConfig["machine_type"]; ok {
-		nc.MachineType = v.(string)
+		setField(nc, "machineType", v.(string))
 	}
 
 	if v, ok := nodeConfig["gpudirect_strategy"]; ok {
-		nc.GpuDirectConfig = expandGpuDirectConfig(v)
+		setField(nc, "gpuDirectConfig", expandGpuDirectConfig(v))
 	}
 
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
 		accels := v.([]interface{})
-		guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
+		guestAccelerators := make([]map[string]interface{}, 0, len(accels))
 		for _, raw := range accels {
 			data := raw.(map[string]interface{})
 			if data["count"].(int) == 0 {
 				continue
 			}
-			guestAcceleratorConfig := &container.AcceleratorConfig{
-				AcceleratorCount: int64(data["count"].(int)),
-				AcceleratorType:  data["type"].(string),
-				GpuPartitionSize: data["gpu_partition_size"].(string),
-			}
+			guestAcceleratorConfig := map[string]interface{}{}
+			setStringIntField(guestAcceleratorConfig, "acceleratorCount", int64(data["count"].(int)))
+			setField(guestAcceleratorConfig, "acceleratorType", data["type"].(string))
+			setField(guestAcceleratorConfig, "gpuPartitionSize", data["gpu_partition_size"].(string))
 
 			if v, ok := data["gpu_driver_installation_config"]; ok && len(v.([]interface{})) > 0 {
 				gpuDriverInstallationConfig := data["gpu_driver_installation_config"].([]interface{})[0].(map[string]interface{})
-				guestAcceleratorConfig.GpuDriverInstallationConfig = &container.GPUDriverInstallationConfig{
-					GpuDriverVersion: gpuDriverInstallationConfig["gpu_driver_version"].(string),
-				}
+				gpuDriverCfg := map[string]interface{}{}
+				setField(gpuDriverCfg, "gpuDriverVersion", gpuDriverInstallationConfig["gpu_driver_version"].(string))
+				guestAcceleratorConfig["gpuDriverInstallationConfig"] = gpuDriverCfg
 			}
 
 			if v, ok := data["gpu_sharing_config"]; ok && len(v.([]interface{})) > 0 {
 				gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
-				guestAcceleratorConfig.GpuSharingConfig = &container.GPUSharingConfig{
-					GpuSharingStrategy: gpuSharingConfig["gpu_sharing_strategy"].(string),
-					MaxSharedClientsPerGpu: int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)),
-				}
+				gpuSharingCfg := map[string]interface{}{}
+				setField(gpuSharingCfg, "gpuSharingStrategy", gpuSharingConfig["gpu_sharing_strategy"].(string))
+				setStringIntField(gpuSharingCfg, "maxSharedClientsPerGpu", int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)))
+				guestAcceleratorConfig["gpuSharingConfig"] = gpuSharingCfg
 			}
 
 			guestAccelerators = append(guestAccelerators, guestAcceleratorConfig)
 		}
-		nc.Accelerators = guestAccelerators
+		setField(nc, "accelerators", guestAccelerators)
 	}
 
 	if v, ok := nodeConfig["disk_size_gb"]; ok {
-		nc.DiskSizeGb = int64(v.(int))
+		setField(nc, "diskSizeGb", int64(v.(int)))
 	}
 
 	if v, ok := nodeConfig["disk_type"]; ok {
-		nc.DiskType = v.(string)
+		setField(nc, "diskType", v.(string))
 	}
 
 	if v, ok := nodeConfig["boot_disk"]; ok {
-		nc.BootDisk = expandBootDiskConfig(v)
+		setField(nc, "bootDisk", expandBootDiskConfig(v))
 	}
 
 	if v, ok := nodeConfig["local_ssd_count"]; ok {
-		nc.LocalSsdCount = int64(v.(int))
+		setField(nc, "localSsdCount", int64(v.(int)))
 	}
 
 	if v, ok := nodeConfig["logging_variant"]; ok {
-		nc.LoggingConfig = &container.NodePoolLoggingConfig{
-			VariantConfig: &container.LoggingVariantConfig{
-				Variant: v.(string),
-			},
+		variantConfig := map[string]interface{}{}
+		setField(variantConfig, "variant", v.(string))
+		nc["loggingConfig"] = map[string]interface{}{
+			"variantConfig": variantConfig,
 		}
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.EphemeralStorageConfig = &container.EphemeralStorageConfig{
-			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
-		}
+		esc := map[string]interface{}{}
+		setField(esc, "localSsdCount", int64(conf["local_ssd_count"].(int)))
+		nc["ephemeralStorageConfig"] = esc
 	}
 {{- end }}
 	if v, ok := nodeConfig["local_nvme_ssd_block_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.LocalNvmeSsdBlockConfig = &container.LocalNvmeSsdBlockConfig{
-			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
-		}
+		lnsbc := map[string]interface{}{}
+		setField(lnsbc, "localSsdCount", int64(conf["local_ssd_count"].(int)))
+		nc["localNvmeSsdBlockConfig"] = lnsbc
 	}
 
 	if v, ok := nodeConfig["ephemeral_storage_local_ssd_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.EphemeralStorageLocalSsdConfig = &container.EphemeralStorageLocalSsdConfig{
-			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
-		}
+		eslsc := map[string]interface{}{}
+		setField(eslsc, "localSsdCount", int64(conf["local_ssd_count"].(int)))
 		dataCacheCount, ok := conf["data_cache_count"]
 		if ok {
-			nc.EphemeralStorageLocalSsdConfig.DataCacheCount = int64(dataCacheCount.(int))
+			setField(eslsc, "dataCacheCount", int64(dataCacheCount.(int)))
 		}
-
+		nc["ephemeralStorageLocalSsdConfig"] = eslsc
 	}
 
 	if v, ok := nodeConfig["secondary_boot_disks"]; ok && len(v.([]interface{})) > 0 {
+		var secondaryBootDisks []map[string]interface{}
 		conf, confOK := v.([]interface{})[0].(map[string]interface{})
 		if confOK {
-			modeValue, modeOK := conf["mode"]
-			diskImage := conf["disk_image"].(string)
-			if modeOK {
-				nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
-					DiskImage: diskImage,
-					Mode:      modeValue.(string),
-				})
-			} else {
-				nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
-					DiskImage: diskImage,
-				})
+			sbd := map[string]interface{}{}
+			setField(sbd, "diskImage", conf["disk_image"].(string))
+			if modeValue, modeOK := conf["mode"]; modeOK {
+				setField(sbd, "mode", modeValue.(string))
 			}
+			secondaryBootDisks = append(secondaryBootDisks, sbd)
 		} else {
-			nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
-				DiskImage: "",
-			})
+			secondaryBootDisks = append(secondaryBootDisks, map[string]interface{}{})
 		}
+		setField(nc, "secondaryBootDisks", secondaryBootDisks)
 	}
 
 	if v, ok := nodeConfig["gcfs_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.GcfsConfig = &container.GcfsConfig{
-			Enabled: conf["enabled"].(bool),
-		}
+		gcfs := map[string]interface{}{}
+		setField(gcfs, "enabled", conf["enabled"].(bool))
+		nc["gcfsConfig"] = gcfs
 	}
 
 	if v, ok := nodeConfig["gvnic"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.Gvnic = &container.VirtualNIC{
-			Enabled: conf["enabled"].(bool),
-		}
+		gvnic := map[string]interface{}{}
+		setField(gvnic, "enabled", conf["enabled"].(bool))
+		nc["gvnic"] = gvnic
 	}
 
 	if v, ok := nodeConfig["fast_socket"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.FastSocket = &container.FastSocket{
-			Enabled: conf["enabled"].(bool),
-		}
+		fastSocket := map[string]interface{}{}
+		setField(fastSocket, "enabled", conf["enabled"].(bool))
+		nc["fastSocket"] = fastSocket
 	}
 
 	if v, ok := nodeConfig["reservation_affinity"]; ok && len(v.([]interface{})) > 0 {
@@ -1806,11 +1797,11 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			values[i] = value.(string)
 		}
 
-		nc.ReservationAffinity = &container.ReservationAffinity{
-			ConsumeReservationType: conf["consume_reservation_type"].(string),
-			Key:                    conf["key"].(string),
-			Values:                 values,
-		}
+		ra := map[string]interface{}{}
+		setField(ra, "consumeReservationType", conf["consume_reservation_type"].(string))
+		setField(ra, "key", conf["key"].(string))
+		setField(ra, "values", values)
+		nc["reservationAffinity"] = ra
 	}
 
 	if scopes, ok := nodeConfig["oauth_scopes"]; ok {
@@ -1820,11 +1811,15 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			scopes[i] = tpgresource.CanonicalizeServiceScope(scope.(string))
 		}
 
-		nc.OauthScopes = scopes
+		if len(scopes) > 0 {
+			nc["oauthScopes"] = scopes
+		} else {
+			delete(nc, "oauthScopes")
+		}
 	}
 
 	if v, ok := nodeConfig["service_account"]; ok {
-		nc.ServiceAccount = v.(string)
+		setField(nc, "serviceAccount", v.(string))
 	}
 
 	if v, ok := nodeConfig["metadata"]; ok {
@@ -1832,11 +1827,11 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
 		}
-		nc.Metadata = m
+		setField(nc, "metadata", m)
 	}
 
 	if v, ok := nodeConfig["image_type"]; ok {
-		nc.ImageType = v.(string)
+		setField(nc, "imageType", v.(string))
 	}
 
 	if v, ok := nodeConfig["labels"]; ok {
@@ -1844,7 +1839,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
 		}
-		nc.Labels = m
+		setField(nc, "labels", m)
 	}
 
 	if v, ok := nodeConfig["resource_labels"]; ok {
@@ -1852,11 +1847,11 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		for k, val := range v.(map[string]interface{}) {
 			m[k] = val.(string)
 		}
-		nc.ResourceLabels = m
+		setField(nc, "resourceLabels", m)
 	}
 
 	if v, ok := nodeConfig["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
-		nc.ResourceManagerTags = expandResourceManagerTags(v)
+		setField(nc, "resourceManagerTags", expandResourceManagerTags(v))
 	}
 
 	if v, ok := nodeConfig["tags"]; ok {
@@ -1867,7 +1862,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 				tags = append(tags, v.(string))
 			}
 		}
-		nc.Tags = tags
+		setField(nc, "tags", tags)
 	}
 
 	if v, ok := nodeConfig["storage_pools"]; ok {
@@ -1878,68 +1873,68 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 				storagePools = append(storagePools, v.(string))
 			}
 		}
-		nc.StoragePools = storagePools
+		setField(nc, "storagePools", storagePools)
 	}
 	if v, ok := nodeConfig["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.ShieldedInstanceConfig = &container.ShieldedInstanceConfig{
-			EnableSecureBoot:          conf["enable_secure_boot"].(bool),
-			EnableIntegrityMonitoring: conf["enable_integrity_monitoring"].(bool),
-		}
+		sic := map[string]interface{}{}
+		setField(sic, "enableSecureBoot", conf["enable_secure_boot"].(bool))
+		setField(sic, "enableIntegrityMonitoring", conf["enable_integrity_monitoring"].(bool))
+		nc["shieldedInstanceConfig"] = sic
 	}
 
 	// Preemptible Is Optional+Default, so it always has a value
-	nc.Preemptible = nodeConfig["preemptible"].(bool)
+	setField(nc, "preemptible", nodeConfig["preemptible"].(bool))
 
 	// Spot Is Optional+Default, so it always has a value
-	nc.Spot = nodeConfig["spot"].(bool)
+	setField(nc, "spot", nodeConfig["spot"].(bool))
 
 	if v, ok := nodeConfig["min_cpu_platform"]; ok {
-		nc.MinCpuPlatform = v.(string)
+		setField(nc, "minCpuPlatform", v.(string))
 	}
 
 	if v, ok := nodeConfig["taint"]; ok && len(v.([]interface{})) > 0 {
 		taints := v.([]interface{})
-		nodeTaints := make([]*container.NodeTaint, 0, len(taints))
+		nodeTaints := make([]map[string]interface{}, 0, len(taints))
 		for _, raw := range taints {
 			data := raw.(map[string]interface{})
-			taint := &container.NodeTaint{
-				Key:    data["key"].(string),
-				Value:  data["value"].(string),
-				Effect: data["effect"].(string),
-			}
+			taint := map[string]interface{}{}
+			setField(taint, "key", data["key"].(string))
+			setField(taint, "value", data["value"].(string))
+			setField(taint, "effect", data["effect"].(string))
 
 			nodeTaints = append(nodeTaints, taint)
 		}
 
-		nc.Taints = nodeTaints
+		setField(nc, "taints", nodeTaints)
 	}
 
 	if v, ok := nodeConfig["workload_metadata_config"]; ok {
-		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
+		setField(nc, "workloadMetadataConfig", expandWorkloadMetadataConfig(v))
 	}
 
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.SandboxConfig = &container.SandboxConfig{}
+		sc := map[string]interface{}{}
 {{ if ne $.TargetVersionName `ga` -}}
 		if st, ok := conf["sandbox_type"]; ok && st != "" {
-			nc.SandboxConfig.SandboxType = st.(string)
+			setField(sc, "sandboxType", st.(string))
 		} else if t, ok := conf["type"]; ok {
-			nc.SandboxConfig.Type = t.(string)
+			setField(sc, "type", t.(string))
 		}
 {{- else -}}
 		if v, ok := conf["type"]; ok {
-			nc.SandboxConfig.Type = v.(string)
+			setField(sc, "type", v.(string))
 		}
 {{- end }}
+		nc["sandboxConfig"] = sc
 	}
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
-		nc.BootDiskKmsKey = v.(string)
+		setField(nc, "bootDiskKmsKey", v.(string))
 	}
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
-		nc.KubeletConfig = expandKubeletConfig(v)
+		kubeletConfig := expandKubeletConfig(v)
 
 		// start cpu_cfs_quota fix https://github.com/hashicorp/terraform-provider-google/issues/15767
 		// this makes the field conditional on appearance in configuration. This allows the API `true` default
@@ -1951,19 +1946,19 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
 			npIndex, err := strconv.Atoi(parts[1])
 			if err != nil { // no error return from expander
-			    panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
+				panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
 			}
 
 			rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
 		}
 
 		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
+			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 && kubeletConfig != nil {
+				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
 				if v == cty.NullVal(cty.Bool) {
-				    nc.KubeletConfig.CpuCfsQuota = true
+					kubeletConfig["cpuCfsQuota"] = true
 				} else if v.False() { // force-send explicit false to API
-					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
+					kubeletConfig["cpuCfsQuota"] = false
 				}
 			}
 		}
@@ -1971,91 +1966,93 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 
 		// start shutdown_grace_period ForceSendFields fix
 		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 && kubeletConfig != nil {
+				cfg := v.([]interface{})[0].(map[string]interface{})
 				vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
 				if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
-					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+					kubeletConfig["shutdownGracePeriodSeconds"] = int64(cfg["shutdown_grace_period_seconds"].(int))
 				}
 				vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
 				if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
-					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+					kubeletConfig["shutdownGracePeriodCriticalPodsSeconds"] = int64(cfg["shutdown_grace_period_critical_pods_seconds"].(int))
 				}
 			}
 		}
 		// end shutdown_grace_period ForceSendFields fix
+
+		setField(nc, "kubeletConfig", kubeletConfig)
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
-		nc.LinuxNodeConfig = expandLinuxNodeConfig(v)
+		setField(nc, "linuxNodeConfig", expandLinuxNodeConfig(v))
 	}
 
 	if v, ok := nodeConfig["windows_node_config"]; ok {
-		nc.WindowsNodeConfig = expandWindowsNodeConfig(v)
+		setField(nc, "windowsNodeConfig", expandWindowsNodeConfig(v))
 	}
 
 	if v, ok := nodeConfig["node_group"]; ok {
-		nc.NodeGroup = v.(string)
+		setField(nc, "nodeGroup", v.(string))
 	}
 
 	if v, ok := nodeConfig["node_image_config"]; ok {
-		nc.NodeImageConfig = expandNodeImageConfig(v)
+		setField(nc, "nodeImageConfig", expandNodeImageConfig(v))
 	}
 
 	if v, ok := nodeConfig["advanced_machine_features"]; ok && len(v.([]interface{})) > 0 {
 		advanced_machine_features := v.([]interface{})[0].(map[string]interface{})
-		nc.AdvancedMachineFeatures = &container.AdvancedMachineFeatures{
-			ThreadsPerCore: int64(advanced_machine_features["threads_per_core"].(int)),
-			EnableNestedVirtualization: advanced_machine_features["enable_nested_virtualization"].(bool),
-			PerformanceMonitoringUnit: advanced_machine_features["performance_monitoring_unit"].(string),
-		}
+		amf := map[string]interface{}{}
+		setStringIntField(amf, "threadsPerCore", int64(advanced_machine_features["threads_per_core"].(int)))
+		setField(amf, "enableNestedVirtualization", advanced_machine_features["enable_nested_virtualization"].(bool))
+		setField(amf, "performanceMonitoringUnit", advanced_machine_features["performance_monitoring_unit"].(string))
+		nc["advancedMachineFeatures"] = amf
 	}
 
 	if v, ok := nodeConfig["sole_tenant_config"]; ok && len(v.([]interface{})) > 0 {
-		nc.SoleTenantConfig = expandSoleTenantConfig(v)
+		setField(nc, "soleTenantConfig", expandSoleTenantConfig(v))
 	}
 
-	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
-		nc.EnableConfidentialStorage = v.(bool)
+	if v, ok := nodeConfig["enable_confidential_storage"]; ok {
+		setField(nc, "enableConfidentialStorage", v.(bool))
 	}
 
-	if v,ok := nodeConfig["local_ssd_encryption_mode"]; ok {
-		nc.LocalSsdEncryptionMode = v.(string)
+	if v, ok := nodeConfig["local_ssd_encryption_mode"]; ok {
+		setField(nc, "localSsdEncryptionMode", v.(string))
 	}
 
-	if v,ok := nodeConfig["max_run_duration"]; ok {
-		nc.MaxRunDuration = v.(string)
+	if v, ok := nodeConfig["max_run_duration"]; ok {
+		setField(nc, "maxRunDuration", v.(string))
 	}
 
-	if v,ok := nodeConfig["flex_start"]; ok {
-		nc.FlexStart = v.(bool)
+	if v, ok := nodeConfig["flex_start"]; ok {
+		setField(nc, "flexStart", v.(bool))
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
-		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
+		setField(nc, "hostMaintenancePolicy", expandHostMaintenancePolicy(v))
 	}
 	{{- end }}
 
 	if v, ok := nodeConfig["confidential_nodes"]; ok {
-		nc.ConfidentialNodes = expandConfidentialNodes(v)
+		setField(nc, "confidentialNodes", expandConfidentialNodes(v))
 	}
 
 	return nc
 }
 
 // GPUDirectConfig is currently directly stored as a GpuDirectStrategy string.
-func expandGpuDirectConfig(v interface{}) *container.GPUDirectConfig {
-	if v == nil  || v.(string) == "" {
+func expandGpuDirectConfig(v interface{}) map[string]interface{} {
+	if v == nil || v.(string) == "" {
 		return nil
 	}
 
-	return &container.GPUDirectConfig{
-		GpuDirectStrategy: v.(string),
+	return map[string]interface{}{
+		"gpuDirectStrategy": v.(string),
 	}
 }
 
-func expandBootDiskConfig(v interface{}) *container.BootDisk {
-	bd := &container.BootDisk{}
+func expandBootDiskConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2064,27 +2061,28 @@ func expandBootDiskConfig(v interface{}) *container.BootDisk {
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
+	bd := map[string]interface{}{}
 
 	if v, ok := cfg["disk_type"]; ok {
-		bd.DiskType = v.(string)
+		setField(bd, "diskType", v.(string))
 	}
 
 	if v, ok := cfg["size_gb"]; ok {
-		bd.SizeGb = int64(v.(int))
+		setStringIntField(bd, "sizeGb", int64(v.(int)))
 	}
 
 	if v, ok := cfg["provisioned_iops"]; ok {
-		bd.ProvisionedIops = int64(v.(int))
+		setStringIntField(bd, "provisionedIops", int64(v.(int)))
 	}
 
 	if v, ok := cfg["provisioned_throughput"]; ok {
-		bd.ProvisionedThroughput = int64(v.(int))
+		setStringIntField(bd, "provisionedThroughput", int64(v.(int)))
 	}
 
 	return bd
 }
 
-func expandResourceManagerTags(v interface{}) *container.ResourceManagerTags {
+func expandResourceManagerTags(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2094,14 +2092,16 @@ func expandResourceManagerTags(v interface{}) *container.ResourceManagerTags {
 	if v != nil {
 		rmts = tpgresource.ConvertStringMap(v.(map[string]interface{}))
 	}
+	if rmts == nil {
+		rmts = make(map[string]string)
+	}
 
-	return &container.ResourceManagerTags{
-		Tags:            rmts,
-		ForceSendFields: []string{"Tags"},
+	return map[string]interface{}{
+		"tags": rmts,
 	}
 }
 
-func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConfig {
+func expandWorkloadMetadataConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2109,12 +2109,12 @@ func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConf
 	if len(ls) == 0 {
 		return nil
 	}
-	wmc := &container.WorkloadMetadataConfig{}
+	wmc := map[string]interface{}{}
 
 	cfg := ls[0].(map[string]interface{})
 
 	if v, ok := cfg["mode"]; ok {
-		wmc.Mode = v.(string)
+		setField(wmc, "mode", v.(string))
 	}
 
 	return wmc
@@ -2127,7 +2127,7 @@ func expandInsecureKubeletReadonlyPortEnabled(v interface{}) bool {
 	return false
 }
 
-func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
+func expandKubeletConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2136,152 +2136,152 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
-	kConfig := &container.NodeKubeletConfig{}
+	kConfig := map[string]interface{}{}
 	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"]; ok {
-		kConfig.CpuManagerPolicy = cpuManagerPolicy.(string)
+		setField(kConfig, "cpuManagerPolicy", cpuManagerPolicy.(string))
 	}
 	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
-		kConfig.CpuCfsQuota = cpuCfsQuota.(bool)
+		setField(kConfig, "cpuCfsQuota", cpuCfsQuota.(bool))
 	}
 	if cpuCfsQuotaPeriod, ok := cfg["cpu_cfs_quota_period"]; ok {
-		kConfig.CpuCfsQuotaPeriod = cpuCfsQuotaPeriod.(string)
+		setField(kConfig, "cpuCfsQuotaPeriod", cpuCfsQuotaPeriod.(string))
 	}
 	if insecureKubeletReadonlyPortEnabled, ok := cfg["insecure_kubelet_readonly_port_enabled"]; ok {
-		kConfig.InsecureKubeletReadonlyPortEnabled = expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled)
-		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "InsecureKubeletReadonlyPortEnabled")
+		kConfig["insecureKubeletReadonlyPortEnabled"] = expandInsecureKubeletReadonlyPortEnabled(insecureKubeletReadonlyPortEnabled)
 	}
 	if podPidsLimit, ok := cfg["pod_pids_limit"]; ok {
-		kConfig.PodPidsLimit = int64(podPidsLimit.(int))
+		setStringIntField(kConfig, "podPidsLimit", int64(podPidsLimit.(int)))
 	}
 	if maxParallelImagePulls, ok := cfg["max_parallel_image_pulls"]; ok {
-		kConfig.MaxParallelImagePulls = int64(maxParallelImagePulls.(int))
+		setField(kConfig, "maxParallelImagePulls", int64(maxParallelImagePulls.(int)))
 	}
 	if containerLogMaxSize, ok := cfg["container_log_max_size"]; ok {
-	        kConfig.ContainerLogMaxSize = containerLogMaxSize.(string)
+		setField(kConfig, "containerLogMaxSize", containerLogMaxSize.(string))
 	}
 	if containerLogMaxFiles, ok := cfg["container_log_max_files"]; ok {
-    	        kConfig.ContainerLogMaxFiles = int64(containerLogMaxFiles.(int))
-        }
+		setField(kConfig, "containerLogMaxFiles", int64(containerLogMaxFiles.(int)))
+	}
 	if imageGcLowThresholdPercent, ok := cfg["image_gc_low_threshold_percent"]; ok {
-    	        kConfig.ImageGcLowThresholdPercent = int64(imageGcLowThresholdPercent.(int))
+		setField(kConfig, "imageGcLowThresholdPercent", int64(imageGcLowThresholdPercent.(int)))
 	}
 	if imageGcHighThresholdPercent, ok := cfg["image_gc_high_threshold_percent"]; ok {
-    	        kConfig.ImageGcHighThresholdPercent = int64(imageGcHighThresholdPercent.(int))
+		setField(kConfig, "imageGcHighThresholdPercent", int64(imageGcHighThresholdPercent.(int)))
 	}
 	if imageMinimumGcAge, ok := cfg["image_minimum_gc_age"]; ok {
-    	        kConfig.ImageMinimumGcAge = imageMinimumGcAge.(string)
+		setField(kConfig, "imageMinimumGcAge", imageMinimumGcAge.(string))
 	}
 	if imageMaximumGcAge, ok := cfg["image_maximum_gc_age"]; ok {
-    	        kConfig.ImageMaximumGcAge = imageMaximumGcAge.(string)
+		setField(kConfig, "imageMaximumGcAge", imageMaximumGcAge.(string))
 	}
 	if allowedUnsafeSysctls, ok := cfg["allowed_unsafe_sysctls"]; ok {
-	        sysctls := allowedUnsafeSysctls.([]interface{})
-		kConfig.AllowedUnsafeSysctls = make([]string, len(sysctls))
+		sysctls := allowedUnsafeSysctls.([]interface{})
+		allowed := make([]string, len(sysctls))
 		for i, s := range sysctls {
-		    kConfig.AllowedUnsafeSysctls[i] = s.(string)
+			allowed[i] = s.(string)
 		}
+		setField(kConfig, "allowedUnsafeSysctls", allowed)
 	}
 	if singleProcessOomKill, ok := cfg["single_process_oom_kill"]; ok {
-            kConfig.SingleProcessOomKill = singleProcessOomKill.(bool)
+		setField(kConfig, "singleProcessOomKill", singleProcessOomKill.(bool))
 	}
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
-                kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
-        }
+		setField(kConfig, "evictionMaxPodGracePeriodSeconds", int64(evictionMaxPodGracePeriodSeconds.(int)))
+	}
 	if shutdownGracePeriodSeconds, ok := cfg["shutdown_grace_period_seconds"]; ok {
-		kConfig.ShutdownGracePeriodSeconds = int64(shutdownGracePeriodSeconds.(int))
+		setField(kConfig, "shutdownGracePeriodSeconds", int64(shutdownGracePeriodSeconds.(int)))
 	}
 	if shutdownGracePeriodCriticalPodsSeconds, ok := cfg["shutdown_grace_period_critical_pods_seconds"]; ok {
-		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
+		setField(kConfig, "shutdownGracePeriodCriticalPodsSeconds", int64(shutdownGracePeriodCriticalPodsSeconds.(int)))
 	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
-		evictionSoft := &container.EvictionSignals{}
+		evictionSoft := map[string]interface{}{}
 		if val, ok := es["memory_available"]; ok {
-			evictionSoft.MemoryAvailable = val.(string)
+			setField(evictionSoft, "memoryAvailable", val.(string))
 		}
 		if val, ok := es["nodefs_available"]; ok {
-		        evictionSoft.NodefsAvailable = val.(string)
+			setField(evictionSoft, "nodefsAvailable", val.(string))
 		}
 		if val, ok := es["imagefs_available"]; ok {
-			evictionSoft.ImagefsAvailable = val.(string)
+			setField(evictionSoft, "imagefsAvailable", val.(string))
 		}
 		if val, ok := es["imagefs_inodes_free"]; ok {
-			evictionSoft.ImagefsInodesFree = val.(string)
+			setField(evictionSoft, "imagefsInodesFree", val.(string))
 		}
 		if val, ok := es["nodefs_inodes_free"]; ok {
-			evictionSoft.NodefsInodesFree = val.(string)
+			setField(evictionSoft, "nodefsInodesFree", val.(string))
 		}
 		if val, ok := es["pid_available"]; ok {
-			evictionSoft.PidAvailable = val.(string)
+			setField(evictionSoft, "pidAvailable", val.(string))
 		}
-		kConfig.EvictionSoft = evictionSoft
+		kConfig["evictionSoft"] = evictionSoft
 	}
 
 	if v, ok := cfg["memory_manager"]; ok {
-		kConfig.MemoryManager = expandMemoryManager(v)
+		setField(kConfig, "memoryManager", expandMemoryManager(v))
 	}
 	if v, ok := cfg["topology_manager"]; ok {
-		kConfig.TopologyManager = expandTopologyManager(v)
+		setField(kConfig, "topologyManager", expandTopologyManager(v))
 	}
 
 	if v, ok := cfg["eviction_soft_grace_period"]; ok && len(v.([]interface{})) > 0 {
-                es := v.([]interface{})[0].(map[string]interface{})
-                periods := &container.EvictionGracePeriod{}
-                if val, ok := es["memory_available"]; ok {
-                        periods.MemoryAvailable = val.(string)
-                }
-                if val, ok := es["nodefs_available"]; ok {
-                        periods.NodefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_available"]; ok {
-                        periods.ImagefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_inodes_free"]; ok {
-                        periods.ImagefsInodesFree = val.(string)
-                }
-                if val, ok := es["nodefs_inodes_free"]; ok {
-                        periods.NodefsInodesFree = val.(string)
-                }
-                if val, ok := es["pid_available"]; ok {
-                        periods.PidAvailable = val.(string)
-                }
-                kConfig.EvictionSoftGracePeriod = periods
-        }
+		es := v.([]interface{})[0].(map[string]interface{})
+		periods := map[string]interface{}{}
+		if val, ok := es["memory_available"]; ok {
+			setField(periods, "memoryAvailable", val.(string))
+		}
+		if val, ok := es["nodefs_available"]; ok {
+			setField(periods, "nodefsAvailable", val.(string))
+		}
+		if val, ok := es["imagefs_available"]; ok {
+			setField(periods, "imagefsAvailable", val.(string))
+		}
+		if val, ok := es["imagefs_inodes_free"]; ok {
+			setField(periods, "imagefsInodesFree", val.(string))
+		}
+		if val, ok := es["nodefs_inodes_free"]; ok {
+			setField(periods, "nodefsInodesFree", val.(string))
+		}
+		if val, ok := es["pid_available"]; ok {
+			setField(periods, "pidAvailable", val.(string))
+		}
+		kConfig["evictionSoftGracePeriod"] = periods
+	}
 	if v, ok := cfg["eviction_minimum_reclaim"]; ok && len(v.([]interface{})) > 0 {
-                es := v.([]interface{})[0].(map[string]interface{})
-                reclaim := &container.EvictionMinimumReclaim{}
-                if val, ok := es["memory_available"]; ok {
-                        reclaim.MemoryAvailable = val.(string)
-                }
-                if val, ok := es["nodefs_available"]; ok {
-                        reclaim.NodefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_available"]; ok {
-                        reclaim.ImagefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_inodes_free"]; ok {
-                        reclaim.ImagefsInodesFree = val.(string)
-                }
-                if val, ok := es["nodefs_inodes_free"]; ok {
-                        reclaim.NodefsInodesFree = val.(string)
-                }
-                if val, ok := es["pid_available"]; ok {
-                        reclaim.PidAvailable = val.(string)
-                }
-                kConfig.EvictionMinimumReclaim = reclaim
-        }
+		es := v.([]interface{})[0].(map[string]interface{})
+		reclaim := map[string]interface{}{}
+		if val, ok := es["memory_available"]; ok {
+			setField(reclaim, "memoryAvailable", val.(string))
+		}
+		if val, ok := es["nodefs_available"]; ok {
+			setField(reclaim, "nodefsAvailable", val.(string))
+		}
+		if val, ok := es["imagefs_available"]; ok {
+			setField(reclaim, "imagefsAvailable", val.(string))
+		}
+		if val, ok := es["imagefs_inodes_free"]; ok {
+			setField(reclaim, "imagefsInodesFree", val.(string))
+		}
+		if val, ok := es["nodefs_inodes_free"]; ok {
+			setField(reclaim, "nodefsInodesFree", val.(string))
+		}
+		if val, ok := es["pid_available"]; ok {
+			setField(reclaim, "pidAvailable", val.(string))
+		}
+		kConfig["evictionMinimumReclaim"] = reclaim
+	}
 	if v, ok := cfg["crash_loop_back_off"]; ok && len(v.([]interface{})) > 0 {
 		clb := v.([]interface{})[0].(map[string]interface{})
-		crashLoopBackOff := &container.CrashLoopBackOffConfig{}
+		crashLoopBackOff := map[string]interface{}{}
 		if val, ok := clb["max_container_restart_period"]; ok {
-			crashLoopBackOff.MaxContainerRestartPeriod = val.(string)
+			setField(crashLoopBackOff, "maxContainerRestartPeriod", val.(string))
 		}
-		kConfig.CrashLoopBackOff = crashLoopBackOff
+		kConfig["crashLoopBackOff"] = crashLoopBackOff
 	}
 	return kConfig
 }
 
-func expandTopologyManager(v interface{}) *container.TopologyManager {
+func expandTopologyManager(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2290,24 +2290,24 @@ func expandTopologyManager(v interface{}) *container.TopologyManager {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.TopologyManager{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	topologyManager := &container.TopologyManager{}
+	topologyManager := map[string]interface{}{}
 
 	if v, ok := cfg["policy"]; ok {
-		topologyManager.Policy = v.(string)
+		setField(topologyManager, "policy", v.(string))
 	}
 
 	if v, ok := cfg["scope"]; ok {
-		topologyManager.Scope = v.(string)
+		setField(topologyManager, "scope", v.(string))
 	}
 
 	return topologyManager
 }
 
-func expandMemoryManager(v interface{}) *container.MemoryManager {
+func expandMemoryManager(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2316,20 +2316,20 @@ func expandMemoryManager(v interface{}) *container.MemoryManager {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.MemoryManager{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	memoryManager := &container.MemoryManager{}
+	memoryManager := map[string]interface{}{}
 
 	if v, ok := cfg["policy"]; ok {
-		memoryManager.Policy = v.(string)
+		setField(memoryManager, "policy", v.(string))
 	}
 
 	return memoryManager
 }
 
-func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
+func expandLinuxNodeConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2338,51 +2338,51 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.LinuxNodeConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	linuxNodeConfig := &container.LinuxNodeConfig{}
+	linuxNodeConfig := map[string]interface{}{}
 	sysctls := expandSysctls(cfg)
 	if sysctls != nil {
-		linuxNodeConfig.Sysctls = sysctls
+		setField(linuxNodeConfig, "sysctls", sysctls)
 	}
 	cgroupMode := expandCgroupMode(cfg)
 	if len(cgroupMode) != 0 {
-		linuxNodeConfig.CgroupMode = cgroupMode
+		setField(linuxNodeConfig, "cgroupMode", cgroupMode)
 	}
 
 	if v, ok := cfg["transparent_hugepage_enabled"]; ok {
-		linuxNodeConfig.TransparentHugepageEnabled = v.(string)
+		setField(linuxNodeConfig, "transparentHugepageEnabled", v.(string))
 	}
 	if v, ok := cfg["transparent_hugepage_defrag"]; ok {
-		linuxNodeConfig.TransparentHugepageDefrag = v.(string)
+		setField(linuxNodeConfig, "transparentHugepageDefrag", v.(string))
 	}
 
 	if v, ok := cfg["hugepages_config"]; ok {
-		linuxNodeConfig.Hugepages = expandHugepagesConfig(v)
+		setField(linuxNodeConfig, "hugepages", expandHugepagesConfig(v))
 	}
-	
+
 	if v, ok := cfg["node_kernel_module_loading"]; ok {
-		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
+		setField(linuxNodeConfig, "nodeKernelModuleLoading", expandNodeKernelModuleLoading(v))
 	}
 
 	if v, ok := cfg["swap_config"]; ok {
-		linuxNodeConfig.SwapConfig = expandSwapConfig(v)
+		setField(linuxNodeConfig, "swapConfig", expandSwapConfig(v))
 	}
 
 	if v, ok := cfg["accurate_time_config"]; ok {
-		linuxNodeConfig.AccurateTimeConfig = expandAccurateTimeConfig(v)
+		setField(linuxNodeConfig, "accurateTimeConfig", expandAccurateTimeConfig(v))
 	}
 
 	if v, ok := cfg["custom_node_init"]; ok {
-		linuxNodeConfig.CustomNodeInit = expandCustomNodeInit(v)
+		setField(linuxNodeConfig, "customNodeInit", expandCustomNodeInit(v))
 	}
 
 	return linuxNodeConfig
 }
 
-func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
+func expandWindowsNodeConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2395,12 +2395,12 @@ func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
 	if !ok {
 		return nil
 	}
-	return &container.WindowsNodeConfig{
-		OsVersion: osversionRaw.(string),
-	}
+	wnc := map[string]interface{}{}
+	setField(wnc, "osVersion", osversionRaw.(string))
+	return wnc
 }
 
-func expandNodeImageConfig(v interface{}) *container.CustomImageConfig {
+func expandNodeImageConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2410,14 +2410,14 @@ func expandNodeImageConfig(v interface{}) *container.CustomImageConfig {
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	nodeImageConfig := &container.CustomImageConfig{}
+	nodeImageConfig := map[string]interface{}{}
 
 	if v, ok := cfg["image_project"]; ok {
-		nodeImageConfig.ImageProject = v.(string)
+		setField(nodeImageConfig, "imageProject", v.(string))
 	}
 
 	if v, ok := cfg["image"]; ok {
-		nodeImageConfig.Image = v.(string)
+		setField(nodeImageConfig, "image", v.(string))
 	}
 	return nodeImageConfig
 }
@@ -2443,7 +2443,7 @@ func expandCgroupMode(cfg map[string]interface{}) string {
 	return cgroupMode.(string)
 }
 
-func expandHugepagesConfig(v interface{}) *container.HugepagesConfig {
+func expandHugepagesConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2452,24 +2452,24 @@ func expandHugepagesConfig(v interface{}) *container.HugepagesConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.HugepagesConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	hugepagesConfig := &container.HugepagesConfig{}
+	hugepagesConfig := map[string]interface{}{}
 
 	if v, ok := cfg["hugepage_size_2m"]; ok {
-		hugepagesConfig.HugepageSize2m = int64(v.(int))
+		setField(hugepagesConfig, "hugepageSize2m", int64(v.(int)))
 	}
 
 	if v, ok := cfg["hugepage_size_1g"]; ok {
-		hugepagesConfig.HugepageSize1g = int64(v.(int))
+		setField(hugepagesConfig, "hugepageSize1g", int64(v.(int)))
 	}
 
 	return hugepagesConfig
 }
 
-func expandNodeKernelModuleLoading(v interface{}) *container.NodeKernelModuleLoading {
+func expandNodeKernelModuleLoading(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2478,20 +2478,20 @@ func expandNodeKernelModuleLoading(v interface{}) *container.NodeKernelModuleLoa
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.NodeKernelModuleLoading{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	NodeKernelModuleLoading := &container.NodeKernelModuleLoading{}
+	nodeKernelModuleLoading := map[string]interface{}{}
 
 	if v, ok := cfg["policy"]; ok {
-		NodeKernelModuleLoading.Policy = v.(string)
+		setField(nodeKernelModuleLoading, "policy", v.(string))
 	}
 
-	return NodeKernelModuleLoading
+	return nodeKernelModuleLoading
 }
 
-func expandAccurateTimeConfig(v interface{}) *container.AccurateTimeConfig {
+func expandAccurateTimeConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2500,20 +2500,20 @@ func expandAccurateTimeConfig(v interface{}) *container.AccurateTimeConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.AccurateTimeConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	accurateTimeConfig := &container.AccurateTimeConfig{}
+	accurateTimeConfig := map[string]interface{}{}
 
 	if v, ok := cfg["enable_ptp_kvm_time_sync"]; ok {
-		accurateTimeConfig.EnablePtpKvmTimeSync = v.(bool)
+		setField(accurateTimeConfig, "enablePtpKvmTimeSync", v.(bool))
 	}
 
 	return accurateTimeConfig
 }
 
-func expandCustomNodeInit(v interface{}) *container.CustomNodeInit {
+func expandCustomNodeInit(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2522,18 +2522,18 @@ func expandCustomNodeInit(v interface{}) *container.CustomNodeInit {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.CustomNodeInit{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	customNodeInit := &container.CustomNodeInit{}
+	customNodeInit := map[string]interface{}{}
 	if v, ok := cfg["init_script"]; ok {
-		customNodeInit.InitScript = expandInitScript(v)
+		setField(customNodeInit, "initScript", expandInitScript(v))
 	}
 	return customNodeInit
 }
 
-func expandInitScript(v interface{}) *container.InitScript {
+func expandInitScript(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2542,24 +2542,24 @@ func expandInitScript(v interface{}) *container.InitScript {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.InitScript{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	initScript := &container.InitScript{}
+	initScript := map[string]interface{}{}
 	if v, ok := cfg["gcs_uri"]; ok {
-		initScript.GcsUri = v.(string)
+		setField(initScript, "gcsUri", v.(string))
 	}
 	if v, ok := cfg["gcs_generation"]; ok {
-		initScript.GcsGeneration = int64(v.(int))
+		setStringIntField(initScript, "gcsGeneration", int64(v.(int)))
 	}
 	if v, ok := cfg["gcp_secret_manager_secret_uri"]; ok {
-		initScript.GcpSecretManagerSecretUri = v.(string)
+		setField(initScript, "gcpSecretManagerSecretUri", v.(string))
 	}
 	return initScript
 }
 
-func expandSwapConfig(v interface{}) *container.SwapConfig {
+func expandSwapConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2568,39 +2568,36 @@ func expandSwapConfig(v interface{}) *container.SwapConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.SwapConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	swapConfig := &container.SwapConfig{}
+	swapConfig := map[string]interface{}{}
 
 	if v, ok := cfg["boot_disk_profile"]; ok && len(v.([]interface{})) > 0 {
-		swapConfig.BootDiskProfile = expandBootDiskProfile(v)
+		setField(swapConfig, "bootDiskProfile", expandBootDiskProfile(v))
 	}
 
 	if v, ok := cfg["dedicated_local_ssd_profile"]; ok && len(v.([]interface{})) > 0 {
-		swapConfig.DedicatedLocalSsdProfile = expandDedicatedLocalSsdProfile(v)
+		setField(swapConfig, "dedicatedLocalSsdProfile", expandDedicatedLocalSsdProfile(v))
 	}
 
 	if v, ok := cfg["enabled"]; ok {
-		swapConfig.Enabled = v.(bool)
-		if !swapConfig.Enabled {
-			swapConfig.ForceSendFields = append(swapConfig.ForceSendFields, "Enabled")
-		}
+		swapConfig["enabled"] = v.(bool)
 	}
 
 	if v, ok := cfg["encryption_config"]; ok && len(v.([]interface{})) > 0 {
-		swapConfig.EncryptionConfig = expandSwapEncryptionConfig(v)
+		setField(swapConfig, "encryptionConfig", expandSwapEncryptionConfig(v))
 	}
 
 	if v, ok := cfg["ephemeral_local_ssd_profile"]; ok && len(v.([]interface{})) > 0 {
-		swapConfig.EphemeralLocalSsdProfile = expandEphemeralLocalSsdProfile(v)
+		setField(swapConfig, "ephemeralLocalSsdProfile", expandEphemeralLocalSsdProfile(v))
 	}
 
 	return swapConfig
 }
 
-func expandBootDiskProfile(v interface{}) *container.BootDiskProfile {
+func expandBootDiskProfile(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2609,24 +2606,24 @@ func expandBootDiskProfile(v interface{}) *container.BootDiskProfile {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.BootDiskProfile{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	profile := &container.BootDiskProfile{}
+	profile := map[string]interface{}{}
 
 	if v, ok := cfg["swap_size_gib"]; ok {
-		profile.SwapSizeGib = int64(v.(int))
+		setStringIntField(profile, "swapSizeGib", int64(v.(int)))
 	}
 
 	if v, ok := cfg["swap_size_percent"]; ok {
-		profile.SwapSizePercent = int64(v.(int))
+		setField(profile, "swapSizePercent", int64(v.(int)))
 	}
 
 	return profile
 }
 
-func expandDedicatedLocalSsdProfile(v interface{}) *container.DedicatedLocalSsdProfile {
+func expandDedicatedLocalSsdProfile(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2635,20 +2632,20 @@ func expandDedicatedLocalSsdProfile(v interface{}) *container.DedicatedLocalSsdP
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.DedicatedLocalSsdProfile{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	profile := &container.DedicatedLocalSsdProfile{}
+	profile := map[string]interface{}{}
 
 	if v, ok := cfg["disk_count"]; ok {
-		profile.DiskCount = int64(v.(int))
+		setStringIntField(profile, "diskCount", int64(v.(int)))
 	}
 
 	return profile
 }
 
-func expandSwapEncryptionConfig(v interface{}) *container.EncryptionConfig {
+func expandSwapEncryptionConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2657,23 +2654,20 @@ func expandSwapEncryptionConfig(v interface{}) *container.EncryptionConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.EncryptionConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	config := &container.EncryptionConfig{}
+	config := map[string]interface{}{}
 
 	if v, ok := cfg["disabled"]; ok {
-		config.Disabled = v.(bool)
-		if !config.Disabled {
-			config.ForceSendFields = append(config.ForceSendFields, "Disabled")
-		}
+		config["disabled"] = v.(bool)
 	}
 
 	return config
 }
 
-func expandEphemeralLocalSsdProfile(v interface{}) *container.EphemeralLocalSsdProfile {
+func expandEphemeralLocalSsdProfile(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2682,24 +2676,24 @@ func expandEphemeralLocalSsdProfile(v interface{}) *container.EphemeralLocalSsdP
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.EphemeralLocalSsdProfile{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	profile := &container.EphemeralLocalSsdProfile{}
+	profile := map[string]interface{}{}
 
 	if v, ok := cfg["swap_size_gib"]; ok {
-		profile.SwapSizeGib = int64(v.(int))
+		setStringIntField(profile, "swapSizeGib", int64(v.(int)))
 	}
 
 	if v, ok := cfg["swap_size_percent"]; ok {
-		profile.SwapSizePercent = int64(v.(int))
+		setField(profile, "swapSizePercent", int64(v.(int)))
 	}
 
 	return profile
 }
 
-func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
+func expandContainerdConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2708,18 +2702,18 @@ func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.ContainerdConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	cc := &container.ContainerdConfig{}
-	cc.PrivateRegistryAccessConfig = expandPrivateRegistryAccessConfig(cfg["private_registry_access_config"])
-	cc.WritableCgroups = expandWritableCgroups(cfg["writable_cgroups"])
-	cc.RegistryHosts = expandRegistryHosts(cfg["registry_hosts"])
+	cc := map[string]interface{}{}
+	setField(cc, "privateRegistryAccessConfig", expandPrivateRegistryAccessConfig(cfg["private_registry_access_config"]))
+	setField(cc, "writableCgroups", expandWritableCgroups(cfg["writable_cgroups"]))
+	setField(cc, "registryHosts", expandRegistryHosts(cfg["registry_hosts"]))
 	return cc
 }
 
-func expandPrivateRegistryAccessConfig(v interface{}) *container.PrivateRegistryAccessConfig {
+func expandPrivateRegistryAccessConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2728,46 +2722,48 @@ func expandPrivateRegistryAccessConfig(v interface{}) *container.PrivateRegistry
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.PrivateRegistryAccessConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	pracc := &container.PrivateRegistryAccessConfig{}
+	pracc := map[string]interface{}{}
 	if enabled, ok := cfg["enabled"]; ok {
-		pracc.Enabled = enabled.(bool)
+		setField(pracc, "enabled", enabled.(bool))
 	}
 	if caCfgRaw, ok := cfg["certificate_authority_domain_config"]; ok {
 		ls := caCfgRaw.([]interface{})
-		pracc.CertificateAuthorityDomainConfig = make([]*container.CertificateAuthorityDomainConfig, len(ls))
+		caConfigs := make([]map[string]interface{}, len(ls))
 		for i, caCfg := range ls {
-			pracc.CertificateAuthorityDomainConfig[i] = expandCADomainConfig(caCfg)
+			caConfigs[i] = expandCADomainConfig(caCfg)
 		}
+		setField(pracc, "certificateAuthorityDomainConfig", caConfigs)
 	}
 
 	return pracc
 }
 
-func expandCADomainConfig(v interface{}) *container.CertificateAuthorityDomainConfig {
+func expandCADomainConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
 	cfg := v.(map[string]interface{})
 
-	caConfig := &container.CertificateAuthorityDomainConfig{}
+	caConfig := map[string]interface{}{}
 	if v, ok := cfg["fqdns"]; ok {
 		fqdns := v.([]interface{})
-		caConfig.Fqdns = make([]string, len(fqdns))
+		fqdnsSlice := make([]string, len(fqdns))
 		for i, dn := range fqdns {
-			caConfig.Fqdns[i] = dn.(string)
+			fqdnsSlice[i] = dn.(string)
 		}
+		setField(caConfig, "fqdns", fqdnsSlice)
 	}
 
-	caConfig.GcpSecretManagerCertificateConfig = expandGCPSecretManagerCertificateConfig(cfg["gcp_secret_manager_certificate_config"])
+	setField(caConfig, "gcpSecretManagerCertificateConfig", expandGCPSecretManagerCertificateConfig(cfg["gcp_secret_manager_certificate_config"]))
 
 	return caConfig
 }
 
-func expandGCPSecretManagerCertificateConfig(v interface{}) *container.GCPSecretManagerCertificateConfig {
+func expandGCPSecretManagerCertificateConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2776,18 +2772,18 @@ func expandGCPSecretManagerCertificateConfig(v interface{}) *container.GCPSecret
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.GCPSecretManagerCertificateConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	gcpSMConfig := &container.GCPSecretManagerCertificateConfig{}
+	gcpSMConfig := map[string]interface{}{}
 	if v, ok := cfg["secret_uri"]; ok {
-		gcpSMConfig.SecretUri = v.(string)
+		setField(gcpSMConfig, "secretUri", v.(string))
 	}
 	return gcpSMConfig
 }
 
-func expandWritableCgroups(v interface{}) *container.WritableCgroups {
+func expandWritableCgroups(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2796,18 +2792,18 @@ func expandWritableCgroups(v interface{}) *container.WritableCgroups {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.WritableCgroups{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	wcg := &container.WritableCgroups{}
+	wcg := map[string]interface{}{}
 	if enabled, ok := cfg["enabled"]; ok {
-		wcg.Enabled = enabled.(bool)
+		setField(wcg, "enabled", enabled.(bool))
 	}
 	return wcg
 }
 
-func expandRegistryHosts(v interface{}) []*container.RegistryHostConfig {
+func expandRegistryHosts(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2815,95 +2811,99 @@ func expandRegistryHosts(v interface{}) []*container.RegistryHostConfig {
 	if len(ls) == 0 {
 		return nil
 	}
-	registryHosts := make([]*container.RegistryHostConfig, 0, len(ls))
+	registryHosts := make([]map[string]interface{}, 0, len(ls))
 	for _, raw := range ls {
 		data := raw.(map[string]interface{})
-		rh := &container.RegistryHostConfig{
-			Server: data["server"].(string),
-		}
+		rh := map[string]interface{}{}
+		setField(rh, "server", data["server"].(string))
 		if v, ok := data["hosts"]; ok {
 			hosts := v.([]interface{})
-			rh.Hosts = make([]*container.HostConfig, 0, len(hosts))
+			hostsSlice := make([]map[string]interface{}, 0, len(hosts))
 			for _, rawHost := range hosts {
 				hostData := rawHost.(map[string]interface{})
-				h := &container.HostConfig{
-					Host: hostData["host"].(string),
-				}
+				h := map[string]interface{}{}
+				setField(h, "host", hostData["host"].(string))
 				if v, ok := hostData["override_path"]; ok {
-					h.OverridePath = v.(bool)
+					setField(h, "overridePath", v.(bool))
 				}
 				if v, ok := hostData["dial_timeout"]; ok {
-					h.DialTimeout = v.(string)
+					setField(h, "dialTimeout", v.(string))
 				}
 				if v, ok := hostData["capabilities"]; ok {
-				    cap := v.([]interface{})
-					h.Capabilities = make([]string, len(cap))
+					cap := v.([]interface{})
+					caps := make([]string, len(cap))
 					for i, c := range cap {
-						h.Capabilities[i] = c.(string)
+						caps[i] = c.(string)
 					}
+					setField(h, "capabilities", caps)
 				}
 				if v, ok := hostData["header"]; ok {
-				    headers := v.([]interface{})
-					h.Header = make([]*container.RegistryHeader, len(headers))
+					headers := v.([]interface{})
+					headerSlice := make([]map[string]interface{}, len(headers))
 					for i, headerRaw := range headers {
-					   h.Header[i] = expandRegistryHeader(headerRaw)
+						headerSlice[i] = expandRegistryHeader(headerRaw)
 					}
+					setField(h, "header", headerSlice)
 				}
 				if v, ok := hostData["ca"]; ok {
-				    ca := v.([]interface{})
-					h.Ca = make([]*container.CertificateConfig, len(ca))
+					ca := v.([]interface{})
+					caSlice := make([]map[string]interface{}, len(ca))
 					for i, caRaw := range ca {
-					   h.Ca[i] = expandRegistryCertificateConfig(caRaw)
+						caSlice[i] = expandRegistryCertificateConfig(caRaw)
 					}
+					setField(h, "ca", caSlice)
 				}
 				if v, ok := hostData["client"]; ok {
-				    client := v.([]interface{})
-					h.Client = make([]*container.CertificateConfigPair, len(client))
+					client := v.([]interface{})
+					clientSlice := make([]map[string]interface{}, len(client))
 					for i, clientRaw := range client {
-					   h.Client[i] = expandRegistryCertificateConfigPair(clientRaw)
+						clientSlice[i] = expandRegistryCertificateConfigPair(clientRaw)
 					}
+					setField(h, "client", clientSlice)
 				}
-				rh.Hosts = append(rh.Hosts, h)
+				hostsSlice = append(hostsSlice, h)
 			}
+			setField(rh, "hosts", hostsSlice)
 		}
 		registryHosts = append(registryHosts, rh)
 	}
 	return registryHosts
 }
 
-func expandRegistryHeader(v interface{}) *container.RegistryHeader {
-	header := &container.RegistryHeader{}
+func expandRegistryHeader(v interface{}) map[string]interface{} {
+	header := map[string]interface{}{}
 	if v == nil {
 		return header
 	}
 	ls := v.(map[string]interface{})
 	if val, ok := ls["key"]; ok {
-	    header.Key = val.(string)
+		setField(header, "key", val.(string))
 	}
 	if val, ok := ls["value"]; ok {
 		headerVal := val.([]interface{})
-		header.Value = make([]string, len(headerVal))
+		vals := make([]string, len(headerVal))
 		for i, hv := range headerVal {
-			header.Value[i] = hv.(string)
+			vals[i] = hv.(string)
 		}
+		setField(header, "value", vals)
 	}
 	return header
 }
 
-func expandRegistryCertificateConfig(v interface{}) *container.CertificateConfig {
-	cfg := &container.CertificateConfig{}
+func expandRegistryCertificateConfig(v interface{}) map[string]interface{} {
+	cfg := map[string]interface{}{}
 	if v == nil {
 		return cfg
 	}
 	ls := v.(map[string]interface{})
 	if val, ok := ls["gcp_secret_manager_secret_uri"]; ok {
-	    cfg.GcpSecretManagerSecretUri = val.(string)
+		setField(cfg, "gcpSecretManagerSecretUri", val.(string))
 	}
 	return cfg
 }
 
-func expandRegistryCertificateConfigPair(v interface{}) *container.CertificateConfigPair {
-	cfg := &container.CertificateConfigPair{}
+func expandRegistryCertificateConfigPair(v interface{}) map[string]interface{} {
+	cfg := map[string]interface{}{}
 	if v == nil {
 		return cfg
 	}
@@ -2911,19 +2911,19 @@ func expandRegistryCertificateConfigPair(v interface{}) *container.CertificateCo
 	if val, ok := ls["cert"]; ok {
 		certRaw := val.([]interface{})
 		if len(certRaw) > 0 {
-		    cfg.Cert = expandRegistryCertificateConfig(certRaw[0])
+			setField(cfg, "cert", expandRegistryCertificateConfig(certRaw[0]))
 		}
 	}
 	if val, ok := ls["key"]; ok {
-	    keyRaw := val.([]interface{})
+		keyRaw := val.([]interface{})
 		if len(keyRaw) > 0 {
-		    cfg.Key = expandRegistryCertificateConfig(keyRaw[0])
+			setField(cfg, "key", expandRegistryCertificateConfig(keyRaw[0]))
 		}
 	}
 	return cfg
 }
 
-func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
+func expandSoleTenantConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2931,27 +2931,27 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 	if len(ls) == 0 {
 		return nil
 	}
-	stConfig := &container.SoleTenantConfig{}
+	stConfig := map[string]interface{}{}
 	cfg := ls[0].(map[string]interface{})
 	if affinitiesRaw, ok := cfg["node_affinity"]; ok {
-	        affinities := make([]*container.NodeAffinity, 0)
+		affinities := make([]map[string]interface{}, 0)
 		for _, v := range affinitiesRaw.(*schema.Set).List() {
-		        na := v.(map[string]interface{})
-			affinities = append(affinities, &container.NodeAffinity{
-			        Key:      na["key"].(string),
-				Operator: na["operator"].(string),
-				Values:   tpgresource.ConvertStringArr(na["values"].([]interface{})),
-			})
+			na := v.(map[string]interface{})
+			naMap := map[string]interface{}{}
+			setField(naMap, "key", na["key"].(string))
+			setField(naMap, "operator", na["operator"].(string))
+			setField(naMap, "values", tpgresource.ConvertStringArr(na["values"].([]interface{})))
+			affinities = append(affinities, naMap)
 		}
-		stConfig.NodeAffinities = affinities
+		setField(stConfig, "nodeAffinities", affinities)
 	}
 	if v, ok := cfg["min_node_cpus"]; ok {
-	        stConfig.MinNodeCpus = int64(v.(int))
+		setField(stConfig, "minNodeCpus", int64(v.(int)))
 	}
 	return stConfig
 }
 
-func expandTaintConfig(v interface{}) *container.TaintConfig {
+func expandTaintConfig(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2960,21 +2960,21 @@ func expandTaintConfig(v interface{}) *container.TaintConfig {
 		return nil
 	}
 	if ls[0] == nil {
-		return &container.TaintConfig{}
+		return map[string]interface{}{}
 	}
 	cfg := ls[0].(map[string]interface{})
 
-	taintConfig := &container.TaintConfig{}
+	taintConfig := map[string]interface{}{}
 
 	if v, ok := cfg["architecture_taint_behavior"]; ok {
-		taintConfig.ArchitectureTaintBehavior = v.(string)
+		setField(taintConfig, "architectureTaintBehavior", v.(string))
 	}
 
 	return taintConfig
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy {
+func expandHostMaintenancePolicy(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -2983,18 +2983,18 @@ func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
-	mPolicy := &container.HostMaintenancePolicy{}
+	mPolicy := map[string]interface{}{}
 	if maintenanceInterval, ok := cfg["maintenance_interval"]; ok {
-		mPolicy.MaintenanceInterval = maintenanceInterval.(string)
+		setField(mPolicy, "maintenanceInterval", maintenanceInterval.(string))
 	}
 	if v, ok := cfg["opportunistic_maintenance_strategy"]; ok {
-		mPolicy.OpportunisticMaintenanceStrategy = expandOpportunisticMaintenanceStrategy(v)
+		setField(mPolicy, "opportunisticMaintenanceStrategy", expandOpportunisticMaintenanceStrategy(v))
 	}
 
 	return mPolicy
 }
 
-func expandOpportunisticMaintenanceStrategy(v interface{}) *container.OpportunisticMaintenanceStrategy {
+func expandOpportunisticMaintenanceStrategy(v interface{}) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
@@ -3003,36 +3003,37 @@ func expandOpportunisticMaintenanceStrategy(v interface{}) *container.Opportunis
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
-	strategy := &container.OpportunisticMaintenanceStrategy{
-		ForceSendFields: []string{"MinNodesPerPool"},
+	var minNodes int64
+	if minNodesPerPool, ok := cfg["min_nodes_per_pool"]; ok {
+		minNodes = int64(minNodesPerPool.(int))
+	}
+	strategy := map[string]interface{}{
+		"minNodesPerPool": strconv.FormatInt(minNodes, 10),
 	}
 	if nodeIdleTimeWindow, ok := cfg["node_idle_time_window"]; ok {
-		strategy.NodeIdleTimeWindow = nodeIdleTimeWindow.(string)
+		setField(strategy, "nodeIdleTimeWindow", nodeIdleTimeWindow.(string))
 	}
 	if maintenanceAvailabilityWindow, ok := cfg["maintenance_availability_window"]; ok {
-		strategy.MaintenanceAvailabilityWindow = maintenanceAvailabilityWindow.(string)
-	}
-	if minNodesPerPool, ok := cfg["min_nodes_per_pool"]; ok {
-		strategy.MinNodesPerPool = int64(minNodesPerPool.(int))
+		setField(strategy, "maintenanceAvailabilityWindow", maintenanceAvailabilityWindow.(string))
 	}
 
 	return strategy
 }
 {{- end }}
 
-func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
+func expandConfidentialNodes(configured interface{}) map[string]interface{} {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
-	return &container.ConfidentialNodes{
-		Enabled: config["enabled"].(bool),
-		ConfidentialInstanceType: config["confidential_instance_type"].(string),
-	}
+	cn := map[string]interface{}{}
+	setField(cn, "enabled", config["enabled"].(bool))
+	setField(cn, "confidentialInstanceType", config["confidential_instance_type"].(string))
+	return cn
 }
 
-func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]interface{} {
+func flattenNodeConfigDefaults(c map[string]interface{}) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, 1)
 
 	if c == nil {
@@ -3041,19 +3042,19 @@ func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]int
 
 	result = append(result, map[string]interface{}{})
 
-	result[0]["containerd_config"] = flattenContainerdConfig(c.ContainerdConfig)
+	result[0]["containerd_config"] = flattenContainerdConfig(getMap(c, "containerdConfig"))
 
-	result[0]["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c.NodeKubeletConfig)
+	result[0]["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(getMap(c, "nodeKubeletConfig"))
 
-	result[0]["logging_variant"] = flattenLoggingVariant(c.LoggingConfig)
+	result[0]["logging_variant"] = flattenLoggingVariant(getMap(c, "loggingConfig"))
 
-	result[0]["gcfs_config"] = flattenGcfsConfig(c.GcfsConfig)
+	result[0]["gcfs_config"] = flattenGcfsConfig(getMap(c, "gcfsConfig"))
 
 	return result
 }
 
 // v == old state of `node_config`
-func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]interface{} {
+func flattenNodeConfig(c map[string]interface{}, v interface{}) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
 
 	if c == nil {
@@ -3071,68 +3072,68 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 	}
 
 	config = append(config, map[string]interface{}{
-		"machine_type":             c.MachineType,
-		"taint_config":             flattenTaintConfig(c.TaintConfig),
-		"containerd_config":        flattenContainerdConfig(c.ContainerdConfig),
-		"disk_size_gb":             c.DiskSizeGb,
-		"disk_type":                c.DiskType,
-		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
-		"gpudirect_strategy": 		flattenGpuDirectConfig(c.GpuDirectConfig),
-		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
-		"local_ssd_count":          c.LocalSsdCount,
-		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
+		"machine_type":             flattenString(c["machineType"]),
+		"taint_config":             flattenTaintConfig(getMap(c, "taintConfig")),
+		"containerd_config":        flattenContainerdConfig(getMap(c, "containerdConfig")),
+		"disk_size_gb":             flattenInt(c["diskSizeGb"]),
+		"disk_type":                flattenString(c["diskType"]),
+		"boot_disk":                flattenBootDiskConfig(getMap(c, "bootDisk")),
+		"gpudirect_strategy":       flattenGpuDirectConfig(getMap(c, "gpuDirectConfig")),
+		"guest_accelerator":        flattenContainerGuestAccelerators(getSlice(c, "accelerators")),
+		"local_ssd_count":          flattenInt(c["localSsdCount"]),
+		"logging_variant":          flattenLoggingVariant(getMap(c, "loggingConfig")),
 {{- if ne $.TargetVersionName "ga" }}
-		"ephemeral_storage_config": flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
+		"ephemeral_storage_config": flattenEphemeralStorageConfig(getMap(c, "ephemeralStorageConfig")),
 {{- end }}
-		"local_nvme_ssd_block_config": flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
-		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
-		"gcfs_config":              flattenGcfsConfig(c.GcfsConfig),
-		"gvnic":					flattenGvnic(c.Gvnic),
-		"reservation_affinity":     flattenGKEReservationAffinity(c.ReservationAffinity),
-		"service_account":          c.ServiceAccount,
-		"metadata":                 c.Metadata,
-		"image_type":               c.ImageType,
-		"labels":                   c.Labels,
-		"resource_labels":          c.ResourceLabels,
-		"tags":                     c.Tags,
-		"preemptible":              c.Preemptible,
-		"secondary_boot_disks":     flattenSecondaryBootDisks(c.SecondaryBootDisks),
-		"storage_pools":            c.StoragePools,
-		"spot":                     c.Spot,
-		"min_cpu_platform":         c.MinCpuPlatform,
-		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
-		"taint":                    flattenTaints(c.Taints, oldTaints),
-		"effective_taints":         flattenEffectiveTaints(c.Taints),
-		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
-		"sandbox_config":           flattenSandboxConfig(c.SandboxConfig),
+		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(getMap(c, "localNvmeSsdBlockConfig")),
+		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(getMap(c, "ephemeralStorageLocalSsdConfig")),
+		"gcfs_config":                        flattenGcfsConfig(getMap(c, "gcfsConfig")),
+		"gvnic":                              flattenGvnic(getMap(c, "gvnic")),
+		"reservation_affinity":               flattenGKEReservationAffinity(getMap(c, "reservationAffinity")),
+		"service_account":                    flattenString(c["serviceAccount"]),
+		"metadata":                           flattenStringMap(c["metadata"]),
+		"image_type":                         flattenString(c["imageType"]),
+		"labels":                             flattenStringMap(c["labels"]),
+		"resource_labels":                    flattenStringMap(c["resourceLabels"]),
+		"tags":                               flattenStringSlice(c["tags"]),
+		"preemptible":                        flattenBool(c["preemptible"]),
+		"secondary_boot_disks":               flattenSecondaryBootDisks(getSlice(c, "secondaryBootDisks")),
+		"storage_pools":                      flattenStringSlice(c["storagePools"]),
+		"spot":                               flattenBool(c["spot"]),
+		"min_cpu_platform":                   flattenString(c["minCpuPlatform"]),
+		"shielded_instance_config":           flattenShieldedInstanceConfig(getMap(c, "shieldedInstanceConfig")),
+		"taint":                              flattenTaints(getSlice(c, "taints"), oldTaints),
+		"effective_taints":                   flattenEffectiveTaints(getSlice(c, "taints")),
+		"workload_metadata_config":           flattenWorkloadMetadataConfig(getMap(c, "workloadMetadataConfig")),
+		"sandbox_config":                     flattenSandboxConfig(getMap(c, "sandboxConfig")),
 {{- if ne $.TargetVersionName "ga" }}
-		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
+		"host_maintenance_policy":  flattenHostMaintenancePolicy(getMap(c, "hostMaintenancePolicy")),
 {{- end }}
-		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
-		"boot_disk_kms_key":        c.BootDiskKmsKey,
-		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
-		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
-		"windows_node_config":      flattenWindowsNodeConfig(c.WindowsNodeConfig),
-		"node_group":               c.NodeGroup,
-		"node_image_config":        flattenNodeImageConfig(c.NodeImageConfig),
-		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
-		"max_run_duration": 		 c.MaxRunDuration,
-		"flex_start":				 c.FlexStart,
-		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
-		"fast_socket":               flattenFastSocket(c.FastSocket),
-		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
-		"enable_confidential_storage": c.EnableConfidentialStorage,
-		"local_ssd_encryption_mode":      c.LocalSsdEncryptionMode,
+		"confidential_nodes":          flattenConfidentialNodes(getMap(c, "confidentialNodes")),
+		"boot_disk_kms_key":           flattenString(c["bootDiskKmsKey"]),
+		"kubelet_config":              flattenKubeletConfig(getMap(c, "kubeletConfig")),
+		"linux_node_config":           flattenLinuxNodeConfig(getMap(c, "linuxNodeConfig")),
+		"windows_node_config":         flattenWindowsNodeConfig(getMap(c, "windowsNodeConfig")),
+		"node_group":                  flattenString(c["nodeGroup"]),
+		"node_image_config":           flattenNodeImageConfig(getMap(c, "nodeImageConfig")),
+		"advanced_machine_features":   flattenAdvancedMachineFeaturesConfig(getMap(c, "advancedMachineFeatures")),
+		"max_run_duration":            flattenString(c["maxRunDuration"]),
+		"flex_start":                  flattenBool(c["flexStart"]),
+		"sole_tenant_config":          flattenSoleTenantConfig(getMap(c, "soleTenantConfig")),
+		"fast_socket":                 flattenFastSocket(getMap(c, "fastSocket")),
+		"resource_manager_tags":       flattenResourceManagerTags(getMap(c, "resourceManagerTags")),
+		"enable_confidential_storage": flattenBool(c["enableConfidentialStorage"]),
+		"local_ssd_encryption_mode":   flattenString(c["localSsdEncryptionMode"]),
 	})
 
-	if len(c.OauthScopes) > 0 {
-		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(c.OauthScopes))
+	if oauthScopes := flattenStringSlice(c["oauthScopes"]); len(oauthScopes) > 0 {
+		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(oauthScopes))
 	}
 
 	return config
 }
 
-func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
+func flattenBootDiskConfig(c map[string]interface{}) []map[string]interface{} {
 	config := []map[string]interface{}{}
 
 	if c == nil {
@@ -3140,23 +3141,23 @@ func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
 	}
 
 	config = append(config, map[string]interface{}{
-		"disk_type": c.DiskType,
-		"size_gb": c.SizeGb,
-		"provisioned_iops": c.ProvisionedIops,
-		"provisioned_throughput": c.ProvisionedThroughput,
+		"disk_type":              flattenString(c["diskType"]),
+		"size_gb":                flattenInt(c["sizeGb"]),
+		"provisioned_iops":       flattenInt(c["provisionedIops"]),
+		"provisioned_throughput": flattenInt(c["provisionedThroughput"]),
 	})
 
 	return config
 }
 
-func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]interface{} {
+func flattenResourceManagerTags(c map[string]interface{}) map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 
 	rmt := make(map[string]interface{})
 
-	for k, v := range c.Tags {
+	for k, v := range flattenStringMap(c["tags"]) {
 		rmt[k] = v
 	}
 
@@ -3164,46 +3165,50 @@ func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]int
 }
 
 // GPUDirectConfig currently only has one field, flatten directly to string.
-func flattenGpuDirectConfig(c *container.GPUDirectConfig) string {
+func flattenGpuDirectConfig(c map[string]interface{}) string {
 	if c == nil {
 		return ""
 	}
 
-	return c.GpuDirectStrategy
+	return flattenString(c["gpuDirectStrategy"])
 }
 
-func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
+func flattenAdvancedMachineFeaturesConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"threads_per_core": c.ThreadsPerCore,
-			"enable_nested_virtualization": c.EnableNestedVirtualization,
-			"performance_monitoring_unit": c.PerformanceMonitoringUnit,
+			"threads_per_core":             flattenInt(c["threadsPerCore"]),
+			"enable_nested_virtualization": flattenBool(c["enableNestedVirtualization"]),
+			"performance_monitoring_unit":  flattenString(c["performanceMonitoringUnit"]),
 		})
 	}
 	return result
 }
 
-func flattenContainerGuestAccelerators(c []*container.AcceleratorConfig) []map[string]interface{} {
+func flattenContainerGuestAccelerators(c []interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
-	for _, accel := range c {
-		accelerator := map[string]interface{}{
-			"count": accel.AcceleratorCount,
-			"type":  accel.AcceleratorType,
-			"gpu_partition_size": accel.GpuPartitionSize,
+	for _, raw := range c {
+		accel, ok := raw.(map[string]interface{})
+		if !ok || accel == nil {
+			continue
 		}
-		if accel.GpuDriverInstallationConfig != nil {
+		accelerator := map[string]interface{}{
+			"count":              flattenInt(accel["acceleratorCount"]),
+			"type":               flattenString(accel["acceleratorType"]),
+			"gpu_partition_size": flattenString(accel["gpuPartitionSize"]),
+		}
+		if gpuDriverInstallationConfig := getMap(accel, "gpuDriverInstallationConfig"); gpuDriverInstallationConfig != nil {
 			accelerator["gpu_driver_installation_config"] = []map[string]interface{}{
 				{
-					"gpu_driver_version": accel.GpuDriverInstallationConfig.GpuDriverVersion,
+					"gpu_driver_version": flattenString(gpuDriverInstallationConfig["gpuDriverVersion"]),
 				},
 			}
 		}
-		if accel.GpuSharingConfig != nil {
+		if gpuSharingConfig := getMap(accel, "gpuSharingConfig"); gpuSharingConfig != nil {
 			accelerator["gpu_sharing_config"] = []map[string]interface{}{
 				{
-					"gpu_sharing_strategy": accel.GpuSharingConfig.GpuSharingStrategy,
-					"max_shared_clients_per_gpu": accel.GpuSharingConfig.MaxSharedClientsPerGpu,
+					"gpu_sharing_strategy":       flattenString(gpuSharingConfig["gpuSharingStrategy"]),
+					"max_shared_clients_per_gpu": flattenInt(gpuSharingConfig["maxSharedClientsPerGpu"]),
 				},
 			}
 		}
@@ -3212,57 +3217,61 @@ func flattenContainerGuestAccelerators(c []*container.AcceleratorConfig) []map[s
 	return result
 }
 
-func flattenShieldedInstanceConfig(c *container.ShieldedInstanceConfig) []map[string]interface{} {
+func flattenShieldedInstanceConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enable_secure_boot":          c.EnableSecureBoot,
-			"enable_integrity_monitoring": c.EnableIntegrityMonitoring,
+			"enable_secure_boot":          flattenBool(c["enableSecureBoot"]),
+			"enable_integrity_monitoring": flattenBool(c["enableIntegrityMonitoring"]),
 		})
 	}
 	return result
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[string]interface{} {
+func flattenEphemeralStorageConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count": c.LocalSsdCount,
+			"local_ssd_count": flattenInt(c["localSsdCount"]),
 		})
 	}
 	return result
 }
 {{- end }}
 
-func flattenLocalNvmeSsdBlockConfig(c *container.LocalNvmeSsdBlockConfig) []map[string]interface{} {
+func flattenLocalNvmeSsdBlockConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count": c.LocalSsdCount,
+			"local_ssd_count": flattenInt(c["localSsdCount"]),
 		})
 	}
 	return result
 }
 
-func flattenEphemeralStorageLocalSsdConfig(c *container.EphemeralStorageLocalSsdConfig) []map[string]interface{} {
+func flattenEphemeralStorageLocalSsdConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count": c.LocalSsdCount,
-			"data_cache_count": c.DataCacheCount,
+			"local_ssd_count":  flattenInt(c["localSsdCount"]),
+			"data_cache_count": flattenInt(c["dataCacheCount"]),
 		})
 	}
 	return result
 }
 
-func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]interface{} {
+func flattenSecondaryBootDisks(c []interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
-		for _, disk := range c {
+		for _, raw := range c {
+			disk, ok := raw.(map[string]interface{})
+			if !ok || disk == nil {
+				continue
+			}
 			secondaryBootDisk := map[string]interface{}{
-				"disk_image": disk.DiskImage,
-				"mode": disk.Mode,
+				"disk_image": flattenString(disk["diskImage"]),
+				"mode":       flattenString(disk["mode"]),
 			}
 			result = append(result, secondaryBootDisk)
 		}
@@ -3270,56 +3279,58 @@ func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]in
 	return result
 }
 
-func flattenInsecureKubeletReadonlyPortEnabled(c *container.NodeKubeletConfig) string {
+func flattenInsecureKubeletReadonlyPortEnabled(c map[string]interface{}) string {
 	// Convert bool from the API to the enum values used internally
-	if c != nil && c.InsecureKubeletReadonlyPortEnabled {
+	if c != nil && flattenBool(c["insecureKubeletReadonlyPortEnabled"]) {
 		return "TRUE"
 	}
 	return "FALSE"
 }
 
-func flattenLoggingVariant(c *container.NodePoolLoggingConfig) string {
+func flattenLoggingVariant(c map[string]interface{}) string {
 	variant := "DEFAULT"
-	if c != nil && c.VariantConfig != nil && c.VariantConfig.Variant != "" {
-		variant = c.VariantConfig.Variant
+	if variantConfig := getMap(c, "variantConfig"); variantConfig != nil {
+		if v := flattenString(variantConfig["variant"]); v != "" {
+			variant = v
+		}
 	}
 	return variant
 }
 
-func flattenGcfsConfig(c *container.GcfsConfig) []map[string]interface{} {
+func flattenGcfsConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
+			"enabled": flattenBool(c["enabled"]),
 		})
 	}
 	return result
 }
 
-func flattenGvnic(c *container.VirtualNIC) []map[string]interface{} {
+func flattenGvnic(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
+			"enabled": flattenBool(c["enabled"]),
 		})
 	}
 	return result
 }
 
-func flattenGKEReservationAffinity(c *container.ReservationAffinity) []map[string]interface{} {
+func flattenGKEReservationAffinity(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"consume_reservation_type": c.ConsumeReservationType,
-			"key":                      c.Key,
-			"values":                   c.Values,
+			"consume_reservation_type": flattenString(c["consumeReservationType"]),
+			"key":                      flattenString(c["key"]),
+			"values":                   flattenStringSlice(c["values"]),
 		})
 	}
 	return result
 }
 
 // flattenTaints records the set of taints already present in state.
-func flattenTaints(c []*container.NodeTaint, oldTaints []interface{}) []map[string]interface{} {
+func flattenTaints(c []interface{}, oldTaints []interface{}) []map[string]interface{} {
 	taintKeys := map[string]struct{}{}
 	for _, raw := range oldTaints {
 		data := raw.(map[string]interface{})
@@ -3328,12 +3339,17 @@ func flattenTaints(c []*container.NodeTaint, oldTaints []interface{}) []map[stri
 	}
 
 	result := []map[string]interface{}{}
-	for _, taint := range c {
-		if _, ok := taintKeys[taint.Key]; ok {
+	for _, raw := range c {
+		taint, ok := raw.(map[string]interface{})
+		if !ok || taint == nil {
+			continue
+		}
+		key := flattenString(taint["key"])
+		if _, ok := taintKeys[key]; ok {
 			result = append(result, map[string]interface{}{
-				"key":    taint.Key,
-				"value":  taint.Value,
-				"effect": taint.Effect,
+				"key":    key,
+				"value":  flattenString(taint["value"]),
+				"effect": flattenString(taint["effect"]),
 			})
 		}
 	}
@@ -3342,40 +3358,44 @@ func flattenTaints(c []*container.NodeTaint, oldTaints []interface{}) []map[stri
 }
 
 // flattenEffectiveTaints records the complete set of taints returned from GKE.
-func flattenEffectiveTaints(c []*container.NodeTaint) []map[string]interface{} {
+func flattenEffectiveTaints(c []interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
-	for _, taint := range c {
+	for _, raw := range c {
+		taint, ok := raw.(map[string]interface{})
+		if !ok || taint == nil {
+			continue
+		}
 		result = append(result, map[string]interface{}{
-			"key":    taint.Key,
-			"value":  taint.Value,
-			"effect": taint.Effect,
+			"key":    flattenString(taint["key"]),
+			"value":  flattenString(taint["value"]),
+			"effect": flattenString(taint["effect"]),
 		})
 	}
 
 	return result
 }
 
-func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[string]interface{} {
+func flattenWorkloadMetadataConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"mode":          c.Mode,
+			"mode": flattenString(c["mode"]),
 		})
 	}
 	return result
 }
 
-func flattenSandboxConfig(c *container.SandboxConfig) []map[string]interface{} {
+func flattenSandboxConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		sandboxConfig := map[string]interface{}{}
 {{ if ne $.TargetVersionName `ga` -}}
-		if c.SandboxType != "" {
-			sandboxConfig["sandbox_type"] = c.SandboxType
+		if sandboxType := flattenString(c["sandboxType"]); sandboxType != "" {
+			sandboxConfig["sandbox_type"] = sandboxType
 		}
 {{- end }}
-		if c.Type != "" {
-			sandboxConfig["type"] = c.Type
+		if t := flattenString(c["type"]); t != "" {
+			sandboxConfig["type"] = t
 		}
 		if len(sandboxConfig) > 0 {
 			result = append(result, sandboxConfig)
@@ -3494,389 +3514,401 @@ func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.R
 	return false
 }
 
-func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
+func flattenKubeletConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"cpu_cfs_quota":                          c.CpuCfsQuota,
-			"cpu_cfs_quota_period":                   c.CpuCfsQuotaPeriod,
-			"cpu_manager_policy":                     c.CpuManagerPolicy,
-			"memory_manager":                         flattenMemoryManager(c.MemoryManager),
-			"topology_manager":                       flattenTopologyManager(c.TopologyManager),        
+			"cpu_cfs_quota":                               flattenBool(c["cpuCfsQuota"]),
+			"cpu_cfs_quota_period":                        flattenString(c["cpuCfsQuotaPeriod"]),
+			"cpu_manager_policy":                          flattenString(c["cpuManagerPolicy"]),
+			"memory_manager":                              flattenMemoryManager(getMap(c, "memoryManager")),
+			"topology_manager":                            flattenTopologyManager(getMap(c, "topologyManager")),
+			"insecure_kubelet_readonly_port_enabled":      flattenInsecureKubeletReadonlyPortEnabled(c),
+			"pod_pids_limit":                              flattenInt(c["podPidsLimit"]),
+			"container_log_max_size":                      flattenString(c["containerLogMaxSize"]),
+			"container_log_max_files":                     flattenInt(c["containerLogMaxFiles"]),
+			"image_gc_low_threshold_percent":              flattenInt(c["imageGcLowThresholdPercent"]),
+			"image_gc_high_threshold_percent":             flattenInt(c["imageGcHighThresholdPercent"]),
+			"image_minimum_gc_age":                        flattenString(c["imageMinimumGcAge"]),
+			"image_maximum_gc_age":                        flattenString(c["imageMaximumGcAge"]),
+			"allowed_unsafe_sysctls":                      flattenStringSlice(c["allowedUnsafeSysctls"]),
+			"single_process_oom_kill":                     flattenBool(c["singleProcessOomKill"]),
+			"max_parallel_image_pulls":                    flattenInt(c["maxParallelImagePulls"]),
+			"eviction_max_pod_grace_period_seconds":       flattenInt(c["evictionMaxPodGracePeriodSeconds"]),
+			"shutdown_grace_period_seconds":               flattenInt(c["shutdownGracePeriodSeconds"]),
+			"shutdown_grace_period_critical_pods_seconds": flattenInt(c["shutdownGracePeriodCriticalPodsSeconds"]),
+			"eviction_soft":                               flattenEvictionSignals(getMap(c, "evictionSoft")),
+			"eviction_soft_grace_period":                  flattenEvictionGracePeriod(getMap(c, "evictionSoftGracePeriod")),
+			"eviction_minimum_reclaim":                    flattenEvictionMinimumReclaim(getMap(c, "evictionMinimumReclaim")),
+			"crash_loop_back_off":                         flattenCrashLoopBackOffConfig(getMap(c, "crashLoopBackOff")),
+		})
+	}
+	return result
+}
+
+func flattenTopologyManager(c map[string]interface{}) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": flattenString(c["policy"]),
+			"scope":  flattenString(c["scope"]),
+		})
+	}
+	return result
+}
+
+func flattenMemoryManager(c map[string]interface{}) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": flattenString(c["policy"]),
+		})
+	}
+	return result
+}
+
+func flattenNodePoolAutoConfigNodeKubeletConfig(c map[string]interface{}) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
 			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
-			"pod_pids_limit":                         c.PodPidsLimit,
-			"container_log_max_size":                 c.ContainerLogMaxSize,
-			"container_log_max_files":                c.ContainerLogMaxFiles,
-			"image_gc_low_threshold_percent":         c.ImageGcLowThresholdPercent,
-			"image_gc_high_threshold_percent":        c.ImageGcHighThresholdPercent,
-			"image_minimum_gc_age":                   c.ImageMinimumGcAge,
-			"image_maximum_gc_age":                   c.ImageMaximumGcAge,
-			"allowed_unsafe_sysctls":                 c.AllowedUnsafeSysctls,
-			"single_process_oom_kill":                c.SingleProcessOomKill,
-			"max_parallel_image_pulls":               c.MaxParallelImagePulls,
-			"eviction_max_pod_grace_period_seconds":  c.EvictionMaxPodGracePeriodSeconds,
-			"shutdown_grace_period_seconds":          c.ShutdownGracePeriodSeconds,
-			"shutdown_grace_period_critical_pods_seconds": c.ShutdownGracePeriodCriticalPodsSeconds,
-			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
-			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
-			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
-			"crash_loop_back_off":                    flattenCrashLoopBackOffConfig(c.CrashLoopBackOff),
 		})
 	}
 	return result
 }
 
-func flattenTopologyManager(c *container.TopologyManager) []map[string]interface{} {
+func flattenCrashLoopBackOffConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"policy": c.Policy,
-			"scope":  c.Scope,
+			"max_container_restart_period": flattenString(c["maxContainerRestartPeriod"]),
 		})
 	}
 	return result
 }
 
-func flattenMemoryManager(c *container.MemoryManager) []map[string]interface{} {
+func flattenEvictionSignals(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"policy": c.Policy,
+			"memory_available":    flattenString(c["memoryAvailable"]),
+			"nodefs_available":    flattenString(c["nodefsAvailable"]),
+			"nodefs_inodes_free":  flattenString(c["nodefsInodesFree"]),
+			"imagefs_available":   flattenString(c["imagefsAvailable"]),
+			"imagefs_inodes_free": flattenString(c["imagefsInodesFree"]),
+			"pid_available":       flattenString(c["pidAvailable"]),
 		})
 	}
 	return result
 }
 
-func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
+func flattenEvictionGracePeriod(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
+			"memory_available":    flattenString(c["memoryAvailable"]),
+			"nodefs_available":    flattenString(c["nodefsAvailable"]),
+			"nodefs_inodes_free":  flattenString(c["nodefsInodesFree"]),
+			"imagefs_available":   flattenString(c["imagefsAvailable"]),
+			"imagefs_inodes_free": flattenString(c["imagefsInodesFree"]),
+			"pid_available":       flattenString(c["pidAvailable"]),
 		})
 	}
 	return result
 }
 
-func flattenCrashLoopBackOffConfig(c *container.CrashLoopBackOffConfig) []map[string]interface{} {
+func flattenEvictionMinimumReclaim(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"max_container_restart_period": c.MaxContainerRestartPeriod,
+			"memory_available":    flattenString(c["memoryAvailable"]),
+			"nodefs_available":    flattenString(c["nodefsAvailable"]),
+			"nodefs_inodes_free":  flattenString(c["nodefsInodesFree"]),
+			"imagefs_available":   flattenString(c["imagefsAvailable"]),
+			"imagefs_inodes_free": flattenString(c["imagefsInodesFree"]),
+			"pid_available":       flattenString(c["pidAvailable"]),
 		})
 	}
 	return result
 }
 
-func flattenEvictionSignals(c *container.EvictionSignals) []map[string]interface{} {
-        result := []map[string]interface{}{}
-        if c != nil {
-                result = append(result, map[string]interface{}{
-                        "memory_available":    c.MemoryAvailable,
-                        "nodefs_available":    c.NodefsAvailable,
-                        "nodefs_inodes_free":  c.NodefsInodesFree,
-                        "imagefs_available":   c.ImagefsAvailable,
-                        "imagefs_inodes_free": c.ImagefsInodesFree,
-                        "pid_available":       c.PidAvailable,
-                })
-        }
-        return result
-}
-
-func flattenEvictionGracePeriod(c *container.EvictionGracePeriod) []map[string]interface{} {
-        result := []map[string]interface{}{}
-        if c != nil {
-                result = append(result, map[string]interface{}{
-                        "memory_available":    c.MemoryAvailable,
-                        "nodefs_available":    c.NodefsAvailable,
-                        "nodefs_inodes_free":  c.NodefsInodesFree,
-                        "imagefs_available":   c.ImagefsAvailable,
-                        "imagefs_inodes_free": c.ImagefsInodesFree,
-                        "pid_available":       c.PidAvailable,
-                })
-        }
-        return result
-}
-
-func flattenEvictionMinimumReclaim(c *container.EvictionMinimumReclaim) []map[string]interface{} {
-        result := []map[string]interface{}{}
-        if c != nil {
-                result = append(result, map[string]interface{}{
-                        "memory_available":    c.MemoryAvailable,
-                        "nodefs_available":    c.NodefsAvailable,
-                        "nodefs_inodes_free":  c.NodefsInodesFree,
-                        "imagefs_available":   c.ImagefsAvailable,
-                        "imagefs_inodes_free": c.ImagefsInodesFree,
-                        "pid_available":       c.PidAvailable,
-                })
-        }
-        return result
-}
-
-func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface{} {
+func flattenLinuxNodeConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"sysctls":                      c.Sysctls,
-			"cgroup_mode":                  c.CgroupMode,
-			"hugepages_config":             flattenHugepagesConfig(c.Hugepages),
-			"transparent_hugepage_enabled": c.TransparentHugepageEnabled,
-			"transparent_hugepage_defrag":  c.TransparentHugepageDefrag,
-			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c.NodeKernelModuleLoading),
-			"swap_config":                  flattenSwapConfig(c.SwapConfig),
-			"accurate_time_config":         flattenAccurateTimeConfig(c.AccurateTimeConfig),
-			"custom_node_init":             flattenCustomNodeInit(c.CustomNodeInit),
+			"sysctls":                      flattenStringMap(c["sysctls"]),
+			"cgroup_mode":                  flattenString(c["cgroupMode"]),
+			"hugepages_config":             flattenHugepagesConfig(getMap(c, "hugepages")),
+			"transparent_hugepage_enabled": flattenString(c["transparentHugepageEnabled"]),
+			"transparent_hugepage_defrag":  flattenString(c["transparentHugepageDefrag"]),
+			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(getMap(c, "nodeKernelModuleLoading")),
+			"swap_config":                  flattenSwapConfig(getMap(c, "swapConfig")),
+			"accurate_time_config":         flattenAccurateTimeConfig(getMap(c, "accurateTimeConfig")),
+			"custom_node_init":             flattenCustomNodeInit(getMap(c, "customNodeInit")),
 		})
 	}
 	return result
 }
 
-func flattenAccurateTimeConfig(c *container.AccurateTimeConfig) []map[string]interface{} {
+func flattenAccurateTimeConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enable_ptp_kvm_time_sync": c.EnablePtpKvmTimeSync,
+			"enable_ptp_kvm_time_sync": flattenBool(c["enablePtpKvmTimeSync"]),
 		})
 	}
 	return result
 }
 
-func flattenCustomNodeInit(c *container.CustomNodeInit) []map[string]interface{} {
+func flattenCustomNodeInit(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"init_script": flattenInitScript(c.InitScript),
+			"init_script": flattenInitScript(getMap(c, "initScript")),
 		})
 	}
 	return result
 }
 
-func flattenInitScript(c *container.InitScript) []map[string]interface{} {
+func flattenInitScript(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"gcs_uri":                       c.GcsUri,
-			"gcs_generation":                c.GcsGeneration,
-			"gcp_secret_manager_secret_uri": c.GcpSecretManagerSecretUri,
+			"gcs_uri":                       flattenString(c["gcsUri"]),
+			"gcs_generation":                flattenInt(c["gcsGeneration"]),
+			"gcp_secret_manager_secret_uri": flattenString(c["gcpSecretManagerSecretUri"]),
 		})
 	}
 	return result
 }
 
-func flattenSwapConfig(c *container.SwapConfig) []map[string]interface{} {
+func flattenSwapConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled":                     c.Enabled,
-			"boot_disk_profile":           flattenBootDiskProfile(c.BootDiskProfile),
-			"dedicated_local_ssd_profile": flattenDedicatedLocalSsdProfile(c.DedicatedLocalSsdProfile),
-			"ephemeral_local_ssd_profile": flattenEphemeralLocalSsdProfile(c.EphemeralLocalSsdProfile),
-			"encryption_config":           flattenSwapEncryptionConfig(c.EncryptionConfig),
+			"enabled":                     flattenBool(c["enabled"]),
+			"boot_disk_profile":           flattenBootDiskProfile(getMap(c, "bootDiskProfile")),
+			"dedicated_local_ssd_profile": flattenDedicatedLocalSsdProfile(getMap(c, "dedicatedLocalSsdProfile")),
+			"ephemeral_local_ssd_profile": flattenEphemeralLocalSsdProfile(getMap(c, "ephemeralLocalSsdProfile")),
+			"encryption_config":           flattenSwapEncryptionConfig(getMap(c, "encryptionConfig")),
 		})
 	}
 	return result
 }
 
-func flattenBootDiskProfile(c *container.BootDiskProfile) []map[string]interface{} {
+func flattenBootDiskProfile(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"swap_size_gib":     c.SwapSizeGib,
-			"swap_size_percent": c.SwapSizePercent,
+			"swap_size_gib":     flattenInt(c["swapSizeGib"]),
+			"swap_size_percent": flattenInt(c["swapSizePercent"]),
 		})
 	}
 	return result
 }
 
-func flattenDedicatedLocalSsdProfile(c *container.DedicatedLocalSsdProfile) []map[string]interface{} {
+func flattenDedicatedLocalSsdProfile(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"disk_count": c.DiskCount,
+			"disk_count": flattenInt(c["diskCount"]),
 		})
 	}
 	return result
 }
 
-func flattenEphemeralLocalSsdProfile(c *container.EphemeralLocalSsdProfile) []map[string]interface{} {
+func flattenEphemeralLocalSsdProfile(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"swap_size_gib":     c.SwapSizeGib,
-			"swap_size_percent": c.SwapSizePercent,
+			"swap_size_gib":     flattenInt(c["swapSizeGib"]),
+			"swap_size_percent": flattenInt(c["swapSizePercent"]),
 		})
 	}
 	return result
 }
 
-func flattenSwapEncryptionConfig(c *container.EncryptionConfig) []map[string]interface{} {
+func flattenSwapEncryptionConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"disabled": c.Disabled,
+			"disabled": flattenBool(c["disabled"]),
 		})
 	}
 	return result
 }
 
-func flattenWindowsNodeConfig(c *container.WindowsNodeConfig) []map[string]interface{} {
+func flattenWindowsNodeConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"osversion": c.OsVersion,
+			"osversion": flattenString(c["osVersion"]),
 		})
 	}
 	return result
 }
 
-func flattenNodeImageConfig(c *container.CustomImageConfig) []map[string]interface{} {
+func flattenNodeImageConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"image": c.Image,
-			"image_project": c.ImageProject,
+			"image":         flattenString(c["image"]),
+			"image_project": flattenString(c["imageProject"]),
 		})
 	}
 	return result
 }
 
-func flattenHugepagesConfig(c *container.HugepagesConfig) []map[string]interface{} {
+func flattenHugepagesConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"hugepage_size_2m": c.HugepageSize2m,
-			"hugepage_size_1g": c.HugepageSize1g,
+			"hugepage_size_2m": flattenInt(c["hugepageSize2m"]),
+			"hugepage_size_1g": flattenInt(c["hugepageSize1g"]),
 		})
 	}
 	return result
 }
 
-func flattenNodeKernelModuleLoading(c *container.NodeKernelModuleLoading) []map[string]interface{} {
+func flattenNodeKernelModuleLoading(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"policy": c.Policy,
+			"policy": flattenString(c["policy"]),
 		})
 	}
 	return result
 }
 
-func flattenTaintConfig(c *container.TaintConfig) []map[string]interface{} {
+func flattenTaintConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
 		return result
 	}
 	r := map[string]interface{}{
-		"architecture_taint_behavior": c.ArchitectureTaintBehavior,
+		"architecture_taint_behavior": flattenString(c["architectureTaintBehavior"]),
 	}
 	return append(result, r)
 }
 
-func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interface{} {
+func flattenContainerdConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
 		return result
 	}
 	r := map[string]interface{}{}
-	if c.PrivateRegistryAccessConfig != nil {
-		r["private_registry_access_config"] = flattenPrivateRegistryAccessConfig(c.PrivateRegistryAccessConfig)
+	if prac := getMap(c, "privateRegistryAccessConfig"); prac != nil {
+		r["private_registry_access_config"] = flattenPrivateRegistryAccessConfig(prac)
 	}
-	if c.WritableCgroups != nil {
-		r["writable_cgroups"] = flattenWritableCgroups(c.WritableCgroups)
+	if wc := getMap(c, "writableCgroups"); wc != nil {
+		r["writable_cgroups"] = flattenWritableCgroups(wc)
 	}
-	if c.RegistryHosts != nil {
-	    r["registry_hosts"] = flattenRegistryHosts(c.RegistryHosts)
+	if rh := getSlice(c, "registryHosts"); rh != nil {
+		r["registry_hosts"] = flattenRegistryHosts(rh)
 	}
 	return append(result, r)
 }
 
-func flattenRegistryHosts(registryHosts []*container.RegistryHostConfig) []map[string]interface{} {
-    items := []map[string]interface{}{}
+func flattenRegistryHosts(registryHosts []interface{}) []map[string]interface{} {
+	items := []map[string]interface{}{}
 	if len(registryHosts) == 0 {
 		return items
 	}
 
-	for _, host := range registryHosts {
+	for _, raw := range registryHosts {
+		host, ok := raw.(map[string]interface{})
+		if !ok || host == nil {
+			continue
+		}
 		item := make(map[string]interface{})
-		item["server"] = host.Server
-		item["hosts"] = flattenHostInRegistryHosts(host.Hosts)
+		item["server"] = flattenString(host["server"])
+		item["hosts"] = flattenHostInRegistryHosts(getSlice(host, "hosts"))
 		items = append(items, item)
 	}
 	return items
 }
 
-func flattenHostInRegistryHosts(hosts []*container.HostConfig) []map[string]interface{} {
+func flattenHostInRegistryHosts(hosts []interface{}) []map[string]interface{} {
 	items := make([]map[string]interface{}, 0, len(hosts))
 	if len(hosts) == 0 {
 		return items
 	}
-	for _, h := range hosts {
+	for _, rawH := range hosts {
+		h, ok := rawH.(map[string]interface{})
+		if !ok || h == nil {
+			continue
+		}
 		item := make(map[string]interface{})
-		item["host"] = h.Host
-		item["capabilities"] = h.Capabilities
-		item["override_path"] = h.OverridePath
-		item["dial_timeout"] = h.DialTimeout
+		item["host"] = flattenString(h["host"])
+		item["capabilities"] = flattenStringSlice(h["capabilities"])
+		item["override_path"] = flattenBool(h["overridePath"])
+		item["dial_timeout"] = flattenString(h["dialTimeout"])
 
-		if h.Header != nil {
-		    tmp := make([]interface{}, len(h.Header))
-			for i, val := range h.Header {
-			    tmp[i] = map[string]interface{}{
-					"key": val.Key,
-					"value": val.Value,
+		if headers := getSlice(h, "header"); headers != nil {
+			tmp := make([]interface{}, len(headers))
+			for i, rawVal := range headers {
+				val, _ := rawVal.(map[string]interface{})
+				tmp[i] = map[string]interface{}{
+					"key":   flattenString(val["key"]),
+					"value": flattenStringSlice(val["value"]),
 				}
 			}
-		    item["header"] = tmp
+			item["header"] = tmp
 		}
 
-		if h.Ca != nil {
-		    tmp := make([]interface{}, len(h.Ca))
-			for i, val := range h.Ca {
-			    if val != nil && val.GcpSecretManagerSecretUri != "" {
-				    tmp[i] = map[string]interface{}{
-						"gcp_secret_manager_secret_uri": val.GcpSecretManagerSecretUri,
+		if cas := getSlice(h, "ca"); cas != nil {
+			tmp := make([]interface{}, len(cas))
+			for i, rawVal := range cas {
+				val, _ := rawVal.(map[string]interface{})
+				if val != nil && flattenString(val["gcpSecretManagerSecretUri"]) != "" {
+					tmp[i] = map[string]interface{}{
+						"gcp_secret_manager_secret_uri": flattenString(val["gcpSecretManagerSecretUri"]),
 					}
 				}
 			}
-		    item["ca"] = tmp
+			item["ca"] = tmp
 		}
 
-		if h.Client != nil {
-		    tmp := make([]interface{}, len(h.Client))
-			for i, val := range h.Client {
-			    currentClient := map[string]interface{}{}
-				if val != nil && val.Cert != nil && val.Cert.GcpSecretManagerSecretUri != "" {
+		if clients := getSlice(h, "client"); clients != nil {
+			tmp := make([]interface{}, len(clients))
+			for i, rawVal := range clients {
+				val, _ := rawVal.(map[string]interface{})
+				currentClient := map[string]interface{}{}
+				if cert := getMap(val, "cert"); cert != nil && flattenString(cert["gcpSecretManagerSecretUri"]) != "" {
 					currentClient["cert"] = []interface{}{
 						map[string]interface{}{
-							"gcp_secret_manager_secret_uri": val.Cert.GcpSecretManagerSecretUri,
+							"gcp_secret_manager_secret_uri": flattenString(cert["gcpSecretManagerSecretUri"]),
 						},
 					}
 				}
-				if val != nil && val.Key != nil && val.Key.GcpSecretManagerSecretUri != "" {
+				if key := getMap(val, "key"); key != nil && flattenString(key["gcpSecretManagerSecretUri"]) != "" {
 					currentClient["key"] = []interface{}{
 						map[string]interface{}{
-							"gcp_secret_manager_secret_uri": val.Key.GcpSecretManagerSecretUri,
+							"gcp_secret_manager_secret_uri": flattenString(key["gcpSecretManagerSecretUri"]),
 						},
 					}
 				}
 				tmp[i] = currentClient
 			}
-		    item["client"] = tmp
+			item["client"] = tmp
 		}
 		items = append(items, item)
 	}
 	return items
 }
 
-func flattenPrivateRegistryAccessConfig(c *container.PrivateRegistryAccessConfig) []map[string]interface{} {
+func flattenPrivateRegistryAccessConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
 		return result
 	}
 	r := map[string]interface{}{
-		"enabled": c.Enabled,
+		"enabled": flattenBool(c["enabled"]),
 	}
-	if c.CertificateAuthorityDomainConfig != nil {
-		caConfigs := make([]interface{}, len(c.CertificateAuthorityDomainConfig))
-		for i, caCfg := range c.CertificateAuthorityDomainConfig {
+	if caConfigsSlice := getSlice(c, "certificateAuthorityDomainConfig"); caConfigsSlice != nil {
+		caConfigs := make([]interface{}, len(caConfigsSlice))
+		for i, caCfgRaw := range caConfigsSlice {
+			caCfg, _ := caCfgRaw.(map[string]interface{})
 			caConfigs[i] = flattenCADomainConfig(caCfg)
 		}
 		r["certificate_authority_domain_config"] = caConfigs
@@ -3884,115 +3916,105 @@ func flattenPrivateRegistryAccessConfig(c *container.PrivateRegistryAccessConfig
 	return append(result, r)
 }
 
-//  func flattenCADomainConfig(c *container.CertificateAuthorityDomainConfig) []map[string]interface{} {
-//  	result := []map[string]interface{}{}
-//  	if c == nil {
-//  		return result
-//  	}
-//  	r := map[string]interface{}{
-//  		"fqdns": c.Fqdns,
-//  	}
-//  	if c.GcpSecretManagerCertificateConfig != nil {
-//  		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(c.GcpSecretManagerCertificateConfig)
-//  	}
-//  	return append(result, r)
-//  }
-
-func flattenCADomainConfig(c *container.CertificateAuthorityDomainConfig) map[string]interface{} {
+func flattenCADomainConfig(c map[string]interface{}) map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	r := map[string]interface{}{
-		"fqdns": c.Fqdns,
+		"fqdns": flattenStringSlice(c["fqdns"]),
 	}
-	if c.GcpSecretManagerCertificateConfig != nil {
-		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(c.GcpSecretManagerCertificateConfig)
+	if gcpSM := getMap(c, "gcpSecretManagerCertificateConfig"); gcpSM != nil {
+		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(gcpSM)
 	}
 	return r
 }
 
-func flattenGCPSecretManagerCertificateConfig(c *container.GCPSecretManagerCertificateConfig) []map[string]interface{} {
+func flattenGCPSecretManagerCertificateConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
 		return result
 	}
 	r := map[string]interface{}{
-		"secret_uri": c.SecretUri,
+		"secret_uri": flattenString(c["secretUri"]),
 	}
 	return append(result, r)
 }
 
-func flattenWritableCgroups(c *container.WritableCgroups) []map[string]interface{} {
+func flattenWritableCgroups(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
 		return result
 	}
 	r := map[string]interface{}{
-		"enabled": c.Enabled,
+		"enabled": flattenBool(c["enabled"]),
 	}
 	return append(result, r)
 }
 
-func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
+func flattenConfidentialNodes(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
-			"confidential_instance_type": c.ConfidentialInstanceType,
+			"enabled":                    flattenBool(c["enabled"]),
+			"confidential_instance_type": flattenString(c["confidentialInstanceType"]),
 		})
 	}
 	return result
 }
 
-func flattenSoleTenantConfig(c *container.SoleTenantConfig) []map[string]interface{} {
+func flattenSoleTenantConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
 		return result
 	}
 	affinities := []map[string]interface{}{}
-	for _, affinity := range c.NodeAffinities {
+	for _, raw := range getSlice(c, "nodeAffinities") {
+		affinity, ok := raw.(map[string]interface{})
+		if !ok || affinity == nil {
+			continue
+		}
 		affinities = append(affinities, map[string]interface{}{
-			"key":      affinity.Key,
-			"operator": affinity.Operator,
-			"values":   affinity.Values,
+			"key":      flattenString(affinity["key"]),
+			"operator": flattenString(affinity["operator"]),
+			"values":   flattenStringSlice(affinity["values"]),
 		})
 	}
 	return append(result, map[string]interface{}{
 		"node_affinity": affinities,
-		"min_node_cpus": c.MinNodeCpus,
+		"min_node_cpus": flattenInt(c["minNodeCpus"]),
 	})
 }
 
-func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
+func flattenFastSocket(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
+			"enabled": flattenBool(c["enabled"]),
 		})
 	}
 	return result
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[string]interface{} {
+func flattenHostMaintenancePolicy(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"maintenance_interval":               c.MaintenanceInterval,
-			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(c.OpportunisticMaintenanceStrategy),
+			"maintenance_interval":               flattenString(c["maintenanceInterval"]),
+			"opportunistic_maintenance_strategy": flattenOpportunisticMaintenanceStrategy(getMap(c, "opportunisticMaintenanceStrategy")),
 		})
 	}
 
 	return result
 }
 
-func flattenOpportunisticMaintenanceStrategy(c *container.OpportunisticMaintenanceStrategy) []map[string]interface{} {
+func flattenOpportunisticMaintenanceStrategy(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"node_idle_time_window":           c.NodeIdleTimeWindow,
-			"maintenance_availability_window": c.MaintenanceAvailabilityWindow,
-			"min_nodes_per_pool":              c.MinNodesPerPool,
+			"node_idle_time_window":           flattenString(c["nodeIdleTimeWindow"]),
+			"maintenance_availability_window": flattenString(c["maintenanceAvailabilityWindow"]),
+			"min_nodes_per_pool":              flattenInt(c["minNodesPerPool"]),
 		})
 	}
 
@@ -4007,7 +4029,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 	// Nodepool write-lock will be acquired when update function is called.
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -4017,21 +4039,24 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		if d.HasChange(prefix + "node_config.0.logging_variant") {
 			if v, ok := d.GetOk(prefix + "node_config.0.logging_variant"); ok {
 				loggingVariant := v.(string)
-				req := &container.UpdateNodePoolRequest{
-					Name: name,
-					LoggingConfig: &container.NodePoolLoggingConfig{
-						VariantConfig: &container.LoggingVariantConfig{
-							Variant: loggingVariant,
-						},
-					},
-				}
+				variantConfig := map[string]interface{}{}
+				setField(variantConfig, "variant", loggingVariant)
+				loggingConfig := map[string]interface{}{}
+				setField(loggingConfig, "variantConfig", variantConfig)
+				req := map[string]interface{}{}
+				setField(req, "name", name)
+				setField(req, "loggingConfig", loggingConfig)
 
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
+					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "PUT",
+						Project:   nodePoolInfo.project,
+						RawURL:    url,
+						UserAgent: userAgent,
+						Body:      req,
+					})
 					if err != nil {
 						return err
 					}
@@ -4045,7 +4070,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-						return err
+					return err
 				}
 
 				log.Printf("[INFO] Updated logging_variant for node pool %s", name)
@@ -4054,21 +4079,25 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.taint_config") {
 			if _, ok := d.GetOk(prefix + "node_config.0.taint_config"); ok {
-				req := &container.UpdateNodePoolRequest{
-					Name:        name,
-					TaintConfig: expandTaintConfig(d.Get(prefix + "node_config.0.taint_config")),
+				taintConfig := expandTaintConfig(d.Get(prefix + "node_config.0.taint_config"))
+				if taintConfig == nil {
+					taintConfig = map[string]interface{}{}
 				}
-				if req.TaintConfig == nil {
-					req.TaintConfig = &container.TaintConfig{}
-					req.ForceSendFields = []string{"TaintConfig"}
+				req := map[string]interface{}{
+					"taintConfig": taintConfig,
 				}
+				setField(req, "name", name)
 
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
+					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "PUT",
+						Project:   nodePoolInfo.project,
+						RawURL:    url,
+						UserAgent: userAgent,
+						Body:      req,
+					})
 					if err != nil {
 						return err
 					}
@@ -4091,20 +4120,24 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.containerd_config") {
 			if _, ok := d.GetOk(prefix + "node_config.0.containerd_config"); ok {
-				req := &container.UpdateNodePoolRequest{
-					Name: name,
-					ContainerdConfig: expandContainerdConfig(d.Get(prefix + "node_config.0.containerd_config")),
+				containerdConfig := expandContainerdConfig(d.Get(prefix + "node_config.0.containerd_config"))
+				if containerdConfig == nil {
+					containerdConfig = map[string]interface{}{}
 				}
-				if req.ContainerdConfig == nil {
-					req.ContainerdConfig = &container.ContainerdConfig{}
-					req.ForceSendFields = []string{"ContainerdConfig"}
+				req := map[string]interface{}{
+					"containerdConfig": containerdConfig,
 				}
+				setField(req, "name", name)
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
+					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "PUT",
+						Project:   nodePoolInfo.project,
+						RawURL:    url,
+						UserAgent: userAgent,
+						Body:      req,
+					})
 					if err != nil {
 						return err
 					}
@@ -4118,7 +4151,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-						return err
+					return err
 				}
 
 				log.Printf("[INFO] Updated containerd_config for node pool %s", name)
@@ -4127,20 +4160,24 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.confidential_nodes") {
 			if _, ok := d.GetOk(prefix + "node_config.0.confidential_nodes"); ok {
-				req := &container.UpdateNodePoolRequest{
-					Name: name,
-					ConfidentialNodes: expandConfidentialNodes(d.Get(prefix + "node_config.0.confidential_nodes")),
+				confidentialNodes := expandConfidentialNodes(d.Get(prefix + "node_config.0.confidential_nodes"))
+				if confidentialNodes == nil {
+					confidentialNodes = map[string]interface{}{}
 				}
-				if req.ConfidentialNodes == nil {
-					req.ConfidentialNodes = &container.ConfidentialNodes{}
-					req.ForceSendFields = []string{"ConfidentialNodes"}
+				req := map[string]interface{}{
+					"confidentialNodes": confidentialNodes,
 				}
+				setField(req, "name", name)
 				updateF := func() error {
-					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
+					url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+					op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "PUT",
+						Project:   nodePoolInfo.project,
+						RawURL:    url,
+						UserAgent: userAgent,
+						Body:      req,
+					})
 					if err != nil {
 						return err
 					}
@@ -4154,7 +4191,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-						return err
+					return err
 				}
 
 				log.Printf("[INFO] Updated confidential_nodes for node pool %s", name)
@@ -4167,12 +4204,11 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			d.HasChange("node_config.0.storage_pools") ||
 			d.HasChange("node_config.0.boot_disk") {
 
-			req := &container.UpdateNodePoolRequest{
-				Name:        name,
-				DiskSizeGb:  int64(d.Get("node_config.0.disk_size_gb").(int)),
-				DiskType:    d.Get("node_config.0.disk_type").(string),
-				MachineType: d.Get("node_config.0.machine_type").(string),
-			}
+			req := map[string]interface{}{}
+			setField(req, "name", name)
+			setStringIntField(req, "diskSizeGb", int64(d.Get("node_config.0.disk_size_gb").(int)))
+			setField(req, "diskType", d.Get("node_config.0.disk_type").(string))
+			setField(req, "machineType", d.Get("node_config.0.machine_type").(string))
 			if v, ok := d.GetOk("node_config.0.storage_pools"); ok {
 				spList := v.([]interface{})
 				storagePools := []string{}
@@ -4181,43 +4217,47 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 						storagePools = append(storagePools, v.(string))
 					}
 				}
-				req.StoragePools = storagePools
+				setField(req, "storagePools", storagePools)
 			}
 
 			if v, ok := d.GetOk("node_config.0.boot_disk"); ok {
 				bd := expandBootDiskConfig(v)
-				req.BootDisk = bd
+				setField(req, "bootDisk", bd)
 
 				// The following checks are to ensure that the migrating fields are handled properly.
 				// Migrating fields are disk_type -> boot_disk.disk_type and disk_size_gb -> boot_disk.size_gb
 				// If the legacy (top level) disk_type field is not changing, nil it out to allow the API to fill it in.
 				legacyDiskTypeOld, legacyDiskTypeNew := d.GetChange("node_config.0.disk_type")
 				if legacyDiskTypeOld == legacyDiskTypeNew {
-					req.DiskType = ""
+					delete(req, "diskType")
 				}
 				// If the new boot disk configuration disk_filed is not changing, nil it out to allow the API to fill it in.
 				bootDiskTypeOld, bootDiskTypeNew := d.GetChange("node_config.0.boot_disk.0.disk_type")
-				if bootDiskTypeOld == bootDiskTypeNew {
-					req.BootDisk.DiskType = ""
+				if bootDiskTypeOld == bootDiskTypeNew && bd != nil {
+					delete(bd, "diskType")
 				}
 				// If the legacy (top level) disk_size_gb field is not changing, nil it out to allow the API to fill it in.
 				legacyDiskSizeGbOld, legacyDiskSizeGbNew := d.GetChange("node_config.0.disk_size_gb")
 				if legacyDiskSizeGbOld == legacyDiskSizeGbNew {
-					req.DiskSizeGb = 0
+					delete(req, "diskSizeGb")
 				}
 				// if the new boot disk configuration size_gb field is not changing, nil it out to allow the API to fill it in.
 				bootDiskSizeGbOld, bootDiskSizeGbNew := d.GetChange("node_config.0.boot_disk.0.size_gb")
-				if bootDiskSizeGbOld == bootDiskSizeGbNew {
-					req.BootDisk.SizeGb = 0
+				if bootDiskSizeGbOld == bootDiskSizeGbNew && bd != nil {
+					delete(bd, "sizeGb")
 				}
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4237,43 +4277,36 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		}
 
 		if d.HasChange(prefix + "node_config.0.taint") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
+			req := map[string]interface{}{}
+			setField(req, "name", name)
+			ntaints := map[string]interface{}{}
 			if v, ok := d.GetOk(prefix + "node_config.0.taint"); ok {
 				taintsList := v.([]interface{})
-				taints := make([]*container.NodeTaint, 0, len(taintsList))
+				taints := make([]map[string]interface{}, 0, len(taintsList))
 				for _, v := range taintsList {
 					if v != nil {
 						data := v.(map[string]interface{})
-						taint := &container.NodeTaint{
-							Key:    data["key"].(string),
-							Value:  data["value"].(string),
-							Effect: data["effect"].(string),
-						}
+						taint := map[string]interface{}{}
+						setField(taint, "key", data["key"].(string))
+						setField(taint, "value", data["value"].(string))
+						setField(taint, "effect", data["effect"].(string))
 						taints = append(taints, taint)
 					}
 				}
-				ntaints := &container.NodeTaints{
-					Taints: taints,
-				}
-				req.Taints = ntaints
+				setField(ntaints, "taints", taints)
 			}
-
-			if req.Taints == nil {
-				taints := make([]*container.NodeTaint, 0, 0)
-				ntaints := &container.NodeTaints{
-					Taints: taints,
-				}
-				req.Taints = ntaints
-			}
+			req["taints"] = ntaints
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4287,15 +4320,15 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated taints for Node Pool %s", d.Id())
 		}
 
 		if d.HasChange(prefix + "node_config.0.tags") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
+			req := map[string]interface{}{}
+			setField(req, "name", name)
+			ntags := map[string]interface{}{}
 			if v, ok := d.GetOk(prefix + "node_config.0.tags"); ok {
 				tagsList := v.([]interface{})
 				tags := []string{}
@@ -4304,28 +4337,23 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 						tags = append(tags, v.(string))
 					}
 				}
-				ntags := &container.NetworkTags{
-					Tags: tags,
-				}
-				req.Tags = ntags
+				setField(ntags, "tags", tags)
 			}
 
 			// sets tags to the empty list when user removes a previously defined list of tags entriely
 			// aka the node pool goes from having tags to no longer having any
-			if req.Tags == nil {
-				tags := []string{}
-				ntags := &container.NetworkTags{
-					Tags: tags,
-				}
-				req.Tags = ntags
-			}
+			req["tags"] = ntags
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4339,35 +4367,36 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated tags for node pool %s", name)
 		}
 
 		if d.HasChange(prefix + "node_config.0.resource_manager_tags") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
+			req := map[string]interface{}{}
+			setField(req, "name", name)
+			var rmTags map[string]interface{}
 			if v, ok := d.GetOk(prefix + "node_config.0.resource_manager_tags"); ok {
-				req.ResourceManagerTags = expandResourceManagerTags(v)
+				rmTags = expandResourceManagerTags(v)
 			}
 
 			// sets resource manager tags to the empty list when user removes a previously defined list of tags entriely
 			// aka the node pool goes from having tags to no longer having any
-			if req.ResourceManagerTags == nil {
-				tags := make(map[string]string)
-				rmTags := &container.ResourceManagerTags{
-					Tags: tags,
-				}
-				req.ResourceManagerTags = rmTags
+			if rmTags == nil {
+				rmTags = map[string]interface{}{}
 			}
+			req["resourceManagerTags"] = rmTags
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4387,23 +4416,26 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		}
 
 		if d.HasChange(prefix + "node_config.0.resource_labels") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
+			req := map[string]interface{}{}
+			setField(req, "name", name)
 
 			if v, ok := d.GetOk(prefix + "node_config.0.resource_labels"); ok {
 				resourceLabels := v.(map[string]interface{})
-				req.ResourceLabels = &container.ResourceLabels{
-					Labels: tpgresource.ConvertStringMap(resourceLabels),
-				}
+				rl := map[string]interface{}{}
+				setField(rl, "labels", tpgresource.ConvertStringMap(resourceLabels))
+				req["resourceLabels"] = rl
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4418,30 +4450,33 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 			// Call update serially.
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated resource labels for node pool %s", name)
 		}
 
 		if d.HasChange(prefix + "node_config.0.labels") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
+			req := map[string]interface{}{}
+			setField(req, "name", name)
 
 			if v, ok := d.GetOk(prefix + "node_config.0.labels"); ok {
 				labels := v.(map[string]interface{})
-				req.Labels = &container.NodeLabels{
-					Labels: tpgresource.ConvertStringMap(labels),
-				}
+				nl := map[string]interface{}{}
+				setField(nl, "labels", tpgresource.ConvertStringMap(labels))
+				req["labels"] = nl
 			}
 
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4456,27 +4491,31 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 			// Call update serially.
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated labels for node pool %s", name)
 		}
 
-    // The case updating both image_type and node_image_config will be handled in the node_image_config section.
-		if d.HasChange(prefix + "node_config.0.image_type") && !d.HasChange(prefix + "node_config.0.node_image_config") {
-			req := &container.UpdateClusterRequest{
-				Update: &container.ClusterUpdate{
-					DesiredNodePoolId: name,
-					DesiredImageType:  d.Get(prefix + "node_config.0.image_type").(string),
-				},
+		// The case updating both image_type and node_image_config will be handled in the node_image_config section.
+		if d.HasChange(prefix+"node_config.0.image_type") && !d.HasChange(prefix+"node_config.0.node_image_config") {
+			update := map[string]interface{}{}
+			setField(update, "desiredNodePoolId", name)
+			setField(update, "desiredImageType", d.Get(prefix+"node_config.0.image_type").(string))
+			req := map[string]interface{}{
+				"update": update,
 			}
 
 			updateF := func() error {
-				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
-				if config.UserProjectOverride {
-					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.parent())
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4489,27 +4528,31 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated image type in Node Pool %s", d.Id())
 		}
 
 		if d.HasChange(prefix + "node_config.0.workload_metadata_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				WorkloadMetadataConfig: expandWorkloadMetadataConfig(
-					d.Get(prefix + "node_config.0.workload_metadata_config")),
+			wmc := expandWorkloadMetadataConfig(
+				d.Get(prefix + "node_config.0.workload_metadata_config"))
+			if wmc == nil {
+				wmc = map[string]interface{}{}
 			}
-			if req.WorkloadMetadataConfig == nil {
-				req.WorkloadMetadataConfig = &container.WorkloadMetadataConfig{}
-				req.ForceSendFields = []string{"WorkloadMetadataConfig"}
+			req := map[string]interface{}{
+				"workloadMetadataConfig": wmc,
 			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 
 				if err != nil {
 					return err
@@ -4524,25 +4567,29 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated workload_metadata_config for node pool %s", name)
 		}
 
 		if d.HasChange(prefix + "node_config.0.gcfs_config") {
 			gcfsEnabled := bool(d.Get(prefix + "node_config.0.gcfs_config.0.enabled").(bool))
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				GcfsConfig: &container.GcfsConfig{
-					Enabled: gcfsEnabled,
-				},
+			gcfsConfig := map[string]interface{}{}
+			setField(gcfsConfig, "enabled", gcfsEnabled)
+			req := map[string]interface{}{
+				"gcfsConfig": gcfsConfig,
 			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4556,7 +4603,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated gcfs_config for node pool %s", name)
@@ -4564,18 +4611,22 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 		if d.HasChange(prefix + "node_config.0.gvnic") {
 			gvnicEnabled := bool(d.Get(prefix + "node_config.0.gvnic.0.enabled").(bool))
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				Gvnic: &container.VirtualNIC{
-					Enabled: gvnicEnabled,
-				},
+			gvnic := map[string]interface{}{}
+			setField(gvnic, "enabled", gvnicEnabled)
+			req := map[string]interface{}{
+				"gvnic": gvnic,
 			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4589,28 +4640,32 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated gvnic for node pool %s", name)
 		}
 
 		if d.HasChange(prefix + "node_config.0.kubelet_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				KubeletConfig: expandKubeletConfig(
-					d.Get(prefix + "node_config.0.kubelet_config")),
+			kubeletConfig := expandKubeletConfig(
+				d.Get(prefix + "node_config.0.kubelet_config"))
+			if kubeletConfig == nil {
+				kubeletConfig = map[string]interface{}{}
 			}
-			if req.KubeletConfig == nil {
-				req.KubeletConfig = &container.NodeKubeletConfig{}
-				req.ForceSendFields = []string{"KubeletConfig"}
+			req := map[string]interface{}{
+				"kubeletConfig": kubeletConfig,
 			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4624,27 +4679,31 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated kubelet_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.linux_node_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				LinuxNodeConfig: expandLinuxNodeConfig(
-					d.Get(prefix + "node_config.0.linux_node_config")),
+			linuxNodeConfig := expandLinuxNodeConfig(
+				d.Get(prefix + "node_config.0.linux_node_config"))
+			if linuxNodeConfig == nil {
+				linuxNodeConfig = map[string]interface{}{}
 			}
-			if req.LinuxNodeConfig == nil {
-				req.LinuxNodeConfig = &container.LinuxNodeConfig{}
-				req.ForceSendFields = []string{"LinuxNodeConfig"}
+			req := map[string]interface{}{
+				"linuxNodeConfig": linuxNodeConfig,
 			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4658,27 +4717,31 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated linux_node_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.windows_node_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				WindowsNodeConfig: expandWindowsNodeConfig(
-					d.Get(prefix + "node_config.0.windows_node_config")),
+			windowsNodeConfig := expandWindowsNodeConfig(
+				d.Get(prefix + "node_config.0.windows_node_config"))
+			if windowsNodeConfig == nil {
+				windowsNodeConfig = map[string]interface{}{}
 			}
-			if req.WindowsNodeConfig == nil {
-				req.WindowsNodeConfig = &container.WindowsNodeConfig{}
-				req.ForceSendFields = []string{"WindowsNodeConfig"}
+			req := map[string]interface{}{
+				"windowsNodeConfig": windowsNodeConfig,
 			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4698,31 +4761,35 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.node_image_config") {
-			req := &container.UpdateClusterRequest{
-				Update: &container.ClusterUpdate{
-					DesiredNodePoolId: name,
-				},
-			}
-			if imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config")); imageConfig!=nil {
-			  req.Update.DesiredImage = imageConfig.Image
-			  req.Update.DesiredImageProject = imageConfig.ImageProject
+			update := map[string]interface{}{}
+			setField(update, "desiredNodePoolId", name)
+			if imageConfig := expandNodeImageConfig(d.Get(prefix + "node_config.0.node_image_config")); imageConfig != nil {
+				setField(update, "desiredImage", flattenString(imageConfig["image"]))
+				setField(update, "desiredImageProject", flattenString(imageConfig["imageProject"]))
 			}
 
 			if d.HasChange(prefix + "node_config.0.image_type") {
-				req.Update.DesiredImageType = d.Get(prefix + "node_config.0.image_type").(string)
+				setField(update, "desiredImageType", d.Get(prefix+"node_config.0.image_type").(string))
 			} else {
-			  // If only updating the node_image_config (DesiredImage and/or DesiredImage) and
-			  // the image_type unspecified, then it is an use case of custom image feature, where
-			  // the DesiredImageType should be CUSTOM_CONTAINERD (go/gke-custom-image-builder-ug-edit)
-			  req.Update.DesiredImageType = "CUSTOM_CONTAINERD"
+				// If only updating the node_image_config (DesiredImage and/or DesiredImage) and
+				// the image_type unspecified, then it is an use case of custom image feature, where
+				// the DesiredImageType should be CUSTOM_CONTAINERD (go/gke-custom-image-builder-ug-edit)
+				setField(update, "desiredImageType", "CUSTOM_CONTAINERD")
+			}
+			req := map[string]interface{}{
+				"update": update,
 			}
 
 			updateF := func() error {
-				clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
-				if config.UserProjectOverride {
-					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.parent())
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4741,22 +4808,25 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated custom image config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.fast_socket") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				FastSocket: &container.FastSocket{},
-			}
+			fs := map[string]interface{}{}
 			if v, ok := d.GetOk(prefix + "node_config.0.fast_socket"); ok {
 				fastSocket := v.([]interface{})[0].(map[string]interface{})
-				req.FastSocket =  &container.FastSocket{
-					Enabled: fastSocket["enabled"].(bool),
-				}
+				setField(fs, "enabled", fastSocket["enabled"].(bool))
 			}
+			req := map[string]interface{}{
+				"fastSocket": fs,
+			}
+			setField(req, "nodePoolId", name)
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 				if err != nil {
 					return err
 				}
@@ -4770,7 +4840,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated fast_socket for node pool %s", name)

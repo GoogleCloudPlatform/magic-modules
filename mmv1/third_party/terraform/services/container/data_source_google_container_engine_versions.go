@@ -89,20 +89,27 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 	}
 
 	location = fmt.Sprintf("projects/%s/locations/%s", project, location)
-	resp, err := NewClient(config, userAgent).Projects.Locations.GetServerConfig(location).Do()
+	url := fmt.Sprintf("%s%s/serverConfig", transport_tpg.BaseUrl(Product, config), location)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error retrieving available container cluster versions: %s", err.Error())
 	}
 
 	validMasterVersions := make([]string, 0)
-	for _, v := range resp.ValidMasterVersions {
+	for _, v := range flattenStringSlice(resp["validMasterVersions"]) {
 		if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
 			validMasterVersions = append(validMasterVersions, v)
 		}
 	}
 
 	validNodeVersions := make([]string, 0)
-	for _, v := range resp.ValidNodeVersions {
+	for _, v := range flattenStringSlice(resp["validNodeVersions"]) {
 		if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
 			validNodeVersions = append(validNodeVersions, v)
 		}
@@ -126,19 +133,24 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		}
 	}
 
-	if err := d.Set("default_cluster_version", resp.DefaultClusterVersion); err != nil {
+	if err := d.Set("default_cluster_version", flattenString(resp["defaultClusterVersion"])); err != nil {
 		return fmt.Errorf("Error setting default_cluster_version: %s", err)
 	}
 
 	releaseChannelDefaultVersion := map[string]string{}
 	releaseChannelLatestVersion := map[string]string{}
 	releaseChannelUpgradeTargetVersion := map[string]string{}
-	for _, channelResp := range resp.Channels {
-		releaseChannelDefaultVersion[channelResp.Channel] = channelResp.DefaultVersion
-		releaseChannelUpgradeTargetVersion[channelResp.Channel] = channelResp.UpgradeTargetVersion
-		for _, v := range channelResp.ValidVersions {
+	for _, rawChannel := range getSlice(resp, "channels") {
+		channelResp, ok := rawChannel.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		channelName := flattenString(channelResp["channel"])
+		releaseChannelDefaultVersion[channelName] = flattenString(channelResp["defaultVersion"])
+		releaseChannelUpgradeTargetVersion[channelName] = flattenString(channelResp["upgradeTargetVersion"])
+		for _, v := range flattenStringSlice(channelResp["validVersions"]) {
 			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
-				releaseChannelLatestVersion[channelResp.Channel] = v
+				releaseChannelLatestVersion[channelName] = v
 				break
 			}
 		}

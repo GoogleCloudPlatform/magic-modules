@@ -1,3 +1,4 @@
+{{- /* This file has no version-specific content */ -}}
 package container
 
 import (
@@ -5,12 +6,6 @@ import (
 	"log"
 	"testing"
 	"time"
-
-{{- if eq $.TargetVersionName "ga" }}
-	"google.golang.org/api/container/v1"
-{{- else }}
-	container "google.golang.org/api/container/v1beta1"
-{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -33,13 +28,31 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 		return ""
 	}
 
-	client := NewClient(config, config.UserAgent)
+	baseUrl := transport_tpg.BaseUrl(Product, config)
+	clusterURL := fmt.Sprintf("%s%s", baseUrl, clusterId)
+	createURL := fmt.Sprintf("%s%s/clusters", baseUrl, parent)
+
+	getCluster := func() (map[string]interface{}, error) {
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    clusterURL,
+			UserAgent: config.UserAgent,
+		})
+	}
 
 	log.Printf("[DEBUG] Getting shared test GKE cluster %q", clusterId)
-	cluster, err := client.Projects.Locations.Clusters.Get(clusterId).Do()
-	if err == nil && cluster != nil && (cluster.Status == "ERROR" || cluster.Status == "DEGRADED") {
-		log.Printf("[DEBUG] Shared test GKE cluster %q is in %s state (%s), deleting before recreating", clusterId, cluster.Status, cluster.StatusMessage)
-		delOp, delErr := client.Projects.Locations.Clusters.Delete(clusterId).Do()
+	cluster, err := getCluster()
+	if err == nil && cluster != nil && (flattenString(cluster["status"]) == "ERROR" || flattenString(cluster["status"]) == "DEGRADED") {
+		log.Printf("[DEBUG] Shared test GKE cluster %q is in %s state (%s), deleting before recreating", clusterId, flattenString(cluster["status"]), flattenString(cluster["statusMessage"]))
+		delOp, delErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			Project:   project,
+			RawURL:    clusterURL,
+			UserAgent: config.UserAgent,
+		})
 		if delErr == nil {
 			err = ContainerOperationWait(config, delOp, project, location, "deleting unhealthy shared test GKE cluster", config.UserAgent, 30*time.Minute)
 			if err != nil {
@@ -48,17 +61,17 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 		} else if !transport_tpg.IsGoogleApiErrorWithCode(delErr, 404) && !transport_tpg.IsGoogleApiErrorWithCode(delErr, 409) && !transport_tpg.IsGoogleApiErrorWithCode(delErr, 400) {
 			t.Fatalf("Error deleting unhealthy shared test GKE cluster %q: %s", clusterId, delErr)
 		}
-		cluster, err = client.Projects.Locations.Clusters.Get(clusterId).Do()
+		cluster, err = getCluster()
 	}
 
 	stopDeadline := time.Now().Add(30 * time.Minute)
-	for err == nil && cluster != nil && cluster.Status == "STOPPING" {
+	for err == nil && cluster != nil && flattenString(cluster["status"]) == "STOPPING" {
 		if time.Now().After(stopDeadline) {
 			t.Fatalf("Timed out waiting for shared test GKE cluster %q deletion to finish", clusterId)
 		}
 		log.Printf("[DEBUG] Shared test GKE cluster %q is in status STOPPING, waiting 15s for deletion...", clusterId)
 		time.Sleep(15 * time.Second)
-		cluster, err = client.Projects.Locations.Clusters.Get(clusterId).Do()
+		cluster, err = getCluster()
 	}
 
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
@@ -67,28 +80,35 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 		networkName := tpgcompute.BootstrapSharedTestNetwork(t, testId)
 		subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, testId, networkName, location, "10.79.0.0/20")
 
-		req := &container.CreateClusterRequest{
-			Cluster: &container.Cluster{
-				Name:             clusterName,
-				Locations:        []string{"us-east1-b"},
-				InitialNodeCount: 1,
-				NodeConfig: &container.NodeConfig{
-					MachineType: "n4-standard-2",
+		req := map[string]interface{}{
+			"cluster": map[string]interface{}{
+				"name":             clusterName,
+				"locations":        []string{"us-east1-b"},
+				"initialNodeCount": 1,
+				"nodeConfig": map[string]interface{}{
+					"machineType": "n4-standard-2",
 				},
-				WorkloadIdentityConfig: &container.WorkloadIdentityConfig{
-					WorkloadPool: fmt.Sprintf("%s.svc.id.goog", project),
+				"workloadIdentityConfig": map[string]interface{}{
+					"workloadPool": fmt.Sprintf("%s.svc.id.goog", project),
 				},
-				AddonsConfig: &container.AddonsConfig{
-					GkeBackupAgentConfig: &container.GkeBackupAgentConfig{
-						Enabled: true,
+				"addonsConfig": map[string]interface{}{
+					"gkeBackupAgentConfig": map[string]interface{}{
+						"enabled": true,
 					},
 				},
-				Network:    networkName,
-				Subnetwork: subnetworkName,
+				"network":    networkName,
+				"subnetwork": subnetworkName,
 			},
 		}
 
-		op, err := client.Projects.Locations.Clusters.Create(parent, req).Do()
+		op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createURL,
+			UserAgent: config.UserAgent,
+			Body:      req,
+		})
 		if err != nil {
 			if !transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
 				t.Fatalf("Error bootstrapping shared test GKE cluster %q: %s", clusterId, err)
@@ -102,7 +122,7 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 			}
 		}
 
-		cluster, err = client.Projects.Locations.Clusters.Get(clusterId).Do()
+		cluster, err = getCluster()
 	}
 
 	if err != nil {
@@ -113,20 +133,20 @@ func BootstrapSharedGKECluster(t *testing.T, testId string) string {
 	}
 
 	deadline := time.Now().Add(30 * time.Minute)
-	for cluster.Status == "PROVISIONING" || cluster.Status == "RECONCILING" {
+	for flattenString(cluster["status"]) == "PROVISIONING" || flattenString(cluster["status"]) == "RECONCILING" {
 		if time.Now().After(deadline) {
-			t.Fatalf("Timed out waiting for shared test GKE cluster %q to leave status %s", clusterId, cluster.Status)
+			t.Fatalf("Timed out waiting for shared test GKE cluster %q to leave status %s", clusterId, flattenString(cluster["status"]))
 		}
-		log.Printf("[DEBUG] Shared test GKE cluster %q is in status %s, waiting 15s...", clusterId, cluster.Status)
+		log.Printf("[DEBUG] Shared test GKE cluster %q is in status %s, waiting 15s...", clusterId, flattenString(cluster["status"]))
 		time.Sleep(15 * time.Second)
-		cluster, err = client.Projects.Locations.Clusters.Get(clusterId).Do()
+		cluster, err = getCluster()
 		if err != nil {
 			t.Fatalf("Error getting shared test GKE cluster %q while waiting for readiness: %s", clusterId, err)
 		}
 	}
 
-	if cluster.Status != "RUNNING" {
-		t.Fatalf("Shared test GKE cluster %q is in unexpected status %s: %s", clusterId, cluster.Status, cluster.StatusMessage)
+	if flattenString(cluster["status"]) != "RUNNING" {
+		t.Fatalf("Shared test GKE cluster %q is in unexpected status %s: %s", clusterId, flattenString(cluster["status"]), flattenString(cluster["statusMessage"]))
 	}
 
 	return clusterId

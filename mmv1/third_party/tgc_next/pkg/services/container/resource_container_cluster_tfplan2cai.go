@@ -668,31 +668,52 @@ func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transp
 	if err != nil {
 		return nil
 	}
-	var cluster *container.Cluster
-	client := NewClient(config, userAgent)
-	if client != nil {
-		clusterGetCall := client.Projects.Locations.Clusters.Get(name)
-		if config.UserProjectOverride {
-			clusterGetCall.Header().Add("X-Goog-User-Project", project)
-		}
-		cluster, _ = clusterGetCall.Do()
-	} else {
-		log.Printf("[WARN] GKE client is nil, skipping cluster GET call")
-	}
 	resourceVersion := ""
 	exclusions := make(map[string]container.TimeWindow)
-	if cluster != nil && cluster.MaintenancePolicy != nil {
-		// If the cluster doesn't exist or if there is a read error of any kind, we will pass in an empty
-		// resourceVersion.  If there happens to be a change to maintenance policy, we will fail at that
-		// point.  This is a compromise between code cleanliness and a slightly worse user experience in
-		// an unlikely error case - we choose code cleanliness.
-		resourceVersion = cluster.MaintenancePolicy.ResourceVersion
-
-		// Having a MaintenancePolicy doesn't mean that you need MaintenanceExclusions, but if they were set,
-		// they need to be assigned to exclusions.
-		if cluster.MaintenancePolicy.Window != nil && cluster.MaintenancePolicy.Window.MaintenanceExclusions != nil {
-			exclusions = cluster.MaintenancePolicy.Window.MaintenanceExclusions
+	if config != nil && config.Client != nil {
+		url := fmt.Sprintf("%s%s", transport.BaseUrl(Product, config), name)
+		res, err := transport.SendRequest(transport.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err == nil && res != nil {
+			if mp, ok := res["maintenancePolicy"].(map[string]interface{}); ok {
+				if rv, ok := mp["resourceVersion"].(string); ok {
+					resourceVersion = rv
+				}
+				if window, ok := mp["window"].(map[string]interface{}); ok {
+					if rawExclusions, ok := window["maintenanceExclusions"].(map[string]interface{}); ok {
+						for k, v := range rawExclusions {
+							if twMap, ok := v.(map[string]interface{}); ok {
+								var tw container.TimeWindow
+								if st, ok := twMap["startTime"].(string); ok {
+									tw.StartTime = st
+								}
+								if et, ok := twMap["endTime"].(string); ok {
+									tw.EndTime = et
+								}
+								if optsMap, ok := twMap["maintenanceExclusionOptions"].(map[string]interface{}); ok {
+									opts := &container.MaintenanceExclusionOptions{}
+									if scope, ok := optsMap["scope"].(string); ok {
+										opts.Scope = scope
+									}
+									if eeb, ok := optsMap["endTimeBehavior"].(string); ok {
+										opts.EndTimeBehavior = eeb
+									}
+									tw.MaintenanceExclusionOptions = opts
+								}
+								exclusions[k] = tw
+							}
+						}
+					}
+				}
+			}
 		}
+	} else {
+		log.Printf("[WARN] GKE client is nil, skipping cluster GET call")
 	}
 
 	configured := d.Get("maintenance_policy")

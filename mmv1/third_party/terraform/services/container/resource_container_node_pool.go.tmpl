@@ -19,18 +19,12 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/container/v1"
-{{- else }}
-	container "google.golang.org/api/container/v1beta1"
-{{- end }}
 )
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
 
 type nodePoolWithUpdateTime struct {
-	nodePool   *container.NodePool
+	nodePool   map[string]interface{}
 	updateTime time.Time
 }
 
@@ -40,7 +34,7 @@ type nodePoolCache struct {
 	mutex     sync.RWMutex
 }
 
-func (nodePoolCache *nodePoolCache) get(nodePool string) (*container.NodePool, error) {
+func (nodePoolCache *nodePoolCache) get(nodePool string) (map[string]interface{}, error) {
 	nodePoolCache.mutex.RLock()
 	defer nodePoolCache.mutex.RUnlock()
 	np, ok := nodePoolCache.nodePools[nodePool]
@@ -59,19 +53,26 @@ func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, conf
 	}
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster)
-	clusterNodePoolsListCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.List(parent)
-	if config.UserProjectOverride {
-		clusterNodePoolsListCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	listNodePoolsResponse, err := clusterNodePoolsListCall.Do()
+	url := fmt.Sprintf("%s%s/nodePools", transport_tpg.BaseUrl(Product, config), parent)
+	listNodePoolsResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   nodePoolInfo.project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePools from cluster %q", nodePoolInfo.cluster))
 	}
 
 	updateTime := time.Now()
-	for _, nodePool := range listNodePoolsResponse.NodePools {
-		nodePoolCache.nodePools[nodePoolInfo.fullyQualifiedName(nodePool.Name)] = &nodePoolWithUpdateTime{
-			nodePool:  nodePool,
+	for _, rawNodePool := range getSlice(listNodePoolsResponse, "nodePools") {
+		nodePool, ok := rawNodePool.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		nodePoolCache.nodePools[nodePoolInfo.fullyQualifiedName(flattenString(nodePool["name"]))] = &nodePoolWithUpdateTime{
+			nodePool:   nodePool,
 			updateTime: updateTime,
 		}
 	}
@@ -917,27 +918,30 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
+	nodePoolName := flattenString(nodePool["name"])
 
 	// Acquire write-lock on nodepool.
-	npLockKey := nodePoolInfo.nodePoolLockKey(nodePool.Name)
+	npLockKey := nodePoolInfo.nodePoolLockKey(nodePoolName)
 	transport_tpg.MutexStore.Lock(npLockKey)
 	defer transport_tpg.MutexStore.Unlock(npLockKey)
 
-	req := &container.CreateNodePoolRequest{
-		NodePool: nodePool,
-	}
+	req := map[string]interface{}{}
+	setField(req, "nodePool", nodePool)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 	startTime := time.Now()
 
 	// we attempt to prefetch the node pool to make sure it doesn't exist before creation
-	var id = fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster, nodePool.Name)
+	var id = fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster, nodePoolName)
 	name := getNodePoolName(id)
-	clusterNodePoolsGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	_, err = clusterNodePoolsGetCall.Do()
+	getUrl := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   nodePoolInfo.project,
+		RawURL:    getUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		// Set the ID before we attempt to create if the resource doesn't exist. That
 		// way, if we receive an error but the resource is created anyway, it will be
@@ -947,20 +951,24 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("resource - %s - already exists", id)
 	}
 
-	var operation *container.Operation
+	var operation map[string]interface{}
+	createUrl := fmt.Sprintf("%s%s/nodePools", transport_tpg.BaseUrl(Product, config), nodePoolInfo.parent())
 	err = retry.Retry(timeout, func() *retry.RetryError {
-		clusterNodePoolsCreateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Create(nodePoolInfo.parent(), req)
-		if config.UserProjectOverride {
-			clusterNodePoolsCreateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-		}
-		operation, err = clusterNodePoolsCreateCall.Do()
+		operation, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   nodePoolInfo.project,
+			RawURL:    createUrl,
+			UserAgent: userAgent,
+			Body:      req,
+		})
 
 		if err != nil {
 			if tpgresource.IsFailedPreconditionError(err) || tpgresource.IsQuotaError(err) {
 				// We get failed precondition errors if the cluster is updating
 				// while we try to add the node pool.
 				// We get quota errors if there the number of running concurrent
-                                // operations reaches the quota.
+				// operations reaches the quota.
 				return retry.RetryableError(err)
 			}
 			return retry.NonRetryableError(err)
@@ -984,8 +992,9 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		// by the upstream Terraform process exiting early such as a sigterm.
 		select {
 		case <-config.Context.Done():
-			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", operation.Name)
-			if err := d.Set("operation", operation.Name); err != nil {
+			opName := flattenString(operation["name"])
+			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", opName)
+			if err := d.Set("operation", opName); err != nil {
 				return fmt.Errorf("Error setting operation: %s", err)
 			}
 			return nil
@@ -995,14 +1004,20 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		// Check if resource was created but apply timed out.
 		// Common cause for that is GCE_STOCKOUT which will wait for resources and return error after timeout,
 		// but in fact nodepool will be created so we have to capture that in state.
-		_, err = clusterNodePoolsGetCall.Do()
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   nodePoolInfo.project,
+			RawURL:    getUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			d.SetId("")
 			return waitErr
 		}
 	}
 
-	log.Printf("[INFO] GKE NodePool %s has been created", nodePool.Name)
+	log.Printf("[INFO] GKE NodePool %s has been created", nodePoolName)
 
 	if err = resourceContainerNodePoolRead(d, meta); err != nil {
 		return err
@@ -1014,7 +1029,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if containerNodePoolRestingStates[state] == ErrorState {
-		return fmt.Errorf("NodePool %s was created in the error state %q", nodePool.Name, state)
+		return fmt.Errorf("NodePool %s was created in the error state %q", nodePoolName, state)
 	}
 
 	return nil
@@ -1035,8 +1050,8 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 	operation := d.Get("operation").(string)
 	if operation != "" {
 		log.Printf("[DEBUG] in progress operation detected at %v, attempting to resume", operation)
-		op := &container.Operation{
-			Name: operation,
+		op := map[string]interface{}{
+			"name": operation,
 		}
 		if err := d.Set("operation", ""); err != nil {
 			return fmt.Errorf("Error setting operation: %s", err)
@@ -1152,13 +1167,16 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	timeout := d.Timeout(schema.TimeoutDelete)
 	startTime := time.Now()
 
-	var operation *container.Operation
+	var operation map[string]interface{}
+	deleteUrl := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
 	err = retry.Retry(timeout, func() *retry.RetryError {
-		clusterNodePoolsDeleteCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Delete(nodePoolInfo.fullyQualifiedName(name))
-		if config.UserProjectOverride {
-			clusterNodePoolsDeleteCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-		}
-		operation, err = clusterNodePoolsDeleteCall.Do()
+		operation, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			Project:   nodePoolInfo.project,
+			RawURL:    deleteUrl,
+			UserAgent: userAgent,
+		})
 
 		if err != nil {
 			if tpgresource.IsFailedPreconditionError(err) || tpgresource.IsQuotaError(err) {
@@ -1237,7 +1255,7 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool, error) {
+func expandNodePool(d *schema.ResourceData, prefix string) (map[string]interface{}, error) {
 	var name string
 	if v, ok := d.GetOk(prefix + "name"); ok {
 		if _, ok := d.GetOk(prefix + "name_prefix"); ok {
@@ -1271,46 +1289,45 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		locations = tpgresource.ConvertStringSet(v.(*schema.Set))
 	}
 
-	np := &container.NodePool{
-		Name:             name,
-		InitialNodeCount: int64(nodeCount),
-		Config:           expandNodeConfig(d, prefix, d.Get(prefix+"node_config")),
-		Locations:        locations,
-		Version:          d.Get(prefix + "version").(string),
-		NetworkConfig:    expandNodeNetworkConfig(d.Get(prefix + "network_config")),
-	}
+	np := map[string]interface{}{}
+	setField(np, "name", name)
+	setField(np, "initialNodeCount", int64(nodeCount))
+	setField(np, "config", expandNodeConfig(d, prefix, d.Get(prefix+"node_config")))
+	setField(np, "locations", locations)
+	setField(np, "version", d.Get(prefix+"version").(string))
+	setField(np, "networkConfig", expandNodeNetworkConfig(d.Get(prefix+"network_config")))
 
 	if v, ok := d.GetOk(prefix + "autoscaling"); ok {
 		if autoscaling, ok := v.([]interface{})[0].(map[string]interface{}); ok {
-			np.Autoscaling = &container.NodePoolAutoscaling{
-				Enabled:           true,
-				MinNodeCount:      int64(autoscaling["min_node_count"].(int)),
-				MaxNodeCount:      int64(autoscaling["max_node_count"].(int)),
-				TotalMinNodeCount: int64(autoscaling["total_min_node_count"].(int)),
-				TotalMaxNodeCount: int64(autoscaling["total_max_node_count"].(int)),
-				LocationPolicy:    autoscaling["location_policy"].(string),
-				ForceSendFields:   []string{"MinNodeCount", "MaxNodeCount", "TotalMinNodeCount", "TotalMaxNodeCount"},
+			as := map[string]interface{}{
+				"enabled":           true,
+				"minNodeCount":      int64(autoscaling["min_node_count"].(int)),
+				"maxNodeCount":      int64(autoscaling["max_node_count"].(int)),
+				"totalMinNodeCount": int64(autoscaling["total_min_node_count"].(int)),
+				"totalMaxNodeCount": int64(autoscaling["total_max_node_count"].(int)),
 			}
+			setField(as, "locationPolicy", autoscaling["location_policy"].(string))
+			np["autoscaling"] = as
 		}
 	}
 
 	if v, ok := d.GetOk(prefix + "placement_policy"); ok {
 		if v.([]interface{}) != nil && v.([]interface{})[0] != nil {
 			placement_policy := v.([]interface{})[0].(map[string]interface{})
-			np.PlacementPolicy = &container.PlacementPolicy{
-				Type: placement_policy["type"].(string),
-				PolicyName: placement_policy["policy_name"].(string),
-				TpuTopology: placement_policy["tpu_topology"].(string),
-			}
+			pp := map[string]interface{}{}
+			setField(pp, "type", placement_policy["type"].(string))
+			setField(pp, "policyName", placement_policy["policy_name"].(string))
+			setField(pp, "tpuTopology", placement_policy["tpu_topology"].(string))
+			np["placementPolicy"] = pp
 		}
 	}
 
 	if v, ok := d.GetOk(prefix + "queued_provisioning"); ok {
 		if v.([]interface{}) != nil && v.([]interface{})[0] != nil {
 			queued_provisioning := v.([]interface{})[0].(map[string]interface{})
-			np.QueuedProvisioning = &container.QueuedProvisioning{
-				Enabled: queued_provisioning["enabled"].(bool),
-			}
+			qp := map[string]interface{}{}
+			setField(qp, "enabled", queued_provisioning["enabled"].(bool))
+			np["queuedProvisioning"] = qp
 		}
 	}
 
@@ -1322,10 +1339,11 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			// The API rejects a bestEffortProvisioning message, even an empty one,
 			// unless enabled is true, so omit it entirely when disabled.
 			if enabled {
-				np.BestEffortProvisioning = &container.BestEffortProvisioning{
-					Enabled:           true,
-					MinProvisionNodes: int64(minProvisionNodes),
+				bepMap := map[string]interface{}{
+					"enabled": true,
 				}
+				setField(bepMap, "minProvisionNodes", int64(minProvisionNodes))
+				np["bestEffortProvisioning"] = bepMap
 			} else if minProvisionNodes > 0 {
 				return nil, fmt.Errorf("best_effort_provisioning.min_provision_nodes can only be set when best_effort_provisioning.enabled is true")
 			}
@@ -1333,55 +1351,58 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 	}
 
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
-		np.MaxPodsConstraint = &container.MaxPodsConstraint{
-			MaxPodsPerNode: int64(v.(int)),
-		}
+		mpc := map[string]interface{}{}
+		setStringIntField(mpc, "maxPodsPerNode", int64(v.(int)))
+		np["maxPodsConstraint"] = mpc
 	}
 
 	if v, ok := d.GetOk(prefix + "management"); ok {
 		managementConfig := v.([]interface{})[0].(map[string]interface{})
-		np.Management = &container.NodeManagement{}
+		management := map[string]interface{}{}
 
 		if v, ok := managementConfig["auto_repair"]; ok {
-			np.Management.AutoRepair = v.(bool)
+			setField(management, "autoRepair", v.(bool))
 		}
 
 		if v, ok := managementConfig["auto_upgrade"]; ok {
-			np.Management.AutoUpgrade = v.(bool)
+			setField(management, "autoUpgrade", v.(bool))
 		}
+		np["management"] = management
 	}
 
 	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
 		upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
-		np.UpgradeSettings = &container.UpgradeSettings{}
+		upgradeSettings := map[string]interface{}{}
 
+		strategy := ""
 		if v, ok := upgradeSettingsConfig["strategy"]; ok {
-			np.UpgradeSettings.Strategy = v.(string)
+			strategy = v.(string)
+			setField(upgradeSettings, "strategy", strategy)
 		}
 
 		if d.HasChange(prefix + "upgrade_settings.0.max_surge") {
-			if np.UpgradeSettings.Strategy != "SURGE" {
+			if strategy != "SURGE" {
 				return nil, fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 			}
 			if v, ok := upgradeSettingsConfig["max_surge"]; ok {
-				np.UpgradeSettings.MaxSurge = int64(v.(int))
+				setField(upgradeSettings, "maxSurge", int64(v.(int)))
 			}
 		}
 
 		if d.HasChange(prefix + "upgrade_settings.0.max_unavailable") {
-			if np.UpgradeSettings.Strategy != "SURGE" {
+			if strategy != "SURGE" {
 				return nil, fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 			}
 			if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
-				np.UpgradeSettings.MaxUnavailable = int64(v.(int))
+				setField(upgradeSettings, "maxUnavailable", int64(v.(int)))
 			}
 		}
 
 		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 {
 			blueGreenSettingsConfig := v.([]interface{})[0].(map[string]interface{})
-			np.UpgradeSettings.BlueGreenSettings = &container.BlueGreenSettings{}
+			blueGreenSettings := map[string]interface{}{}
 
-			if np.UpgradeSettings.Strategy != "BLUE_GREEN" {
+			if strategy != "BLUE_GREEN" {
 				return nil, fmt.Errorf("Blue-green upgrade settings may not be changed when blue-green strategy is not enabled")
 			}
 
@@ -1394,63 +1415,68 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			{{- end }}
 
 			if v, ok := blueGreenSettingsConfig["node_pool_soak_duration"]; ok {
-				np.UpgradeSettings.BlueGreenSettings.NodePoolSoakDuration = v.(string)
+				setField(blueGreenSettings, "nodePoolSoakDuration", v.(string))
 			}
 
 			if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
-				standardRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
-				standardRolloutPolicy := &container.StandardRolloutPolicy{}
+				standardRolloutPolicy := map[string]interface{}{}
+				if standardRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+					if v, ok := standardRolloutPolicyConfig["batch_soak_duration"]; ok {
+						setField(standardRolloutPolicy, "batchSoakDuration", v.(string))
+					}
+					if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
+						setField(standardRolloutPolicy, "batchNodeCount", int64(v.(int)))
+					}
+					if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
+						setField(standardRolloutPolicy, "batchPercentage", v.(float64))
+					}
+				}
 
-				if v, ok := standardRolloutPolicyConfig["batch_soak_duration"]; ok {
-					standardRolloutPolicy.BatchSoakDuration = v.(string)
-				}
-				if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
-					standardRolloutPolicy.BatchNodeCount = int64(v.(int))
-				}
-				if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
-					standardRolloutPolicy.BatchPercentage = v.(float64)
-				}
-
-				np.UpgradeSettings.BlueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
+				blueGreenSettings["standardRolloutPolicy"] = standardRolloutPolicy
 			}
 			{{ if ne $.TargetVersionName `ga` -}}
 			if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
-				autoscaledRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
-				autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
-
-				if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
-					autoscaledRolloutPolicy.WaitForDrainDuration = v.(string)
+				autoscaledRolloutPolicy := map[string]interface{}{}
+				if autoscaledRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+					if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
+						setField(autoscaledRolloutPolicy, "waitForDrainDuration", v.(string))
+					}
 				}
-				np.UpgradeSettings.BlueGreenSettings.AutoscaledRolloutPolicy = autoscaledRolloutPolicy
+				blueGreenSettings["autoscaledRolloutPolicy"] = autoscaledRolloutPolicy
 			}
 			{{- end }}
+			upgradeSettings["blueGreenSettings"] = blueGreenSettings
 		}
+		np["upgradeSettings"] = upgradeSettings
 	}
 
 	if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
 		nodeDrainConfig := v.([]interface{})[0].(map[string]interface{})
-		np.NodeDrainConfig = &container.NodeDrainConfig{}
+		ndc := map[string]interface{}{}
 
 		if v, ok := nodeDrainConfig["respect_pdb_during_node_pool_deletion"]; ok {
-			np.NodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
+			setField(ndc, "respectPdbDuringNodePoolDeletion", v.(bool))
 		}
 		if v, ok := nodeDrainConfig["grace_termination_duration"]; ok {
-			np.NodeDrainConfig.GraceTerminationDuration = v.(string)
+			setField(ndc, "graceTerminationDuration", v.(string))
 		}
 		if v, ok := nodeDrainConfig["pdb_timeout_duration"]; ok {
-			np.NodeDrainConfig.PdbTimeoutDuration = v.(string)
+			setField(ndc, "pdbTimeoutDuration", v.(string))
 		}
+		np["nodeDrainConfig"] = ndc
 	}
 
 	if v, ok := d.GetOk(prefix + "maintenance_policy"); ok {
 		maintenancePolicy := v.([]interface{})[0].(map[string]interface{})
 		if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 {
-			np.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
-				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport {},
+			excl := map[string]interface{}{}
+			if exclusionUntilEndOfSupport, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+				if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
+					setField(excl, "enabled", v.(bool))
+				}
 			}
-			exclusionUntilEndOfSupport := v.([]interface{})[0].(map[string]interface{})
-			if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
-				np.MaintenancePolicy.ExclusionUntilEndOfSupport.Enabled = v.(bool)
+			np["maintenancePolicy"] = map[string]interface{}{
+				"exclusionUntilEndOfSupport": excl,
 			}
 		}
 	}
@@ -1458,102 +1484,102 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 	return np, nil
 }
 
-func flattenNodePoolStandardRolloutPolicy(rp *container.StandardRolloutPolicy) []map[string]interface{} {
+func flattenNodePoolStandardRolloutPolicy(rp map[string]interface{}) []map[string]interface{} {
 	if rp == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"batch_node_count":    rp.BatchNodeCount,
-			"batch_percentage":    rp.BatchPercentage,
-			"batch_soak_duration": rp.BatchSoakDuration,
+			"batch_node_count":    flattenInt(rp["batchNodeCount"]),
+			"batch_percentage":    flattenFloat(rp["batchPercentage"]),
+			"batch_soak_duration": flattenString(rp["batchSoakDuration"]),
 		},
 	}
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func flattenNodePoolAutoscaledRolloutPolicy(rp *container.AutoscaledRolloutPolicy) []map[string]interface{} {
+func flattenNodePoolAutoscaledRolloutPolicy(rp map[string]interface{}) []map[string]interface{} {
   if rp == nil {
     return nil
   }
 
   return []map[string]interface{}{
     {
-      "wait_for_drain_duration": rp.WaitForDrainDuration,
+      "wait_for_drain_duration": flattenString(rp["waitForDrainDuration"]),
     },
   }
 }
 {{- end }}
 
-func flattenNodePoolBlueGreenSettings(bg *container.BlueGreenSettings) []map[string]interface{} {
+func flattenNodePoolBlueGreenSettings(bg map[string]interface{}) []map[string]interface{} {
 	if bg == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"node_pool_soak_duration": bg.NodePoolSoakDuration,
-			"standard_rollout_policy": flattenNodePoolStandardRolloutPolicy(bg.StandardRolloutPolicy),
+			"node_pool_soak_duration": flattenString(bg["nodePoolSoakDuration"]),
+			"standard_rollout_policy": flattenNodePoolStandardRolloutPolicy(getMap(bg, "standardRolloutPolicy")),
 			{{ if ne $.TargetVersionName `ga` -}}
-			"autoscaled_rollout_policy": flattenNodePoolAutoscaledRolloutPolicy(bg.AutoscaledRolloutPolicy),
+			"autoscaled_rollout_policy": flattenNodePoolAutoscaledRolloutPolicy(getMap(bg, "autoscaledRolloutPolicy")),
 			{{- end }}
 		},
 	}
 }
 
-func flattenNodePoolUpgradeSettings(us *container.UpgradeSettings) []map[string]interface{} {
+func flattenNodePoolUpgradeSettings(us map[string]interface{}) []map[string]interface{} {
 	if us == nil {
 		return nil
 	}
 
 	upgradeSettings := make(map[string]interface{})
 
-	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(us.BlueGreenSettings)
-	upgradeSettings["max_surge"] = us.MaxSurge
-	upgradeSettings["max_unavailable"] = us.MaxUnavailable
+	upgradeSettings["blue_green_settings"] = flattenNodePoolBlueGreenSettings(getMap(us, "blueGreenSettings"))
+	upgradeSettings["max_surge"] = flattenInt(us["maxSurge"])
+	upgradeSettings["max_unavailable"] = flattenInt(us["maxUnavailable"])
 
-	upgradeSettings["strategy"] = us.Strategy
+	upgradeSettings["strategy"] = flattenString(us["strategy"])
 	return []map[string]interface{}{upgradeSettings}
 }
 
-func flattenNodePoolNodeDrainConfig(ndc *container.NodeDrainConfig) []map[string]interface{} {
+func flattenNodePoolNodeDrainConfig(ndc map[string]interface{}) []map[string]interface{} {
 	if ndc == nil {
 		return nil
 	}
 
 	nodeDrainConfig := make(map[string]interface{})
 
-	nodeDrainConfig["respect_pdb_during_node_pool_deletion"] = ndc.RespectPdbDuringNodePoolDeletion
-	nodeDrainConfig["grace_termination_duration"] = ndc.GraceTerminationDuration
-	nodeDrainConfig["pdb_timeout_duration"] = ndc.PdbTimeoutDuration
+	nodeDrainConfig["respect_pdb_during_node_pool_deletion"] = flattenBool(ndc["respectPdbDuringNodePoolDeletion"])
+	nodeDrainConfig["grace_termination_duration"] = flattenString(ndc["graceTerminationDuration"])
+	nodeDrainConfig["pdb_timeout_duration"] = flattenString(ndc["pdbTimeoutDuration"])
 	return []map[string]interface{}{nodeDrainConfig}
 }
 
-func flattenExlusionUntilEndOfSupport(ex *container.ExclusionUntilEndOfSupport) []map[string]interface{} {
+func flattenExlusionUntilEndOfSupport(ex map[string]interface{}) []map[string]interface{} {
 	if ex == nil {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
-			"enabled": ex.Enabled,
-			"start_time": ex.StartTime,
-			"end_time": ex.EndTime,
+			"enabled":    flattenBool(ex["enabled"]),
+			"start_time": flattenString(ex["startTime"]),
+			"end_time":   flattenString(ex["endTime"]),
 		},
 	}
 }
 
-func flattenNodePoolMaintenancePolicy(mp *container.NodePoolMaintenancePolicy) []map[string]interface{} {
+func flattenNodePoolMaintenancePolicy(mp map[string]interface{}) []map[string]interface{} {
 	if mp == nil {
 		return nil
 	}
 
 	maintenancePolicy := make(map[string]interface{})
 
-	maintenancePolicy["exclusion_until_end_of_support"] = flattenExlusionUntilEndOfSupport(mp.ExclusionUntilEndOfSupport)
+	maintenancePolicy["exclusion_until_end_of_support"] = flattenExlusionUntilEndOfSupport(getMap(mp, "exclusionUntilEndOfSupport"))
 	return []map[string]interface{}{maintenancePolicy}
 }
 
-func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *container.NodePool, prefix string) (map[string]interface{}, error) {
+func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np map[string]interface{}, prefix string) (map[string]interface{}, error) {
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
@@ -1563,6 +1589,9 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 	igmUrls := []string{}
 	managedIgmUrls := []string{}
 	nodeCount := 0
+	npName := flattenString(np["name"])
+	initialNodeCount := flattenInt(np["initialNodeCount"])
+	instanceGroupUrls := flattenStringSlice(np["instanceGroupUrls"])
 
 	var ignoreNodeCountChanges bool
 	if v := d.Get(prefix + "ignore_node_count_changes"); v != nil {
@@ -1573,20 +1602,20 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 	}
 
 	if ignoreNodeCountChanges {
-		log.Printf("[DEBUG] Skipping IGM fetch for node pool %q due to ignore_node_count_changes = true", np.Name)
+		log.Printf("[DEBUG] Skipping IGM fetch for node pool %q due to ignore_node_count_changes = true", npName)
 		if v, ok := d.GetOkExists(prefix + "node_count"); ok {
 			nodeCount = v.(int)
 		} else {
-			nodeCount = int(np.InitialNodeCount)
+			nodeCount = initialNodeCount
 		}
 		// When ignoring, we might not get exact matching IGMs but we can still pass the unvalidated list from API
 		// or leave them empty. Passing the API URLs to igmUrls at least populates them for basic usage.
-		for _, url := range np.InstanceGroupUrls {
+		for _, url := range instanceGroupUrls {
 			igmUrls = append(igmUrls, url)
 			igmCache.invalidateItem(url)
 		}
 	} else {
-		for _, url := range np.InstanceGroupUrls {
+		for _, url := range instanceGroupUrls {
 			// retrieve instance group manager (InstanceGroupUrls are actually URLs for InstanceGroupManagers)
 			matches := instanceGroupManagerURL.FindStringSubmatch(url)
 			if len(matches) < 4 {
@@ -1596,7 +1625,7 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 				// IGM is autopilot so we know it will not be found, skip it
 				continue
 			}
-			if err := igmCache.refreshIfNeeded(d, config, userAgent, np.Name, url); err != nil {
+			if err := igmCache.refreshIfNeeded(d, config, userAgent, npName, url); err != nil {
 				return nil, err
 			}
 			igm, ok := igmCache.get(matches[0])
@@ -1618,28 +1647,28 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		}
 	}
 	nodePool := map[string]interface{}{
-		"name":                np.Name,
-		"name_prefix":         d.Get(prefix + "name_prefix"),
-		"initial_node_count":  np.InitialNodeCount,
-		"node_locations":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(np.Locations)),
-		"node_count":          nodeCount,
-		"node_config":         flattenNodeConfig(np.Config, d.Get(prefix + "node_config")),
-		"instance_group_urls": igmUrls,
+		"name":                        npName,
+		"name_prefix":                 d.Get(prefix + "name_prefix"),
+		"initial_node_count":          initialNodeCount,
+		"node_locations":              schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(flattenStringSlice(np["locations"]))),
+		"node_count":                  nodeCount,
+		"node_config":                 flattenNodeConfig(getMap(np, "config"), d.Get(prefix+"node_config")),
+		"instance_group_urls":         igmUrls,
 		"managed_instance_group_urls": managedIgmUrls,
-		"version":             np.Version,
-		"network_config":              flattenNodeNetworkConfig(np.NetworkConfig, d, prefix),
+		"version":                     flattenString(np["version"]),
+		"network_config":              flattenNodeNetworkConfig(getMap(np, "networkConfig"), d, prefix),
 		"ignore_node_count_changes":   d.Get(prefix + "ignore_node_count_changes"),
 	}
 
-	if np.Autoscaling != nil {
-		if np.Autoscaling.Enabled {
+	if autoscaling := getMap(np, "autoscaling"); autoscaling != nil {
+		if flattenBool(autoscaling["enabled"]) {
 			nodePool["autoscaling"] = []map[string]interface{}{
 				{
-					"min_node_count":       np.Autoscaling.MinNodeCount,
-					"max_node_count":       np.Autoscaling.MaxNodeCount,
-					"total_min_node_count": np.Autoscaling.TotalMinNodeCount,
-					"total_max_node_count": np.Autoscaling.TotalMaxNodeCount,
-					"location_policy":      np.Autoscaling.LocationPolicy,
+					"min_node_count":       flattenInt(autoscaling["minNodeCount"]),
+					"max_node_count":       flattenInt(autoscaling["maxNodeCount"]),
+					"total_min_node_count": flattenInt(autoscaling["totalMinNodeCount"]),
+					"total_max_node_count": flattenInt(autoscaling["totalMaxNodeCount"]),
+					"location_policy":      flattenString(autoscaling["locationPolicy"]),
 				},
 			}
 		} else {
@@ -1647,29 +1676,29 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		}
 	}
 
-	if np.PlacementPolicy != nil {
+	if placementPolicy := getMap(np, "placementPolicy"); placementPolicy != nil {
 		nodePool["placement_policy"] = []map[string]interface{}{
 			{
-				"type": np.PlacementPolicy.Type,
-				"policy_name": np.PlacementPolicy.PolicyName,
-				"tpu_topology": np.PlacementPolicy.TpuTopology,
+				"type":         flattenString(placementPolicy["type"]),
+				"policy_name":  flattenString(placementPolicy["policyName"]),
+				"tpu_topology": flattenString(placementPolicy["tpuTopology"]),
 			},
 		}
 	}
 
-	if np.QueuedProvisioning != nil {
+	if queuedProvisioning := getMap(np, "queuedProvisioning"); queuedProvisioning != nil {
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
-				"enabled": np.QueuedProvisioning.Enabled,
+				"enabled": flattenBool(queuedProvisioning["enabled"]),
 			},
 		}
 	}
 
-	if np.BestEffortProvisioning != nil && np.BestEffortProvisioning.Enabled {
+	if bep := getMap(np, "bestEffortProvisioning"); bep != nil && flattenBool(bep["enabled"]) {
 		nodePool["best_effort_provisioning"] = []map[string]interface{}{
 			{
 				"enabled":             true,
-				"min_provision_nodes": np.BestEffortProvisioning.MinProvisionNodes,
+				"min_provision_nodes": flattenInt(bep["minProvisionNodes"]),
 			},
 		}
 	} else if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok && len(v.([]interface{})) > 0 {
@@ -1683,103 +1712,112 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		}
 	}
 
-	if np.MaxPodsConstraint != nil {
-		nodePool["max_pods_per_node"] = np.MaxPodsConstraint.MaxPodsPerNode
+	if maxPodsConstraint := getMap(np, "maxPodsConstraint"); maxPodsConstraint != nil {
+		nodePool["max_pods_per_node"] = flattenInt(maxPodsConstraint["maxPodsPerNode"])
 	}
 
-	if np.Management != nil {
+	if management := getMap(np, "management"); management != nil {
 		nodePool["management"] = []map[string]interface{}{
 			{
-				"auto_repair":  np.Management.AutoRepair,
-				"auto_upgrade": np.Management.AutoUpgrade,
+				"auto_repair":  flattenBool(management["autoRepair"]),
+				"auto_upgrade": flattenBool(management["autoUpgrade"]),
 			},
 		}
 	}
 
-	if np.UpgradeSettings != nil {
-		nodePool["upgrade_settings"] = flattenNodePoolUpgradeSettings(np.UpgradeSettings)
+	if upgradeSettings := getMap(np, "upgradeSettings"); upgradeSettings != nil {
+		nodePool["upgrade_settings"] = flattenNodePoolUpgradeSettings(upgradeSettings)
 	} else {
 		delete(nodePool, "upgrade_settings")
 	}
 
-	if np.NodeDrainConfig != nil {
-		nodePool["node_drain_config"] = flattenNodePoolNodeDrainConfig(np.NodeDrainConfig)
+	if nodeDrainConfig := getMap(np, "nodeDrainConfig"); nodeDrainConfig != nil {
+		nodePool["node_drain_config"] = flattenNodePoolNodeDrainConfig(nodeDrainConfig)
 	}
 
-	if np.MaintenancePolicy != nil {
-		nodePool["maintenance_policy"] = flattenNodePoolMaintenancePolicy(np.MaintenancePolicy)
+	if maintenancePolicy := getMap(np, "maintenancePolicy"); maintenancePolicy != nil {
+		nodePool["maintenance_policy"] = flattenNodePoolMaintenancePolicy(maintenancePolicy)
 	}
 
 	return nodePool, nil
 }
 
-func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.ResourceData, prefix string) []map[string]interface{} {
+func flattenNodeNetworkConfig(c map[string]interface{}, d *schema.ResourceData, prefix string) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"create_pod_range":                d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
-			"pod_ipv4_cidr_block":             c.PodIpv4CidrBlock,
-			"pod_range":                       c.PodRange,
-			"enable_private_nodes":            c.EnablePrivateNodes,
-			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(c.PodCidrOverprovisionConfig),
-			"network_performance_config":      flattenNodeNetworkPerformanceConfig(c.NetworkPerformanceConfig),
-			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
-			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
-			"subnetwork":                      c.Subnetwork,
-			"accelerator_network_profile": 	   c.AcceleratorNetworkProfile,
+			"pod_ipv4_cidr_block":             flattenString(c["podIpv4CidrBlock"]),
+			"pod_range":                       flattenString(c["podRange"]),
+			"enable_private_nodes":            flattenBool(c["enablePrivateNodes"]),
+			"pod_cidr_overprovision_config":   flattenPodCidrOverprovisionConfig(getMap(c, "podCidrOverprovisionConfig")),
+			"network_performance_config":      flattenNodeNetworkPerformanceConfig(getMap(c, "networkPerformanceConfig")),
+			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(getSlice(c, "additionalNodeNetworkConfigs")),
+			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(getSlice(c, "additionalPodNetworkConfigs")),
+			"subnetwork":                      flattenString(c["subnetwork"]),
+			"accelerator_network_profile":     flattenString(c["acceleratorNetworkProfile"]),
 		})
 	}
 	return result
 }
 
-func flattenNodeNetworkPerformanceConfig(c *container.NetworkPerformanceConfig) []map[string]interface{} {
+func flattenNodeNetworkPerformanceConfig(c map[string]interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
+			"total_egress_bandwidth_tier": flattenString(c["totalEgressBandwidthTier"]),
 		})
 	}
 	return result
 }
 
-func flattenAdditionalNodeNetworkConfig(c []*container.AdditionalNodeNetworkConfig) []map[string]interface{} {
+func flattenAdditionalNodeNetworkConfig(c []interface{}) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 
 	result := []map[string]interface{}{}
-	for _, nodeNetworkConfig := range c {
+	for _, raw := range c {
+		nodeNetworkConfig, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
 		result = append(result, map[string]interface{}{
-			"network":    nodeNetworkConfig.Network,
-			"subnetwork": nodeNetworkConfig.Subnetwork,
+			"network":    flattenString(nodeNetworkConfig["network"]),
+			"subnetwork": flattenString(nodeNetworkConfig["subnetwork"]),
 			{{ if ne $.TargetVersionName `ga` -}}
-			"stack_type": nodeNetworkConfig.StackType,
+			"stack_type": flattenString(nodeNetworkConfig["stackType"]),
 			{{- end }}
 		})
 	}
 	return result
 }
 
-func flattenAdditionalPodNetworkConfig(c []*container.AdditionalPodNetworkConfig) []map[string]interface{} {
+func flattenAdditionalPodNetworkConfig(c []interface{}) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 
 	result := []map[string]interface{}{}
-	for _, podNetworkConfig := range c {
+	for _, raw := range c {
+		podNetworkConfig, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		maxPodsConstraint := getMap(podNetworkConfig, "maxPodsPerNode")
 		result = append(result, map[string]interface{}{
-			"subnetwork":          podNetworkConfig.Subnetwork,
-			"secondary_pod_range": podNetworkConfig.SecondaryPodRange,
-			"max_pods_per_node":   podNetworkConfig.MaxPodsPerNode.MaxPodsPerNode,
+			"subnetwork":          flattenString(podNetworkConfig["subnetwork"]),
+			"secondary_pod_range": flattenString(podNetworkConfig["secondaryPodRange"]),
+			"max_pods_per_node":   flattenInt(maxPodsConstraint["maxPodsPerNode"]),
 		})
 	}
 	return result
 }
 
-func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
+func expandNodeNetworkConfig(v interface{}) map[string]interface{} {
 	networkNodeConfigs := v.([]interface{})
 
-	nnc := &container.NodeNetworkConfig{}
+	nnc := map[string]interface{}{}
 
 	if len(networkNodeConfigs) == 0 {
 		return nnc
@@ -1788,73 +1826,72 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 	networkNodeConfig := networkNodeConfigs[0].(map[string]interface{})
 
 	if v, ok := networkNodeConfig["create_pod_range"]; ok {
-		nnc.CreatePodRange = v.(bool)
+		setField(nnc, "createPodRange", v.(bool))
 	}
 
 	if v, ok := networkNodeConfig["pod_range"]; ok {
-		nnc.PodRange = v.(string)
+		setField(nnc, "podRange", v.(string))
 	}
 
 	if v, ok := networkNodeConfig["pod_ipv4_cidr_block"]; ok {
-		nnc.PodIpv4CidrBlock = v.(string)
+		setField(nnc, "podIpv4CidrBlock", v.(string))
 	}
 
 	if v, ok := networkNodeConfig["enable_private_nodes"]; ok {
-		nnc.EnablePrivateNodes = v.(bool)
-		nnc.ForceSendFields = []string{"EnablePrivateNodes"}
+		nnc["enablePrivateNodes"] = v.(bool)
 	}
 
 	if v, ok := networkNodeConfig["additional_node_network_configs"]; ok && len(v.([]interface{})) > 0 {
 		node_network_configs := v.([]interface{})
-		nodeNetworkConfigs := make([]*container.AdditionalNodeNetworkConfig, 0, len(node_network_configs))
+		nodeNetworkConfigs := make([]map[string]interface{}, 0, len(node_network_configs))
 		for _, raw := range node_network_configs {
 			data := raw.(map[string]interface{})
-			networkConfig := &container.AdditionalNodeNetworkConfig{
-				Network:    data["network"].(string),
-				Subnetwork: data["subnetwork"].(string),
-				{{ if ne $.TargetVersionName `ga` -}}
-				StackType:  data["stack_type"].(string),
-				{{- end }}
-			}
+			networkConfig := map[string]interface{}{}
+			setField(networkConfig, "network", data["network"].(string))
+			setField(networkConfig, "subnetwork", data["subnetwork"].(string))
+			{{ if ne $.TargetVersionName `ga` -}}
+			setField(networkConfig, "stackType", data["stack_type"].(string))
+			{{- end }}
 			nodeNetworkConfigs = append(nodeNetworkConfigs, networkConfig)
 		}
-		nnc.AdditionalNodeNetworkConfigs = nodeNetworkConfigs
+		setField(nnc, "additionalNodeNetworkConfigs", nodeNetworkConfigs)
 	}
 
 	if v, ok := networkNodeConfig["additional_pod_network_configs"]; ok && len(v.([]interface{})) > 0 {
 		pod_network_configs := v.([]interface{})
-		podNetworkConfigs := make([]*container.AdditionalPodNetworkConfig, 0, len(pod_network_configs))
+		podNetworkConfigs := make([]map[string]interface{}, 0, len(pod_network_configs))
 		for _, raw := range pod_network_configs {
 			data := raw.(map[string]interface{})
-			podnetworkConfig := &container.AdditionalPodNetworkConfig{
-				Subnetwork:        data["subnetwork"].(string),
-				SecondaryPodRange: data["secondary_pod_range"].(string),
-				MaxPodsPerNode:    &container.MaxPodsConstraint{
-					MaxPodsPerNode: int64(data["max_pods_per_node"].(int)),
-				},
+			mpc := map[string]interface{}{}
+			setStringIntField(mpc, "maxPodsPerNode", int64(data["max_pods_per_node"].(int)))
+			podnetworkConfig := map[string]interface{}{
+				"maxPodsPerNode": mpc,
 			}
+			setField(podnetworkConfig, "subnetwork", data["subnetwork"].(string))
+			setField(podnetworkConfig, "secondaryPodRange", data["secondary_pod_range"].(string))
 			podNetworkConfigs = append(podNetworkConfigs, podnetworkConfig)
 		}
-		nnc.AdditionalPodNetworkConfigs = podNetworkConfigs
+		setField(nnc, "additionalPodNetworkConfigs", podNetworkConfigs)
 	}
 
-	nnc.PodCidrOverprovisionConfig = expandPodCidrOverprovisionConfig(networkNodeConfig["pod_cidr_overprovision_config"])
+	setField(nnc, "podCidrOverprovisionConfig", expandPodCidrOverprovisionConfig(networkNodeConfig["pod_cidr_overprovision_config"]))
 
 	if v, ok := networkNodeConfig["network_performance_config"]; ok && len(v.([]interface{})) > 0 {
-		nnc.NetworkPerformanceConfig = &container.NetworkPerformanceConfig{}
+		npc := map[string]interface{}{}
 		network_performance_config := v.([]interface{})[0].(map[string]interface{})
 		if total_egress_bandwidth_tier, ok := network_performance_config["total_egress_bandwidth_tier"]; ok {
-			nnc.NetworkPerformanceConfig.TotalEgressBandwidthTier = total_egress_bandwidth_tier.(string)
+			setField(npc, "totalEgressBandwidthTier", total_egress_bandwidth_tier.(string))
 		}
+		nnc["networkPerformanceConfig"] = npc
 	}
 	if v, ok := networkNodeConfig["accelerator_network_profile"]; ok {
-		nnc.AcceleratorNetworkProfile = v.(string)
+		setField(nnc, "acceleratorNetworkProfile", v.(string))
 	}
 
 	// Allow user to set the top-level node-pool subnetwork via network_config.subnetwork
 	if v, ok := networkNodeConfig["subnetwork"]; ok {
 		if s, ok := v.(string); ok && s != "" {
-			nnc.Subnetwork = s
+			nnc["subnetwork"] = s
 		}
 	}
 	return nnc
@@ -1875,36 +1912,37 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
 	if d.HasChange(prefix + "autoscaling") {
-		update := &container.ClusterUpdate{
-			DesiredNodePoolId: name,
-		}
+		update := map[string]interface{}{}
+		setField(update, "desiredNodePoolId", name)
 		if v, ok := d.GetOk(prefix + "autoscaling"); ok {
 			autoscaling := v.([]interface{})[0].(map[string]interface{})
-			update.DesiredNodePoolAutoscaling = &container.NodePoolAutoscaling{
-				Enabled:           true,
-				MinNodeCount:      int64(autoscaling["min_node_count"].(int)),
-				MaxNodeCount:      int64(autoscaling["max_node_count"].(int)),
-				TotalMinNodeCount: int64(autoscaling["total_min_node_count"].(int)),
-				TotalMaxNodeCount: int64(autoscaling["total_max_node_count"].(int)),
-				LocationPolicy:    autoscaling["location_policy"].(string),
-				ForceSendFields:   []string{"MinNodeCount", "TotalMinNodeCount"},
+			desiredAutoscaling := map[string]interface{}{
+				"enabled":           true,
+				"minNodeCount":      int64(autoscaling["min_node_count"].(int)),
+				"totalMinNodeCount": int64(autoscaling["total_min_node_count"].(int)),
 			}
+			setField(desiredAutoscaling, "maxNodeCount", int64(autoscaling["max_node_count"].(int)))
+			setField(desiredAutoscaling, "totalMaxNodeCount", int64(autoscaling["total_max_node_count"].(int)))
+			setField(desiredAutoscaling, "locationPolicy", autoscaling["location_policy"].(string))
+			update["desiredNodePoolAutoscaling"] = desiredAutoscaling
 		} else {
-			update.DesiredNodePoolAutoscaling = &container.NodePoolAutoscaling{
-				Enabled: false,
-			}
+			update["desiredNodePoolAutoscaling"] = map[string]interface{}{}
 		}
 
-		req := &container.UpdateClusterRequest{
-			Update: update,
+		req := map[string]interface{}{
+			"update": update,
 		}
 
 		updateF := func() error {
-			clusterUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
-			if config.UserProjectOverride {
-				clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterUpdateCall.Do()
+			url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.parent())
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 			if err != nil {
 				return err
 			}
@@ -1930,15 +1968,18 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 	if d.HasChange(prefix + "node_count") {
 		newSize := int64(d.Get(prefix + "node_count").(int))
-		req := &container.SetNodePoolSizeRequest{
-			NodeCount: newSize,
-		}
+		req := map[string]interface{}{}
+		setField(req, "nodeCount", newSize)
 		updateF := func() error {
-			clusterNodePoolsSetSizeCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.SetSize(nodePoolInfo.fullyQualifiedName(name),req)
-			if config.UserProjectOverride {
-				clusterNodePoolsSetSizeCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsSetSizeCall.Do()
+			url := fmt.Sprintf("%s%s:setSize", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 
 			if err != nil {
 				return err
@@ -1962,23 +2003,26 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "management") {
-		management := &container.NodeManagement{}
+		management := map[string]interface{}{}
 		if v, ok := d.GetOk(prefix + "management"); ok {
 			managementConfig := v.([]interface{})[0].(map[string]interface{})
-			management.AutoRepair = managementConfig["auto_repair"].(bool)
-			management.AutoUpgrade = managementConfig["auto_upgrade"].(bool)
-			management.ForceSendFields = []string{"AutoRepair", "AutoUpgrade"}
+			management["autoRepair"] = managementConfig["auto_repair"].(bool)
+			management["autoUpgrade"] = managementConfig["auto_upgrade"].(bool)
 		}
-		req := &container.SetNodePoolManagementRequest{
-			Management: management,
+		req := map[string]interface{}{
+			"management": management,
 		}
 
 		updateF := func() error {
-			clusterNodePoolsSetManagementCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.SetManagement(nodePoolInfo.fullyQualifiedName(name),req)
-			if config.UserProjectOverride {
-				clusterNodePoolsSetManagementCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsSetManagementCall.Do()
+			url := fmt.Sprintf("%s%s:setManagement", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 
 			if err != nil {
 				return err
@@ -1997,16 +2041,19 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "version") {
-		req := &container.UpdateNodePoolRequest{
-			NodePoolId:  name,
-			NodeVersion: d.Get(prefix + "version").(string),
-		}
+		req := map[string]interface{}{}
+		setField(req, "nodePoolId", name)
+		setField(req, "nodeVersion", d.Get(prefix+"version").(string))
 		updateF := func() error {
-			clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsUpdateCall.Do()
+			url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 
 			if err != nil {
 				return err
@@ -2024,15 +2071,18 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "node_locations") {
-		req := &container.UpdateNodePoolRequest{
-			Locations: tpgresource.ConvertStringSet(d.Get(prefix + "node_locations").(*schema.Set)),
-		}
+		req := map[string]interface{}{}
+		setField(req, "locations", tpgresource.ConvertStringSet(d.Get(prefix+"node_locations").(*schema.Set)))
 		updateF := func() error {
-			clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsUpdateCall.Do()
+			url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 
 			if err != nil {
 				return err
@@ -2049,82 +2099,87 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "upgrade_settings") {
-		upgradeSettings := &container.UpgradeSettings{}
+		upgradeSettings := map[string]interface{}{}
 		if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
 			upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
-			upgradeSettings.Strategy = upgradeSettingsConfig["strategy"].(string)
+			strategy := upgradeSettingsConfig["strategy"].(string)
+			setField(upgradeSettings, "strategy", strategy)
 
 			if d.HasChange(prefix + "upgrade_settings.0.max_surge") {
-				if upgradeSettings.Strategy != "SURGE" {
+				if strategy != "SURGE" {
 					return fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 				}
 				if v, ok := upgradeSettingsConfig["max_surge"]; ok {
-					upgradeSettings.MaxSurge = int64(v.(int))
+					setField(upgradeSettings, "maxSurge", int64(v.(int)))
 				}
 				// max_unavailable not be preserved if only max_surge is updated
 				if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
-					upgradeSettings.MaxUnavailable = int64(v.(int))
+					setField(upgradeSettings, "maxUnavailable", int64(v.(int)))
 				}
 			}
 
 			if d.HasChange(prefix + "upgrade_settings.0.max_unavailable") {
-				if upgradeSettings.Strategy != "SURGE" {
+				if strategy != "SURGE" {
 					return fmt.Errorf("Surge upgrade settings may not be changed when surge strategy is not enabled")
 				}
 				if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
-					upgradeSettings.MaxUnavailable = int64(v.(int))
+					setField(upgradeSettings, "maxUnavailable", int64(v.(int)))
 				}
 				// max_surge not be preserved if only max_unavailable is updated
 				if v, ok := upgradeSettingsConfig["max_surge"]; ok {
-					upgradeSettings.MaxSurge = int64(v.(int))
+					setField(upgradeSettings, "maxSurge", int64(v.(int)))
 				}
 			}
 
 			if d.HasChange(prefix + "upgrade_settings.0.blue_green_settings") {
-				if upgradeSettings.Strategy != "BLUE_GREEN" {
+				if strategy != "BLUE_GREEN" {
 					return fmt.Errorf("Blue-green upgrade settings may not be changed when blue-green strategy is not enabled")
 				}
 
-				blueGreenSettings := &container.BlueGreenSettings{}
+				blueGreenSettings := map[string]interface{}{}
 				blueGreenSettingsConfig := upgradeSettingsConfig["blue_green_settings"].([]interface{})[0].(map[string]interface{})
-				blueGreenSettings.NodePoolSoakDuration = blueGreenSettingsConfig["node_pool_soak_duration"].(string)
+				setField(blueGreenSettings, "nodePoolSoakDuration", blueGreenSettingsConfig["node_pool_soak_duration"].(string))
 
 				if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
-					standardRolloutPolicy := &container.StandardRolloutPolicy{}
+					standardRolloutPolicy := map[string]interface{}{}
 					if standardRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok	{
-						standardRolloutPolicy.BatchSoakDuration = standardRolloutPolicyConfig["batch_soak_duration"].(string)
+						setField(standardRolloutPolicy, "batchSoakDuration", standardRolloutPolicyConfig["batch_soak_duration"].(string))
 						if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
-							standardRolloutPolicy.BatchNodeCount = int64(v.(int))
+							setField(standardRolloutPolicy, "batchNodeCount", int64(v.(int)))
 						}
 						if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
-							standardRolloutPolicy.BatchPercentage = v.(float64)
+							setField(standardRolloutPolicy, "batchPercentage", v.(float64))
 						}
 					}
-					blueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
+					blueGreenSettings["standardRolloutPolicy"] = standardRolloutPolicy
 				}
 				{{ if ne $.TargetVersionName `ga` -}}
 				if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
-					autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
+					autoscaledRolloutPolicy := map[string]interface{}{}
 					if autoscaledRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok {
 						if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
-							autoscaledRolloutPolicy.WaitForDrainDuration = v.(string)
+							setField(autoscaledRolloutPolicy, "waitForDrainDuration", v.(string))
 						}
 					}
-					blueGreenSettings.AutoscaledRolloutPolicy = autoscaledRolloutPolicy
+					blueGreenSettings["autoscaledRolloutPolicy"] = autoscaledRolloutPolicy
 				}
 				{{- end }}
-				upgradeSettings.BlueGreenSettings = blueGreenSettings
+				upgradeSettings["blueGreenSettings"] = blueGreenSettings
 			}
 		}
-		req := &container.UpdateNodePoolRequest{
-			UpgradeSettings: upgradeSettings,
+		req := map[string]interface{}{
+			"upgradeSettings": upgradeSettings,
 		}
 		updateF := func() error {
-			clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsUpdateCall.Do()
+			url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 
 			if err != nil {
 				return err
@@ -2141,16 +2196,19 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 	if d.HasChange(prefix + "network_config") {
 		if d.HasChange(prefix + "network_config.0.enable_private_nodes") || d.HasChange(prefix + "network_config.0.network_performance_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				NodeNetworkConfig: expandNodeNetworkConfig(d.Get(prefix + "network_config")),
-			}
+			req := map[string]interface{}{}
+			setField(req, "nodePoolId", name)
+			setField(req, "nodeNetworkConfig", expandNodeNetworkConfig(d.Get(prefix+"network_config")))
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
+				url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+				op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PUT",
+					Project:   nodePoolInfo.project,
+					RawURL:    url,
+					UserAgent: userAgent,
+					Body:      req,
+				})
 
 				if err != nil {
 					return err
@@ -2173,30 +2231,33 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "node_drain_config") {
-		nodeDrainConfig := &container.NodeDrainConfig{}
+		nodeDrainConfig := map[string]interface{}{}
 		if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
 			nodeDrain := v.([]interface{})[0].(map[string]interface{})
 			if v, ok := nodeDrain["respect_pdb_during_node_pool_deletion"]; ok {
-				nodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
+				setField(nodeDrainConfig, "respectPdbDuringNodePoolDeletion", v.(bool))
 			}
 			if v, ok := nodeDrain["grace_termination_duration"]; ok {
-				nodeDrainConfig.GraceTerminationDuration = v.(string)
+				setField(nodeDrainConfig, "graceTerminationDuration", v.(string))
 			}
 			if v, ok := nodeDrain["pdb_timeout_duration"]; ok {
-				nodeDrainConfig.PdbTimeoutDuration = v.(string)
+				setField(nodeDrainConfig, "pdbTimeoutDuration", v.(string))
 			}
 		}
-		req := &container.UpdateNodePoolRequest{
-			NodeDrainConfig: nodeDrainConfig,
+		req := map[string]interface{}{
+			"nodeDrainConfig": nodeDrainConfig,
 		}
 
 		updateF := func() error {
-			clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
-
-			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsUpdateCall.Do()
+			url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 
 			if err != nil {
 				return err
@@ -2216,37 +2277,40 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "maintenance_policy") {
-		req := &container.UpdateNodePoolRequest{
-			NodePoolId: name,
-		}
+		req := map[string]interface{}{}
+		setField(req, "nodePoolId", name)
 		if v, ok := d.GetOk(prefix + "maintenance_policy"); ok && len(v.([]interface{})) > 0 {
-			req.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
-				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport{},
-			}
+			excl := map[string]interface{}{}
 			maintenancePolicy := v.([]interface{})[0].(map[string]interface{})
 			if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 {
-				exclusionUntilEndOfSupport := v.([]interface{})[0].(map[string]interface{})
-				if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
-					req.MaintenancePolicy.ExclusionUntilEndOfSupport.Enabled = v.(bool)
-					req.MaintenancePolicy.ExclusionUntilEndOfSupport.ForceSendFields = []string{"Enabled"}
+				if exclusionUntilEndOfSupport, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+					if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
+						excl["enabled"] = v.(bool)
+					}
 				}
+			}
+			req["maintenancePolicy"] = map[string]interface{}{
+				"exclusionUntilEndOfSupport": excl,
 			}
 		} else {
 			// If removed or cleared from config, explicitly disable the exclusion
-			req.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
-				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport{
-					Enabled:         false,
-					ForceSendFields: []string{"Enabled"},
+			req["maintenancePolicy"] = map[string]interface{}{
+				"exclusionUntilEndOfSupport": map[string]interface{}{
+					"enabled": false,
 				},
 			}
 		}
 
 		updateF := func() error {
-			clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-			}
-			op, err := clusterNodePoolsUpdateCall.Do()
+			url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), nodePoolInfo.fullyQualifiedName(name))
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "PUT",
+				Project:   nodePoolInfo.project,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Body:      req,
+			})
 			if err != nil {
 				return err
 			}
@@ -2282,25 +2346,29 @@ var containerNodePoolRestingStates = RestingStates{
 // returns a state with no error if the state is a resting state, and the last state with an error otherwise
 func containerNodePoolAwaitRestingState(config *transport_tpg.Config, name, project, userAgent string, timeout time.Duration) (state string, err error) {
 	err = retry.Retry(timeout, func() *retry.RetryError {
-		clusterNodePoolsGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Get(name)
-		if config.UserProjectOverride {
-			clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", project)
-		}
-		nodePool, gErr := clusterNodePoolsGetCall.Do()
+		url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), name)
+		nodePool, gErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
 		if gErr != nil {
 			return retry.NonRetryableError(gErr)
 		}
 
-		state = nodePool.Status
+		state = flattenString(nodePool["status"])
+		statusMessage := flattenString(nodePool["statusMessage"])
 		switch stateType := containerNodePoolRestingStates[state]; stateType {
 		case ReadyState:
-			log.Printf("[DEBUG] NodePool %q has status %q with message %q.", name, state, nodePool.StatusMessage)
+			log.Printf("[DEBUG] NodePool %q has status %q with message %q.", name, state, statusMessage)
 			return nil
 		case ErrorState:
-			log.Printf("[DEBUG] NodePool %q has error state %q with message %q.", name, state, nodePool.StatusMessage)
+			log.Printf("[DEBUG] NodePool %q has error state %q with message %q.", name, state, statusMessage)
 			return nil
 		default:
-			return retry.RetryableError(fmt.Errorf("NodePool %q has state %q with message %q", name, state, nodePool.StatusMessage))
+			return retry.RetryableError(fmt.Errorf("NodePool %q has state %q with message %q", name, state, statusMessage))
 		}
 	})
 
