@@ -374,8 +374,8 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	commitSha = strings.TrimSpace(commitSha)
 	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
 
-	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commmit hash
-	// across cloudbuild steps. Used in test-tpg to execute unit tests for the HEAD commit
+	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commit hash
+	// across cloudbuild steps.
 	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") {
 		var variablePath string
 		if strings.HasSuffix(scratchRepo.Branch, "-old") {
