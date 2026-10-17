@@ -20,7 +20,6 @@ references:
     Official Documentation: https://cloud.google.com/dataform/docs/release-configurations
   api: https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories.releaseConfigs
 base_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs
-min_version: beta
 create_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs?releaseConfigId={{name}}
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
@@ -29,114 +28,87 @@ import_format:
 samples:
   - name: dataform_repository_release_config
     primary_resource_id: release
-    min_version: beta
     steps:
       - name: dataform_repository_release_config
-        min_version: beta
         resource_id_vars:
           data: secret-data
           dataform_repository_name: dataform_repository
-          git_repository_name: my/repository
           release_name: my_release
           secret_name: my_secret
-        test_vars_overrides:
-          # for backward compatible
-          git_repository_name: '"my/repository" + randomSuffix'
   - name: dataform_repository_release_config_disabled
     primary_resource_id: release
-    min_version: beta
     steps:
       - name: dataform_repository_release_config_disabled
-        min_version: beta
         resource_id_vars:
           data: secret-data
           dataform_repository_name: dataform_repository
-          git_repository_name: my/repository
           release_name: my_release
           secret_name: my_secret
-        test_vars_overrides:
-          git_repository_name: '"my/repository" + randomSuffix'
 parameters:
   - name: region
     type: String
     description: A reference to the region
     immutable: true
     url_param_only: true
-    min_version: beta
   - name: repository
     type: String
     description: A reference to the Dataform repository
     immutable: true
     url_param_only: true
-    min_version: beta
 properties:
   - name: name
     type: String
     required: true
     description: The release's name.
     immutable: true
-    min_version: beta
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: gitCommitish
     type: String
     required: true
     description: Git commit/tag/branch name at which the repository should be compiled. Must exist in the remote repository.
-    min_version: beta
   - name: cronSchedule
     type: String
     description: Optional. Optional schedule (in cron format) for automatic creation of compilation results.
-    min_version: beta
   - name: timeZone
     type: String
     description: Optional. Specifies the time zone to be used when interpreting cronSchedule. Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). If left unspecified, the default is UTC.
-    min_version: beta
   - name: codeCompilationConfig
     type: NestedObject
     description: Optional. If set, fields of codeCompilationConfig override the default compilation settings that are specified in dataform.json.
-    min_version: beta
     properties:
       - name: defaultDatabase
         type: String
         description: Optional. The default database (Google Cloud project ID).
-        min_version: beta
       - name: defaultSchema
         type: String
         description: Optional. The default schema (BigQuery dataset ID).
-        min_version: beta
       - name: defaultLocation
         type: String
         description: |-
           Optional. The default BigQuery location to use. Defaults to "US".
           See the BigQuery docs for a full list of locations: https://cloud.google.com/bigquery/docs/locations.
-        min_version: beta
       - name: assertionSchema
         type: String
         description: Optional. The default schema (BigQuery dataset ID) for assertions.
-        min_version: beta
       - name: vars
         type: KeyValuePairs
         description: |-
           Optional. User-defined variables that are made available to project code during compilation.
           An object containing a list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-        min_version: beta
       - name: databaseSuffix
         type: String
         description: Optional. The suffix that should be appended to all database (Google Cloud project ID) names.
-        min_version: beta
       - name: schemaSuffix
         type: String
         description: Optional. The suffix that should be appended to all schema (BigQuery dataset ID) names.
-        min_version: beta
       - name: tablePrefix
         type: String
         description: Optional. The prefix that should be prepended to all table names.
-        min_version: beta
   - name: recentScheduledReleaseRecords
     type: Array
     description: Records of the 10 most recent scheduled release attempts, ordered in in descending order of releaseTime. Updated whenever automatic creation of a compilation result is triggered by cronSchedule.
     output: true
-    min_version: beta
     item_type:
       type: NestedObject
       properties:
@@ -144,28 +116,23 @@ properties:
           type: String
           description: The timestamp of this release attempt.
           output: true
-          min_version: beta
         - name: compilationResult
           type: String
           description: The name of the created compilation result, if one was successfully created. Must be in the format projects/*/locations/*/repositories/*/compilationResults/*.
           output: true
-          min_version: beta
         - name: errorStatus
           type: NestedObject
           description: The error status encountered upon this attempt to create the compilation result, if the attempt was unsuccessful.
           output: true
-          min_version: beta
           properties:
             - name: code
               type: Integer
               description: The status code, which should be an enum value of google.rpc.Code.
               output: true
-              min_version: beta
             - name: message
               type: String
               description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
               output: true
-              min_version: beta
   - name: disabled
     type: Boolean
     description: Disables automatic creation of compilation results.
