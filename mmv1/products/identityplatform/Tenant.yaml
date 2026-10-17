@@ -45,6 +45,25 @@ samples:
         # API caps display names at 20 characters, so no random suffix is added.
         test_vars_overrides:
           display_name: '"tf-test-tenant"'
+  - name: identity_platform_tenant_password_policy
+    primary_resource_id: tenant
+    steps:
+      - name: identity_platform_tenant_password_policy
+        vars:
+          display_name: tenant
+        test_vars_overrides:
+          display_name: '"tf-test-tenant-pw"'
+      - name: identity_platform_tenant_strict_password_policy
+        vars:
+          display_name: tenant
+        test_vars_overrides:
+          display_name: '"tf-test-tenant-pw"'
+      - name: identity_platform_tenant_weak_password_policy
+        vars:
+          display_name: tenant
+        test_vars_overrides:
+          display_name: '"tf-test-tenant-pw"'
+
 parameters:
 properties:
   - name: name
