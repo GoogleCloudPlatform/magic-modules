@@ -1,0 +1,55 @@
+resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "resource_name"}}"
+  parent      = "projects/{{index $.TestEnvVars "project"}}"
+  description = "my updated description"
+  type        = "WILDFIRE_ANALYSIS"
+
+  wildfire_analysis_profile {
+    wildfire_realtime_lookup = false
+
+    wildfire_submission_rules {
+      direction           = "DOWNLOAD"
+      file_selection_mode = "CUSTOM_FILE_TYPES"
+      custom_file_types {
+        file_types = ["APK", "JAR"]
+      }
+    }
+
+    wildfire_inline_cloud_analysis_rules {
+      direction           = "DOWNLOAD"
+      action              = "ALERT"
+      file_selection_mode = "CUSTOM_FILE_TYPES"
+      custom_file_types {
+        file_types = ["PE"]
+      }
+    }
+
+    wildfire_overrides {
+      protocol = "WILDFIRE_SMTP"
+      action   = "WILDFIRE_ALLOW"
+    }
+
+    wildfire_inline_ml_overrides {
+      protocol = "WILDFIRE_HTTP2"
+      action   = "WILDFIRE_DENY"
+    }
+
+    wildfire_threat_overrides {
+      threat_id = "67890"
+      action    = "WILDFIRE_DEFAULT_ACTION"
+    }
+
+    wildfire_inline_ml_setting {
+      inline_ml_configs {
+        file_type = "SHELL"
+        action    = "DISABLE"
+      }
+
+      file_exceptions {
+        partial_hash = "fedcba54321"
+        filename     = "updated.exe"
+      }
+    }
+  }
+}

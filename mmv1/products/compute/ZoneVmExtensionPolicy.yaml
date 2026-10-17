@@ -24,10 +24,10 @@ samples:
     primary_resource_id: 'ops_agent_policy'
     steps:
       - name: 'compute_zone_vm_extension_policy_basic'
-        vars:
+        resource_id_vars:
           policy_name: 'zonal-ops-agent-policy'
       - name: 'compute_zone_vm_extension_policy_update'
-        vars:
+        resource_id_vars:
           policy_name: 'zonal-ops-agent-policy'
 autogen_async: true
 async:

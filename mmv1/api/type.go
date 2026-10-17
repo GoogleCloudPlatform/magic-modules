@@ -547,14 +547,56 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot set update_mask_fields because it is nested in resource %s", fullFieldPath, rName))
 	}
 
+	if !t.isExcluded() && len(t.Conflicting()) > 0 {
+		t.cullHigherVersionConflicts()
+		for _, c := range t.Conflicting() {
+			if _, path := t.ResourceMetadata.resolvePropertySchemaPath(c); path == "" {
+				es = append(es, fmt.Errorf("property %s has `conflicts` entry %q that resolved to an empty ConflictsWith in resource %s", fullFieldPath, c, rName))
+			}
+		}
+	}
+
 	return es
+}
+
+// Remove conflicts that are valid, in the max version of the schema, but between
+// groups that are not necessarily present in the current run.
+func (t *Type) cullHigherVersionConflicts() {
+	raw := t.Conflicting()
+	filtered := make([]string, 0, len(raw))
+	for _, c := range raw {
+		_, resolved := t.ResourceMetadata.resolvePropertySchemaPath(c)
+		if resolved == "" && t.isValidHigherVersionConflict(c) {
+			continue
+		}
+		filtered = append(filtered, c)
+	}
+	if len(filtered) != len(raw) {
+		t.Conflicts = filtered
+		if t.ConflictsGroup != nil {
+			t.ConflictsGroup = &filtered
+		}
+	}
+}
+
+// Hierarchical exclusion check against self, parent (if nested), resource
+func (t *Type) isExcluded() bool {
+	if t.Exclude {
+		return true
+	}
+	if t.ParentMetadata != nil {
+		return t.ParentMetadata.isExcluded()
+	}
+	if t.ResourceMetadata != nil {
+		return t.ResourceMetadata.IsExcluded()
+	}
+	return false
 }
 
 // TODO rewrite: add validations
 // check :description, required: true
 // check :update_verb, allowed: %i[POST PUT PATCH NONE],
 // check_default_value_property
-// check_conflicts
 // check_at_least_one_of
 // check_exactly_one_of
 // check_required_with
@@ -1462,78 +1504,76 @@ func (t *Type) ProviderOnly() bool {
 	return parent != nil && parent.ProviderOnly()
 }
 
-// Returns an updated path for a given Terraform field path (e.g.
-// 'a_field', 'parent_field.0.child_name'). Returns nil if the property
-// is not included in the resource's properties and removes keys that have
-// been flattened
-// FYI: Fields that have been renamed should use the new name, however, flattened
-// fields still need to be included, ie:
-// flattenedField > newParent > renameMe should be passed to this function as
-// flattened_field.0.new_parent.0.im_renamed
-// TODO: Change format of input for
-// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
-// convert to snake in this method
-func (t *Type) GetPropertySchemaPath(schemaPath string) string {
-	nestedProps := t.ResourceMetadata.UserProperites()
-
-	pathSegments := strings.Split(schemaPath, ".0.")
-	var pathTkns []string
-	for i, pname := range pathSegments {
-		camelPname := google.Camelize(pname, "lower")
-		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
-
-		// if we couldn't find it, see if it was renamed at the top level
-		if prop == nil {
-			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
-		}
-
-		if prop == nil {
-			return ""
-		}
-
-		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
-		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
-		// intermediate segment. The terminal segment itself may be any type, so
-		// only apply this guard to non-final path tokens.
-		isIntermediate := i < len(pathSegments)-1
-		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
-			return ""
-		}
-
-		nestedProps = prop.NestedProperties()
-		if !prop.FlattenObject {
-			pathTkns = append(pathTkns, google.Underscore(pname))
-		}
+func (t *Type) isValidHigherVersionConflict(conflictPath string) bool {
+	if t.ResourceMetadata == nil {
+		return false
+	}
+	highSchema := t.ResourceMetadata.maxVersionSchema
+	_, highSelfPath := highSchema.resolvePropertySchemaPath(strings.Join(t.Lineage(), ".0."))
+	if highSelfPath == "" {
+		return false
 	}
 
-	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
-		return ""
+	highTarget, highTargetPath := highSchema.resolvePropertySchemaPath(conflictPath)
+	if highTarget == nil || highTargetPath == "" {
+		return false
 	}
 
-	return strings.Join(pathTkns[:], ".0.")
+	for _, rev := range highTarget.Conflicting() {
+		if _, revPath := highSchema.resolvePropertySchemaPath(rev); revPath == highSelfPath {
+			return true
+		}
+	}
+	return false
 }
 
-// findPropByNameInFlattenedList searches for a property by camelCase name in a
-// list of properties. It also searches recursively inside any FlattenObject
-// nested objects, since those appear as top-level fields in the Terraform schema.
-func findPropByNameInFlattenedList(props []*Type, name string) *Type {
-	for _, p := range props {
-		if p.Name == name {
-			return p
-		}
-		if p.FlattenObject {
-			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
-				return found
-			}
+// Deep clone Type for Resource.maxVersionSchema referencing copied Resource and Type values
+func (t *Type) cloneForMaxSchema(res *Resource, parent *Type) *Type {
+	if t == nil {
+		return nil
+	}
+	c := *t
+	c.ResourceMetadata = res
+	c.ParentMetadata = parent
+	c.Conflicts = slices.Clone(t.Conflicts)
+	if t.ConflictsGroup != nil {
+		cg := slices.Clone(*t.ConflictsGroup)
+		c.ConflictsGroup = &cg
+	}
+	c.AtLeastOneOf = slices.Clone(t.AtLeastOneOf)
+	if t.AtLeastOneOfGroup != nil {
+		ag := slices.Clone(*t.AtLeastOneOfGroup)
+		c.AtLeastOneOfGroup = &ag
+	}
+	c.ExactlyOneOf = slices.Clone(t.ExactlyOneOf)
+	if t.ExactlyOneOfGroup != nil {
+		eg := slices.Clone(*t.ExactlyOneOfGroup)
+		c.ExactlyOneOfGroup = &eg
+	}
+	c.RequiredWith = slices.Clone(t.RequiredWith)
+	if t.RequiredWithGroup != nil {
+		rg := slices.Clone(*t.RequiredWithGroup)
+		c.RequiredWithGroup = &rg
+	}
+	if t.Properties != nil {
+		c.Properties = make([]*Type, len(t.Properties))
+		for i, p := range t.Properties {
+			c.Properties[i] = p.cloneForMaxSchema(res, &c)
 		}
 	}
-	return nil
+	if t.ItemType != nil {
+		c.ItemType = t.ItemType.cloneForMaxSchema(res, &c)
+	}
+	if t.ValueType != nil {
+		c.ValueType = t.ValueType.cloneForMaxSchema(res, &c)
+	}
+	return &c
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 	var list []string
 	for _, path := range propertyList {
-		path = t.GetPropertySchemaPath(path)
+		_, path = t.ResourceMetadata.resolvePropertySchemaPath(path)
 		if path != "" {
 			list = append(list, path)
 		}

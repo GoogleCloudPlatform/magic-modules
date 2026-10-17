@@ -24,6 +24,8 @@ fields:
   - api_field: 'dnsNames.name'
   - api_field: 'diskEncryptionConfiguration.kmsKeyName'
     field: 'encryption_key_name'
+  - api_field: 'diskEncryptionConfiguration.confidentialMode'
+    field: 'encryption_confidential_mode'
   - field: 'final_backup_description'
   - api_field: 'ipAddresses.ipAddress'
     field: 'first_ip_address'
@@ -232,3 +234,16 @@ fields:
     field: 'settings.version'
   - field: 'deletion_policy'
     provider_only: true
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'blue_green_deployment.deployment_name'
+  - field: 'blue_green_deployment.target_database_version'
+  - field: 'blue_green_deployment.active_environment'
+  - field: 'blue_green_deployment.delete_old_source_on_destroy'
+  - field: 'blue_green_deployment.target_instance_name'
+  - field: 'blue_green_deployment.target_instance_connection_name'
+  - field: 'blue_green_deployment.target_instance_ip_addresses.ip_address'
+  - field: 'blue_green_deployment.target_instance_ip_addresses.type'
+  - field: 'blue_green_deployment.target_instance_ip_addresses.time_to_retire'
+  - field: 'blue_green_deployment.old_source_instance_name'
+  - field: 'blue_green_deployment.old_source_instance_connection_name'
+{{- end }}

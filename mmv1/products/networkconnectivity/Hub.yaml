@@ -60,6 +60,16 @@ samples:
       - name: network_connectivity_hub_with_export_psc
         resource_id_vars:
           resource_name: basic
+  - name: network_connectivity_hub_with_export_psc_config
+    primary_resource_id: primary
+    min_version: 'beta'
+    steps:
+      - name: network_connectivity_hub_with_export_psc_config
+        resource_id_vars:
+          resource_name: psc-config
+      - name: network_connectivity_hub_with_export_psc_config_update
+        resource_id_vars:
+          resource_name: psc-config
   - name: network_connectivity_hub_mesh_topology
     primary_resource_id: primary
     steps:
@@ -147,3 +157,19 @@ properties:
     type: Boolean
     description: Whether Private Service Connect transitivity is enabled for the hub. If true, Private Service Connect endpoints in VPC spokes attached to the hub are made accessible to other VPC spokes attached to the hub. The default value is false.
     default_from_api: true
+  - name: exportPscConfig
+    type: NestedObject
+    min_version: 'beta'
+    description: |
+      Config for more granular control of Private Service Connect transitivity. Only takes effect when `export_psc` is true.
+      If `export_psc` is true, at least one of `published_services_and_regional_google_apis` and `global_google_apis` must be true.
+    default_from_api: true
+    properties:
+      - name: publishedServicesAndRegionalGoogleApis
+        type: Boolean
+        description: Whether Private Service Connect endpoints for published services (regional ILBs) and regional Google APIs are propagated.
+        send_empty_value: true
+      - name: globalGoogleApis
+        type: Boolean
+        description: Whether Private Service Connect endpoints for global Google APIs are propagated. The default value is false.
+        send_empty_value: true

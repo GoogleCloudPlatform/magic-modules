@@ -1,7 +1,7 @@
 {{/* See mmv1/third_party/terraform/utils/privateca_utils.go for the sub-expanders and explanation */}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
-		v = make(map[string]interface{})
+		return nil
 	}
 	original := v.(map[string]interface{})
 	transformed := make(map[string]interface{})

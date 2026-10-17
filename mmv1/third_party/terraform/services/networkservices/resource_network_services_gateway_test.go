@@ -248,7 +248,7 @@ func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAd
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxy(context, false),
+				Config: testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxy(context),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.default",
@@ -260,9 +260,8 @@ func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAd
 	})
 }
 
-func testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxy(context map[string]interface{}, withAddresses bool) string {
-	config := ""
-	config += acctest.Nprintf(`
+func testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "tf-test-my-certificate-%{random_suffix}"
   location    = "us-central1"
@@ -313,14 +312,7 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
 
 resource "google_network_services_gateway" "default" {
   name                                 = "tf-test-my-gateway-%{random_suffix}"
-  location                             = "us-central1"`, context)
-
-	if withAddresses {
-		config += `
-  addresses                            = ["10.128.0.99"]`
-	}
-
-	config += acctest.Nprintf(`
+  location                             = "us-central1"
   type                                 = "SECURE_WEB_GATEWAY"
   ports                                = [443]
   scope                                = "tf-test-my-default-scope-%{random_suffix}"
@@ -332,8 +324,6 @@ resource "google_network_services_gateway" "default" {
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
 `, context)
-
-	return config
 }
 
 func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyMultiplePorts(t *testing.T) {

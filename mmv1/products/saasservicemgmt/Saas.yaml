@@ -15,6 +15,9 @@
 name: Saas
 description: A Saas resource is the top-level representation of a SaaS service managed by a producer. It contains a list of locations where the service is available, which is used by the Rollout system to generate a rollout plan.
 base_url: projects/{{project}}/locations/{{location}}/saas
+# ListSaasResponse returns the list under `saas`, not the default plural
+# `saases`; the generated sweeper reads this key.
+collection_url_key: 'saas'
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
 create_url: projects/{{project}}/locations/{{location}}/saas?saasId={{saas_id}}
@@ -23,6 +26,22 @@ id_format: projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
 min_version: beta
+timeouts:
+  # The application template import takes up to 20 minutes.
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+# A PATCH on a FAILED Saas (even labels-only) restarts the application template
+# import; while it is RUNNING the service rejects template/revision updates and
+# DELETE with 400. Retry those until the import finishes (bounded by timeouts).
+error_retry_predicates:
+  # Defined in templates/terraform/constants/saas_runtime_saas.go.tmpl.
+  - 'IsSaasRuntimeSaasImportRunningError'
+custom_code:
+  constants: templates/terraform/constants/saas_runtime_saas.go.tmpl
+  # Wait for the application template import to reach STATE_ACTIVE or STATE_FAILED.
+  post_create: templates/terraform/post_create/saas_runtime_saas_wait.go.tmpl
+  post_update: templates/terraform/post_create/saas_runtime_saas_wait.go.tmpl
 samples:
   - name: saas_runtime_saas_basic
     primary_resource_id: "example"
@@ -33,9 +52,42 @@ samples:
     steps:
       - name: saas_runtime_saas_basic
         min_version: 'beta'
+        # The service reconciles a new Saas asynchronously after Create returns
+        # (provisions its blueprint repository and sets status), which refreshes
+        # the output-only etag and update_time fields.
+        ignore_read_extra:
+          - etag
+          - update_time
+          # Set asynchronously by the service after Create.
+          - blueprint_repo
+          # Set asynchronously by the service after Create.
+          - state
+          # Set asynchronously by the service after Create.
+          - conditions
         resource_id_vars:
           saas_name: test-saas
+  - name: saas_runtime_saas_application_template
+    primary_resource_id: "example"
+    min_version: 'beta'
+    exclude_test: true
+    steps:
+      - name: saas_runtime_saas_application_template
+        min_version: 'beta'
+        resource_id_vars:
+          saas_name: example-saas
+          space_name: my-space
+          template_name: my-composite
+        test_env_vars:
+          project: PROJECT_NAME
 autogen_async: false
+# DeleteSaas returns before the resource is removed (no long-running operation);
+# poll until GET returns 404 so destroy completes only once the Saas is gone.
+async:
+  type: PollAsync
+  actions: [delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
 autogen_status: U2Fhcw==
 parameters:
   - name: location
@@ -59,10 +111,115 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: applicationTemplate
+    type: NestedObject
+    description: |-
+      Reference to a composite Application Design Center ApplicationTemplate.
+      When `revision` is set, the service imports the template components into
+      equivalent UnitKind, Release and Blueprint resources. Create waits for
+      the import to finish. Update waits when the template changes or when the
+      Saas was failed, running, or not yet started. Both fail if `state`
+      becomes `STATE_FAILED`.
+
+      * The import creates UnitKinds (named `u-<rootModuleId>-<6 chars>`) and
+        their Releases, and copies the Saas, the UnitKinds and the Releases to
+        `global` and to the other `locations`. Terraform doesn't manage or
+        delete any of them, including when this field changes. Before
+        destroying or replacing the Saas (including `terraform apply -replace`
+        and recreating a tainted Saas), delete the imported UnitKinds and
+        Releases in every location: the API rejects the deletion of a Saas
+        that still has UnitKinds.
+      * After a failed import, fix the template and change `revision`. Any
+        apply that changes a failed Saas restarts the import, and the provider
+        waits for the restarted import to finish or fail again.
+      * While an import is running, the provider retries template or revision
+        updates and DELETE until it finishes, within the resource timeouts.
+      * Don't create Terraform-managed UnitKinds whose
+        `application_template_component` matches a component of this
+        template: the import adopts them and overwrites their fields.
+      * Set this field only on the source-region Saas, not on the copies in
+        `global` or other `locations`.
+    properties:
+      - name: applicationTemplate
+        type: String
+        required: true
+        description: |-
+          Reference to the ApplicationTemplate resource, in the format
+          `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{applicationTemplate}`.
+      - name: revision
+        type: String
+        description: |-
+          Revision of the ApplicationTemplate to import, as a full resource name
+          prefixed by `application_template`:
+          `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{applicationTemplate}/revisions/{revision}`.
+          Changes to the revision trigger a new import. If empty, the service
+          stores `application_template` but doesn't import it.
+      - name: syncOperation
+        type: String
+        description: Reference to the ongoing import and replication operation. Opaque for external usage.
+        output: true
+  - name: blueprintRepo
+    type: String
+    description: |-
+      Name of the repository in Artifact Registry for system-generated
+      Blueprints, for example the Blueprints of imported ApplicationTemplates.
+    output: true
+  - name: conditions
+    type: Array
+    description: |-
+      A set of conditions which indicate the various conditions this resource can
+      have.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: lastTransitionTime
+          type: String
+          description: Last time the condition transited from one status to another.
+          output: true
+        - name: message
+          type: String
+          description: Human readable message indicating details about the last transition.
+          output: true
+        - name: reason
+          type: String
+          description: Brief reason for the condition's last transition.
+          output: true
+        - name: status
+          type: String
+          description: |-
+            Status of the condition.
+            Possible values:
+            STATUS_UNKNOWN
+            STATUS_TRUE
+            STATUS_FALSE
+          output: true
+        - name: type
+          type: String
+          description: |-
+            Type of the condition.
+            Possible values:
+            TYPE_READY
+            TYPE_SYNCHRONIZED
+          output: true
   - name: createTime
     type: String
     description: The timestamp when the resource was created.
     output: true
+  - name: error
+    type: NestedObject
+    description: |-
+      If the state is `STATE_FAILED`, the corresponding error code and message.
+    output: true
+    properties:
+      - name: code
+        type: Integer
+        description: The status code, which should be an enum value of google.rpc.Code.
+        output: true
+      - name: message
+        type: String
+        description: A developer-facing error message.
+        output: true
   - name: etag
     type: String
     description: |-
@@ -93,6 +250,18 @@ properties:
       scheme:
 
       "projects/{project}/locations/{location}/saas/{saas}"
+    output: true
+  - name: state
+    type: String
+    description: |-
+      State of the Saas. It is always `STATE_ACTIVE` if
+      `application_template.revision` is empty.
+      Possible values:
+      STATE_UNSPECIFIED
+      STATE_TYPE_UNSPECIFIED
+      STATE_ACTIVE
+      STATE_RUNNING
+      STATE_FAILED
     output: true
   - name: uid
     type: String

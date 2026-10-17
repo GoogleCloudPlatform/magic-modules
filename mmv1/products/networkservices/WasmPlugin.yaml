@@ -179,8 +179,6 @@ properties:
             A base64-encoded string containing the configuration for the plugin. The configuration is provided to the plugin at runtime through the ON_CONFIGURE callback.
             When a new WasmPluginVersion resource is created, the digest of the contents is saved in the pluginConfigDigest field.
             Conflics with pluginConfigUri.
-          conflicts:
-            - pluginConfigUri
           validation:
             function: verify.ValidateBase64String
         - name: pluginConfigUri
@@ -190,8 +188,6 @@ properties:
             The container image must contain only a single file with the name plugin.config.
             When a new WasmPluginVersion resource is created, the digest of the container image is saved in the pluginConfigDigest field.
             Conflics with pluginConfigData.
-          conflicts:
-            - pluginConfigData
   - name: usedBy
     type: Array
     description: |

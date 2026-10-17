@@ -366,8 +366,6 @@ properties:
 
           This type of authorization should generally be used only when calling Google APIs hosted on *.googleapis.com.
           Note that both the service account email and the scope MUST be specified when using the queue-level authorization override.
-        conflicts:
-          - oidcToken
         is_missing_in_cai: true
         properties:
           - name: 'serviceAccountEmail'
@@ -390,8 +388,6 @@ properties:
 
           This type of authorization can be used for many scenarios, including calling Cloud Run, or endpoints where you intend to validate the token yourself.
           Note that both the service account email and the audience MUST be specified when using the queue-level authorization override.
-        conflicts:
-          - oauthToken
         properties:
           - name: 'serviceAccountEmail'
             type: String

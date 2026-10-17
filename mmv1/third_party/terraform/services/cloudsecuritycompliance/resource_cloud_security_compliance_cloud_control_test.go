@@ -13,8 +13,9 @@ import (
 
 func testAccCloudSecurityComplianceCloudControl_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+%{extra_config}
 resource "google_cloud_security_compliance_cloud_control" "example" {
-	parent            = "organizations/%{org_id}"
+	parent            = "%{parent}"
 	location          = "global"
 	cloud_control_id  = "tf-test-%{random_suffix}"
 	display_name      = "TF Test CloudControl"
@@ -385,7 +386,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 					oneof_value {
 						name = "inner-oneof"
 						parameter_value {
-							string_value = "nested-val"
+							oneof_value = jsonencode({
+								name = "deep-oneof"
+								parameterValue = {
+									stringValue = "deep-val"
+								}
+							})
 						}
 					}
 				}
@@ -401,7 +407,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 							oneof_value {
 								name = "inner-oneof"
 								parameter_value {
-									string_value = "nested-val"
+									oneof_value = jsonencode({
+										name = "deep-oneof"
+										parameterValue = {
+											stringValue = "deep-val"
+										}
+									})
 								}
 							}
 						}
@@ -423,7 +434,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 						oneof_value {
 							name = "sub-inner-oneof"
 							parameter_value {
-								string_value = "sub-nested-val"
+								oneof_value = jsonencode({
+									name = "sub-deep-oneof"
+									parameterValue = {
+										stringValue = "sub-deep-val"
+									}
+								})
 							}
 						}
 					}
@@ -438,7 +454,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 								oneof_value {
 									name = "sub-inner-oneof"
 									parameter_value {
-										string_value = "sub-nested-val"
+										oneof_value = jsonencode({
+											name = "sub-deep-oneof"
+											parameterValue = {
+												stringValue = "sub-deep-val"
+											}
+										})
 									}
 								}
 							}
@@ -450,11 +471,50 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 				name         = "nested-sub-param"
 				display_name = "Nested Sub Parameter"
 				description  = "Testing sub_parameters within sub_parameters"
-				value_type   = "STRING"
+				value_type   = "ONEOF"
 				is_required  = true
 				default_value {
-					string_value = "nested-sub-val"
+					oneof_value {
+						name = "nested-sub-oneof"
+						parameter_value {
+							oneof_value = jsonencode({
+								name = "nested-sub-deep-oneof"
+								parameterValue = {
+									stringValue = "nested-sub-deep-val"
+								}
+							})
+						}
+					}
 				}
+				validation {
+					allowed_values {
+						values {
+							oneof_value {
+								name = "nested-sub-oneof"
+								parameter_value {
+									oneof_value = jsonencode({
+										name = "nested-sub-deep-oneof"
+										parameterValue = {
+											stringValue = "nested-sub-deep-val"
+										}
+									})
+								}
+							}
+						}
+					}
+				}
+				sub_parameters = jsonencode([
+					{
+						name        = "deep-sub-param"
+						displayName = "Deep Sub Parameter"
+						description = "Testing depth 3 sub_parameters"
+						valueType   = "STRING"
+						isRequired  = true
+						defaultValue = {
+							stringValue = "deep-sub-val"
+						}
+					}
+				])
 			}
 		}
 	}
@@ -466,7 +526,48 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"extra_config":  "",
+		"parent":        "organizations/" + envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudSecurityComplianceCloudControl_basic(context),
+			},
+			{
+				ResourceName:            "google_cloud_security_compliance_cloud_control.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent", "organization"},
+			},
+			{
+				Config: testAccCloudSecurityComplianceCloudControl_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloud_security_compliance_cloud_control.example", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_cloud_security_compliance_cloud_control.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cloud_control_id", "location", "parent", "organization"},
+			},
+		},
+	})
+}
+
+func TestAccCloudSecurityComplianceCloudControl_projectUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"extra_config":  `data "google_project" "project" {}`,
+		"parent":        "projects/${data.google_project.project.number}",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -503,8 +604,9 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 
 func testAccCloudSecurityComplianceCloudControl_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+%{extra_config}
 resource "google_cloud_security_compliance_cloud_control" "example" {
-  parent            = "organizations/%{org_id}"
+  parent            = "%{parent}"
   location          = "global"
   cloud_control_id  = "tf-test-%{random_suffix}"
 
@@ -843,7 +945,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
           oneof_value {
             name = "updated-inner-oneof"
             parameter_value {
-              string_value = "updated-nested-val"
+              oneof_value = jsonencode({
+                name = "updated-deep-oneof"
+                parameterValue = {
+                  stringValue = "updated-deep-val"
+                }
+              })
             }
           }
         }
@@ -859,7 +966,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
               oneof_value {
                 name = "updated-inner-oneof"
                 parameter_value {
-                  string_value = "updated-nested-val"
+                  oneof_value = jsonencode({
+                    name = "updated-deep-oneof"
+                    parameterValue = {
+                      stringValue = "updated-deep-val"
+                    }
+                  })
                 }
               }
             }
@@ -881,7 +993,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
             oneof_value {
               name = "updated-sub-inner-oneof"
               parameter_value {
-                string_value = "updated-sub-nested-val"
+                oneof_value = jsonencode({
+                  name = "updated-sub-deep-oneof"
+                  parameterValue = {
+                    stringValue = "updated-sub-deep-val"
+                  }
+                })
               }
             }
           }
@@ -896,7 +1013,12 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
                 oneof_value {
                   name = "updated-sub-inner-oneof"
                   parameter_value {
-                    string_value = "updated-sub-nested-val"
+                    oneof_value = jsonencode({
+                      name = "updated-sub-deep-oneof"
+                      parameterValue = {
+                        stringValue = "updated-sub-deep-val"
+                      }
+                    })
                   }
                 }
               }
@@ -908,11 +1030,50 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
         name         = "nested-sub-param"
         display_name = "Updated Nested Sub Parameter"
         description  = "Updated testing sub_parameters within sub_parameters"
-        value_type   = "STRING"
+        value_type   = "ONEOF"
         is_required  = true
         default_value {
-          string_value = "updated-nested-sub-val"
+          oneof_value {
+            name = "updated-nested-sub-oneof"
+            parameter_value {
+              oneof_value = jsonencode({
+                name = "updated-nested-sub-deep-oneof"
+                parameterValue = {
+                  stringValue = "updated-nested-sub-deep-val"
+                }
+              })
+            }
+          }
         }
+        validation {
+          allowed_values {
+            values {
+              oneof_value {
+                name = "updated-nested-sub-oneof"
+                parameter_value {
+                  oneof_value = jsonencode({
+                    name = "updated-nested-sub-deep-oneof"
+                    parameterValue = {
+                      stringValue = "updated-nested-sub-deep-val"
+                    }
+                  })
+                }
+              }
+            }
+          }
+        }
+        sub_parameters = jsonencode([
+          {
+            name        = "updated-deep-sub-param"
+            displayName = "Updated Deep Sub Parameter"
+            description = "Updated testing depth 3 sub_parameters"
+            valueType   = "STRING"
+            isRequired  = true
+            defaultValue = {
+              stringValue = "updated-deep-sub-val"
+            }
+          }
+        ])
       }
     }
   }

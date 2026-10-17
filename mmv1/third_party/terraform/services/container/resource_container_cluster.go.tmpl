@@ -228,6 +228,13 @@ func isBeenEnabled(_ context.Context, old, new, _ interface{}) bool {
 	return false
 }
 
+func suppressDiffForClusterDns(k, o, n string, d *schema.ResourceData) bool {
+	if o == "" && n == "PROVIDER_UNSPECIFIED" {
+		return true
+	}
+	return false
+}
+
 func suppressDiffForClusterDnsScope(k, o, n string, d *schema.ResourceData) bool {
 	if o == "" && n == "DNS_SCOPE_UNSPECIFIED" {
 		return true
@@ -258,6 +265,7 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterSkipNodePoolRefreshCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
 			clusterAcceleratorNetworkProfileCustomizeDiff,
+			containerClusterBestEffortProvisioningCustomizeDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -2223,7 +2231,6 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
-{{- if ne $.TargetVersionName "ga" }}
 			"managed_opentelemetry_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2233,16 +2240,15 @@ func ResourceContainerCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"scope": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Description:  "The scope of the Managed OpenTelemetry pipeline. Available options include SCOPE_UNSPECIFIED, NONE, and COLLECTION_AND_INSTRUMENTATION_COMPONENTS.",
-							ValidateFunc: validation.StringInSlice([]string{"SCOPE_UNSPECIFIED", "NONE", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"}, false),
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							Description:      "The scope of the Managed OpenTelemetry pipeline. Available options include NONE and COLLECTION_AND_INSTRUMENTATION_COMPONENTS. See https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#managedopentelemetryconfig for more information. To disable the feature, explicitly set this to NONE.",
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
 						},
 					},
 				},
 			},
-{{- end }}
 
 			// Defaults to "VPC_NATIVE" during create only
 			"networking_mode": {
@@ -2768,11 +2774,12 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:     true,
 						},
 						"cluster_dns": {
-							Type:         schema.TypeString,
-							Default:      "PROVIDER_UNSPECIFIED",
-							ValidateFunc: validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "PLATFORM_DEFAULT", "CLOUD_DNS", "KUBE_DNS"}, false),
-							Description:  `Which in-cluster DNS provider should be used.`,
-							Optional:     true,
+							Type:             schema.TypeString,
+							Default:          "PROVIDER_UNSPECIFIED",
+							ValidateFunc:     validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "PLATFORM_DEFAULT", "CLOUD_DNS", "KUBE_DNS"}, false),
+							Description:      `Which in-cluster DNS provider should be used.`,
+							Optional:         true,
+							DiffSuppressFunc: suppressDiffForClusterDns,
 						},
 						"cluster_dns_scope": {
 							Type:            schema.TypeString,
@@ -2934,6 +2941,24 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 				{{- end }}
+			{{- if ne $.TargetVersionName "ga" }}
+			"schedule_upgrade_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for scheduled upgrades on the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Whether scheduled upgrades are enabled.`,
+						},
+					},
+				},
+			},
+			{{- end }}
 			"enterprise_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -3234,9 +3259,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- if ne $.TargetVersionName "ga" }}
 		ManagedMachineLearningDiagnosticsConfig: expandManagedMachineLearningDiagnosticsConfig(d.Get("managed_machine_learning_diagnostics_config")),
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
 		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
-{{- end }}
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
@@ -3480,6 +3503,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("workload_alts_config"); ok {
 		cluster.WorkloadAltsConfig = expandWorkloadAltsConfig(v)
+	}
+	{{- end }}
+	{{ if ne $.TargetVersionName `ga` -}}
+	if v, ok := d.GetOk("schedule_upgrade_config"); ok {
+		cluster.ScheduleUpgradeConfig = expandScheduleUpgradeConfig(v)
 	}
 	{{- end }}
 
@@ -4042,11 +4070,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 {{- end }}
 
-{{ if ne $.TargetVersionName "ga" }}
 	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
 		return err
 	}
-{{- end }}
 
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
@@ -4068,6 +4094,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("workload_alts_config", flattenWorkloadAltsConfig(cluster.WorkloadAltsConfig)); err != nil {
+		return err
+	}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if err := d.Set("schedule_upgrade_config", flattenScheduleUpgradeConfig(cluster.ScheduleUpgradeConfig)); err != nil {
 		return err
 	}
 {{- end }}
@@ -5175,7 +5207,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("managed_opentelemetry_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -5190,7 +5221,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s managed opentelemetry config has been updated", d.Id())
 	}
-{{- end }}
 
 	if d.HasChange("effective_labels") {
 		resourceLabels := d.Get("effective_labels").(map[string]interface{})
@@ -5645,6 +5675,29 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's WorkloadALTSConfig has been updated", d.Id())
+	}
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("schedule_upgrade_config") {
+		suc := expandScheduleUpgradeConfig(d.Get("schedule_upgrade_config"))
+		if suc == nil {
+			suc = &container.ScheduleUpgradeConfig{
+				Enabled:         false,
+				ForceSendFields: []string{"Enabled"},
+			}
+		}
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredScheduleUpgradeConfig: suc,
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster ScheduleUpgradeConfig")
+		if err := updateF(); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's ScheduleUpgradeConfig has been updated", d.Id())
 	}
 {{- end }}
 
@@ -6803,11 +6856,19 @@ func flattenManagedMachineLearningDiagnosticsConfig(c *container.ManagedMachineL
 }
 {{- end }}
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
+	if len(l) == 0 {
 		return nil
+	}
+	// l[0] is nil when the block is present but its scope is empty after diff
+	// suppression: `scope = "SCOPE_UNSPECIFIED"` on Create, or `{}` /
+	// `scope = "SCOPE_UNSPECIFIED"` when the state has no block. Return an empty
+	// struct, sent as `{}`, so the server applies its default scope (currently
+	// SCOPE_UNSPECIFIED). Returning nil would omit the field, causing a permadiff
+	// on Create and an empty-update 400 on Update.
+	if l[0] == nil {
+		return &container.ManagedOpenTelemetryConfig{}
 	}
 	config := l[0].(map[string]interface{})
 	return &container.ManagedOpenTelemetryConfig{
@@ -6825,7 +6886,6 @@ func flattenManagedOpenTelemetryConfig(c *container.ManagedOpenTelemetryConfig) 
 		},
 	}
 }
-{{- end }}
 
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
 	result := &container.NetworkPolicy{}
@@ -7230,8 +7290,12 @@ func expandResourceUsageExportConfig(configured interface{}) *container.Resource
 
 func expandDnsConfig(configured interface{}) *container.DNSConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
+	if len(l) == 0 {
 		return nil
+	}
+
+	if l[0] == nil {
+		return &container.DNSConfig{}
 	}
 
 	config := l[0].(map[string]interface{})
@@ -7530,6 +7594,21 @@ func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSCon
 	return &container.WorkloadALTSConfig{
 		EnableAlts:              config["enable_alts"].(bool),
 		ForceSendFields: []string{"EnableAlts"},
+	}
+}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func expandScheduleUpgradeConfig(configured interface{}) *container.ScheduleUpgradeConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.ScheduleUpgradeConfig{
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
 	}
 }
 {{- end }}
@@ -8761,6 +8840,19 @@ func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]int
 }
 {{- end }}
 
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenScheduleUpgradeConfig(c *container.ScheduleUpgradeConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enabled": c.Enabled,
+		},
+	}
+}
+{{- end }}
+
 func flattenRBACBindingConfig(c *container.RBACBindingConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -9205,6 +9297,16 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 		return fmt.Errorf("Resource argument node_version (value: %s) must either be unset or set to the same value as min_master_version (value: %s) on create." , newValueNode, newValueMaster)
 	}
 
+	return nil
+}
+
+func containerClusterBestEffortProvisioningCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
+	nodePools, _ := diff.Get("node_pool").([]interface{})
+	for i := range nodePools {
+		if err := validateBestEffortProvisioningDiff(diff, fmt.Sprintf("node_pool.%d.", i)); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

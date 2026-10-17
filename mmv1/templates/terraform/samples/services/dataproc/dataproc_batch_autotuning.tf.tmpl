@@ -1,7 +1,7 @@
 resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
 
     batch_id      = "tf-test-batch%{random_suffix}"
-    location      = "us-central1"
+    location      = "us-east1"
     labels        = {"batch_test": "terraform"}
 
     runtime_config {

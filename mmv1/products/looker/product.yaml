@@ -25,3 +25,4 @@ scopes:
 versions:
   - name: ga
     base_url: https://looker.googleapis.com/v1/
+    rep_url: https://looker.{{region}}.rep.googleapis.com/v1/

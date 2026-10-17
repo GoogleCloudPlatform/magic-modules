@@ -11,13 +11,15 @@ specific one.
 3.  **Verify before a PR:** generate, build, and run the tests relevant to the change. A task is not done because it compiles.
 4.  **Never weaken baseline test coverage:** no disabling or skipping tests, and no test-dodging behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent comment justifying the API behavior that requires them.
 5.  **PR descriptions are brief:** what changed and why, in a few sentences.
-6.  **GitHub Issue Label Routing:** When triaging a GitHub issue URL, inspect the GitHub labels (`gh issue view --json labels` or issue payload). Match against the **Issue Label Routing Matrix** below. If no matching label is present, inspect the issue title/body content; if still unmatched, fall back to the **Default Workflow**.
+6.  **Prefer adding commits on PR updates:** once a branch is pushed or a PR is open, add new commits for subsequent updates rather than amending, rebasing, or force-pushing unless instructed otherwise.
+7.  **GitHub Issue Label Routing:** When triaging a GitHub issue URL, inspect the GitHub labels (`gh issue view --json labels` or issue payload). Match against the **Issue Label Routing Matrix** below. If no matching label is present, inspect the issue title/body content; if still unmatched, fall back to the **Default Workflow**.
 
 ## Issue Label Routing Matrix:
 
 | GitHub Label Pattern | Issue Category | Target Workflow Skill |
 | :--- | :--- | :--- |
 | `test-failure`, `test-failure-*` (e.g. `test-failure-0`, `test-failure-10`, `test-failure-50`, `test-failure-100`) | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
+| `promote-to-ga` (takes precedence over `new-resource` / `enhancement`) | Beta → GA Promotion | `.agents/skills/workflows/promote_to_ga/SKILL.md` |
 | `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
 | `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
 | `enhancement` (field additions) | New Field / Property Addition | `.agents/skills/workflows/add_fields/SKILL.md` |
@@ -38,6 +40,7 @@ specific one.
 *   **Bug Fix Workflow** (`.agents/skills/workflows/bug_fix/SKILL.md`): For triaging, planning, fixing, and verifying reported provider bugs.
 *   **Deprecate Resource or Field Workflow** (`.agents/skills/workflows/deprecate_resource_or_field/SKILL.md`): Specifically for deprecating existing resources or fields on `main` prior to a major release.
 *   **Major Release Removal Workflow** (`.agents/skills/workflows/major_release_removal/SKILL.md`): Specifically for executing resource and field removals on a major release feature branch.
+*   **Promote to GA Workflow** (`.agents/skills/workflows/promote_to_ga/SKILL.md`): For promoting beta-only resources, fields, data sources, or products to the GA provider, including verification CI doesn't perform.
 *   *(Future workflows can be added here)*
 
 ## Subagents:

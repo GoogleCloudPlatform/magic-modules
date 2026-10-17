@@ -131,8 +131,6 @@ properties:
         - name: denseVector
           type: NestedObject
           description: Message describing a dense vector field.
-          conflicts:
-            - sparseVector
           properties:
             - name: dimensions
               type: Integer
@@ -173,8 +171,6 @@ properties:
         - name: sparseVector
           type: NestedObject
           description: Message describing a sparse vector field.
-          conflicts:
-            - denseVector
           allow_empty_object: true
           send_empty_value: true
           properties: []

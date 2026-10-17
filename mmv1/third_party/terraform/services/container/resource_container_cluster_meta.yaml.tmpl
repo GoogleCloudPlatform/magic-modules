@@ -256,9 +256,7 @@ fields:
   - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
   - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
   - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
-{{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedMachineLearningDiagnosticsConfig.enabled'
 {{- end }}
@@ -844,6 +842,10 @@ fields:
     api_field: 'nodePools.placementPolicy.type'
   - field: 'node_pool.queued_provisioning.enabled'
     api_field: 'nodePools.queuedProvisioning.enabled'
+  - field: 'node_pool.best_effort_provisioning.enabled'
+    api_field: 'nodePools.bestEffortProvisioning.enabled'
+  - field: 'node_pool.best_effort_provisioning.min_provision_nodes'
+    api_field: 'nodePools.bestEffortProvisioning.minProvisionNodes'
 {{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.upgrade_settings.blue_green_settings.autoscaled_rollout_policy.wait_for_drain_duration'
     api_field: 'nodePools.upgradeSettings.blueGreenSettings.autoscaledRolloutPolicy.waitForDrainDuration'
@@ -928,6 +930,9 @@ fields:
   - field: 'resource_usage_export_config.enable_resource_consumption_metering'
     api_field: 'resourceUsageExportConfig.consumptionMeteringConfig.enabled'
   - api_field: 'rollbackSafeUpgrade.controlPlaneSoakDuration'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'scheduleUpgradeConfig.enabled'
+{{- end }}
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'

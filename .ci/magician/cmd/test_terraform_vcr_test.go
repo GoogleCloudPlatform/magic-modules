@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -10,6 +13,7 @@ import (
 
 	"magician/github"
 	"magician/provider"
+	"magician/source"
 	"magician/vcr"
 )
 
@@ -23,7 +27,7 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 		{
 			name:     "one-package",
 			diffs:    []string{"google-beta/services/servicename/resource.go"},
-			packages: map[string]struct{}{"servicename": struct{}{}},
+			packages: map[string]struct{}{"servicename": {}},
 			all:      false,
 		},
 		{
@@ -34,9 +38,9 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 				"google-beta/services/servicethree/resource_test.go",
 			},
 			packages: map[string]struct{}{
-				"serviceone":   struct{}{},
-				"servicetwo":   struct{}{},
-				"servicethree": struct{}{},
+				"serviceone":   {},
+				"servicetwo":   {},
+				"servicethree": {},
 			},
 			all: false,
 		},
@@ -563,10 +567,10 @@ func TestRecordReplay(t *testing.T) {
 				Head:               "auto-pr-123",
 			},
 			wantContains: []string{
-				"| Recording Mode | Replaying Rerun | Test Name |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log) | TestAcc_b |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log) | TestAcc_c |",
+				"| Recording Mode | Findings | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | - | TestAcc_a |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | `❌ Replay rerun failed`&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/b_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/b.log) | TestAcc_b |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | `❌ Replay rerun failed`&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/replaying_build_after_recording/c_replaying_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/replaying_after_recording/c.log) | TestAcc_c |",
 				"| ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/d_recording_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/d.log) | - | TestAcc_d |",
 				"| ❌&nbsp;[Error](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_build/e_recording_test.log)&nbsp;·&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/e.log) | - | TestAcc_e |",
 
@@ -604,10 +608,10 @@ func TestRecordReplay(t *testing.T) {
 				LogBucket:          "ci-vcr-logs",
 			},
 			wantContains: []string{
-				"| Recording Mode | Replaying Rerun | Test Name |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | ✅ | TestAcc_b |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | ✅ | TestAcc_c |",
+				"| Recording Mode | Findings | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | - | TestAcc_a |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/b.log) | - | TestAcc_b |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/c.log) | - | TestAcc_c |",
 				"🟢 **All tests passed!**",
 				"View the [recording VCR build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/build-log/recording_test.log) or the [debug logs folder](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording) for detailed results.",
 			},
@@ -629,8 +633,8 @@ func TestRecordReplay(t *testing.T) {
 				manyRows[0].DisplayName,
 			},
 			wantStdoutContains: []string{
-				"| Recording Mode | Replaying Rerun | Test Name |",
-				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | ✅ | TestAcc_a |",
+				"| Recording Mode | Findings | Test Name |",
+				"| ✅&nbsp;[Log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-123/artifacts/build-123/recording/a.log) | - | TestAcc_a |",
 			},
 		},
 	}
@@ -777,4 +781,214 @@ func TestAppendVCRResultToDiffComment_UseFileID(t *testing.T) {
 	assert.Equal(t, "123", gh.calledMethods["UpdateComment"][0][0])
 	assert.Contains(t, gh.calledMethods["UpdateComment"][0][1].(string), "VCR Results")
 	assert.Equal(t, 456, gh.calledMethods["UpdateComment"][0][2])
+}
+
+func TestIsCommitOutdated(t *testing.T) {
+	cases := map[string]struct {
+		mmCommitSha       string
+		headSha           string
+		getPullRequestErr error
+		wantOutdated      bool
+		wantHeadSha       string
+	}{
+		"superseded commit": {
+			mmCommitSha:  "old-sha-123",
+			headSha:      "new-sha-456",
+			wantOutdated: true,
+			wantHeadSha:  "new-sha-456",
+		},
+		"latest commit": {
+			mmCommitSha: "old-sha-123",
+			headSha:     "old-sha-123",
+		},
+		"empty head sha": {
+			mmCommitSha: "old-sha-123",
+		},
+		"empty commit sha": {
+			headSha: "new-sha-456",
+		},
+		"pull request lookup error fails open": {
+			mmCommitSha:       "old-sha-123",
+			headSha:           "new-sha-456",
+			getPullRequestErr: errors.New("rate limited"),
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			gh := &mockGithub{
+				calledMethods:     make(map[string][][]any),
+				pullRequest:       github.PullRequest{HeadSha: tc.headSha},
+				getPullRequestErr: tc.getPullRequestErr,
+			}
+
+			outdated, headSha := isCommitOutdated("123", tc.mmCommitSha, gh)
+
+			assert.Equal(t, tc.wantOutdated, outdated)
+			assert.Equal(t, tc.wantHeadSha, headSha)
+			assert.Equal(t, [][]any{{"123"}}, gh.calledMethods["GetPullRequest"])
+		})
+	}
+}
+
+// TestExecTestTerraformVCR_OutdatedCommit pins where execTestTerraformVCR checks for a newer
+// commit: at entry (before cloning/replaying), and again before recording (after posting the Step 1 report).
+func TestExecTestTerraformVCR_OutdatedCommit(t *testing.T) {
+	cases := map[string]struct {
+		// Head SHAs returned by successive pull request lookups.
+		headShas           []string
+		diffCommentBody    string
+		tpgbNewSha         string
+		tpgbOldSha         string
+		updateCommentErr   error
+		postBuildStatusErr error
+		wantStatuses       []string
+		wantReplayed       bool
+		wantUpdateCalls    int
+		wantComment        string
+		wantErr            bool
+	}{
+		"superseded before replaying": {
+			headShas:        []string{"new-sha"},
+			wantStatuses:    []string{"failure"},
+			wantUpdateCalls: 1,
+			wantComment:     "## Test report\n\n**Step 1: Replaying Mode**\n\nSkipped REPLAYING mode because a newer commit (new-sha) was pushed to the PR.",
+		},
+		"superseded before replaying without diffs in comment": {
+			headShas:        []string{"new-sha"},
+			diffCommentBody: "Your PR hasn't generated any diffs, but I'll let you know if a future commit does.",
+		},
+		"superseded before replaying without downstream commits": {
+			headShas:   []string{"new-sha"},
+			tpgbNewSha: "same-downstream-sha",
+			tpgbOldSha: "same-downstream-sha",
+		},
+		"superseded before recording": {
+			headShas:        []string{"mm-sha", "new-sha"},
+			wantStatuses:    []string{"pending", "failure"},
+			wantReplayed:    true,
+			wantUpdateCalls: 2,
+			wantComment:     "---\n\n**Step 2: Recording Mode**\n\nSkipped RECORDING mode because a newer commit (new-sha) was pushed to the PR.",
+		},
+		"comment error before replaying still posts status": {
+			headShas:         []string{"new-sha"},
+			updateCommentErr: errors.New("comment too long"),
+			wantStatuses:     []string{"failure"},
+			wantUpdateCalls:  1,
+			wantComment:      "Skipped REPLAYING mode",
+		},
+		"comment error before recording still posts status": {
+			headShas:         []string{"mm-sha", "new-sha"},
+			updateCommentErr: errors.New("comment too long"),
+			wantStatuses:     []string{"pending", "failure"},
+			wantReplayed:     true,
+			wantUpdateCalls:  2,
+			wantComment:      "Skipped RECORDING mode",
+		},
+		"status error before replaying is returned": {
+			headShas:           []string{"new-sha"},
+			postBuildStatusErr: errors.New("forbidden"),
+			wantStatuses:       []string{"failure"},
+			wantUpdateCalls:    1,
+			wantComment:        "Skipped REPLAYING mode",
+			wantErr:            true,
+		},
+		"status error before recording is returned": {
+			headShas:           []string{"mm-sha", "new-sha"},
+			postBuildStatusErr: errors.New("forbidden"),
+			wantStatuses:       []string{"pending", "failure"},
+			wantReplayed:       true,
+			wantUpdateCalls:    2,
+			wantComment:        "Skipped RECORDING mode",
+			wantErr:            true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			sb := newSandbox(t)
+			sb.RequireAllowlist()
+			writeScript := func(name, script string) {
+				if err := os.WriteFile(filepath.Join(sb.Dir, name), []byte(script), 0755); err != nil {
+					t.Fatalf("Failed to write fake %s: %v", name, err)
+				}
+			}
+			// Cloning creates the destination directory, and the diff reports a change to one service.
+			writeScript("git", `#!/bin/bash
+case "$1" in
+  clone) mkdir -p "${@: -1}" ;;
+  diff) [[ " $* " == *" --name-only "* ]] && echo "google-beta/services/compute/resource_compute_instance.go" ;;
+esac
+exit 0`)
+			writeScript("gcloud", "#!/bin/bash\nexit 0")
+			// Records which VCR modes ran. Replaying fails, so recording would run next.
+			writeScript("go", fmt.Sprintf(`#!/bin/bash
+if [ "$1" = "test" ]; then
+  echo > "%s/go_test_$VCR_MODE"
+  if [ "$VCR_MODE" = "REPLAYING" ]; then
+    echo "--- FAIL: TestAccComputeInstance_basic (1.00s)"
+    exit 1
+  fi
+fi
+exit 0`, sb.Dir))
+			sb.Runner.WriteFile("diff_comment_id.txt", "456")
+			if tc.tpgbNewSha != "" {
+				sb.Runner.WriteFile("commitSHA_modular-magician_terraform-provider-google-beta.txt", tc.tpgbNewSha)
+			}
+			if tc.tpgbOldSha != "" {
+				sb.Runner.WriteFile("commitSHA_modular-magician_terraform-provider-google-beta-old.txt", tc.tpgbOldSha)
+			}
+
+			commentBody := tc.diffCommentBody
+			if commentBody == "" {
+				commentBody = "Diff report"
+			}
+			var pullRequests []github.PullRequest
+			for _, sha := range tc.headShas {
+				pullRequests = append(pullRequests, github.PullRequest{HeadSha: sha})
+			}
+			gh := &mockGithub{
+				calledMethods:       make(map[string][][]any),
+				pullRequests:        pullRequests,
+				pullRequestComments: []github.PullRequestComment{{ID: 456, Body: commentBody}},
+				updateCommentErr:    tc.updateCommentErr,
+				postBuildStatusErr:  tc.postBuildStatusErr,
+			}
+			ctlr := source.NewController(filepath.Join(sb.Dir, "gopath"), "modular-magician", "token", sb.Runner)
+			vt, err := vcr.NewTester(map[string]string{"SA_KEY": "sa_key"}, "ci-vcr-cassettes", "ci-vcr-logs", sb.Runner.(vcr.ExecRunner), false)
+			if err != nil {
+				t.Fatalf("Failed to create VCR tester: %v", err)
+			}
+
+			err = execTestTerraformVCR("123", "mm-sha", "build-1", "project-1", "22", "main", sb.Dir, gh, sb.Runner, ctlr, vt, &fakeGCS{objects: map[string][]byte{}})
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.Len(t, gh.calledMethods["GetPullRequest"], len(tc.headShas))
+
+			var statuses []string
+			for _, call := range gh.calledMethods["PostBuildStatus"] {
+				assert.Equal(t, "mm-sha", call[4])
+				statuses = append(statuses, call[2].(string))
+			}
+			assert.Equal(t, tc.wantStatuses, statuses)
+
+			_, err = os.Stat(filepath.Join(sb.Dir, "gopath"))
+			assert.Equal(t, tc.wantReplayed, err == nil, "whether repos were cloned")
+			_, err = os.Stat(filepath.Join(sb.Dir, "go_test_REPLAYING"))
+			assert.Equal(t, tc.wantReplayed, err == nil, "whether replaying ran")
+			_, err = os.Stat(filepath.Join(sb.Dir, "go_test_RECORDING"))
+			assert.True(t, os.IsNotExist(err), "recording should not run")
+
+			if assert.Len(t, gh.calledMethods["UpdateComment"], tc.wantUpdateCalls) && tc.wantUpdateCalls > 0 {
+				lastComment := gh.calledMethods["UpdateComment"][tc.wantUpdateCalls-1][1].(string)
+				assert.Contains(t, lastComment, tc.wantComment)
+				if tc.wantReplayed {
+					assert.Contains(t, lastComment, "**Step 1: Replaying Mode**")
+				}
+			}
+			assert.Empty(t, gh.calledMethods["PostComment"])
+		})
+	}
 }

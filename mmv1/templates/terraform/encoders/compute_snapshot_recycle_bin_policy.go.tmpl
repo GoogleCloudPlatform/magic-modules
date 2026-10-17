@@ -1,0 +1,20 @@
+// The rules map in SnapshotRecycleBinPolicy is authoritative.
+// When a rule is removed from the Terraform configuration, it should be deleted from the API.
+// Since the API uses PATCH, we must explicitly set removed keys to nil (null in JSON) to delete them.
+
+if rules, ok := obj["rules"].(map[string]interface{}); ok {
+	// Get the old rules from the terraform state to identify deletions
+	oldRulesRaw, ok := d.GetOk("rules")
+	if ok {
+		if oldRules, ok := oldRulesRaw.(map[string]interface{}); ok {
+			for k := range oldRules {
+				if _, ok := rules[k]; !ok {
+					// Rule exists in state but not in new config -> set to nil to delete via PATCH
+					rules[k] = nil
+				}
+			}
+		}
+	}
+}
+
+return obj, nil

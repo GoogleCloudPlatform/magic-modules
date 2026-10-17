@@ -38,6 +38,16 @@ samples:
       - name: dialogflow_generator_basic
         resource_id_vars:
           profile_name: dialogflow-profile
+  - name: dialogflow_generator_agent_coaching
+    primary_resource_id: agent_coaching_generator
+    steps:
+      - name: dialogflow_generator_agent_coaching
+  - name: dialogflow_generator_with_tools
+    primary_resource_id: generator_with_tools
+    steps:
+      - name: dialogflow_generator_with_tools
+        resource_id_vars:
+          tool_key: "generator_tool_key"
 parameters:
   - name: location
     type: String
@@ -63,7 +73,10 @@ properties:
       Optional. Human readable description of the generator.
   - name: summarizationContext
     type: NestedObject
-    required: true
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
     description: |
       Input of prebuilt Summarization feature.
     properties:
@@ -250,11 +263,83 @@ properties:
         type: String
         default_from_api: true
         description: |
-          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["5.0", "6.0"].
       - name: outputLanguageCode
         type: String
         description: |
           Optional. The target language of the generated summary. The language code for conversation will be used if this field is empty. Supported 2.0 and later versions.
+  - name: freeFormContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+    description: |
+      Input of free form generator to LLM.
+    properties:
+      - name: text
+        type: String
+        description: |
+          Optional. Free form text input to LLM.
+  - name: agentCoachingContext
+    type: NestedObject
+    exactly_one_of:
+      - summarization_context
+      - free_form_context
+      - agent_coaching_context
+    description: |
+      Input of prebuilt Agent Coaching feature.
+    properties:
+      - name: overarchingGuidance
+        type: String
+        description: |
+          Optional. The overarching guidance for the agent coaching. This should be set only for v1.5 and later versions.
+      - name: version
+        type: String
+        default_from_api: true
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["2.5"].
+      - name: outputLanguageCode
+        type: String
+        description: |
+          Optional. Output language code.
+      - name: instructions
+        type: Array
+        description: |
+          Optional. Customized instructions for agent coaching.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: displayName
+              type: String
+              description: |
+                Optional. Display name for the instruction.
+            - name: displayDetails
+              type: String
+              description: |
+                Optional. The detailed description of this instruction.
+            - name: condition
+              type: String
+              description: |
+                Optional. The condition of the instruction.
+            - name: agentAction
+              type: String
+              description: |
+                Optional. The action that human agent should take.
+            - name: systemAction
+              type: String
+              description: |
+                Optional. The action that system should take.
+            - name: triggeringEvent
+              type: Enum
+              description: |
+                Optional. The trigger event of the instruction.
+              enum_values:
+                - END_OF_UTTERANCE
+                - MANUAL_CALL
+                - CUSTOMER_MESSAGE
+                - AGENT_MESSAGE
+                - TOOL_CALL_COMPLETION
   - name: inferenceParameter
     type: NestedObject
     description: |
@@ -289,3 +374,9 @@ properties:
     type: String
     description: |
       Optional. The published Large Language Model name. * To use the latest model version, specify the model name without version number. Example: text-bison * To use a stable model version, specify the version number as well. Example: text-bison@002.
+  - name: tools
+    type: Array
+    description: |
+      Optional. Resource names of the tools that the generator can choose from. Format: `projects/<Project ID>/locations/<Location ID>/tools/<tool ID>`.
+    item_type:
+      type: String

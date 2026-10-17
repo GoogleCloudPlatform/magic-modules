@@ -37,11 +37,13 @@ samples:
     steps:
       - name: "chronicle_environment_basic"
         test_env_vars:
+          project_name: 'PROJECT_NAME'
           chronicle_id: 'CHRONICLE_ID'
         ignore_read_extra:
           - 'deletion_protection'
       - name: "chronicle_environment_full"
         test_env_vars:
+          project_name: 'PROJECT_NAME'
           chronicle_id: 'CHRONICLE_ID'
         ignore_read_extra:
           - 'deletion_protection'
@@ -145,6 +147,16 @@ properties:
     description: |-
       URL of the environment. Used to route UI links to the correct SIEM instance
       when making cross-SecOps requests from SOAR.
+  - name: parallelInstance
+    api_name: instance
+    type: String
+    description: |-
+      The optional parallel SIEM instance used as a data source. Used to route
+      API requests to the correct SIEM instance when making cross-SecOps requests
+      from SOAR. For most customers, this is not required, since the parent
+      instance is used as the data source by default.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}
   - name: weight
     type: Integer
     description: |-

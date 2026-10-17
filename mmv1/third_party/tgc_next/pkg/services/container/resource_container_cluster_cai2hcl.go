@@ -144,6 +144,11 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 		hclData["node_pool"], err = flattenContainerClusterNodePools(d, config, asset.Resource.Data["nodePools"])
 	}
 	hclData["node_pool_defaults"] = flattenNodePoolDefaults(asset.Resource.Data["nodePoolDefaults"])
+	if !enableAutopilot {
+		if dmpc, ok := asset.Resource.Data["defaultMaxPodsConstraint"].(map[string]interface{}); ok {
+			hclData["default_max_pods_per_node"] = dmpc["maxPodsPerNode"]
+		}
+	}
 	hclData["authenticator_groups_config"] = flattenAuthenticatorGroupsConfig(asset.Resource.Data["authenticatorGroupsConfig"])
 	hclData["control_plane_endpoints_config"] = flattenControlPlaneEndpointsConfig(asset.Resource.Data["controlPlaneEndpointsConfig"])
 
@@ -655,6 +660,32 @@ func flattenClusterAddonsConfig(v interface{}, enableAutopilot bool) []map[strin
 		}
 	}
 
+	if val, ok := c["highScaleCheckpointingConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["high_scale_checkpointing_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
+	if val, ok := c["agentSandboxConfig"].(map[string]interface{}); ok {
+		enabled := false
+		if v, ok := val["enabled"]; ok && v != nil {
+			enabled = v.(bool)
+		}
+
+		result["agent_sandbox_config"] = []map[string]interface{}{
+			{
+				"enabled": enabled,
+			},
+		}
+	}
+
 	return []map[string]interface{}{result}
 }
 
@@ -1124,17 +1155,31 @@ func flattenMaintenancePolicy(v interface{}) []map[string]interface{} {
 			windowMap := map[string]interface{}{}
 			windowMap["window_start_time"] = []map[string]interface{}{}
 			startTime, _ := recurringMaintenanceWindow["windowStartTime"].(map[string]interface{})
+			hours := interface{}(0)
+			minutes := interface{}(0)
+			seconds := interface{}(0)
+			if startTime != nil {
+				if startTime["hours"] != nil {
+					hours = startTime["hours"]
+				}
+				if startTime["minutes"] != nil {
+					minutes = startTime["minutes"]
+				}
+				if startTime["seconds"] != nil {
+					seconds = startTime["seconds"]
+				}
+			}
 			windowMap["window_start_time"] = []map[string]interface{}{
 				{
-					"hours":   startTime["hours"],
-					"minutes": startTime["minutes"],
-					"seconds": startTime["seconds"],
+					"hours":   hours,
+					"minutes": minutes,
+					"seconds": seconds,
 				},
 			}
 
 			delay, _ := recurringMaintenanceWindow["delayUntil"].(map[string]interface{})
 			if delay != nil {
-				windowMap["delayUntil"] = []map[string]interface{}{
+				windowMap["delay_until"] = []map[string]interface{}{
 					{
 						"year":  delay["year"],
 						"month": delay["month"],

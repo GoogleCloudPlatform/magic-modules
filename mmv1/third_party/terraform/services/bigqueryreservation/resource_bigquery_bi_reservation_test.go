@@ -63,24 +63,24 @@ func testAccBigqueryReservationBiReservation_full(context map[string]interface{}
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "table_%{random_suffix}"
+  table_id   = "tf_test_table_%{random_suffix}"
 }
 
 resource "google_bigquery_table" "foo2" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar2.dataset_id
-  table_id   = "table2_%{random_suffix}"
+  table_id   = "tf_test_table2_%{random_suffix}"
 }
 
 resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "dataset_%{random_suffix}"
+  dataset_id                  = "tf_test_dataset_%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"
 }
 
 resource "google_bigquery_dataset" "bar2" {
-  dataset_id                  = "dataset2_%{random_suffix}"
+  dataset_id                  = "tf_test_dataset2_%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"
@@ -108,24 +108,24 @@ func testAccBigqueryReservationBiReservation_updateProperties(context map[string
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "table_%{random_suffix}"
+  table_id   = "tf_test_table_%{random_suffix}"
 }
 
 resource "google_bigquery_table" "foo2" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar2.dataset_id
-  table_id   = "table2_%{random_suffix}"
+  table_id   = "tf_test_table2_%{random_suffix}"
 }
 
 resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "dataset_%{random_suffix}"
+  dataset_id                  = "tf_test_dataset_%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"
 }
 
 resource "google_bigquery_dataset" "bar2" {
-  dataset_id                  = "dataset2_%{random_suffix}"
+  dataset_id                  = "tf_test_dataset2_%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"
@@ -148,24 +148,24 @@ func testAccBigqueryReservationBiReservation_updateLocation(context map[string]i
 resource "google_bigquery_table" "foo" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "table_%{random_suffix}"
+  table_id   = "tf_test_table_%{random_suffix}"
 }
 
 resource "google_bigquery_table" "foo2" {
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bar2.dataset_id
-  table_id   = "table2_%{random_suffix}"
+  table_id   = "tf_test_table2_%{random_suffix}"
 }
 
 resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "dataset_%{random_suffix}"
+  dataset_id                  = "tf_test_dataset_%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"
 }
 
 resource "google_bigquery_dataset" "bar2" {
-  dataset_id                  = "dataset2_%{random_suffix}"
+  dataset_id                  = "tf_test_dataset2_%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"

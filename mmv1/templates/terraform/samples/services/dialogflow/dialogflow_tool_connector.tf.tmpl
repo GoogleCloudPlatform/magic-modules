@@ -1,0 +1,81 @@
+data "google_project" "test_project" {
+}
+
+resource "google_bigquery_dataset" "bq_dataset" {
+  dataset_id                 = "{{index $.ResourceIdVars "dataset_id"}}"
+  friendly_name              = "test"
+  description                = "This is a test description"
+  location                   = "us-central1"
+  delete_contents_on_destroy = true
+}
+
+resource "google_bigquery_table" "bq_table" {
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.bq_dataset.dataset_id
+  table_id            = "{{index $.ResourceIdVars "table_id"}}"
+}
+
+resource "google_bigquery_dataset_iam_member" "connector_sa_dataset_perms" {
+  project    = data.google_project.test_project.project_id
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_integration_connectors_connection" "integration_connector" {
+  name              = "{{index $.ResourceIdVars "connection_name"}}"
+  location          = "us-central1"
+  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+  description       = "tf created description"
+  config_variable {
+    key          = "dataset_id"
+    string_value = google_bigquery_dataset.bq_dataset.dataset_id
+  }
+  config_variable {
+    key          = "project_id"
+    string_value = data.google_project.test_project.project_id
+  }
+  config_variable {
+    key           = "support_native_data_type"
+    boolean_value = false
+  }
+  config_variable {
+    key           = "proxy_enabled"
+    boolean_value = false
+  }
+
+  service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+
+  auth_config {
+    auth_type = "AUTH_TYPE_UNSPECIFIED"
+  }
+  lifecycle {
+    ignore_changes = [
+      auth_config,
+    ]
+  }
+  depends_on = [
+    google_bigquery_dataset_iam_member.connector_sa_dataset_perms,
+  ]
+}
+
+resource "google_dialogflow_tool" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  tool_key     = "{{index $.ResourceIdVars "tool_key"}}"
+  display_name = "connector-tool"
+  description  = "A tool with Connector spec"
+  connector_spec {
+    name = "projects/${data.google_project.test_project.project_id}/locations/us-central1/connections/${google_integration_connectors_connection.integration_connector.name}"
+    actions {
+      connection_action_id = "ExecuteCustomQuery"
+      input_fields         = ["test1"]
+      output_fields        = ["test1"]
+    }
+    actions {
+      entity_operation {
+        entity_id = google_bigquery_table.bq_table.table_id
+        operation = "LIST"
+      }
+    }
+  }
+}

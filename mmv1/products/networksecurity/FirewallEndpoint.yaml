@@ -51,6 +51,14 @@ async:
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+sweeper:
+  dependencies:
+    - google_network_security_firewall_endpoint_association
+  url_substitutions:
+    - parent: organizations/${ORG_ID}
+      location: us-central1-a
+    - parent: projects/${PROJECT_NAME}
+      location: us-central1-a
 samples:
   - name: network_security_firewall_endpoint_basic
     primary_resource_id: default
@@ -145,6 +153,16 @@ properties:
     type: NestedObject
     description: |
       Settings for the endpoint.
+    # The API populates this block when WildFire is enabled (e.g. with a
+    # location-dependent contentCloudRegion such as NETHERLANDS in europe-west1).
+    default_from_api: true
+    # jumboFramesEnabled is immutable and the API rejects update masks that
+    # include immutable paths, so only list the mutable sub-fields here.
+    # These paths only exist in beta, but this update path is unreachable in
+    # GA because jumboFramesEnabled (the only GA sub-field) forces recreation.
+    update_mask_fields:
+      - 'endpointSettings.contentCloudRegion'
+      - 'endpointSettings.httpPartialResponseBlocked'
     properties:
       - name: jumboFramesEnabled
         type: Boolean
@@ -152,3 +170,103 @@ properties:
         immutable: true
         description: |
           Indicates whether Jumbo Frames are enabled for the firewall endpoint.
+      - name: contentCloudRegion
+        type: String
+        min_version: beta
+        # The API assigns a region (e.g. US_CENTRAL) when this is not set.
+        default_from_api: true
+        description: |
+          The Palo Alto Networks content cloud region of the firewall endpoint,
+          for example `US_CENTRAL` or `CANADA`. See
+          [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.firewallEndpoints#contentcloudregion)
+          for the list of supported regions.
+      - name: httpPartialResponseBlocked
+        type: Boolean
+        min_version: beta
+        send_empty_value: true
+        description: |
+          Whether to block HTTP partial responses for the firewall endpoint.
+          When `true`, resumption of blocked malicious HTTP file downloads is
+          blocked by the firewall. `false` provides maximum availability, `true`
+          provides maximum security.
+  - name: wildfireSettings
+    type: NestedObject
+    min_version: beta
+    description: |
+      Settings for WildFire analysis on the firewall endpoint.
+    # The API returns default values for this block once WildFire has been
+    # configured, even after the settings are cleared.
+    default_from_api: true
+    update_mask_fields:
+      - 'wildfireSettings.enabled'
+      - 'wildfireSettings.wildfireRegion'
+      - 'wildfireSettings.wildfireRealtimeLookupDuration'
+      - 'wildfireSettings.wildfireRealtimeLookupTimeoutAction'
+      - 'wildfireSettings.wildfireInlineCloudAnalysisSettings.maxAnalysisDuration'
+      - 'wildfireSettings.wildfireInlineCloudAnalysisSettings.timeoutAction'
+      - 'wildfireSettings.wildfireInlineCloudAnalysisSettings.submissionTimeoutLoggingDisabled'
+    properties:
+      - name: enabled
+        type: Boolean
+        send_empty_value: true
+        description: |
+          Indicates whether WildFire is enabled for the firewall endpoint.
+          Enabling WildFire requires accepting the WildFire end-user license
+          agreement (EULA) for the endpoint's billing project; see
+          [Configure WildFire](https://docs.cloud.google.com/firewall/docs/configure-wildfire).
+      - name: wildfireRegion
+        type: String
+        default_from_api: true
+        description: |
+          The WildFire region for the firewall endpoint, for example
+          `UNITED_STATES` or `CANADA`. See
+          [API docs](https://docs.cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.firewallEndpoints#wildfireregion)
+          for the list of supported regions.
+      - name: wildfireRealtimeLookupDuration
+        type: String
+        default_from_api: true
+        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+        description: |
+          The duration for which the firewall endpoint waits for a real-time
+          signature lookup response from the WildFire cloud before taking the
+          configured timeout action (1ms to 5000ms, default 1000ms).
+          A duration in seconds with up to nine fractional digits, ending with 's'.
+          Example: "1s".
+      - name: wildfireRealtimeLookupTimeoutAction
+        type: Enum
+        default_from_api: true
+        description: |
+          The action to take when a WildFire real-time signature lookup times out.
+        enum_values:
+          - 'ALLOW'
+          - 'DENY'
+      - name: wildfireInlineCloudAnalysisSettings
+        type: NestedObject
+        default_from_api: true
+        description: |
+          Settings for WildFire inline cloud analysis.
+        properties:
+          - name: maxAnalysisDuration
+            type: String
+            default_from_api: true
+            diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+            description: |
+              The maximum duration for which the firewall endpoint holds a file
+              while waiting for an inline cloud analysis verdict before taking
+              the configured timeout action (1ms to 240000ms, default 30000ms).
+              A duration in seconds with up to nine fractional digits, ending with 's'.
+              Example: "30s".
+          - name: timeoutAction
+            type: Enum
+            default_from_api: true
+            description: |
+              The action to take when WildFire inline cloud analysis times out.
+            enum_values:
+              - 'ALLOW'
+              - 'DENY'
+          - name: submissionTimeoutLoggingDisabled
+            type: Boolean
+            send_empty_value: true
+            description: |
+              Indicates whether logging is disabled when a WildFire inline cloud
+              analysis submission times out.

@@ -1,0 +1,22 @@
+resource "google_project" "project" {
+  project_id      = "{{index $.ResourceIdVars "project_id"}}"
+  name            = "{{index $.ResourceIdVars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+// wait for project creation
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project.project]
+}
+
+resource "google_resource_manager_capability_config" "{{$.PrimaryResourceId}}" {
+  parent               = "projects/${google_project.project.number}"
+  capability_config_id = "{{index $.ResourceIdVars "capability_config_id"}}"
+  display_name         = "Project capability config"
+  types                = ["AGENT_MANAGEMENT"]
+  management_project   = "projects/${google_project.project.number}"
+  depends_on = [time_sleep.wait_60_seconds]
+}

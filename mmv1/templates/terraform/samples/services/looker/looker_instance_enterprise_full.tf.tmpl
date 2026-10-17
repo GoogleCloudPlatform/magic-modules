@@ -44,6 +44,9 @@ resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
     client_id = "{{index $.ResourceIdVars "client_id"}}"
     client_secret = "{{index $.ResourceIdVars "client_secret"}}"
   }
+  custom_domain {
+    domain = "{{index $.ResourceIdVars "custom_domain"}}.com"
+  }
   depends_on   = [
     google_service_networking_connection.looker_vpc_connection
   ]

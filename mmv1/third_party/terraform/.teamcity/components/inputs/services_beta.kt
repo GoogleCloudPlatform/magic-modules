@@ -516,6 +516,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Gemini",
         "path" to "./google-beta/services/gemini"
     ),
+    "geminidataanalytics" to mapOf(
+        "name" to "geminidataanalytics",
+        "displayName" to "Gemini Data Analytics",
+        "path" to "./google-beta/services/geminidataanalytics"
+    ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
         "displayName" to "Gkebackup",
@@ -685,6 +690,11 @@ var ServicesListBeta = mapOf(
         "name" to "networkservices",
         "displayName" to "Networkservices",
         "path" to "./google-beta/services/networkservices"
+    ),
+    "networkservices2" to mapOf(
+        "name" to "networkservices2",
+        "displayName" to "Networkservices2",
+        "path" to "./google-beta/services/networkservices2"
     ),
     "observability" to mapOf(
         "name" to "observability",

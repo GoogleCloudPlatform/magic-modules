@@ -108,6 +108,7 @@ samples:
           url_map: 'url-map'
           target_proxy: 'target-http-proxy'
           forwarding_rule: 'forwarding-rule'
+          global_assoc: 'global-policy-assoc'
         test_env_vars:
           org_id: 'ORG_ID'
           project_name: PROJECT_NAME
@@ -206,8 +207,6 @@ properties:
         description: |
           Network scope of the traffic destination.
         min_version: beta
-        conflicts:
-          - match.0.dest_network_context
         enum_values:
           - UNSPECIFIED
           - INTERNET
@@ -219,8 +218,6 @@ properties:
         type: Enum
         description: |
           Network context of the traffic destination.
-        conflicts:
-          - match.0.src_network_scope
         enum_values:
           - UNSPECIFIED
           - INTERNET

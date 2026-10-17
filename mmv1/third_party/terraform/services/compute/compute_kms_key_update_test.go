@@ -1,0 +1,246 @@
+package compute
+
+import (
+	"context"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+const (
+	testKmsKeyA = "projects/p/locations/us-central1/keyRings/r/cryptoKeys/a"
+	testKmsKeyB = "projects/p/locations/global/keyRings/r/cryptoKeys/b"
+	testKmsSA   = "sa@p.iam.gserviceaccount.com"
+	// hcl2shim.UnknownVariableValue
+	testUnknownValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
+)
+
+func TestKmsKeyChangeRequiresReplacement(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		newKey              string
+		newKeyKnown         bool
+		serviceAccountSet   bool
+		customerSuppliedKey bool
+		wantForceNew        bool
+		wantErr             bool
+	}{
+		"key to key updates in place":             {newKey: testKmsKeyB, newKeyKnown: true},
+		"unknown key updates in place":            {newKeyKnown: false},
+		"removing the key errors":                 {newKey: "", newKeyKnown: true, wantErr: true},
+		"key change with service account errors":  {newKey: testKmsKeyB, newKeyKnown: true, serviceAccountSet: true, wantErr: true},
+		"unknown key with service account errors": {newKeyKnown: false, serviceAccountSet: true, wantErr: true},
+		"replacing a CSEK recreates":              {newKey: testKmsKeyB, newKeyKnown: true, customerSuppliedKey: true, wantForceNew: true},
+	}
+	for name, tc := range cases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			forceNew, err := kmsKeyChangeRequiresReplacement(tc.newKey, tc.newKeyKnown, tc.serviceAccountSet, tc.customerSuppliedKey)
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("got error %v, want error: %t", err, tc.wantErr)
+			}
+			if forceNew != tc.wantForceNew {
+				t.Errorf("got forceNew %t, want %t", forceNew, tc.wantForceNew)
+			}
+		})
+	}
+}
+
+func TestKmsKeyUpdateRequestBody(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		newKey, serviceAccount string
+		wantErr                bool
+	}{
+		"key":                      {testKmsKeyB, "", false},
+		"no key":                   {"", "", true},
+		"key with service account": {testKmsKeyB, testKmsSA, true},
+	}
+	for name, tc := range cases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			body, err := kmsKeyUpdateRequestBody(tc.newKey, tc.serviceAccount)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected an error, got body %v", body)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			if len(body) != 1 || body["kmsKeyName"] != tc.newKey {
+				t.Errorf("got body %v, want exactly {kmsKeyName: %q}", body, tc.newKey)
+			}
+		})
+	}
+}
+
+// testKmsKeyResource mirrors the disk/snapshot encryption key block.
+func testKmsKeyResource(withServiceAccount bool) *schema.Resource {
+	keySchema := map[string]*schema.Schema{
+		"raw_key":           {Type: schema.TypeString, Optional: true, ForceNew: true},
+		"sha256":            {Type: schema.TypeString, Computed: true},
+		"kms_key_self_link": {Type: schema.TypeString, Optional: true},
+	}
+	serviceAccountPath := ""
+	if withServiceAccount {
+		keySchema["kms_key_service_account"] = &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true}
+		serviceAccountPath = "encryption_key.0.kms_key_service_account"
+	}
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": {Type: schema.TypeString, Required: true, ForceNew: true},
+			"encryption_key": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem:     &schema.Resource{Schema: keySchema},
+			},
+		},
+		CustomizeDiff: kmsKeyUpdateCustomDiff("encryption_key.0.kms_key_self_link", serviceAccountPath, "encryption_key.0.sha256"),
+	}
+}
+
+func TestKmsKeyUpdateCustomDiff(t *testing.T) {
+	t.Parallel()
+
+	type action int
+	const (
+		noChange action = iota
+		update
+		replace
+		planError
+	)
+
+	keyState := func(key, serviceAccount string) map[string]string {
+		s := map[string]string{
+			"name":                               "r",
+			"encryption_key.#":                   "1",
+			"encryption_key.0.raw_key":           "",
+			"encryption_key.0.kms_key_self_link": key,
+		}
+		if serviceAccount != "" {
+			s["encryption_key.0.kms_key_service_account"] = serviceAccount
+		}
+		return s
+	}
+	keyConfig := func(block map[string]interface{}) map[string]interface{} {
+		c := map[string]interface{}{"name": "r"}
+		if block != nil {
+			c["encryption_key"] = []interface{}{block}
+		}
+		return c
+	}
+	noKeyState := map[string]string{"name": "r", "encryption_key.#": "0"}
+
+	cases := map[string]struct {
+		withServiceAccount bool
+		state              map[string]string
+		config             map[string]interface{}
+		want               action
+	}{
+		"key to key updates in place": {
+			state:  keyState(testKmsKeyA, ""),
+			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
+			want:   update,
+		},
+		"key to key without a service account field updates in place": {
+			state:  map[string]string{"name": "r", "encryption_key.#": "1", "encryption_key.0.kms_key_self_link": testKmsKeyA},
+			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
+			want:   update,
+		},
+		"key to unknown key updates in place": {
+			state:  keyState(testKmsKeyA, ""),
+			config: keyConfig(map[string]interface{}{"kms_key_self_link": testUnknownValue}),
+			want:   update,
+		},
+		"unchanged key": {
+			state:  keyState(testKmsKeyA, ""),
+			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyA}),
+			want:   noChange,
+		},
+		"key to key with a service account errors": {
+			withServiceAccount: true,
+			state:              keyState(testKmsKeyA, testKmsSA),
+			config:             keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB, "kms_key_service_account": testKmsSA}),
+			want:               planError,
+		},
+		"key to unknown key with a service account errors": {
+			withServiceAccount: true,
+			state:              keyState(testKmsKeyA, testKmsSA),
+			config:             keyConfig(map[string]interface{}{"kms_key_self_link": testUnknownValue, "kms_key_service_account": testKmsSA}),
+			want:               planError,
+		},
+		"key to key without a service account set updates in place": {
+			withServiceAccount: true,
+			state:              keyState(testKmsKeyA, ""),
+			config:             keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
+			want:               update,
+		},
+		"key to empty key in a remaining block errors": {
+			state:  keyState(testKmsKeyA, ""),
+			config: keyConfig(map[string]interface{}{}),
+			want:   planError,
+		},
+		"removing the block errors": {
+			state:  keyState(testKmsKeyA, ""),
+			config: keyConfig(nil),
+			want:   planError,
+		},
+		"adding a key to a resource without one updates in place": {
+			state:  noKeyState,
+			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
+			want:   update,
+		},
+		"replacing a raw CSEK with a key replaces": {
+			state:  map[string]string{"name": "r", "encryption_key.#": "1", "encryption_key.0.raw_key": "secret", "encryption_key.0.sha256": "hash"},
+			config: keyConfig(map[string]interface{}{"kms_key_self_link": testKmsKeyB}),
+			want:   replace,
+		},
+	}
+
+	for name, tc := range cases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := testKmsKeyResource(tc.withServiceAccount)
+			state := &terraform.InstanceState{ID: "r", Attributes: tc.state}
+			diff, err := r.SimpleDiff(context.Background(), state, terraform.NewResourceConfigRaw(tc.config), nil)
+			got := noChange
+			switch {
+			case err != nil:
+				got = planError
+			case diff != nil && !diff.Empty() && diff.RequiresNew():
+				got = replace
+			case diff != nil && !diff.Empty():
+				got = update
+			}
+			if got != tc.want {
+				t.Errorf("got action %d, want %d (0=no change, 1=update, 2=replace, 3=error); err: %v; diff: %#v", got, tc.want, err, diff)
+			}
+		})
+	}
+}
+
+func TestKmsKeyUpdateCustomDiff_create(t *testing.T) {
+	t.Parallel()
+
+	r := testKmsKeyResource(true)
+	config := terraform.NewResourceConfigRaw(map[string]interface{}{
+		"name":           "r",
+		"encryption_key": []interface{}{map[string]interface{}{"kms_key_self_link": testKmsKeyA, "kms_key_service_account": testKmsSA}},
+	})
+	diff, err := r.SimpleDiff(context.Background(), nil, config, nil)
+	if err != nil {
+		t.Fatalf("unexpected error on create: %s", err)
+	}
+	if diff == nil || diff.Empty() {
+		t.Fatalf("expected a create diff")
+	}
+}

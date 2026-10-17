@@ -7,6 +7,7 @@ go_library(
         "log_utils.go",
         "slice_utils.go",
         "string_utils.go",
+        "template_cache.go",
         "template_utils.go",
         "yaml_validator.go",
     ],
@@ -24,6 +25,7 @@ go_test(
         "fs_test.go",
         "slice_utils_test.go",
         "string_utils_test.go",
+        "template_cache_test.go",
     ],
     embed = [":google"],
 )

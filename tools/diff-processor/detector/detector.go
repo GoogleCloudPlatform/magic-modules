@@ -109,7 +109,13 @@ func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTest
 	resourceNamesToTests := make(map[string][]string)
 	for _, test := range allTests {
 		for _, step := range test.Steps {
-			for resourceName, resourceMap := range step {
+			// Only managed resource blocks count towards coverage here.
+			// changedFields is derived from the provider's managed resource
+			// map, and a data source, list resource or ephemeral resource can
+			// share a type label with a managed resource while having a
+			// different schema, so testing a field on one says nothing about
+			// whether the managed resource's field of that name is tested.
+			for resourceName, resourceMap := range step[reader.ResourceBlock] {
 				if changedResourceFields, ok := changedFields[resourceName]; ok {
 					// This resource type has changed fields.
 					resourceNamesToTests[resourceName] = append(resourceNamesToTests[resourceName], test.Name)
@@ -137,7 +143,7 @@ func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTest
 	return missingTests, nil
 }
 
-func markCoverage(fieldCoverage ResourceChanges, config reader.Resource) error {
+func markCoverage(fieldCoverage ResourceChanges, config reader.Block) error {
 	for fieldName := range config {
 		if field, ok := fieldCoverage[fieldName]; ok {
 			field.Tested = true

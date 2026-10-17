@@ -36,6 +36,10 @@ timeouts:
 sweeper:
   url_substitutions:
     - region: global
+    - region: us-central1
+  dependencies:
+    - google_compute_backend_service
+    - google_compute_region_backend_service
 async:
   type: OpAsync
   operation:
@@ -72,6 +76,15 @@ samples:
         resource_id_vars:
           resource_name: my-lb-policy
           backend_name: my-lb-backend
+  - name: network_services_service_lb_policies_regional
+    min_version: beta
+    primary_resource_id: default
+    steps:
+      - name: network_services_service_lb_policies_regional
+        min_version: beta
+        resource_id_vars:
+          resource_name: my-regional-lb-policy
+          backend_name: my-regional-lb-backend
 parameters:
   - name: name
     type: String

@@ -17,6 +17,7 @@ resource "google_chronicle_environment" "{{$.PrimaryResourceId}}" {
     value = "value1"
   }
   instance_uri = "https://test.backstory.chronicle.security?foo=bar"
+  parallel_instance = "projects/{{index $.TestEnvVars "project_name"}}/locations/us/instances/00000000-0000-0000-0000-000000000001"
   weight = 1
 
   deletion_protection  = false

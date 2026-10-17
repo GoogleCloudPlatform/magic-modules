@@ -52,9 +52,6 @@ samples:
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     exclude_basic_doc: true
@@ -63,9 +60,6 @@ samples:
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     exclude_test: true
@@ -84,12 +78,10 @@ samples:
           public: 'public'
           account_name: 'bqowner'
         test_vars_overrides:
-          # for backward compatible
-          private: '"private" + randomSuffix'
-          # for backward compatible
-          public: '"public" + randomSuffix'
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
+          # BigQuery dataset ids only allow letters, numbers and underscores, so
+          # the sweepable tf_test prefix is set explicitly here.
+          private: '"tf_test_private" + randomSuffix'
+          public: '"tf_test_public" + randomSuffix'
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     steps:
@@ -108,9 +100,6 @@ samples:
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     exclude_basic_doc: true
@@ -119,9 +108,6 @@ samples:
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     exclude_test: true
@@ -147,8 +133,9 @@ samples:
           tag_key2: 'tag_key2'
           tag_value2: 'tag_value2'
         test_vars_overrides:
-          # for backward compatible
-          dataset_id: '"dataset" + randomSuffix'
+          # BigQuery dataset ids only allow letters, numbers and underscores, so
+          # the sweepable tf_test prefix is set explicitly here.
+          dataset_id: '"tf_test_dataset" + randomSuffix'
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |

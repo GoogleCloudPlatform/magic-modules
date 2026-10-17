@@ -24,8 +24,11 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes:assign?notebook_runtime_id={{name}}'
 generate_list_resource: true
+autogen_async: true
 async:
   type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
 include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/colab_runtime.go.tmpl'

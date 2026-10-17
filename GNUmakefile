@@ -92,8 +92,9 @@ clean-provider: check_safe_build
 			else \
 				echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
 				go mod download && \
-				echo "---> Finding tracked files to remove..." && \
-				git ls-files | grep -v -E '(^\.git|^\.changelog|^\.agents/|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|docscheck\.sh$$|^\.whitesource$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples|^scripts/)' | xargs -r git rm -f -q && \
+				echo "---> Removing tracked files that will be regenerated..." && \
+				git ls-files | grep -v -E '(^\.git|^\.changelog|^\.agents/|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|docscheck\.sh$$|^\.whitesource$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples|^scripts/)' | tr '\n' '\0' | xargs -0 -r rm -f && \
+				find . -mindepth 1 -type d -empty -not -path './.git' -not -path './.git/*' -delete && \
 				echo "---> Unstaging changes with git reset..." && \
 				git reset -q && \
 				echo "---> clean-provider actions finished. Changes have been unstaged."; \

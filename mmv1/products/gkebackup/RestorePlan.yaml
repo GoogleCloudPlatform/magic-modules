@@ -43,7 +43,12 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+generate_list_resource: true
 include_in_tgc_next: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
 custom_code:
 samples:
   - name: gkebackup_restoreplan_all_namespaces
@@ -52,153 +57,81 @@ samples:
       - name: gkebackup_restoreplan_all_namespaces
         resource_id_vars:
           name: restore-all-ns
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/restore-all-ns-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_rollback_namespace
     primary_resource_id: rollback_ns
     steps:
       - name: gkebackup_restoreplan_rollback_namespace
         resource_id_vars:
           name: rollback-ns
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/rollback-ns-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_protected_application
     primary_resource_id: rollback_app
     steps:
       - name: gkebackup_restoreplan_protected_application
         resource_id_vars:
           name: rollback-app
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/rollback-app-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_all_cluster_resources
     primary_resource_id: all_cluster_resources
     steps:
       - name: gkebackup_restoreplan_all_cluster_resources
         resource_id_vars:
           name: all-groupkinds
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/all-groupkinds-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_rename_namespace
     primary_resource_id: rename_ns
     steps:
       - name: gkebackup_restoreplan_rename_namespace
         resource_id_vars:
           name: rename-ns
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/rename-ns-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_second_transformation
     primary_resource_id: transform_rule
     steps:
       - name: gkebackup_restoreplan_second_transformation
         resource_id_vars:
           name: transform-rule
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/transform-rule-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_gitops_mode
     primary_resource_id: gitops_mode
     steps:
       - name: gkebackup_restoreplan_gitops_mode
         resource_id_vars:
           name: gitops-mode
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/gitops-mode-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_restore_order
     primary_resource_id: restore_order
     steps:
       - name: gkebackup_restoreplan_restore_order
         resource_id_vars:
           name: restore-order
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/restore-order-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
   - name: gkebackup_restoreplan_volume_res
     primary_resource_id: volume_res
     steps:
       - name: gkebackup_restoreplan_volume_res
         resource_id_vars:
           name: volume-res
-          network_name: default
-          subnetwork_name: default
-          deletion_protection: "true"
-        test_env_vars:
-          project: PROJECT_NAME
+          cluster: projects/my-project-name/locations/us-east1/clusters/volume-res-cluster
         test_vars_overrides:
-          deletion_protection: "false"
-          network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
-          subnetwork_name: compute.BootstrapSubnet(t, "gke-cluster", compute.BootstrapSharedTestNetwork(t, "gke-cluster"))
-        oics_vars_overrides:
-          deletion_protection: "false"
+          cluster: container.BootstrapSharedGKECluster(t, "gkebackup")
 parameters:
   - name: location
     type: String

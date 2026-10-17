@@ -180,7 +180,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		}
 	}
 
-	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
+	if err := pushWithRetry(rnr, ctlr.URL(scratchRepo), scratchRepo.Branch); err != nil {
 		return fmt.Errorf("error pushing commit: %w", err)
 	}
 
@@ -190,6 +190,27 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		}
 	}
 	return nil
+}
+
+// pushRetryBackoffs are the delays between successive attempts to push to the
+// scratch repo. GitHub occasionally rejects pushes with transient server-side
+// errors (e.g. "remote: fatal error in commit_refs") that succeed on retry.
+// Since this is a force push of the same commit, retrying is idempotent.
+var pushRetryBackoffs = []time.Duration{10 * time.Second, 30 * time.Second, 60 * time.Second}
+
+func pushWithRetry(rnr ExecRunner, remote, branch string) error {
+	var err error
+	for attempt := 0; ; attempt++ {
+		if _, err = rnr.Run("git", []string{"push", remote, branch, "-f"}, nil); err == nil {
+			return nil
+		}
+		if attempt >= len(pushRetryBackoffs) {
+			break
+		}
+		fmt.Printf("Push of branch %s failed (attempt %d of %d), retrying in %s: %v\n", branch, attempt+1, len(pushRetryBackoffs)+1, pushRetryBackoffs[attempt], err)
+		time.Sleep(pushRetryBackoffs[attempt])
+	}
+	return fmt.Errorf("push of branch %s failed after %d attempts: %w", branch, len(pushRetryBackoffs)+1, err)
 }
 
 func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref string, rnr ExecRunner, ctlr *source.Controller) (*source.Repo, *source.Repo, string, error) {

@@ -1,7 +1,8 @@
 resource "google_compute_region_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
-  name            = "{{index $.ResourceIdVars "region_target_tcp_proxy_name"}}"
-  region          = "{{index $.Vars "region"}}"
-  backend_service = google_compute_region_backend_service.default.id
+  name                  = "{{index $.ResourceIdVars "region_target_tcp_proxy_name"}}"
+  region                = "{{index $.Vars "region"}}"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  backend_service       = google_compute_region_backend_service.default.id
 }
 
 resource "google_compute_region_backend_service" "default" {
@@ -11,7 +12,7 @@ resource "google_compute_region_backend_service" "default" {
   region      = "{{index $.Vars "region"}}"
 
   health_checks         = [google_compute_region_health_check.default.id]
-  load_balancing_scheme = "INTERNAL_MANAGED"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 }
 
 resource "google_compute_region_health_check" "default" {

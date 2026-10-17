@@ -132,6 +132,9 @@ properties:
                 type: NestedObject
                 description: Represents an image input or output in the conversation.
                 properties:
+                  - name: altText
+                    type: String
+                    description: The alternative text for the image.
                   - name: data
                     type: String
                     description: Raw bytes of the image.

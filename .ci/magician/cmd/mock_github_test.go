@@ -18,6 +18,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"magician/github"
 )
@@ -31,10 +32,24 @@ type mockGithub struct {
 	teamMembers         map[string][]github.User
 	calledMethods       map[string][][]any
 	commitMessage       string
+
+	// If set, successive GetPullRequest calls return these in order, then fall back to pullRequest.
+	pullRequests []github.PullRequest
+
+	// If set, returned by the corresponding methods.
+	getPullRequestErr  error
+	updateCommentErr   error
+	postBuildStatusErr error
 }
 
 func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
 	m.calledMethods["GetPullRequest"] = append(m.calledMethods["GetPullRequest"], []any{prNumber})
+	if m.getPullRequestErr != nil {
+		return github.PullRequest{}, m.getPullRequestErr
+	}
+	if i := len(m.calledMethods["GetPullRequest"]) - 1; i < len(m.pullRequests) {
+		return m.pullRequests[i], nil
+	}
 	return m.pullRequest, nil
 }
 
@@ -108,6 +123,14 @@ func (m *mockGithub) PostComment(prNumber string, comment string) (int, error) {
 
 func (m *mockGithub) UpdateComment(prNumber, comment string, id int) error {
 	m.calledMethods["UpdateComment"] = append(m.calledMethods["UpdateComment"], []any{prNumber, comment, id})
+	for i := range m.pullRequestComments {
+		if m.pullRequestComments[i].ID == id {
+			m.pullRequestComments[i].Body = comment
+		}
+	}
+	if strings.Contains(comment, "because a newer commit") {
+		return m.updateCommentErr
+	}
 	return nil
 }
 
@@ -123,6 +146,9 @@ func (m *mockGithub) RemoveLabel(prNumber string, label string) error {
 
 func (m *mockGithub) PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error {
 	m.calledMethods["PostBuildStatus"] = append(m.calledMethods["PostBuildStatus"], []any{prNumber, title, state, targetUrl, commitSha})
+	if state == "failure" {
+		return m.postBuildStatusErr
+	}
 	return nil
 }
 

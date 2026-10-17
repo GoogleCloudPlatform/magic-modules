@@ -16,7 +16,7 @@ import (
 
 func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 
-	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	bucket := "tf-test-bucket-object-content-" + acctest.RandString(t, 10)
 	content := "qwertyuioasdfghjk1234567!!@#$*"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,7 +39,7 @@ func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 func TestAccDataSourceStorageBucketObjectContent_FileContentBase64(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
-	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	bucket := "tf-test-bucket-object-content-" + acctest.RandString(t, 10)
 	folderName := "tf-folder-" + acctest.RandString(t, 10)
 
 	if err := os.Mkdir(folderName, 0777); err != nil {
@@ -149,22 +149,20 @@ resource "local_file" "this" {
 
 func TestAccDataSourceStorageBucketObjectContent_Issue15717(t *testing.T) {
 
-	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	bucket := "tf-test-bucket-object-content-" + acctest.RandString(t, 10)
 	content := "qwertyuioasdfghjk1234567!!@#$*"
-
-	config := fmt.Sprintf(`
-%s
-
-output "output" {
-	value = replace(data.google_storage_bucket_object_content.default.content, "q", "Q")
-}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config: fmt.Sprintf(`
+%s
+
+output "output" {
+	value = replace(data.google_storage_bucket_object_content.default.content, "q", "Q")
+}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.default", "content"),
 					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.default", "content", content),
@@ -176,24 +174,22 @@ output "output" {
 
 func TestAccDataSourceStorageBucketObjectContent_Issue15717BackwardCompatibility(t *testing.T) {
 
-	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	bucket := "tf-test-bucket-object-content-" + acctest.RandString(t, 10)
 	content := "qwertyuioasdfghjk1234567!!@#$*"
-
-	config := fmt.Sprintf(`
-%s
-
-data "google_storage_bucket_object_content" "new" {
-	bucket  = google_storage_bucket.contenttest.name
-	content = "%s"
-	name    = google_storage_bucket_object.object.name
-}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket), content)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config: fmt.Sprintf(`
+%s
+
+data "google_storage_bucket_object_content" "new" {
+	bucket  = google_storage_bucket.contenttest.name
+	content = "%s"
+	name    = google_storage_bucket_object.object.name
+}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket), content),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.new", "content"),
 					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.new", "content", content),

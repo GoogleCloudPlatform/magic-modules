@@ -70,11 +70,30 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
+  - 'kmsKeyUpdateCustomDiff("disk_encryption_key.0.kms_key_name", "", "disk_encryption_key.0.sha256")'
 samples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
     steps:
       - name: 'region_disk_basic'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_disk_encryption_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_disk_encryption_key_wo'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_rsa_encrypted_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_rsa_encrypted_key_wo'
         resource_id_vars:
           region_disk_name: 'my-region-disk'
           disk_name: 'my-disk'
@@ -154,14 +173,22 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
+
+      ~>**NOTE** `kms_key_name` can be added or changed in place. Removing it
+      fails at plan time. Other changes to this block recreate the disk.
+    # NOOP: makes the block updatable without generating an update call.
+    # The key is sent by custom_update; see kmsKeyUpdateCustomDiff.
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
+    update_verb: 'NOOP'
     properties:
       - name: 'rawKey'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        immutable: true
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
@@ -169,7 +196,9 @@ properties:
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        immutable: true
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'sha256'
         type: String
@@ -182,6 +211,10 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+
+          Specify the key without a `/cryptoKeyVersions/` suffix.
+        validation:
+          function: 'verify.ValidateKmsKeyWithoutVersion'
   - name: 'sourceImageEncryptionKey'
     type: NestedObject
     description: |
@@ -440,12 +473,14 @@ properties:
             - 'VIRTIO_SCSI_MULTIQUEUE'
             - 'WINDOWS'
             - 'GVNIC'
+            - 'IDPF'
             - 'SEV_LIVE_MIGRATABLE'
             - 'SEV_SNP_CAPABLE'
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
             - 'SEV_LIVE_MIGRATABLE_V2'
             - 'SNP_SVSM_CAPABLE'
+            - 'SUSPEND_SAFE_FPR'
   - name: 'licenses'
     type: Array
     description: Any applicable license URI.
