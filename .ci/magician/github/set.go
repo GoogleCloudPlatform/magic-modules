@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	utils "magician/utility"
+
 	gh "github.com/google/go-github/v68/github"
 )
 
@@ -180,20 +182,16 @@ func (c *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map
 	return nil
 }
 
-// MergePullRequest merges a pull request using the squash merge method
-func (c *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error {
-	num, err := strconv.Atoi(prNumber)
-	if err != nil {
-		return err
-	}
+func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
 
-	opts := &gh.PullRequestOptions{
-		MergeMethod: "squash",
-		SHA:         commitSha,
-	}
-
+	var err error
 	for attempt := 0; attempt <= maxMergeRetries; attempt++ {
-		_, _, err = c.gh.PullRequests.Merge(c.ctx, owner, repo, num, "", opts)
+		err = utils.RequestCallWithRetry(url, "PUT", gh.token, nil, map[string]any{
+			"merge_method": "squash",
+			"sha":          commitSha,
+		})
+
 		if err == nil {
 			fmt.Printf("Successfully merged pull request %s\n", prNumber)
 			return nil
@@ -202,13 +200,14 @@ func (c *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error
 		// Check if the error is "Merge already in progress" (405)
 		if strings.Contains(err.Error(), "Merge already in progress") {
 			fmt.Printf("Pull request %s is already being merged\n", prNumber)
+			// This status does not indicate that the Pull Request was merged
+			// Try again after 20s
 			if attempt < maxMergeRetries {
 				time.Sleep(mergeRetryDelay)
 				continue
 			}
 			return fmt.Errorf("failed to merge pull request: %w", err)
 		}
-
 		// Check if the base branch was modified while evaluating the merge (405)
 		if strings.Contains(err.Error(), "Base branch was modified") {
 			fmt.Printf("Base branch for pull request %s was modified; retrying merge\n", prNumber)
@@ -218,11 +217,10 @@ func (c *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error
 			}
 			return fmt.Errorf("failed to merge pull request: %w", err)
 		}
-
-		// Check if the PR is already merged or transiently not mergeable (405 Pull Request is not mergeable)
+		// Check if the PR is already merged (returns 405 Pull Request is not mergeable)
 		if strings.Contains(err.Error(), "Pull Request is not mergeable") {
 			fmt.Printf("Pull request %s is not mergeable; checking if it was already merged\n", prNumber)
-			pr, getErr := c.GetPullRequestFromRepo(owner, repo, prNumber)
+			pr, getErr := gh.GetPullRequestFromRepo(owner, repo, prNumber)
 			if getErr != nil {
 				return fmt.Errorf("failed to check if PR was already merged: %w", getErr)
 			}
@@ -237,7 +235,6 @@ func (c *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error
 			}
 			return fmt.Errorf("failed to merge pull request: %w", err)
 		}
-
 		return fmt.Errorf("failed to merge pull request: %w", err)
 	}
 

@@ -16,7 +16,6 @@
 package github
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -24,27 +23,40 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	gh "github.com/google/go-github/v68/github"
 )
+
+type rewriteTransport struct {
+	base      http.RoundTripper
+	serverURL *url.URL
+}
+
+func (rt *rewriteTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	reqCopy := req.Clone(req.Context())
+	reqCopy.URL.Scheme = rt.serverURL.Scheme
+	reqCopy.URL.Host = rt.serverURL.Host
+	return rt.base.RoundTrip(reqCopy)
+}
 
 func newTestClient(t *testing.T, handler http.HandlerFunc) *Client {
 	t.Helper()
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
 
-	ghClient := gh.NewClient(server.Client())
-	baseURL, err := url.Parse(server.URL + "/")
+	serverURL, err := url.Parse(server.URL)
 	if err != nil {
 		t.Fatalf("failed to parse test server URL: %v", err)
 	}
-	ghClient.BaseURL = baseURL
 
-	return &Client{
-		gh:    ghClient,
-		token: "test-token",
-		ctx:   context.Background(),
+	origTransport := http.DefaultTransport
+	http.DefaultTransport = &rewriteTransport{
+		base:      server.Client().Transport,
+		serverURL: serverURL,
 	}
+	t.Cleanup(func() {
+		http.DefaultTransport = origTransport
+	})
+
+	return NewClient("test-token")
 }
 
 func TestMergePullRequest(t *testing.T) {
