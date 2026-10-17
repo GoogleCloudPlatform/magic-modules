@@ -1177,7 +1177,11 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
 		}
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		if idx := slices.Index(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff"); idx != -1 {
+			r.CustomDiff[idx] = "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		}
 	}
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
@@ -1214,7 +1218,11 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	if parent == nil {
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetAnnotationsDiff")
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+		if idx := slices.Index(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff"); idx != -1 {
+			r.CustomDiff[idx] = "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+		}
 	}
 
 	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
