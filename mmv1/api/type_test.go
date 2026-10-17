@@ -325,6 +325,39 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("map value_type nested property is excluded if not in version", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name:            "test",
+			ProductMetadata: &p,
+		}
+		nestedBetaProp := &Type{
+			Name:             "betaProp",
+			Type:             "String",
+			MinVersion:       "beta",
+			ResourceMetadata: res,
+		}
+		mapProp := &Type{
+			Name:             "mapProp",
+			Type:             "Map",
+			ResourceMetadata: res,
+			ValueType: &Type{
+				Type:             "NestedObject",
+				ResourceMetadata: res,
+				Properties:       []*Type{nestedBetaProp},
+			},
+		}
+
+		mapProp.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+		if mapProp.Exclude {
+			t.Errorf("expected mapProp.Exclude to be false in ga")
+		}
+		if !nestedBetaProp.Exclude {
+			t.Errorf("expected nestedBetaProp.Exclude to be true in ga")
+		}
+	})
 }
 
 func TestLineage(t *testing.T) {
