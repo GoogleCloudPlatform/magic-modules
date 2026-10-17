@@ -14,7 +14,7 @@ import (
 	"reflect"
 	"strconv"
 {{- end }}
-{{- if or (contains $.ListUrlTemplate "/aggregated/") $.Sweeper.EnsureValue (and $.Sweeper.Parent $.Sweeper.Parent.ParentField $.Sweeper.Parent.ParentFieldExtractName) }}
+{{- if or (contains $.ListUrlTemplate "/aggregated/") (contains $.DeleteUrlTemplate "?") $.Sweeper.EnsureValue (and $.Sweeper.Parent $.Sweeper.Parent.ParentField $.Sweeper.Parent.ParentFieldExtractName) }}
 	"strings"
 {{- end }}
 	"testing"
@@ -433,7 +433,23 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 			log.Printf("[INFO][SWEEPER_LOG] error preparing update url: %s", err)
 			return err
 		}
+		{{- if contains $.DeleteUrlTemplate "?" }}
+		updateURLParts := strings.SplitN(updateURL, "?", 2)
+		updateURL = updateURLParts[0] + {{ $deleteId }}
+		if len(updateURLParts) == 2 {
+			var queryParams []string
+			for _, param := range strings.Split(updateURLParts[1], "&") {
+				if !strings.HasSuffix(param, "=") {
+					queryParams = append(queryParams, param)
+				}
+			}
+			if len(queryParams) > 0 {
+				updateURL = fmt.Sprintf("%s?%s", updateURL, strings.Join(queryParams, "&"))
+			}
+		}
+		{{- else }}
 		updateURL = updateURL + {{ $deleteId }}
+		{{- end }}
 
 		{{- if $.Sweeper.QueryString }}
 		// Apply additional query string defined in Sweeper config
@@ -529,7 +545,23 @@ func deleteResource{{ $.ResourceName }}(config *transport_tpg.Config, d *tpgreso
 			"{{ $.Sweeper.EnsureValue.Field }}")
 	}
 	{{- end }}
+	{{- if contains $.DeleteUrlTemplate "?" }}
+	urlParts := strings.SplitN(url, "?", 2)
+	url = urlParts[0] + {{ $deleteId }}
+	if len(urlParts) == 2 {
+		var queryParams []string
+		for _, param := range strings.Split(urlParts[1], "&") {
+			if !strings.HasSuffix(param, "=") {
+				queryParams = append(queryParams, param)
+			}
+		}
+		if len(queryParams) > 0 {
+			url = fmt.Sprintf("%s?%s", url, strings.Join(queryParams, "&"))
+		}
+	}
+	{{- else }}
 	url = url + {{ $deleteId }}
+	{{- end }}
 	{{- if $.Sweeper.QueryString }}
 	// Apply additional query string defined in Sweeper config
 	url = url + "{{ $.Sweeper.QueryString }}"
