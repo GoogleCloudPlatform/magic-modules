@@ -1,0 +1,62 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_backup_dr_backup_vault" "my_backup_vault" {
+  provider                                   = google-beta
+  location                                   = "us-central1"
+  backup_vault_id                            = "{{index $.ResourceIdVars "backup_vault_id"}}"
+  backup_minimum_enforced_retention_duration = "100000s"
+}
+
+resource "google_backup_dr_backup_plan" "my_backup_plan" {
+  provider       = google-beta
+  location       = "us-central1"
+  backup_plan_id = "{{index $.ResourceIdVars "backup_plan_id"}}"
+  resource_type  = "compute.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.my_backup_vault.id
+
+  backup_rules {
+    rule_id               = "rule-1"
+    backup_retention_days = 5
+
+    standard_schedule {
+      recurrence_type  = "HOURLY"
+      hourly_frequency = 6
+      time_zone        = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 24
+      }
+    }
+  }
+}
+
+resource "google_backup_dr_auto_protection_policy" "my_policy" {
+  provider                  = google-beta
+  location                  = "us-central1"
+  auto_protection_policy_id = "{{index $.ResourceIdVars "auto_protection_policy_id"}}"
+
+  criteria {
+    matching_conditions {
+      label_condition {
+        key    = "backup-policy"
+        values = ["{{index $.ResourceIdVars "label_value"}}"]
+      }
+    }
+  }
+
+  backup_plan_details {
+    resource_type = "compute.googleapis.com/Instance"
+    backup_plan   = google_backup_dr_backup_plan.my_backup_plan.name
+  }
+}
+
+resource "google_backup_dr_auto_protection_policy_binding" "{{$.PrimaryResourceId}}" {
+  provider                          = google-beta
+  location                          = "us-central1"
+  auto_protection_policy_id         = google_backup_dr_auto_protection_policy.my_policy.auto_protection_policy_id
+  auto_protection_policy_binding_id = "{{index $.ResourceIdVars "auto_protection_policy_binding_id"}}"
+  scope                             = "projects/${data.google_project.project.project_id}"
+}
