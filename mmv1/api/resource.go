@@ -2267,6 +2267,62 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
+func customFlattenProperties(props []*Type) []*Type {
+	var res []*Type
+	for _, p := range props {
+		if p.WriteOnly {
+			continue
+		}
+		if p.CustomFlatten != "" && !p.ShouldIgnoreCustomFlatten() {
+			res = append(res, p)
+		} else if nested := p.NestedProperties(); len(nested) > 0 {
+			res = append(res, customFlattenProperties(nested)...)
+		}
+	}
+	return res
+}
+
+func (r Resource) CustomFlattenProperties() []*Type {
+	return customFlattenProperties(r.GettableProperties())
+}
+
+func customExpandProperties(props []*Type) []*Type {
+	var res []*Type
+	for _, p := range props {
+		if p.CustomExpand != "" {
+			res = append(res, p)
+		} else if nested := p.NestedProperties(); len(nested) > 0 {
+			for _, np := range nested {
+				if !(strings.HasPrefix(np.Type, "KeyValue") && np.IgnoreWrite) {
+					res = append(res, customExpandProperties([]*Type{np})...)
+				}
+			}
+		}
+	}
+	return res
+}
+
+func (r Resource) CustomExpandProperties() []*Type {
+	return customExpandProperties(r.SettableProperties())
+}
+
+func (r Resource) HasCustomMethods() bool {
+	return r.CustomCode.CustomCreate != "" ||
+		(r.CustomCode.CustomUpdate != "" && r.Updatable()) ||
+		(r.CustomCode.CustomDelete != "" && !r.ExcludeDelete) ||
+		(r.CustomCode.CustomImport != "" && !r.ExcludeImport) ||
+		r.CustomCode.Encoder != "" ||
+		r.CustomCode.UpdateEncoder != "" ||
+		r.CustomCode.Decoder != "" ||
+		r.CustomCode.PostCreateFailure != "" ||
+		r.CustomCode.PostUpdateFailure != "" ||
+		r.CustomCode.PostDeleteFailure != "" ||
+		(r.SchemaVersion != 0 && r.StateUpgraders) ||
+		(r.IdentitySchemaVersion != 0 && r.IdentityUpgraders && !r.ExcludeRead) ||
+		len(r.CustomFlattenProperties()) > 0 ||
+		len(r.CustomExpandProperties()) > 0
+}
+
 func (r Resource) TestSamples() []*resource.Sample {
 	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
 		return s.ExcludeTest
