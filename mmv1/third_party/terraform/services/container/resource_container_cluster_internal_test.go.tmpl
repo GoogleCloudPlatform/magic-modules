@@ -1459,6 +1459,45 @@ func TestUnitContainerOperationWaiter(t *testing.T) {
 	}
 }
 
+func TestUnitContainerOperationWaiter_BrownoutRetry(t *testing.T) {
+	// Not parallel: temporarily lowers DefaultRequestTimeout to test multi-window brownout recovery in <1s.
+	origTimeout := transport_tpg.DefaultRequestTimeout
+	transport_tpg.DefaultRequestTimeout = 100 * time.Millisecond
+	defer func() {
+		transport_tpg.DefaultRequestTimeout = origTimeout
+	}()
+
+	start := time.Now()
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		if time.Since(start) < 250*time.Millisecond {
+			time.Sleep(40 * time.Millisecond)
+			rw.WriteHeader(http.StatusServiceUnavailable)
+			rw.Write([]byte(`{"error":{"code":503,"message":"backend brownout"}}`))
+			return
+		}
+		rw.Write([]byte(`{"name":"op-brownout","status":"DONE"}`))
+	}))
+	defer ts.Close()
+
+	cfg := &transport_tpg.Config{
+		Project: "test-project",
+		CustomEndpoints: map[string]string{
+			"container_custom_endpoint": ts.URL + "/v1/",
+		},
+		Client:       ts.Client(),
+		Context:      context.Background(),
+		PollInterval: 10 * time.Millisecond,
+	}
+	err := ContainerOperationWait(cfg, map[string]interface{}{
+		"name":   "op-brownout",
+		"status": "RUNNING",
+	}, "test-project", "us-central1", "testing brownout wait", "test-ua", 5*time.Second)
+	if err != nil {
+		t.Fatalf("ContainerOperationWait failed during retryable 503 brownout exceeding DefaultRequestTimeout: %v", err)
+	}
+}
+
 func TestUnitContainerCluster_expandWireSerialization(t *testing.T) {
 	t.Parallel()
 
