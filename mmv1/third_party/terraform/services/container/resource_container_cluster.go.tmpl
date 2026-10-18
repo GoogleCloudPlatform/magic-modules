@@ -3948,9 +3948,8 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 
 	rawLocations, _ := cluster["locations"].([]interface{})
 	locations := schema.NewSet(schema.HashString, rawLocations)
-	if zone, ok := cluster["zone"].(string); ok {
-		locations.Remove(zone) // Remove the original zone since we only store additional zones
-	}
+	zone, _ := cluster["zone"].(string)
+	locations.Remove(zone) // Remove the original zone since we only store additional zones
 	if err := d.Set("node_locations", locations); err != nil {
 		return fmt.Errorf("Error setting node_locations: %s", err)
 	}
@@ -4201,8 +4200,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster["secretSyncConfig"])); err != nil {
 		return err
 	}
-	resourceLabels := map[string]string{}
+	var resourceLabels map[string]string
 	if raw, ok := cluster["resourceLabels"].(map[string]interface{}); ok {
+		resourceLabels = make(map[string]string, len(raw))
 		for k, v := range raw {
 			resourceLabels[k], _ = v.(string)
 		}
@@ -4213,7 +4213,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := tpgresource.SetLabels(resourceLabels, d, "terraform_labels"); err != nil {
 		return fmt.Errorf("Error setting terraform_labels: %s", err)
 	}
-	if err := d.Set("effective_labels", cluster["resourceLabels"]); err != nil {
+	if err := d.Set("effective_labels", resourceLabels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err := d.Set("label_fingerprint", cluster["labelFingerprint"]); err != nil {
@@ -5806,12 +5806,15 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
-		tags := d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{})
+		tags := tpgresource.ConvertStringArr(d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{}))
+		if tags == nil {
+			tags = []string{}
+		}
 
 		req := map[string]interface{}{
 			"update": map[string]interface{}{
 				"desiredNodePoolAutoConfigNetworkTags": map[string]interface{}{
-					"tags": tpgresource.ConvertStringArr(tags),
+					"tags": tags,
 				},
 			},
 		}
@@ -5879,7 +5882,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 
-		log.Printf("[INFO] GKE cluster %s Enterprise Config has been updated to %#v", d.Id(), nil)
+		log.Printf("[INFO] GKE cluster %s Enterprise Config has been updated to %#v", d.Id(), dec)
 	}
 
 	if d.HasChange("anonymous_authentication_config") {
@@ -6544,7 +6547,24 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) map[strin
 			if win, ok := mp["window"].(map[string]interface{}); ok && win != nil {
 				if mex, ok := win["maintenanceExclusions"].(map[string]interface{}); ok && mex != nil {
 					for k, v := range mex {
-						exclusions[k] = v
+						tw := map[string]interface{}{}
+						if w, ok := v.(map[string]interface{}); ok {
+							for _, f := range []string{"startTime", "endTime"} {
+								if s, ok := w[f].(string); ok && s != "" {
+									tw[f] = s
+								}
+							}
+							if o, ok := w["maintenanceExclusionOptions"].(map[string]interface{}); ok {
+								opts := map[string]interface{}{}
+								for _, f := range []string{"scope", "endTimeBehavior"} {
+									if s, ok := o[f].(string); ok && s != "" {
+										opts[f] = s
+									}
+								}
+								tw["maintenanceExclusionOptions"] = opts
+							}
+						}
+						exclusions[k] = tw
 					}
 				}
 			}
@@ -8146,7 +8166,9 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) map[string]inte
 	config := l[0].(map[string]interface{})
 
 	if v, ok := config["tags"]; ok && len(v.([]interface{})) > 0 {
-		nt["tags"] = tpgresource.ConvertStringArr(v.([]interface{}))
+		if tags := tpgresource.ConvertStringArr(v.([]interface{})); len(tags) > 0 {
+			nt["tags"] = tags
+		}
 	}
 	return nt
 }
@@ -10154,7 +10176,9 @@ func expandAgentSandboxConfig(v interface{}) map[string]interface{} {
 	}
 	raw := l[0].(map[string]interface{})
 	res := map[string]interface{}{}
-	res["enabled"] = raw["enabled"].(bool)
+	if enabled, ok := raw["enabled"].(bool); ok && enabled {
+		res["enabled"] = enabled
+	}
 	return res
 }
 

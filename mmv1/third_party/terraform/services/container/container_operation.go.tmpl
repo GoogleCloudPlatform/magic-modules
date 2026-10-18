@@ -13,13 +13,12 @@ import (
 )
 
 type ContainerOperationWaiter struct {
-	Config              *transport_tpg.Config
-	UserAgent           string
-	Context             context.Context
-	Op                  map[string]interface{}
-	Project             string
-	Location            string
-	UserProjectOverride bool
+	Config    *transport_tpg.Config
+	UserAgent string
+	Context   context.Context
+	Op        map[string]interface{}
+	Project   string
+	Location  string
 }
 
 func (w *ContainerOperationWaiter) State() string {
@@ -82,21 +81,13 @@ func (w *ContainerOperationWaiter) QueryOp() (interface{}, error) {
 		// default must be here to keep the previous case from blocking
 	}
 	url := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, w.Config), name)
-	err := transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (opErr error) {
-			op, opErr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    w.Config,
-				Method:    "GET",
-				Project:   w.Project,
-				RawURL:    url,
-				UserAgent: w.UserAgent,
-			})
-			return opErr
-		},
-		Timeout: transport_tpg.DefaultRequestTimeout,
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    w.Config,
+		Method:    "GET",
+		Project:   w.Project,
+		RawURL:    url,
+		UserAgent: w.UserAgent,
 	})
-
-	return op, err
 }
 
 func (w *ContainerOperationWaiter) OpName() string {
@@ -117,13 +108,12 @@ func (w *ContainerOperationWaiter) TargetStates() []string {
 
 func ContainerOperationWait(config *transport_tpg.Config, op map[string]interface{}, project, location, activity, userAgent string, timeout time.Duration) error {
 	w := &ContainerOperationWaiter{
-		Config:              config,
-		UserAgent:           userAgent,
-		Context:             config.Context,
-		Op:                  op,
-		Project:             project,
-		Location:            location,
-		UserProjectOverride: config.UserProjectOverride,
+		Config:    config,
+		UserAgent: userAgent,
+		Context:   config.Context,
+		Op:        op,
+		Project:   project,
+		Location:  location,
 	}
 
 	if err := w.SetOp(op); err != nil {
