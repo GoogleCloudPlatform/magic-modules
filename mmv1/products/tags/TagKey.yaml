@@ -19,8 +19,9 @@ references:
     Official Documentation: https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing
   api: https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagKeys
 docs:
-base_url: tagKeys
+base_url: tagKeys?parent={{%parent}}
 self_link: tagKeys/{{name}}
+create_url: tagKeys
 update_mask: true
 update_verb: PATCH
 iam_policy:
@@ -37,7 +38,11 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 mutex: tagKeys/{{parent}}
-exclude_sweeper: true
+sweeper:
+  identifier_field: shortName
+  url_substitutions:
+    - parent: "organizations/${ORG_ID}"
+    - parent: "projects/${PROJECT_NAME}"
 async:
   type: OpAsync
   operation:
@@ -128,7 +133,7 @@ properties:
 
       Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose expects data in the following format: `network = "<project-name>/<vpc-name>"`.
     immutable: true
-    diff_suppress_func: 'tagsTagKeyPurposeDataDiffSuppress'
+    diff_suppress_func: 'TagsTagKeyPurposeDataDiffSuppress'
   - name: allowedValuesRegex
     type: String
     description: |

@@ -113,6 +113,64 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 	})
 }
 
+func TestTagsTagKeyPurposeDataDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		K, Old, New        string
+		ExpectDiffSuppress bool
+	}{
+		"map count unchanged is suppressed": {
+			K:                  "purpose_data.%",
+			Old:                "1",
+			New:                "1",
+			ExpectDiffSuppress: true,
+		},
+		"map count changed is not suppressed": {
+			K:                  "purpose_data.%",
+			Old:                "1",
+			New:                "2",
+			ExpectDiffSuppress: false,
+		},
+		"organization auto suppresses non-empty old": {
+			K:                  "purpose_data.organization",
+			Old:                "123456789",
+			New:                "auto",
+			ExpectDiffSuppress: true,
+		},
+		"organization auto does not suppress empty old": {
+			K:                  "purpose_data.organization",
+			Old:                "",
+			New:                "auto",
+			ExpectDiffSuppress: false,
+		},
+		"network selfLinkWithId with global segment suppresses project/vpc-name": {
+			K:                  "purpose_data.network",
+			Old:                "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/6992953698831725600",
+			New:                "my-project/tf-test-vpc-12345",
+			ExpectDiffSuppress: true,
+		},
+		"network empty old is not suppressed when adding key": {
+			K:                  "purpose_data.network",
+			Old:                "",
+			New:                "my-project/tf-test-vpc-12345",
+			ExpectDiffSuppress: false,
+		},
+		"network empty new is not suppressed when removing key": {
+			K:                  "purpose_data.network",
+			Old:                "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/6992953698831725600",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := tags.TagsTagKeyPurposeDataDiffSuppress(tc.K, tc.Old, tc.New, nil); got != tc.ExpectDiffSuppress {
+				t.Errorf("%s: TagsTagKeyPurposeDataDiffSuppress(%q, %q, %q) = %t, want %t", tn, tc.K, tc.Old, tc.New, got, tc.ExpectDiffSuppress)
+			}
+		})
+	}
+}
+
 func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "tag_network" {
