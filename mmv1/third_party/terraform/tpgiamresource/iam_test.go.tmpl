@@ -2,6 +2,7 @@ package tpgiamresource
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -1328,6 +1329,66 @@ func TestIamListFromIamAuditConfigsMap(t *testing.T) {
 		if !CompareAuditConfigs(got, tc.expect) {
 			t.Errorf("Unexpected value for listFromIamAuditConfigMap(%+v).\nActual: %s\nExpected: %s\n",
 				tc.input, DebugPrintAuditConfigs(got), DebugPrintAuditConfigs(tc.expect))
+		}
+	}
+}
+
+func TestIamPolicyNoExistingBindingChanged(t *testing.T) {
+	cond := &cloudresourcemanager.Expr{Title: "condition-1", Expression: "true"}
+	testCases := []struct {
+		name    string
+		before  []*cloudresourcemanager.Binding
+		after   []*cloudresourcemanager.Binding
+		wantErr string
+	}{
+		{
+			name:   "new binding",
+			before: []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:a@example.com"}}},
+			after: []*cloudresourcemanager.Binding{
+				{Role: "role-1", Members: []string{"user:a@example.com"}},
+				{Role: "role-2", Members: []string{"user:b@example.com"}},
+			},
+		},
+		{
+			name:   "identical binding, ignoring member order and casing",
+			before: []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:A@example.com", "user:b@example.com"}}},
+			after:  []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:b@example.com", "user:a@example.com"}}},
+		},
+		{
+			name:    "existing binding with different members",
+			before:  []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:a@example.com"}}},
+			after:   []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:b@example.com"}}},
+			wantErr: `role "role-1" already exists`,
+		},
+		{
+			name:    "existing binding removed",
+			before:  []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:a@example.com"}}},
+			after:   []*cloudresourcemanager.Binding{},
+			wantErr: `role "role-1" already exists`,
+		},
+		{
+			name:   "new conditional binding next to an unconditional one",
+			before: []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:a@example.com"}}},
+			after: []*cloudresourcemanager.Binding{
+				{Role: "role-1", Members: []string{"user:a@example.com"}},
+				{Role: "role-1", Members: []string{"user:b@example.com"}, Condition: cond},
+			},
+		},
+		{
+			name:    "existing conditional binding with different members",
+			before:  []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:a@example.com"}, Condition: cond}},
+			after:   []*cloudresourcemanager.Binding{ {Role: "role-1", Members: []string{"user:b@example.com"}, Condition: cond}},
+			wantErr: `role "role-1" with condition "condition-1" already exists`,
+		},
+	}
+
+	for _, tc := range testCases {
+		err := iamPolicyNoExistingBindingChanged(&cloudresourcemanager.Policy{Bindings: tc.before}, &cloudresourcemanager.Policy{Bindings: tc.after})
+		if tc.wantErr == "" && err != nil {
+			t.Errorf("%s: unexpected error: %s", tc.name, err)
+		}
+		if tc.wantErr != "" && (err == nil || !strings.Contains(err.Error(), tc.wantErr)) {
+			t.Errorf("%s: expected error containing %q, got %v", tc.name, tc.wantErr, err)
 		}
 	}
 }
