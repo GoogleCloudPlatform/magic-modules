@@ -35,6 +35,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		"access_level_custom":				testAccAccessContextManagerAccessLevel_customTest,
 		"access_levels":				testAccAccessContextManagerAccessLevels_basicTest,
 		"access_level_condition":			testAccAccessContextManagerAccessLevelCondition_basicTest,
+		"access_level_condition_unverified_chrome_os":	testAccAccessContextManagerAccessLevelCondition_unverifiedChromeOsTest,
 		"service_perimeter_psc_endpoint": testAccAccessContextManagerServicePerimeter_pscEndpointTest,
 		"service_perimeter_egress_policy":		testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest,
 		"service_perimeter_egress_policy_update":	testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest,
