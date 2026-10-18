@@ -731,7 +731,7 @@ func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with AOF enabled
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"AOF\"\naof_config{\nappend_fsync = \"EVERYSEC\"\n}\n}"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 1, nodeType: "REDIS_SHARED_CORE_NANO", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"AOF\"\naof_config{\nappend_fsync = \"EVERYSEC\"\n}\n}"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -741,7 +741,7 @@ func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 			},
 			{
 				// disable AOF
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"DISABLED\"\n}"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 1, nodeType: "REDIS_SHARED_CORE_NANO", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"DISABLED\"\n}"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -750,7 +750,7 @@ func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psc_configs"},
 			}, {
 				// update persistence to RDB
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 1, nodeType: "REDIS_SHARED_CORE_NANO", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -760,7 +760,7 @@ func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 1, nodeType: "REDIS_SHARED_CORE_NANO", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
 			},
 		},
 	})
