@@ -35,14 +35,14 @@ resource "google_redis_cluster" "cluster" {
   name                           = "tf-test-redis-cluster-%{random_suffix}"
   shard_count                    = 1
   node_type                      = "REDIS_SHARED_CORE_NANO"
-  region                         = "us-east4"
+  region                         = "us-east1"
   deletion_protection_enabled    = false 
   
 }   
 
 data "google_redis_cluster" "default" {
   name   = google_redis_cluster.cluster.name
-  region = "us-east4"
+  region = "us-east1"
 }
 `, context)
 }
