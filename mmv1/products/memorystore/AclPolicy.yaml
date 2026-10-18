@@ -26,6 +26,7 @@ sweeper:
   url_substitutions:
     - region: us-central1
     - region: us-west1
+    - region: us-east4
 parameters:
   - name: location
     type: String
