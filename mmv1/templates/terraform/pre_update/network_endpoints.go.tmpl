@@ -35,7 +35,6 @@ for _, e := range o.(*schema.Set).List() {
     ep := NetworkEndpointsNetworkEndpointConvertToStruct(e)
     if _, ok := oldEndpoints[ep]; ok {
         endpointsToDetach = append(endpointsToDetach, NetworkEndpointsNetworkEndpointConvertToAny(ep))
-        delete(oldEndpoints, ep)
     }
 }
 var endpointsToAttach []interface{}
@@ -43,7 +42,6 @@ for _, e := range n.(*schema.Set).List() {
     ep := NetworkEndpointsNetworkEndpointConvertToStruct(e)
     if _, ok := newEndpoints[ep]; ok {
         endpointsToAttach = append(endpointsToAttach, NetworkEndpointsNetworkEndpointConvertToAny(ep))
-        delete(newEndpoints, ep)
     }
 }
 
