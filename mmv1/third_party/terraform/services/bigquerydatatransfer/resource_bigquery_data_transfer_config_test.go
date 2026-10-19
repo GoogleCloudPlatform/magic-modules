@@ -909,6 +909,8 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 
 func testAccBigqueryDataTransferConfig_booleanParam(random_suffix string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
 resource "google_bigquery_dataset" "source_dataset" {
   dataset_id    = "source_%s"
   friendly_name = "foo"
