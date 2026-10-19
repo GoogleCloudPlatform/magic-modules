@@ -44,6 +44,7 @@ const (
 
 var validPRTypeLabels = []string{
 	"type/new-resource",
+	"type/new-datasource",
 	"type/new-field",
 	"type/ga-promotion",
 	"type/bugfix",
@@ -104,7 +105,7 @@ type prClassificationResult struct {
 var labelMergedPRCmd = &cobra.Command{
 	Use:   "label-merged-pr",
 	Short: "Classify and label a merged pull request by type",
-	Long: `This command classifies a merged pull request into one of the 14 type/* taxonomy labels
+	Long: `This command classifies a merged pull request into one of the 15 type/* taxonomy labels
 using Vertex AI Serverless Gemini 2.5 Flash, applies the label on GitHub, and posts a commit status.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -315,8 +316,9 @@ func buildClassificationPrompt(pr github.PullRequest, changedFiles []string, dif
 	return fmt.Sprintf(`Classify this Google Cloud Terraform provider (Magic Modules) pull request into exactly one type label.
 
 Taxonomy (choose the single primary purpose):
-- type/new-resource: Adds a brand new Terraform resource or data source
-- type/new-field: Adds new fields, properties, or arguments to an existing resource
+- type/new-resource: Adds a brand new Terraform resource (including when a companion data source is added alongside the new resource)
+- type/new-datasource: Adds a brand new Terraform data source without adding a new resource
+- type/new-field: Adds new fields, properties, or arguments to an existing resource or data source
 - type/ga-promotion: Promoting beta-only resources, fields, or data sources to GA (google provider)
 - type/bugfix: Fixes a provider runtime bug, API error, diff suppression, timeout, or state issue
 - type/test-fix: Fixes, stabilizes, skips, or adds acceptance tests, VCR cassettes, or test helpers
@@ -373,7 +375,8 @@ func callGeminiClassifier(classifierURL, token, prompt string) (prClassification
 						"type": "NUMBER",
 					},
 				},
-				"required": []string{"label", "confidence"},
+				"required":         []string{"label", "confidence"},
+				"propertyOrdering": []string{"label", "confidence"},
 			},
 		},
 	}
