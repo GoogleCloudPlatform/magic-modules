@@ -51,7 +51,13 @@ samples:
           pipeline_job_id: 'example-pipeline-job'
           storage_bucket: 'example-pipeline-bucket'
         ignore_read_extra:
+          - 'end_time'
+          - 'error'
+          - 'job_detail'
           - 'pipeline_spec'
+          - 'start_time'
+          - 'state'
+          - 'update_time'
   - name: 'vertex_ai_pipeline_job_full'
     primary_resource_id: 'pipeline_job'
     bootstrap_iam:
@@ -74,7 +80,13 @@ samples:
         test_vars_overrides:
           kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
+          - 'end_time'
+          - 'error'
+          - 'job_detail'
           - 'pipeline_spec'
+          - 'start_time'
+          - 'state'
+          - 'update_time'
   - name: 'vertex_ai_pipeline_job_persistent_resource'
     primary_resource_id: 'pipeline_job'
     min_version: 'beta'
@@ -86,7 +98,13 @@ samples:
           persistent_resource_id: 'example-persistent-resource'
           storage_bucket: 'example-pipeline-bucket-pr'
         ignore_read_extra:
+          - 'end_time'
+          - 'error'
+          - 'job_detail'
           - 'pipeline_spec'
+          - 'start_time'
+          - 'state'
+          - 'update_time'
 parameters:
   - name: 'region'
     type: String
