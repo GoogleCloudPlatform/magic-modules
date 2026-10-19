@@ -734,6 +734,13 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 func TestAccVertexAIReasoningEngine_apiParity(t *testing.T) {
 	t.Parallel()
 
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/cloudbuild.workerPoolUser",
+		},
+	})
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
