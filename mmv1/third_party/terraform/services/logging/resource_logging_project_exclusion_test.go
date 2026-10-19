@@ -34,23 +34,6 @@ func TestAccLoggingProjectExclusion(t *testing.T) {
 	}
 }
 
-// DO NOT MERGE: demonstrates the unreadable test report. The config is
-// assigned to a local variable, which the test reader can't follow.
-func TestAccLoggingProjectExclusion_unreadableDemo(t *testing.T) {
-	t.Skip("demonstrates the unreadable test report; not a real test")
-	config := testAccLoggingProjectExclusion_basicCfg("tf-test-exclusion-" + acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: config,
-			},
-		},
-	})
-}
-
 func testAccLoggingProjectExclusion_basic(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
 
@@ -208,23 +191,15 @@ resource "google_logging_project_exclusion" "basic" {
 }
 
 func testAccLoggingProjectExclusion_multipleCfg(exclusionName string) string {
-	return fmt.Sprintf(`
-resource "google_logging_project_exclusion" "basic0" {
-	name = "%[1]s0"
+	s := ""
+	for i := 0; i < 3; i++ {
+		s += fmt.Sprintf(`
+resource "google_logging_project_exclusion" "basic%d" {
+	name = "%s%d"
 	description = "Basic Project Logging Exclusion"
-	filter = "logName=\"projects/%[2]s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+	filter = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-
-resource "google_logging_project_exclusion" "basic1" {
-	name = "%[1]s1"
-	description = "Basic Project Logging Exclusion"
-	filter = "logName=\"projects/%[2]s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-}
-
-resource "google_logging_project_exclusion" "basic2" {
-	name = "%[1]s2"
-	description = "Basic Project Logging Exclusion"
-	filter = "logName=\"projects/%[2]s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-}
-`, exclusionName, envvar.GetTestProjectFromEnv())
+`, i, exclusionName, i, envvar.GetTestProjectFromEnv())
+	}
+	return s
 }
