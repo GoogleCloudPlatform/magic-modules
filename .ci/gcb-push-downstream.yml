@@ -190,6 +190,8 @@ steps:
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: label-merged-pr
       waitFor: ["build-magician-binary"]
+      allowFailure: true
+      timeout: 180s
       env:
         - BASE_BRANCH=$BRANCH_NAME
         - BUILD_ID=$BUILD_ID
