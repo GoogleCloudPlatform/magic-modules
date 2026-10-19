@@ -485,7 +485,7 @@ resource "google_lustre_instance" "instance" {
   filesystem                  = "testfs"
   network                     = data.google_compute_network.lustre-network.id
   gke_support_enabled         = false
-  capacity_gib                = 118000
+  capacity_gib                = 472000
   dynamic_tier_options {
     mode = "DEFAULT_CACHE"
   }
@@ -514,7 +514,7 @@ resource "google_lustre_instance" "instance" {
   instance_id                 = "tf-test-my-instance%{random_suffix}"
   location                    = "us-east4-b"
   filesystem                  = "testfs"
-  capacity_gib                = 118000
+  capacity_gib                = 472000
   network                     = data.google_compute_network.lustre-network.id
   description                 = "test-description"
   dynamic_tier_options {
