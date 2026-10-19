@@ -291,6 +291,10 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten,omitempty"`
 
+	// A Framework ephemeral response transformer converts a raw API value into
+	// API-shaped data before the generated ephemeral converter runs.
+	CustomFlattenEphemeral string `yaml:"custom_flatten_ephemeral,omitempty"`
+
 	ResourceMetadata *Resource `yaml:"-"`
 
 	ParentMetadata *Type `yaml:"-"`
@@ -519,6 +523,10 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	if t.WriteOnly && t.Sensitive {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
+	}
+
+	if t.ResourceMetadata != nil && t.ResourceMetadata.ShouldGenerateEphemeralResource() && !t.Exclude && t.CustomFlatten != "" && t.CustomFlattenEphemeral == "" {
+		es = append(es, fmt.Errorf("property %s in resource %s requires custom_flatten_ephemeral: SDK custom_flatten cannot be used by generated ephemeral resources", fullFieldPath, rName))
 	}
 
 	if t.ResourceMetadata != nil && t.ResourceMetadata.ShouldGenerateEphemeralResource() && t.ResourceMetadata.ExcludeRead && !t.Exclude && t.IsEphemeralInput() {

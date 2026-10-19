@@ -9,6 +9,28 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
 
+func TestEphemeralCustomFlattenValidation(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		generate  bool
+		hook      string
+		wantError bool
+	}{
+		{"SDK only", false, "", false},
+		{"unsupported SDK flattener", true, "", true},
+		{"explicit ephemeral flattener", true, "flattenEphemeralKey", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := &Resource{ProductMetadata: &Product{Name: "test"}, Ephemeral: &resource.Ephemeral{Generate: tc.generate}}
+			p := &Type{Name: "key", Type: "String", CustomFlatten: "sdk.tmpl", CustomFlattenEphemeral: tc.hook, ResourceMetadata: r}
+			errs := p.Validate("TestResource")
+			if (len(errs) > 0) != tc.wantError {
+				t.Fatalf("errors = %v, want error = %v", errs, tc.wantError)
+			}
+		})
+	}
+}
+
 func TestEphemeralActionInputValidation(t *testing.T) {
 	for _, tc := range []struct {
 		name      string
