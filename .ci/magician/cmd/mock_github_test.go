@@ -39,6 +39,7 @@ type mockGithub struct {
 	// If set, returned by the corresponding methods.
 	getPullRequestErr  error
 	updateCommentErr   error
+	addLabelsErr       error
 	postBuildStatusErr error
 }
 
@@ -136,7 +137,7 @@ func (m *mockGithub) UpdateComment(prNumber, comment string, id int) error {
 
 func (m *mockGithub) AddLabels(prNumber string, labels []string) error {
 	m.calledMethods["AddLabels"] = append(m.calledMethods["AddLabels"], []any{prNumber, labels})
-	return nil
+	return m.addLabelsErr
 }
 
 func (m *mockGithub) RemoveLabel(prNumber string, label string) error {

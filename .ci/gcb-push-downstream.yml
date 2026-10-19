@@ -186,8 +186,23 @@ steps:
         - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_CLASSIC"]
+      id: label-merged-pr
+      waitFor: ["build-magician-binary"]
+      allowFailure: true
+      timeout: 180s
+      env:
+        - BASE_BRANCH=$BRANCH_NAME
+        - BUILD_ID=$BUILD_ID
+        - PROJECT_ID=$PROJECT_ID
+      args:
+        - "label-merged-pr"
+        - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: magician-delete-branches
-      waitFor: ["vcr-merge"]
+      waitFor: ["vcr-merge", "label-merged-pr"]
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv:
         - "GITHUB_TOKEN_CLASSIC"
