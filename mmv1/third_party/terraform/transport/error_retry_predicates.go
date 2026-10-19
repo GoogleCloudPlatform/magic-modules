@@ -739,3 +739,26 @@ func IsAgentConnectivityTemplateInUse(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry when the AlloyDB API returns a 400 that the instance is currently undergoing another update operation
+// or a 409 that it is unable to queue the operation.
+func IsAlloyDbInstanceUpdatingError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && (strings.Contains(gerr.Body, "The instance is currently undergoing another update operation") || strings.Contains(gerr.Message, "The instance is currently undergoing another update operation")) {
+			return true, "Instance is undergoing another update operation"
+		}
+		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "unable to queue the operation") || strings.Contains(strings.ToLower(gerr.Message), "unable to queue the operation")) {
+			return true, "Waiting for other enqueued operations to finish"
+		}
+		return false, ""
+	}
+	if err != nil {
+		if strings.Contains(err.Error(), "The instance is currently undergoing another update operation") {
+			return true, "Instance is undergoing another update operation"
+		}
+		if strings.Contains(strings.ToLower(err.Error()), "unable to queue the operation") {
+			return true, "Waiting for other enqueued operations to finish"
+		}
+	}
+	return false, ""
+}

@@ -61,6 +61,8 @@ custom_code:
   custom_import: templates/terraform/custom_import/alloydb_instance.go.tmpl
   # Decoder reads Terraform state via d.Get; skip during CAI→HCL (no state).
   tgc_ignore_terraform_decoder: true
+error_retry_predicates:
+  - transport_tpg.IsAlloyDbInstanceUpdatingError
 samples:
   - name: alloydb_instance_basic
     primary_resource_id: default
