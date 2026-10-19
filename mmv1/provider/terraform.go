@@ -886,7 +886,7 @@ func copyfileHeaderBytes(srcpath, target string, content []byte) ([]byte, bool) 
 	if filepath.Ext(target) == ".markdown" {
 		// insert the header after ---
 		templateFormat = "---\n" + strings.Replace(templateFormat, "//", "#", -1)
-		body = strings.TrimPrefix(srcStr, "---\n")
+		body = strings.TrimPrefix(strings.TrimPrefix(srcStr, "---\r\n"), "---\n")
 	}
 
 	return []byte(fmt.Sprintf(templateFormat, srcpath, body)), true
