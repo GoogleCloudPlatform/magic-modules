@@ -34,6 +34,23 @@ func TestAccLoggingProjectExclusion(t *testing.T) {
 	}
 }
 
+// DO NOT MERGE: demonstrates the unreadable test report. The config is
+// assigned to a local variable, which the test reader can't follow.
+func TestAccLoggingProjectExclusion_unreadableDemo(t *testing.T) {
+	t.Skip("demonstrates the unreadable test report; not a real test")
+	config := testAccLoggingProjectExclusion_basicCfg("tf-test-exclusion-" + acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+		},
+	})
+}
+
 func testAccLoggingProjectExclusion_basic(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + acctest.RandString(t, 10)
 
