@@ -133,6 +133,7 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 		"preconfigured_waf_config": testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithPreconfiguredWafConfigTest,
 		"header_action":            testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithHeaderActionTest,
 		"redirect":                 testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRedirectTest,
+		"rate_limit":               testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitTest,
 	}
 
 	for name, tc := range testCases {
@@ -696,6 +697,189 @@ resource "google_compute_organization_security_policy_rule" "policy" {
   redirect_options {
     type   = "EXTERNAL_302"
     target = "https://www.example.com/new-blocked"
+  }
+
+  priority = 100
+}
+`, context)
+}
+
+func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitTest(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeOrganizationSecurityPolicyRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitThrottle(context),
+			},
+			{
+				ResourceName:      "google_compute_organization_security_policy_rule.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitBan(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_organization_security_policy_rule.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_organization_security_policy_rule.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitClear(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_organization_security_policy_rule.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_organization_security_policy_rule.policy", "rate_limit_options.#", "0"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_organization_security_policy_rule.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitThrottle(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "security_policy_target" {
+  display_name = "tf-test-secpol-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_compute_organization_security_policy" "policy" {
+  short_name = "tf-test%{random_suffix}"
+  parent     = google_folder.security_policy_target.name
+  type       = "CLOUD_ARMOR"
+}
+
+resource "google_compute_organization_security_policy_rule" "policy" {
+  policy_id = google_compute_organization_security_policy.policy.id
+  action    = "throttle"
+
+  match {
+    config {
+      src_ip_ranges = ["10.0.1.0/24"]
+    }
+    versioned_expr = "SRC_IPS_V1"
+  }
+
+  rate_limit_options {
+    conform_action      = "allow"
+    exceed_action       = "deny(429)"
+    enforce_on_key      = "HTTP_COOKIE"
+    enforce_on_key_name = "session-id"
+
+    rate_limit_threshold {
+      count        = 100
+      interval_sec = 60
+    }
+  }
+
+  priority = 100
+}
+`, context)
+}
+
+func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitBan(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "security_policy_target" {
+  display_name = "tf-test-secpol-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_compute_organization_security_policy" "policy" {
+  short_name = "tf-test%{random_suffix}"
+  parent     = google_folder.security_policy_target.name
+  type       = "CLOUD_ARMOR"
+}
+
+resource "google_compute_organization_security_policy_rule" "policy" {
+  policy_id = google_compute_organization_security_policy.policy.id
+  action    = "rate_based_ban"
+
+  match {
+    config {
+      src_ip_ranges = ["10.0.1.0/24"]
+    }
+    versioned_expr = "SRC_IPS_V1"
+  }
+
+  rate_limit_options {
+    conform_action = "allow"
+    exceed_action  = "redirect"
+
+    exceed_redirect_options {
+      type   = "EXTERNAL_302"
+      target = "https://www.example.com/rate-limited"
+    }
+
+    enforce_on_key_configs {
+      enforce_on_key_type = "HTTP_HEADER"
+      enforce_on_key_name = "X-Client-Id"
+    }
+    enforce_on_key_configs {
+      enforce_on_key_type = "REGION_CODE"
+    }
+
+    rate_limit_threshold {
+      count        = 200
+      interval_sec = 120
+    }
+
+    ban_threshold {
+      count        = 1000
+      interval_sec = 600
+    }
+    ban_duration_sec = 3600
+  }
+
+  priority = 100
+}
+`, context)
+}
+
+func testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRuleWithRateLimitClear(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "security_policy_target" {
+  display_name = "tf-test-secpol-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+
+resource "google_compute_organization_security_policy" "policy" {
+  short_name = "tf-test%{random_suffix}"
+  parent     = google_folder.security_policy_target.name
+  type       = "CLOUD_ARMOR"
+}
+
+resource "google_compute_organization_security_policy_rule" "policy" {
+  policy_id = google_compute_organization_security_policy.policy.id
+  action    = "allow"
+
+  match {
+    config {
+      src_ip_ranges = ["10.0.1.0/24"]
+    }
+    versioned_expr = "SRC_IPS_V1"
   }
 
   priority = 100
