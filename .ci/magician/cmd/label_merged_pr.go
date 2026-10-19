@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	defaultClassifierURL       = "https://us-central1-aiplatform.googleapis.com/v1/projects/673497134629/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent"
+	defaultClassifierURL       = "https://aiplatform.googleapis.com/v1/projects/673497134629/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent"
 	defaultMetadataTokenURL    = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
 	defaultCloudBuildProjectID = "graphite-docker-images"
 	classifierStatusContext    = "pr-type-classifier"
@@ -84,7 +84,7 @@ type geminiGenerationConfig struct {
 }
 
 type geminiThinkingConfig struct {
-	ThinkingBudget int `json:"thinkingBudget"`
+	ThinkingLevel string `json:"thinkingLevel"`
 }
 
 type geminiResponse struct {
@@ -106,7 +106,7 @@ var labelMergedPRCmd = &cobra.Command{
 	Use:   "label-merged-pr",
 	Short: "Classify and label a merged pull request by type",
 	Long: `This command classifies a merged pull request into one of the 15 type/* taxonomy labels
-using Vertex AI Serverless Gemini 2.5 Flash, applies the label on GitHub, and posts a commit status.`,
+using Vertex AI Serverless Gemini 3.5 Flash-Lite, applies the label on GitHub, and posts a commit status.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		commitSha := args[0]
@@ -362,7 +362,7 @@ func callGeminiClassifier(classifierURL, token, prompt string) (prClassification
 			ResponseMimeType: "application/json",
 			Temperature:      0.0,
 			ThinkingConfig: geminiThinkingConfig{
-				ThinkingBudget: 0,
+				ThinkingLevel: "MINIMAL",
 			},
 			ResponseSchema: map[string]any{
 				"type": "OBJECT",
