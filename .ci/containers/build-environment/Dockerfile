@@ -1,15 +1,5 @@
 FROM golang:1.26-trixie AS builder
 
-# Set working directory
-WORKDIR /app
-
-# Download go.mod and go.sum from your repository
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tpgtools/go.mod" go.mod
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tpgtools/go.sum" go.sum
-
-# Install the go dependencies
-RUN go mod download
-
 ENV GOPATH /go
 ENV PATH /usr/local/go/bin:$PATH
 ENV PATH $GOPATH/bin:$PATH
@@ -32,3 +22,10 @@ RUN git config --global user.email "magic-modules@google.com"
 
 RUN go install golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
 RUN go install github.com/github/hub@v2.11.2+incompatible
+
+# Pre-cache Go module dependencies from magic-modules
+WORKDIR /app
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/third_party/terraform/go.mod" go.mod
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/third_party/terraform/go.sum" go.sum
+RUN go mod download && rm -rf /app && chmod -R 1777 "$GOPATH"
+WORKDIR $GOPATH

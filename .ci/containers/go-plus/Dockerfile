@@ -11,14 +11,13 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 # Build the binary (we won't use it in the final image, but it's cached)
 RUN go build -o /dev/null .
 
+WORKDIR /app1/magic-modules-main/mmv1/third_party/terraform
+RUN go mod download
+
 # Stage 2: Creating the final image
 FROM golang:1.26-trixie
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
-
-# Copy Go dependencies and Go build cache
-COPY --from=builder /go/pkg/mod /go/pkg/mod
-COPY --from=builder /go/cache /go/cache
 
 RUN apt-get update && \
     apt-get install -y git jq unzip zip parallel apt-transport-https ca-certificates gnupg curl && \
@@ -33,3 +32,7 @@ RUN wget https://releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_
     && unzip terraform_1.14.3_linux_amd64.zip \
     && rm terraform_1.14.3_linux_amd64.zip \
     && mv ./terraform /bin/terraform
+
+# Copy Go dependencies and Go build cache
+COPY --from=builder /go/pkg/mod /go/pkg/mod
+COPY --from=builder /go/cache /go/cache
