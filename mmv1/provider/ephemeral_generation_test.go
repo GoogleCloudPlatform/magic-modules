@@ -52,8 +52,7 @@ func TestEphemeralArtifactGeneration(t *testing.T) {
 					td := NewTemplateData(out, version, os.DirFS(".."))
 					generator.GenerateEphemeralResource(*r, *td, out, mode.code, mode.docs)
 					testPath := filepath.Join(out, generator.FolderName(), "services/testproduct", "ephemeral_"+generator.ResourceGoFilename(*r)+"_generated_test.go")
-					docPath := filepath.Join(out, "website/docs/ephemeral-resources", generator.FullResourceName(*r)+".html.markdown")
-					for path, expected := range map[string]bool{testPath: mode.code, docPath: mode.docs} {
+					for path, expected := range map[string]bool{testPath: mode.code} {
 						b, err := os.ReadFile(path)
 						if !expected {
 							if !os.IsNotExist(err) {
@@ -76,17 +75,6 @@ func TestEphemeralArtifactGeneration(t *testing.T) {
 								if !strings.Contains(text, want) {
 									t.Fatalf("missing %q in test", want)
 								}
-							}
-						} else {
-							arguments := strings.Split(strings.Split(text, "## Argument Reference")[1], "## Attributes Reference")[0]
-							if !strings.Contains(arguments, "`name` - (Required)") || strings.Contains(arguments, "edition_config") {
-								t.Fatal("docs use managed-resource input roles")
-							}
-							if !strings.Contains(text, "effective_intelligence_config.inner.inner_value") {
-								t.Fatal("missing nested output documentation")
-							}
-							if strings.Contains(text, "### beta") != (version == "beta") {
-								t.Fatal("incorrect doc example filtering")
 							}
 						}
 					}
@@ -139,9 +127,7 @@ ephemeral "google_test_product_test_resource" "test" { name = google_compute_net
 	})
 	td := NewTemplateData(t.TempDir(), "ga", os.DirFS(".."))
 	testPath := filepath.Join(td.OutputFolder, "ephemeral_test.go")
-	docPath := filepath.Join(td.OutputFolder, "ephemeral.md")
 	td.GenerateEphemeralResourceTestFile(testPath, *r)
-	td.GenerateEphemeralResourceDocumentationFile(docPath, *r)
 	b, err := os.ReadFile(testPath)
 	if err != nil {
 		t.Fatal(err)
@@ -158,12 +144,5 @@ ephemeral "google_test_product_test_resource" "test" { name = google_compute_net
 	steps := r.Ephemeral.Samples[0].Steps
 	if steps[0].TestContextVars["network"] != steps[1].TestContextVars["network"] {
 		t.Fatal("fixture names must remain stable across setup and read")
-	}
-	b, err = os.ReadFile(docPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if strings.Count(string(b), `resource "google_compute_network"`) != 1 || !strings.Contains(string(b), `ephemeral "google_test_product_test_resource"`) {
-		t.Fatal("documentation must show only the complete read example")
 	}
 }

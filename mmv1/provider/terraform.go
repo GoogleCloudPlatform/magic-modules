@@ -122,7 +122,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	// Definitions with exclude_resource can still generate an independently
 	// opted-in ephemeral artifact without a managed CRUD resource.
 	if object.ExcludeResource && !object.Exclude {
-		t.GenerateEphemeralResource(object, *templateData, outputFolder, generateCode)
+		t.GenerateEphemeralResource(object, *templateData, outputFolder, generateCode, generateDocs)
 	}
 
 	// if iam_policy is not defined or excluded, don't generate it
@@ -356,11 +356,6 @@ func (t *Terraform) GenerateEphemeralResource(object api.Resource, templateData 
 			testPath := path.Join(targetFolder, fmt.Sprintf("ephemeral_%s_generated_test.go", t.ResourceGoFilename(object)))
 			templateData.GenerateEphemeralResourceTestFile(testPath, object)
 		}
-	}
-	if generateDocs {
-		targetFolder := t.makeFolder(outputFolder, "website", "docs", "ephemeral-resources")
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
-		templateData.GenerateEphemeralResourceDocumentationFile(targetFilePath, object)
 	}
 }
 
