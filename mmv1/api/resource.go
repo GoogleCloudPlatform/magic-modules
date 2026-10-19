@@ -2566,6 +2566,10 @@ func (r Resource) EphemeralTestDependencies() map[string]string {
 	return r.TestDependencies()
 }
 
+func (r Resource) EphemeralModelProperties() []*Type {
+	return r.AllUserProperties()
+}
+
 func (r Resource) EphemeralBodyProperties() []*Type {
 	return google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return r.ExcludeRead && !p.Output && !p.UrlParamOnly && !p.ClientSide && !p.IgnoreWrite

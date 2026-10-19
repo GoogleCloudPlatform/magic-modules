@@ -357,6 +357,11 @@ func (t *Terraform) GenerateEphemeralResource(object api.Resource, templateData 
 			templateData.GenerateEphemeralResourceTestFile(testPath, object)
 		}
 	}
+	if generateDocs {
+		targetFolder := t.makeFolder(outputFolder, "website", "docs", "ephemeral-resources")
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
+		templateData.GenerateEphemeralResourceDocumentationFile(targetFilePath, object)
+	}
 }
 
 func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
