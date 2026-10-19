@@ -23,6 +23,9 @@ jobs:
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version: '^1.26'
+          cache-dependency-path: |
+            tools/diff-processor/go.sum
+            mmv1/third_party/terraform/go.sum
 
       - name: Build diff-processor with TPG
         run: |
@@ -62,7 +65,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            tools/go-changelog/go.mod
+            tools/go-changelog/go.sum
 
       - name: Build go-changelog
         run: |
@@ -86,7 +89,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            tools/issue-labeler/go.mod
+            tools/issue-labeler/go.sum
 
       - name: Build issue-labeler
         run: |
@@ -110,7 +113,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            tools/template-check/go.mod
+            tools/template-check/go.sum
 
       - name: Build template-check
         run: |
@@ -134,7 +137,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            tools/test-reader/go.mod
+            tools/test-reader/go.sum
 
       - name: Build test-reader
         run: |

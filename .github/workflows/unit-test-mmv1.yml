@@ -35,6 +35,12 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: '^1.26'
+          cache-dependency-path: |
+            repo/tools/template-check/go.sum
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
@@ -62,6 +68,12 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: '^1.26'
+          cache-dependency-path: |
+            repo/tools/template-check/go.sum
       - name: Check new product templates are linked
         id: new_templates
         run: |
@@ -90,6 +102,12 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: '^1.26'
+          cache-dependency-path: |
+            repo/tools/template-check/go.sum
       - name: Check for legacy Apiary usage
         run: |
           cd repo/tools/template-check
@@ -163,7 +181,7 @@ jobs:
         with:
           go-version: '^1.26'
           cache-dependency-path: |
-            repo/mmv1/go.mod
+            repo/mmv1/go.sum
 
       - name: Run mmv1 unit tests
         run: |
