@@ -239,38 +239,6 @@ const AttributionValue = "true"
 const CreateOnlyAttributionStrategy = "CREATION_ONLY"
 const ProactiveAttributionStrategy = "PROACTIVE"
 
-// HandleSDKDefaultsSchema defines the provider schema fields populated by HandleSDKDefaults.
-var HandleSDKDefaultsSchema = map[string]*schema.Schema{
-	"impersonate_service_account": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"project": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"billing_project": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"region": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"zone": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"user_project_override": {
-		Type:     schema.TypeBool,
-		Optional: true,
-	},
-	"request_reason": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-}
-
 func HandleSDKDefaults(d *schema.ResourceData) error {
 	if d.Get("impersonate_service_account") == "" {
 		if err := d.Set("impersonate_service_account", envvar.MultiEnvDefault([]string{

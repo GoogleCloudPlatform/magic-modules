@@ -16,6 +16,37 @@ import (
 
 const testOauthScope = "https://www.googleapis.com/auth/compute"
 
+var testHandleSDKDefaultsSchema = map[string]*schema.Schema{
+	"impersonate_service_account": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"project": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"billing_project": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"region": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"zone": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"user_project_override": {
+		Type:     schema.TypeBool,
+		Optional: true,
+	},
+	"request_reason": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+}
+
 func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 	cases := map[string]struct {
 		ConfigValue      string
@@ -51,7 +82,7 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema fields read by HandleSDKDefaults
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, transport_tpg.HandleSDKDefaultsSchema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, testHandleSDKDefaultsSchema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -154,7 +185,7 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 			// Arrange
 			// Create empty schema.ResourceData using the SDK Provider schema fields read by HandleSDKDefaults
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, transport_tpg.HandleSDKDefaultsSchema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, testHandleSDKDefaultsSchema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.SetViaConfig {
