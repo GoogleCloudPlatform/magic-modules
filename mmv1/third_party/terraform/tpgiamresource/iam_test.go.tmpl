@@ -2,9 +2,12 @@ package tpgiamresource
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -1331,3 +1334,152 @@ func TestIamListFromIamAuditConfigsMap(t *testing.T) {
 		}
 	}
 }
+
+type mockIamUpdater struct {
+	policy    *cloudresourcemanager.Policy
+	setPolicy func(p *cloudresourcemanager.Policy) error
+}
+
+func (m *mockIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	return m.policy, nil
+}
+
+func (m *mockIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	if m.setPolicy != nil {
+		return m.setPolicy(policy)
+	}
+	m.policy = policy
+	return nil
+}
+
+func (m *mockIamUpdater) GetMutexKey() string     { return "mock-mutex-key" }
+func (m *mockIamUpdater) GetResourceId() string   { return "b/test-bucket" }
+func (m *mockIamUpdater) DescribeResource() string { return `storage bucket "b/test-bucket"` }
+
+func TestResourceIamMemberRead_MergesDuplicateRoleAndConditionBindings(t *testing.T) {
+	parentSchema := map[string]*schema.Schema{
+		"bucket": {
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+		},
+	}
+	cond := &cloudresourcemanager.Expr{
+		Title:       "conditional_object_readers",
+		Description: "Allow approved readers to read bucket objects.",
+		Expression:  "resource.name.startsWith('projects/_/buckets/test-bucket/objects/')",
+	}
+	updater := &mockIamUpdater{
+		policy: &cloudresourcemanager.Policy{
+			Etag:    "CAI=",
+			Version: IamPolicyVersion,
+			Bindings: []*cloudresourcemanager.Binding{
+				{
+					Role:      "roles/storage.objectViewer",
+					Members:   []string{"user:first@example.com"},
+					Condition: cond,
+				},
+				{
+					Role:      "roles/storage.objectViewer",
+					Members:   []string{"user:second@example.com"},
+					Condition: cond,
+				},
+			},
+		},
+	}
+	newUpdater := func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+		return updater, nil
+	}
+
+	res := ResourceIamMember(parentSchema, newUpdater, nil)
+	d := res.TestResourceData()
+	if err := d.Set("bucket", "b/test-bucket"); err != nil {
+		t.Fatalf("unexpected error setting bucket: %v", err)
+	}
+	if err := d.Set("role", "roles/storage.objectViewer"); err != nil {
+		t.Fatalf("unexpected error setting role: %v", err)
+	}
+	if err := d.Set("member", "user:second@example.com"); err != nil {
+		t.Fatalf("unexpected error setting member: %v", err)
+	}
+	if err := d.Set("condition", FlattenIamCondition(cond)); err != nil {
+		t.Fatalf("unexpected error setting condition: %v", err)
+	}
+	d.SetId("b/test-bucket/roles/storage.objectViewer/user:second@example.com/" + conditionKeyFromCondition(cond).String())
+
+	if err := res.Read(d, &transport_tpg.Config{}); err != nil {
+		t.Fatalf("unexpected error during Read: %v", err)
+	}
+	if d.Id() == "" {
+		t.Fatalf("expected member in second binding with same role+condition to be retained in state, but Id was cleared")
+	}
+	if got := d.Get("member").(string); got != "user:second@example.com" {
+		t.Fatalf("expected member %q, got %q", "user:second@example.com", got)
+	}
+}
+
+func TestResourceIamMemberCreate_OmittedMemberReturnsError(t *testing.T) {
+	parentSchema := map[string]*schema.Schema{
+		"bucket": {
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+		},
+	}
+	cond := &cloudresourcemanager.Expr{
+		Title:       "conditional_object_readers",
+		Description: "Allow approved readers to read bucket objects.",
+		Expression:  "resource.name.startsWith('projects/_/buckets/test-bucket/objects/')",
+	}
+	updater := &mockIamUpdater{
+		policy: &cloudresourcemanager.Policy{
+			Etag:    "CAE=",
+			Version: IamPolicyVersion,
+			Bindings: []*cloudresourcemanager.Binding{
+				{
+					Role:      "roles/storage.objectViewer",
+					Members:   []string{"user:existing@example.com"},
+					Condition: cond,
+				},
+			},
+		},
+		setPolicy: func(p *cloudresourcemanager.Policy) error {
+			// Simulate API omitting the newly added member (e.g. alias deduplication)
+			p.Bindings = []*cloudresourcemanager.Binding{
+				{
+					Role:      "roles/storage.objectViewer",
+					Members:   []string{"user:existing@example.com"},
+					Condition: cond,
+				},
+			}
+			return nil
+		},
+	}
+	newUpdater := func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (ResourceIamUpdater, error) {
+		return updater, nil
+	}
+
+	res := ResourceIamMember(parentSchema, newUpdater, nil)
+	d := res.TestResourceData()
+	if err := d.Set("bucket", "b/test-bucket"); err != nil {
+		t.Fatalf("unexpected error setting bucket: %v", err)
+	}
+	if err := d.Set("role", "roles/storage.objectViewer"); err != nil {
+		t.Fatalf("unexpected error setting role: %v", err)
+	}
+	if err := d.Set("member", "user:omitted@example.com"); err != nil {
+		t.Fatalf("unexpected error setting member: %v", err)
+	}
+	if err := d.Set("condition", FlattenIamCondition(cond)); err != nil {
+		t.Fatalf("unexpected error setting condition: %v", err)
+	}
+
+	err := res.Create(d, &transport_tpg.Config{})
+	if err == nil {
+		t.Fatalf("expected error when member is absent from policy after Create, got nil")
+	}
+	if !strings.Contains(err.Error(), "was not found in policy after apply") {
+		t.Fatalf("expected 'was not found in policy after apply' error, got: %v", err)
+	}
+}
+

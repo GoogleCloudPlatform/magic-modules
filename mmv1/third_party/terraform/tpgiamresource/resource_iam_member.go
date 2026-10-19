@@ -157,12 +157,13 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 			return nil, err
 		}
 		var binding *cloudresourcemanager.Binding
-		for _, b := range p.Bindings {
+		for _, b := range MergeBindings(p.Bindings) {
 			if b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle {
 				containsMember := false
 				for _, m := range b.Members {
 					if strings.ToLower(m) == strings.ToLower(member) {
 						containsMember = true
+						break
 					}
 				}
 				if !containsMember {
@@ -345,7 +346,14 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			setIamMemberResourceIdentity(identity, d, parentSpecificSchema, memberBind.Role, memberBind.Members[0], conditionTitle)
 		}
 
-		return resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, parentResourceIdentityParser)(d, meta)
+		err = resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, parentResourceIdentityParser)(d, meta)
+		if err != nil {
+			return err
+		}
+		if d.Id() == "" {
+			return fmt.Errorf("Error applying IAM policy for %s: member %q for role %q was not found in policy after apply", updater.DescribeResource(), memberBind.Members[0], memberBind.Role)
+		}
+		return nil
 	}
 }
 
@@ -368,7 +376,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 		log.Printf("[DEBUG]: Looking for binding with role %q and condition %#v", eMember.Role, eCondition)
 
 		var binding *cloudresourcemanager.Binding
-		for _, b := range p.Bindings {
+		for _, b := range MergeBindings(p.Bindings) {
 			if b.Role == eMember.Role && conditionKeyFromCondition(b.Condition) == eCondition {
 				binding = b
 				break
@@ -386,6 +394,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 		for _, m := range binding.Members {
 			if strings.ToLower(m) == strings.ToLower(eMember.Members[0]) {
 				member = m
+				break
 			}
 		}
 
@@ -436,6 +445,7 @@ func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
 			// Merge the bindings together
 			ep.Bindings = subtractFromBindings(ep.Bindings, memberBind)
+			ep.Version = IamPolicyVersion
 			return nil
 		}
 		if enableBatching {
