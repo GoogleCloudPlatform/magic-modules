@@ -172,7 +172,6 @@ properties:
           Indicates whether Jumbo Frames are enabled for the firewall endpoint.
       - name: contentCloudRegion
         type: String
-        min_version: beta
         # The API assigns a region (e.g. US_CENTRAL) when this is not set.
         default_from_api: true
         description: |
@@ -182,7 +181,6 @@ properties:
           for the list of supported regions.
       - name: httpPartialResponseBlocked
         type: Boolean
-        min_version: beta
         send_empty_value: true
         description: |
           Whether to block HTTP partial responses for the firewall endpoint.
@@ -191,7 +189,6 @@ properties:
           provides maximum security.
   - name: wildfireSettings
     type: NestedObject
-    min_version: beta
     description: |
       Settings for WildFire analysis on the firewall endpoint.
     # The API returns default values for this block once WildFire has been
