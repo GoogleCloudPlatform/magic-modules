@@ -21,7 +21,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 func TestExecLabelMergedPR_HighConfidenceSuccess(t *testing.T) {
@@ -193,5 +195,24 @@ func TestExecLabelMergedPR_SoftFailsOnHTTP500OrMalformedResponse(t *testing.T) {
 				t.Errorf("PostBuildStatus calls = %v, want %v", got, wantPostStatus)
 			}
 		})
+	}
+}
+
+func TestTruncateUTF8(t *testing.T) {
+	// Multi-byte rune: '€' is 3 bytes in UTF-8
+	input := strings.Repeat("€", 10)
+	got := truncateUTF8(input, 4)
+	if !utf8.ValidString(got) {
+		t.Errorf("truncateUTF8 produced invalid UTF-8: %q", got)
+	}
+	if got != "€€€€" {
+		t.Errorf("truncateUTF8(%q, 4) = %q, want %q", input, got, "€€€€")
+	}
+
+	// Invalid UTF-8 bytes are stripped cleanly
+	withInvalid := "abc\xff\xfedef"
+	gotClean := truncateUTF8(withInvalid, 10)
+	if !utf8.ValidString(gotClean) || gotClean != "abcdef" {
+		t.Errorf("truncateUTF8(%q, 10) = %q, want %q", withInvalid, gotClean, "abcdef")
 	}
 }

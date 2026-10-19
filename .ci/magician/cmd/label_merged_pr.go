@@ -38,6 +38,7 @@ const (
 	classifierStatusContext    = "pr-type-classifier"
 	classifierConfidenceFloor  = 0.50
 	maxChangedFilesInPrompt    = 25
+	maxBodyCharsInPrompt       = 4000
 	maxPatchCharsInPrompt      = 10000
 )
 
@@ -192,10 +193,7 @@ func execLabelMergedPR(commitSha, targetURL, classifierURL string, runner ExecRu
 	if err != nil {
 		fmt.Printf("Warning: git show -p failed for %s: %v\n", commitSha, err)
 	}
-	patchSample := patchOut
-	if len(patchSample) > maxPatchCharsInPrompt {
-		patchSample = patchSample[:maxPatchCharsInPrompt]
-	}
+	patchSample := truncateUTF8(patchOut, maxPatchCharsInPrompt)
 
 	token, err := getGCPAccessToken(defaultMetadataTokenURL)
 	if err != nil {
@@ -302,7 +300,18 @@ func getGCPAccessToken(metadataURL string) (string, error) {
 	return tokenResp.AccessToken, nil
 }
 
+func truncateUTF8(s string, maxRunes int) string {
+	s = strings.ToValidUTF8(s, "")
+	runes := []rune(s)
+	if len(runes) > maxRunes {
+		return string(runes[:maxRunes])
+	}
+	return s
+}
+
 func buildClassificationPrompt(pr github.PullRequest, changedFiles []string, diffstat, patchSample string) string {
+	body := truncateUTF8(pr.Body, maxBodyCharsInPrompt)
+	patchSample = truncateUTF8(patchSample, maxPatchCharsInPrompt)
 	return fmt.Sprintf(`Classify this Google Cloud Terraform provider (Magic Modules) pull request into exactly one type label.
 
 Taxonomy (choose the single primary purpose):
@@ -334,7 +343,7 @@ Diffstat:
 
 Patch Sample:
 %s
-`, pr.Number, pr.Title, pr.Body, strings.Join(changedFiles, "\n"), diffstat, patchSample)
+`, pr.Number, pr.Title, body, strings.Join(changedFiles, "\n"), diffstat, patchSample)
 }
 
 func callGeminiClassifier(classifierURL, token, prompt string) (prClassificationResult, error) {

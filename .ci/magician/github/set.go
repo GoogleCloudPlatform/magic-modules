@@ -33,9 +33,11 @@ var mergeRetryDelay = 20 * time.Second
 // PostBuildStatus creates a commit status for a specific SHA
 func (c *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
 	repoStatus := &gh.RepoStatus{
-		Context:   gh.Ptr(title),
-		State:     gh.Ptr(state),
-		TargetURL: gh.Ptr(targetURL),
+		Context: gh.Ptr(title),
+		State:   gh.Ptr(state),
+	}
+	if targetURL != "" {
+		repoStatus.TargetURL = gh.Ptr(targetURL)
 	}
 
 	_, _, err := c.gh.Repositories.CreateStatus(c.ctx, defaultOwner, defaultRepo, commitSha, repoStatus)
