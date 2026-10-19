@@ -45,7 +45,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"oidc.0.client_secret.0.value.0.plain_text"},
 			},
-      {
+			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProvider_oidc_update_users_groups(context),
 			},
 			{
@@ -111,7 +111,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_saml(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProvider_saml_update_users_groups(context),
 			},
 			{
@@ -1455,7 +1455,7 @@ resource "google_iam_workforce_pool_provider" "my_provider" {
 func testAccIAMWorkforcePoolWorkforcePoolProvider_oidc_update_users_groups(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
 }
@@ -1463,7 +1463,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 resource "google_iam_workforce_pool_provider" "my_provider" {
   workforce_pool_id   = google_iam_workforce_pool.my_pool.workforce_pool_id
   location            = google_iam_workforce_pool.my_pool.location
-  provider_id         = "my-provider-%{random_suffix}"
+  provider_id         = "tf-test-my-provider-%{random_suffix}"
   attribute_mapping   = {
     "google.subject"  = "false"
   }
@@ -1493,7 +1493,7 @@ resource "google_iam_workforce_pool_provider" "my_provider" {
 func testAccIAMWorkforcePoolWorkforcePoolProvider_saml_update_users_groups(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
 }
@@ -1501,7 +1501,7 @@ resource "google_iam_workforce_pool" "my_pool" {
 resource "google_iam_workforce_pool_provider" "my_provider" {
   workforce_pool_id   = google_iam_workforce_pool.my_pool.workforce_pool_id
   location            = google_iam_workforce_pool.my_pool.location
-  provider_id         = "my-provider-%{random_suffix}"
+  provider_id         = "tf-test-my-provider-%{random_suffix}"
   attribute_mapping   = {
     "google.subject": "false"
   }
