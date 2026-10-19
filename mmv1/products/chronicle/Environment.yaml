@@ -163,3 +163,9 @@ properties:
       The weight of the environment, enabling customers to control distribution
       of resources between the separate environments in a single instance of
       Chronicle SOAR.
+  - name: environmentAllowedForAllUsers
+    type: Boolean
+    immutable: true
+    description: |-
+      If set to true, automatically assigns the new environment to all
+      existing users and API keys.
