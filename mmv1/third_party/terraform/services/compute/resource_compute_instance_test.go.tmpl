@@ -12413,6 +12413,8 @@ resource "google_compute_instance" "foobar" {
         seconds = 60
     }
   }
+
+  allow_stopping_for_update = true
 }
 `, instance, instanceTerminationAction)
 }
