@@ -66,6 +66,15 @@ samples:
         test_env_vars:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
+  - name: 'colab_notebook_execution_workbench_runtime_custom_container_no_tag'
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_workbench_runtime_custom_container_no_tag'
+        resource_id_vars:
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_workbench_runtime_vm'
     primary_resource_id: 'notebook-execution'
     steps:
