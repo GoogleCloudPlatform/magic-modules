@@ -38,19 +38,16 @@ jobs:
           go mod download
 
 
-      # `make vet` runs `go vet ./...`, which compiles all provider packages and
-      # typechecks all test files without linking an unused binary via `go build`.
-      - name: Build Provider
-        run: |
-          make vet
-
+      # `make testnolint` compiles all provider and unit test packages into the
+      # Go build cache without linking an unused root binary via `go build`, so
+      # `make lint` (`fmtcheck` + `go vet ./...`) can reuse the cached artifacts.
       - name: Run Unit Tests
         run: |
           make testnolint
 
-      - name: Lint Check
+      - name: Full Build & Lint Check
         run: |
-          make fmtcheck
+          make lint
 
       - name: Documentation Check
         run: |
