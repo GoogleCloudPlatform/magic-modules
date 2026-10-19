@@ -76,6 +76,44 @@ func TestResourceMinVersionObj(t *testing.T) {
 	}
 }
 
+func TestValidateEphemeralShape(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name     string
+		resource api.Resource
+		want     string
+	}{
+		{
+			name:     "read verb",
+			resource: api.Resource{Name: "ReadPost", ReadVerb: "POST", Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "only supports read_verb GET",
+		},
+		{
+			name:     "escaped identifier",
+			resource: api.Resource{Name: "Escaped", SelfLink: "things/{{%name}}", Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "does not support escaped URL identifiers",
+		},
+		{
+			name:     "flatten object",
+			resource: api.Resource{Name: "Flattened", Properties: []*api.Type{{Name: "nested", Type: "NestedObject", FlattenObject: true}}, Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "does not support flatten_object",
+		},
+		{
+			name:     "mixed action object",
+			resource: api.Resource{Name: "Mixed", ExcludeRead: true, CreateUrl: "things:run", Properties: []*api.Type{{Name: "request", Type: "NestedObject", Properties: []*api.Type{{Name: "input", Type: "String"}, {Name: "result", Type: "String", Output: true}}}}, Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "mixing inputs and outputs",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			errs := tc.resource.ValidateEphemeralShape()
+			if !slices.ContainsFunc(errs, func(err error) bool { return strings.Contains(err.Error(), tc.want) }) {
+				t.Fatalf("errors = %v, want message containing %q", errs, tc.want)
+			}
+		})
+	}
+}
+
 func TestResourceNotInVersion(t *testing.T) {
 	t.Parallel()
 	p := api.Product{

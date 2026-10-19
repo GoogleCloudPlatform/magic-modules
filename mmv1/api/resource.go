@@ -625,6 +625,9 @@ func (r *Resource) Validate() (es []error) {
 	if r.Examples != nil {
 		es = append(es, fmt.Errorf("Examples weren't converted to samples on %s; this should never happen.", r.Name))
 	}
+	if r.ShouldGenerateEphemeralResource() {
+		es = append(es, r.ValidateEphemeralShape()...)
+	}
 
 	for _, sample := range r.Samples {
 		es = append(es, sample.Validate(r.Name)...)
@@ -2542,6 +2545,37 @@ func (r *Resource) ShouldGenerateEphemeralResource() bool {
 
 func (r *Resource) ShouldGenerateEphemeralResourceTests() bool {
 	return r.ShouldGenerateEphemeralResource() && !r.Ephemeral.ExcludeTest
+}
+
+func (r Resource) ValidateEphemeralShape() (es []error) {
+	if !r.ExcludeRead && r.ReadVerb != "GET" {
+		es = append(es, fmt.Errorf("ephemeral resource %s only supports read_verb GET", r.Name))
+	}
+	for _, url := range []string{r.SelfLinkUri(), r.CreateUrl} {
+		if strings.Contains(url, "{{%") {
+			es = append(es, fmt.Errorf("ephemeral resource %s does not support escaped URL identifiers", r.Name))
+			break
+		}
+	}
+	for _, p := range r.AllUserProperties() {
+		if p.FlattenObject {
+			es = append(es, fmt.Errorf("ephemeral resource %s does not support flatten_object property %s", r.Name, p.Name))
+		}
+		if r.ExcludeRead && p.IsA("NestedObject") {
+			input, output := false, false
+			for _, child := range p.Properties {
+				if child.Output {
+					output = true
+				} else {
+					input = true
+				}
+			}
+			if input && output {
+				es = append(es, fmt.Errorf("ephemeral action %s does not support nested fields mixing inputs and outputs in %s", r.Name, p.Name))
+			}
+		}
+	}
+	return es
 }
 
 func (r Resource) EphemeralSamples() []*resource.Sample {
