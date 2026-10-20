@@ -1,13 +1,6 @@
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-{{- if not (contains $.ResourceMetadata.ProductMetadata.Compiler "terraformgoogleconversion") }}
-	if rd, ok := d.(*schema.ResourceData); ok {
-		if raw := tpgresource.GetRawConfigAttributeAsString(rd, "vpc_access.0.{{ underscore $.Name }}"); raw != "" {
-			return raw, nil
-		}
-		if otherRaw := tpgresource.GetRawConfigAttributeAsString(rd, "vpc_access.0.{{ if eq (underscore $.Name) "vpc_egress" }}egress_setting{{ else }}vpc_egress{{ end }}"); otherRaw != "" {
-			return nil, nil
-		}
+	if d.HasChange("vpc_access.0.egress_setting") {
+		return nil, nil
 	}
-{{- end }}
 	return v, nil
 }

@@ -381,7 +381,6 @@ properties:
         deprecation_message: '`egress_setting` is deprecated and will be removed in a future major release. Use `vpc_egress` instead.'
         conflicts:
           - vpc_access.0.vpc_egress
-        custom_expand: templates/terraform/custom_expand/appengine_standardappversion_vpc_egress.go.tmpl
         description: |
           The egress setting for the VPC Access, controlling what traffic is diverted through it.
       - name: vpcEgress
