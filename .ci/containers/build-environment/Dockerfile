@@ -27,5 +27,8 @@ RUN go install github.com/github/hub@dcdf56167c38eacef96ad5ef88575e7f74f9a6f2 # 
 WORKDIR /app
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/third_party/terraform/go.mod" go.mod
 ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/third_party/terraform/go.sum" go.sum
+RUN go mod download
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/go.mod" go.mod
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/mmv1/go.sum" go.sum
 RUN go mod download && rm -rf /app && chmod -R 1777 "$GOPATH"
 WORKDIR $GOPATH
