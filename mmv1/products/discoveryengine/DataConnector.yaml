@@ -67,6 +67,17 @@ samples:
           - errors
           - state
           - update_time
+  - name: 'discoveryengine_dataconnector_custom_mcp_with_json_action_params'
+    primary_resource_id: 'custom-mcp'
+    steps:
+      - name: 'discoveryengine_dataconnector_custom_mcp_with_json_action_params'
+        resource_id_vars:
+          collection_id: 'collection-id'
+        ignore_read_extra:
+          - action_state
+          - errors
+          - state
+          - update_time
 parameters:
   - name: 'location'
     type: String
@@ -316,6 +327,20 @@ properties:
           String-to-String (Key, Value) pairs. Contains connection
           credentials and configuration for the action connector.
         ignore_read: true
+        conflicts:
+          - action_config.0.json_action_params
+      - name: 'jsonActionParams'
+        type: String
+        description: |
+          Params needed to configure the actions in the format of a json string.
+          Use this instead of `action_params` when some values must be sent as
+          non-string JSON types, for example booleans such as
+          `pkce_support_enabled` for custom MCP connectors.
+        ignore_read: true
+        validation:
+          function: 'validation.StringIsJSON'
+        conflicts:
+          - action_config.0.action_params
       - name: 'isActionConfigured'
         type: Boolean
         description: |
