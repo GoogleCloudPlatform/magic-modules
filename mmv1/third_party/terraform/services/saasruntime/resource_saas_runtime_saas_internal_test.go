@@ -1,7 +1,5 @@
 package saasruntime
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 	"testing"
@@ -47,4 +45,3 @@ func TestIsSaasRuntimeSaasImportRunningError(t *testing.T) {
 		})
 	}
 }
-{{- end }}

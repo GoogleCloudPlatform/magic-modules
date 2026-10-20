@@ -1,7 +1,5 @@
 package saasruntime_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"testing"
 
@@ -9,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
 )
 
 func TestAccSaasRuntimeUnit_update(t *testing.T) {
@@ -30,7 +28,7 @@ func TestAccSaasRuntimeUnit_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeUnit_basic(context),
@@ -62,7 +60,6 @@ func TestAccSaasRuntimeUnit_update(t *testing.T) {
 func testAccSaasRuntimeUnit_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas_regional" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-central1"
 
@@ -72,21 +69,18 @@ resource "google_saas_runtime_saas" "example_saas_regional" {
 }
 
 resource "google_saas_runtime_unit_kind" "example_unit_kind" {
-  provider = google-beta
   location = "us-central1"
   unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas_regional.id
 }
 
 resource "google_saas_runtime_tenant" "example_tenant" {
-  provider = google-beta
   location = "us-central1"
   tenant_id = "tf-test-example-tenant%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas_regional.id
 }
 
 resource "google_saas_runtime_unit" "example" {
-  provider = google-beta
   location = "us-central1"
   unit_id = "tf-test-example-unit%{random_suffix}"
   unit_kind = google_saas_runtime_unit_kind.example_unit_kind.id
@@ -98,7 +92,6 @@ resource "google_saas_runtime_unit" "example" {
 func testAccSaasRuntimeUnit_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas_regional" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-central1"
 
@@ -108,21 +101,18 @@ resource "google_saas_runtime_saas" "example_saas_regional" {
 }
 
 resource "google_saas_runtime_unit_kind" "example_unit_kind" {
-  provider = google-beta
   location = "us-central1"
   unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas_regional.id
 }
 
 resource "google_saas_runtime_tenant" "example_tenant" {
-  provider = google-beta
   location = "us-central1"
   tenant_id = "tf-test-example-tenant%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas_regional.id
 }
 
 resource "google_saas_runtime_unit" "example" {
-  provider = google-beta
   location = "us-central1"
   unit_id = "tf-test-example-unit%{random_suffix}"
   unit_kind = google_saas_runtime_unit_kind.example_unit_kind.id
@@ -161,7 +151,7 @@ func TestAccSaasRuntimeUnit_application(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeUnit_application(context),
@@ -193,7 +183,6 @@ func TestAccSaasRuntimeUnit_application(t *testing.T) {
 func testAccSaasRuntimeUnit_application(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_apphub_application" "app_one" {
-  provider       = google-beta
   location       = "us-central1"
   application_id = "tf-test-app-one%{random_suffix}"
   scope {
@@ -202,7 +191,6 @@ resource "google_apphub_application" "app_one" {
 }
 
 resource "google_apphub_application" "app_two" {
-  provider       = google-beta
   location       = "us-central1"
   application_id = "tf-test-app-two%{random_suffix}"
   scope {
@@ -211,7 +199,6 @@ resource "google_apphub_application" "app_two" {
 }
 
 resource "google_saas_runtime_saas" "example_saas_regional" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-central1"
 
@@ -221,14 +208,12 @@ resource "google_saas_runtime_saas" "example_saas_regional" {
 }
 
 resource "google_saas_runtime_unit_kind" "example_unit_kind" {
-  provider     = google-beta
   location     = "us-central1"
   unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
   saas         = google_saas_runtime_saas.example_saas_regional.id
 }
 
 resource "google_saas_runtime_unit" "example" {
-  provider        = google-beta
   location        = "us-central1"
   unit_id         = "tf-test-example-unit%{random_suffix}"
   unit_kind       = google_saas_runtime_unit_kind.example_unit_kind.id
@@ -237,4 +222,3 @@ resource "google_saas_runtime_unit" "example" {
 }
 `, context)
 }
-{{- end }}
