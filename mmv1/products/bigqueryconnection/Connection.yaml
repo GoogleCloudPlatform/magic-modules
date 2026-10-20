@@ -150,6 +150,7 @@ samples:
   - name: bigquery_connection_salesforce_data_cloud
     primary_resource_id: connection
     region_override: US
+    skip_test: 'Requires a Salesforce partner project; unavailable in CI.'
     steps:
       - name: bigquery_connection_salesforce_data_cloud
         resource_id_vars:
