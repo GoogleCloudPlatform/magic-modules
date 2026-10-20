@@ -28,6 +28,7 @@ id_format: 'projects/{{project}}/locations/{{region}}/pipelineJobs/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{region}}/pipelineJobs/{{name}}'
 immutable: true
+deletion_policy_custom_docs: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -51,6 +52,7 @@ samples:
           pipeline_job_id: 'example-pipeline-job'
           storage_bucket: 'example-pipeline-bucket'
         ignore_read_extra:
+          - 'deletion_policy'
           - 'end_time'
           - 'error'
           - 'job_detail'
@@ -80,6 +82,7 @@ samples:
         test_vars_overrides:
           kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
+          - 'deletion_policy'
           - 'end_time'
           - 'error'
           - 'job_detail'
@@ -98,6 +101,7 @@ samples:
           persistent_resource_id: 'example-persistent-resource'
           storage_bucket: 'example-pipeline-bucket-pr'
         ignore_read_extra:
+          - 'deletion_policy'
           - 'end_time'
           - 'error'
           - 'job_detail'
@@ -105,6 +109,20 @@ samples:
           - 'start_time'
           - 'state'
           - 'update_time'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the pipeline job. Setting `FORCE` will cancel the pipeline
+      job if it is in an active state before deleting it. Defaults to `DELETE`.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", Terraform will attempt to delete the pipeline job without
+      cancelling it first, which will fail if the pipeline job is still in an active state.
+    type: String
+    exclude: true
 parameters:
   - name: 'region'
     type: String

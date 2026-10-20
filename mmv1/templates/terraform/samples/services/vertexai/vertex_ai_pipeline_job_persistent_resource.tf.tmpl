@@ -15,6 +15,7 @@ resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
   display_name    = "{{index $.ResourceIdVars "pipeline_job_id"}}"
   pipeline_job_id = "{{index $.ResourceIdVars "pipeline_job_id"}}"
   region          = "us-central1"
+  deletion_policy = "FORCE"
 
   pipeline_spec = jsonencode({
     components = {

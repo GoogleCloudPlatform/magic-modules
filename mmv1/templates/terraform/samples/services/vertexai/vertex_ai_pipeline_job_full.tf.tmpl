@@ -55,6 +55,7 @@ resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
   pipeline_job_id       = "{{index $.ResourceIdVars "pipeline_job_id"}}"
   region                = "us-central1"
   preflight_validations = false
+  deletion_policy       = "FORCE"
   service_account       = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
   network               = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.vertex_network.name}"
   reserved_ip_ranges    = [google_compute_global_address.vertex_range.name]
