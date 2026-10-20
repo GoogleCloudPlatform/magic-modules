@@ -37,7 +37,7 @@ update_mask: true
 delete_url: '{{parent}}/boundaries/{{boundary_id}}'
 id_format: '{{parent}}/boundaries/{{boundary_id}}'
 import_format:
-- '{{%parent}}/boundaries/{{boundary_id}}'
+  - '{{%parent}}/boundaries/{{boundary_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -55,119 +55,119 @@ async:
     resource_inside_response: true
 autogen_async: true
 samples:
-- name: 'resource_manager_boundary_basic'
-  primary_resource_id: 'boundary'
-  steps:
   - name: 'resource_manager_boundary_basic'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    resource_id_vars:
-      tag_key_short_name: 'bndkey'
-      tag_value_short_name: 'bndval'
-      boundary_id: 'bnd'
-    ignore_read_extra:
-    - 'update_time'
-  - name: 'resource_manager_boundary_basic_update'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    resource_id_vars:
-      tag_key_short_name: 'bndkey'
-      tag_value_short_name: 'bndval'
-      boundary_id: 'bnd'
-    ignore_read_extra:
-    - 'update_time'
+    primary_resource_id: 'boundary'
+    steps:
+      - name: 'resource_manager_boundary_basic'
+        test_env_vars:
+          org_id: 'ORG_ID'
+        resource_id_vars:
+          tag_key_short_name: 'bndkey'
+          tag_value_short_name: 'bndval'
+          boundary_id: 'bnd'
+        ignore_read_extra:
+          - 'update_time'
+      - name: 'resource_manager_boundary_basic_update'
+        test_env_vars:
+          org_id: 'ORG_ID'
+        resource_id_vars:
+          tag_key_short_name: 'bndkey'
+          tag_value_short_name: 'bndval'
+          boundary_id: 'bnd'
+        ignore_read_extra:
+          - 'update_time'
 parameters:
-- name: 'parent'
-  type: String
-  description: |
-    The parent resource under which the Boundary is created. Must be of the
-    form `organizations/{organization_id}` or `folders/{folder_id}`.
-  url_param_only: true
-  required: true
-  immutable: true
-- name: 'boundaryId'
-  type: String
-  description: |
-    The user-assigned ID for the Boundary, which becomes the final component
-    of the Boundary's resource name. Must be unique within the parent.
-    Must be 6 to 30 lowercase ASCII letters, digits, or hyphens, must start
-    with a letter, and may not end with a hyphen.
-  url_param_only: true
-  required: true
-  immutable: true
+  - name: 'parent'
+    type: String
+    description: |
+      The parent resource under which the Boundary is created. Must be of the
+      form `organizations/{organization_id}` or `folders/{folder_id}`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'boundaryId'
+    type: String
+    description: |
+      The user-assigned ID for the Boundary, which becomes the final component
+      of the Boundary's resource name. Must be unique within the parent.
+      Must be 6 to 30 lowercase ASCII letters, digits, or hyphens, must start
+      with a letter, and may not end with a hyphen.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-- name: 'name'
-  type: String
-  description: |
-    The unique resource name of the Boundary, in the form
-    `organizations/{organization_id}/boundaries/{boundary_id}` or
-    `folders/{folder_id}/boundaries/{boundary_id}`.
-  output: true
-- name: 'displayName'
-  type: String
-  description: |
-    Human-readable display name of the Boundary. When present it must be
-    between 4 and 30 characters. Allowed characters are lowercase and
-    uppercase letters, numbers, hyphen, single-quote, double-quote, space,
-    and exclamation point.
-- name: 'managementProject'
-  type: String
-  description: |
-    The Management Project associated with this Boundary, in the form
-    `projects/{project_number}`. This is populated by the service when the
-    Boundary is associated with a CapabilityConfig; it cannot be set directly
-    on the Boundary. To choose a management project, set it on the
-    `google_resource_manager_capability_config` resource instead.
-  output: true
-- name: 'resourceFilter'
-  type: NestedObject
-  description: |
-    The filter defining the criteria for descendant projects to be included
-    in the Boundary.
-
-    `tag_value` is the only part of the filter that can be changed after
-    creation, and it cannot be cleared.
-  properties:
-  - name: 'tagFilter'
+  - name: 'name'
+    type: String
+    description: |
+      The unique resource name of the Boundary, in the form
+      `organizations/{organization_id}/boundaries/{boundary_id}` or
+      `folders/{folder_id}/boundaries/{boundary_id}`.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Human-readable display name of the Boundary. When present it must be
+      between 4 and 30 characters. Allowed characters are lowercase and
+      uppercase letters, numbers, hyphen, single-quote, double-quote, space,
+      and exclamation point.
+  - name: 'managementProject'
+    type: String
+    description: |
+      The Management Project associated with this Boundary, in the form
+      `projects/{project_number}`. This is populated by the service when the
+      Boundary is associated with a CapabilityConfig; it cannot be set directly
+      on the Boundary. To choose a management project, set it on the
+      `google_resource_manager_capability_config` resource instead.
+    output: true
+  - name: 'resourceFilter'
     type: NestedObject
     description: |
-      A tag based filter. A project must match it to be included in the
-      Boundary.
+      The filter defining the criteria for descendant projects to be included
+      in the Boundary.
+
+      `tag_value` is the only part of the filter that can be changed after
+      creation, and it cannot be cleared.
     properties:
-    - name: 'tagKey'
-      type: String
-      description: |
-        The namespaced name of the tag key, in the form
-        `{parent_id}/{tag_key_short_name}`, for example `123456789012/env`.
-      required: true
-      immutable: true
-    - name: 'tagValue'
-      type: String
-      description: |
-        The allowed short name of the tag value, for example `production`.
-        A project matches this tag filter if its effective tag value for
-        the given `tagKey` matches this value.
-      required: true
-- name: 'state'
-  type: String
-  description: |
-    The lifecycle state of the Boundary. Possible values are `CREATING` and
-    `ACTIVE`.
-  output: true
-- name: 'etag'
-  type: String
-  description: |
-    A checksum computed by the server based on the value of other fields. May
-    be sent on update and delete requests to ensure the client has an
-    up-to-date value before proceeding.
-  output: true
-- name: 'createTime'
-  type: Time
-  description: |
-    The creation time of the Boundary.
-  output: true
-- name: 'updateTime'
-  type: Time
-  description: |
-    The most recent time this Boundary was modified.
-  output: true
+      - name: 'tagFilter'
+        type: NestedObject
+        description: |
+          A tag based filter. A project must match it to be included in the
+          Boundary.
+        properties:
+          - name: 'tagKey'
+            type: String
+            description: |
+              The namespaced name of the tag key, in the form
+              `{parent_id}/{tag_key_short_name}`, for example `123456789012/env`.
+            required: true
+            immutable: true
+          - name: 'tagValue'
+            type: String
+            description: |
+              The allowed short name of the tag value, for example `production`.
+              A project matches this tag filter if its effective tag value for
+              the given `tagKey` matches this value.
+            required: true
+  - name: 'state'
+    type: String
+    description: |
+      The lifecycle state of the Boundary. Possible values are `CREATING` and
+      `ACTIVE`.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      A checksum computed by the server based on the value of other fields. May
+      be sent on update and delete requests to ensure the client has an
+      up-to-date value before proceeding.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The creation time of the Boundary.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The most recent time this Boundary was modified.
+    output: true
