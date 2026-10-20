@@ -7,8 +7,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/golang/glog v1.2.5
-
 require (
 	github.com/getkin/kin-openapi v0.149.0
 	github.com/google/go-cmp v0.7.0
