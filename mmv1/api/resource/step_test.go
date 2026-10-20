@@ -2,8 +2,10 @@ package resource_test
 
 import (
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
+	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
@@ -138,5 +140,152 @@ resource "google_kms_crypto_key" "foobar" {
 				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestStep_SetHCLText_NullVars(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/terraform/samples/services/appengine/sample.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
+  service        = "{{index $.ResourceIdVars "service_id"}}"
+  vpc_egress     = "{{index $.Vars "vpc_egress"}}"
+  egress_setting = "{{index $.Vars "egress_setting"}}"
+  empty_str      = "{{index $.Vars "empty_str"}}"
+  max_instances  = {{index $.Vars "max_instances"}}
+  delete_service = {{index $.Vars "delete_service"}}
+}
+`),
+		},
+	}
+
+	rawYAML := `
+- name: sample
+  config_path: templates/terraform/samples/services/appengine/sample.tf.tmpl
+  resource_id_vars:
+    service_id: my-service
+  vars:
+    vpc_egress: "ALL_TRAFFIC"
+    egress_setting: null
+    empty_str: ""
+    max_instances: 10
+    delete_service: true
+- name: sample
+  config_path: templates/terraform/samples/services/appengine/sample.tf.tmpl
+  resource_id_vars:
+    service_id: my-service
+  vars:
+    vpc_egress: ~
+    egress_setting: "ALL_TRAFFIC"
+    empty_str: ""
+    max_instances: null
+    delete_service: "null"
+`
+
+	var steps []*resource.Step
+	if err := yaml.Unmarshal([]byte(rawYAML), &steps); err != nil {
+		t.Fatalf("yaml.Unmarshal failed: %v", err)
+	}
+	if len(steps) != 2 {
+		t.Fatalf("expected 2 steps, got %d", len(steps))
+	}
+
+	for _, st := range steps {
+		st.PrimaryResourceId = "primary"
+		st.SetHCLText(sysfs)
+		st.SetOiCSHCLText(sysfs)
+	}
+
+	wantTestHCL := `resource "google_app_engine_standard_app_version" "primary" {
+  service        = "%{service_id}"
+  vpc_egress     = "%{vpc_egress}"
+  egress_setting = "%{egress_setting}"
+  empty_str      = "%{empty_str}"
+  max_instances  = %{max_instances}
+  delete_service = %{delete_service}
+}
+`
+
+	// Step 0: vpc_egress="ALL_TRAFFIC", egress_setting=null, empty_str="", max_instances=10, delete_service=true
+	wantStep0Context := map[string]string{
+		"service_id":     `"tf-test-my-service"+randomSuffix`,
+		"vpc_egress":     `"ALL_TRAFFIC"`,
+		"egress_setting": "nil",
+		"empty_str":      `""`,
+		"max_instances":  "10",
+		"delete_service": "true",
+	}
+	wantStep0Doc := `resource "google_app_engine_standard_app_version" "primary" {
+  service        = "my-service"
+  vpc_egress     = "ALL_TRAFFIC"
+  egress_setting = null
+  empty_str      = ""
+  max_instances  = 10
+  delete_service = true
+}
+`
+	wantStep0OiCS := `resource "google_app_engine_standard_app_version" "primary" {
+  service        = "my-service-${local.name_suffix}"
+  vpc_egress     = "ALL_TRAFFIC"
+  egress_setting = null
+  empty_str      = ""
+  max_instances  = 10
+  delete_service = true
+}
+`
+
+	if diff := cmp.Diff(wantStep0Context, steps[0].TestContextVars); diff != "" {
+		t.Errorf("Step 0 TestContextVars mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(wantTestHCL, steps[0].TestHCLText); diff != "" {
+		t.Errorf("Step 0 TestHCLText mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(wantStep0Doc, steps[0].DocumentationHCLText); diff != "" {
+		t.Errorf("Step 0 DocumentationHCLText mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(wantStep0OiCS, steps[0].OicsHCLText); diff != "" {
+		t.Errorf("Step 0 OicsHCLText mismatch (-want +got):\n%s", diff)
+	}
+
+	// Step 1: vpc_egress=null (~), egress_setting="ALL_TRAFFIC", empty_str="", max_instances=null, delete_service="null"
+	wantStep1Context := map[string]string{
+		"service_id":     `"tf-test-my-service"+randomSuffix`,
+		"vpc_egress":     "nil",
+		"egress_setting": `"ALL_TRAFFIC"`,
+		"empty_str":      `""`,
+		"max_instances":  "nil",
+		"delete_service": "nil",
+	}
+	wantStep1Doc := `resource "google_app_engine_standard_app_version" "primary" {
+  service        = "my-service"
+  vpc_egress     = null
+  egress_setting = "ALL_TRAFFIC"
+  empty_str      = ""
+  max_instances  = null
+  delete_service = null
+}
+`
+	wantStep1OiCS := `resource "google_app_engine_standard_app_version" "primary" {
+  service        = "my-service-${local.name_suffix}"
+  vpc_egress     = null
+  egress_setting = "ALL_TRAFFIC"
+  empty_str      = ""
+  max_instances  = null
+  delete_service = null
+}
+`
+
+	if diff := cmp.Diff(wantStep1Context, steps[1].TestContextVars); diff != "" {
+		t.Errorf("Step 1 TestContextVars mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(wantTestHCL, steps[1].TestHCLText); diff != "" {
+		t.Errorf("Step 1 TestHCLText mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(wantStep1Doc, steps[1].DocumentationHCLText); diff != "" {
+		t.Errorf("Step 1 DocumentationHCLText mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(wantStep1OiCS, steps[1].OicsHCLText); diff != "" {
+		t.Errorf("Step 1 OicsHCLText mismatch (-want +got):\n%s", diff)
 	}
 }
