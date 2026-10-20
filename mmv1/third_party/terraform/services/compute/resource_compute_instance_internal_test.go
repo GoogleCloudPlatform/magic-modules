@@ -245,8 +245,6 @@ func TestComputeInstanceUpdate_internalIpv6PrefixLength(t *testing.T) {
 				"internal_ipv6_prefix_length": 96,
 			},
 		},
-		"service_account": []interface{}{nil},
-		"scheduling":      []interface{}{nil},
 	}
 
 	cfg := &transport_tpg.Config{

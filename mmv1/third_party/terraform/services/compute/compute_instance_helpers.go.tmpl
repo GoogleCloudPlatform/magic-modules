@@ -1319,16 +1319,8 @@ func flattenEnableDisplay(displayDevice map[string]interface{}) interface{} {
 // Node affinity updates require a reboot
 func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	o, n := d.GetChange("scheduling")
-	oList, ok := o.([]interface{})
-	if !ok || len(oList) == 0 || oList[0] == nil {
-		return false
-	}
-	nList, ok := n.([]interface{})
-	if !ok || len(nList) == 0 || nList[0] == nil {
-		return false
-	}
-	oScheduling := oList[0].(map[string]interface{})
-	newScheduling := nList[0].(map[string]interface{})
+	oScheduling := o.([]interface{})[0].(map[string]interface{})
+	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
 {{ if ne $.TargetVersionName `ga` -}}
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
@@ -1351,16 +1343,8 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 		return false
 	}
 	o, n := d.GetChange("scheduling")
-	oList, ok := o.([]interface{})
-	if !ok || len(oList) == 0 || oList[0] == nil {
-		return false
-	}
-	nList, ok := n.([]interface{})
-	if !ok || len(nList) == 0 || nList[0] == nil {
-		return false
-	}
-	oScheduling := oList[0].(map[string]interface{})
-	newScheduling := nList[0].(map[string]interface{})
+	oScheduling := o.([]interface{})[0].(map[string]interface{})
+	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
 	if schedulingHasChangeRequiringReboot(d) {
 		return false
@@ -1649,12 +1633,8 @@ func expandComputeInstanceEncryptionKey(d tpgresource.TerraformResourceData) map
 	if !ok {
 		return nil
 	}
-	l := iek.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
 
-	iekRes := l[0].(map[string]interface{})
+	iekRes := iek.([]interface{})[0].(map[string]interface{})
 	return map[string]interface{}{
 		"kmsKeyName":           iekRes["kms_key_self_link"].(string),
 		"sha256":               iekRes["sha256"].(string),
@@ -1680,12 +1660,8 @@ func expandComputeInstanceSourceEncryptionKey(d tpgresource.TerraformResourceDat
 	if !ok {
 		return nil
 	}
-	l := cek.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
 
-	cekRes := l[0].(map[string]interface{})
+	cekRes := cek.([]interface{})[0].(map[string]interface{})
 	result := map[string]interface{}{}
 	if v, _ := cekRes["rsa_encrypted_key"].(string); v != "" {
 		result["rsaEncryptedKey"] = v
@@ -1736,12 +1712,8 @@ func expandWorkloadIdentityConfig(d tpgresource.TerraformResourceData) map[strin
 	if !ok {
 		return nil
 	}
-	l := iek.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
 
-	wicRes := l[0].(map[string]interface{})
+	wicRes := iek.([]interface{})[0].(map[string]interface{})
 	return map[string]interface{}{
 		"identity":                   wicRes["identity"].(string),
 		"identityCertificateEnabled": wicRes["identity_certificate_enabled"].(bool),
