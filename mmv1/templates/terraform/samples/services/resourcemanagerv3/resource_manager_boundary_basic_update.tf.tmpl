@@ -30,10 +30,8 @@ resource "google_resource_manager_boundary" "{{$.PrimaryResourceId}}" {
 
   resource_filter {
     tag_filter {
-      tag_key   = google_tags_tag_key.boundary.namespaced_name
+      tag_key   = google_resource_manager_boundary_config.boundary.tag_key
       tag_value = google_tags_tag_value.boundary_updated.short_name
     }
   }
-
-  depends_on = [google_resource_manager_boundary_config.boundary]
 }

@@ -26,9 +26,9 @@ description: |
   once at least one Boundary exists under the same parent
   (`FAILED_PRECONDITION`). In practice that means the BoundaryConfig must be
   fully configured before the first Boundary is created and must be the last
-  thing destroyed. Give every `google_resource_manager_boundary` under this
-  parent an explicit `depends_on` this resource so Terraform orders both the
-  create and the destroy correctly.
+  thing destroyed. Reference `google_resource_manager_boundary_config.<name>.tag_key`
+  in each `google_resource_manager_boundary`'s `tag_filter.tag_key` (or use
+  `depends_on`) so Terraform orders both the create and the destroy correctly.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/resource-manager/docs/boundaries'
@@ -113,8 +113,9 @@ properties:
       every subsequent Boundary create fail with `FAILED_PRECONDITION`. Always
       use the namespaced form, for example
       `google_tags_tag_key.example.namespaced_name`.
+    required: true
   - name: 'etag'
-    type: String
+    type: Fingerprint
     description: |
       A checksum computed by the server based on the value of other fields. May
       be sent on update requests to ensure the client has an up-to-date value

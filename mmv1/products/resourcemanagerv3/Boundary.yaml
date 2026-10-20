@@ -18,10 +18,6 @@ description: |
   organization or a folder. Descendant projects are dynamically included in the
   Boundary based on the configured resource filter.
 
-  A Boundary that is attached to a `google_resource_manager_capability_config`
-  cannot be deleted until it is detached. Express this with `depends_on` so
-  Terraform orders creates and destroys correctly.
-
   Membership is recomputed asynchronously, so the projects inside a Boundary
   are not necessarily settled by the time the apply returns.
 references:
@@ -65,6 +61,8 @@ samples:
           tag_key_short_name: 'bndkey'
           tag_value_short_name: 'bndval'
           boundary_id: 'bnd'
+        # Background membership recomputation asynchronously updates update_time
+        # after create/update completes.
         ignore_read_extra:
           - 'update_time'
       - name: 'resource_manager_boundary_basic_update'
@@ -74,6 +72,8 @@ samples:
           tag_key_short_name: 'bndkey'
           tag_value_short_name: 'bndval'
           boundary_id: 'bnd'
+        # Background membership recomputation asynchronously updates update_time
+        # after create/update completes.
         ignore_read_extra:
           - 'update_time'
 parameters:
@@ -133,6 +133,7 @@ properties:
         description: |
           A tag based filter. A project must match it to be included in the
           Boundary.
+        required: true
         properties:
           - name: 'tagKey'
             type: String
@@ -155,11 +156,11 @@ properties:
       `ACTIVE`.
     output: true
   - name: 'etag'
-    type: String
+    type: Fingerprint
     description: |
       A checksum computed by the server based on the value of other fields. May
-      be sent on update and delete requests to ensure the client has an
-      up-to-date value before proceeding.
+      be sent on update requests to ensure the client has an up-to-date value
+      before proceeding.
     output: true
   - name: 'createTime'
     type: Time
