@@ -184,10 +184,6 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 		region = r
 	}
 
-	lockName := fmt.Sprintf("bootstrap-subnet/%s/%s/%s", projectID, region, subnetName)
-	transport_tpg.MutexStore.Lock(lockName)
-	defer transport_tpg.MutexStore.Unlock(lockName)
-
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap config.")
@@ -229,43 +225,26 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 
 		log.Printf("[DEBUG] Response is, %s", res)
 		if err != nil {
-			if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-				log.Printf("[DEBUG] Subnet %q is already being created by another process, waiting for it to be ready", subnetName)
-			} else {
-				t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
-			}
-		} else {
-			log.Printf("[DEBUG] Waiting for network creation to finish")
-			err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
-			if err != nil {
-				t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
-			}
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for network creation to finish")
+		err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
 		}
 	}
 
-	var subnetNameResult string
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() error {
-			subnet, getErr := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
-			if getErr != nil {
-				return getErr
-			}
-			if subnet == nil {
-				return fmt.Errorf("Error getting test subnet %s: is nil", subnetName)
-			}
-			if subnet.State != "" && subnet.State != "READY" {
-				return fmt.Errorf("The resource 'projects/%s/regions/%s/subnetworks/%s' is not ready (state: %s)", projectID, region, subnetName, subnet.State)
-			}
-			subnetNameResult = subnet.Name
-			return nil
-		},
-		Timeout:              4 * time.Minute,
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError, transport_tpg.IsNotFoundRetryableError("bootstrap subnet")},
-	})
+	subnet, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+
+	if subnet == nil {
+		t.Fatalf("Error getting test subnet %s: is nil", subnetName)
+	}
+
 	if err != nil {
 		t.Fatalf("Error getting test subnet %s: %s", subnetName, err)
 	}
-	return subnetNameResult
+	return subnet.Name
 }
 
 func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subnetName string) string {
