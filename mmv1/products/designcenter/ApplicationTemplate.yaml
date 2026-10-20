@@ -1,0 +1,122 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ApplicationTemplate'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates?applicationTemplateId={{application_template_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
+update_verb: 'PATCH'
+update_mask: true
+description: |
+  Application template in Application Design Center.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'space'
+    type: String
+    description: |
+      The space of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'application_template_id'
+    type: String
+    description: |
+      The ID of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Identifier. The resource name of the ApplicationTemplate. Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template_id}`
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Optional. User-defined display name.
+  - name: 'description'
+    type: String
+    description: |
+      Optional. User-defined description.
+  - name: 'applicationParameters'
+    type: String
+    description: |
+      Optional. Application parameters.
+  - name: 'compositionType'
+    type: Enum
+    description: |
+      Optional. Composition type of the template.
+    immutable: true
+    enum_values:
+      - 'STANDARD'
+      - 'COMPOSITE'
+  - name: 'rootInputVariables'
+    type: Array
+    description: |
+      Optional. Root input variables.
+    item_type:
+      type: String
+  - name: 'rootOutputVariables'
+    type: Array
+    description: |
+      Optional. Root output variables.
+    item_type:
+      type: String
+  - name: 'saasRuntimeContext'
+    type: String
+    description: |
+      Optional. SaaS runtime context.
+  - name: 'inputsAsRootModuleVariables'
+    type: Boolean
+    description: |
+      Optional. Inputs as root module variables.
+  - name: 'iacFormat'
+    type: String
+    output: true
+    description: |
+      Output only. IaC format.
+  - name: 'serializedApplicationTemplate'
+    type: String
+    output: true
+    description: |
+      Output only. Serialized application template.
+  - name: 'latestRevision'
+    type: String
+    output: true
+    description: |
+      Output only. Latest revision.
+  - name: 'artifactLocation'
+    type: String
+    output: true
+    description: |
+      Output only. Artifact location.
+  - name: 'createTime'
+    type: Time
+    output: true
+    description: |
+      Output only. The time the resource was created.
+  - name: 'updateTime'
+    type: Time
+    output: true
+    description: |
+      Output only. The time the resource was last updated.

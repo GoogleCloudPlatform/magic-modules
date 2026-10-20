@@ -1,0 +1,97 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Policy'
+description: 'A policy within an application template.'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies/{{policy_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies?policyId={{policy_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies/{{policy_id}}'
+
+parameters:
+  - name: 'location'
+    type: 'String'
+    description: 'The location of the policy.'
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'space'
+    type: 'String'
+    description: 'The space in which the policy is defined.'
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'application_template'
+    type: 'String'
+    description: 'The application template to which the policy belongs.'
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'policy_id'
+    type: 'String'
+    description: 'The ID of the policy.'
+    required: true
+    immutable: true
+    url_param_only: true
+
+properties:
+  - name: 'name'
+    type: 'String'
+    description: 'Identifier. The name of the policy.'
+    output: true
+  - name: 'policyType'
+    type: 'Enum'
+    description: 'Required. The type of the policy.'
+    required: true
+    enum_values:
+      - 'COMPLIANCE_FRAMEWORK'
+  - name: 'policyUri'
+    type: 'String'
+    description: 'The URI of the policy.'
+    exactly_one_of:
+      - 'policy_uri'
+      - 'policy_revision_uri'
+  - name: 'policyRevisionUri'
+    type: 'String'
+    description: 'The revision URI of the policy.'
+    exactly_one_of:
+      - 'policy_uri'
+      - 'policy_revision_uri'
+  - name: 'displayName'
+    type: 'String'
+    description: 'Optional. The display name of the policy.'
+  - name: 'description'
+    type: 'String'
+    description: 'Optional. A description of the policy.'
+  - name: 'applyConditions'
+    type: 'Array'
+    description: 'Optional. Conditions under which this policy applies.'
+    item_type:
+      type: 'String'
+  - name: 'cloudControlConfigs'
+    type: 'Array'
+    description: 'Optional. Cloud control configs for the policy.'
+    item_type:
+      type: 'String'
+  - name: 'createTime'
+    type: 'Time'
+    description: 'Output only. The time the policy was created.'
+    output: true
+  - name: 'updateTime'
+    type: 'Time'
+    description: 'Output only. The time the policy was last updated.'
+    output: true
