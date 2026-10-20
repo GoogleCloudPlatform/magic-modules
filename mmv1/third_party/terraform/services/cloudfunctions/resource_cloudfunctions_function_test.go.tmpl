@@ -612,7 +612,7 @@ func TestAccCloudFunctionsFunction_buildServiceAccount(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_buildServiceAccount("sa1", functionName, bucketName, zipFilePath, serviceAccount1, serviceAccount2),
+				Config: testAccCloudFunctionsFunction_buildServiceAccount(bucketName, zipFilePath, serviceAccount1, serviceAccount2, functionName, "sa1"),
 				Check: resource.TestCheckResourceAttr(funcResourceName,
 					"build_service_account",
 					fmt.Sprintf("projects/%[1]s/serviceAccounts/%s@%[1]s.iam.gserviceaccount.com", proj, serviceAccount1)),
@@ -624,7 +624,7 @@ func TestAccCloudFunctionsFunction_buildServiceAccount(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_buildServiceAccount("sa2", functionName, bucketName, zipFilePath, serviceAccount1, serviceAccount2),
+				Config: testAccCloudFunctionsFunction_buildServiceAccount(bucketName, zipFilePath, serviceAccount1, serviceAccount2, functionName, "sa2"),
 				Check: resource.TestCheckResourceAttr(funcResourceName,
 					"build_service_account",
 					fmt.Sprintf("projects/%[1]s/serviceAccounts/%s@%[1]s.iam.gserviceaccount.com", proj, serviceAccount2)),
@@ -1515,7 +1515,7 @@ resource "google_cloudfunctions_function" "function" {
 `, accountId, secretName, versionName, bucketName, zipFilePath, functionName, projectNumber, versionNumber)
 }
 
-func testAccCloudFunctionsFunction_buildServiceAccount(saName, functionName, bucketName, zipFilePath, serviceAccount1, serviceAccount2 string) string {
+func testAccCloudFunctionsFunction_buildServiceAccount(bucketName, zipFilePath, serviceAccount1, serviceAccount2, functionName, saName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
@@ -1532,7 +1532,7 @@ resource "google_storage_bucket_object" "archive" {
 }
 
 resource "google_service_account" "cloud_function_build_account_sa1" {
-  account_id   = "%[4]s"
+  account_id   = "%s"
   display_name = "Testing Cloud Function build service account 1"
 }
 
@@ -1555,7 +1555,7 @@ resource "google_project_iam_member" "log_writer_sa1" {
 }
 
 resource "google_service_account" "cloud_function_build_account_sa2" {
-  account_id   = "%[5]s"
+  account_id   = "%s"
   display_name = "Testing Cloud Function build service account 2"
 }
 
@@ -1591,18 +1591,18 @@ resource "time_sleep" "wait_iam_roles" {
 
 resource "google_cloudfunctions_function" "function" {
   depends_on = [time_sleep.wait_iam_roles]
-  name       = "%[6]s"
+  name       = "%s"
   runtime    = "nodejs20"
 
   source_archive_bucket = google_storage_bucket.bucket.name
   source_archive_object = google_storage_bucket_object.archive.name
 
-  build_service_account = google_service_account.cloud_function_build_account_%[3]s.name
+  build_service_account = google_service_account.cloud_function_build_account_%s.name
 
   trigger_http = true
   entry_point  = "helloGET"
 }
-`, bucketName, zipFilePath, saName, serviceAccount1, serviceAccount2, functionName)
+`, bucketName, zipFilePath, serviceAccount1, serviceAccount2, functionName, saName)
 }
 
 func testAccCloudFunctionsFunction_abiuAutomatic(functionName string, bucketName string, zipFilePath string) string {
