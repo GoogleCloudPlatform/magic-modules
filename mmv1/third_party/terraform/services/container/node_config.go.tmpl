@@ -1957,34 +1957,32 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 				rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
 			}
 
-			if !rawConfigNPRoot.IsNull() {
-				if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-					if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-						v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
-						if v == cty.NullVal(cty.Bool) {
-						    nc.KubeletConfig.CpuCfsQuota = true
-						} else if v.False() { // force-send explicit false to API
-							nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
-						}
+			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+					v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
+					if v == cty.NullVal(cty.Bool) {
+					    nc.KubeletConfig.CpuCfsQuota = true
+					} else if v.False() { // force-send explicit false to API
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
 					}
 				}
-				// end cpu_cfs_quota fix
-
-				// start shutdown_grace_period ForceSendFields fix
-				if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-					if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-						vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
-						if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
-							nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
-						}
-						vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
-						if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
-							nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
-						}
-					}
-				}
-				// end shutdown_grace_period ForceSendFields fix
 			}
+			// end cpu_cfs_quota fix
+
+			// start shutdown_grace_period ForceSendFields fix
+			if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+				if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+					vSGP := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_seconds")
+					if vSGP != cty.NullVal(cty.Number) && !vSGP.IsNull() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodSeconds")
+					}
+					vSGPC := vKC.Index(cty.NumberIntVal(0)).GetAttr("shutdown_grace_period_critical_pods_seconds")
+					if vSGPC != cty.NullVal(cty.Number) && !vSGPC.IsNull() {
+						nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
+					}
+				}
+			}
+			// end shutdown_grace_period ForceSendFields fix
 		}
 	}
 
