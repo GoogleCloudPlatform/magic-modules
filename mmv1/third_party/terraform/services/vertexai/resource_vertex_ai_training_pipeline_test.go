@@ -205,7 +205,7 @@ func TestAccVertexAITrainingPipeline_labelsForceNew(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
 				Config: testAccVertexAITrainingPipeline_labels(pipelineName, "updated"),
@@ -219,7 +219,7 @@ func TestAccVertexAITrainingPipeline_labelsForceNew(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 		},
 	})
@@ -229,6 +229,7 @@ func testAccVertexAITrainingPipeline_labels(displayName, labelValue string) stri
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
+  model_id                 = "test-model-id"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 
@@ -278,7 +279,7 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
 				Config: testAccVertexAITrainingPipeline_timestampSplit(pipelineName, datasetName, bucketName),
@@ -287,7 +288,7 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
 				Config: testAccVertexAITrainingPipeline_stratifiedSplit(pipelineName, datasetName, bucketName),
@@ -296,7 +297,7 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
 				Config: testAccVertexAITrainingPipeline_fractionSplit(pipelineName, datasetName, bucketName),
@@ -305,7 +306,7 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
 				Config: testAccVertexAITrainingPipeline_savedQueryAndBigqueryDestination(pipelineName, sqDatasetId, savedQueryId, project),
@@ -314,7 +315,7 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+				ImportStateVerifyIgnore: []string{"end_time", "error", "labels", "model_id", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 		},
 	})
@@ -324,6 +325,7 @@ func testAccVertexAITrainingPipeline_predefinedSplit(pipelineName, datasetName, 
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
+  model_id                 = "test-model-id"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 
@@ -381,6 +383,7 @@ func testAccVertexAITrainingPipeline_timestampSplit(pipelineName, datasetName, b
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
+  model_id                 = "test-model-id"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 
@@ -441,6 +444,7 @@ func testAccVertexAITrainingPipeline_stratifiedSplit(pipelineName, datasetName, 
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
+  model_id                 = "test-model-id"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 
@@ -501,6 +505,7 @@ func testAccVertexAITrainingPipeline_fractionSplit(pipelineName, datasetName, bu
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
+  model_id                 = "test-model-id"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 
@@ -560,6 +565,7 @@ func testAccVertexAITrainingPipeline_savedQueryAndBigqueryDestination(pipelineNa
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
+  model_id                 = "test-model-id"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 

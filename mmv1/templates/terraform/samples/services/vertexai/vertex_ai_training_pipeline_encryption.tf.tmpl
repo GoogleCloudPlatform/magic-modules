@@ -1,5 +1,6 @@
 resource "google_vertex_ai_training_pipeline" "{{.PrimaryResourceId}}" {
   display_name             = "{{index $.ResourceIdVars "display_name"}}"
+  model_id                 = "test_model_{{index $.ResourceIdVars "model_id"}}"
   region                   = "us-central1"
   training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
 

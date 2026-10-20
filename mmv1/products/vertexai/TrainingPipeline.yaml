@@ -40,10 +40,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-custom_diff:
-  - resourceVertexAITrainingPipelineCustomDiff
 custom_code:
-  constants: templates/terraform/constants/vertex_ai_training_pipeline.go.tmpl
   pre_delete: templates/terraform/pre_delete/vertex_ai_training_pipeline.go.tmpl
 samples:
   - name: vertex_ai_training_pipeline_basic
@@ -52,7 +49,10 @@ samples:
       - name: vertex_ai_training_pipeline_basic
         resource_id_vars:
           display_name: test-training-pipeline
+          model_id: test-model-id
         ignore_read_extra:
+          - end_time
+          - error
           - start_time
           - state
           - training_task_metadata
@@ -70,6 +70,8 @@ samples:
         test_vars_overrides:
           parent_model: 'bootstrapTestParentModel(t, "us-central1")'
         ignore_read_extra:
+          - end_time
+          - error
           - start_time
           - state
           - training_task_metadata
@@ -82,7 +84,10 @@ samples:
           display_name: test-training-pipeline-dataset
           dataset_name: test-dataset
           bucket_name: test-bucket
+          model_id: test-model-id
         ignore_read_extra:
+          - end_time
+          - error
           - start_time
           - state
           - training_task_metadata
@@ -94,10 +99,13 @@ samples:
         resource_id_vars:
           display_name: test-training-pipeline-enc
           model_name: test-model-enc
+          model_id: test-model-id
           kms_key_name: kms-key
         test_vars_overrides:
           kms_key_name: 'bootstrapTestKmsKey(t, "us-central1")'
         ignore_read_extra:
+          - end_time
+          - error
           - start_time
           - state
           - training_task_metadata
@@ -109,6 +117,12 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true
+  - name: modelId
+    type: String
+    description: |
+      The ID to use for the uploaded Model, which will become the final component of the model resource name.
+    required: true
+    ignore_read: true
 properties:
   - name: name
     type: String
@@ -430,11 +444,6 @@ properties:
             custom_expand: templates/terraform/custom_expand/json_value.tmpl
             validation:
               function: validation.StringIsJSON
-  - name: modelId
-    type: String
-    description: |
-      The ID to use for the uploaded Model, which will become the final component of the model resource name.
-    ignore_read: true
   - name: parentModel
     type: String
     description: |
