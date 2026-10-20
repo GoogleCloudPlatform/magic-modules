@@ -41,6 +41,18 @@ parameters:
     immutable: true
     url_param_only: true
 
+
+samples:
+  - name: 'designcenter_space_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_space_basic'
+  - name: 'designcenter_space_update'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_space_basic'
+      - name: 'designcenter_space_update'
+
 properties:
   - name: 'displayName'
     type: 'String'
