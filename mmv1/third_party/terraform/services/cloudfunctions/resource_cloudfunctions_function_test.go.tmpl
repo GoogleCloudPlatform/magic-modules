@@ -1531,7 +1531,18 @@ resource "google_storage_bucket_object" "archive" {
   source = "%s"
 }
 
+# Sequence service account replacement across steps so VCR replay does not merge
+# old IAM member deletions and new IAM member creations into a single IAM batch
+# when service account creation sleeps are shortened.
+resource "time_sleep" "wait_service_account_iam" {
+  create_duration = "1s"
+  triggers = {
+    sa = "%[3]s"
+  }
+}
+
 resource "google_service_account" "cloud_function_build_account_%[3]s" {
+  depends_on   = [time_sleep.wait_service_account_iam]
   account_id   = "%s"
   display_name = "Testing Cloud Function build service account"
 }
