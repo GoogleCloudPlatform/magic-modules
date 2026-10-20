@@ -303,7 +303,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"- `TestAccA`: errors parsing hcl\n- `TestAccB`: failed to find variable declaration config",
 			},
 			notExpectedStrings: []string{
-				"Please remove them from the list.",
+				"These tests can now be read",
 				"## Errors",
 			},
 		},
@@ -317,7 +317,7 @@ func TestFormatDiffComment(t *testing.T) {
 			expectedStrings: []string{
 				"## Unreadable test report",
 				"`KnownUnreadableTests` in `tools/diff-processor/detector/unreadable_tests.go`",
-				"Please remove them from the list.\n\n- `TestAccA`\n- `TestAccB`",
+				"`tools/diff-processor/detector/unreadable_tests.go`.\n\n- `TestAccA`\n- `TestAccB`",
 			},
 			notExpectedStrings: []string{
 				"Missing test detection may be incomplete",

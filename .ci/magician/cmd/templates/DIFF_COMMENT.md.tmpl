@@ -44,14 +44,14 @@ Please add an acceptance test which includes these fields. The test should inclu
 ## Unreadable test report
 {{- if .UnreadableTests.NewUnreadableTests }}
 
-Missing test detection may be incomplete for the services your PR changes. The missing test detector can't read the following acceptance tests in those services, so the fields they cover aren't counted. Please rewrite them so that each test step's `Config` is a call to a config function that returns a single `fmt.Sprintf` or `acctest.Nprintf` template.
+Missing test detection may be incomplete because the following tests can't be read. Each test step's `Config` should call a function that returns a single `fmt.Sprintf` or `acctest.Nprintf` template.
 {{ range $testName, $err := .UnreadableTests.NewUnreadableTests }}
 - `{{ $testName }}`: {{ $err }}
 {{- end }}
 {{- end }}
 {{- if .UnreadableTests.StaleUnreadableTests }}
 
-The following acceptance tests are listed in `KnownUnreadableTests` in `tools/diff-processor/detector/unreadable_tests.go` but can now be read. Please remove them from the list.
+These tests can now be read; please remove them from `KnownUnreadableTests` in `tools/diff-processor/detector/unreadable_tests.go`.
 {{ range .UnreadableTests.StaleUnreadableTests }}
 - `{{ . }}`
 {{- end }}
