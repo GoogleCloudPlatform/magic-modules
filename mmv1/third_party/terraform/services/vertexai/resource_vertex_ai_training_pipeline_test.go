@@ -2,7 +2,6 @@ package vertexai_test
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -88,6 +87,107 @@ func bootstrapTestParentModel(t *testing.T, location string) string {
 	return modelName
 }
 
+func bootstrapTestDatasetWithSavedQuery(t *testing.T, location string) (string, string) {
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return "", ""
+	}
+	project := envvar.GetTestProjectFromEnv()
+	displayName := "tf-bootstrap-sq-dataset"
+	baseUrl := strings.ReplaceAll(transport_tpg.BaseUrl(vertexai.Product, config), "{{region}}", location)
+
+	var datasetFullName string
+	listUrl := fmt.Sprintf("%sprojects/%s/locations/%s/datasets?filter=display_name=%%22%s%%22", baseUrl, project, location, displayName)
+	listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    listUrl,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		t.Fatalf("Error listing datasets for %q: %s", displayName, err)
+	}
+	if datasets, ok := listRes["datasets"].([]interface{}); ok {
+		for _, raw := range datasets {
+			if ds, ok := raw.(map[string]interface{}); ok {
+				if name, ok := ds["name"].(string); ok && name != "" {
+					datasetFullName = name
+					break
+				}
+			}
+		}
+	}
+
+	if datasetFullName == "" {
+		createUrl := fmt.Sprintf("%sprojects/%s/locations/%s/datasets", baseUrl, project, location)
+		createBody := map[string]interface{}{
+			"displayName":       displayName,
+			"metadataSchemaUri": "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml",
+			"savedQueries": []interface{}{
+				map[string]interface{}{
+					"displayName": "tf-bootstrap-sq",
+					"problemType": "IMAGE_CLASSIFICATION_SINGLE_LABEL",
+				},
+			},
+		}
+		opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createUrl,
+			UserAgent: config.UserAgent,
+			Body:      createBody,
+		})
+		if err != nil {
+			t.Fatalf("Error creating bootstrap dataset %q: %s", displayName, err)
+		}
+
+		var opResponse map[string]interface{}
+		err = vertexai.VertexAIOperationWaitTimeWithResponse(config, opRes, &opResponse, project, location, "Creating bootstrap dataset with saved query", config.UserAgent, 5*time.Minute)
+		if err != nil {
+			t.Fatalf("Error waiting for bootstrap dataset %q creation: %s", displayName, err)
+		}
+		if name, ok := opResponse["name"].(string); ok {
+			datasetFullName = name
+		}
+	}
+
+	if datasetFullName == "" {
+		t.Fatalf("Bootstrap dataset %q has empty name", displayName)
+	}
+
+	sqUrl := fmt.Sprintf("%s%s/savedQueries", baseUrl, datasetFullName)
+	sqRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    sqUrl,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		t.Fatalf("Error listing saved queries for %q: %s", datasetFullName, err)
+	}
+
+	var savedQueryFullName string
+	if sqs, ok := sqRes["savedQueries"].([]interface{}); ok && len(sqs) > 0 {
+		if sq, ok := sqs[0].(map[string]interface{}); ok {
+			if name, ok := sq["name"].(string); ok {
+				savedQueryFullName = name
+			}
+		}
+	}
+	if savedQueryFullName == "" {
+		t.Fatalf("No savedQuery found in bootstrap dataset %q", datasetFullName)
+	}
+
+	datasetParts := strings.Split(datasetFullName, "/")
+	datasetId := datasetParts[len(datasetParts)-1]
+	sqParts := strings.Split(savedQueryFullName, "/")
+	savedQueryId := sqParts[len(sqParts)-1]
+	return datasetId, savedQueryId
+}
+
 func TestAccVertexAITrainingPipeline_labelsForceNew(t *testing.T) {
 	t.Parallel()
 
@@ -163,6 +263,8 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 	pipelineName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	datasetName := fmt.Sprintf("tf-test-ds-%s", acctest.RandString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	project := envvar.GetTestProjectFromEnv()
+	sqDatasetId, savedQueryId := bootstrapTestDatasetWithSavedQuery(t, "us-central1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -206,12 +308,13 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
-				Config:      testAccVertexAITrainingPipeline_bigqueryDestination(pipelineName, datasetName),
-				ExpectError: regexp.MustCompile("Please provide TrainingPipeline.input_data_config.gcs_destination"),
+				Config: testAccVertexAITrainingPipeline_savedQueryAndBigqueryDestination(pipelineName, sqDatasetId, savedQueryId, project),
 			},
 			{
-				Config:      testAccVertexAITrainingPipeline_savedQueryId(pipelineName, datasetName, bucketName),
-				ExpectError: regexp.MustCompile("SavedQuery .* not found"),
+				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 		},
 	})
@@ -453,7 +556,7 @@ resource "google_storage_bucket" "bucket" {
 `, pipelineName, datasetName, bucketName)
 }
 
-func testAccVertexAITrainingPipeline_bigqueryDestination(pipelineName, datasetName string) string {
+func testAccVertexAITrainingPipeline_savedQueryAndBigqueryDestination(pipelineName, datasetId, savedQueryId, project string) string {
 	return fmt.Sprintf(`
 resource "google_vertex_ai_training_pipeline" "pipeline" {
   display_name             = "%s"
@@ -479,17 +582,12 @@ resource "google_vertex_ai_training_pipeline" "pipeline" {
   })
 
   input_data_config {
-    dataset_id = google_vertex_ai_dataset.dataset.name
-
-    timestamp_split {
-      key                 = "ts"
-      training_fraction   = 0.8
-      validation_fraction = 0.1
-      test_fraction       = 0.1
-    }
+    dataset_id            = "%s"
+    annotation_schema_uri = "gs://google-cloud-aiplatform/schema/dataset/annotation/image_classification_1.0.0.yaml"
+    saved_query_id        = "%s"
 
     bigquery_destination {
-      output_uri = "bq://graphite-test-sam-again"
+      output_uri = "bq://%s"
     }
   }
 
@@ -497,66 +595,5 @@ resource "google_vertex_ai_training_pipeline" "pipeline" {
     env = "test"
   }
 }
-
-resource "google_vertex_ai_dataset" "dataset" {
-  display_name        = "%s"
-  metadata_schema_uri = "gs://google-cloud-aiplatform/schema/dataset/metadata/tabular_1.0.0.yaml"
-  region              = "us-central1"
-}
-`, pipelineName, datasetName)
-}
-
-func testAccVertexAITrainingPipeline_savedQueryId(pipelineName, datasetName, bucketName string) string {
-	return fmt.Sprintf(`
-resource "google_vertex_ai_training_pipeline" "pipeline" {
-  display_name             = "%s"
-  region                   = "us-central1"
-  training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
-
-  training_task_inputs = jsonencode({
-    workerPoolSpecs = [
-      {
-        machineSpec = {
-          machineType = "n1-standard-4"
-        }
-        replicaCount = "1"
-        diskSpec = {
-          bootDiskType   = "pd-ssd"
-          bootDiskSizeGb = 100
-        }
-        containerSpec = {
-          imageUri = "gcr.io/cloud-marketplace/google/debian11"
-        }
-      }
-    ]
-  })
-
-  input_data_config {
-    dataset_id            = google_vertex_ai_dataset.dataset.name
-    annotation_schema_uri = "gs://google-cloud-aiplatform/schema/dataset/annotation/image_classification_1.0.0.yaml"
-    saved_query_id        = "123456789"
-
-    gcs_destination {
-      output_uri_prefix = "gs://${google_storage_bucket.bucket.name}/dataset-export"
-    }
-  }
-
-  labels = {
-    env = "test"
-  }
-}
-
-resource "google_vertex_ai_dataset" "dataset" {
-  display_name        = "%s"
-  metadata_schema_uri = "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"
-  region              = "us-central1"
-}
-
-resource "google_storage_bucket" "bucket" {
-  name                        = "%s"
-  location                    = "us-central1"
-  force_destroy               = true
-  uniform_bucket_level_access = true
-}
-`, pipelineName, datasetName, bucketName)
+`, pipelineName, datasetId, savedQueryId, project)
 }
