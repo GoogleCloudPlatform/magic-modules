@@ -32,7 +32,10 @@ import (
 
 const nullVarSentinel = "\x00NULL\x00"
 
+var nullVarLineRegexp = regexp.MustCompile(`(?m)^[ \t]*[a-zA-Z0-9_-]+[ \t]*=[ \t]*"?` + regexp.QuoteMeta(nullVarSentinel) + `"?[ \t]*\r?\n`)
+
 func replaceNullVarSentinels(hcl string) string {
+	hcl = nullVarLineRegexp.ReplaceAllString(hcl, "")
 	hcl = strings.ReplaceAll(hcl, `"`+nullVarSentinel+`"`, "null")
 	hcl = strings.ReplaceAll(hcl, nullVarSentinel, "null")
 	return hcl
@@ -69,7 +72,8 @@ type Step struct {
 	// unmodified strings (e.g., labels, descriptions, or other non-identifier fields).
 	// These values are used verbatim in both generated tests and documentation.
 	// A value of `null` (or `~` / `"null"`) sets the test context variable to `nil`
-	// and renders unquoted HCL `null` in documentation and OiCS configs.
+	// and omits the attribute line (or renders unquoted HCL `null` when inline) in
+	// documentation and OiCS configs.
 	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
