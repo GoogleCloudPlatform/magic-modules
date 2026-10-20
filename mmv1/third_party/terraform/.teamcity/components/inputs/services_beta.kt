@@ -326,6 +326,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Databasemigrationservice",
         "path" to "./google-beta/services/databasemigrationservice"
     ),
+    "designcenter" to mapOf(
+        "name" to "designcenter",
+        "displayName" to "Designcenter",
+        "path" to "./google-beta/services/designcenter"
+    ),
     "datacatalog" to mapOf(
         "name" to "datacatalog",
         "displayName" to "Datacatalog",
@@ -390,11 +395,6 @@ var ServicesListBeta = mapOf(
         "name" to "deploymentmanager",
         "displayName" to "Deploymentmanager",
         "path" to "./google-beta/services/deploymentmanager"
-    ),
-    "designcenter" to mapOf(
-        "name" to "designcenter",
-        "displayName" to "Designcenter",
-        "path" to "./google-beta/services/designcenter"
     ),
     "developerconnect" to mapOf(
         "name" to "developerconnect",

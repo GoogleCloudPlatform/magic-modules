@@ -68,7 +68,7 @@ properties:
       Identifier. The name of the share.
       Format: `projects/{project}/locations/{location}/spaces/{space}/catalogs/{catalog}/shares/{share}`
     output: true
-  - name: 'destinationSpace'
+  - name: 'destination_space'
     type: 'String'
     description: |
       The space to which the catalog is shared.
@@ -80,12 +80,12 @@ properties:
     description: |
       The state of the share.
     output: true
-  - name: 'createTime'
+  - name: 'create_time'
     type: 'Time'
     description: |
       Output only. [Output only] Create time stamp.
     output: true
-  - name: 'updateTime'
+  - name: 'update_time'
     type: 'Time'
     description: |
       Output only. [Output only] Update time stamp.

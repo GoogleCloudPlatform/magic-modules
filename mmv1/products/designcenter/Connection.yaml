@@ -22,60 +22,60 @@ description: |
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
 parameters:
-  - name: 'location'
-    type: String
+  - type: String
+    name: 'location'
     description: 'The location of the space.'
     required: true
     url_param_only: true
     immutable: true
-  - name: 'space'
-    type: String
+  - type: String
+    name: 'space'
     description: 'The ID of the space.'
     required: true
     url_param_only: true
     immutable: true
-  - name: 'application_template'
-    type: String
+  - type: String
+    name: 'application_template'
     description: 'The ID of the application template.'
     required: true
     url_param_only: true
     immutable: true
-  - name: 'component'
-    type: String
+  - type: String
+    name: 'component'
     description: 'The ID of the component.'
     required: true
     url_param_only: true
     immutable: true
-  - name: 'connection_id'
-    type: String
+  - type: String
+    name: 'connection_id'
     description: 'The ID of the connection.'
     required: true
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
-    type: String
+  - type: String
+    name: 'name'
     description: 'Identifier. The resource name of the Connection. Format: projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}/connections/{connection_id}'
     output: true
-  - name: 'createTime'
-    type: Time
+  - type: Time
+    name: 'createTime'
     description: 'Output only. [Output only] Create time stamp.'
     output: true
-  - name: 'updateTime'
-    type: Time
+  - type: Time
+    name: 'updateTime'
     description: 'Output only. [Output only] Update time stamp.'
     output: true
-  - name: 'destinationComponentUri'
-    type: String
+  - type: String
+    name: 'destinationComponentUri'
     description: 'Required. The component URI that the connection points to.'
     required: true
-  - name: 'sourceComponentParameters'
-    type: KeyValuePairs
+  - type: KeyValuePairs
+    name: 'sourceComponentParameters'
     description: 'Optional. Parameters associated with the source component.'
-  - name: 'destinationComponentParameters'
-    type: KeyValuePairs
+  - type: KeyValuePairs
+    name: 'destinationComponentParameters'
     description: 'Optional. Parameters associated with the destination component.'
-  - name: 'dependencyType'
-    type: String
+  - type: String
+    name: 'dependencyType'
     description: 'Output only. The dependency type of the connection.'
     output: true

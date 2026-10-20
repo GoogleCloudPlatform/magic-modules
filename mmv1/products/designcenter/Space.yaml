@@ -27,7 +27,7 @@ iam_policy:
   parent: 'projects/{{project}}/locations/{{location}}/spaces/{{space_id}}'
   fetch_iam_policy_verb: 'GET'
 
-parameters:
+properties:
   - name: 'location'
     type: 'String'
     description: 'The location of the space.'
@@ -40,20 +40,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-
-
-samples:
-  - name: 'designcenter_space_basic'
-    primary_resource_id: 'example'
-    steps:
-      - name: 'designcenter_space_basic'
-  - name: 'designcenter_space_update'
-    primary_resource_id: 'example'
-    steps:
-      - name: 'designcenter_space_basic'
-      - name: 'designcenter_space_update'
-
-properties:
   - name: 'displayName'
     type: 'String'
     description: 'The display name of the space.'
@@ -84,3 +70,8 @@ properties:
     type: 'Time'
     description: 'The time when the space was last updated.'
     output: true
+examples:
+  - name: 'designcenter_space_basic'
+    primary_resource_id: 'example'
+    vars:
+      space_id: 'example-space'

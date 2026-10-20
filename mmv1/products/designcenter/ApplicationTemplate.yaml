@@ -23,100 +23,100 @@ description: |
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
 parameters:
-  - name: 'location'
-    type: String
+  - type: String
+    name: 'location'
     description: |
       The location of the application template.
     required: true
     url_param_only: true
     immutable: true
-  - name: 'space'
-    type: String
+  - type: String
+    name: 'space'
     description: |
       The space of the application template.
     required: true
     url_param_only: true
     immutable: true
-  - name: 'application_template_id'
-    type: String
+  - type: String
+    name: 'application_template_id'
     description: |
       The ID of the application template.
     required: true
     url_param_only: true
     immutable: true
 properties:
-  - name: 'name'
-    type: String
+  - type: String
+    name: 'name'
     description: |
       Identifier. The resource name of the ApplicationTemplate. Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template_id}`
     output: true
-  - name: 'displayName'
-    type: String
+  - type: String
+    name: 'display_name'
     description: |
       Optional. User-defined display name.
-  - name: 'description'
-    type: String
+  - type: String
+    name: 'description'
     description: |
       Optional. User-defined description.
-  - name: 'applicationParameters'
-    type: String
+  - type: String
+    name: 'application_parameters'
     description: |
       Optional. Application parameters.
-  - name: 'compositionType'
-    type: Enum
+  - type: Enum
+    name: 'composition_type'
     description: |
       Optional. Composition type of the template.
     immutable: true
     enum_values:
       - 'STANDARD'
       - 'COMPOSITE'
-  - name: 'rootInputVariables'
-    type: Array
+  - type: Array
+    name: 'root_input_variables'
     description: |
       Optional. Root input variables.
     item_type:
       type: String
-  - name: 'rootOutputVariables'
-    type: Array
+  - type: Array
+    name: 'root_output_variables'
     description: |
       Optional. Root output variables.
     item_type:
       type: String
-  - name: 'saasRuntimeContext'
-    type: String
+  - type: String
+    name: 'saas_runtime_context'
     description: |
       Optional. SaaS runtime context.
-  - name: 'inputsAsRootModuleVariables'
-    type: Boolean
+  - type: Boolean
+    name: 'inputs_as_root_module_variables'
     description: |
       Optional. Inputs as root module variables.
-  - name: 'iacFormat'
-    type: String
+  - type: String
+    name: 'iac_format'
     output: true
     description: |
       Output only. IaC format.
-  - name: 'serializedApplicationTemplate'
-    type: String
+  - type: String
+    name: 'serialized_application_template'
     output: true
     description: |
       Output only. Serialized application template.
-  - name: 'latestRevision'
-    type: String
+  - type: String
+    name: 'latest_revision'
     output: true
     description: |
       Output only. Latest revision.
-  - name: 'artifactLocation'
-    type: String
+  - type: String
+    name: 'artifact_location'
     output: true
     description: |
       Output only. Artifact location.
-  - name: 'createTime'
-    type: Time
+  - type: Time
+    name: 'create_time'
     output: true
     description: |
       Output only. The time the resource was created.
-  - name: 'updateTime'
-    type: Time
+  - type: Time
+    name: 'update_time'
     output: true
     description: |
       Output only. The time the resource was last updated.

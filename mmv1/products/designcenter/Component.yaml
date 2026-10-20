@@ -63,14 +63,14 @@ properties:
       Identifier. The resource name of the component.
     output: true
 
-  - name: 'sharedTemplateRevisionUri'
+  - name: 'shared_template_revision_uri'
     type: 'String'
     description: |
       The URI of the shared template revision.
     required: true
     immutable: true
 
-  - name: 'displayName'
+  - name: 'display_name'
     type: 'String'
     description: |
       The display name of the component.
@@ -80,22 +80,22 @@ properties:
     description: |
       The parameters of the component.
 
-  - name: 'applicationInfo'
+  - name: 'application_info'
     type: 'KeyValuePairs'
     description: |
       The application info of the component.
 
-  - name: 'useAsRootModule'
+  - name: 'use_as_root_module'
     type: 'Boolean'
     description: |
       Whether to use as root module.
 
-  - name: 'inputVariableAliases'
+  - name: 'input_variable_aliases'
     type: 'KeyValuePairs'
     description: |
       The input variable aliases.
 
-  - name: 'applicationTemplateRevisionUri'
+  - name: 'application_template_revision_uri'
     type: 'String'
     description: |
       The application template revision URI.
@@ -116,25 +116,25 @@ properties:
       The APIs of the component.
     output: true
 
-  - name: 'connectionsParameters'
+  - name: 'connections_parameters'
     type: 'KeyValuePairs'
     description: |
       The connections parameters of the component.
     output: true
 
-  - name: 'componentParameterSchema'
+  - name: 'component_parameter_schema'
     type: 'String'
     description: |
       The component parameter schema.
     output: true
 
-  - name: 'createTime'
+  - name: 'create_time'
     type: 'Time'
     description: |
       [Output only] Create time stamp.
     output: true
 
-  - name: 'updateTime'
+  - name: 'update_time'
     type: 'Time'
     description: |
       [Output only] Update time stamp.

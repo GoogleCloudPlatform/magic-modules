@@ -23,42 +23,41 @@ description: |
 autogen_async: false
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}'
-parameters:
-  - name: 'location'
-    type: String
+properties:
+  - type: String
+    name: 'location'
     description: |
       The location of the catalog template.
     required: true
     immutable: true
     url_param_only: true
 
-  - name: 'space'
-    type: String
+  - type: String
+    name: 'space'
     description: |
       The space of the catalog template.
     required: true
     immutable: true
     url_param_only: true
 
-  - name: 'catalog'
-    type: String
+  - type: String
+    name: 'catalog'
     description: |
       The catalog of the catalog template.
     required: true
     immutable: true
     url_param_only: true
 
-  - name: 'catalog_template_id'
-    type: String
+  - type: String
+    name: 'catalog_template_id'
     description: |
       The ID of the catalog template.
     required: true
     immutable: true
     url_param_only: true
 
-properties:
-  - name: 'templateCategory'
-    type: Enum
+  - type: Enum
+    name: 'template_category'
     description: |
       The category of the template.
     required: true
@@ -66,47 +65,47 @@ properties:
       - 'APPLICATION_TEMPLATE'
       - 'COMPONENT_TEMPLATE'
 
-  - name: 'displayName'
-    type: String
+  - type: String
+    name: 'display_name'
     description: |
       The display name of the catalog template.
 
-  - name: 'description'
-    type: String
+  - type: String
+    name: 'description'
     description: |
       The description of the catalog template.
 
-  - name: 'type'
-    type: String
+  - type: String
+    name: 'type'
     description: |
       The type of the catalog template.
 
-  - name: 'name'
-    type: String
+  - type: String
+    name: 'name'
     description: |
       The resource name of the catalog template.
     output: true
 
-  - name: 'uuid'
-    type: String
+  - type: String
+    name: 'uuid'
     description: |
       The unique system-generated UUID for the template.
     output: true
 
-  - name: 'latestRevisionId'
-    type: String
+  - type: String
+    name: 'latest_revision_id'
     description: |
       The ID of the latest revision of the template.
     output: true
 
-  - name: 'createTime'
-    type: Time
+  - type: Time
+    name: 'create_time'
     description: |
       The time the catalog template was created.
     output: true
 
-  - name: 'updateTime'
-    type: Time
+  - type: Time
+    name: 'update_time'
     description: |
       The time the catalog template was last updated.
     output: true

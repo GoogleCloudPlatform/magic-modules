@@ -357,6 +357,7 @@ service/data-transfer-essentials:
   resources:
   - google_network_connectivity_multicloud_data_transfer_config
   - google_network_connectivity_destination
+  designcenter: "service/designcenter"
 service/datacatalog:
   resources:
   - google_data_catalog_.*
@@ -397,9 +398,6 @@ service/deploymentmanager:
   resources:
   - google_deployment_manager_.*
   - google_runtimeconfig_.*
-service/designcenter:
-  resources:
-  - google_design_center_.*
 service/developerconnect:
   resources:
   - google_developer_connect_.*

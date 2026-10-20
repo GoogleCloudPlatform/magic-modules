@@ -8,57 +8,51 @@ update_mask: true
 description: |
   Application Design Center Application.
 autogen_async: true
-async:
-  type: OpAsync
-  operation:
+async: 
+  operation: 
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result:
+  result: 
     path: 'response'
-    resource_inside_response: true
-  status:
+  status: 
     path: 'done'
     complete: true
     allowed_value:
       - true
-  error:
+  error: 
     path: 'error'
     message: 'message'
   actions:
     - 'delete'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications/{{application_id}}'
-parameters:
+properties:
   - name: 'location'
     type: String
     required: true
     url_param_only: true
-    immutable: true
     description: |
       The location of the space.
   - name: 'space'
     type: String
     required: true
     url_param_only: true
-    immutable: true
     description: |
       The space for the application.
   - name: 'application_id'
     type: String
     required: true
     url_param_only: true
-    immutable: true
     description: |
       The ID of the application.
-properties:
   - name: 'source'
     type: NestedObject
     required: true
     description: |
       DeploymentSource for the application.
     properties:
-      - name: 'applicationTemplateRevisionUri'
+      - name: 'application_template_revision_uri'
         type: String
         description: |
           Application template revision URI.
@@ -72,7 +66,7 @@ properties:
         type: String
         description: |
           Scope type.
-  - name: 'displayName'
+  - name: 'display_name'
     type: String
     description: |
       Display name.
@@ -80,15 +74,15 @@ properties:
     type: String
     description: |
       Description of the application.
-  - name: 'appParameters'
+  - name: 'app_parameters'
     type: KeyValuePairs
     description: |
       Application parameters.
-  - name: 'componentParameters'
+  - name: 'component_parameters'
     type: KeyValuePairs
     description: |
       Component parameters.
-  - name: 'serviceAccount'
+  - name: 'service_account'
     type: String
     description: |
       Service account for deployment.
@@ -96,38 +90,38 @@ properties:
     type: KeyValuePairs
     description: |
       Attributes of the application.
-  - name: 'deploymentRegion'
+  - name: 'deployment_region'
     type: String
     description: |
       Deployment region.
-  - name: 'deploymentProject'
+  - name: 'deployment_project'
     type: String
     description: |
       Deployment project.
-  - name: 'connectionConfigs'
+  - name: 'connection_configs'
     type: Array
     description: |
       Connection configurations.
     item_type:
       type: NestedObject
       properties:
-        - name: 'connectionId'
+        - name: 'connection_id'
           type: String
           description: |
             Connection ID.
-        - name: 'destinationUri'
+        - name: 'destination_uri'
           type: String
           description: |
             Destination URI.
-  - name: 'deploymentTarget'
+  - name: 'deployment_target'
     type: String
     description: |
       Deployment target.
-  - name: 'compositeApplicationParameters'
+  - name: 'composite_application_parameters'
     type: KeyValuePairs
     description: |
       Composite application parameters.
-  - name: 'rolesApisConfig'
+  - name: 'roles_apis_config'
     type: NestedObject
     description: |
       Roles and APIs configuration.
@@ -154,22 +148,22 @@ properties:
     output: true
     description: |
       State of the application.
-  - name: 'deploymentMetadata'
+  - name: 'deployment_metadata'
     type: KeyValuePairs
     output: true
     description: |
       Deployment metadata.
-  - name: 'apphubApplication'
+  - name: 'apphub_application'
     type: String
     output: true
     description: |
       AppHub application URI.
-  - name: 'createTime'
+  - name: 'create_time'
     type: Time
     output: true
     description: |
       Create time.
-  - name: 'updateTime'
+  - name: 'update_time'
     type: Time
     output: true
     description: |
