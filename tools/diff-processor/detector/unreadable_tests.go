@@ -49,12 +49,6 @@ var KnownUnreadableTests = []string{
 	"TestAccEphemeralServiceAccountToken_basic",
 	"TestAccEphemeralServiceAccountToken_withCustomLifetime",
 	"TestAccEphemeralServiceAccountToken_withDelegates",
-	"TestAccFolderIamAuditConfig_addFirstExemptMember",
-	"TestAccFolderIamAuditConfig_removeLastExemptMember",
-	"TestAccOrganizationIamAuditConfig_addFirstExemptMember",
-	"TestAccOrganizationIamAuditConfig_removeLastExemptMember",
-	"TestAccProjectIamAuditConfig_addFirstExemptMember",
-	"TestAccProjectIamAuditConfig_removeLastExemptMember",
 	"TestAccPubsubTopic_schema",
 	"TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork",
 }
