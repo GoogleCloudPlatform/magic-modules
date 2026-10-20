@@ -92,6 +92,9 @@ const SharedTestFirewallPrefix = "tf-bootstrap-firewall-"
 func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string, networkName string) string {
 	project := envvar.GetTestProjectFromEnv()
 	firewallName = SharedTestFirewallPrefix + firewallName
+	if acctest.IsVcrReplaying() {
+		return firewallName
+	}
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {

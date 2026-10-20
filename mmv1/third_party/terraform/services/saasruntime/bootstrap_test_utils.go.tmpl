@@ -5,6 +5,7 @@ package saasruntime
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -67,6 +68,13 @@ var bootstrapAdcProjectServices = []string{
 // Importing r-2 after r-1 re-runs the import without creating a new UnitKind or
 // Release.
 func BootstrapSaasRuntimeApplicationTemplate(t *testing.T) (project, template string) {
+	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") == "REPLAYING" {
+		projectIDSuffix := strings.Replace(envvar.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+		project = bootstrapAdcProjectPrefix + projectIDSuffix
+		space := fmt.Sprintf("projects/%s/locations/%s/spaces/%s", project, bootstrapAdcLocation, bootstrapAdcSpace)
+		composite := space + "/applicationTemplates/" + bootstrapAdcComposite
+		return project, composite
+	}
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		return "", ""

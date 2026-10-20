@@ -48,6 +48,11 @@ func IsVcrEnabled() bool {
 	return envPath != "" && vcrMode != ""
 }
 
+// IsVcrReplaying returns true if VCR is enabled and running in REPLAYING mode.
+func IsVcrReplaying() bool {
+	return IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING"
+}
+
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 

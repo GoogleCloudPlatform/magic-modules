@@ -5135,6 +5135,9 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 				// Clean up any NetworkEdgeSecurityService left over from a previously failed recording
 				// before creating a new one. Only one can exist per region.
 				PreConfig: func() {
+					if acctest.IsVcrReplaying() {
+						return
+					}
 					config := acctest.GoogleProviderConfig(t)
 					client := tpgcompute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent)
 					found, err := client.NetworkEdgeSecurityServices.AggregatedList(config.Project).Do()
