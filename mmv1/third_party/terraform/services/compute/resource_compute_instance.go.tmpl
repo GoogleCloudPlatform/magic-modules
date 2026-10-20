@@ -3477,7 +3477,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 
 			if d.HasChange(prefix+".internal_ipv6_prefix_length") {
-				niPatchMap["ipv6Address"] = networkInterface["ipv6Address"]
+				niPatchMap["internalIpv6PrefixLength"] = networkInterface["internalIpv6PrefixLength"]
 			}
 
 			if d.HasChange(prefix+".ipv6_address") {
