@@ -472,6 +472,9 @@ func (c *Config) synchronousTimeout() time.Duration {
 
 // Print Identities executing terraform API Calls.
 func (c *Config) logGoogleIdentities(ctx context.Context) error {
+	if !logging.IsDebugOrHigher() {
+		return nil
+	}
 	if c.ImpersonateServiceAccount == "" {
 
 	tokenSource, err := c.getTokenSource(ctx, c.Scopes, true)
