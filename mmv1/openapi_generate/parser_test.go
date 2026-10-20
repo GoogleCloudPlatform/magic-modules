@@ -2,6 +2,7 @@ package openapi_generate
 
 import (
 	_ "embed"
+	"path/filepath"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -274,5 +275,118 @@ paths:
 	}
 	if optionalDeprecatedFound {
 		t.Error("Expected optionalDeprecatedParam to be skipped, but it was found")
+	}
+}
+
+func TestBuildProduct(t *testing.T) {
+	tests := []struct {
+		name           string
+		spec           string
+		expectedBase   string
+		expectedRepUrl string
+	}{
+		{
+			name: "GlobalAndRegionalEndpoints",
+			spec: `
+openapi: "3.0.3"
+info:
+  version: v1
+  title: Test Service API
+servers:
+  - url: https://testservice.googleapis.com
+    description: Global Endpoint
+  - url: https://asia-east1-testservice.googleapis.com/
+    description: Locational Endpoint
+    x-google-endpoint-location: asia-east1
+  - url: https://testservice.africa-south1.rep.googleapis.com/
+    description: Regional Endpoint
+    x-google-deprecated: true
+    x-google-endpoint-location: africa-south1
+  - url: https://testservice.asia-east1.rep.googleapis.com/
+    description: Regional Endpoint
+    x-google-endpoint-location: asia-east1
+paths: {}
+`,
+			expectedBase:   "https://testservice.googleapis.com/v1/",
+			expectedRepUrl: "https://testservice.{{location}}.rep.googleapis.com/v1/",
+		},
+		{
+			name: "GlobalOnlyNoRegionalEndpoints",
+			spec: `
+openapi: "3.0.3"
+info:
+  version: v1
+  title: Test Service API
+servers:
+  - url: https://testservice.googleapis.com
+    description: Global Endpoint
+  - url: https://asia-east1-testservice.googleapis.com/
+    description: Locational Endpoint
+    x-google-endpoint-location: asia-east1
+paths: {}
+`,
+			expectedBase:   "https://testservice.googleapis.com/v1/",
+			expectedRepUrl: "",
+		},
+		{
+			name: "ServiceNameContainsLocationSubstring",
+			spec: `
+openapi: "3.0.3"
+info:
+  version: v1
+  title: Test Service API
+servers:
+  - url: https://lustre.googleapis.com
+    description: Global Endpoint
+  - url: https://lustre.us.rep.googleapis.com/
+    description: Regional Endpoint
+    x-google-endpoint-location: us
+paths: {}
+`,
+			expectedBase:   "https://lustre.googleapis.com/v1/",
+			expectedRepUrl: "https://lustre.{{location}}.rep.googleapis.com/v1/",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := t.Context()
+			loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
+			doc, err := loader.LoadFromData([]byte(tc.spec))
+			if err != nil {
+				t.Fatalf("Could not load data: %v", err)
+			}
+			if err := doc.Validate(ctx); err != nil {
+				t.Fatalf("Could not validate data: %v", err)
+			}
+
+			outDir := t.TempDir()
+			productPath := buildProduct("/fake/testservice_v1.json", outDir, doc, header)
+
+			var product api.Product
+			api.Compile(filepath.Join(productPath, "product.yaml"), &product)
+			product.Validate()
+
+			if product.Name != "TestService" {
+				t.Errorf("Expected product.Name to be 'TestService', got %q", product.Name)
+			}
+			if product.DisplayName != "Test Service" {
+				t.Errorf("Expected product.DisplayName to be 'Test Service', got %q", product.DisplayName)
+			}
+			if len(product.Versions) != 1 {
+				t.Fatalf("Expected 1 version in product.Versions, got %d", len(product.Versions))
+			}
+
+			v := product.Versions[0]
+			if v.Name != "ga" {
+				t.Errorf("Expected version.Name to be 'ga', got %q", v.Name)
+			}
+			if v.BaseUrl != tc.expectedBase {
+				t.Errorf("Expected version.BaseUrl to be %q, got %q", tc.expectedBase, v.BaseUrl)
+			}
+			if v.RepUrl != tc.expectedRepUrl {
+				t.Errorf("Expected version.RepUrl to be %q, got %q", tc.expectedRepUrl, v.RepUrl)
+			}
+		})
 	}
 }

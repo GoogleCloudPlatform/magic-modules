@@ -227,6 +227,7 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 	apiVersion := &product.Version{}
 
 	apiVersion.BaseUrl = fmt.Sprintf("%s/%s/", server, version)
+	apiVersion.RepUrl = repUrl(root.Servers, version)
 	// TODO figure out how to tell the API version
 	apiVersion.Name = "ga"
 	apiProduct.Versions = []*product.Version{apiVersion}
@@ -264,6 +265,32 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 		log.Fatalf("error closing product file %v", err)
 	}
 	return productPath
+}
+
+func repUrl(servers openapi3.Servers, version string) string {
+	for _, s := range servers {
+		if s == nil {
+			continue
+		}
+		if dep, ok := s.Extensions["x-google-deprecated"]; ok && anyToBool(dep) {
+			continue
+		}
+		if s.Description == "Regional Endpoint" || strings.Contains(s.URL, ".rep.") {
+			u := strings.TrimSuffix(s.URL, "/")
+			if loc, ok := s.Extensions["x-google-endpoint-location"].(string); ok && loc != "" {
+				if strings.Contains(u, "."+loc+".") {
+					u = strings.Replace(u, "."+loc+".", ".{{location}}.", 1)
+				} else {
+					u = strings.Replace(u, loc, "{{location}}", 1)
+				}
+			} else if !strings.Contains(u, "{{location}}") {
+				re := regexp.MustCompile(`\.[^.]+\.rep\.`)
+				u = re.ReplaceAllString(u, ".{{location}}.rep.")
+			}
+			return fmt.Sprintf("%s/%s/", u, version)
+		}
+	}
+	return ""
 }
 
 func baseUrl(resourcePath string) string {
