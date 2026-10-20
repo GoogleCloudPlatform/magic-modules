@@ -56,8 +56,6 @@ var KnownUnreadableTests = []string{
 	"TestAccProjectIamAuditConfig_addFirstExemptMember",
 	"TestAccProjectIamAuditConfig_removeLastExemptMember",
 	"TestAccPubsubTopic_schema",
-	"TestAccSecurityCenterV2ProjectNotificationConfig_locationEu",
-	"TestAccSecurityCenterV2ProjectNotificationConfig_locationUs",
 	"TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork",
 }
 
