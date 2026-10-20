@@ -177,9 +177,31 @@ func TestFirestoreField409_retryUnderlyingDataChanged(t *testing.T) {
 		Code: 409,
 		Body: "Please retry, underlying data changed",
 	}
-	isRetryable, _ := FirestoreField409RetryUnderlyingDataChanged(&err)
+	isRetryable, _ := FirestoreField409Retry(&err)
 	if !isRetryable {
 		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestFirestoreField409_crossTransactionContention(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "Aborted due to cross-transaction contention. This occurs when multiple transactions attempt to access the same data, requiring Firestore to abort at least one in order to enforce serializability.",
+	}
+	isRetryable, _ := FirestoreField409Retry(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestFirestoreField409_otherConflictNotRetryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "Already exists",
+	}
+	isRetryable, _ := FirestoreField409Retry(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
 	}
 }
 

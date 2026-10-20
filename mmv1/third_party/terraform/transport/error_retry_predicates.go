@@ -421,10 +421,16 @@ func DatastoreIndex409Contention(err error) (bool, string) {
 	return false, ""
 }
 
-// relevant for firestore in datastore mode
-func FirestoreField409RetryUnderlyingDataChanged(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 409 && strings.Contains(gerr.Body, "Please retry, underlying data changed") {
+// Firestore aborts concurrent admin mutations on one database (field and
+// index changes alike) with a 409, for example when several fields or TTL
+// policies are created in one apply.
+func FirestoreField409Retry(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 {
+		if strings.Contains(gerr.Body, "Aborted due to cross-transaction contention") {
+			return true, "aborted due to cross-transaction contention - retrying"
+		}
+
+		if strings.Contains(gerr.Body, "Please retry, underlying data changed") {
 			return true, "underlying data changed - retrying"
 		}
 	}
