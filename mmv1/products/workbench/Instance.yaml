@@ -161,7 +161,7 @@ virtual_fields:
     default_value: "ACTIVE"
 error_retry_predicates:
   - 'transport_tpg.IsWorkbenchQueueError'
-  - 'transport_tpg.IsSubnetworkNotReadyError'
+  - 'transport_tpg.IsSubnetworkNotReadyLROError'
 error_retry_on_async: true
 parameters:
   - name: 'location'

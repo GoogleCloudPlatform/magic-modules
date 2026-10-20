@@ -36,7 +36,7 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 include_in_tgc_next: true
 error_retry_predicates:
-  - 'transport_tpg.IsSubnetworkNotReadyError'
+  - 'transport_tpg.IsSubnetworkNotReadyLROError'
 error_retry_on_async: true
 custom_code:
   post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'

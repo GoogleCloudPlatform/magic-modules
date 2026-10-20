@@ -42,7 +42,7 @@ func ModifyColabRuntime(config *transport_tpg.Config, d *schema.ResourceData, pr
 			return nil
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyLROError},
 	})
 }
 {{- end }}

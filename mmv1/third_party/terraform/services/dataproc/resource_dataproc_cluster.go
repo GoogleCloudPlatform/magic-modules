@@ -2536,7 +2536,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 			// Wait until it's created
 			waitErr := DataprocClusterOperationWait(config, op, "creating Dataproc cluster", userAgent, d.Timeout(schema.TimeoutCreate))
 			if waitErr != nil {
-				if isRetryable, _ := transport_tpg.IsSubnetworkNotReadyError(waitErr); isRetryable {
+				if isRetryable, _ := transport_tpg.IsSubnetworkNotReadyLROError(waitErr); isRetryable {
 					log.Printf("[DEBUG] Dataproc cluster %s creation failed with subnetwork not ready error, deleting partially created cluster before retrying", cluster.ClusterName)
 					delOp, delErr := NewClient(config, userAgent).Projects.Regions.Clusters.Delete(
 						project, region, cluster.ClusterName).Do()
@@ -2561,7 +2561,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 			return nil
 		},
 		Timeout:              d.Timeout(schema.TimeoutCreate),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyLROError},
 	})
 	if err != nil {
 		return err

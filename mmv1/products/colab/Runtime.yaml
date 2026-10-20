@@ -31,7 +31,7 @@ async:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
 error_retry_predicates:
-  - 'transport_tpg.IsSubnetworkNotReadyError'
+  - 'transport_tpg.IsSubnetworkNotReadyLROError'
 error_retry_on_async: true
 custom_code:
   encoder: 'templates/terraform/encoders/colab_runtime.go.tmpl'
