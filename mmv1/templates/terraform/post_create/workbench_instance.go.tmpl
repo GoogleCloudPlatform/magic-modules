@@ -3,11 +3,21 @@ if err := waitForWorkbenchInstanceActive(d, config, d.Timeout(schema.TimeoutCrea
 }
 
 if p, ok := d.GetOk("desired_state"); ok && p.(string) == "STOPPED" {
-  dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
+  err := transport_tpg.Retry(transport_tpg.RetryOptions{
+    RetryFunc: func() error {
+      dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
+      if err != nil {
+        return err
+      }
+      if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+        return fmt.Errorf("Error stopping Workbench Instance: %s", err)
+      }
+      return nil
+    },
+    Timeout:              d.Timeout(schema.TimeoutUpdate),
+    ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyError},
+  })
   if err != nil {
     return err
-  }
-  if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
-    return fmt.Errorf("Error stopping Workbench Instance: %s", err)
   }
 }

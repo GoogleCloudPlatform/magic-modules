@@ -184,6 +184,10 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 		region = r
 	}
 
+	lockName := fmt.Sprintf("bootstrap-subnet/%s/%s/%s", projectID, region, subnetName)
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
+
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap config.")
@@ -235,16 +239,29 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 		}
 	}
 
-	subnet, err := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
-
-	if subnet == nil {
-		t.Fatalf("Error getting test subnet %s: is nil", subnetName)
-	}
-
+	var subnetNameResult string
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			subnet, getErr := computeService.Subnetworks.Get(projectID, region, subnetName).Do()
+			if getErr != nil {
+				return getErr
+			}
+			if subnet == nil {
+				return fmt.Errorf("Error getting test subnet %s: is nil", subnetName)
+			}
+			if subnet.State != "" && subnet.State != "READY" {
+				return fmt.Errorf("The resource 'projects/%s/regions/%s/subnetworks/%s' is not ready (state: %s)", projectID, region, subnetName, subnet.State)
+			}
+			subnetNameResult = subnet.Name
+			return nil
+		},
+		Timeout:              4 * time.Minute,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
+	})
 	if err != nil {
 		t.Fatalf("Error getting test subnet %s: %s", subnetName, err)
 	}
-	return subnet.Name
+	return subnetNameResult
 }
 
 func BootstrapNetworkAttachment(t *testing.T, networkAttachmentName string, subnetName string) string {

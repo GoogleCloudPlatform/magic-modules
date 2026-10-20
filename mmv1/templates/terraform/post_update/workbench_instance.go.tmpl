@@ -6,13 +6,23 @@ if state != desired_state || stopInstance{
   if desired_state == "STOPPED" {
     verb = "stop"
   }
-  pRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, verb)
+  err := transport_tpg.Retry(transport_tpg.RetryOptions{
+    RetryFunc: func() error {
+      pRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, verb)
+      if err != nil {
+        return err
+      }
+
+      if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, pRes); err != nil {
+        return fmt.Errorf("Error waiting to modify Workbench Instance state: %s", err)
+      }
+      return nil
+    },
+    Timeout:              d.Timeout(schema.TimeoutUpdate),
+    ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyError},
+  })
   if err != nil {
     return err
-  }
-
-  if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, pRes); err != nil {
-    return fmt.Errorf("Error waiting to modify Workbench Instance state: %s", err)
   }
 
   if verb == "start"{

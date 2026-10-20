@@ -5,11 +5,12 @@ func ModifyColabRuntimeOperation(config *transport_tpg.Config, d *schema.Resourc
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config: config,
-		Method: "POST",
-		Project: billingProject,
-		RawURL: url,
-		UserAgent: userAgent,
+		Config:               config,
+		Method:               "POST",
+		Project:              billingProject,
+		RawURL:               url,
+		UserAgent:            userAgent,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Unable to %q google_colab_runtime %q: %s", method, d.Id(), err)
@@ -30,13 +31,19 @@ func waitForColabOperation(config *transport_tpg.Config, d *schema.ResourceData,
 }
 
 func ModifyColabRuntime(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, method string) error {
-	dRes, err := ModifyColabRuntimeOperation(config, d, project, billingProject, userAgent, method)
-	if err != nil {
-		return err
-	}
-	if err := waitForColabOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
-		return fmt.Errorf("Error with Colab runtime method: %s", err)
-	}
-	return nil
+	return transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			dRes, err := ModifyColabRuntimeOperation(config, d, project, billingProject, userAgent, method)
+			if err != nil {
+				return err
+			}
+			if err := waitForColabOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+				return fmt.Errorf("Error with Colab runtime method: %s", err)
+			}
+			return nil
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
+	})
 }
 {{- end }}

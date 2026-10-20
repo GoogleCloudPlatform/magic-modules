@@ -739,3 +739,17 @@ func IsAgentConnectivityTemplateInUse(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry when a referenced subnetwork is not ready yet (e.g., during async LROs or creation).
+func IsSubnetworkNotReadyError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "subnetworks") && strings.Contains(gerr.Body, "is not ready") {
+			return true, "Subnetwork is not ready"
+		}
+		return false, ""
+	}
+	if err != nil && strings.Contains(err.Error(), "subnetworks") && strings.Contains(err.Error(), "is not ready") {
+		return true, "Subnetwork is not ready"
+	}
+	return false, ""
+}
