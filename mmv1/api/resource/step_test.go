@@ -219,7 +219,6 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 	wantStep0Doc := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service"
   vpc_egress     = "ALL_TRAFFIC"
-  egress_setting = null
   empty_str      = ""
   max_instances  = 10
   delete_service = true
@@ -228,7 +227,6 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 	wantStep0OiCS := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service-${local.name_suffix}"
   vpc_egress     = "ALL_TRAFFIC"
-  egress_setting = null
   empty_str      = ""
   max_instances  = 10
   delete_service = true
@@ -259,20 +257,14 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 	}
 	wantStep1Doc := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service"
-  vpc_egress     = null
   egress_setting = "ALL_TRAFFIC"
   empty_str      = ""
-  max_instances  = null
-  delete_service = null
 }
 `
 	wantStep1OiCS := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service-${local.name_suffix}"
-  vpc_egress     = null
   egress_setting = "ALL_TRAFFIC"
   empty_str      = ""
-  max_instances  = null
-  delete_service = null
 }
 `
 
