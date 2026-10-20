@@ -4,6 +4,11 @@ resource "google_folder" "folder" {
   deletion_protection = false
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_folder.folder]
+}
+
 resource "google_tags_tag_key" "boundary_config" {
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   short_name  = "{{index $.ResourceIdVars "tag_key_short_name"}}"
@@ -17,6 +22,7 @@ resource "google_tags_tag_key" "boundary_config_2" {
 }
 
 resource "google_resource_manager_boundary_config" "{{$.PrimaryResourceId}}" {
-  parent  = google_folder.folder.name
-  tag_key = google_tags_tag_key.boundary_config_2.namespaced_name
+  parent     = google_folder.folder.name
+  tag_key    = google_tags_tag_key.boundary_config_2.namespaced_name
+  depends_on = [time_sleep.wait_60_seconds]
 }
