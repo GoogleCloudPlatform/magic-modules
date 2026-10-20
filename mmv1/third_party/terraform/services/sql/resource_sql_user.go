@@ -313,7 +313,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	var password string
 	if pw, ok := d.GetOk("password"); ok {
 		password = pw.(string)
-	} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); pwWo.Type() == cty.String && !pwWo.IsNull() {
+	} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
 		password = pwWo.AsString()
 	}
 	var databaseRoles []string
@@ -434,8 +434,8 @@ func flattenSqlUser(user *sqladmin.User, d *schema.ResourceData, project string)
 	return nil
 }
 
-// FindSqlUser matches a configured SQL user against the list returned by the Cloud SQL Admin API.
-func FindSqlUser(databaseVersion, name, host string, users []*sqladmin.User) *sqladmin.User {
+// findSqlUser matches a configured SQL user against the list returned by the Cloud SQL Admin API.
+func findSqlUser(databaseVersion, name, host string, users []*sqladmin.User) *sqladmin.User {
 	for _, currentUser := range users {
 		var username string
 		if !(strings.Contains(databaseVersion, "POSTGRES") || strings.Contains(databaseVersion, "SQLSERVER") || currentUser.Type == "CLOUD_IAM_GROUP" || currentUser.Type == "ENTRAID_USER") {
@@ -507,7 +507,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
 	}
 
-	user := FindSqlUser(databaseInstance.DatabaseVersion, name, host, users.Items)
+	user := findSqlUser(databaseInstance.DatabaseVersion, name, host, users.Items)
 
 	if user == nil {
 		log.Printf("[WARN] Removing SQL User %q because it's gone", d.Get("name").(string))
@@ -607,7 +607,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		var password string
 		if pw, ok := d.GetOk("password"); ok {
 			password = pw.(string)
-		} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); pwWo.Type() == cty.String && !pwWo.IsNull() {
+		} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
 			password = pwWo.AsString()
 		}
 		var databaseRoles []string
