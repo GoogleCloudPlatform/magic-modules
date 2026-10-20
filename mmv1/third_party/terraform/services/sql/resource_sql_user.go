@@ -313,7 +313,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	var password string
 	if pw, ok := d.GetOk("password"); ok {
 		password = pw.(string)
-	} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
+	} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); pwWo.Type() == cty.String && !pwWo.IsNull() {
 		password = pwWo.AsString()
 	}
 	var databaseRoles []string
@@ -434,6 +434,33 @@ func flattenSqlUser(user *sqladmin.User, d *schema.ResourceData, project string)
 	return nil
 }
 
+// FindSqlUser matches a configured SQL user against the list returned by the Cloud SQL Admin API.
+func FindSqlUser(databaseVersion, name, host string, users []*sqladmin.User) *sqladmin.User {
+	for _, currentUser := range users {
+		var username string
+		if !(strings.Contains(databaseVersion, "POSTGRES") || strings.Contains(databaseVersion, "SQLSERVER") || currentUser.Type == "CLOUD_IAM_GROUP" || currentUser.Type == "ENTRAID_USER") {
+			username = strings.Split(name, "@")[0]
+		} else if strings.Contains(databaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
+			splitName := strings.SplitN(name, "@", 2)
+			if len(splitName) == 2 {
+				groupUsername := splitName[0]
+				groupHostname := splitName[1]
+				username = groupUsername + "@" + strings.ToLower(groupHostname)
+			}
+		} else {
+			username = name
+		}
+		if currentUser.Name == username {
+			// Host can only be empty for Postgres and SQL Server instances,
+			// so don't compare the host if the configured host is empty.
+			if host == "" || currentUser.Host == host {
+				return currentUser
+			}
+		}
+	}
+	return nil
+}
+
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -480,30 +507,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return handleUserNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
 	}
 
-	var user *sqladmin.User
-	for _, currentUser := range users.Items {
-		var username string
-		if !(strings.Contains(databaseInstance.DatabaseVersion, "POSTGRES") || currentUser.Type == "CLOUD_IAM_GROUP") {
-			username = strings.Split(name, "@")[0]
-		} else if strings.Contains(databaseInstance.DatabaseVersion, "MYSQL") && currentUser.Type == "CLOUD_IAM_GROUP" {
-			splitName := strings.SplitN(name, "@", 2)
-			if len(splitName) == 2 {
-				groupUsername := splitName[0]
-				groupHostname := splitName[1]
-				username = groupUsername + "@" + strings.ToLower(groupHostname)
-			}
-		} else {
-			username = name
-		}
-		if currentUser.Name == username {
-			// Host can only be empty for postgres instances,
-			// so don't compare the host if the API host is empty.
-			if host == "" || currentUser.Host == host {
-				user = currentUser
-				break
-			}
-		}
-	}
+	user := FindSqlUser(databaseInstance.DatabaseVersion, name, host, users.Items)
 
 	if user == nil {
 		log.Printf("[WARN] Removing SQL User %q because it's gone", d.Get("name").(string))
@@ -603,7 +607,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		var password string
 		if pw, ok := d.GetOk("password"); ok {
 			password = pw.(string)
-		} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
+		} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); pwWo.Type() == cty.String && !pwWo.IsNull() {
 			password = pwWo.AsString()
 		}
 		var databaseRoles []string
