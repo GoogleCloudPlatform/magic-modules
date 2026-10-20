@@ -215,7 +215,7 @@ func closeRecorder(t *testing.T) {
 	configsLock.RUnlock()
 	if ok {
 		// We did not cache the config if it does not use VCR
-		if !t.Failed() && IsVcrEnabled() && os.Getenv("VCR_MODE") != "REPLAYING" {
+		if !t.Failed() && IsVcrEnabled() && os.Getenv("VCR_MODE") == "RECORDING" {
 			// If a test succeeds, write new seed/yaml to files
 			err := config.Client.Transport.(*recorder.Recorder).Stop()
 			if err != nil {
