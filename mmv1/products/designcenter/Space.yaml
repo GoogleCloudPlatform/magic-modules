@@ -1,77 +1,66 @@
-# Copyright 2024 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
----
-name: 'Space'
-description: 'A Space in the Application Design Center.'
-base_url: 'projects/{{project}}/locations/{{location}}/spaces'
-self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/spaces?spaceId={{space_id}}'
-update_verb: 'PATCH'
+name: Space
+description: A Space in the Application Design Center.
+base_url: projects/{{project}}/locations/{{location}}/spaces
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces?spaceId={{space_id}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/spaces/{{space_id}}'
-
+  - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
 iam_policy:
   method_name_separator: ':'
-  parent: 'projects/{{project}}/locations/{{location}}/spaces/{{space_id}}'
-  fetch_iam_policy_verb: 'GET'
-
+  parent: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+  fetch_iam_policy_verb: GET
 properties:
-  - name: 'location'
-    type: 'String'
-    description: 'The location of the space.'
+  - name: location
+    type: String
+    description: The location of the space.
     required: true
     immutable: true
     url_param_only: true
-  - name: 'space_id'
-    type: 'String'
-    description: 'The ID of the space.'
+  - name: space_id
+    type: String
+    description: The ID of the space.
     required: true
     immutable: true
     url_param_only: true
-  - name: 'displayName'
-    type: 'String'
-    description: 'The display name of the space.'
-  - name: 'description'
-    type: 'String'
-    description: 'The description of the space.'
-  - name: 'enableGcpSharedTemplates'
-    type: 'Boolean'
-    description: 'Whether to enable GCP shared templates.'
-  - name: 'gcsBucket'
-    type: 'String'
-    description: 'The GCS bucket for the space.'
+  - name: displayName
+    type: String
+    description: The display name of the space.
+  - name: description
+    type: String
+    description: The description of the space.
+  - name: enableGcpSharedTemplates
+    type: Boolean
+    description: Whether to enable GCP shared templates.
+  - name: gcsBucket
+    type: String
+    description: The GCS bucket for the space.
     default_from_api: true
-  - name: 'tags'
-    type: 'KeyValuePairs'
-    description: 'Tags for the space.'
+  - name: tags
+    type: KeyValuePairs
+    description: Tags for the space.
     immutable: true
     ignore_read: true
-  - name: 'name'
-    type: 'String'
-    description: 'The resource name of the space.'
+  - name: name
+    type: String
+    description: The resource name of the space.
     output: true
-  - name: 'createTime'
-    type: 'Time'
-    description: 'The time when the space was created.'
+  - name: createTime
+    type: Time
+    description: The time when the space was created.
     output: true
-  - name: 'updateTime'
-    type: 'Time'
-    description: 'The time when the space was last updated.'
+  - name: updateTime
+    type: Time
+    description: The time when the space was last updated.
     output: true
-examples:
-  - name: 'designcenter_space_basic'
-    primary_resource_id: 'example'
-    vars:
-      space_id: 'example-space'
+samples:
+  - name: designcenter_space_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_space_basic
+        resource_id_vars:
+          space_id: example-space
+      - name: designcenter_space_update
+        resource_id_vars:
+          space_id: example-space
