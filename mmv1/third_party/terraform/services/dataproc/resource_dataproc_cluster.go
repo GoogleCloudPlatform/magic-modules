@@ -2528,7 +2528,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 			op, reqErr := NewClient(config, userAgent).Projects.Regions.Clusters.Create(
 				project, region, cluster).Do()
 			if reqErr != nil {
-				return fmt.Errorf("Error creating Dataproc cluster: %s", reqErr)
+				return fmt.Errorf("Error creating Dataproc cluster: %w", reqErr)
 			}
 
 			d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster.ClusterName))
@@ -2541,9 +2541,16 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 					delOp, delErr := NewClient(config, userAgent).Projects.Regions.Clusters.Delete(
 						project, region, cluster.ClusterName).Do()
 					if delErr == nil {
-						_ = DataprocClusterOperationWait(config, delOp, "deleting failed Dataproc cluster", userAgent, d.Timeout(schema.TimeoutDelete))
+						if delWaitErr := DataprocClusterOperationWait(config, delOp, "deleting failed Dataproc cluster", userAgent, d.Timeout(schema.TimeoutDelete)); delWaitErr != nil {
+							log.Printf("[WARN] Error waiting for deletion of failed Dataproc cluster %s: %s", cluster.ClusterName, delWaitErr)
+						} else {
+							d.SetId("")
+						}
+					} else if transport_tpg.IsGoogleApiErrorWithCode(delErr, 404) {
+						d.SetId("")
+					} else {
+						log.Printf("[WARN] Error deleting failed Dataproc cluster %s: %s", cluster.ClusterName, delErr)
 					}
-					d.SetId("")
 				}
 				// The resource didn't actually create
 				// Note that we do not remove the ID here - this resource tends to leave

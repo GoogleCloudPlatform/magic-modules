@@ -229,13 +229,17 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 
 		log.Printf("[DEBUG] Response is, %s", res)
 		if err != nil {
-			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
-		}
-
-		log.Printf("[DEBUG] Waiting for network creation to finish")
-		err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
-		if err != nil {
-			t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+				log.Printf("[DEBUG] Subnet %q is already being created by another process, waiting for it to be ready", subnetName)
+			} else {
+				t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+			}
+		} else {
+			log.Printf("[DEBUG] Waiting for network creation to finish")
+			err = ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping test subnet", config.UserAgent, 4*time.Minute)
+			if err != nil {
+				t.Fatalf("Error bootstrapping test subnet %s: %s", subnetName, err)
+			}
 		}
 	}
 
@@ -256,7 +260,7 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 			return nil
 		},
 		Timeout:              4 * time.Minute,
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError, transport_tpg.IsNotFoundRetryableError("bootstrap subnet")},
 	})
 	if err != nil {
 		t.Fatalf("Error getting test subnet %s: %s", subnetName, err)

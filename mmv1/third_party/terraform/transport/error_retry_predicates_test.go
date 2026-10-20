@@ -364,6 +364,21 @@ func TestIsSubnetworkNotReadyError_retryable(t *testing.T) {
 		t.Errorf("expected googleapi.Error for subnetwork not ready to be retryable")
 	}
 
+	gerrMsg := &googleapi.Error{
+		Code:    400,
+		Message: "The resource 'projects/test-project/regions/us-central1/subnetworks/test-subnet' is not ready",
+	}
+	isRetryable, _ = IsSubnetworkNotReadyError(gerrMsg)
+	if !isRetryable {
+		t.Errorf("expected googleapi.Error with Message for subnetwork not ready to be retryable")
+	}
+
+	wrapped400 := fmt.Errorf("wrapped: %w", gerr)
+	isRetryable, _ = IsSubnetworkNotReadyError(wrapped400)
+	if !isRetryable {
+		t.Errorf("expected wrapped 400 googleapi.Error for subnetwork not ready to be retryable")
+	}
+
 	opErr := fmt.Errorf("Error code 9, message: The resource 'projects/test-project/regions/us-central1/subnetworks/default' is not ready")
 	isRetryable, _ = IsSubnetworkNotReadyError(opErr)
 	if !isRetryable {
@@ -379,6 +394,15 @@ func TestIsSubnetworkNotReadyError_otherError(t *testing.T) {
 	isRetryable, _ := IsSubnetworkNotReadyError(gerr)
 	if isRetryable {
 		t.Errorf("expected 404 googleapi.Error to not be retryable")
+	}
+
+	wrapped404 := fmt.Errorf("wrapped: %w", &googleapi.Error{
+		Code: 404,
+		Body: "The resource 'projects/test-project/regions/us-central1/subnetworks/test-subnet' is not ready",
+	})
+	isRetryable, _ = IsSubnetworkNotReadyError(wrapped404)
+	if isRetryable {
+		t.Errorf("expected wrapped 404 googleapi.Error to not be retryable")
 	}
 
 	opErr := fmt.Errorf("Error code 13, message: Internal error")
