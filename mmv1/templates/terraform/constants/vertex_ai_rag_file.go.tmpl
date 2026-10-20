@@ -1,3 +1,4 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // vertexAIRagFileCount parses an int64 count from an operation response, where
 // int64 values are serialized as JSON strings.
 func vertexAIRagFileCount(v interface{}) int64 {
@@ -119,3 +120,4 @@ func vertexAIRagFileWaitForImportAndSetName(d *schema.ResourceData, config *tran
 	log.Printf("[DEBUG] Imported RagFile %q", newestName)
 	return d.Set("name", tpgresource.GetResourceNameFromSelfLink(newestName))
 }
+{{- end }}
