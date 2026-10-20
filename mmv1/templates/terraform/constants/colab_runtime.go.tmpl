@@ -5,12 +5,11 @@ func ModifyColabRuntimeOperation(config *transport_tpg.Config, d *schema.Resourc
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:               config,
-		Method:               "POST",
-		Project:              billingProject,
-		RawURL:               url,
-		UserAgent:            userAgent,
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyError},
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Unable to %q google_colab_runtime %q: %s", method, d.Id(), err)

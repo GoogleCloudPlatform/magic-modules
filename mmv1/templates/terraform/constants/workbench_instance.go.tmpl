@@ -201,12 +201,12 @@ func modifyWorkbenchInstanceState(config *transport_tpg.Config, d *schema.Resour
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:               config,
-		Method:               "POST",
-		Project:              billingProject,
-		RawURL:               url,
-		UserAgent:            userAgent,
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyError},
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Unable to %q google_workbench_instance %q: %s", state, d.Id(), err)
@@ -280,7 +280,7 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 				UserAgent:            userAgent,
 				Body:                 diskObj,
 				Timeout:              d.Timeout(schema.TimeoutUpdate),
-				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyError},
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError},
 			})
 			if reqErr != nil {
 				return fmt.Errorf("Error resizing disk: %s", reqErr)

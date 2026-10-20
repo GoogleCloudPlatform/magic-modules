@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -741,22 +740,10 @@ func IsAgentConnectivityTemplateInUse(err error) (bool, string) {
 	return false, ""
 }
 
-// Retry when a referenced subnetwork is not ready yet (e.g., during async LROs or creation).
+// Retry when a referenced subnetwork is not ready yet during an async LRO.
+// This is a post-operation error so it uses tpgresource.CommonOpError instead of googleapi.Error.
 func IsSubnetworkNotReadyError(err error) (bool, string) {
-	if err == nil {
-		return false, ""
-	}
-	var gerr *googleapi.Error
-	if errors.As(err, &gerr) {
-		if gerr.Code == 400 && ((strings.Contains(gerr.Body, "subnetworks") && strings.Contains(gerr.Body, "is not ready")) || (strings.Contains(gerr.Message, "subnetworks") && strings.Contains(gerr.Message, "is not ready"))) {
-			return true, "Subnetwork is not ready"
-		}
-		return false, ""
-	}
-	if strings.Contains(err.Error(), "googleapi: Error ") && !strings.Contains(err.Error(), "googleapi: Error 400:") {
-		return false, ""
-	}
-	if strings.Contains(err.Error(), "subnetworks") && strings.Contains(err.Error(), "is not ready") {
+	if err != nil && strings.Contains(err.Error(), "subnetworks") && strings.Contains(err.Error(), "is not ready") {
 		return true, "Subnetwork is not ready"
 	}
 	return false, ""

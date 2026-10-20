@@ -2528,7 +2528,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 			op, reqErr := NewClient(config, userAgent).Projects.Regions.Clusters.Create(
 				project, region, cluster).Do()
 			if reqErr != nil {
-				return fmt.Errorf("Error creating Dataproc cluster: %w", reqErr)
+				return fmt.Errorf("Error creating Dataproc cluster: %s", reqErr)
 			}
 
 			d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster.ClusterName))
