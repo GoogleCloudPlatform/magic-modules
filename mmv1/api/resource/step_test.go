@@ -155,6 +155,8 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
   empty_str      = "{{index $.Vars "empty_str"}}"
   max_instances  = {{index $.Vars "max_instances"}}
   delete_service = {{index $.Vars "delete_service"}}
+  tags           = ["primary", "{{index $.Vars "optional_tag"}}"]
+  counts         = [1, {{index $.Vars "optional_count"}}]
 }
 `),
 		},
@@ -171,6 +173,8 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
     empty_str: ""
     max_instances: 10
     delete_service: true
+    optional_tag: "v1"
+    optional_count: 2
 - name: sample
   config_path: templates/terraform/samples/services/appengine/sample.tf.tmpl
   resource_id_vars:
@@ -181,6 +185,8 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
     empty_str: ""
     max_instances: null
     delete_service: "null"
+    optional_tag: null
+    optional_count: ~
 `
 
 	var steps []*resource.Step
@@ -204,10 +210,12 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
   empty_str      = "%{empty_str}"
   max_instances  = %{max_instances}
   delete_service = %{delete_service}
+  tags           = ["primary", "%{optional_tag}"]
+  counts         = [1, %{optional_count}]
 }
 `
 
-	// Step 0: vpc_egress="ALL_TRAFFIC", egress_setting=null, empty_str="", max_instances=10, delete_service=true
+	// Step 0: vpc_egress="ALL_TRAFFIC", egress_setting=null, empty_str="", max_instances=10, delete_service=true, optional_tag="v1", optional_count=2
 	wantStep0Context := map[string]string{
 		"service_id":     `"tf-test-my-service"+randomSuffix`,
 		"vpc_egress":     `"ALL_TRAFFIC"`,
@@ -215,6 +223,8 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 		"empty_str":      `""`,
 		"max_instances":  "10",
 		"delete_service": "true",
+		"optional_tag":   `"v1"`,
+		"optional_count": "2",
 	}
 	wantStep0Doc := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service"
@@ -222,6 +232,8 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
   empty_str      = ""
   max_instances  = 10
   delete_service = true
+  tags           = ["primary", "v1"]
+  counts         = [1, 2]
 }
 `
 	wantStep0OiCS := `resource "google_app_engine_standard_app_version" "primary" {
@@ -230,6 +242,8 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
   empty_str      = ""
   max_instances  = 10
   delete_service = true
+  tags           = ["primary", "v1"]
+  counts         = [1, 2]
 }
 `
 
@@ -246,7 +260,7 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 		t.Errorf("Step 0 OicsHCLText mismatch (-want +got):\n%s", diff)
 	}
 
-	// Step 1: vpc_egress=null (~), egress_setting="ALL_TRAFFIC", empty_str="", max_instances=null, delete_service="null"
+	// Step 1: vpc_egress=null (~), egress_setting="ALL_TRAFFIC", empty_str="", max_instances=null, delete_service="null", optional_tag=null, optional_count=null (~)
 	wantStep1Context := map[string]string{
 		"service_id":     `"tf-test-my-service"+randomSuffix`,
 		"vpc_egress":     "nil",
@@ -254,17 +268,23 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 		"empty_str":      `""`,
 		"max_instances":  "nil",
 		"delete_service": "nil",
+		"optional_tag":   "nil",
+		"optional_count": "nil",
 	}
 	wantStep1Doc := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service"
   egress_setting = "ALL_TRAFFIC"
   empty_str      = ""
+  tags           = ["primary", null]
+  counts         = [1, null]
 }
 `
 	wantStep1OiCS := `resource "google_app_engine_standard_app_version" "primary" {
   service        = "my-service-${local.name_suffix}"
   egress_setting = "ALL_TRAFFIC"
   empty_str      = ""
+  tags           = ["primary", null]
+  counts         = [1, null]
 }
 `
 
