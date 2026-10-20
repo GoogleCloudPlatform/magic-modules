@@ -60,7 +60,7 @@ resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
   runtime      = "python312"
 
   vpc_access {
-    egress_setting = "PRIVATE_IP_RANGES"
+    egress_setting = "{{index $.Vars "egress_setting"}}"
     network_interfaces {
       subnetwork = google_compute_subnetwork.custom.name
       tags       = ["tag1"]
