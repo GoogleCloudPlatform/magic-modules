@@ -358,7 +358,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_filestore_instance" "filestore_instance" {
   name     = "tf-test-filestore-%{random_suffix}"
-  location = "us-central1-c"
+  location = "us-central1-f"
   tier     = "BASIC_HDD"
   file_shares {
     capacity_gb = 1024
@@ -372,7 +372,7 @@ resource "google_filestore_instance" "filestore_instance" {
 
 resource "google_lustre_instance" "lustre_instance" {
   instance_id                 = "tf-test-lustre-%{random_suffix}"
-  location                    = "us-central1-c"
+  location                    = "us-central1-f"
   filesystem                  = "tffs"
   capacity_gib                = 18000
   network                     = data.google_compute_network.vpc.id
@@ -436,7 +436,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     config {
       new_on_demand_instances {
         machine_type = "n2-standard-2"
-        zone = "us-central1-c"
+        zone = "us-central1-f"
       }
     }
   }
@@ -445,7 +445,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
       login_nodes {
         machine_type = "n2-standard-2"        
         count = 1
-        zone = "us-central1-c"
+        zone = "us-central1-f"
         boot_disk {
           size_gb = "100"
           type = "pd-balanced"
