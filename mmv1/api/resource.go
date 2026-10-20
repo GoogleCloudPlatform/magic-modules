@@ -297,6 +297,10 @@ type Resource struct {
 	// resource's service package (for example, from custom_code.constants).
 	ErrorAbortPredicates []string `yaml:"error_abort_predicates,omitempty"`
 
+	// If true, retries the Create and Update requests when the async operation
+	// fails with a retryable error matching ErrorRetryPredicates.
+	ErrorRetryOnAsync bool `yaml:"error_retry_on_async,omitempty"`
+
 	// Optional attributes for declaring a resource's current version and generating
 	// state_upgrader code to the output .go file from files stored at
 	// mmv1/templates/terraform/state_migrations/

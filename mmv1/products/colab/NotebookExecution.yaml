@@ -37,8 +37,8 @@ import_format:
 include_in_tgc_next: true
 error_retry_predicates:
   - 'transport_tpg.IsSubnetworkNotReadyError'
+error_retry_on_async: true
 custom_code:
-  custom_create: 'templates/terraform/custom_create/subnetwork_retry_create.go.tmpl'
   post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'
   decoder: 'templates/terraform/decoders/colab_notebook_execution.go.tmpl'
 samples:

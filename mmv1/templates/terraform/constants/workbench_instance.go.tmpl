@@ -233,6 +233,23 @@ func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceD
 	return nil
 }
 
+func modifyWorkbenchInstanceStateAndWait(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, state string) error {
+	return transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, state)
+			if err != nil {
+				return err
+			}
+			if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+				return fmt.Errorf("Error waiting to modify Workbench Instance state: %s", err)
+			}
+			return nil
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyError},
+	})
+}
+
 func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.ResourceData, project string, userAgent string, isBoot bool) (error) {
 	diskObj := make(map[string]interface{})
 	var sizeString string
