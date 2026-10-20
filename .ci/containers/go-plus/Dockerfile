@@ -14,6 +14,9 @@ RUN go build -o /dev/null .
 WORKDIR /app1/magic-modules-main/mmv1/third_party/terraform
 RUN go mod download
 
+WORKDIR /app1/magic-modules-main/tools/diff-processor
+RUN go mod download
+
 # Stage 2: Creating the final image
 FROM golang:1.26.9-trixie@sha256:f06b7122f888680048afb247c4e5f49c0069eb6c4c1ccae0f3f4834527a8d22c
 SHELL ["/bin/bash", "-c"]
