@@ -85,6 +85,8 @@ var testPanicExpression = regexp.MustCompile(`(?m:^panic: .*)`)
 
 var buildFailedExpression = regexp.MustCompile(`FAIL\s+(\S+)\s+\[build failed\]`)
 
+var featureBranchExpression = regexp.MustCompile(`^FEATURE-BRANCH-[a-zA-Z0-9._-]+$`)
+
 var safeToLog = map[string]bool{
 	"ACCTEST_PARALLELISM":                        true,
 	"COMMIT_SHA":                                 true,
@@ -174,7 +176,7 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head stri
 			fmt.Println("Error fetching cassettes: ", err)
 		}
 	}
-	if baseBranch != "main" {
+	if featureBranchExpression.MatchString(baseBranch) {
 		bucketPath := fmt.Sprintf("gs://%s/%srefs/branches/%s/fixtures/*", vt.cassetteBucket, version.BucketPath(), baseBranch)
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)

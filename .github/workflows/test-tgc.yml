@@ -71,8 +71,11 @@ jobs:
         persist-credentials: false
     - name: Check for Code Changes
       id: pull_request
+      env:
+        PR_NUMBER: ${{ github.event.inputs.pr-number }}
       run: |
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" -e "tfplan2cai/testdata/" || test $? = 1; })
+        git fetch --depth=1 origin "+refs/heads/auto-pr-${PR_NUMBER}-old:refs/remotes/origin/auto-pr-${PR_NUMBER}-old"
+        gofiles=$(git diff --name-only "origin/auto-pr-${PR_NUMBER}-old" HEAD | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" -e "tfplan2cai/testdata/" || test $? = 1; })
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else

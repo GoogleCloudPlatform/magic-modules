@@ -36,8 +36,8 @@ jobs:
           cd repo 
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
-          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+          git fetch origin "${GITHUB_BASE_REF}" # Fetch the base branch
+          git merge --no-ff "origin/${GITHUB_BASE_REF}" # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
@@ -47,7 +47,8 @@ jobs:
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
-          tmpls=$(git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} ../../*.tmpl | sed 's=^=../../=g')
+          base_ref="${GITHUB_BASE_REF:-main}"
+          tmpls=$(git diff --name-only --diff-filter=d "origin/${base_ref}" ../../*.tmpl | sed 's=^=../../=g')
           tmpls=${tmpls//$'\n'/,}
           echo $tmpls
           if [[ -n "$tmpls" ]]; then
@@ -69,8 +70,8 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
-          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+          git fetch origin "${GITHUB_BASE_REF}" # Fetch the base branch
+          git merge --no-ff "origin/${GITHUB_BASE_REF}" # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
@@ -81,7 +82,8 @@ jobs:
         id: new_templates
         run: |
           cd repo/tools/template-check
-          newtmplfiles=$(git diff --name-only --diff-filter=A origin/${GITHUB_BASE_REF} HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
+          base_ref="${GITHUB_BASE_REF:-main}"
+          newtmplfiles=$(git diff --name-only --diff-filter=A "origin/${base_ref}" HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
           if [ ! -z "$newtmplfiles" ]; then
             newtmplfiles=${newtmplfiles//$'\n'/,}
             echo $newtmplfiles
@@ -103,8 +105,8 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
-          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+          git fetch origin "${GITHUB_BASE_REF}" # Fetch the base branch
+          git merge --no-ff "origin/${GITHUB_BASE_REF}" # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
@@ -131,15 +133,16 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${GITHUB_BASE_REF}
-          git merge --no-ff origin/${GITHUB_BASE_REF}
+          git fetch origin "${GITHUB_BASE_REF}"
+          git merge --no-ff "origin/${GITHUB_BASE_REF}"
       - name: Find YAML files to lint
         id: yaml_files
         run: |
           cd repo
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For PRs, get only changed files
-            yamlfiles=$(git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} -- mmv1/products)
+            base_ref="${GITHUB_BASE_REF:-main}"
+            yamlfiles=$(git diff --name-only --diff-filter=d "origin/${base_ref}" -- mmv1/products)
             if [ ! -z "$yamlfiles" ]; then
               echo "yamlfiles=${yamlfiles//$'\n'/ }" >> $GITHUB_OUTPUT
             fi
@@ -176,8 +179,8 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
-          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+          git fetch origin "${GITHUB_BASE_REF}" # Fetch the base branch
+          git merge --no-ff "origin/${GITHUB_BASE_REF}" # Merge with the base branch
       
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0

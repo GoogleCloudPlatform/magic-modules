@@ -41,15 +41,21 @@ jobs:
           export GOPATH=~/go
 
           # Clean up branch name if it starts with refs/heads/
-          if [[ $BASE_BRANCH == refs/heads/* ]]; then
-            BASE_BRANCH=${BASE_BRANCH#refs/heads/}
+          if [[ "$BASE_BRANCH" == refs/heads/* ]]; then
+            BASE_BRANCH="${BASE_BRANCH#refs/heads/}"
+          fi
+
+          # Downstream repos only have main (or master) and FEATURE-BRANCH-* branches.
+          # Stacked PRs targeting other magic-modules branches must clone downstream main.
+          if [[ "$BASE_BRANCH" != "main" && ! "$BASE_BRANCH" =~ ^FEATURE-BRANCH-[a-zA-Z0-9._-]+$ ]]; then
+            BASE_BRANCH="main"
           fi
 
           function clone_repo() {
             export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
             GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
             mkdir -p "$(dirname $OUTPUT_PATH)"
-            git clone --depth 1 $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
+            git clone --depth 1 "$GITHUB_PATH" "$OUTPUT_PATH" --branch "$BASE_BRANCH"
           }
 
           GH_REPO="${INPUTS_REPO}"

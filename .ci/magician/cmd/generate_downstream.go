@@ -31,6 +31,22 @@ import (
 )
 
 var changelogExp = regexp.MustCompile("(?s)```release-note:(?P<noteType>[a-zA-Z]+).*```")
+var featureBranchRegexp = regexp.MustCompile(`^FEATURE-BRANCH-[a-zA-Z0-9._-]+$`)
+
+func isDownstreamTargetBranch(branch string) bool {
+	return branch == "main" || featureBranchRegexp.MatchString(branch)
+}
+
+func downstreamBaseBranch(baseBranch, repo string) string {
+	branch := "main"
+	if isDownstreamTargetBranch(baseBranch) {
+		branch = baseBranch
+	}
+	if repo == "tf-oics" && branch == "main" {
+		return "master"
+	}
+	return branch
+}
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
@@ -113,6 +129,9 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		baseBranch = "main"
 	}
 	if command == "downstream" {
+		if !isDownstreamTargetBranch(baseBranch) {
+			return fmt.Errorf("unsupported base branch %q for downstream push", baseBranch)
+		}
 		var syncBranchPrefix string
 		if repo == "terraform" {
 			if version == "beta" {
@@ -216,7 +235,7 @@ func pushWithRetry(rnr ExecRunner, remote, branch string) error {
 func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref string, rnr ExecRunner, ctlr *source.Controller) (*source.Repo, *source.Repo, string, error) {
 	downstreamRepo := &source.Repo{
 		Title:  repo,
-		Branch: baseBranch,
+		Branch: downstreamBaseBranch(baseBranch, repo),
 	}
 	switch repo {
 	case "terraform":
@@ -234,9 +253,6 @@ func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref stri
 		downstreamRepo.Name = "terraform-google-conversion"
 		downstreamRepo.Owner = "GoogleCloudPlatform"
 	case "tf-oics":
-		if downstreamRepo.Branch == "main" {
-			downstreamRepo.Branch = "master"
-		}
 		downstreamRepo.Name = "docs-examples"
 		downstreamRepo.Owner = "terraform-google-modules"
 	case "tf-cloud-docs":

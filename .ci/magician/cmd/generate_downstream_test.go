@@ -241,3 +241,128 @@ func TestRunMake(t *testing.T) {
 		})
 	}
 }
+
+func TestDownstreamBaseBranch(t *testing.T) {
+	cases := []struct {
+		name       string
+		baseBranch string
+		repo       string
+		want       string
+	}{
+		{
+			name:       "main branch for terraform",
+			baseBranch: "main",
+			repo:       "terraform",
+			want:       "main",
+		},
+		{
+			name:       "main branch for tf-oics maps to master",
+			baseBranch: "main",
+			repo:       "tf-oics",
+			want:       "master",
+		},
+		{
+			name:       "stacked PR branch for terraform normalizes to main",
+			baseBranch: "stack-pr-1",
+			repo:       "terraform",
+			want:       "main",
+		},
+		{
+			name:       "stacked PR branch for tgc normalizes to main",
+			baseBranch: "user/feature-stack-1",
+			repo:       "terraform-google-conversion",
+			want:       "main",
+		},
+		{
+			name:       "stacked PR branch for tf-oics normalizes to master",
+			baseBranch: "stack-pr-1",
+			repo:       "tf-oics",
+			want:       "master",
+		},
+		{
+			name:       "feature release branch is preserved for terraform",
+			baseBranch: "FEATURE-BRANCH-major-release-7.0.0",
+			repo:       "terraform",
+			want:       "FEATURE-BRANCH-major-release-7.0.0",
+		},
+		{
+			name:       "feature release branch is preserved for tf-oics",
+			baseBranch: "FEATURE-BRANCH-major-release-7.0.0",
+			repo:       "tf-oics",
+			want:       "FEATURE-BRANCH-major-release-7.0.0",
+		},
+		{
+			name:       "feature branch with unsafe characters normalizes to main",
+			baseBranch: "FEATURE-BRANCH-foo; evil",
+			repo:       "terraform",
+			want:       "main",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := downstreamBaseBranch(tc.baseBranch, tc.repo); got != tc.want {
+				t.Errorf("downstreamBaseBranch(%q, %q) = %q, want %q", tc.baseBranch, tc.repo, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCloneRepo_StackedBaseBranch(t *testing.T) {
+	rnr := NewMockRunner()
+	ctlr := source.NewController("/go", "modular-magician", "secret-token", rnr)
+	mmRepo := &source.Repo{
+		Name: "magic-modules",
+		Path: "/workspace/mm-terraform-beta-base",
+	}
+
+	downstreamRepo, scratchRepo, commitMessage, err := cloneRepo(mmRepo, "stack-pr-1", "terraform", "beta", "base", "12345", rnr, ctlr)
+	if err != nil {
+		t.Fatalf("cloneRepo() unexpected error: %v", err)
+	}
+	if downstreamRepo.Branch != "main" {
+		t.Errorf("downstreamRepo.Branch = %q, want \"main\"", downstreamRepo.Branch)
+	}
+	if scratchRepo.Branch != "auto-pr-12345-old" {
+		t.Errorf("scratchRepo.Branch = %q, want \"auto-pr-12345-old\"", scratchRepo.Branch)
+	}
+	if commitMessage != "Old generated code for MM PR 12345." {
+		t.Errorf("commitMessage = %q, want \"Old generated code for MM PR 12345.\"", commitMessage)
+	}
+
+	calls, ok := rnr.Calls("Run")
+	if !ok {
+		t.Fatal("expected Run calls on runner")
+	}
+	wantCalls := []ParameterList{
+		{
+			"/mock/dir/magic-modules/.ci/magician",
+			"git",
+			[]string{"clone", "-b", "main", "https://modular-magician:secret-token@github.com/hashicorp/terraform-provider-google-beta", "/go/src/github.com/hashicorp/terraform-provider-google-beta"},
+			map[string]string(nil),
+		},
+		{
+			"/workspace/mm-terraform-beta-base",
+			"git",
+			[]string{"checkout", "HEAD~"},
+			map[string]string(nil),
+		},
+	}
+	if !reflect.DeepEqual(calls, wantCalls) {
+		t.Errorf("Run calls = %v, want %v", calls, wantCalls)
+	}
+}
+
+func TestExecGenerateDownstream_RejectsNonReleaseBranchOnDownstreamPush(t *testing.T) {
+	rnr := NewMockRunner()
+	ctlr := source.NewController("/go", "modular-magician", "secret-token", rnr)
+	gh := &mockGithub{}
+
+	err := execGenerateDownstream("stack-pr-1", "downstream", "terraform", "beta", "abc1234", gh, rnr, ctlr)
+	if err == nil {
+		t.Fatal("execGenerateDownstream() with stacked baseBranch and command=\"downstream\" succeeded, want error")
+	}
+	if !strings.Contains(err.Error(), "unsupported base branch") {
+		t.Errorf("execGenerateDownstream() error = %v, want 'unsupported base branch'", err)
+	}
+}

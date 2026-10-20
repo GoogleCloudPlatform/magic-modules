@@ -23,7 +23,9 @@ jobs:
       - name: "Check for New Services"
         id: services
         run: |
-          newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
+          base_ref="${GITHUB_BASE_REF:-main}"
+          git fetch origin "${base_ref}"
+          newServices=$(($(git diff --name-only --diff-filter=A "origin/${base_ref}" HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
           echo "services=$newServices" >> "${GITHUB_OUTPUT}"
           if [ "$newServices" = "0" ];then
           echo "No new service found."

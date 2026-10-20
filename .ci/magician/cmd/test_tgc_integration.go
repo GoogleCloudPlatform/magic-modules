@@ -46,6 +46,7 @@ var testTGCIntegrationCmd = &cobra.Command{
 
 func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, ghRepo, githubUsername string, rnr ExecRunner, ctlr *source.Controller, gh GithubClient) error {
 	newBranch := "auto-pr-" + prNumber
+	oldBranch := newBranch + "-old"
 	repo := &source.Repo{
 		Name:   ghRepo,
 		Branch: newBranch,
@@ -54,16 +55,16 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	if err := ctlr.Clone(repo); err != nil {
 		return fmt.Errorf("error cloning repo: %w", err)
 	}
-	if err := rnr.PushDir(repo.Path); err != nil {
-		return fmt.Errorf("error changing to repo dir: %w", err)
+	if err := ctlr.Fetch(repo, oldBranch); err != nil {
+		return fmt.Errorf("error fetching branch: %w", err)
 	}
-	diffs, err := rnr.Run("git", []string{"diff", "--name-only", "HEAD~1"}, nil)
+	changedFiles, err := ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 	if err != nil {
 		return fmt.Errorf("error diffing repo: %w", err)
 	}
-
-	// Convert the raw diff string into a slice of strings
-	changedFiles := strings.Split(strings.TrimSpace(diffs), "\n")
+	if err := rnr.PushDir(repo.Path); err != nil {
+		return fmt.Errorf("error changing to repo dir: %w", err)
+	}
 
 	if !shouldRunTests(changedFiles) {
 		fmt.Println("Skipping tests: No relevant go files changed")

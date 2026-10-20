@@ -16,6 +16,8 @@
 package cmd
 
 import (
+	"magician/source"
+	"reflect"
 	"testing"
 )
 
@@ -94,5 +96,48 @@ func TestShouldRunTests(t *testing.T) {
 				t.Errorf("expected %v, got %v", tc.expected, actual)
 			}
 		})
+	}
+}
+
+func TestExecTestTGCIntegration_DiffsAgainstOldBranch(t *testing.T) {
+	mr := NewMockRunner().(*mockRunner)
+	repoPath := "/go/src/github.com/modular-magician/terraform-google-conversion"
+	mr.cmdResults[repoPath+" git [diff origin/auto-pr-12345-old origin/auto-pr-12345 --name-only] map[]"] = "docs/supported_resources.md\n"
+	ctlr := source.NewController("/go", "modular-magician", "secret-token", mr)
+	gh := &mockGithub{
+		calledMethods: make(map[string][][]any),
+	}
+
+	err := execTestTGCIntegration("12345", "sha123", "build1", "proj1", "19", "terraform-google-conversion", "modular-magician", mr, ctlr, gh)
+	if err != nil {
+		t.Fatalf("execTestTGCIntegration() unexpected error: %v", err)
+	}
+
+	calls, ok := mr.Calls("Run")
+	if !ok {
+		t.Fatal("expected Run calls on mockRunner")
+	}
+	wantCalls := []ParameterList{
+		{
+			"/mock/dir/magic-modules/.ci/magician",
+			"git",
+			[]string{"clone", "-b", "auto-pr-12345", "https://modular-magician:secret-token@github.com/modular-magician/terraform-google-conversion", repoPath},
+			map[string]string(nil),
+		},
+		{
+			repoPath,
+			"git",
+			[]string{"fetch", "origin", "auto-pr-12345-old"},
+			map[string]string(nil),
+		},
+		{
+			repoPath,
+			"git",
+			[]string{"diff", "origin/auto-pr-12345-old", "origin/auto-pr-12345", "--name-only"},
+			map[string]string(nil),
+		},
+	}
+	if !reflect.DeepEqual(calls, wantCalls) {
+		t.Errorf("Run calls = %v, want %v", calls, wantCalls)
 	}
 }

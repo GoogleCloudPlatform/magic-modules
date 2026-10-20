@@ -22,8 +22,8 @@ jobs:
         run: |
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
-          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+          git fetch origin "${GITHUB_BASE_REF}" # Fetch the base branch
+          git merge --no-ff "origin/${GITHUB_BASE_REF}" # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
