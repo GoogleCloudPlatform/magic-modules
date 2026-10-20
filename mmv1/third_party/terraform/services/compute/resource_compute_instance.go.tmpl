@@ -3464,24 +3464,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if air, ok := networkInterface["aliasIpRanges"].([]interface{}); ok && len(air) > 0 {
 				niPatchMap["aliasIpRanges"] = air
 			}
-{{- if ne $.TargetVersionName "ga" }}
-			if air6, ok := networkInterface["aliasIpv6Ranges"].([]interface{}); ok && len(air6) > 0 {
-				niPatchMap["aliasIpv6Ranges"] = air6
-			}
-{{- end }}
 
 			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
 			// otherwise this could fail if the network ip is not compatible with the new Subnetwork/Network.
 			if d.HasChange(prefix + ".network_ip") {
 				niPatchMap["networkIP"] = networkInterface["networkIP"]
-			}
-
-			if d.HasChange(prefix+".internal_ipv6_prefix_length") {
-				niPatchMap["ipv6Address"] = networkInterface["ipv6Address"]
-			}
-
-			if d.HasChange(prefix+".ipv6_address") {
-				niPatchMap["ipv6Address"] = networkInterface["ipv6Address"]
 			}
 
 			// Access config can run into some issues since we can't tell the difference between
