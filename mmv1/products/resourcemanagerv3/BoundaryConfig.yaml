@@ -71,18 +71,27 @@ autogen_async: true
 samples:
   - name: 'resource_manager_boundary_config_basic'
     primary_resource_id: 'boundary_config'
+    external_providers: ['time']
     steps:
       - name: 'resource_manager_boundary_config_basic'
         test_env_vars:
           org_id: 'ORG_ID'
+          service_account: 'SERVICE_ACCT'
         resource_id_vars:
+          folder_name: 'bndcfg-fldr'
           tag_key_short_name: 'boundary-config-tag-key'
+        ignore_read_extra:
+          - 'update_time'
       - name: 'resource_manager_boundary_config_update'
         test_env_vars:
           org_id: 'ORG_ID'
+          service_account: 'SERVICE_ACCT'
         resource_id_vars:
+          folder_name: 'bndcfg-fldr'
           tag_key_short_name: 'boundary-config-tag-key'
           tag_key_short_name_2: 'boundary-config-tag-key-2'
+        ignore_read_extra:
+          - 'update_time'
 parameters:
   - name: 'parent'
     type: String
