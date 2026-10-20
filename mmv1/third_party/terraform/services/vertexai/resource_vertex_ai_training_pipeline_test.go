@@ -197,6 +197,15 @@ func TestAccVertexAITrainingPipeline_inputDataConfigSplits(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
 			},
 			{
+				Config: testAccVertexAITrainingPipeline_fractionSplit(pipelineName, datasetName, bucketName),
+			},
+			{
+				ResourceName:            "google_vertex_ai_training_pipeline.pipeline",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "region", "start_time", "state", "terraform_labels", "training_task_metadata", "update_time"},
+			},
+			{
 				Config:      testAccVertexAITrainingPipeline_bigqueryDestination(pipelineName, datasetName),
 				ExpectError: regexp.MustCompile("Please provide TrainingPipeline.input_data_config.gcs_destination"),
 			},
@@ -355,6 +364,65 @@ resource "google_vertex_ai_training_pipeline" "pipeline" {
 
     stratified_split {
       key                 = "label"
+      training_fraction   = 0.8
+      validation_fraction = 0.1
+      test_fraction       = 0.1
+    }
+
+    gcs_destination {
+      output_uri_prefix = "gs://${google_storage_bucket.bucket.name}/dataset-export"
+    }
+  }
+
+  labels = {
+    env = "test"
+  }
+}
+
+resource "google_vertex_ai_dataset" "dataset" {
+  display_name        = "%s"
+  metadata_schema_uri = "gs://google-cloud-aiplatform/schema/dataset/metadata/tabular_1.0.0.yaml"
+  region              = "us-central1"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "%s"
+  location                    = "us-central1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+`, pipelineName, datasetName, bucketName)
+}
+
+func testAccVertexAITrainingPipeline_fractionSplit(pipelineName, datasetName, bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_vertex_ai_training_pipeline" "pipeline" {
+  display_name             = "%s"
+  region                   = "us-central1"
+  training_task_definition = "gs://google-cloud-aiplatform/schema/trainingjob/definition/custom_task_1.0.0.yaml"
+
+  training_task_inputs = jsonencode({
+    workerPoolSpecs = [
+      {
+        machineSpec = {
+          machineType = "n1-standard-4"
+        }
+        replicaCount = "1"
+        diskSpec = {
+          bootDiskType   = "pd-ssd"
+          bootDiskSizeGb = 100
+        }
+        containerSpec = {
+          imageUri = "gcr.io/cloud-marketplace/google/debian11"
+        }
+      }
+    ]
+  })
+
+  input_data_config {
+    dataset_id = google_vertex_ai_dataset.dataset.name
+
+    fraction_split {
       training_fraction   = 0.8
       validation_fraction = 0.1
       test_fraction       = 0.1
