@@ -1537,21 +1537,21 @@ resource "google_service_account" "cloud_function_build_account_sa1" {
 }
 
 resource "google_project_iam_member" "storage_object_admin_sa1" {
-	project = data.google_project.project.project_id
-  role      = "roles/storage.objectAdmin"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_sa1.email}"
+  project = data.google_project.project.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.cloud_function_build_account_sa1.email}"
 }
 
 resource "google_project_iam_member" "artifact_registry_writer_sa1" {
-	project = data.google_project.project.project_id
-  role      = "roles/artifactregistry.writer"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_sa1.email}"
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.cloud_function_build_account_sa1.email}"
 }
 
 resource "google_project_iam_member" "log_writer_sa1" {
-	project = data.google_project.project.project_id
-  role      = "roles/logging.logWriter"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_sa1.email}"
+  project = data.google_project.project.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.cloud_function_build_account_sa1.email}"
 }
 
 resource "google_service_account" "cloud_function_build_account_sa2" {
@@ -1560,39 +1560,39 @@ resource "google_service_account" "cloud_function_build_account_sa2" {
 }
 
 resource "google_project_iam_member" "storage_object_admin_sa2" {
-	project = data.google_project.project.project_id
-  role      = "roles/storage.objectAdmin"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_sa2.email}"
+  project = data.google_project.project.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.cloud_function_build_account_sa2.email}"
 }
 
 resource "google_project_iam_member" "artifact_registry_writer_sa2" {
-	project = data.google_project.project.project_id
-  role      = "roles/artifactregistry.writer"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_sa2.email}"
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.cloud_function_build_account_sa2.email}"
 }
 
 resource "google_project_iam_member" "log_writer_sa2" {
-	project = data.google_project.project.project_id
-  role      = "roles/logging.logWriter"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_sa2.email}"
+  project = data.google_project.project.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.cloud_function_build_account_sa2.email}"
 }
 
 resource "time_sleep" "wait_iam_roles" {
-  depends_on       = [
-		google_project_iam_member.storage_object_admin_sa1,
-		google_project_iam_member.artifact_registry_writer_sa1,
-		google_project_iam_member.log_writer_sa1,
-		google_project_iam_member.storage_object_admin_sa2,
-		google_project_iam_member.artifact_registry_writer_sa2,
-		google_project_iam_member.log_writer_sa2,
-	]
-	create_duration  = "120s"
+  depends_on = [
+    google_project_iam_member.storage_object_admin_sa1,
+    google_project_iam_member.artifact_registry_writer_sa1,
+    google_project_iam_member.log_writer_sa1,
+    google_project_iam_member.storage_object_admin_sa2,
+    google_project_iam_member.artifact_registry_writer_sa2,
+    google_project_iam_member.log_writer_sa2,
+  ]
+  create_duration = "120s"
 }
 
 resource "google_cloudfunctions_function" "function" {
-	depends_on = [time_sleep.wait_iam_roles]
-  name    = "%[6]s"
-  runtime = "nodejs20"
+  depends_on = [time_sleep.wait_iam_roles]
+  name       = "%[6]s"
+  runtime    = "nodejs20"
 
   source_archive_bucket = google_storage_bucket.bucket.name
   source_archive_object = google_storage_bucket_object.archive.name
