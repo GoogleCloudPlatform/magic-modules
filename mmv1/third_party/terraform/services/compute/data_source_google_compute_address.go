@@ -138,7 +138,7 @@ func dataSourceGoogleComputeAddressRead(d *schema.ResourceData, meta interface{}
 	if err := d.Set("address_type", address["addressType"]); err != nil {
 		return fmt.Errorf("Error setting address_type: %s", err)
 	}
-	if err := d.Set("address_id", address["addressId"]); err != nil {
+	if err := d.Set("address_id", address["id"]); err != nil {
 		return fmt.Errorf("Error setting address_id: %s", err)
 	}
 	if err := d.Set("network", address["network"]); err != nil {
