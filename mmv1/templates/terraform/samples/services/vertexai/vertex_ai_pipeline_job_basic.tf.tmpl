@@ -1,0 +1,39 @@
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "storage_bucket"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
+  pipeline_job_id = "{{index $.ResourceIdVars "pipeline_job_id"}}"
+  display_name    = "test-pipeline-job"
+  region          = "us-central1"
+
+  pipeline_spec = jsonencode({
+    pipelineInfo = {
+      name = "hello-world"
+    }
+    root = {
+      dag = {
+        tasks = {}
+      }
+    }
+    schemaVersion = "2.1.0"
+    sdkVersion    = "kfp-2.0.0"
+  })
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.bucket.name}/pipeline_root"
+    failure_policy       = "PIPELINE_FAILURE_POLICY_FAIL_FAST"
+    parameter_values     = {
+      param1 = "val1"
+    }
+  }
+
+  preflight_validations = false
+
+  labels = {
+    test-label = "test-value"
+  }
+}

@@ -1,0 +1,69 @@
+getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/pipelineJobs/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+	Headers:   headers,
+})
+if err != nil {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		return nil
+	}
+	return fmt.Errorf("error reading PipelineJob %q for deletion: %w", d.Id(), err)
+}
+
+state, _ := getRes["state"].(string)
+if state == "PIPELINE_STATE_QUEUED" || state == "PIPELINE_STATE_PENDING" || state == "PIPELINE_STATE_RUNNING" || state == "PIPELINE_STATE_PAUSED" {
+	log.Printf("[DEBUG] Cancelling Vertex AI PipelineJob before deletion: %q", d.Id())
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    getUrl + ":cancel",
+		UserAgent: userAgent,
+		Headers:   headers,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
+	if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[WARN] Failed to cancel PipelineJob %q (might already be terminal): %v", d.Id(), err)
+	}
+
+	pollRead := func() (map[string]interface{}, error) {
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    getUrl,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+	}
+
+	pollCheck := func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+		if respErr != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(respErr, 404) {
+				return transport_tpg.SuccessPollResult()
+			}
+			return transport_tpg.ErrorPollResult(respErr)
+		}
+		currState, ok := resp["state"].(string)
+		if !ok {
+			return transport_tpg.SuccessPollResult()
+		}
+		if currState == "PIPELINE_STATE_CANCELLED" || currState == "PIPELINE_STATE_FAILED" || currState == "PIPELINE_STATE_SUCCEEDED" {
+			return transport_tpg.SuccessPollResult()
+		}
+		return transport_tpg.PendingStatusPollResult(currState)
+	}
+
+	err = transport_tpg.PollingWaitTime(pollRead, pollCheck, "Waiting for PipelineJob to be cancelled", d.Timeout(schema.TimeoutDelete), 1)
+	if err != nil {
+		log.Printf("[WARN] Timeout waiting for PipelineJob %q cancellation: %v", d.Id(), err)
+	}
+}
