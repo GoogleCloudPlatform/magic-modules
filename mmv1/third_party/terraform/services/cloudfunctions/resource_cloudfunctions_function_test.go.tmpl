@@ -1531,45 +1531,37 @@ resource "google_storage_bucket_object" "archive" {
   source = "%s"
 }
 
-# Sequence service account replacement across steps so VCR replay does not merge
-# old IAM member deletions and new IAM member creations into a single IAM batch
-# when service account creation sleeps are shortened.
-resource "time_sleep" "wait_service_account_iam" {
-  create_duration = "1s"
-  triggers = {
-    sa = "%[3]s"
-  }
-}
-
-resource "google_service_account" "cloud_function_build_account_%[3]s" {
-  depends_on   = [time_sleep.wait_service_account_iam]
-  account_id   = "%s"
+# Use stable resource addresses across steps so Terraform's replacement graph
+# destroys the previous service account's IAM bindings before creating the new
+# service account and its IAM bindings during VCR replay.
+resource "google_service_account" "cloud_function_build_account" {
+  account_id   = "%[4]s"
   display_name = "Testing Cloud Function build service account"
 }
 
-resource "google_project_iam_member" "storage_object_admin_%[3]s" {
+resource "google_project_iam_member" "storage_object_admin" {
 	project = data.google_project.project.project_id
   role      = "roles/storage.objectAdmin"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
+  member    = "serviceAccount:${google_service_account.cloud_function_build_account.email}"
 }
 
-resource "google_project_iam_member" "artifact_registry_writer_%[3]s" {
+resource "google_project_iam_member" "artifact_registry_writer" {
 	project = data.google_project.project.project_id
   role      = "roles/artifactregistry.writer"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
+  member    = "serviceAccount:${google_service_account.cloud_function_build_account.email}"
 }
 
-resource "google_project_iam_member" "log_writer_%[3]s" {
+resource "google_project_iam_member" "log_writer" {
 	project = data.google_project.project.project_id
   role      = "roles/logging.logWriter"
-  member    = "serviceAccount:${google_service_account.cloud_function_build_account_%[3]s.email}"
+  member    = "serviceAccount:${google_service_account.cloud_function_build_account.email}"
 }
 
 resource "time_sleep" "wait_iam_roles_%[3]s" {
   depends_on       = [
-		google_project_iam_member.storage_object_admin_%[3]s,
-		google_project_iam_member.artifact_registry_writer_%[3]s,
-		google_project_iam_member.log_writer_%[3]s,
+		google_project_iam_member.storage_object_admin,
+		google_project_iam_member.artifact_registry_writer,
+		google_project_iam_member.log_writer,
 	]
 	create_duration  = "120s"
 }
@@ -1582,7 +1574,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_bucket = google_storage_bucket.bucket.name
   source_archive_object = google_storage_bucket_object.archive.name
 
-  build_service_account = google_service_account.cloud_function_build_account_%[3]s.name
+  build_service_account = google_service_account.cloud_function_build_account.name
 
   trigger_http = true
   entry_point  = "helloGET"
