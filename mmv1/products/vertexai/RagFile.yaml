@@ -68,6 +68,14 @@ samples:
         resource_id_vars:
           corpus_display_name: 'rag-corpus-file-full'
           bucket_name: 'tf-test-rag-file-full'
+  - name: 'vertex_ai_rag_file_layout_parser'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'vertex_ai_rag_file_layout_parser'
+        resource_id_vars:
+          corpus_display_name: 'rag-corpus-file-layout'
+          bucket_name: 'tf-test-rag-file-layout'
+          processor_display_name: 'rag-layout-parser'
   - name: 'vertex_ai_rag_file_google_drive'
     primary_resource_id: 'example'
     # Requires a Google Drive file shared with the RAG Engine service agent,
