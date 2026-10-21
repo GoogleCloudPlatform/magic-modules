@@ -42,6 +42,8 @@ async:
     base_url: '{{op_id}}'
   actions: [create, update, delete]
 autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/resource_manager_capability_config.go.tmpl
 samples:
   - name: resource_manager_capability_config_basic
     primary_resource_id: capability_config
@@ -92,6 +94,110 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
+  - name: resource_manager_capability_config_boundaries
+    primary_resource_id: capability_config
+    external_providers: [time]
+    steps:
+      - name: resource_manager_capability_config_boundaries
+        resource_id_vars:
+          folder_name: capbnd-fldr
+          management_project_id: capbnd-mgmt
+          boundary_id_1: capbnd-1
+          boundary_id_2: capbnd-2
+          capability_config_id: capcfg-bnd
+        vars:
+          boundaries_expr: "[google_resource_manager_boundary.boundary_1.name]"
+          tag_key: capcfg-boundary-key
+          tag_value_1: capcfg-boundary-val-1
+          tag_value_2: capcfg-boundary-val-2
+        test_vars_overrides:
+          tag_key: 'tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil)'
+          tag_value_1: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-1", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+          tag_value_2: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-2", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          service_account: SERVICE_ACCT
+        # CRM v3 asynchronously recomputes boundary membership and updates etag
+        # and update_time shortly after boundary mutations complete.
+        ignore_read_extra:
+          - etag
+          - update_time
+      - name: resource_manager_capability_config_boundaries
+        resource_id_vars:
+          folder_name: capbnd-fldr
+          management_project_id: capbnd-mgmt
+          boundary_id_1: capbnd-1
+          boundary_id_2: capbnd-2
+          capability_config_id: capcfg-bnd
+        vars:
+          boundaries_expr: "[google_resource_manager_boundary.boundary_2.name, google_resource_manager_boundary.boundary_1.name]"
+          tag_key: capcfg-boundary-key
+          tag_value_1: capcfg-boundary-val-1
+          tag_value_2: capcfg-boundary-val-2
+        test_vars_overrides:
+          tag_key: 'tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil)'
+          tag_value_1: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-1", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+          tag_value_2: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-2", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          service_account: SERVICE_ACCT
+        # CRM v3 asynchronously recomputes boundary membership and updates etag
+        # and update_time shortly after boundary mutations complete.
+        ignore_read_extra:
+          - etag
+          - update_time
+      - name: resource_manager_capability_config_boundaries
+        resource_id_vars:
+          folder_name: capbnd-fldr
+          management_project_id: capbnd-mgmt
+          boundary_id_1: capbnd-1
+          boundary_id_2: capbnd-2
+          capability_config_id: capcfg-bnd
+        vars:
+          boundaries_expr: "[]"
+          tag_key: capcfg-boundary-key
+          tag_value_1: capcfg-boundary-val-1
+          tag_value_2: capcfg-boundary-val-2
+        test_vars_overrides:
+          tag_key: 'tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil)'
+          tag_value_1: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-1", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+          tag_value_2: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-2", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          service_account: SERVICE_ACCT
+        # CRM v3 asynchronously recomputes boundary membership and updates etag
+        # and update_time shortly after boundary mutations complete.
+        ignore_read_extra:
+          - etag
+          - update_time
+      - name: resource_manager_capability_config_boundaries
+        resource_id_vars:
+          folder_name: capbnd-fldr
+          management_project_id: capbnd-mgmt
+          boundary_id_1: capbnd-1
+          boundary_id_2: capbnd-2
+          capability_config_id: capcfg-bnd
+        vars:
+          boundaries_expr: "[google_resource_manager_boundary.boundary_1.name]"
+          tag_key: capcfg-boundary-key
+          tag_value_1: capcfg-boundary-val-1
+          tag_value_2: capcfg-boundary-val-2
+        test_vars_overrides:
+          tag_key: 'tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil)'
+          tag_value_1: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-1", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+          tag_value_2: 'tags.BootstrapSharedTestOrganizationTagValue(t, "capcfg-boundary-val-2", tags.BootstrapSharedTestOrganizationTagKey(t, "capcfg-boundary-key", nil))'
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          service_account: SERVICE_ACCT
+        # CRM v3 asynchronously recomputes boundary membership and updates etag
+        # and update_time shortly after boundary mutations complete.
+        ignore_read_extra:
+          - etag
+          - update_time
 parameters:
   - name: parent
     type: String
@@ -140,6 +246,16 @@ properties:
       Format: `projects/{project_number}`.
     immutable: true
     default_from_api: true
+  - name: boundaries
+    type: Array
+    description: |-
+      The boundaries associated with this capability config. Supported for
+      organization-scoped and folder-scoped capability configs.
+      Each entry has format `organizations/{organization_id}/boundaries/{boundary_id}`
+      or `folders/{folder_id}/boundaries/{boundary_id}`.
+    send_empty_value: true
+    item_type:
+      type: String
   - name: state
     type: String
     description: |-
