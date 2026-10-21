@@ -31,6 +31,11 @@ timeouts:
   delete_minutes: 180
 sweeper:
   identifier_field: displayName
+  dependencies:
+    - google_vertex_ai_index_endpoint
+  url_substitutions:
+    - region: us-central1
+    - region: europe-west4
 generate_list_resource: true
 async:
   type: OpAsync
