@@ -333,7 +333,7 @@ data "google_compute_network" "vpc" {
 resource "google_compute_subnetwork" "subnet" {
   name                     = "tf-test-existing-subnet-%{random_suffix}"
   ip_cidr_range            = "%{subnet_cidr}"
-  region                   = "us-south1"
+  region                   = "us-central1"
   network                  = data.google_compute_network.vpc.id
   private_ip_google_access = true
 }
@@ -358,7 +358,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_filestore_instance" "filestore_instance" {
   name     = "tf-test-filestore-%{random_suffix}"
-  location = "us-south1-b"
+  location = "us-central1-a"
   tier     = "BASIC_HDD"
   file_shares {
     capacity_gb = 1024
@@ -372,7 +372,7 @@ resource "google_filestore_instance" "filestore_instance" {
 
 resource "google_lustre_instance" "lustre_instance" {
   instance_id                 = "tf-test-lustre-%{random_suffix}"
-  location                    = "us-south1-b"
+  location                    = "us-central1-a"
   filesystem                  = "tffs"
   capacity_gib                = 18000
   network                     = data.google_compute_network.vpc.id
@@ -384,7 +384,7 @@ resource "google_lustre_instance" "lustre_instance" {
 
 resource "google_hypercomputecluster_cluster" "cluster" {
   cluster_id                  = "tfgen%{cluster_suffix}"
-  location                    = "us-south1"
+  location                    = "us-central1"
   description                 = "Cluster Director instance created through Terraform"
   network_resources {
     id = "network-existing"
@@ -436,7 +436,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     config {
       new_on_demand_instances {
         machine_type = "n2-standard-2"
-        zone = "us-south1-b"
+        zone = "us-central1-a"
       }
     }
   }
@@ -445,7 +445,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
       login_nodes {
         machine_type = "n2-standard-2"        
         count = 1
-        zone = "us-south1-b"
+        zone = "us-central1-a"
         boot_disk {
           size_gb = "100"
           type = "pd-balanced"
