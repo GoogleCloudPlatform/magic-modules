@@ -302,7 +302,7 @@ func testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t *tes
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
 			if err != nil {
 				return err
 			}
@@ -474,3 +474,144 @@ func captureEndpointAttribute(resourceName, attr string, dest *string) resource.
 		return nil
 	}
 }
+{{- if ne $.TargetVersionName "ga" }}
+
+func TestAccVertexAIEndpointWithModelGardenDeployment_scaleToZero(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	var endpointBefore, endpointAfter string
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_scaleToZero(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.min_replica_count", "0"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.max_replica_count", "2"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.initial_replica_count", "1"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.scale_to_zero_spec.0.min_scaleup_period", "300s"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.scale_to_zero_spec.0.idle_scaledown_period", "300s"),
+					captureEndpointAttribute(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"endpoint", &endpointBefore),
+				),
+			},
+			{
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_scaleToZeroUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.min_replica_count", "0"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.max_replica_count", "3"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.initial_replica_count", "2"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.scale_to_zero_spec.0.min_scaleup_period", "600s"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"deploy_config.0.dedicated_resources.0.scale_to_zero_spec.0.idle_scaledown_period", "600s"),
+					captureEndpointAttribute(
+						"google_vertex_ai_endpoint_with_model_garden_deployment.test_scale_to_zero",
+						"endpoint", &endpointAfter),
+					func(s *terraform.State) error {
+						if endpointBefore == "" || endpointAfter == "" {
+							return fmt.Errorf("endpoint id not captured (before=%q after=%q)",
+								endpointBefore, endpointAfter)
+						}
+						if endpointBefore != endpointAfter {
+							return fmt.Errorf(
+								"endpoint id changed across in-place update (before=%q after=%q); "+
+									"resource was recreated instead of mutated in place",
+								endpointBefore, endpointAfter)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpointWithModelGardenDeployment_scaleToZero(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test_scale_to_zero" {
+  provider             = google-beta
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+
+  model_config {
+    accept_eula = true
+  }
+
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-12"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count     = 0
+      max_replica_count     = 2
+      initial_replica_count = 1
+      scale_to_zero_spec {
+        min_scaleup_period    = "300s"
+        idle_scaledown_period = "300s"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIEndpointWithModelGardenDeployment_scaleToZeroUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test_scale_to_zero" {
+  provider             = google-beta
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+
+  model_config {
+    accept_eula = true
+  }
+
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-12"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count     = 0
+      max_replica_count     = 3
+      initial_replica_count = 2
+      scale_to_zero_spec {
+        min_scaleup_period    = "600s"
+        idle_scaledown_period = "600s"
+      }
+    }
+  }
+}
+`, context)
+}
+{{- end }}
