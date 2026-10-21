@@ -1,0 +1,18 @@
+resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.ResourceIdVars "cloud_run_service_name"}}"
+  location = "us-central1"
+  deletion_protection = false
+
+  functional_type = "FUNCTIONAL_TYPE_AGENT"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+    workload_identity_config {
+      identity_type                = "IDENTITY_TYPE_AGENT_IDENTITY"
+      identity_certificate_enabled = false
+    }
+  }
+}

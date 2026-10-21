@@ -1,0 +1,117 @@
+{{/*
+  Used as both post_create and post_update for google_saas_runtime_saas.
+  Waits for the asynchronous application template import to finish.
+  Create always waits. Update waits when application_template changes or when
+  the pre-update state is STATE_FAILED, STATE_RUNNING or the zero value (absent,
+  STATE_UNSPECIFIED, STATE_TYPE_UNSPECIFIED): otherwise an apply that follows an
+  interrupted apply or an out-of-band change would return while the import is
+  still running. In post_update this runs before the final Read, so
+  d.Get("state") still holds the refreshed pre-update value (with
+  -refresh=false, the last saved value). Polls at a fixed config.PollInterval
+  (10s live, 10ms in VCR replay).
+*/ -}}
+if v, ok := d.GetOk("application_template.0.revision"); ok && v.(string) != "" {
+	preState, _ := d.Get("state").(string)
+	preStateNotDone := false
+	switch preState {
+	case "STATE_FAILED", "STATE_RUNNING", "", "STATE_UNSPECIFIED", "STATE_TYPE_UNSPECIFIED":
+		preStateNotDone = true
+	}
+	if d.IsNewResource() || d.HasChange("application_template") || preStateNotDone {
+		timeout := d.Timeout(schema.TimeoutUpdate)
+		if d.IsNewResource() {
+			timeout = d.Timeout(schema.TimeoutCreate)
+		}
+		// A PATCH that doesn't change application_template on a FAILED Saas
+		// doesn't reset state: GET keeps returning the previous FAILED result
+		// until the service restarts the import a few seconds later. In that case
+		// treat FAILED as stale (pending) while no non-FAILED state has been seen
+		// and the TYPE_SYNCHRONIZED condition's lastTransitionTime equals the
+		// pre-update value (both empty counts as equal), for at most restartGrace.
+		// Both timestamps come from the server (no clock skew). A template change
+		// resets state synchronously, so FAILED is always fresh there. When the
+		// pre-update state was STATE_RUNNING or the zero value, any ACTIVE or
+		// FAILED result is fresh.
+		syncTransition := func(conds interface{}, key string) string {
+			list, _ := conds.([]interface{})
+			for _, c := range list {
+				if m, ok := c.(map[string]interface{}); ok && m["type"] == "TYPE_SYNCHRONIZED" {
+					t, _ := m[key].(string)
+					return t
+				}
+			}
+			return ""
+		}
+		checkStale := !d.IsNewResource() && preState == "STATE_FAILED" && !d.HasChange("application_template")
+		staleTransition := ""
+		if checkStale {
+			staleTransition = syncTransition(d.Get("conditions"), "last_transition_time")
+		}
+		const restartGrace = 2 * time.Minute
+		waitStart := time.Now()
+		sawNonFailed := false
+
+		log.Printf("[DEBUG] Waiting for Saas %q application template import to finish", d.Id())
+		err := transport_tpg.Retry(transport_tpg.RetryOptions{
+			Timeout:      timeout,
+			PollInterval: config.PollInterval,
+			RetryFunc: func() error {
+				url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/saas/{{"{{"}}saas_id{{"}}"}}")
+				if err != nil {
+					return err
+				}
+
+				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "GET",
+					Project:   billingProject,
+					RawURL:    url,
+					UserAgent: userAgent,
+				})
+				if err != nil {
+					// SendRequest already retries transient errors. Return others (for
+					// example, 403 or 404) as is, so they fail the wait instead of being
+					// retried until the timeout.
+					return err
+				}
+
+				state, _ := res["state"].(string)
+				log.Printf("[DEBUG] Saas %q state: %q", d.Id(), state)
+				if state != "STATE_FAILED" {
+					sawNonFailed = true
+				}
+
+				switch state {
+				case "STATE_ACTIVE":
+					return nil
+				case "STATE_FAILED":
+					if checkStale && !sawNonFailed && time.Since(waitStart) < restartGrace &&
+						syncTransition(res["conditions"], "lastTransitionTime") == staleTransition {
+						return fmt.Errorf("Saas %q import is still pending (STATE_FAILED from before the update; waiting for the import to restart)", d.Id())
+					}
+					msg := ""
+					if e, ok := res["error"].(map[string]interface{}); ok {
+						msg, _ = e["message"].(string)
+					}
+					return fmt.Errorf("Saas %q application template import failed (STATE_FAILED): %s", d.Id(), msg)
+				case "", "STATE_UNSPECIFIED", "STATE_TYPE_UNSPECIFIED", "STATE_RUNNING":
+					return fmt.Errorf("Saas %q import is still pending (state %q)", d.Id(), state)
+				default:
+					return fmt.Errorf("Saas %q has unexpected state: %s", d.Id(), state)
+				}
+			},
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+				func(err error) (bool, string) {
+					if strings.Contains(err.Error(), "import is still pending") {
+						return true, "retry pending import"
+					}
+					return false, ""
+				},
+			},
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error waiting for Saas application template import: %s", err)
+		}
+	}
+}

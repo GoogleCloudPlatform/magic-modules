@@ -23,13 +23,36 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
+	"text/template" // NOLINT
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
+
+	"gopkg.in/yaml.v3"
 )
 
+const nullVarSentinel = "\x00NULL\x00"
+
+var nullVarLineRegexp = regexp.MustCompile(`(?m)^[ \t]*[a-zA-Z0-9_-]+[ \t]*=[ \t]*"?` + regexp.QuoteMeta(nullVarSentinel) + `"?[ \t]*\r?\n`)
+
+func replaceNullVarSentinels(hcl string) string {
+	hcl = nullVarLineRegexp.ReplaceAllString(hcl, "")
+	hcl = strings.ReplaceAll(hcl, `"`+nullVarSentinel+`"`, "null")
+	hcl = strings.ReplaceAll(hcl, nullVarSentinel, "null")
+	return hcl
+}
+
 var hclResourceRegexp = regexp.MustCompile(`(?:resource|data|list|ephemeral) "(?P<resource>google_[^"]+)"`)
+
+// Regular expressions used when rendering sample/step HCL. Compiled once at
+// init as they are applied to every step of every sample, several times each.
+var (
+	trailingBlankLineRegexp  = regexp.MustCompile(`\n\n$`)
+	regionTagLineRegexp      = regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	regionTagTrailingRegexp  = regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	testEnvVarUsageRegexp    = regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	varUsageRegexp           = regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	resourceIdVarUsageRegexp = regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+)
 
 type Step struct {
 	Name string `yaml:"name,omitempty"`
@@ -47,7 +70,10 @@ type Step struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It is used for values that should be inserted into the template as literal,
 	// unmodified strings (e.g., labels, descriptions, or other non-identifier fields).
-	// These values are used verbatim in both generated tests and documentation
+	// These values are used verbatim in both generated tests and documentation.
+	// A value of `null` (or `~` / `"null"`) sets the test context variable to `nil`
+	// and omits the attribute line (or renders unquoted HCL `null` when inline) in
+	// documentation and OiCS configs.
 	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
@@ -119,6 +145,39 @@ type Step struct {
 	TestContextVars      map[string]string `yaml:"-"`
 }
 
+// UnmarshalYAML implements a custom YAML unmarshaler for Step so that explicit
+// YAML null values (`field: null` or `field: ~`) in `vars` are preserved as
+// `"null"` rather than being decoded as empty strings (`""`).
+func (s *Step) UnmarshalYAML(value *yaml.Node) error {
+	type stepAlias Step
+	aliasObj := (*stepAlias)(s)
+
+	if err := value.Decode(aliasObj); err != nil {
+		return err
+	}
+
+	if value.Kind == yaml.MappingNode {
+		for i := 0; i+1 < len(value.Content); i += 2 {
+			keyNode := value.Content[i]
+			valNode := value.Content[i+1]
+			if keyNode.Value == "vars" && valNode.Kind == yaml.MappingNode {
+				for j := 0; j+1 < len(valNode.Content); j += 2 {
+					varKey := valNode.Content[j].Value
+					varVal := valNode.Content[j+1]
+					if varVal.Kind == yaml.ScalarNode && varVal.Tag == "!!null" {
+						if s.Vars == nil {
+							s.Vars = make(map[string]string)
+						}
+						s.Vars[varKey] = "null"
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func (s *Step) TestStepSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
@@ -131,6 +190,9 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 	for _, val := range s.TestContextVars {
 		if strings.HasPrefix(val, "compute.") {
 			deps["services/compute"] = ""
+		}
+		if strings.HasPrefix(val, "container.") {
+			deps["services/container"] = ""
 		}
 		if strings.HasPrefix(val, "kms.") {
 			deps["services/kms"] = ""
@@ -219,13 +281,23 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	for key := range s.TestEnvVars {
 		docTestEnvVars[key] = docs_defaults[s.TestEnvVars[key]]
 	}
+	docVars := make(map[string]string, len(originalVars))
+	for key, value := range originalVars {
+		if value == "null" {
+			docVars[key] = nullVarSentinel
+		} else {
+			docVars[key] = value
+		}
+	}
+	s.Vars = docVars
 	s.TestEnvVars = docTestEnvVars
 	s.DocumentationHCLText = s.ExecuteTemplate(sysfs)
-	s.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.DocumentationHCLText, "\n")
+	s.DocumentationHCLText = replaceNullVarSentinels(s.DocumentationHCLText)
+	s.DocumentationHCLText = trailingBlankLineRegexp.ReplaceAllString(s.DocumentationHCLText, "\n")
 
 	// Remove region tags
-	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	re1 := regionTagLineRegexp
+	re2 := regionTagTrailingRegexp
 	s.DocumentationHCLText = re1.ReplaceAllString(s.DocumentationHCLText, "")
 	s.DocumentationHCLText = re2.ReplaceAllString(s.DocumentationHCLText, "")
 
@@ -253,7 +325,9 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 
 	for key, value := range originalVars {
 		testVars[key] = fmt.Sprintf("%%{%s}", key)
-		if _, err := strconv.ParseBool(value); err == nil {
+		if value == "null" {
+			testContextVars[key] = "nil"
+		} else if _, err := strconv.ParseBool(value); err == nil {
 			testContextVars[key] = value
 		} else if _, err := strconv.ParseInt(value, 10, 64); err == nil {
 			testContextVars[key] = value
@@ -276,7 +350,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.Vars = testVars
 	s.TestContextVars = testContextVars
 	s.TestHCLText = s.ExecuteTemplate(sysfs)
-	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
+	s.TestHCLText = trailingBlankLineRegexp.ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = re2.ReplaceAllString(s.TestHCLText, "")
@@ -291,29 +365,29 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
 	templateContent, err := fs.ReadFile(sysfs, s.ConfigPath)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	fileContentString := string(templateContent)
 
 	// Check that any variables in ResourceIdVars, Vars or TestEnvVars used in the step are defined via YAML
-	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	envVarRegex := testEnvVarUsageRegexp
 	validateRegexForContents(envVarRegex, fileContentString, s.ConfigPath, "test_env_vars", s.TestEnvVars)
-	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	varRegex := varUsageRegexp
 	validateRegexForContents(varRegex, fileContentString, s.ConfigPath, "vars", s.Vars)
-	prefixedVarRegex := regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+	prefixedVarRegex := resourceIdVarUsageRegexp
 	validateRegexForContents(prefixedVarRegex, fileContentString, s.ConfigPath, "resource_id_vars", s.ResourceIdVars)
 
 	templateFileName := filepath.Base(s.ConfigPath)
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, s); err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	rs := contents.String()
@@ -366,8 +440,8 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	originalVars := s.Vars
 
 	// // Remove region tags
-	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	re1 := regionTagLineRegexp
+	re2 := regionTagTrailingRegexp
 
 	testResourceIdVars := make(map[string]string)
 	testVars := make(map[string]string)
@@ -376,23 +450,28 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	}
 
 	for key, value := range originalVars {
-		testVars[key] = value
-	}
-
-	for key, value := range originalVars {
-		testVars[key] = value
+		if value == "null" {
+			testVars[key] = nullVarSentinel
+		} else {
+			testVars[key] = value
+		}
 	}
 
 	// Apply overrides from YAML
 	for key, value := range s.OicsVarsOverrides {
 		testResourceIdVars[key] = value
-		testVars[key] = value
+		if value == "null" {
+			testVars[key] = nullVarSentinel
+		} else {
+			testVars[key] = value
+		}
 	}
 
 	s.ResourceIdVars = testResourceIdVars
 	s.Vars = testVars
 	s.OicsHCLText = s.ExecuteTemplate(sysfs)
-	s.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.OicsHCLText, "\n")
+	s.OicsHCLText = replaceNullVarSentinels(s.OicsHCLText)
+	s.OicsHCLText = trailingBlankLineRegexp.ReplaceAllString(s.OicsHCLText, "\n")
 
 	// Remove region tags
 	s.OicsHCLText = re1.ReplaceAllString(s.OicsHCLText, "")

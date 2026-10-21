@@ -21,6 +21,9 @@ base_url: projects/{{project}}/locations/{{location}}/reservationGroups
 immutable: true
 create_url: projects/{{project}}/locations/{{location}}/reservationGroups?reservationGroupId={{name}}
 id_format: projects/{{project}}/locations/{{location}}/reservationGroups/{{name}}
+sweeper:
+  url_substitutions:
+    - region: us-west2
 samples:
   - name: bigquery_reservation_group_basic
     primary_resource_id: reservation_group

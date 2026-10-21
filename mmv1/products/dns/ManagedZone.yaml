@@ -140,9 +140,6 @@ samples:
         resource_id_vars:
           zone_name: peering-zone
           network_name: network
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
   - name: dns_managed_zone_cloud_logging
     primary_resource_id: cloud-logging-enabled-zone
     steps:
@@ -424,6 +421,20 @@ properties:
             - ipv4_address
             - ipv6_address
             - domain_name
+      - name: outboundEndpoints
+        type: Array
+        description: |
+          The list of outbound endpoints to use for queries.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: name
+              type: String
+              description: |
+                Specified as a resource path including project and region.
+                This should be formatted like
+                `projects/{project}/locations/{location}/outboundEndpoints/{endpoint}`
+              required: true
   - name: peeringConfig
     type: NestedObject
     description: |

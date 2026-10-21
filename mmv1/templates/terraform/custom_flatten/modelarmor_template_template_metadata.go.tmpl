@@ -14,6 +14,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     transformed["custom_llm_response_safety_error_code"] = original["customLlmResponseSafetyErrorCode"]
     transformed["custom_llm_response_safety_error_message"] = original["customLlmResponseSafetyErrorMessage"]
     transformed["enforcement_type"] = original["enforcementType"]
+    transformed["modalities"] = original["modalities"]
     transformed["filter_version_selector"] =
         flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FilterVersionSelector(original["filterVersionSelector"], d, config)
     return []interface{}{transformed}

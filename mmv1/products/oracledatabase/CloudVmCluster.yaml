@@ -50,7 +50,10 @@ samples:
   - name: oracledatabase_cloud_vmcluster_basic
     primary_resource_id: my_vmcluster
     steps:
+      # Step 1 -> create test
       - name: oracledatabase_cloud_vmcluster_basic
+        vars:
+          label_value: value-one
         resource_id_vars:
           project: my-project
           cloud_vm_cluster_id: my-instance
@@ -65,8 +68,24 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", acctest.RandString(t, 10))
-          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", acctest.RandString(t, 10))
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", randomSuffix)
+      # Step 2 -> update test (in-place update of labels)
+      - name: oracledatabase_cloud_vmcluster_basic
+        vars:
+          label_value: value-two
+        resource_id_vars:
+          project: my-project
+          cloud_vm_cluster_id: my-instance
+          cloud_exadata_infrastructure_id: my-exadata
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", randomSuffix)
   - name: oracledatabase_cloud_vmcluster_odbnetwork
     primary_resource_id: my_vmcluster
     steps:
@@ -261,11 +280,11 @@ properties:
       - name: scanListenerPortTcp
         type: Integer
         description: 'SCAN listener port - TCP '
-        output: true
+        default_from_api: true
       - name: scanListenerPortTcpSsl
         type: Integer
         description: 'SCAN listener port - TLS '
-        output: true
+        default_from_api: true
       - name: domain
         type: String
         description: "Parent DNS domain where SCAN DNS and hosts names are qualified.\nex: ocispdelegated.ocisp10jvnet.oraclevcn.com "
@@ -327,8 +346,28 @@ properties:
           ASM
           EXASCALE
         output: true
+      - name: vmFileSystemStorageType
+        type: String
+        description: |-
+          Specifies whether VM file system storage / VM images are stored on local DB server storage or Exascale storage.
+          Possible values:
+          VM_FILE_SYSTEM_STORAGE_TYPE_UNSPECIFIED
+          VM_FILE_SYSTEM_STORAGE_TYPE_LOCAL
+          VM_FILE_SYSTEM_STORAGE_TYPE_EXASCALE
+        default_from_api: true
+      - name: vmBackupStorageType
+        type: String
+        description: |-
+          Specifies whether VM backups are stored on local DB server storage or Exascale storage.
+          Possible values:
+          VM_BACKUP_STORAGE_TYPE_UNSPECIFIED
+          VM_BACKUP_STORAGE_TYPE_LOCAL
+          VM_BACKUP_STORAGE_TYPE_EXASCALE
+        default_from_api: true
   - name: labels
     type: KeyValueLabels
+    update_url: 'projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}?updateMask=labels'
+    update_verb: 'PATCH'
     description: 'Labels or tags associated with the VM Cluster. '
   - name: createTime
     type: String

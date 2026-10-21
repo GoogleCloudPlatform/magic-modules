@@ -170,6 +170,13 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 	return BootstrapSubnetWithOverrides(t, subnetName, networkName, make(map[string]interface{}))
 }
 
+func BootstrapSubnetInRegion(t *testing.T, subnetName string, networkName string, region string, ipCidrRange string) string {
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, map[string]interface{}{
+		"region":      region,
+		"ipCidrRange": ipCidrRange,
+	})
+}
+
 func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
@@ -307,8 +314,11 @@ func BootstrapNetworkAttachmentInRegion(t *testing.T, networkAttachmentName stri
 const SharedStoragePoolPrefix = "tf-bootstrap-storage-pool-"
 
 func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType string) string {
+	return BootstrapComputeStoragePoolInZone(t, storagePoolName, storagePoolType, envvar.GetTestZoneFromEnv())
+}
+
+func BootstrapComputeStoragePoolInZone(t *testing.T, storagePoolName, storagePoolType, zone string) string {
 	projectID := envvar.GetTestProjectFromEnv()
-	zone := envvar.GetTestZoneFromEnv()
 
 	storagePoolName = SharedStoragePoolPrefix + storagePoolType + "-" + storagePoolName
 

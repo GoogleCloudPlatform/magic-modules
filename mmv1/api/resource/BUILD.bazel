@@ -22,7 +22,6 @@ go_library(
         "//mmv1/api/product",
         "//mmv1/api/utils",
         "//mmv1/google",
-        "@com_github_golang_glog//:glog",
         "@in_gopkg_yaml_v3//:yaml_v3",
     ],
 )
@@ -36,5 +35,6 @@ go_test(
     deps = [
         ":resource",
         "@com_github_google_go_cmp//cmp",
+        "@in_gopkg_yaml_v3//:yaml_v3",
     ],
 )

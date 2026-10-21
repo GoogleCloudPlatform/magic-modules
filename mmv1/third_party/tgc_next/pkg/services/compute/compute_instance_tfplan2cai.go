@@ -234,6 +234,14 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 			ForceSendFields: []string{"EnableDisplay"},
 		}
 	}
+
+	if wicMap := expandWorkloadIdentityConfig(d); wicMap != nil {
+		instance.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
+			Identity:                   wicMap["identity"].(string),
+			IdentityCertificateEnabled: wicMap["identityCertificateEnabled"].(bool),
+			ForceSendFields:            []string{"Identity", "IdentityCertificateEnabled"},
+		}
+	}
 	return instance, nil
 }
 
@@ -512,6 +520,12 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 			IgmpQuery:                data["igmp_query"].(string),
 			Vlan:                     int64(data["vlan"].(int)),
 		}
+		if v, ok := data["enable_vpc_scoped_dns"].(bool); ok && v {
+			ifaces[i].EnableVpcScopedDns = v
+		}
+		if v, ok := data["service_class_id"].(string); ok && v != "" {
+			ifaces[i].ServiceClassId = v
+		}
 	}
 	return ifaces, nil
 }
@@ -588,16 +602,12 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.AvailabilityDomain = int64(v.(int))
 	}
 	if v, ok := original["max_run_duration"]; ok {
-		maxRunDurationMap, err := expandComputeMaxRunDuration(v)
+		transformedMaxRunDuration, err := expandComputeLocalSsdRecoveryTimeoutTgc(v)
 		if err != nil {
 			return nil, err
 		}
-		if maxRunDurationMap != nil {
-			typed := &compute.Duration{}
-			if err := convertViaJSONTgcNext(maxRunDurationMap, typed); err != nil {
-				return nil, fmt.Errorf("Error converting max_run_duration: %s", err)
-			}
-			scheduling.MaxRunDuration = typed
+		if transformedMaxRunDuration != nil {
+			scheduling.MaxRunDuration = transformedMaxRunDuration
 			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
 		}
 	}
@@ -624,6 +634,19 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		}
 		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
+	}
+	if v, ok := original["preemption_notice_duration"]; ok {
+		transformedPreemptionNoticeDuration, err := expandComputeLocalSsdRecoveryTimeoutTgc(v)
+		if err != nil {
+			return nil, err
+		}
+		if transformedPreemptionNoticeDuration != nil {
+			scheduling.PreemptionNoticeDuration = transformedPreemptionNoticeDuration
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "PreemptionNoticeDuration")
+		}
+	}
+	if v, ok := original["host_error_timeout_seconds"].(int); ok && v != 0 {
+		scheduling.HostErrorTimeoutSeconds = int64(v)
 	}
 	if v, ok := original["termination_time"]; ok {
 		scheduling.TerminationTime = v.(string)

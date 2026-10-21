@@ -2128,7 +2128,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_schedulingUpdated(instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -2136,7 +2136,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{}),
 		},
 	})
 }
@@ -2165,7 +2165,7 @@ func TestAccComputeInstance_schedulingTerminationTime(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_TerminationTime(instanceName, terminationTimeUpdated),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -2178,7 +2178,7 @@ func TestAccComputeInstance_schedulingTerminationTime(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_TerminationTimeDeleted(instanceName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -2191,7 +2191,7 @@ func TestAccComputeInstance_schedulingTerminationTime(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -2371,25 +2371,25 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	context_1 := map[string]interface{}{
 		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"zone":                   "us-central1-a",
-		"host_error_timeout_sec": "host_error_timeout_seconds = 90",
+		"host_error_timeout_sec": 90,
 	}
 
 	context_2 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": "host_error_timeout_seconds = 120",
+		"host_error_timeout_sec": 120,
 	}
 
 	context_3 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": "host_error_timeout_seconds = null",
+		"host_error_timeout_sec": nil,
 	}
 
 	context_4 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": "host_error_timeout_seconds = 0",
+		"host_error_timeout_sec": 0,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4063,7 +4063,7 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scheduling(instanceName),
+				Config: testAccComputeInstance_schedulingInZone(instanceName, "us-central1-a"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -4256,7 +4256,7 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scheduling(instanceName),
+				Config: testAccComputeInstance_schedulingInZone(instanceName, "us-central1-a"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -4321,7 +4321,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scheduling(instanceName),
+				Config: testAccComputeInstance_schedulingInZone(instanceName, "us-central1-a"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -4996,6 +4996,7 @@ func TestAccComputeInstance_schedulingSkipGuestOSShutdown(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func TestAccComputeInstance_preemptionNoticeDuration(t *testing.T) {
 	t.Parallel()
@@ -5021,6 +5022,7 @@ func TestAccComputeInstance_preemptionNoticeDuration(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs(t *testing.T) {
 	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
@@ -5438,6 +5440,7 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
+{{ end }}
 
 func testAccComputeInstance_preemptionNoticeDuration(instance string) string {
 	return fmt.Sprintf(`
@@ -5474,8 +5477,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
-
-{{ end }}
 
 func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -5562,8 +5563,75 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.enable_vpc_scoped_dns", "true"),
 				),
 			},
+		},
+	})
+}
+
+// testAccServiceClassId returns the PSC Interface service class the current test
+// project is authorized to use as a producer. Setting service_class_id on a
+// network interface requires networkconnectivity.serviceClasses.use on the
+// service class, which is owned by the producer project. Creating a service class
+// is an internal API, so each CI project was given its own class in b/521416084;
+// they only exist in us-central1. Tests that need one are skipped in any other
+// project because they cannot pass there.
+func testAccServiceClassId(t *testing.T) string {
+	switch envvar.GetTestProjectFromEnv() {
+	case "ci-test-project-188019":
+		return "gcp-tf-persistent-service-class-dev"
+	case "ci-test-project-nightly-ga":
+		return "gcp-tf-persistent-service-class-ga"
+	case "ci-test-project-nightly-beta":
+		return "gcp-tf-persistent-service-class-beta"
+	default:
+		t.Skip("b/521416084")
+		return ""
+	}
+}
+
+func TestAccComputeInstance_NetworkAttachmentServiceClass(t *testing.T) {
+	t.Parallel()
+	suffix := acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	region := "us-central1"
+	serviceClassId := testAccServiceClassId(t)
+	var instance map[string]interface{}
+
+{{ if eq $.TargetVersionName `ga` }}
+	providerVersion := "v1"
+{{- else }}
+	providerVersion := "beta"
+{{- end }}
+
+	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
+
+	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", project, region, testNetworkAttachmentName)
+
+	context := map[string]interface{}{
+		"suffix":                  suffix,
+		"network_attachment_name": testNetworkAttachmentName,
+		"region":                  region,
+		"service_class_id":        serviceClassId,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_networkAttachmentServiceClass(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.service_class_id", serviceClassId),
+				),
+			},
+			computeInstanceImportStep(fmt.Sprintf("%s-a", region), fmt.Sprintf("tf-test-instance-%s", suffix), []string{}),
 		},
 	})
 }
@@ -9464,6 +9532,10 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_scheduling(instance string) string {
+	return testAccComputeInstance_schedulingInZone(instance, "us-central1-f")
+}
+
+func testAccComputeInstance_schedulingInZone(instance, zone string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-13"
@@ -9472,8 +9544,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "%s"
 
   boot_disk {
     initialize_params {
@@ -9489,7 +9561,7 @@ resource "google_compute_instance" "foobar" {
     automatic_restart = false
   }
 }
-`, instance)
+`, instance, zone)
 }
 
 func testAccComputeInstance_schedulingUpdated(instance string) string {
@@ -9501,8 +9573,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "us-central1-f"
 
   boot_disk {
     initialize_params {
@@ -9531,8 +9603,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "us-central1-f"
 
   boot_disk {
     initialize_params {
@@ -9565,8 +9637,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "us-central1-f"
 
   boot_disk {
     initialize_params {
@@ -11078,8 +11150,8 @@ resource "google_compute_instance" "foobar" {
     network = "default"
   }
   scheduling {
-    %{host_error_timeout_sec}
-	automatic_restart = true
+    host_error_timeout_seconds = %{host_error_timeout_sec}
+    automatic_restart          = true
   }
 }
 `, context)
@@ -13482,12 +13554,70 @@ resource "google_compute_instance" "foobar" {
 	}
 
 	network_interface {
-		network_attachment = google_compute_network_attachment.test_network_attachment.self_link
+		network_attachment    = google_compute_network_attachment.test_network_attachment.self_link
+		enable_vpc_scoped_dns = true
 	}
 
 	metadata = {
 		foo = "bar"
 	}
+}
+`, context)
+}
+
+func testAccComputeInstance_networkAttachmentServiceClass(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "test-network" {
+  name                    = "tf-test-network-%{suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-subnetwork" {
+  name          = "tf-test-compute-subnet-%{suffix}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "%{region}"
+  network       = google_compute_network.test-network.id
+}
+
+resource "google_compute_network_attachment" "test_network_attachment" {
+  name                  = "%{network_attachment_name}"
+  region                = "%{region}"
+  description           = "network attachment description"
+  connection_preference = "ACCEPT_MANUAL"
+
+  producer_accept_lists = [
+    "serviceclasses/%{service_class_id}",
+  ]
+
+  subnetworks = [
+    google_compute_subnetwork.test-subnetwork.self_link
+  ]
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "tf-test-instance-%{suffix}"
+  machine_type = "e2-medium"
+  zone         = "%{region}-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.id
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  network_interface {
+    network_attachment = google_compute_network_attachment.test_network_attachment.self_link
+    service_class_id   = "%{service_class_id}"
+  }
 }
 `, context)
 }

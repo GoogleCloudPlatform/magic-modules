@@ -253,6 +253,7 @@ func ResourceContainerNodePool() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceNodeConfigEmptyGuestAccelerator,
 			nodePoolAcceleratorNetworkProfileCustomizeDiff,
+			nodePoolBestEffortProvisioningCustomizeDiff,
 		),
 
 		UseJSONNumber: true,
@@ -449,6 +450,31 @@ var schemaNodePool = map[string]*schema.Schema{
 					Required:    true,
 					ForceNew:    true,
 					Description: `Whether nodes in this node pool are obtainable solely through the ProvisioningRequest API`,
+				},
+			},
+		},
+	},
+
+	"best_effort_provisioning": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		ForceNew:    true,
+		MaxItems:    1,
+		Description: `Specifies the configuration for best effort provisioning.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:        schema.TypeBool,
+					Required:    true,
+					ForceNew:    true,
+					Description: `Whether node pool creation ignores non-fatal errors like stockout to provision as many nodes as possible, eventually bringing up the target number of nodes.`,
+				},
+				"min_provision_nodes": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.IntAtLeast(0),
+					Description:  `Minimum number of nodes that must be provisioned for the creation to be considered successful. Can only be set when enabled is true.`,
 				},
 			},
 		},
@@ -1288,13 +1314,31 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
+	if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			bep := l[0].(map[string]interface{})
+			enabled := bep["enabled"].(bool)
+			minProvisionNodes := bep["min_provision_nodes"].(int)
+			// The API rejects a bestEffortProvisioning message, even an empty one,
+			// unless enabled is true, so omit it entirely when disabled.
+			if enabled {
+				np.BestEffortProvisioning = &container.BestEffortProvisioning{
+					Enabled:           true,
+					MinProvisionNodes: int64(minProvisionNodes),
+				}
+			} else if minProvisionNodes > 0 {
+				return nil, fmt.Errorf("best_effort_provisioning.min_provision_nodes can only be set when best_effort_provisioning.enabled is true")
+			}
+		}
+	}
+
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &container.MaxPodsConstraint{
 			MaxPodsPerNode: int64(v.(int)),
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "management"); ok {
+	if v, ok := d.GetOk(prefix + "management"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		managementConfig := v.([]interface{})[0].(map[string]interface{})
 		np.Management = &container.NodeManagement{}
 
@@ -1307,7 +1351,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
+	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 		np.UpgradeSettings = &container.UpgradeSettings{}
 
@@ -1333,7 +1377,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			}
 		}
 
-		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 {
+		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			blueGreenSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 			np.UpgradeSettings.BlueGreenSettings = &container.BlueGreenSettings{}
 
@@ -1353,7 +1397,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 				np.UpgradeSettings.BlueGreenSettings.NodePoolSoakDuration = v.(string)
 			}
 
-			if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+			if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 				standardRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
 				standardRolloutPolicy := &container.StandardRolloutPolicy{}
 
@@ -1370,7 +1414,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 				np.UpgradeSettings.BlueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
 			}
 			{{ if ne $.TargetVersionName `ga` -}}
-			if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+			if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 				autoscaledRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
 				autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
 
@@ -1383,7 +1427,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
+	if v, ok := d.GetOk(prefix + "node_drain_config"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		nodeDrainConfig := v.([]interface{})[0].(map[string]interface{})
 		np.NodeDrainConfig = &container.NodeDrainConfig{}
 
@@ -1398,9 +1442,9 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "maintenance_policy"); ok {
+	if v, ok := d.GetOk(prefix + "maintenance_policy"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		maintenancePolicy := v.([]interface{})[0].(map[string]interface{})
-		if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 {
+		if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			np.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
 				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport {},
 			}
@@ -1621,6 +1665,24 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		}
 	}
 
+	if np.BestEffortProvisioning != nil && np.BestEffortProvisioning.Enabled {
+		nodePool["best_effort_provisioning"] = []map[string]interface{}{
+			{
+				"enabled":             true,
+				"min_provision_nodes": np.BestEffortProvisioning.MinProvisionNodes,
+			},
+		}
+	} else if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok && len(v.([]interface{})) > 0 {
+		// The API omits bestEffortProvisioning when it is disabled. Keep an explicitly
+		// configured `enabled = false` block in state so it doesn't cause a permadiff.
+		nodePool["best_effort_provisioning"] = []map[string]interface{}{
+			{
+				"enabled":             false,
+				"min_provision_nodes": 0,
+			},
+		}
+	}
+
 	if np.MaxPodsConstraint != nil {
 		nodePool["max_pods_per_node"] = np.MaxPodsConstraint.MaxPodsPerNode
 	}
@@ -1719,7 +1781,7 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 
 	nnc := &container.NodeNetworkConfig{}
 
-	if len(networkNodeConfigs) == 0 {
+	if len(networkNodeConfigs) == 0 || networkNodeConfigs[0] == nil {
 		return nnc
 	}
 
@@ -1778,7 +1840,7 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 
 	nnc.PodCidrOverprovisionConfig = expandPodCidrOverprovisionConfig(networkNodeConfig["pod_cidr_overprovision_config"])
 
-	if v, ok := networkNodeConfig["network_performance_config"]; ok && len(v.([]interface{})) > 0 {
+	if v, ok := networkNodeConfig["network_performance_config"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		nnc.NetworkPerformanceConfig = &container.NetworkPerformanceConfig{}
 		network_performance_config := v.([]interface{})[0].(map[string]interface{})
 		if total_egress_bandwidth_tier, ok := network_performance_config["total_egress_bandwidth_tier"]; ok {
@@ -1816,7 +1878,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		update := &container.ClusterUpdate{
 			DesiredNodePoolId: name,
 		}
-		if v, ok := d.GetOk(prefix + "autoscaling"); ok {
+		if v, ok := d.GetOk(prefix + "autoscaling"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			autoscaling := v.([]interface{})[0].(map[string]interface{})
 			update.DesiredNodePoolAutoscaling = &container.NodePoolAutoscaling{
 				Enabled:           true,
@@ -1901,7 +1963,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 	if d.HasChange(prefix + "management") {
 		management := &container.NodeManagement{}
-		if v, ok := d.GetOk(prefix + "management"); ok {
+		if v, ok := d.GetOk(prefix + "management"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			managementConfig := v.([]interface{})[0].(map[string]interface{})
 			management.AutoRepair = managementConfig["auto_repair"].(bool)
 			management.AutoUpgrade = managementConfig["auto_upgrade"].(bool)
@@ -1988,7 +2050,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 	if d.HasChange(prefix + "upgrade_settings") {
 		upgradeSettings := &container.UpgradeSettings{}
-		if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
+		if v, ok := d.GetOk(prefix + "upgrade_settings"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 			upgradeSettings.Strategy = upgradeSettingsConfig["strategy"].(string)
 
@@ -2024,33 +2086,35 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				}
 
 				blueGreenSettings := &container.BlueGreenSettings{}
-				blueGreenSettingsConfig := upgradeSettingsConfig["blue_green_settings"].([]interface{})[0].(map[string]interface{})
-				blueGreenSettings.NodePoolSoakDuration = blueGreenSettingsConfig["node_pool_soak_duration"].(string)
+				if bgsList, ok := upgradeSettingsConfig["blue_green_settings"].([]interface{}); ok && len(bgsList) > 0 && bgsList[0] != nil {
+					blueGreenSettingsConfig := bgsList[0].(map[string]interface{})
+					blueGreenSettings.NodePoolSoakDuration = blueGreenSettingsConfig["node_pool_soak_duration"].(string)
 
-				if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
-					standardRolloutPolicy := &container.StandardRolloutPolicy{}
-					if standardRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok	{
-						standardRolloutPolicy.BatchSoakDuration = standardRolloutPolicyConfig["batch_soak_duration"].(string)
-						if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
-							standardRolloutPolicy.BatchNodeCount = int64(v.(int))
+					if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+						standardRolloutPolicy := &container.StandardRolloutPolicy{}
+						if standardRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok	{
+							standardRolloutPolicy.BatchSoakDuration = standardRolloutPolicyConfig["batch_soak_duration"].(string)
+							if v, ok := standardRolloutPolicyConfig["batch_node_count"]; ok {
+								standardRolloutPolicy.BatchNodeCount = int64(v.(int))
+							}
+							if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
+								standardRolloutPolicy.BatchPercentage = v.(float64)
+							}
 						}
-						if v, ok := standardRolloutPolicyConfig["batch_percentage"]; ok {
-							standardRolloutPolicy.BatchPercentage = v.(float64)
-						}
+						blueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
 					}
-					blueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
-				}
-				{{ if ne $.TargetVersionName `ga` -}}
-				if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
-					autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
-					if autoscaledRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok {
-						if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
-							autoscaledRolloutPolicy.WaitForDrainDuration = v.(string)
+					{{ if ne $.TargetVersionName `ga` -}}
+					if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+						autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
+						if autoscaledRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+							if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
+								autoscaledRolloutPolicy.WaitForDrainDuration = v.(string)
+							}
 						}
+						blueGreenSettings.AutoscaledRolloutPolicy = autoscaledRolloutPolicy
 					}
-					blueGreenSettings.AutoscaledRolloutPolicy = autoscaledRolloutPolicy
+					{{- end }}
 				}
-				{{- end }}
 				upgradeSettings.BlueGreenSettings = blueGreenSettings
 			}
 		}
@@ -2112,7 +2176,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 	if d.HasChange(prefix + "node_drain_config") {
 		nodeDrainConfig := &container.NodeDrainConfig{}
-		if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
+		if v, ok := d.GetOk(prefix + "node_drain_config"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			nodeDrain := v.([]interface{})[0].(map[string]interface{})
 			if v, ok := nodeDrain["respect_pdb_during_node_pool_deletion"]; ok {
 				nodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
@@ -2151,6 +2215,54 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				return err
 		}
 		log.Printf("[INFO] Updated node_drain_config in Node Pool %s", name)
+	}
+
+	if d.HasChange(prefix + "maintenance_policy") {
+		req := &container.UpdateNodePoolRequest{
+			NodePoolId: name,
+		}
+		if v, ok := d.GetOk(prefix + "maintenance_policy"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			req.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
+				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport{},
+			}
+			maintenancePolicy := v.([]interface{})[0].(map[string]interface{})
+			if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+				exclusionUntilEndOfSupport := v.([]interface{})[0].(map[string]interface{})
+				if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
+					req.MaintenancePolicy.ExclusionUntilEndOfSupport.Enabled = v.(bool)
+					req.MaintenancePolicy.ExclusionUntilEndOfSupport.ForceSendFields = []string{"Enabled"}
+				}
+			}
+		} else {
+			// If removed or cleared from config, explicitly disable the exclusion
+			req.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
+				ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport{
+					Enabled:         false,
+					ForceSendFields: []string{"Enabled"},
+				},
+			}
+		}
+
+		updateF := func() error {
+			clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+			if config.UserProjectOverride {
+				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+			}
+			op, err := clusterNodePoolsUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+
+			return ContainerOperationWait(config, op,
+				nodePoolInfo.project,
+				nodePoolInfo.location,
+				"updating GKE node pool maintenance policy", userAgent, timeout)
+		}
+
+		if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+			return err
+		}
+		log.Printf("[INFO] Updated maintenance policy in Node Pool %s", name)
 	}
 
 	return nil
@@ -2295,6 +2407,26 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 	}
 
 	return nil
+}
+
+// validateBestEffortProvisioningDiff rejects min_provision_nodes without enabled at plan time.
+// All best_effort_provisioning fields are ForceNew, so failing at apply time would destroy the
+// existing node pool before the API rejects the replacement.
+func validateBestEffortProvisioningDiff(diff *schema.ResourceDiff, prefix string) error {
+	key := prefix + "best_effort_provisioning.0."
+	if !diff.NewValueKnown(key+"enabled") || !diff.NewValueKnown(key+"min_provision_nodes") {
+		return nil
+	}
+	enabled, _ := diff.Get(key + "enabled").(bool)
+	minProvisionNodes, _ := diff.Get(key + "min_provision_nodes").(int)
+	if !enabled && minProvisionNodes > 0 {
+		return fmt.Errorf("%smin_provision_nodes can only be set when %senabled is true", key, key)
+	}
+	return nil
+}
+
+func nodePoolBestEffortProvisioningCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
+	return validateBestEffortProvisioningDiff(diff, "")
 }
 
 func init() {

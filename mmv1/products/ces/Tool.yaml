@@ -605,8 +605,6 @@ properties:
       - name: dataStoreSource
         type: NestedObject
         description: Optional. Search within a single specific DataStore.
-        conflicts:
-          - engineSource
         properties:
           - name: filter
             type: String
@@ -678,8 +676,6 @@ properties:
         description: |-
           Configuration for searching within an Engine, potentially targeting
           specific DataStores.
-        conflicts:
-          - dataStoreSource
         properties:
           - name: dataStoreSources
             type: Array
@@ -841,6 +837,20 @@ properties:
                         controls the randomness of the model's responses. Lower temperatures
                         produce responses that are more predictable. Higher temperatures produce
                         responses that are more creative.
+                    - name: thinkingLevel
+                      type: Enum
+                      description: |-
+                        The thinking level of the model.
+                        Possible values:
+                        DEFAULT
+                        LOW
+                        MEDIUM
+                        HIGH
+                      enum_values:
+                        - 'DEFAULT'
+                        - 'LOW'
+                        - 'MEDIUM'
+                        - 'HIGH'
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
@@ -853,6 +863,11 @@ properties:
                   type: Boolean
                   description: Whether snippets are enabled.
                   send_empty_value: true
+                - name: maxSnippets
+                  type: Integer
+                  description: |-
+                    Number of snippets to return per query.
+                    If unset, returns all snippets from the service by default.
             - name: summarizationConfig
               type: NestedObject
               description: Summarization configuration.
@@ -876,6 +891,20 @@ properties:
                         controls the randomness of the model's responses. Lower temperatures
                         produce responses that are more predictable. Higher temperatures produce
                         responses that are more creative.
+                    - name: thinkingLevel
+                      type: Enum
+                      description: |-
+                        The thinking level of the model.
+                        Possible values:
+                        DEFAULT
+                        LOW
+                        MEDIUM
+                        HIGH
+                      enum_values:
+                        - 'DEFAULT'
+                        - 'LOW'
+                        - 'MEDIUM'
+                        - 'HIGH'
                 - name: prompt
                   type: String
                   description: The prompt definition. If not set, default prompt will be used.
@@ -1659,6 +1688,22 @@ properties:
             send_empty_value: true
             output: true
             properties: [] # Explicitly show no properties
+      - name: inputVariableMapping
+        type: KeyValuePairs
+        description: Mapping of input variable names of remote agent to GECX variable names.
+        output: true
+      - name: outputVariableMapping
+        type: KeyValuePairs
+        description: Mapping of output variable names of remote agent to GECX variable names.
+        output: true
+      - name: statefulAgent
+        type: Boolean
+        description: |-
+          When enabled, the interaction between the CXAS app and the remote agent
+          will share the same context. If the remote agent returns a context_id, it
+          will be persisted for the entirety of the session for this remote agent
+          tool.
+        output: true
   - name: systemTool
     type: NestedObject
     description: The system tool.

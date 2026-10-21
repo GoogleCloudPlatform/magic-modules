@@ -499,7 +499,6 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(t *testing.T) {
   t.Parallel()
 
@@ -519,6 +518,34 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
     Steps: []resource.TestStep{
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(context),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_1",
+              "disks.0.device_name": "boot-disk",
+              "disks.0.boot":        "true",
+              "disks.0.auto_delete": "true",
+              "disks.1.device_name": "additional-disk-with-resource-policy",
+              "disks.1.boot":        "false",
+              "disks.1.auto_delete": "true",
+              "disks.2.device_name": "local-ssd-disk",
+              "disks.2.boot":        "false",
+              "disks.2.auto_delete": "true",
+            },
+          ),
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_2",
+              "disks.0.device_name": "additional-disk",
+              "disks.0.boot":        "false",
+              "disks.0.auto_delete": "true",
+            },
+          ),
+        ),
       },
       {
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -528,6 +555,23 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesUpdate(context),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_1",
+              "disks.0.device_name": "boot-disk",
+              "disks.0.boot":        "true",
+              "disks.0.auto_delete": "true",
+              "disks.1.boot":        "false",
+              "disks.1.auto_delete": "true",
+              "disks.2.device_name": "additional-disk",
+              "disks.2.boot":        "false",
+              "disks.2.auto_delete": "true",
+            },
+          ),
+        ),
       },
       {
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -547,7 +591,6 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
     },
   })
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
@@ -2282,7 +2325,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, network, template, igm)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(context map[string]any) string {
 	return acctest.Nprintf(`
 
@@ -2393,7 +2435,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
           value = "terraform-insert"
         }
         mode = "READ_WRITE"
-        type = "SCRATCH"
+        type = "PERSISTENT"
         source_image_encryption_key {
           raw_key = "%{raw_key}"
         }
@@ -2523,7 +2565,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
           value = "terraform-update"
         }
         mode = "READ_WRITE"
-        type = "SCRATCH"
+        type = "PERSISTENT"
       }
     }
     instance_selections {
@@ -2599,7 +2641,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, context)
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_targetSizePolicy(t *testing.T) {
 	t.Parallel()
@@ -2958,3 +2999,97 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
 `, suffix, suffix)
 }
 
+func TestAccRegionInstanceGroupManager_deletionPolicyForce(t *testing.T) {
+	t.Parallel()
+
+	templateName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+	igmName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRegionInstanceGroupManager_deletionPolicyForce(templateName, igmName, "DELETE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-force", "deletion_policy", "DELETE"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-force",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_deletionPolicyForce(templateName, igmName, "FORCE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-force", "deletion_policy", "FORCE"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_group_manager.igm-force",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_policy is a client-side field that defaults to DELETE on import
+				ImportStateVerifyIgnore: []string{"status", "deletion_policy"},
+			},
+		},
+	})
+}
+
+func testAccRegionInstanceGroupManager_deletionPolicyForce(template, igm, deletionPolicy string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-force" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+{{- if ne $.TargetVersionName "ga" }}
+
+  scheduling {
+    graceful_shutdown {
+      enabled = true
+      max_duration {
+        seconds = 60
+      }
+    }
+  }
+{{- end }}
+}
+
+resource "google_compute_region_instance_group_manager" "igm-force" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-force"
+  region             = "us-central1"
+  target_size        = 1
+  deletion_policy    = "%s"
+
+  version {
+    name              = "primary"
+    instance_template = google_compute_instance_template.igm-force.self_link
+  }
+}
+`, template, igm, deletionPolicy)
+}

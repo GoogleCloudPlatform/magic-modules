@@ -31,22 +31,21 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.26'
+          go-version: '1.26.9'
 
       - name: Get dependencies
         run: |
           go mod download
 
 
-      - name: Build Provider
-        run: |
-          go build
-
+      # `make testnolint` compiles all provider and unit test packages into the
+      # Go build cache without linking an unused root binary via `go build`, so
+      # `make lint` (`fmtcheck` + `go vet ./...`) can reuse the cached artifacts.
       - name: Run Unit Tests
         run: |
           make testnolint
 
-      - name: Lint Check
+      - name: Full Build & Lint Check
         run: |
           make lint
 

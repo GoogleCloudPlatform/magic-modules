@@ -24,6 +24,8 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/persistentResources
 self_link: projects/{{project}}/locations/{{location}}/persistentResources/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/persistentResources?persistentResourceId={{name}}
+update_verb: 'PATCH'
+update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/persistentResources/{{name}}
 async:
@@ -31,9 +33,12 @@ async:
     base_url: '{{op_id}}'
   actions:
     - create
+    - update
     - delete
   result:
     resource_inside_response: true
+custom_code:
+  update_encoder: templates/terraform/update_encoder/vertex_ai_persistent_resource.go.tmpl
 autogen_status: UGVyc2lzdGVudFJlc291cmNlQXV0b2dlblYyQWdlbnQ=
 generate_list_resource: true
 samples:
@@ -41,6 +46,9 @@ samples:
     primary_resource_id: persistent_resource
     steps:
       - name: vertex_ai_persistent_resource
+        resource_id_vars:
+          persistent_resource_id: example-persistent-resource
+      - name: vertex_ai_persistent_resource_update
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
   - name: vertex_ai_persistent_resource_autoscaling
@@ -102,9 +110,12 @@ properties:
       The display name of the PersistentResource.
       The name can be up to 128 characters long and can consist of any UTF-8
       characters.
+    immutable: true
   - name: resourcePools
     type: Array
     required: true
+    update_mask_fields:
+      - 'resource_pools.replica_count'
     description: The spec of the pools of different resources.
     item_type:
       type: NestedObject
@@ -331,6 +342,21 @@ properties:
               workloads (for example, Vertex Jobs) on the resource.
               Otherwise, uses the [Vertex AI Custom Code Service
               Agent](https://cloud.google.com/vertex-ai/docs/general/access-control#service-agents).
+      - name: raySpec
+        type: NestedObject
+        immutable: true
+        description: Configuration information for the Ray cluster.
+        properties:
+          - name: imageUri
+            type: String
+            immutable: true
+            description: |-
+              Default image for user to choose a preferred ML framework
+              (for example, TensorFlow or Pytorch) by choosing from [Vertex prebuilt
+              images](https://cloud.google.com/vertex-ai/docs/training/pre-built-containers).
+              Either this or the resource_pool_images is required. Use this field if
+              you need all the resource pools to have the same Ray image. Otherwise, use
+              the `resource_pool_images` field.
   - name: reservedIpRanges
     type: Array
     immutable: true

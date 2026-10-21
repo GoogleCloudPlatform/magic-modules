@@ -33,7 +33,7 @@ if err != nil {
 }
 
 err = VertexAIOperationWaitTime(
-    config, deleteRes, project, "Updating RagEngineConfig tier to Unprovisioned", userAgent,
+    config, deleteRes, project, tpgresource.LocationFromId(d.Id()), "Updating RagEngineConfig tier to Unprovisioned", userAgent,
     d.Timeout(schema.TimeoutDelete))
 
 if err != nil {

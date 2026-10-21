@@ -49,6 +49,7 @@ type TestInfo struct {
 	ErrorMessage    string    `json:"error_message"`
 	ErrorType       string    `json:"error_type"`
 	LogLink         string    `json:"log_link"`
+	TestNameId      string    `json:"test_name_id,omitempty"`
 	ProviderVersion string    `json:"provider_version"`
 	QueuedDate      time.Time `json:"queued_date"`
 	StartDate       time.Time `json:"start_date"`
@@ -232,6 +233,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 				ErrorMessage:    errorMessage,
 				ErrorType:       errorType,
 				LogLink:         logLink,
+				TestNameId:      testResult.Test.Id,
 				ProviderVersion: strings.ToUpper(pVersion.String()),
 				Duration:        testResult.Duration,
 				QueuedDate:      queuedTime,

@@ -1,0 +1,4 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+setCloudRunV2ClientDefaults(d, obj)
+{{- end }}
+return obj, nil
