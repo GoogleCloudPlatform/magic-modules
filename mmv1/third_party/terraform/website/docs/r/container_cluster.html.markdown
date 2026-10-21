@@ -690,7 +690,7 @@ addons_config {
 
 * `load_balancer_type` - (Optional) The load balancer type of CloudRun ingress service. It is external load balancer by default.
     Set `load_balancer_type=LOAD_BALANCER_TYPE_INTERNAL` to configure it as internal load balancer.
-    Allowed values are `LOAD_BALANCER_TYPE_EXTERNAL`, `LOAD_BALANCER_TYPE_INTERNAL`, and `LOAD_BALANCER_TYPE_UNSPECIFIED`.
+    Allowed values are `LOAD_BALANCER_TYPE_EXTERNAL` and `LOAD_BALANCER_TYPE_INTERNAL`.
 
 <a name="nested_identity_service_config"></a>The `identity_service_config` block supports:
 

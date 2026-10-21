@@ -435,7 +435,7 @@ func ResourceContainerCluster() *schema.Resource {
 									},
 									"load_balancer_type": {
 										Type:         schema.TypeString,
-										ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL", "LOAD_BALANCER_TYPE_EXTERNAL", "LOAD_BALANCER_TYPE_UNSPECIFIED"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL", "LOAD_BALANCER_TYPE_EXTERNAL"}, false),
 										Optional:     true,
 									},
 								},
