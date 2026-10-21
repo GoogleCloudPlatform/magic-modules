@@ -38,7 +38,7 @@ A sample contains a list of one or more `steps`. Each step has its own configura
 * `name`: `snake_case` name of the individual step. This is used for generating test configuration function names and documentation headers.
 * `config_path`: The path to the step's configuration file. If omitted, it defaults to `templates/terraform/samples/services/{{product}}/{{step_name}}.tf.tmpl`.
 * `resource_id_vars`: Key/value pairs to inject into the configuration file. Reference them with `{{index $.ResourceIdVars "key"}}`. Values here automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. **Note:** If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
-* `vars`: Key/value pairs that are copied directly to tests without a prefix. Reference with `{{index $.Vars "key"}}`. **Note:** This should ONLY be used for fields that vary between steps (for example, to test update functionality). Constant values should be hardcoded directly in the `.tf.tmpl` file.
+* `vars`: Key/value pairs that are copied directly to tests without a prefix. Reference with `{{index $.Vars "key"}}`. **Note:** This should ONLY be used for fields that vary between steps (for example, to test update functionality). Constant values should be hardcoded directly in the `.tf.tmpl` file. Setting a value to `null` (or `~`) sets the test context variable to `nil` (which `acctest.Nprintf` expands to unquoted HCL `null`, peeling surrounding quotes from `"{{index $.Vars "key"}}"`) and omits the attribute line in generated documentation and OiCS configs. This allows a single `.tf.tmpl` template to set an attribute in one step and unset it (or swap between conflicting attributes) in another step.
 * `test_env_vars`: Key/value pairs that map variable names to environment variables for tests (for example, `PROJECT_NAME`, `REGION`, `ORG_ID`).
 * `test_vars_overrides`: Key/value pairs to override variables with literal values or function calls specifically for tests.
 * `oics_vars_overrides`: Key/value pairs to override variables with literal values specifically for Open in Cloud Shell (OiCS) tutorial generation.
@@ -65,9 +65,10 @@ samples:
     external_providers:
       - "time"
     steps:
-      - name: service_resource_minimal # Matches templates/terraform/samples/services/{{product}}/service_resource_minimal.tf.tmpl
+      - name: service_resource_update # Matches templates/terraform/samples/services/{{product}}/service_resource_update.tf.tmpl
         vars: # Varies between steps to test update functionality
-          description: "A minimal description" 
+          description: "A minimal description"
+          optional_label: "initial-value"
         resource_id_vars: # Used for resource id in the configuration file
           dataset_id: "my-dataset"
           network_name: "my-network"
@@ -78,10 +79,15 @@ samples:
         ignore_read_extra:
           - 'foo'
         exclude_import_test: true
-      - name: service_resource_update # Matches templates/terraform/samples/services/{{product}}/service_resource_update.tf.tmpl
+      - name: service_resource_update # Reuses the same .tf.tmpl file across update steps
         vars:
-          description: "An updated description" # This value updates the description field
+          description: "An updated description" # Updates the description field
+          optional_label: null # Unsets optional_label (renders `optional_label = null` in tests)
         resource_id_vars:
           dataset_id: "my-dataset"
           network_name: "my-network"
+        test_env_vars:
+          org_id: "ORG_ID"
+        test_vars_overrides:
+          network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "service-resource-network-config")'
 ```

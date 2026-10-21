@@ -89,6 +89,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
    When defining variables for your steps, follow these guidelines:
    - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
    - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
+     - To unset an optional HCL attribute (or toggle between mutually exclusive `conflicts` / `exactly_one_of` attributes) across steps using a single `.tf.tmpl` file, set the variable to `null` (or `~`) in the step where it should be omitted. In generated tests, `null` sets the context value to `nil`—which `acctest.Nprintf` expands to unquoted HCL `null` (even when the placeholder is quoted as `"{{index $.Vars "field"}}"` in `.tf.tmpl`). In generated documentation and OiCS configs, whole attribute lines assigned to `null` are automatically omitted. (Note: `= null` applies to HCL attributes, not nested HCL blocks.)
    - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
    samples:
@@ -100,8 +101,8 @@ An **acceptance test** verifies that a resource can be created, updated, and des
        min_version: beta
        steps:
          # The first step defines the initial create configuration.
-         # Step name: Matches the template file name by default (for example, pubsub_topic_minimal.tf.tmpl). Use config_path to override this.
-         - name: "pubsub_topic_minimal" 
+         # Step name: Matches the template file name by default (for example, pubsub_topic_full.tf.tmpl). Use config_path to override this.
+         - name: "pubsub_topic_full"
            # resource_id_vars contains key/value pairs to inject into the configuration file.
            # These can be referenced as a key inside `{{$.ResourceIdVars}}`.
            resource_id_vars:
@@ -110,7 +111,9 @@ An **acceptance test** verifies that a resource can be created, updated, and des
            # test_vars_overrides contains literal overrides for variables in tests.
            test_vars_overrides:
              network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
-         # Subsequent steps define update configurations.
+           vars:
+             display_name: null # Omitted on initial create (and stripped from generated docs)
+         # Subsequent steps define update configurations and can reuse the same template.
          - name: "pubsub_topic_full"
            resource_id_vars:
              resource_name: "example-resource"
@@ -131,34 +134,16 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              display_name: "Updated Display Name" # The new value for the updatable field
    ```
 
-2. Create one or more `.tf.tmpl` files in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file names should match the step name (for example, `pubsub_topic_minimal.tf.tmpl` and `pubsub_topic_full.tf.tmpl`).
-3. In those files, write the Terraform configuration for your test steps. This should include all required dependencies.
+2. Create the `.tf.tmpl` file in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file name should match the step name (for example, `pubsub_topic_full.tf.tmpl`). Use a single `.tf.tmpl` file across steps whenever steps only differ by attribute values or `null` attributes; only create multiple `.tf.tmpl` files when steps add or remove entire nested HCL blocks.
+3. In that file, write the Terraform configuration for your test steps. This should include all required dependencies.
 
-  `pubsub_topic_minimal.tf.tmpl`:
-   ```tf
-   resource "google_pubsub_topic" "{{.PrimaryResourceId}}" {
-     name          = "{{index $.ResourceIdVars "resource_name"}}"
-     network       = google_compute_network.network.name
-
-     labels = {
-       env = "test"
-     }
-   }
-
-   resource "google_compute_network" "network" {
-     name                    = "{{index $.ResourceIdVars "network_name"}}"
-     auto_create_subnetworks = false
-     routing_mode            = "REGIONAL"
-   }
-   ```
-
-  `pubsub_topic_full.tf.tmpl`: (This file added the `display_name` variable).
+   `pubsub_topic_full.tf.tmpl`:
    ```tf
    resource "google_pubsub_topic" "{{.PrimaryResourceId}}" {
      name          = "{{index $.ResourceIdVars "resource_name"}}"
 
      # This is an example of a field whose value changes between steps
-     # to test update functionality of display_name
+     # (from null -> "Display Name" -> "Updated Display Name")
      display_name  = "{{index $.Vars "display_name"}}"
      
      # The rest of the fields can be baked in the configuration directly
@@ -232,10 +217,11 @@ An update test ensures that updatable fields can be changed without recreating t
    }
    ```
 5. Modify the `testAcc*` Terraform *template function* to support updates.
-   - Copy the template function and paste it immediately after so that there are 2 template functions.
-   - Change the suffix of the first template function to `_full` (or `_basic`).
-   - Change the suffix of the second template function to `_update`.
-   - The resulting template functions would look similar to this:
+   - If the steps only differ by changing or unsetting HCL attributes (as opposed to adding or removing entire nested HCL blocks), prefer reusing a **single** `testAcc*` template function with `acctest.Nprintf` rather than duplicating the function:
+     - Parameterize the varying attributes in the HCL template (for example, `display_name = "%{display_name}"` or `paused = %{paused}`).
+     - To unset an attribute in a step, pass `nil` for that key in `context`. `acctest.Nprintf` replaces both quoted `"%{key}"` and unquoted `%{key}` placeholders with unquoted HCL `null` (`display_name = null`), which Terraform treats identically to omitting the attribute.
+     - Avoid injecting entire `field = value` lines via standalone `%s` or `%{...}` placeholders on their own line, as whole-line substitutions are stripped by the static test coverage parser (`detect-missing-tests`).
+   - If the update adds or removes entire nested HCL blocks, you can define separate `_basic` and `_update` template functions:
    ```go
    func testAccPubsubTopic_full(...) string {
        ...
