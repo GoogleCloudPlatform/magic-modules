@@ -198,6 +198,8 @@ properties:
                     description: |-
                       The default fraction of leaf nodes that any query may be searched. Must be in
                       range 0.0-1.0, exclusive. The default value is 0.05 if not set.
+                      This value can only be set when creating the index.
+                    immutable: true
                     default_from_api: true
               - name: bruteForceConfig
                 type: NestedObject
