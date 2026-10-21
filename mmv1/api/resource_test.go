@@ -76,6 +76,44 @@ func TestResourceMinVersionObj(t *testing.T) {
 	}
 }
 
+func TestValidateEphemeralShape(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name     string
+		resource api.Resource
+		want     string
+	}{
+		{
+			name:     "read verb",
+			resource: api.Resource{Name: "ReadPost", ReadVerb: "POST", Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "only supports read_verb GET",
+		},
+		{
+			name:     "escaped identifier",
+			resource: api.Resource{Name: "Escaped", SelfLink: "things/{{%name}}", Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "does not support escaped URL identifiers",
+		},
+		{
+			name:     "flatten object",
+			resource: api.Resource{Name: "Flattened", Properties: []*api.Type{{Name: "nested", Type: "NestedObject", FlattenObject: true}}, Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "does not support flatten_object",
+		},
+		{
+			name:     "mixed action object",
+			resource: api.Resource{Name: "Mixed", ExcludeRead: true, CreateUrl: "things:run", Properties: []*api.Type{{Name: "request", Type: "NestedObject", Properties: []*api.Type{{Name: "input", Type: "String"}, {Name: "result", Type: "String", Output: true}}}}, Ephemeral: &resource.Ephemeral{Generate: true}},
+			want:     "mixing inputs and outputs",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			errs := tc.resource.ValidateEphemeralShape()
+			if !slices.ContainsFunc(errs, func(err error) bool { return strings.Contains(err.Error(), tc.want) }) {
+				t.Fatalf("errors = %v, want message containing %q", errs, tc.want)
+			}
+		})
+	}
+}
+
 func TestResourceNotInVersion(t *testing.T) {
 	t.Parallel()
 	p := api.Product{
@@ -1251,6 +1289,186 @@ func TestResourceFirstRunnableTestConfig(t *testing.T) {
 			}
 			if got.Sample == nil || got.Sample.Name != tc.wantName {
 				t.Errorf("got %v, want %q", got.Sample, tc.wantName)
+			}
+		})
+	}
+}
+
+func TestShouldGenerateEphemeralResource(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no ephemeral_experimental block returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "ephemeral_experimental present but generate false returns false",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate: false,
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "ephemeral_experimental with generate true returns true",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate: true,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateEphemeralResource(); got != tc.expected {
+				t.Errorf("ShouldGenerateEphemeralResource() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestShouldGenerateEphemeralResourceTests(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "generate false does not emit orphan tests",
+			resource:    api.Resource{Ephemeral: &resource.Ephemeral{Generate: false}},
+			expected:    false,
+		},
+		{
+			description: "no ephemeral_experimental block returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "exclude_test true returns false",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate:    true,
+					ExcludeTest: true,
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "exclude_test false returns true",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate:    true,
+					ExcludeTest: false,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateEphemeralResourceTests(); got != tc.expected {
+				t.Errorf("ShouldGenerateEphemeralResourceTests() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestHasEphemeralNestedProperties(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no properties returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "only flat properties returns false",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+					{Name: "keyId", Type: "String"},
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "a NestedObject property returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+					{Name: "filter", Type: "NestedObject"},
+				},
+			},
+			expected: true,
+		},
+		{
+			description: "an Array of NestedObject returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:     "items",
+						Type:     "Array",
+						ItemType: &api.Type{Type: "NestedObject"},
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			description: "an Array of scalars returns false",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:     "items",
+						Type:     "Array",
+						ItemType: &api.Type{Type: "String"},
+					},
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "a Map of NestedObject returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:      "labelsLike",
+						Type:      "Map",
+						ValueType: &api.Type{Type: "NestedObject"},
+					},
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.HasEphemeralNestedProperties(); got != tc.expected {
+				t.Errorf("HasEphemeralNestedProperties() = %v, want %v", got, tc.expected)
 			}
 		})
 	}
