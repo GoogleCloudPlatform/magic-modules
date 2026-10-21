@@ -278,12 +278,16 @@ samples:
         min_version: 'beta'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
+        vars:
+          identity_certificate_enabled: true
         ignore_read_extra:
           - 'deletion_protection'
-      - name: 'cloudrunv2_service_agent_identity_update'
+      - name: 'cloudrunv2_service_agent_identity'
         min_version: 'beta'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
+        vars:
+          identity_certificate_enabled: false
         ignore_read_extra:
           - 'deletion_protection'
   - name: 'cloudrunv2_service_mcp_server'
