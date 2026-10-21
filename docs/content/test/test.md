@@ -246,7 +246,7 @@ An update test ensures that updatable fields can be changed without recreating t
        ...
    }
    ```
-   - **Tip:** If the steps only differ by attribute values, you can reuse a single `testAcc*` template function with `acctest.Nprintf` instead of duplicating the function. Pass `nil` in `context` to unset an attribute in a step (rendering `field = null` in the test config).
+   - **Tip:** If the steps only differ by field presence, you can reuse a single `testAcc*` template function with `acctest.Nprintf` instead of duplicating the function. Pass `nil` in `context` to unset an attribute in a step (rendering `field = null` in the test config).
 6. Modify the test as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
