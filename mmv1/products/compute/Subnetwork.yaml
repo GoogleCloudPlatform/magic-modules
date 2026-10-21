@@ -171,6 +171,9 @@ samples:
         resource_id_vars:
           network_name: network-ipv6-only
           subnetwork_name: subnet-ipv6-only
+        vars:
+          ipv6_access_type: INTERNAL
+          enable_ula_internal_ipv6: true
   - name: subnetwork_with_subnet_mode_pdp
     primary_resource_id: subnetwork-with-subnet-mode-pdp
     exclude_basic_doc: true
@@ -221,9 +224,13 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: subnetwork_ipv6_only_external
+        config_path: templates/terraform/samples/services/compute/subnetwork_ipv6_only_internal.tf.tmpl
         resource_id_vars:
           network_name: network-ipv6-only
           subnetwork_name: subnet-ipv6-only
+        vars:
+          ipv6_access_type: EXTERNAL
+          enable_ula_internal_ipv6: null
   - name: subnetwork_with_secondary_ipv6_range
     primary_resource_id: subnetwork_with_secondary_ipv6_range
     min_version: 'beta'
