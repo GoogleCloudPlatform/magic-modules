@@ -99,6 +99,10 @@ type Step struct {
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
+	// Boolean HCL expressions evaluated through the echo provider by generated
+	// ephemeral tests. Only assertion results, not ephemeral values, enter state.
+	EphemeralAssertions map[string]string `yaml:"ephemeral_assertions,omitempty"`
+
 	// Hash to provider custom override values for generating test config
 	// If field my-var is set in this hash, it will replace vars[my-var] in
 	// tests. i.e. if vars["network"] = "my-vpc", without override:

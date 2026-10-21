@@ -1,0 +1,50 @@
+{{/*# The license inside this block applies to this file.
+  # Copyright 2026 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+*/}}
+{{/*
+  fwtransport.ReplaceVars (the shared URL-templating helper resource_fw.go.tmpl
+  uses) resolves {{var}} placeholders by type-switching on the request object —
+  resource.CreateRequest/UpdateRequest/ReadRequest/DeleteRequest — with no case
+  for ephemeral.OpenRequest, so it isn't usable here. Instead, {{var}} placeholders
+  in a resource's create_url/self_link are resolved at CODEGEN time (not runtime)
+  into a plain fmt.Sprintf call, matching what both hand-written Phase 0 spikes
+  did manually.
+*/}}
+
+{{/* Given a dict with "Resource" (the api.Resource, for ExtractIdentifiers) and
+  "Url" (a URL template string containing {{var}} placeholders), emits that same
+  string with every {{var}} replaced by %s — the fmt.Sprintf format string. */}}
+{{- define "EphemeralUrlFormatFW" -}}
+  {{- $url := .Url -}}
+  {{- range $id := .Resource.ExtractIdentifiers .Url -}}
+    {{- $url = replaceAll $url (printf "{{%s}}" $id) "%s" -}}
+  {{- end -}}
+{{- $url -}}
+{{- end -}}
+
+{{/* Given one {{var}} identifier name extracted from a URL template, emits the
+  Go expression that supplies its value: the well-known project/region/zone
+  locals already resolved earlier in Open(), or, for any other name, the
+  corresponding top-level property's value straight from the parsed config. */}}
+{{- define "EphemeralUrlArgFW" -}}
+  {{- if eq . "project" -}}
+project
+  {{- else if eq . "region" -}}
+region
+  {{- else if eq . "zone" -}}
+zone
+  {{- else -}}
+data.{{camelize . "upper"}}.ValueString()
+  {{- end -}}
+{{- end -}}

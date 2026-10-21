@@ -428,6 +428,7 @@ properties:
       - instance_schedule_policy
     custom_expand: templates/terraform/custom_expand/disk_consistency_group_policy.tmpl
     custom_flatten: templates/terraform/custom_flatten/disk_consistency_group_policy.tmpl
+    custom_flatten_ephemeral: flattenEphemeralDiskConsistencyGroupPolicy
     properties:
       - name: enabled
         type: Boolean
