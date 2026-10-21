@@ -296,10 +296,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		log.Printf("[WARN] Unable to acquire logging bucket config at %s", d.Id())
-
-		d.SetId("")
-		return err
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("LoggingBucketConfig %q", d.Id()))
 	}
 
 	if err := d.Set("name", res["name"]); err != nil {
