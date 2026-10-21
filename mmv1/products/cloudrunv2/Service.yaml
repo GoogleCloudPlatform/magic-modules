@@ -263,11 +263,17 @@ samples:
       - name: 'cloudrunv2_service_sandbox_templates'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
+        vars:
+          args: '["-c", "echo hello"]'
+          env_value: '9000'
         ignore_read_extra:
           - 'deletion_protection'
-      - name: 'cloudrunv2_service_sandbox_templates_update'
+      - name: 'cloudrunv2_service_sandbox_templates'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-service'
+        vars:
+          args: '["-c", "echo goodbye"]'
+          env_value: '9001'
         ignore_read_extra:
           - 'deletion_protection'
   - name: 'cloudrunv2_service_agent_identity'
