@@ -7,6 +7,7 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -295,6 +296,12 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 			{
 				// Step 2: Add E2 with IPv6_2 + PORT alongside E1
 				Config: testAccComputeNetworkEndpoint_ipv6Multiple(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.default", plancheck.ResourceActionNoop),
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionCreate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointCount(t, negId, 2),
 				),
@@ -312,6 +319,12 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 			{
 				// Step 3: Detach E2, ensuring E1 remains
 				Config: testAccComputeNetworkEndpoint_ipv6Single(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.default", plancheck.ResourceActionNoop),
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionDestroy),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointCount(t, negId, 1),
 				),
@@ -324,6 +337,12 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 			{
 				// Step 4: Dual-stack - E1 via IPv4 for VM1 and E2 via IPv6 for VM2
 				Config: testAccComputeNetworkEndpoint_dualStackVm1Ipv4Vm2Ipv6(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.default", plancheck.ResourceActionReplace),
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionCreate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointCount(t, negId, 2),
 				),
@@ -341,6 +360,12 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 			{
 				// Step 5: Dual-stack update - update E2 to IPv6 of VM1 while E1 is IPv4 of VM1
 				Config: testAccComputeNetworkEndpoint_dualStackVm1Both(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.default", plancheck.ResourceActionNoop),
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointCount(t, negId, 2),
 				),
@@ -358,6 +383,12 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 			{
 				// Step 6: Remove all endpoints and verify no leftover NEs remain
 				Config: testAccComputeNetworkEndpoint_ipv6Base(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.default", plancheck.ResourceActionDestroy),
+						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionDestroy),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointWithPortsDestroyed(t, negId, "90"),
 					testAccCheckComputeNetworkEndpointCount(t, negId, 0),

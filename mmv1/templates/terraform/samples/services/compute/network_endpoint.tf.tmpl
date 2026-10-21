@@ -69,7 +69,7 @@ resource "google_compute_instance" "endpoint-instance2" {
   }
 }
 
-resource "google_compute_network_endpoint_group" "group" {
+resource "google_compute_network_endpoint_group" "neg" {
   name         = "{{index $.ResourceIdVars "neg_name"}}"
   network      = google_compute_network.default.id
   subnetwork   = google_compute_subnetwork.default.id

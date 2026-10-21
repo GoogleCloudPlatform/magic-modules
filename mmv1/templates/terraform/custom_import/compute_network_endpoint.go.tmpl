@@ -1,5 +1,7 @@
 config := meta.(*transport_tpg.Config)
-// instance and ip_address are optional
+// instance is optional, and ip_address is empty in the generated resource id
+// ({project}/{zone}/{network_endpoint_group}/{instance}/{ip_address}/{port})
+// when ipv6_address is set instead of ip_address, so use * instead of + when reading the import id
 if err := tpgresource.ParseImportId([]string{
     "projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/networkEndpointGroups/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]*)/(?P<port>[^/]+)",
     "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]*)/(?P<port>[^/]+)",

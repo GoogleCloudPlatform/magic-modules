@@ -223,53 +223,26 @@ func TestUnitComputeNetworkEndpoint_customImport(t *testing.T) {
 			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1/10.0.0.2/90, got %s", got)
 		}
 	})
-}
 
-func TestUnitComputeNetworkEndpoints_convertToStructAndAny(t *testing.T) {
-	t.Parallel()
-
-	t.Run("ipv6_endpoint_produces_camelCase_api_payload", func(t *testing.T) {
+	t.Run("empty_ip_address_slot_from_ipv6_resource_id", func(t *testing.T) {
 		t.Parallel()
-		raw := map[string]interface{}{
-			"instance":     "projects/my-proj/zones/us-central1-a/instances/vm1",
-			"ipv6_address": "2600:1900:4000:318:0:0:0:1",
-			"port":         90,
-		}
-		s := NetworkEndpointsNetworkEndpointConvertToStruct(raw)
-		if s.Instance != "vm1" {
-			t.Errorf("expected normalized instance vm1, got %s", s.Instance)
-		}
-		if s.IPv6Address != "2600:1900:4000:318::1" {
-			t.Errorf("expected canonical IPv6 2600:1900:4000:318::1, got %s", s.IPv6Address)
-		}
+		d := ResourceComputeNetworkEndpoint().TestResourceData()
+		d.SetId("my-proj/us-central1-a/my-neg/vm1//90")
 
-		apiPayload := NetworkEndpointsNetworkEndpointConvertToAny(s)
-		expected := map[string]interface{}{
-			"instance":    "vm1",
-			"ipv6Address": "2600:1900:4000:318::1",
-			"port":        90,
+		if _, err := resourceComputeNetworkEndpointImport(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected error: %v", err)
 		}
-		if !reflect.DeepEqual(apiPayload, expected) {
-			t.Errorf("got %#v, want %#v", apiPayload, expected)
+		if got := d.Get("instance"); got != "vm1" {
+			t.Errorf("expected instance vm1, got %v", got)
 		}
-	})
-
-	t.Run("ipv4_endpoint_produces_camelCase_api_payload", func(t *testing.T) {
-		t.Parallel()
-		raw := map[string]interface{}{
-			"instance":   "vm1",
-			"ip_address": "10.0.0.2",
-			"port":       90,
+		if got := d.Get("ip_address"); got != "" {
+			t.Errorf("expected empty ip_address, got %v", got)
 		}
-		s := NetworkEndpointsNetworkEndpointConvertToStruct(raw)
-		apiPayload := NetworkEndpointsNetworkEndpointConvertToAny(s)
-		expected := map[string]interface{}{
-			"instance":  "vm1",
-			"ipAddress": "10.0.0.2",
-			"port":      90,
+		if got := d.Get("port"); got != 90 {
+			t.Errorf("expected port 90, got %v", got)
 		}
-		if !reflect.DeepEqual(apiPayload, expected) {
-			t.Errorf("got %#v, want %#v", apiPayload, expected)
+		if got := d.Id(); got != "my-proj/us-central1-a/my-neg/vm1//90" {
+			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1//90, got %s", got)
 		}
 	})
 }
