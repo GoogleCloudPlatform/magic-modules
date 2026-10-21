@@ -1,3 +1,4 @@
+{{- /* This file has no version-specific content */ -}}
 package container
 
 import (
@@ -9,12 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-{{ if eq $.TargetVersionName `ga` }}
-	container "google.golang.org/api/container/v1"
-{{ else }}
-	container "google.golang.org/api/container/v1beta1"
-{{ end }}
 )
 
 func TestPerformanceMonitoringUnitStandardPlan(t *testing.T) {
@@ -148,7 +143,7 @@ func TestUnitFlattenNodePool(t *testing.T) {
 	cases := []struct {
 		name                   string
 		d                      *schema.ResourceData
-		np                     *container.NodePool
+		np                     map[string]interface{}
 		prepopulateCache       bool
 		expectedNodeCount      int
 		expectedIgmUrls        []string
@@ -157,12 +152,12 @@ func TestUnitFlattenNodePool(t *testing.T) {
 		{
 			name: "Standard flow (ignore_node_count_changes=false) fetches from IGM",
 			d:    schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
-			np: &container.NodePool{
-				Name: "pool-1",
-				InstanceGroupUrls: []string{
+			np: map[string]interface{}{
+				"name": "pool-1",
+				"instanceGroupUrls": []interface{}{
 					"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp",
 				},
-				Locations: []string{"us-central1-a"},
+				"locations": []interface{}{"us-central1-a"},
 			},
 			prepopulateCache:  true,
 			expectedNodeCount: nodeCountFromAPI,
@@ -179,11 +174,11 @@ func TestUnitFlattenNodePool(t *testing.T) {
 				"ignore_node_count_changes": true,
 				"node_count":              10,
 			}),
-			np: &container.NodePool{
-				Name:              "pool-1",
-				InitialNodeCount:  3,
-				InstanceGroupUrls: []string{"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp"},
-				Locations:         []string{"us-central1-a"},
+			np: map[string]interface{}{
+				"name":              "pool-1",
+				"initialNodeCount":  float64(3),
+				"instanceGroupUrls": []interface{}{"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp"},
+				"locations":         []interface{}{"us-central1-a"},
 			},
 			prepopulateCache:  false, // Cache is empty, proving we skipped the API fetch
 			expectedNodeCount: 10,
@@ -197,11 +192,11 @@ func TestUnitFlattenNodePool(t *testing.T) {
 			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
 				"ignore_node_count_changes": true,
 			}),
-			np: &container.NodePool{
-				Name:              "pool-1",
-				InitialNodeCount:  3,
-				InstanceGroupUrls: []string{"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp"},
-				Locations:         []string{"us-central1-a"},
+			np: map[string]interface{}{
+				"name":              "pool-1",
+				"initialNodeCount":  float64(3),
+				"instanceGroupUrls": []interface{}{"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gke-pool-1-grp"},
+				"locations":         []interface{}{"us-central1-a"},
 			},
 			prepopulateCache:  false,
 			expectedNodeCount: 3,
@@ -254,5 +249,146 @@ func TestUnitFlattenNodePool(t *testing.T) {
 				t.Errorf("managed_instance_group_urls returned unexpected diff. +got, -want:\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestUnitExpandAndFlattenNodeConfig_StringInt64AndForceSend(t *testing.T) {
+	t.Parallel()
+
+	rawNodeConfig := []interface{}{
+		map[string]interface{}{
+			"machine_type":              "n2-standard-4",
+			"disk_size_gb":              100,
+			"local_ssd_encryption_mode": "STANDARD_ENCRYPTED",
+			"guest_accelerator": []interface{}{
+				map[string]interface{}{
+					"type":  "nvidia-tesla-t4",
+					"count": 2,
+				},
+			},
+			"advanced_machine_features": []interface{}{
+				map[string]interface{}{
+					"threads_per_core": 2,
+				},
+			},
+			"boot_disk": []interface{}{
+				map[string]interface{}{
+					"size_gb":                100,
+					"provisioned_iops":       3000,
+					"provisioned_throughput": 140,
+				},
+			},
+		},
+	}
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+		"node_config": schemaNodeConfig(),
+	}, map[string]interface{}{})
+
+	nc := expandNodeConfig(d, "", rawNodeConfig)
+	if nc["diskSizeGb"] != 100 {
+		t.Fatalf("expandNodeConfig diskSizeGb = %#v (%T), want int 100", nc["diskSizeGb"], nc["diskSizeGb"])
+	}
+	if nc["localSsdEncryptionMode"] != "STANDARD_ENCRYPTED" {
+		t.Fatalf("expandNodeConfig localSsdEncryptionMode = %#v, want STANDARD_ENCRYPTED", nc["localSsdEncryptionMode"])
+	}
+	accels, ok := nc["accelerators"].([]map[string]interface{})
+	if !ok || len(accels) != 1 || accels[0]["acceleratorCount"] != "2" {
+		t.Fatalf("expandNodeConfig accelerators = %#v, want string acceleratorCount=\"2\"", nc["accelerators"])
+	}
+	amf, ok := nc["advancedMachineFeatures"].(map[string]interface{})
+	if !ok || amf["threadsPerCore"] != "2" {
+		t.Fatalf("expandNodeConfig advancedMachineFeatures = %#v, want string threadsPerCore=\"2\"", nc["advancedMachineFeatures"])
+	}
+	bd, ok := nc["bootDisk"].(map[string]interface{})
+	if !ok || bd["sizeGb"] != "100" || bd["provisionedIops"] != "3000" || bd["provisionedThroughput"] != "140" {
+		t.Fatalf("expandNodeConfig bootDisk = %#v, want string sizeGb/provisionedIops/provisionedThroughput", nc["bootDisk"])
+	}
+
+	kc := expandKubeletConfig([]interface{}{
+		map[string]interface{}{
+			"cpu_manager_policy": "static",
+			"pod_pids_limit":     1024,
+		},
+	})
+	if kc["podPidsLimit"] != "1024" {
+		t.Fatalf("expandKubeletConfig podPidsLimit = %#v, want string \"1024\"", kc["podPidsLimit"])
+	}
+
+	// Verify flattenKubeletConfig and flattenNodeConfig parse ,string-encoded int64 fields to int.
+	flatKC := flattenKubeletConfig(map[string]interface{}{
+		"cpuManagerPolicy": "static",
+		"podPidsLimit":     "2048",
+	})
+	if len(flatKC) != 1 || flatKC[0]["pod_pids_limit"] != 2048 {
+		t.Fatalf("flattenKubeletConfig pod_pids_limit = %#v, want int 2048", flatKC)
+	}
+	flatNC := flattenNodeConfig(map[string]interface{}{
+		"machineType": "n2-standard-4",
+		"accelerators": []interface{}{
+			map[string]interface{}{
+				"acceleratorType":  "nvidia-tesla-t4",
+				"acceleratorCount": "4",
+			},
+		},
+		"advancedMachineFeatures": map[string]interface{}{
+			"threadsPerCore": "2",
+		},
+		"bootDisk": map[string]interface{}{
+			"sizeGb":                "100",
+			"provisionedIops":       "3000",
+			"provisionedThroughput": "140",
+		},
+	}, []interface{}{})
+	if len(flatNC) != 1 {
+		t.Fatalf("flattenNodeConfig len = %d, want 1", len(flatNC))
+	}
+	flatAccels := flatNC[0]["guest_accelerator"].([]map[string]interface{})
+	if flatAccels[0]["count"] != 4 {
+		t.Fatalf("flattenNodeConfig guest_accelerator count = %#v, want int 4", flatAccels[0]["count"])
+	}
+}
+
+func TestUnitExpandNodePool_StringInt64AndForceSend(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceContainerNodePool()
+	d := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+		"name":               "np-1",
+		"initial_node_count": 3,
+		"max_pods_per_node":  64,
+		"network_config": []interface{}{
+			map[string]interface{}{
+				"enable_private_nodes": false,
+			},
+		},
+		"autoscaling": []interface{}{
+			map[string]interface{}{
+				"min_node_count": 0,
+				"max_node_count": 5,
+			},
+		},
+	})
+
+	np, err := expandNodePool(d, "")
+	if err != nil {
+		t.Fatalf("expandNodePool failed: %v", err)
+	}
+	if np["initialNodeCount"] != 3 {
+		t.Fatalf("expandNodePool initialNodeCount = %#v, want int 3", np["initialNodeCount"])
+	}
+	mpc, ok := np["maxPodsConstraint"].(map[string]interface{})
+	if !ok || mpc["maxPodsPerNode"] != "64" {
+		t.Fatalf("expandNodePool maxPodsConstraint = %#v, want string maxPodsPerNode=\"64\"", np["maxPodsConstraint"])
+	}
+	nnc, ok := np["networkConfig"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expandNodePool networkConfig = %#v, want map", np["networkConfig"])
+	}
+	if val, exists := nnc["enablePrivateNodes"]; !exists || val != false {
+		t.Fatalf("expandNodePool networkConfig.enablePrivateNodes = %#v (exists=%t), want false", val, exists)
+	}
+	autoscaling, ok := np["autoscaling"].(map[string]interface{})
+	if !ok || autoscaling["enabled"] != true || autoscaling["minNodeCount"] != 0 || autoscaling["maxNodeCount"] != 5 {
+		t.Fatalf("expandNodePool autoscaling = %#v, want enabled=true, minNodeCount=0, maxNodeCount=5", np["autoscaling"])
 	}
 }

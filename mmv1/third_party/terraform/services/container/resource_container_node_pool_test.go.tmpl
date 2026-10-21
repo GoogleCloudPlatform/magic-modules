@@ -17,12 +17,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
-
-{{ if eq $.TargetVersionName "ga" }}
-	gke "google.golang.org/api/container/v1"
-{{- else }}
-	gke "google.golang.org/api/container/v1beta1"
-{{- end }}
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccContainerNodePool_basic(t *testing.T) {
@@ -3564,20 +3559,33 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 			attributes := rs.Primary.Attributes
 			location := attributes["location"]
 
-			var err error
+			var url string
 			if location != "" {
-				_, err = container.NewClient(config, config.UserAgent).Projects.Zones.Clusters.NodePools.Get(
-					config.Project, attributes["location"], attributes["cluster"], attributes["name"]).Do()
-			} else {
-				name := fmt.Sprintf(
-					"projects/%s/locations/%s/clusters/%s/nodePools/%s",
+				url = fmt.Sprintf(
+					"%sprojects/%s/zones/%s/clusters/%s/nodePools/%s",
+					transport_tpg.BaseUrl(container.Product, config),
 					config.Project,
 					attributes["location"],
 					attributes["cluster"],
 					attributes["name"],
 				)
-				_, err = container.NewClient(config, config.UserAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
+			} else {
+				url = fmt.Sprintf(
+					"%sprojects/%s/locations/%s/clusters/%s/nodePools/%s",
+					transport_tpg.BaseUrl(container.Product, config),
+					config.Project,
+					attributes["location"],
+					attributes["cluster"],
+					attributes["name"],
+				)
 			}
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 
 			if err == nil {
 				return fmt.Errorf("NodePool still exists")
@@ -7873,20 +7881,28 @@ func testAccResizeNodePoolExternally(t *testing.T, clusterName, poolName string,
 	config := acctest.GoogleProviderConfig(t)
 	userAgent := "terraform-provider-google-test"
 	location := "us-east1-b"
-	fqName := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", 
+	fqName := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s",
 		config.Project, location, clusterName, poolName)
-	
-	req := &gke.SetNodePoolSizeRequest{
-		NodeCount: size,
+
+	req := map[string]interface{}{}
+	if size != 0 {
+		req["nodeCount"] = size
 	}
-	
-	gkeClient := container.NewClient(config, userAgent)
-	op, err := gkeClient.Projects.Locations.Clusters.NodePools.SetSize(fqName, req).Do()
+
+	url := fmt.Sprintf("%s%s:setSize", transport_tpg.BaseUrl(container.Product, config), fqName)
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      req,
+	})
 	if err != nil {
 		t.Fatalf("Failed to resize node pool externally: %s", err)
 	}
-	
-	err = container.ContainerOperationWait(config, op, config.Project, location, "resizing node pool externally", userAgent, 20 * time.Minute)
+
+	err = container.ContainerOperationWait(config, op, config.Project, location, "resizing node pool externally", userAgent, 20*time.Minute)
 	if err != nil {
 		t.Fatalf("Failed waiting for external GKE resize operation: %s", err)
 	}

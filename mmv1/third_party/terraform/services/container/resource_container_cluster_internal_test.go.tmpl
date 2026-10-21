@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 {{ if ne $.TargetVersionName `ga` -}}
 	"strings"
 {{- end }}
@@ -17,84 +19,78 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/container/v1"
-{{- else }}
-	container "google.golang.org/api/container/v1beta1"
-{{- end }}
 )
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestValidateNodePoolAutoConfig(t *testing.T) {
-	withTags := &container.NodePoolAutoConfig{
-		NetworkTags: &container.NetworkTags{
-			Tags: []string{"not-empty"},
+	withTags := map[string]interface{}{
+		"networkTags": map[string]interface{}{
+			"tags": []string{"not-empty"},
 		},
 	}
-	noTags := &container.NodePoolAutoConfig{}
+	noTags := map[string]interface{}{}
 
 	cases := map[string]struct {
-		Input       *container.Cluster
+		Input       map[string]interface{}
 		ExpectError bool
 	}{
 		"with tags, nap nil, autopilot nil": {
-			Input:       &container.Cluster{NodePoolAutoConfig: withTags},
+			Input:       map[string]interface{}{"nodePoolAutoConfig": withTags},
 			ExpectError: true,
 		},
 		"with tags, autopilot disabled": {
-			Input: &container.Cluster{
-				Autopilot:          &container.Autopilot{Enabled: false},
-				NodePoolAutoConfig: withTags,
+			Input: map[string]interface{}{
+				"autopilot":          map[string]interface{}{"enabled": false},
+				"nodePoolAutoConfig": withTags,
 			},
 			ExpectError: true,
 		},
 		"with tags, nap disabled": {
-			Input: &container.Cluster{
-				Autoscaling:        &container.ClusterAutoscaling{EnableNodeAutoprovisioning: false},
-				NodePoolAutoConfig: withTags,
+			Input: map[string]interface{}{
+				"autoscaling":        map[string]interface{}{"enableNodeAutoprovisioning": false},
+				"nodePoolAutoConfig": withTags,
 			},
 			ExpectError: true,
 		},
 		"with tags, autopilot enabled": {
-			Input: &container.Cluster{
-				Autopilot:          &container.Autopilot{Enabled: true},
-				NodePoolAutoConfig: withTags,
+			Input: map[string]interface{}{
+				"autopilot":          map[string]interface{}{"enabled": true},
+				"nodePoolAutoConfig": withTags,
 			},
 			ExpectError: false,
 		},
 		"with tags, nap enabled": {
-			Input: &container.Cluster{
-				Autoscaling:        &container.ClusterAutoscaling{EnableNodeAutoprovisioning: true},
-				NodePoolAutoConfig: withTags,
+			Input: map[string]interface{}{
+				"autoscaling":        map[string]interface{}{"enableNodeAutoprovisioning": true},
+				"nodePoolAutoConfig": withTags,
 			},
 			ExpectError: false,
 		},
 		"no tags, autopilot enabled": {
-			Input: &container.Cluster{
-				Autopilot:          &container.Autopilot{Enabled: true},
-				NodePoolAutoConfig: noTags,
+			Input: map[string]interface{}{
+				"autopilot":          map[string]interface{}{"enabled": true},
+				"nodePoolAutoConfig": noTags,
 			},
 			ExpectError: false,
 		},
 		"no tags, nap enabled": {
-			Input: &container.Cluster{
-				Autoscaling:        &container.ClusterAutoscaling{EnableNodeAutoprovisioning: true},
-				NodePoolAutoConfig: noTags,
+			Input: map[string]interface{}{
+				"autoscaling":        map[string]interface{}{"enableNodeAutoprovisioning": true},
+				"nodePoolAutoConfig": noTags,
 			},
 			ExpectError: false,
 		},
 		"no tags, autopilot disabled": {
-			Input: &container.Cluster{
-				Autopilot:          &container.Autopilot{Enabled: false},
-				NodePoolAutoConfig: noTags,
+			Input: map[string]interface{}{
+				"autopilot":          map[string]interface{}{"enabled": false},
+				"nodePoolAutoConfig": noTags,
 			},
 			ExpectError: false,
 		},
 		"no tags, nap disabled": {
-			Input: &container.Cluster{
-				Autoscaling:        &container.ClusterAutoscaling{EnableNodeAutoprovisioning: false},
-				NodePoolAutoConfig: noTags,
+			Input: map[string]interface{}{
+				"autoscaling":        map[string]interface{}{"enableNodeAutoprovisioning": false},
+				"nodePoolAutoConfig": noTags,
 			},
 			ExpectError: false,
 		},
@@ -461,7 +457,7 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		config *container.UserManagedKeysConfig
+		config map[string]interface{}
 		want   []map[string]interface{}
 	}{
 		{
@@ -469,12 +465,12 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name:   "empty",
-			config: &container.UserManagedKeysConfig{},
+			config: map[string]interface{}{},
 		},
 		{
 			name: "cluster_ca",
-			config: &container.UserManagedKeysConfig{
-				ClusterCa: "value",
+			config: map[string]interface{}{
+				"clusterCa": "value",
 			},
 			want: []map[string]interface{}{
 				{
@@ -489,8 +485,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "etcd_api_ca",
-			config: &container.UserManagedKeysConfig{
-				EtcdApiCa: "value",
+			config: map[string]interface{}{
+				"etcdApiCa": "value",
 			},
 			want: []map[string]interface{}{
 				{
@@ -505,8 +501,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "etcd_peer_ca",
-			config: &container.UserManagedKeysConfig{
-				EtcdPeerCa: "value",
+			config: map[string]interface{}{
+				"etcdPeerCa": "value",
 			},
 			want: []map[string]interface{}{
 				{
@@ -521,8 +517,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "aggregation_ca",
-			config: &container.UserManagedKeysConfig{
-				AggregationCa: "value",
+			config: map[string]interface{}{
+				"aggregationCa": "value",
 			},
 			want: []map[string]interface{}{
 				{
@@ -537,8 +533,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "control_plane_disk_encryption_key",
-			config: &container.UserManagedKeysConfig{
-				ControlPlaneDiskEncryptionKey: "value",
+			config: map[string]interface{}{
+				"controlPlaneDiskEncryptionKey": "value",
 			},
 			want: []map[string]interface{}{
 				{
@@ -553,8 +549,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "gkeops_etcd_backup_encryption_key",
-			config: &container.UserManagedKeysConfig{
-				GkeopsEtcdBackupEncryptionKey: "value",
+			config: map[string]interface{}{
+				"gkeopsEtcdBackupEncryptionKey": "value",
 			},
 			want: []map[string]interface{}{
 				{
@@ -569,8 +565,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "service_account_signing_keys",
-			config: &container.UserManagedKeysConfig{
-				ServiceAccountSigningKeys: []string{"value"},
+			config: map[string]interface{}{
+				"serviceAccountSigningKeys": []interface{}{"value"},
 			},
 			want: []map[string]interface{}{
 				{
@@ -586,8 +582,8 @@ func TestContainerCluster_flattenUserManagedKeysConfig(t *testing.T) {
 		},
 		{
 			name: "service_account_verification_keys",
-			config: &container.UserManagedKeysConfig{
-				ServiceAccountVerificationKeys: []string{"value"},
+			config: map[string]interface{}{
+				"serviceAccountVerificationKeys": []interface{}{"value"},
 			},
 			want: []map[string]interface{}{
 				{
@@ -684,7 +680,7 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 	cases := []struct {
 		name        string
 		d           *schema.ResourceData
-		c           []*container.NodePool
+		c           []interface{}
 		expected    []map[string]interface{}
 		expectError bool
 	}{
@@ -696,15 +692,15 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 					map[string]interface{}{"name": "pool-2"},
 				},
 			}),
-			c: []*container.NodePool{
-				&container.NodePool{Name: "pool-1"},
-				&container.NodePool{Name: "pool-2"},
+			c: []interface{}{
+				map[string]interface{}{"name": "pool-1"},
+				map[string]interface{}{"name": "pool-2"},
 			},
 			expected: []map[string]interface{}{
 				{
 					"name":                        "pool-1",
 					"name_prefix":                 "",
-					"initial_node_count":          int64(0),
+					"initial_node_count":          0,
 					"node_locations":              schema.NewSet(schema.HashString, []interface{}{}),
 					"node_count":                  0,
 					"node_config":                 []map[string]interface{}{},
@@ -717,7 +713,7 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 				{
 					"name":                        "pool-2",
 					"name_prefix":                 "",
-					"initial_node_count":          int64(0),
+					"initial_node_count":          0,
 					"node_locations":              schema.NewSet(schema.HashString, []interface{}{}),
 					"node_count":                  0,
 					"node_config":                 []map[string]interface{}{},
@@ -735,7 +731,7 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
 				"node_pool": []interface{}{map[string]interface{}{"name": "default-pool"}},
 			}),
-			c:           []*container.NodePool{},
+			c:           []interface{}{},
 			expected:    []map[string]interface{}{},
 			expectError: false,
 		},
@@ -748,9 +744,9 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 				},
 				"skip_node_pool_refresh": true,
 			}),
-			c: []*container.NodePool{
-				&container.NodePool{Name: "pool-1"},
-				&container.NodePool{Name: "pool-2"},
+			c: []interface{}{
+				map[string]interface{}{"name": "pool-1"},
+				map[string]interface{}{"name": "pool-2"},
 			},
 			expected:    nil,
 			expectError: false,
@@ -760,7 +756,7 @@ func TestUnitFlattenClusterNodePools(t *testing.T) {
 			d: schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{
 				"skip_node_pool_refresh": true,
 			}),
-			c:           []*container.NodePool{&container.NodePool{Name: "pool-1"}},
+			c:           []interface{}{map[string]interface{}{"name": "pool-1"}},
 			expected:    nil,
 			expectError: false,
 		},
@@ -1129,14 +1125,14 @@ func TestUnitContainerCluster_flattenManagedOpenTelemetryConfig(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
-		in   *container.ManagedOpenTelemetryConfig
+		in   map[string]interface{}
 		want []map[string]interface{}
 	}{
 		"nil":   {nil, nil},
-		"empty": {&container.ManagedOpenTelemetryConfig{}, []map[string]interface{}{map[string]interface{}{"scope": ""}}},
-		"NONE":  {&container.ManagedOpenTelemetryConfig{Scope: "NONE"}, []map[string]interface{}{map[string]interface{}{"scope": "NONE"}}},
+		"empty": {map[string]interface{}{}, []map[string]interface{}{map[string]interface{}{"scope": ""}}},
+		"NONE":  {map[string]interface{}{"scope": "NONE"}, []map[string]interface{}{map[string]interface{}{"scope": "NONE"}}},
 		"COLLECTION": {
-			&container.ManagedOpenTelemetryConfig{Scope: "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"},
+			map[string]interface{}{"scope": "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"},
 			[]map[string]interface{}{map[string]interface{}{"scope": "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"}},
 		},
 	}
@@ -1296,5 +1292,379 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 				t.Errorf("request = %s, want %s", b, tc.wantRequest)
 			}
 		})
+	}
+}
+
+func TestUnitContainerCluster_effectiveLabelsRefreshClearsStaleLabels(t *testing.T) {
+	t.Parallel()
+
+	responses := []string{
+		`{
+			"name": "test-cluster",
+			"location": "us-central1-a",
+			"zone": "us-central1-a",
+			"locations": ["us-central1-a", "us-central1-b"],
+			"status": "RUNNING",
+			"resourceLabels": {
+				"env": "prod",
+				"team": "gke"
+			},
+			"labelFingerprint": "fp-1"
+		}`,
+		`{
+			"name": "test-cluster",
+			"location": "us-central1-a",
+			"locations": [""],
+			"status": "RUNNING",
+			"labelFingerprint": "fp-2"
+		}`,
+	}
+	reqIdx := 0
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(responses[reqIdx]))
+		reqIdx++
+	}))
+	defer ts.Close()
+
+	r := ResourceContainerCluster()
+	d := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+		"name":     "test-cluster",
+		"location": "us-central1-a",
+		"project":  "test-project",
+		"resource_labels": map[string]interface{}{
+			"env": "prod",
+		},
+		"terraform_labels": map[string]interface{}{
+			"env": "prod",
+		},
+	})
+	d.SetId("projects/test-project/locations/us-central1-a/clusters/test-cluster")
+
+	cfg := &transport_tpg.Config{
+		Project: "test-project",
+		CustomEndpoints: map[string]string{
+			"container_custom_endpoint": ts.URL + "/v1/",
+		},
+		Client:  ts.Client(),
+		Context: context.Background(),
+	}
+
+	// First Read: populates effective_labels with 2 keys and keeps resource_labels/terraform_labels.
+	if err := resourceContainerClusterRead(d, cfg); err != nil {
+		t.Fatalf("first resourceContainerClusterRead failed: %v", err)
+	}
+	if got := d.Get("effective_labels").(map[string]interface{}); len(got) != 2 || got["env"] != "prod" {
+		t.Fatalf("after first Read: effective_labels = %#v, want 2 labels", got)
+	}
+	if got := d.Get("resource_labels").(map[string]interface{}); len(got) != 1 || got["env"] != "prod" {
+		t.Fatalf("after first Read: resource_labels = %#v, want env=prod", got)
+	}
+	if got := d.Get("node_locations").(*schema.Set).List(); len(got) != 1 || got[0] != "us-central1-b" {
+		t.Fatalf("after first Read: node_locations = %#v, want [us-central1-b]", got)
+	}
+
+	// Second Read: resourceLabels omitted from API response; effective_labels, resource_labels, and terraform_labels must all be cleared.
+	if err := resourceContainerClusterRead(d, cfg); err != nil {
+		t.Fatalf("second resourceContainerClusterRead failed: %v", err)
+	}
+	if got := d.Get("effective_labels").(map[string]interface{}); len(got) != 0 {
+		t.Fatalf("after second Read: stale effective_labels retained in state: %#v, want empty map", got)
+	}
+	if got := d.Get("resource_labels").(map[string]interface{}); len(got) != 0 {
+		t.Fatalf("after second Read: stale resource_labels retained in state: %#v, want empty map", got)
+	}
+	if got := d.Get("terraform_labels").(map[string]interface{}); len(got) != 0 {
+		t.Fatalf("after second Read: stale terraform_labels retained in state: %#v, want empty map", got)
+	}
+	if got := d.Get("node_locations").(*schema.Set).List(); len(got) != 0 {
+		t.Fatalf("after second Read: node_locations = %#v, want empty set", got)
+	}
+}
+
+func TestUnitContainerOperationWaiter(t *testing.T) {
+	t.Parallel()
+
+	var w *ContainerOperationWaiter
+	if got := w.State(); got != "<nil>" {
+		t.Fatalf("nil waiter State() = %q, want <nil>", got)
+	}
+	if got := w.OpName(); got != "<nil>" {
+		t.Fatalf("nil waiter OpName() = %q, want <nil>", got)
+	}
+	if err := w.Error(); err != nil {
+		t.Fatalf("nil waiter Error() = %v, want nil", err)
+	}
+
+	w = &ContainerOperationWaiter{}
+	if err := w.SetOp("not-a-map"); err == nil {
+		t.Fatal("SetOp with non-map expected error, got nil")
+	}
+	if err := w.SetOp(map[string]interface{}{
+		"name":          "op-123",
+		"status":        "RUNNING",
+		"statusMessage": "still running",
+	}); err != nil {
+		t.Fatalf("SetOp unexpected error: %v", err)
+	}
+	if got := w.State(); got != "RUNNING" {
+		t.Fatalf("State() = %q, want RUNNING", got)
+	}
+	if got := w.OpName(); got != "op-123" {
+		t.Fatalf("OpName() = %q, want op-123", got)
+	}
+	if err := w.Error(); err != nil {
+		t.Fatalf("Error() while RUNNING = %v, want nil", err)
+	}
+
+	_ = w.SetOp(map[string]interface{}{
+		"name":          "op-123",
+		"status":        "DONE",
+		"statusMessage": "operation failed: quota exceeded",
+	})
+	if err := w.Error(); err == nil || err.Error() != "operation failed: quota exceeded" {
+		t.Fatalf("Error() when DONE with statusMessage = %v, want quota exceeded error", err)
+	}
+
+	polls := 0
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		polls++
+		if polls == 1 {
+			rw.Write([]byte(`{"name":"op-123","status":"RUNNING"}`))
+			return
+		}
+		rw.Write([]byte(`{"name":"op-123","status":"DONE"}`))
+	}))
+	defer ts.Close()
+
+	cfg := &transport_tpg.Config{
+		Project: "test-project",
+		CustomEndpoints: map[string]string{
+			"container_custom_endpoint": ts.URL + "/v1/",
+		},
+		Client:       ts.Client(),
+		Context:      context.Background(),
+		PollInterval: time.Millisecond,
+	}
+	err := ContainerOperationWait(cfg, map[string]interface{}{
+		"name":   "op-123",
+		"status": "PENDING",
+	}, "test-project", "us-central1", "testing operation wait", "test-ua", 5*time.Second)
+	if err != nil {
+		t.Fatalf("ContainerOperationWait failed: %v", err)
+	}
+	if polls < 2 {
+		t.Fatalf("expected at least 2 operation polls, got %d", polls)
+	}
+}
+
+func TestUnitContainerOperationWaiter_BrownoutRetry(t *testing.T) {
+	// Not parallel: temporarily lowers DefaultRequestTimeout to test multi-window brownout recovery in <1s.
+	origTimeout := transport_tpg.DefaultRequestTimeout
+	transport_tpg.DefaultRequestTimeout = 100 * time.Millisecond
+	defer func() {
+		transport_tpg.DefaultRequestTimeout = origTimeout
+	}()
+
+	start := time.Now()
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		if time.Since(start) < 250*time.Millisecond {
+			time.Sleep(40 * time.Millisecond)
+			rw.WriteHeader(http.StatusServiceUnavailable)
+			rw.Write([]byte(`{"error":{"code":503,"message":"backend brownout"}}`))
+			return
+		}
+		rw.Write([]byte(`{"name":"op-brownout","status":"DONE"}`))
+	}))
+	defer ts.Close()
+
+	cfg := &transport_tpg.Config{
+		Project: "test-project",
+		CustomEndpoints: map[string]string{
+			"container_custom_endpoint": ts.URL + "/v1/",
+		},
+		Client:       ts.Client(),
+		Context:      context.Background(),
+		PollInterval: 10 * time.Millisecond,
+	}
+	err := ContainerOperationWait(cfg, map[string]interface{}{
+		"name":   "op-brownout",
+		"status": "RUNNING",
+	}, "test-project", "us-central1", "testing brownout wait", "test-ua", 5*time.Second)
+	if err != nil {
+		t.Fatalf("ContainerOperationWait failed during retryable 503 brownout exceeding DefaultRequestTimeout: %v", err)
+	}
+}
+
+func TestUnitContainerCluster_expandWireSerialization(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceContainerCluster()
+
+	// 1. AddonsConfig: verify camelCase keys and ForceSend zero-value booleans.
+	addons := expandClusterAddonsConfig([]interface{}{
+		map[string]interface{}{
+			"http_load_balancing": []interface{}{
+				map[string]interface{}{"disabled": false},
+			},
+			"horizontal_pod_autoscaling": []interface{}{
+				map[string]interface{}{"disabled": true},
+			},
+			"gce_persistent_disk_csi_driver_config": []interface{}{
+				map[string]interface{}{"enabled": false},
+			},
+		},
+	})
+	if hlb, ok := addons["httpLoadBalancing"].(map[string]interface{}); !ok || hlb["disabled"] != false {
+		t.Fatalf("expandClusterAddonsConfig httpLoadBalancing = %#v, want disabled=false", addons["httpLoadBalancing"])
+	}
+	if pd, ok := addons["gcePersistentDiskCsiDriverConfig"].(map[string]interface{}); !ok || pd["enabled"] != false {
+		t.Fatalf("expandClusterAddonsConfig gcePersistentDiskCsiDriverConfig = %#v, want enabled=false", addons["gcePersistentDiskCsiDriverConfig"])
+	}
+
+	// 2. IPAllocationPolicy: verify useIpAliases key and explicit stackType.
+	dIP := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+		"ip_allocation_policy": []interface{}{
+			map[string]interface{}{
+				"stack_type": "IPV4",
+			},
+		},
+	})
+	ipPolicy, _, err := expandIPAllocationPolicy(dIP.Get("ip_allocation_policy"), dIP, "VPC_NATIVE", false, &transport_tpg.Config{})
+	if err != nil {
+		t.Fatalf("expandIPAllocationPolicy failed: %v", err)
+	}
+	if ipPolicy["useIpAliases"] != true || ipPolicy["stackType"] != "IPV4" {
+		t.Fatalf("expandIPAllocationPolicy = %#v, want useIpAliases=true and stackType=IPV4", ipPolicy)
+	}
+
+	// 3. ClusterAutoscaling: verify ,string-encoded ResourceLimit minimum/maximum and zero-value ForceSend.
+	dCA := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+		"cluster_autoscaling": []interface{}{
+			map[string]interface{}{
+				"enabled": true,
+				"resource_limits": []interface{}{
+					map[string]interface{}{
+						"resource_type": "cpu",
+						"minimum":       2,
+						"maximum":       16,
+					},
+				},
+			},
+		},
+	})
+	ca := expandClusterAutoscaling(dCA.Get("cluster_autoscaling"), dCA)
+	limits, ok := ca["resourceLimits"].([]map[string]interface{})
+	if !ok || len(limits) != 1 || limits[0]["minimum"] != "2" || limits[0]["maximum"] != "16" {
+		t.Fatalf("expandClusterAutoscaling resourceLimits = %#v, want string-encoded minimum=\"2\" and maximum=\"16\"", ca["resourceLimits"])
+	}
+	flattenedCA := flattenClusterAutoscaling(map[string]interface{}{
+		"enableNodeAutoprovisioning": true,
+		"resourceLimits": []interface{}{
+			map[string]interface{}{
+				"resourceType": "cpu",
+				"minimum":      "4",
+				"maximum":      "32",
+			},
+		},
+	})
+	flatLimits := flattenedCA[0]["resource_limits"].([]interface{})
+	flatLimit0 := flatLimits[0].(map[string]interface{})
+	if flatLimit0["minimum"] != 4 || flatLimit0["maximum"] != 32 {
+		t.Fatalf("flattenClusterAutoscaling resource_limits = %#v, want int 4 and 32", flatLimits)
+	}
+
+	// 4. ControlPlaneEndpointsConfig & PrivateClusterConfigMasterIpv4CidrBlock: verify ForceSend fields and nil safety.
+	dPCC := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+		"private_cluster_config": []interface{}{
+			map[string]interface{}{
+				"enable_private_nodes":    true,
+				"enable_private_endpoint": true,
+				"master_ipv4_cidr_block":  "172.16.0.0/28",
+			},
+		},
+	})
+	cpec := expandControlPlaneEndpointsConfig(dPCC)
+	ipEndpoints, ok := cpec["ipEndpointsConfig"].(map[string]interface{})
+	if !ok || ipEndpoints["enablePublicEndpoint"] != false {
+		t.Fatalf("expandControlPlaneEndpointsConfig ipEndpointsConfig = %#v, want enablePublicEndpoint=false", cpec["ipEndpointsConfig"])
+	}
+	pcc := expandPrivateClusterConfigMasterIpv4CidrBlock(dPCC.Get("private_cluster_config.0.master_ipv4_cidr_block"), map[string]interface{}{
+		"networkConfig": map[string]interface{}{
+			"defaultEnablePrivateNodes": true,
+		},
+	})
+	if pcc["masterIpv4CidrBlock"] != "172.16.0.0/28" || pcc["enablePrivateNodes"] != true {
+		t.Fatalf("expandPrivateClusterConfigMasterIpv4CidrBlock = %#v, want masterIpv4CidrBlock and enablePrivateNodes=true", pcc)
+	}
+
+	// 5. NodePoolAutoConfigNetworkTags with []interface{}{nil} and AgentSandboxConfig with enabled=false.
+	nt := expandNodePoolAutoConfigNetworkTags([]interface{}{
+		map[string]interface{}{
+			"tags": []interface{}{nil},
+		},
+	})
+	if _, hasTags := nt["tags"]; hasTags {
+		t.Fatalf("expandNodePoolAutoConfigNetworkTags with nil tag element = %#v, want tags omitted", nt)
+	}
+	asc := expandAgentSandboxConfig([]interface{}{
+		map[string]interface{}{
+			"enabled": false,
+		},
+	})
+	if _, hasEnabled := asc["enabled"]; hasEnabled {
+		t.Fatalf("expandAgentSandboxConfig with enabled=false = %#v, want enabled omitted", asc)
+	}
+
+	// 6. expandMaintenancePolicy: verify unknown/output-only keys on GET exclusions are stripped when maintenance_policy is empty.
+	tsMP := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{
+			"maintenancePolicy": {
+				"resourceVersion": "rv-1",
+				"window": {
+					"maintenanceExclusions": {
+						"excl-1": {
+							"startTime": "2026-01-01T00:00:00Z",
+							"endTime": "2026-01-02T00:00:00Z",
+							"unknownOutputOnlyField": "should-be-dropped",
+							"maintenanceExclusionOptions": {
+								"scope": "NO_UPGRADES",
+								"extraOption": "should-also-be-dropped"
+							}
+						}
+					}
+				}
+			}
+		}`))
+	}))
+	defer tsMP.Close()
+	dMP := schema.TestResourceDataRaw(t, r.Schema, map[string]interface{}{
+		"name":     "test-cluster",
+		"location": "us-central1-a",
+		"project":  "test-project",
+	})
+	cfgMP := &transport_tpg.Config{
+		Project: "test-project",
+		CustomEndpoints: map[string]string{
+			"container_custom_endpoint": tsMP.URL + "/v1/",
+		},
+		Client:  tsMP.Client(),
+		Context: context.Background(),
+	}
+	mp := expandMaintenancePolicy(dMP, cfgMP)
+	mpWin := mp["window"].(map[string]interface{})
+	mpExcl := mpWin["maintenanceExclusions"].(map[string]interface{})["excl-1"].(map[string]interface{})
+	if _, hasUnknown := mpExcl["unknownOutputOnlyField"]; hasUnknown {
+		t.Fatalf("expandMaintenancePolicy leaked unknownOutputOnlyField into request: %#v", mpExcl)
+	}
+	mpOpts := mpExcl["maintenanceExclusionOptions"].(map[string]interface{})
+	if mpOpts["scope"] != "NO_UPGRADES" {
+		t.Fatalf("expandMaintenancePolicy scope = %#v, want NO_UPGRADES", mpOpts["scope"])
+	}
+	if _, hasExtra := mpOpts["extraOption"]; hasExtra {
+		t.Fatalf("expandMaintenancePolicy leaked extraOption into request: %#v", mpOpts)
 	}
 }

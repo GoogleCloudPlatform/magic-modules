@@ -89,22 +89,35 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 	}
 
 	location = fmt.Sprintf("projects/%s/locations/%s", project, location)
-	resp, err := NewClient(config, userAgent).Projects.Locations.GetServerConfig(location).Do()
+	url := fmt.Sprintf("%s%s/serverConfig", transport_tpg.BaseUrl(Product, config), location)
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return fmt.Errorf("Error retrieving available container cluster versions: %s", err.Error())
 	}
 
 	validMasterVersions := make([]string, 0)
-	for _, v := range resp.ValidMasterVersions {
-		if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
-			validMasterVersions = append(validMasterVersions, v)
+	if rawVersions, ok := resp["validMasterVersions"].([]interface{}); ok {
+		for _, rawV := range rawVersions {
+			v, _ := rawV.(string)
+			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
+				validMasterVersions = append(validMasterVersions, v)
+			}
 		}
 	}
 
 	validNodeVersions := make([]string, 0)
-	for _, v := range resp.ValidNodeVersions {
-		if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
-			validNodeVersions = append(validNodeVersions, v)
+	if rawVersions, ok := resp["validNodeVersions"].([]interface{}); ok {
+		for _, rawV := range rawVersions {
+			v, _ := rawV.(string)
+			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
+				validNodeVersions = append(validNodeVersions, v)
+			}
 		}
 	}
 
@@ -126,20 +139,32 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		}
 	}
 
-	if err := d.Set("default_cluster_version", resp.DefaultClusterVersion); err != nil {
+	if err := d.Set("default_cluster_version", resp["defaultClusterVersion"]); err != nil {
 		return fmt.Errorf("Error setting default_cluster_version: %s", err)
 	}
 
 	releaseChannelDefaultVersion := map[string]string{}
 	releaseChannelLatestVersion := map[string]string{}
 	releaseChannelUpgradeTargetVersion := map[string]string{}
-	for _, channelResp := range resp.Channels {
-		releaseChannelDefaultVersion[channelResp.Channel] = channelResp.DefaultVersion
-		releaseChannelUpgradeTargetVersion[channelResp.Channel] = channelResp.UpgradeTargetVersion
-		for _, v := range channelResp.ValidVersions {
-			if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
-				releaseChannelLatestVersion[channelResp.Channel] = v
-				break
+	if channels, ok := resp["channels"].([]interface{}); ok {
+		for _, rawChannel := range channels {
+			channelResp, ok := rawChannel.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			channelName, _ := channelResp["channel"].(string)
+			defaultVersion, _ := channelResp["defaultVersion"].(string)
+			upgradeTargetVersion, _ := channelResp["upgradeTargetVersion"].(string)
+			releaseChannelDefaultVersion[channelName] = defaultVersion
+			releaseChannelUpgradeTargetVersion[channelName] = upgradeTargetVersion
+			if validVersions, ok := channelResp["validVersions"].([]interface{}); ok {
+				for _, rawV := range validVersions {
+					v, _ := rawV.(string)
+					if strings.HasPrefix(v, d.Get("version_prefix").(string)) {
+						releaseChannelLatestVersion[channelName] = v
+						break
+					}
+				}
 			}
 		}
 	}
