@@ -1811,33 +1811,33 @@ func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
 
 	acceptableByApi_1 := map[string]interface{}{
 		"instance_name": instanceName,
-		"enabled":       fmt.Sprintf("enabled = %t", true),
-		"seconds":       fmt.Sprintf("seconds = %d", 1),
-		"nanos":         fmt.Sprintf("nanos = %d", 1000000),
+		"enabled":       true,
+		"seconds":       1,
+		"nanos":         1000000,
 	}
 	invalid_1 := map[string]interface{}{
 		"instance_name": instanceName,
-		"enabled":       fmt.Sprintf("enabled = %t", true),
-		"seconds":       "",
-		"nanos":         "",
+		"enabled":       true,
+		"seconds":       nil,
+		"nanos":         nil,
 	}
 	invalid_2 := map[string]interface{}{
 		"instance_name": instanceName,
-		"enabled":       "",
-		"seconds":       "",
-		"nanos":         "",
+		"enabled":       nil,
+		"seconds":       nil,
+		"nanos":         nil,
 	}
 	invalid_3 := map[string]interface{}{
 		"instance_name": instanceName,
-		"enabled":       fmt.Sprintf("enabled = %t", true),
-		"seconds":       fmt.Sprintf("seconds = %d", 86400),
-		"nanos":         fmt.Sprintf("nanos = %d", 1000000),
+		"enabled":       true,
+		"seconds":       86400,
+		"nanos":         1000000,
 	}
 	invalid_4 := map[string]interface{}{
 		"instance_name": instanceName,
-		"enabled":       fmt.Sprintf("enabled = %t", true),
-		"seconds":       fmt.Sprintf("seconds = %d", 0),
-		"nanos":         fmt.Sprintf("nanos = %d", 1000000000),
+		"enabled":       true,
+		"seconds":       0,
+		"nanos":         1000000000,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5687,11 +5687,11 @@ resource "google_compute_region_instance_template" "foobar" {
 	preemptible = false
 
 	graceful_shutdown {
-	  %{enabled}
+	  enabled = %{enabled}
 
 	  max_duration {
-		%{seconds}
-		%{nanos}
+		seconds = %{seconds}
+		nanos   = %{nanos}
 	  }
 	}
   }
