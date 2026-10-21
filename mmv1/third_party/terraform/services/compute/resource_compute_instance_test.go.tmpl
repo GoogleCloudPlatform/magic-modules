@@ -4786,38 +4786,38 @@ func TestAccComputeInstance_GracefulShutdownWithResetUpdate(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acceptableByApi_1 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": fmt.Sprintf("allow_stopping_for_update = %t", true),
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 1),
-		"nanos":                     "",
+		"allow_stopping_for_update": true,
+		"enabled":                   true,
+		"seconds":                   1,
+		"nanos":                     nil,
 	}
 	acceptableByApi_2 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": fmt.Sprintf("allow_stopping_for_update = %t", true),
-		"enabled":                   fmt.Sprintf("enabled = %t", false),
-		"seconds":                   fmt.Sprintf("seconds = %d", 1),
-		"nanos":                     fmt.Sprintf("nanos = %d", 1000),
+		"allow_stopping_for_update": true,
+		"enabled":                   false,
+		"seconds":                   1,
+		"nanos":                     1000,
 	}
 	acceptableByApi_3 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": fmt.Sprintf("allow_stopping_for_update = %t", true),
-		"enabled":                   fmt.Sprintf("enabled = %t", false),
-		"seconds":                   fmt.Sprintf("seconds = %d", 100),
-		"nanos":                     "",
+		"allow_stopping_for_update": true,
+		"enabled":                   false,
+		"seconds":                   100,
+		"nanos":                     nil,
 	}
 	ivalid_1 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": fmt.Sprintf("allow_stopping_for_update = %t", true),
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 86400),
-		"nanos":                     "",
+		"allow_stopping_for_update": true,
+		"enabled":                   true,
+		"seconds":                   86400,
+		"nanos":                     nil,
 	}
 	ivalid_2 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": fmt.Sprintf("allow_stopping_for_update = %t", true),
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 0),
-		"nanos":                     fmt.Sprintf("nanos = %d", 1000000000),
+		"allow_stopping_for_update": true,
+		"enabled":                   true,
+		"seconds":                   0,
+		"nanos":                     1000000000,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4870,52 +4870,52 @@ func TestAccComputeInstance_GracefulShutdownWithoutResetUpdate(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acceptableByApi_1 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 1),
-		"nanos":                     "",
+		"allow_stopping_for_update": nil,
+		"enabled":                   true,
+		"seconds":                   1,
+		"nanos":                     nil,
 	}
 	acceptableByApi_2 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   fmt.Sprintf("enabled = %t", false),
-		"seconds":                   fmt.Sprintf("seconds = %d", 1),
-		"nanos":                     fmt.Sprintf("nanos = %d", 1000),
+		"allow_stopping_for_update": nil,
+		"enabled":                   false,
+		"seconds":                   1,
+		"nanos":                     1000,
 	}
 	acceptableByApi_3 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   fmt.Sprintf("enabled = %t", false),
-		"seconds":                   fmt.Sprintf("seconds = %d", 100),
-		"nanos":                     "",
+		"allow_stopping_for_update": nil,
+		"enabled":                   false,
+		"seconds":                   100,
+		"nanos":                     nil,
 	}
 	ivalid_1 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   "",
-		"nanos":                     "",
+		"allow_stopping_for_update": nil,
+		"enabled":                   true,
+		"seconds":                   nil,
+		"nanos":                     nil,
 	}
 	ivalid_2 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   "",
-		"seconds":                   "",
-		"nanos":                     "",
+		"allow_stopping_for_update": nil,
+		"enabled":                   nil,
+		"seconds":                   nil,
+		"nanos":                     nil,
 	}
 	ivalid_3 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 86400),
-		"nanos":                     "",
+		"allow_stopping_for_update": nil,
+		"enabled":                   true,
+		"seconds":                   86400,
+		"nanos":                     nil,
 	}
 	ivalid_4 := map[string]interface{}{
 		"instance_name":             instanceName,
-		"allow_stopping_for_update": "",
-		"enabled":                   fmt.Sprintf("enabled = %t", true),
-		"seconds":                   fmt.Sprintf("seconds = %d", 0),
-		"nanos":                     fmt.Sprintf("nanos = %d", 1000000000),
+		"allow_stopping_for_update": nil,
+		"enabled":                   true,
+		"seconds":                   0,
+		"nanos":                     1000000000,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5354,10 +5354,10 @@ data "google_compute_image" "my_image" {
 	project = "debian-cloud"
 }
 resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-	%{allow_stopping_for_update}
+	name                      = "%{instance_name}"
+	machine_type              = "e2-medium"
+	zone                      = "us-central1-a"
+	allow_stopping_for_update = %{allow_stopping_for_update}
 
 	boot_disk {
 		initialize_params {
@@ -5372,10 +5372,10 @@ resource "google_compute_instance" "foobar" {
 
 	scheduling {
 		graceful_shutdown {
-			%{enabled}
+			enabled = %{enabled}
 			max_duration {
-				%{seconds}
-				%{nanos}
+				seconds = %{seconds}
+				nanos   = %{nanos}
 			}
 		}
 	}
