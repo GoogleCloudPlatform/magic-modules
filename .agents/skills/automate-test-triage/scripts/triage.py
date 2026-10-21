@@ -5,8 +5,6 @@ import os
 import re
 import subprocess
 import sys
-import urllib.parse
-import urllib.request
 from collections import defaultdict
 
 def get_date_str(days_ago, base_date=None):
@@ -325,47 +323,6 @@ def sanitize_for_comparison(error_str):
     
     return s.strip()
 
-
-def fetch_github_issues_fallback():
-    issues = []
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "User-Agent": "magic-modules-test-triage",
-    }
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-
-    for page in range(1, 11):
-        params = urllib.parse.urlencode({
-            "labels": "test-failure",
-            "state": "open",
-            "per_page": 100,
-            "page": page,
-        })
-        url = f"https://api.github.com/repos/hashicorp/terraform-provider-google/issues?{params}"
-        req = urllib.request.Request(url, headers=headers)
-        try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                if not data:
-                    break
-                for item in data:
-                    if "pull_request" in item:
-                        continue
-                    issues.append({
-                        "number": item.get("number"),
-                        "title": item.get("title", ""),
-                        "url": item.get("html_url", ""),
-                    })
-                if len(data) < 100:
-                    break
-        except Exception as e:
-            print(f"Warning: GitHub REST API fallback failed on page {page}: {e}")
-            break
-    return issues
-
-
 def find_issue_link(test_name, issues):
     exact_target = f"Failing test(s): {test_name}"
     for issue in issues:
@@ -453,20 +410,14 @@ def main():
     # Fetch GitHub issues
     issues = []
     print("Fetching open test-failure issues from GitHub...")
-    try:
-        gh_res = subprocess.run(["gh", "issue", "list", "--repo", "hashicorp/terraform-provider-google", "--label", "test-failure", "--state", "open", "--limit", "1000", "--json", "number,title,url"], capture_output=True, text=True)
-        if gh_res.returncode == 0:
-            try:
-                issues = json.loads(gh_res.stdout)
-            except Exception as e:
-                print(f"Failed to parse gh issue list JSON: {e}")
-                issues = fetch_github_issues_fallback()
-        else:
-            print(f"Failed to fetch GitHub issues via gh CLI: {gh_res.stderr}")
-            issues = fetch_github_issues_fallback()
-    except FileNotFoundError:
-        print("Warning: 'gh' CLI not found in PATH; falling back to GitHub REST API...")
-        issues = fetch_github_issues_fallback()
+    gh_res = subprocess.run(["gh", "issue", "list", "--repo", "hashicorp/terraform-provider-google", "--label", "test-failure", "--state", "open", "--limit", "1000", "--json", "number,title,url"], capture_output=True, text=True)
+    if gh_res.returncode == 0:
+        try:
+            issues = json.loads(gh_res.stdout)
+        except Exception as e:
+            print(f"Failed to parse gh issue list JSON: {e}")
+    else:
+        print(f"Failed to fetch GitHub issues: {gh_res.stderr}")
 
     report_date = beta_date or ga_date or get_date_str(0, base_date=base_date)
     output_file = f"tmp/test-status/test-report-{report_date}.md"
