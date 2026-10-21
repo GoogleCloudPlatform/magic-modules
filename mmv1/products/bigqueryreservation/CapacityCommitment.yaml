@@ -47,12 +47,19 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: bigquery_reservation_capacity_commitment_basic
+        vars:
+          capacity_commitment_id: example-commitment
+        test_vars_overrides:
+          capacity_commitment_id: '"tf-test-capacity-" + randomSuffix'
   - name: bigquery_reservation_capacity_commitment_no_id
     primary_resource_id: commitment
     external_providers: [random, time]
     exclude_basic_doc: true
     steps:
       - name: bigquery_reservation_capacity_commitment_no_id
+        config_path: templates/terraform/samples/services/bigqueryreservation/bigquery_reservation_capacity_commitment_basic.tf.tmpl
+        vars:
+          capacity_commitment_id: null
   - name: bigquery_reservation_capacity_commitment_docs
     exclude_test: true
     steps:
