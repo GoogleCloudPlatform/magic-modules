@@ -1255,3 +1255,178 @@ func TestResourceFirstRunnableTestConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestShouldGenerateEphemeralResource(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no ephemeral_experimental block returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "ephemeral_experimental present but generate false returns false",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate: false,
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "ephemeral_experimental with generate true returns true",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate: true,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateEphemeralResource(); got != tc.expected {
+				t.Errorf("ShouldGenerateEphemeralResource() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestShouldGenerateEphemeralResourceTests(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no ephemeral_experimental block returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "exclude_test true returns false",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate:    true,
+					ExcludeTest: true,
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "exclude_test false returns true",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate:    true,
+					ExcludeTest: false,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateEphemeralResourceTests(); got != tc.expected {
+				t.Errorf("ShouldGenerateEphemeralResourceTests() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestHasEphemeralNestedProperties(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no properties returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "only flat properties returns false",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+					{Name: "keyId", Type: "String"},
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "a NestedObject property returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{Name: "name", Type: "String"},
+					{Name: "filter", Type: "NestedObject"},
+				},
+			},
+			expected: true,
+		},
+		{
+			description: "an Array of NestedObject returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:     "items",
+						Type:     "Array",
+						ItemType: &api.Type{Type: "NestedObject"},
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			description: "an Array of scalars returns false",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:     "items",
+						Type:     "Array",
+						ItemType: &api.Type{Type: "String"},
+					},
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "a Map of NestedObject returns true",
+			resource: api.Resource{
+				Properties: []*api.Type{
+					{
+						Name:      "labelsLike",
+						Type:      "Map",
+						ValueType: &api.Type{Type: "NestedObject"},
+					},
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.HasEphemeralNestedProperties(); got != tc.expected {
+				t.Errorf("HasEphemeralNestedProperties() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}

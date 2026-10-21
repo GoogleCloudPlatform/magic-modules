@@ -1,0 +1,1 @@
+fmt.Sprintf("%s{{template "EphemeralUrlFormatFW" .}}", transport_tpg.BaseUrl(Product, config){{range $id := .Resource.ExtractIdentifiers .Url}}, {{template "EphemeralUrlArgFW" $id}}{{end}})

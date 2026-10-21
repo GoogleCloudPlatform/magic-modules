@@ -1,0 +1,213 @@
+{{/* The license inside this block applies to this file
+  Copyright 2026 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+	"context"
+	"fmt"
+
+{{- if $.HasEphemeralNestedProperties }}
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+{{- end }}
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"{{ $.ImportPath }}/fwutils"
+	"{{ $.ImportPath }}/registry"
+	transport_tpg "{{ $.ImportPath }}/transport"
+)
+
+var _ ephemeral.EphemeralResource = &googleEphemeral{{$.ResourceName}}{}
+
+func init() {
+	registry.FrameworkEphemeralResource{
+		Name:        "{{ $.TerraformName }}",
+		ProductName: "{{ lower $.ProductMetadata.Name }}",
+		Func:        GoogleEphemeral{{$.ResourceName}},
+	}.Register()
+}
+
+func GoogleEphemeral{{$.ResourceName}}() ephemeral.EphemeralResource {
+	return &googleEphemeral{{$.ResourceName}}{}
+}
+
+type googleEphemeral{{$.ResourceName}} struct {
+	providerConfig *transport_tpg.Config
+}
+
+type ephemeral{{$.ResourceName}}Model struct {
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+	{{ camelize $prop.Name "upper" }} types.{{ $prop.GetFWType }} `tfsdk:"{{ underscore $prop.Name }}"`
+{{- end }}
+	{{/* project/region/zone are frequently referenced via {{var}} in create_url/
+	  self_link (HasProject/HasRegion/HasZone just check for that substring) but
+	  are NOT necessarily properties in AllUserProperties — MMv1 only adds them
+	  there for identity/list-scope purposes, not generally. Hardcoded here,
+	  matching how resource_fw.go.tmpl handles the exact same gap for the schema
+	  (not the model, which is unique to the FW resource template — this mirrors
+	  its schema-level "project"/"self_link"/"id" fields, adapted for the model
+	  struct too, since ephemeral resources have no separate Read-only container). */}}
+{{- if $.HasProject }}
+	Project types.String `tfsdk:"project"`
+{{- end }}
+{{- if $.HasRegion }}
+	Region types.String `tfsdk:"region"`
+{{- end }}
+{{- if $.HasZone }}
+	Zone types.String `tfsdk:"zone"`
+{{- end }}
+}
+
+func (p *googleEphemeral{{$.ResourceName}}) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
+	// TerraformName already includes the "google_" prefix and the product name
+	// (e.g. "google_storage_control_project_intelligence_config") — unlike
+	// req.ProviderTypeName + name, which only works for resources with no
+	// product prefix in their type name (the handwritten ephemeral resources
+	// this was originally copied from, e.g. google_client_config, don't have one).
+	resp.TypeName = "{{ $.TerraformName }}"
+}
+
+func (p *googleEphemeral{{$.ResourceName}}) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		{{/* Description/MarkdownDescription are deliberately omitted, matching
+		  resource_fw.go.tmpl and schema_property_ephemeral_fw.go.tmpl: MMv1
+		  YAML descriptions are almost always multi-line and unsafe to
+		  interpolate into a Go string literal without a proper escaping
+		  helper, which doesn't exist in the template FuncMap. */}}
+		Attributes: map[string]schema.Attribute{
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+			{{ template "SchemaFieldsEphemeralFW" $prop -}}
+{{- end }}
+{{- if $.HasProject }}
+			"project": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end }}
+{{- if $.HasRegion }}
+			"region": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end }}
+{{- if $.HasZone }}
+			"zone": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+{{- end }}
+		},
+	}
+}
+
+func (p *googleEphemeral{{$.ResourceName}}) Configure(ctx context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	pd, ok := req.ProviderData.(*transport_tpg.Config)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Ephemeral Resource Configure Type",
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+
+	p.providerConfig = pd
+}
+
+func (p *googleEphemeral{{$.ResourceName}}) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
+	var data ephemeral{{$.ResourceName}}Model
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	config := p.providerConfig
+	userAgent := config.UserAgent
+{{ if $.HasProject }}
+	project := data.Project.ValueString()
+	if project == "" {
+		project = config.Project
+	}
+{{- end }}
+{{ if $.HasRegion }}
+	region := data.Region.ValueString()
+	if region == "" {
+		region = config.Region
+	}
+{{- end }}
+{{ if $.HasZone }}
+	zone := data.Zone.ValueString()
+	if zone == "" {
+		zone = config.Zone
+	}
+{{- end }}
+
+{{ if $.ExcludeRead }}
+	obj := make(map[string]interface{})
+{{- range $prop := $.SettableProperties }}
+	if !data.{{camelize $prop.Name "upper"}}.IsNull() {
+		obj["{{$prop.ApiName}}"] = data.{{camelize $prop.Name "upper"}}.ValueString()
+	}
+{{- end }}
+
+	url := fmt.Sprintf("%s{{template "EphemeralUrlFormatFW" (dict "Resource" $ "Url" $.CreateUrl)}}", transport_tpg.BaseUrl(Product, config){{range $id := $.ExtractIdentifiers $.CreateUrl}}, {{template "EphemeralUrlArgFW" $id}}{{end}})
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   {{ if $.HasProject }}project{{ else }}config.Project{{ end }},
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Error creating {{ $.Name }}", err.Error())
+		return
+	}
+{{ else }}
+	url := fmt.Sprintf("%s{{template "EphemeralUrlFormatFW" (dict "Resource" $ "Url" $.SelfLinkUri)}}", transport_tpg.BaseUrl(Product, config){{range $id := $.ExtractIdentifiers $.SelfLinkUri}}, {{template "EphemeralUrlArgFW" $id}}{{end}})
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   {{ if $.HasProject }}project{{ else }}config.Project{{ end }},
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Error retrieving {{ $.Name }}", err.Error())
+		return
+	}
+{{ end }}
+{{ range $prop := $.GettableProperties }}
+	{{ camelize $prop.Name "lower" }}Val, {{ camelize $prop.Name "lower" }}Diags := fwutils.FlattenEphemeralValue(res["{{$prop.ApiName}}"], {{template "FieldMappingEphemeralFW" $prop}})
+	resp.Diagnostics.Append({{ camelize $prop.Name "lower" }}Diags...)
+	data.{{ camelize $prop.Name "upper" }} = {{ camelize $prop.Name "lower" }}Val.(types.{{ $prop.GetFWType }})
+{{ end }}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
+}
