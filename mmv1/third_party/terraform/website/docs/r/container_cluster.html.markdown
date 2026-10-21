@@ -690,6 +690,7 @@ addons_config {
 
 * `load_balancer_type` - (Optional) The load balancer type of CloudRun ingress service. It is external load balancer by default.
     Set `load_balancer_type=LOAD_BALANCER_TYPE_INTERNAL` to configure it as internal load balancer.
+    Allowed values are `LOAD_BALANCER_TYPE_EXTERNAL`, `LOAD_BALANCER_TYPE_INTERNAL`, and `LOAD_BALANCER_TYPE_UNSPECIFIED`.
 
 <a name="nested_identity_service_config"></a>The `identity_service_config` block supports:
 
@@ -774,7 +775,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
-* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
+* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN, SURGE, or SHORT_LIVED. The default is value is SURGE.
 
 * `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
 
