@@ -70,10 +70,8 @@ if validateDependenciesEnabled {
     }
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 if url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"}); err != nil {
     return err
 }
-{{- end }}
 
 log.Printf("[DEBUG] Delete policy request: %v", obj)

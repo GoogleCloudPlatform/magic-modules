@@ -145,3 +145,17 @@ func isTimeoutError(err error) bool {
 	var timeoutErr *retry.TimeoutError
 	return errors.As(err, &timeoutErr)
 }
+
+func transformServiceUsageV2ConsumerPolicyReadError(err error) error {
+	if gErr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok {
+		if gErr.Code == 400 && (strings.Contains(gErr.Message, "SU_INVALID_POLICY_NAME_FORMAT") || strings.Contains(gErr.Message, "must be default") || strings.Contains(gErr.Body, "SU_INVALID_POLICY_NAME_FORMAT")) {
+			// Reading a consumer policy with a non-default name returns 400 Bad Request
+			// (SU_INVALID_POLICY_NAME_FORMAT) rather than 404. Remap to 404 so
+			// HandleNotFoundError removes the invalid resource from state (d.SetId("")).
+			gErr.Code = 404
+		}
+		log.Printf("[DEBUG] Transformed ServiceUsageV2ConsumerPolicy read error")
+		return gErr
+	}
+	return err
+}

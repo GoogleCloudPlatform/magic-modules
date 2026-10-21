@@ -36,6 +36,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+read_error_transform: transformServiceUsageV2ConsumerPolicyReadError
 custom_code:
   constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
   pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
