@@ -43,6 +43,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because pre_delete must detach the disk from any attached instances before deletion, and a handwritten sweeper is used instead.
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'

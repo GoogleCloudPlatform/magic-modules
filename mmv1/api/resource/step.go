@@ -26,7 +26,7 @@ import (
 	"text/template" // NOLINT
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -365,7 +365,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
 	templateContent, err := fs.ReadFile(sysfs, s.ConfigPath)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	fileContentString := string(templateContent)
@@ -382,12 +382,12 @@ func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, s); err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	rs := contents.String()

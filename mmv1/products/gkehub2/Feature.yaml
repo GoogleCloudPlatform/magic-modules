@@ -186,6 +186,7 @@ properties:
       - name: fleetobservability
         type: NestedObject
         description: Fleet Observability feature spec.
+        allow_empty_object: true
         send_empty_value: true
         properties:
           - name: loggingConfig
@@ -283,6 +284,7 @@ properties:
       - name: workloadidentity
         type: NestedObject
         description: Workload Identity feature spec.
+        allow_empty_object: true
         send_empty_value: true
         properties:
           - name: scopeTenancyPool

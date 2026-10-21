@@ -15,7 +15,6 @@ replace github.com/GoogleCloudPlatform/magic-modules/tools/test-reader => ../tes
 require (
 	github.com/GoogleCloudPlatform/magic-modules/tools/test-reader v0.0.0-00010101000000-000000000000
 	github.com/davecgh/go-spew v1.1.1
-	github.com/golang/glog v1.2.5
 	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/hcl/v2 v2.20.1
