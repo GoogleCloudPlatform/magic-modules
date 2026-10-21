@@ -1,0 +1,140 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'BoundaryConfig'
+api_variant_patterns:
+  - folders/{folder}/boundaryConfig
+  - organizations/{organization}/boundaryConfig
+description: |
+  A BoundaryConfig defines the common configuration for all Boundaries under a
+  parent Organization or Folder, such as the partitioning tag key.
+
+  A BoundaryConfig is a singleton: exactly one exists per parent and it cannot
+  be created or deleted through the API, only read and updated. Applying this
+  resource updates the existing BoundaryConfig. Destroying it clears the
+  `tagKey` field, returning the BoundaryConfig to its unconfigured state.
+
+  The service rejects *any* write to a BoundaryConfig, including a no-op one,
+  once at least one Boundary exists under the same parent
+  (`FAILED_PRECONDITION`). In practice that means the BoundaryConfig must be
+  fully configured before the first Boundary is created and must be the last
+  thing destroyed. Reference `google_resource_manager_boundary_config.<name>.tag_key`
+  in each `google_resource_manager_boundary`'s `tag_filter.tag_key` (or use
+  `depends_on`) so Terraform orders both the create and the destroy correctly.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/boundaries'
+  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/organizations.boundaryConfig'
+base_url: '{{parent}}/boundaryConfig'
+self_link: '{{parent}}/boundaryConfig'
+# The API exposes no Create method; the singleton always exists. Terraform
+# "creates" it by PATCHing the fields it manages, the same pattern used by
+# google_resource_manager_capability and the storagecontrol *IntelligenceConfig
+# resources.
+create_url: '{{parent}}/boundaryConfig?updateMask=tagKey'
+create_verb: 'PATCH'
+update_url: '{{parent}}/boundaryConfig'
+update_verb: 'PATCH'
+update_mask: true
+# The API has no Delete method. Rather than orphan the configuration, destroy
+# clears the managed field via PATCH. See the custom_delete template below.
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/clear_boundary_config.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+id_format: '{{parent}}/boundaryConfig'
+import_format:
+  - '{{%parent}}/boundaryConfig'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'OpAsync'
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions: ['create', 'update']
+  result:
+    resource_inside_response: true
+autogen_async: true
+samples:
+  - name: 'resource_manager_boundary_config_basic'
+    primary_resource_id: 'boundary_config'
+    external_providers: ['time']
+    steps:
+      - name: 'resource_manager_boundary_config_basic'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          service_account: 'SERVICE_ACCT'
+        resource_id_vars:
+          folder_name: 'bndcfg-fldr'
+          tag_key_short_name: 'boundary-config-tag-key'
+        ignore_read_extra:
+          - 'update_time'
+      - name: 'resource_manager_boundary_config_update'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          service_account: 'SERVICE_ACCT'
+        resource_id_vars:
+          folder_name: 'bndcfg-fldr'
+          tag_key_short_name: 'boundary-config-tag-key'
+          tag_key_short_name_2: 'boundary-config-tag-key-2'
+        ignore_read_extra:
+          - 'update_time'
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The parent resource whose BoundaryConfig this is. Must be of the form
+      `organizations/{organization_id}` or `folders/{folder_id}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique resource name of the BoundaryConfig, in the form
+      `organizations/{organization_id}/boundaryConfig` or
+      `folders/{folder_id}/boundaryConfig`.
+    output: true
+  - name: 'tagKey'
+    type: String
+    description: |
+      The namespaced name of the partitioning tag key, in the form
+      `{parent_id}/{tag_key_short_name}`, for example `123456789012/env`.
+      Boundaries under this parent filter projects on this tag key.
+
+      The service also accepts the `tagKeys/{numeric_id}` form here, but
+      Boundaries accept only the namespaced form and are validated against this
+      value verbatim. Storing the `tagKeys/{numeric_id}` form therefore makes
+      every subsequent Boundary create fail with `FAILED_PRECONDITION`. Always
+      use the namespaced form, for example
+      `google_tags_tag_key.example.namespaced_name`.
+    required: true
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      A checksum computed by the server based on the value of other fields. May
+      be sent on update requests to ensure the client has an up-to-date value
+      before proceeding.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The most recent time this BoundaryConfig was modified.
+    output: true
