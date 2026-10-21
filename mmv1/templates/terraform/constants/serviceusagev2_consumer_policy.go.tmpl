@@ -146,8 +146,10 @@ func isTimeoutError(err error) bool {
 	return errors.As(err, &timeoutErr)
 }
 
+{{- if not $.ProductMetadata.IsTgcCompiler }}
 func transformServiceUsageV2ConsumerPolicyReadError(err error) error {
-	if gErr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok {
+	var gErr *googleapi.Error
+	if errors.As(err, &gErr) {
 		if gErr.Code == 400 && (strings.Contains(gErr.Message, "SU_INVALID_POLICY_NAME_FORMAT") || strings.Contains(gErr.Message, "must be default") || strings.Contains(gErr.Body, "SU_INVALID_POLICY_NAME_FORMAT")) {
 			// Reading a consumer policy with a non-default name returns 400 Bad Request
 			// (SU_INVALID_POLICY_NAME_FORMAT) rather than 404. Remap to 404 so
@@ -159,3 +161,4 @@ func transformServiceUsageV2ConsumerPolicyReadError(err error) error {
 	}
 	return err
 }
+{{- end }}
