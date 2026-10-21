@@ -321,12 +321,10 @@ func TestRetryTransport_SleepUnitFastBackoff(t *testing.T) {
 	client := ts.Client()
 	rt := NewTransportWithDefaultRetries(http.DefaultTransport)
 	rt.sleepUnit = time.Millisecond
-	rt.retryPredicates = []RetryErrorPredicateFunc{testRetryTransportRetryPredicate}
-	client.Transport = NewTransportWithHeaders(rt)
-	copiedClient := ClientWithAdditionalRetries(client)
+	client.Transport = rt.WithAddedPredicates(testRetryTransportRetryPredicate)
 
 	start := time.Now()
-	resp, err := copiedClient.Get(ts.URL)
+	resp, err := client.Get(ts.URL)
 	testRetryTransport_checkSuccess(t, resp, err)
 	if attempts != 3 {
 		t.Fatalf("Expected 3 attempts, got %d", attempts)

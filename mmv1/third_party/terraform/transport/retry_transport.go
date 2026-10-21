@@ -48,32 +48,10 @@ const defaultRetryTransportTimeoutSec = 90
 
 // NewTransportWithDefaultRetries constructs a default retryTransport that will retry common temporary errors
 func NewTransportWithDefaultRetries(t http.RoundTripper) *retryTransport {
-	sleepUnit := time.Second
-	if existing := findRetryTransport(t); existing != nil && existing.sleepUnit > 0 {
-		sleepUnit = existing.sleepUnit
-	}
 	return &retryTransport{
 		retryPredicates: defaultErrorRetryPredicates,
 		internal:        t,
-		sleepUnit:       sleepUnit,
-	}
-}
-
-func findRetryTransport(rt http.RoundTripper) *retryTransport {
-	switch t := rt.(type) {
-	case *retryTransport:
-		return t
-	case headerTransportLayer:
-		return findRetryTransport(t.baseTransit)
-	case *headerTransportLayer:
-		return findRetryTransport(t.baseTransit)
-	}
-	return nil
-}
-
-func setRetryTransportSleepUnit(rt http.RoundTripper, sleepUnit time.Duration) {
-	if t := findRetryTransport(rt); t != nil {
-		t.sleepUnit = sleepUnit
+		sleepUnit:       time.Second,
 	}
 }
 

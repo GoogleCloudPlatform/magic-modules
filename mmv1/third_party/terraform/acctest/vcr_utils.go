@@ -443,7 +443,6 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		diags = append(diags, *tpgresource.FrameworkDiagsToSdkDiags(fwD)...)
 		return nil, diags
 	}
-	config.ApplySleepUnit()
 
 	configsLock.Lock()
 	configs[testName] = config
