@@ -35,7 +35,7 @@ func TestAccTags(t *testing.T) {
 		"tagKeyIamPolicy":                          testAccTagsTagKeyIamPolicy,
 		"tagValueBasic":                            testAccTagsTagValue_tagValueBasic,
 		"tagValueUpdate":                           testAccTagsTagValue_tagValueUpdate,
-		"tagBindingBasicUpdate": TestAccTagsTagBinding_tagBindingBasicUpdate,
+		"tagBindingBasicUpdate":                    testAccTagsTagBinding_tagBindingBasicUpdate,
 		"tagBindingBasic":                          testAccTagsTagBinding_tagBindingBasic,
 		"tagBindingBasicDynamic":                   testAccTagsTagBinding_tagBindingBasicDynamic,
 		"tagBindingNamespaced":                     testAccTagsTagBinding_tagBindingNamespaced,
@@ -43,6 +43,7 @@ func TestAccTags(t *testing.T) {
 		"tagValueIamMember":                        testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                        testAccTagsTagValueIamPolicy,
 		"tagsLocationTagBindingBasic":              testAccTagsLocationTagBinding_locationTagBindingbasic,
+		"tagsLocationTagBindingBasicUpdate":        testAccTagsLocationTagBinding_locationTagBindingBasicUpdate,
 		"tagsLocationTagBindingBasicDynamic":       testAccTagsLocationTagBinding_locationTagBindingBasicDynamic,
 		"tagsLocationTagBindingBasicWithProjectId": testAccTagsLocationTagBinding_locationTagBindingBasicWithProjectId,
 		"tagsLocationTagBindingZonal":              testAccTagsLocationTagBinding_locationTagBindingzonal,
@@ -1654,14 +1655,13 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 	}
 }
 
-func TestAccTagsTagBinding_tagBindingBasicUpdate(t *testing.T) {
+func testAccTagsTagBinding_tagBindingBasicUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":           envvar.GetTestOrgFromEnv(t),
-		"project_id":       envvar.GetTestProjectFromEnv(),
-		"key_short_name":   "tf-test-key-" + acctest.RandString(t, 10),
-		"value_short_name": "tf-test-val-" + acctest.RandString(t, 10),
+		"project_id":        envvar.GetTestProjectFromEnv(),
+		"key_short_name":    "tf-test-key-" + acctest.RandString(t, 10),
+		"value_short_name":  "tf-test-val-" + acctest.RandString(t, 10),
 		"value2_short_name": "tf-test-val2-" + acctest.RandString(t, 10),
 	}
 
@@ -1677,6 +1677,7 @@ func TestAccTagsTagBinding_tagBindingBasicUpdate(t *testing.T) {
 				Config: testAccTagsTagBinding_tagBindingBasicUpdate2(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_tags_tag_binding.binding", "name"),
+					resource.TestCheckResourceAttrPair("google_tags_tag_binding.binding", "tag_value", "google_tags_tag_value.value2", "id"),
 				),
 			},
 		},
@@ -1690,7 +1691,7 @@ data "google_project" "project" {
 }
 
 resource "google_tags_tag_key" "key" {
-  parent     = "organizations/%{org_id}"
+  parent     = "projects/%{project_id}"
   short_name = "%{key_short_name}"
 }
 
@@ -1722,7 +1723,7 @@ data "google_project" "project" {
 }
 
 resource "google_tags_tag_key" "key" {
-  parent     = "organizations/%{org_id}"
+  parent     = "projects/%{project_id}"
   short_name = "%{key_short_name}"
 }
 
@@ -1739,6 +1740,137 @@ resource "google_tags_tag_value" "value2" {
 resource "google_tags_tag_binding" "binding" {
   parent    = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.number}"
   tag_value = google_tags_tag_value.value2.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+`, context)
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingBasicUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":        envvar.GetTestProjectFromEnv(),
+		"random_suffix":     acctest.RandString(t, 10),
+		"value_short_name":  "tf-test-val-" + acctest.RandString(t, 10),
+		"value2_short_name": "tf-test-val2-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckTagsLocationTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsLocationTagBinding_locationTagBindingBasicUpdate1(context),
+			},
+			{
+				Config: testAccTagsLocationTagBinding_locationTagBindingBasicUpdate2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_tags_location_tag_binding.binding", "name"),
+					resource.TestCheckResourceAttrPair("google_tags_location_tag_binding.binding", "tag_value", "google_tags_tag_value.value2", "id"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingBasicUpdate1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{project_id}"
+}
+
+resource "google_tags_tag_key" "key" {
+  parent     = "projects/%{project_id}"
+  short_name = "tf-test-keyname%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "value" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value_short_name}"
+}
+
+resource "google_tags_tag_value" "value2" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value2_short_name}"
+}
+
+resource "google_cloud_run_service" "default" {
+  name     = "tf-test-cloudrun-srv%{random_suffix}"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+resource "google_tags_location_tag_binding" "binding" {
+  parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+  tag_value = google_tags_tag_value.value.id
+  location  = "us-central1"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+`, context)
+}
+
+func testAccTagsLocationTagBinding_locationTagBindingBasicUpdate2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{project_id}"
+}
+
+resource "google_tags_tag_key" "key" {
+  parent     = "projects/%{project_id}"
+  short_name = "tf-test-keyname%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "value" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value_short_name}"
+}
+
+resource "google_tags_tag_value" "value2" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value2_short_name}"
+}
+
+resource "google_cloud_run_service" "default" {
+  name     = "tf-test-cloudrun-srv%{random_suffix}"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+resource "google_tags_location_tag_binding" "binding" {
+  parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+  tag_value = google_tags_tag_value.value2.id
+  location  = "us-central1"
 
   lifecycle {
     create_before_destroy = true

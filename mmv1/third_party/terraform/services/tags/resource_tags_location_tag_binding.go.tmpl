@@ -136,29 +136,49 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 			Body:      obj,
 			Timeout:   d.Timeout(schema.TimeoutCreate),
 		})
-		
+
 		if err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 400) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-				if strings.Contains(err.Error(), "EXISTING_BINDING") {
-					listUrl, listUrlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}TagsLocationBasePath{{"}}"}}tagBindings/?parent={{"{{"}}parent{{"}}"}}&pageSize=300")
-					if listUrlErr == nil {
-						listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-							Config:    config,
-							Method:    "GET",
-							Project:   billingProject,
-							RawURL:    listUrl,
-							UserAgent: userAgent,
-						})
-						if listErr == nil {
-							if bindings, ok := listRes["tagBindings"].([]interface{}); ok {
-								subjectRegex := regexp.MustCompile(`subject:\s*"?(tagValues/[0-9]+)"?`)
-								matches := subjectRegex.FindStringSubmatch(err.Error())
-								if len(matches) > 1 {
-									conflictingTagValue := matches[1]
+				if i == 0 && strings.Contains(err.Error(), "EXISTING_BINDING") {
+					subjectRegex := regexp.MustCompile(`"?subject"?:\s*"?(?:[^"]*?)(tagValues/[0-9]+)"?`)
+					matches := subjectRegex.FindStringSubmatch(err.Error())
+					if len(matches) > 1 {
+						conflictingTagValue := matches[1]
+						listUrl, listUrlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}TagsLocationBasePath{{"}}"}}tagBindings/?parent={{"{{"}}parent{{"}}"}}&pageSize=300")
+						if listUrlErr == nil {
+							deleted := false
+							pageToken := ""
+							for !deleted {
+								reqUrl := listUrl
+								if pageToken != "" {
+									var tokenErr error
+									reqUrl, tokenErr = transport_tpg.AddQueryParams(reqUrl, map[string]string{"pageToken": pageToken})
+									if tokenErr != nil {
+										break
+									}
+								}
+								listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+									Config:    config,
+									Method:    "GET",
+									Project:   billingProject,
+									RawURL:    reqUrl,
+									UserAgent: userAgent,
+								})
+								if listErr != nil {
+									break
+								}
+								if bindings, ok := listRes["tagBindings"].([]interface{}); ok {
 									for _, b := range bindings {
-										binding := b.(map[string]interface{})
+										binding, ok := b.(map[string]interface{})
+										if !ok {
+											continue
+										}
 										if binding["tagValue"] == conflictingTagValue {
-											deleteUrl, deleteUrlErr := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}%s", binding["name"].(string)))
+											nameStr, ok := binding["name"].(string)
+											if !ok {
+												continue
+											}
+											deleteUrl, deleteUrlErr := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}%s", nameStr))
 											if deleteUrlErr == nil {
 												deleteRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 													Config:    config,
@@ -169,10 +189,11 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 												})
 												if deleteErr == nil {
 													var delOpRes map[string]interface{}
-													err = TagsLocationOperationWaitTimeWithResponse(
+													waitErr := TagsLocationOperationWaitTimeWithResponse(
 														config, deleteRes, &delOpRes, "Deleting conflicting LocationTagBinding", userAgent,
 														d.Timeout(schema.TimeoutCreate))
-													if err == nil {
+													if waitErr == nil {
+														deleted = true
 														break
 													}
 												}
@@ -180,11 +201,16 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 										}
 									}
 								}
+								if nextToken, ok := listRes["nextPageToken"].(string); ok && nextToken != "" {
+									pageToken = nextToken
+								} else {
+									break
+								}
+							}
+							if deleted {
+								continue
 							}
 						}
-					}
-					if i == 0 {
-						continue
 					}
 				}
 			}

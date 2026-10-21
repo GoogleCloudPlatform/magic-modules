@@ -24,7 +24,7 @@
 	transport_tpg.MutexStore.Lock(lockName)
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
-	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"tagBindings")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}TagsBasePath{{"}}"}}tagBindings")
 	if err != nil {
 		return err
 	}
@@ -48,12 +48,12 @@
 		obj["tagValueNamespacedName"] = tagValueInput
 		delete(obj, "tagValue") // Ensure the other key is not present
 	}
-	
+
 	// Create the binding, handle EXISTING_BINDING by deleting the conflicting binding and retrying.
 	var res map[string]interface{}
 	var opRes map[string]interface{}
-	
-	// wrap the request in a retry loop limited to 1 retry
+
+	// Wrap the request in a retry loop limited to 1 retry
 	for i := 0; i < 2; i++ {
 		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
@@ -65,70 +65,87 @@
 			Timeout:   d.Timeout(schema.TimeoutCreate),
 			Headers:   headers,
 		})
-		
+
 		if err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 400) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-				if strings.Contains(err.Error(), "EXISTING_BINDING") {
-					// We need to delete the conflicting binding.
-					// Let's get the conflicting tag value from the error message.
-					// Error looks like: "google.rpc.PreconditionFailure: ... type: "EXISTING_BINDING" ... subject: "tagValues/123""
-					// Actually, the easiest way is to just list all bindings for the parent, and if we are creating one with a specific TagKey, we delete the one with the same TagKey.
-					// But we don't know the TagKey easily without another API call.
-					// Let's list all bindings on the parent.
-					listUrl := fmt.Sprintf("%stagBindings?parent=%s", transport_tpg.BaseUrl(Product, config), strings.ReplaceAll(parentProp.(string), "/", "%2F"))
-					listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-						Config:    config,
-						Method:    "GET",
-						Project:   billingProject,
-						RawURL:    listUrl,
-						UserAgent: userAgent,
-					})
-					if listErr == nil {
-						if bindings, ok := listRes["tagBindings"].([]interface{}); ok {
-							// We need to find the conflicting binding. 
-							// Since we don't know the TagKey, and `subject` parsing could be brittle,
-							// wait, we can just extract the `subject` from the error string!
-							subjectRegex := regexp.MustCompile(`subject:\s*"?(tagValues/[0-9]+)"?`)
-							matches := subjectRegex.FindStringSubmatch(err.Error())
-							if len(matches) > 1 {
-								conflictingTagValue := matches[1]
-								for _, b := range bindings {
-									binding := b.(map[string]interface{})
-									if binding["tagValue"] == conflictingTagValue {
-										// Found the conflicting binding, delete it!
-										deleteUrl := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), binding["name"].(string))
-										deleteRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-											Config:    config,
-											Method:    "DELETE",
-											Project:   billingProject,
-											RawURL:    deleteUrl,
-											UserAgent: userAgent,
-										})
-										if deleteErr == nil {
-											// Wait for the delete operation
-											var delOpRes map[string]interface{}
-											err = TagsOperationWaitTimeWithResponse(
-												config, deleteRes, &delOpRes, "Deleting conflicting TagBinding", userAgent,
-												d.Timeout(schema.TimeoutCreate))
-											if err == nil {
-												// Deleted successfully, continue to retry Create
-												break
+				if i == 0 && strings.Contains(err.Error(), "EXISTING_BINDING") {
+					subjectRegex := regexp.MustCompile(`"?subject"?:\s*"?(?:[^"]*?)(tagValues/[0-9]+)"?`)
+					matches := subjectRegex.FindStringSubmatch(err.Error())
+					if len(matches) > 1 {
+						conflictingTagValue := matches[1]
+						listUrl, listUrlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}TagsBasePath{{"}}"}}tagBindings/?parent={{"{{"}}parent{{"}}"}}&pageSize=300")
+						if listUrlErr == nil {
+							deleted := false
+							pageToken := ""
+							for !deleted {
+								reqUrl := listUrl
+								if pageToken != "" {
+									var tokenErr error
+									reqUrl, tokenErr = transport_tpg.AddQueryParams(reqUrl, map[string]string{"pageToken": pageToken})
+									if tokenErr != nil {
+										break
+									}
+								}
+								listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+									Config:    config,
+									Method:    "GET",
+									Project:   billingProject,
+									RawURL:    reqUrl,
+									UserAgent: userAgent,
+								})
+								if listErr != nil {
+									break
+								}
+								if bindings, ok := listRes["tagBindings"].([]interface{}); ok {
+									for _, b := range bindings {
+										binding, ok := b.(map[string]interface{})
+										if !ok {
+											continue
+										}
+										if binding["tagValue"] == conflictingTagValue {
+											nameStr, ok := binding["name"].(string)
+											if !ok {
+												continue
+											}
+											deleteUrl, deleteUrlErr := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}TagsBasePath{{"}}"}}%s", nameStr))
+											if deleteUrlErr == nil {
+												deleteRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+													Config:    config,
+													Method:    "DELETE",
+													Project:   billingProject,
+													RawURL:    deleteUrl,
+													UserAgent: userAgent,
+												})
+												if deleteErr == nil {
+													var delOpRes map[string]interface{}
+													waitErr := TagsOperationWaitTimeWithResponse(
+														config, deleteRes, &delOpRes, "Deleting conflicting TagBinding", userAgent,
+														d.Timeout(schema.TimeoutCreate))
+													if waitErr == nil {
+														deleted = true
+														break
+													}
+												}
 											}
 										}
 									}
 								}
+								if nextToken, ok := listRes["nextPageToken"].(string); ok && nextToken != "" {
+									pageToken = nextToken
+								} else {
+									break
+								}
+							}
+							if deleted {
+								continue
 							}
 						}
-					}
-					// If we reach here and it's the first iteration, we just continue loop to retry POST
-					if i == 0 {
-						continue
 					}
 				}
 			}
 			return fmt.Errorf("Error creating TagBinding: %s", err)
 		}
-		
+
 		// If we succeed, break
 		break
 	}
