@@ -40,6 +40,9 @@ import_format:
 datasource_experimental:
   generate: true
   exclude_test: true
+ephemeral_experimental:
+  generate: true
+  exclude_test: true
 exclude_delete: true
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.

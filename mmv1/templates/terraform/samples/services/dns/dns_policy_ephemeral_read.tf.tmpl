@@ -1,0 +1,7 @@
+{{ customTemplate . "templates/terraform/samples/services/dns/dns_policy_ephemeral_setup.tf.tmpl" true }}
+# The explicit dependency also allows this example to run in a single apply.
+# Only the lookup name is configured; nested properties come from the GET response.
+ephemeral "google_dns_policy" "test" {
+  name       = google_dns_policy.source.name
+  depends_on = [google_dns_policy.source]
+}
