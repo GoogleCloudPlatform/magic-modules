@@ -250,12 +250,14 @@ samples:
           subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
           membership_id: 'rs-membership'
+        vars:
+          min_node_version: null
         test_env_vars:
           org_id: 'ORG_ID'
           billing_acct: 'BILLING_ACCT'
         ignore_read_extra:
           - 'min_control_plane_version'
-      - name: 'gke_hub_rollout_sequence_user_triggered_update'
+      - name: 'gke_hub_rollout_sequence_user_triggered_create'
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
           project_id: 'rs-project'
@@ -263,6 +265,8 @@ samples:
           subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
           membership_id: 'rs-membership'
+        vars:
+          min_node_version: 'data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_acct: 'BILLING_ACCT'
