@@ -2941,11 +2941,13 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 				{{- end }}
-			{{- if ne $.TargetVersionName "ga" }}
 			"schedule_upgrade_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
+{{- if eq $.TargetVersionName "ga" }}
+				ForceNew:    true,
+{{- end }}
 				MaxItems:    1,
 				Description: `Configuration for scheduled upgrades on the cluster.`,
 				Elem: &schema.Resource{
@@ -2953,12 +2955,14 @@ func ResourceContainerCluster() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Required:    true,
+{{- if eq $.TargetVersionName "ga" }}
+							ForceNew:    true,
+{{- end }}
 							Description: `Whether scheduled upgrades are enabled.`,
 						},
 					},
 				},
 			},
-			{{- end }}
 			"enterprise_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -3505,11 +3509,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.WorkloadAltsConfig = expandWorkloadAltsConfig(v)
 	}
 	{{- end }}
-	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := d.GetOk("schedule_upgrade_config"); ok {
 		cluster.ScheduleUpgradeConfig = expandScheduleUpgradeConfig(v)
 	}
-	{{- end }}
 
 	req := &container.CreateClusterRequest{
 		Cluster: cluster,
@@ -4098,11 +4100,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if err := d.Set("schedule_upgrade_config", flattenScheduleUpgradeConfig(cluster.ScheduleUpgradeConfig)); err != nil {
 		return err
 	}
-{{- end }}
 
 	if err := d.Set("enterprise_config", flattenEnterpriseConfig(cluster.EnterpriseConfig)); err != nil {
 		return err
@@ -7601,7 +7601,6 @@ func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSCon
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandScheduleUpgradeConfig(configured interface{}) *container.ScheduleUpgradeConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -7614,7 +7613,6 @@ func expandScheduleUpgradeConfig(configured interface{}) *container.ScheduleUpgr
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-{{- end }}
 
 func expandRBACBindingConfig(configured interface{}) *container.RBACBindingConfig {
 	l := configured.([]interface{})
@@ -8843,7 +8841,6 @@ func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]int
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenScheduleUpgradeConfig(c *container.ScheduleUpgradeConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -8854,7 +8851,6 @@ func flattenScheduleUpgradeConfig(c *container.ScheduleUpgradeConfig) []map[stri
 		},
 	}
 }
-{{- end }}
 
 func flattenRBACBindingConfig(c *container.RBACBindingConfig) []map[string]interface{} {
 	if c == nil {
