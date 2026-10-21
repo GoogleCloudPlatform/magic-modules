@@ -2687,7 +2687,7 @@ func (r Resource) ShouldGenerateSweepers() bool {
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false
 	}
-	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PreDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete {
+	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete || (r.DeleteVerb != "" && strings.ToUpper(r.DeleteVerb) != "DELETE") {
 		return false
 	}
 	return true

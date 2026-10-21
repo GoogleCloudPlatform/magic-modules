@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because pre_delete must disable active Realtime Database instances before deletion and skip DEFAULT_DATABASE.
+exclude_sweeper: true
 custom_code:
   decoder: templates/terraform/decoders/firebase_database_instance.go.tmpl
   constants: templates/terraform/constants/firebase_database_instance.go.tmpl
