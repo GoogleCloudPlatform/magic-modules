@@ -35,6 +35,7 @@ func TestAccTags(t *testing.T) {
 		"tagKeyIamPolicy":                          testAccTagsTagKeyIamPolicy,
 		"tagValueBasic":                            testAccTagsTagValue_tagValueBasic,
 		"tagValueUpdate":                           testAccTagsTagValue_tagValueUpdate,
+		"tagBindingBasicUpdate": TestAccTagsTagBinding_tagBindingBasicUpdate,
 		"tagBindingBasic":                          testAccTagsTagBinding_tagBindingBasic,
 		"tagBindingBasicDynamic":                   testAccTagsTagBinding_tagBindingBasicDynamic,
 		"tagBindingNamespaced":                     testAccTagsTagBinding_tagBindingNamespaced,
@@ -502,11 +503,8 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 
 func testAccTagsTagBinding_tagBindingBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
+data "google_project" "project" {
 	project_id = "%{project_id}"
-	name       = "%{project_id}"
-	org_id     = "%{org_id}"
-	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -558,11 +556,8 @@ func testAccTagsTagBinding_tagBindingBasicDynamic(t *testing.T) {
 
 func testAccTagsTagBinding_tagBindingBasicDynamicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
+data "google_project" "project" {
 	project_id = "%{project_id}"
-	name       = "%{project_id}"
-	org_id     = "%{org_id}"
-	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -610,11 +605,8 @@ func testAccTagsTagBinding_tagBindingNamespaced(t *testing.T) {
 // Generates Terraform configuration for testing tag binding with namespaced value.
 func testAccTagsTagBinding_tagBindingNamespacedExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
+data "google_project" "project" {
 	project_id = "%{project_id}"
-	name       = "%{project_id}"
-	org_id     = "%{org_id}"
-	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -1651,4 +1643,97 @@ func testAccCheckTagsLocationTagBindingDestroyProducer(t *testing.T) func(s *ter
 		}
 		return nil
 	}
+}
+
+func TestAccTagsTagBinding_tagBindingBasicUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":           envvar.GetTestOrgFromEnv(t),
+		"project_id":       envvar.GetTestProjectFromEnv(),
+		"key_short_name":   "tf-test-key-" + acctest.RandString(t, 10),
+		"value_short_name": "tf-test-val-" + acctest.RandString(t, 10),
+		"value2_short_name": "tf-test-val2-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckTagsTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagBinding_tagBindingBasicUpdate1(context),
+			},
+			{
+				Config: testAccTagsTagBinding_tagBindingBasicUpdate2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_tags_tag_binding.binding", "name"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTagsTagBinding_tagBindingBasicUpdate1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{project_id}"
+}
+
+resource "google_tags_tag_key" "key" {
+  parent     = "organizations/%{org_id}"
+  short_name = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "value" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value_short_name}"
+}
+
+resource "google_tags_tag_value" "value2" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value2_short_name}"
+}
+
+resource "google_tags_tag_binding" "binding" {
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  tag_value = google_tags_tag_value.value.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+`, context)
+}
+
+func testAccTagsTagBinding_tagBindingBasicUpdate2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  project_id = "%{project_id}"
+}
+
+resource "google_tags_tag_key" "key" {
+  parent     = "organizations/%{org_id}"
+  short_name = "%{key_short_name}"
+}
+
+resource "google_tags_tag_value" "value" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value_short_name}"
+}
+
+resource "google_tags_tag_value" "value2" {
+  parent     = google_tags_tag_key.key.id
+  short_name = "%{value2_short_name}"
+}
+
+resource "google_tags_tag_binding" "binding" {
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  tag_value = google_tags_tag_value.value2.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+`, context)
 }
