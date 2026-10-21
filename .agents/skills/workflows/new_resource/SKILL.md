@@ -36,5 +36,5 @@ There are two ways to generate the initial YAML definition for the resource:
 *   **Handoff:** Once the YAML is drafted, enter the **Default Workflow** ([default/SKILL.md](../default/SKILL.md)) at **Step 3 (Generate)** to compile the provider and continue with testing, then proceed to **Step 3 (Check for Corresponding Data Source)**.
 
 ### 3. Check for Corresponding Data Source
-*   Use [`add-data-source-workflow`](../add_data_source/SKILL.md) (**Step 0**) to check whether a corresponding data source exists for the new resource.
+*   Use [`add-data-source-workflow`](../add_data_source/SKILL.md) (**Step 1**) to check whether a corresponding data source exists for the new resource.
 *   If the data source does not exist, follow [`add-data-source-workflow`](../add_data_source/SKILL.md) to create the corresponding data source, its acceptance test, and its documentation.

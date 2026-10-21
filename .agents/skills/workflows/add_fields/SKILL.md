@@ -54,9 +54,9 @@ Because you're adding fields to an existing resource, try to modify existing tes
 
 ### 4. Check for Corresponding Data Source
 
-- Use [`add-data-source-workflow`](.agents/skills/workflows/add_data_source/SKILL.md) (**Step 0**) to check whether a corresponding data source exists for the modified resource:
+- Use [`add-data-source-workflow`](.agents/skills/workflows/add_data_source/SKILL.md) (**Step 1**) to check whether a corresponding data source exists for the modified resource:
   - If the data source **does not exist**, follow `add-data-source-workflow` to add the corresponding data source (or confirm with the user if out of scope).
-  - If the data source **already exists**, follow `add-data-source-workflow` (**Step 0, Case B**) to verify whether the newly added fields require any updates to the data source `Read` function (such as `ignore_read: true` fields, `labels`/`annotations`, or `virtual_fields`) and include the data source's acceptance tests in your test run.
+  - If the data source **already exists**, follow `add-data-source-workflow` (**Task Definition** & **Model Behavior**) to verify whether the newly added fields require any updates to the data source `Read` function (such as `ignore_read: true` fields, `labels`/`annotations`, or `virtual_fields`) and include the data source's acceptance tests in your test run.
 
 ### 5. Run Pre-Gen Checks
 
