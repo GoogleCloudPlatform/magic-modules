@@ -61,7 +61,8 @@ func testSweepBigtableInstance(region string) error {
 		obj := ri.(map[string]interface{})
 		if obj["name"] == nil {
 			log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
-			return nil
+			nonPrefixCount++
+			continue
 		}
 
 		instanceName := obj["name"].(string)
