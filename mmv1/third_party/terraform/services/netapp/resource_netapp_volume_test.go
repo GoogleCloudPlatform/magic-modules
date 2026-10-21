@@ -799,7 +799,7 @@ func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface
 	return acctest.Nprintf(`
     resource "google_netapp_storage_pool" "default" {
         name = "tf-test-pool%{random_suffix}"
-        location = "us-south1-a"
+        location = "us-east4-a"
         service_level = "FLEX"
         capacity_gib = "2048"
         network = data.google_compute_network.default.id
@@ -811,7 +811,7 @@ func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface
         enable_hot_tier_auto_resize = true
     }
     resource "google_netapp_volume" "test_volume" {
-        location = "us-south1-a"
+        location = "us-east4-a"
         name = "tf-test-volume%{random_suffix}"
         capacity_gib = "100"
         share_name = "tf-test-volume%{random_suffix}"
@@ -833,7 +833,7 @@ func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{
 	return acctest.Nprintf(`
     resource "google_netapp_storage_pool" "default" {
         name = "tf-test-pool%{random_suffix}"
-        location = "us-south1-a"
+        location = "us-east4-a"
         service_level = "FLEX"
         capacity_gib = "2048"
         network = data.google_compute_network.default.id
@@ -845,7 +845,7 @@ func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{
         enable_hot_tier_auto_resize = true
     }
     resource "google_netapp_volume" "test_volume" {
-        location = "us-south1-a"
+        location = "us-east4-a"
         name = "tf-test-volume%{random_suffix}"
         capacity_gib = "100"
         share_name = "tf-test-volume%{random_suffix}"
