@@ -391,8 +391,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.Client = client
 	c.Context = ctx
 	c.Region = GetRegionFromRegionSelfLink(c.Region)
-	c.RequestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
-	c.RequestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 	// Set default of 10s if unset by user in provider.go or LoadAndValidate was invoked directly
 	if c.PollInterval == 0 {
 		c.PollInterval = 10 * time.Second
@@ -400,6 +398,9 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	if c.SleepUnit == 0 {
 		c.SleepUnit = time.Second
 	}
+	c.ApplySleepUnit()
+	c.RequestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
+	c.RequestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 
 	c.setRPCClients()
 
@@ -441,6 +442,16 @@ func (c *Config) getExternalAccountConfig(clientScopes []string) externalaccount
 	return eaConfig
 }
 
+
+func (c *Config) ApplySleepUnit() {
+	sleepUnit := c.SleepUnit
+	if sleepUnit == 0 {
+		sleepUnit = time.Second
+	}
+	if c.Client != nil {
+		setRetryTransportSleepUnit(c.Client.Transport, sleepUnit)
+	}
+}
 
 func ExpandProviderBatchingConfig(v interface{}) (*BatchingConfig, error) {
 	config := &BatchingConfig{
