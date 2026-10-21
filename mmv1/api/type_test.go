@@ -6,7 +6,54 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 )
+
+func TestEphemeralCustomFlattenValidation(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		generate  bool
+		hook      string
+		wantError bool
+	}{
+		{"SDK only", false, "", false},
+		{"unsupported SDK flattener", true, "", true},
+		{"explicit ephemeral flattener", true, "flattenEphemeralKey", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := &Resource{ProductMetadata: &Product{Name: "test"}, Ephemeral: &resource.Ephemeral{Generate: tc.generate}}
+			p := &Type{Name: "key", Type: "String", CustomFlatten: "sdk.tmpl", CustomFlattenEphemeral: tc.hook, ResourceMetadata: r}
+			errs := p.Validate("TestResource")
+			if (len(errs) > 0) != tc.wantError {
+				t.Fatalf("errors = %v, want error = %v", errs, tc.wantError)
+			}
+		})
+	}
+}
+
+func TestEphemeralActionInputValidation(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		property  Type
+		wantError bool
+	}{
+		{"plain string", Type{Name: "value", Type: "String"}, false},
+		{"scalar default", Type{Name: "value", Type: "String", DefaultValue: "3600s"}, false},
+		{"SDK expansion", Type{Name: "value", Type: "String", CustomExpand: "sdk.tmpl"}, true},
+		{"SDK validation", Type{Name: "value", Type: "String", Validation: resource.Validation{Function: "validation.StringIsNotEmpty"}}, true},
+		{"cross-field constraints", Type{Name: "value", Type: "String", Conflicts: []string{"other"}}, true},
+		{"nested default", Type{Name: "value", Type: "String", DefaultValue: "default", ParentMetadata: &Type{Name: "parent"}}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := tc.property
+			p.ResourceMetadata = &Resource{ExcludeRead: true, ProductMetadata: &Product{Name: "test"}, Ephemeral: &resource.Ephemeral{Generate: true}}
+			errs := p.Validate("Action")
+			if (len(errs) > 0) != tc.wantError {
+				t.Fatalf("errors = %v; want error %v", errs, tc.wantError)
+			}
+		})
+	}
+}
 
 func TestTypeMinVersionObj(t *testing.T) {
 	t.Parallel()

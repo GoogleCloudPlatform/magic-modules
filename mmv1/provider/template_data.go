@@ -97,6 +97,16 @@ func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Res
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+func (td *TemplateData) GenerateEphemeralResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/ephemeral_fw.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/schema_property_ephemeral_fw.go.tmpl",
+		"templates/terraform/ephemeral_url_fw.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateProductFile(filePath string, product api.Product) {
 	templatePath := "templates/terraform/product.go.tmpl"
 	templates := []string{
