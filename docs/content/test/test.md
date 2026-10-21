@@ -89,7 +89,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
    When defining variables for your steps, follow these guidelines:
    - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
    - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
-     - To unset an optional HCL attribute (or toggle between mutually exclusive `conflicts` / `exactly_one_of` attributes) across steps using a single `.tf.tmpl` file, set the variable to `null` in the step where it should be omitted. In generated tests, `null` sets the context value to `nil`—which `acctest.Nprintf` expands to unquoted HCL `null` (even when the placeholder is quoted as `"{{index $.Vars "field"}}"` in `.tf.tmpl`). In generated documentation and OiCS configs, whole attribute lines assigned to `null` are automatically omitted. (Note: `= null` applies to HCL attributes, not nested HCL blocks.)
+     - To unset an attribute in a step while reusing the same `.tf.tmpl` file, set its value to `null` (rendering `field = null` in generated tests and omitting the line in generated documentation and OiCS configs).
    - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
    samples:
@@ -246,7 +246,7 @@ An update test ensures that updatable fields can be changed without recreating t
        ...
    }
    ```
-   - **Tip:** If the steps only differ by changing or unsetting HCL attributes (as opposed to adding or removing entire nested HCL blocks), you can reuse a single `testAcc*` template function with `acctest.Nprintf` instead of duplicating the function. Parameterize the varying attributes in `context`, and pass `nil` for any key you want to unset in a given step—`acctest.Nprintf` replaces both quoted `"%{key}"` and unquoted `%{key}` placeholders with unquoted HCL `null` (`field = null`). Avoid injecting entire `field = value` lines via standalone `%s` or `%{...}` placeholders on their own line, as whole-line substitutions are stripped by the static test coverage parser (`detect-missing-tests`).
+   - **Tip:** If the steps only differ by attribute values, you can reuse a single `testAcc*` template function with `acctest.Nprintf` instead of duplicating the function. Pass `nil` in `context` to unset an attribute in a step (rendering `field = null` in the test config).
 6. Modify the test as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
