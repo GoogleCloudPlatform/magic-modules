@@ -5671,7 +5671,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's WorkloadALTSConfig has been updated", d.Id())
 	}
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("schedule_upgrade_config") {
 		suc := expandScheduleUpgradeConfig(d.Get("schedule_upgrade_config"))
 		if suc == nil {
@@ -5693,7 +5692,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s's ScheduleUpgradeConfig has been updated", d.Id())
 	}
-{{- end }}
 
 	if d.HasChange("user_managed_keys_config") {
 		req := &container.UpdateClusterRequest{
