@@ -48,6 +48,11 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/cloudrunv2_instance.go.tmpl'
 taint_resource_on_failed_create: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east4"
+    - region: "us-west4"
 samples:
   - name: 'cloudrunv2_instance_basic'
     primary_resource_id: 'default'
