@@ -38,7 +38,6 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
       boost_configs {
         id                        = "boost-1"
         machine_type              = "n1-standard-2"
-        boot_disk_size_gb         = 50
         enable_automatic_failover = {{index $.Vars "enable_automatic_failover"}}
         accelerators {
           type  = "nvidia-tesla-t4"
