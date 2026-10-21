@@ -503,8 +503,11 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 
 func testAccTagsTagBinding_tagBindingBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
+resource "google_project" "project" {
 	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -556,8 +559,11 @@ func testAccTagsTagBinding_tagBindingBasicDynamic(t *testing.T) {
 
 func testAccTagsTagBinding_tagBindingBasicDynamicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
+resource "google_project" "project" {
 	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -605,8 +611,11 @@ func testAccTagsTagBinding_tagBindingNamespaced(t *testing.T) {
 // Generates Terraform configuration for testing tag binding with namespaced value.
 func testAccTagsTagBinding_tagBindingNamespacedExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
+resource "google_project" "project" {
 	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -1696,7 +1705,7 @@ resource "google_tags_tag_value" "value2" {
 }
 
 resource "google_tags_tag_binding" "binding" {
-  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.number}"
   tag_value = google_tags_tag_value.value.id
 
   lifecycle {
@@ -1728,7 +1737,7 @@ resource "google_tags_tag_value" "value2" {
 }
 
 resource "google_tags_tag_binding" "binding" {
-  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.number}"
   tag_value = google_tags_tag_value.value2.id
 
   lifecycle {

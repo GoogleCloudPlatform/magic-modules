@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-"regexp"
+	"regexp"
 	"strings"
 	"time"
 
@@ -140,38 +140,42 @@ func resourceTagsLocationTagBindingCreate(d *schema.ResourceData, meta interface
 		if err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 400) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
 				if strings.Contains(err.Error(), "EXISTING_BINDING") {
-					listUrl := fmt.Sprintf("%stagBindings?parent=%s", transport_tpg.BaseUrl(Product, config), strings.ReplaceAll(parentProp.(string), "/", "%2F"))
-					listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-						Config:    config,
-						Method:    "GET",
-						Project:   billingProject,
-						RawURL:    listUrl,
-						UserAgent: userAgent,
-					})
-					if listErr == nil {
-						if bindings, ok := listRes["tagBindings"].([]interface{}); ok {
-							subjectRegex := regexp.MustCompile(`subject:\s*"?(tagValues/[0-9]+)"?`)
-							matches := subjectRegex.FindStringSubmatch(err.Error())
-							if len(matches) > 1 {
-								conflictingTagValue := matches[1]
-								for _, b := range bindings {
-									binding := b.(map[string]interface{})
-									if binding["tagValue"] == conflictingTagValue {
-										deleteUrl := fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), binding["name"].(string))
-										deleteRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-											Config:    config,
-											Method:    "DELETE",
-											Project:   billingProject,
-											RawURL:    deleteUrl,
-											UserAgent: userAgent,
-										})
-										if deleteErr == nil {
-											var delOpRes map[string]interface{}
-											err = TagsLocationOperationWaitTimeWithResponse(
-												config, deleteRes, &delOpRes, "Deleting conflicting LocationTagBinding", userAgent,
-												d.Timeout(schema.TimeoutCreate))
-											if err == nil {
-												break
+					listUrl, listUrlErr := tpgresource.ReplaceVars(d, config, "{{"{{"}}TagsLocationBasePath{{"}}"}}tagBindings/?parent={{"{{"}}parent{{"}}"}}&pageSize=300")
+					if listUrlErr == nil {
+						listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+							Config:    config,
+							Method:    "GET",
+							Project:   billingProject,
+							RawURL:    listUrl,
+							UserAgent: userAgent,
+						})
+						if listErr == nil {
+							if bindings, ok := listRes["tagBindings"].([]interface{}); ok {
+								subjectRegex := regexp.MustCompile(`subject:\s*"?(tagValues/[0-9]+)"?`)
+								matches := subjectRegex.FindStringSubmatch(err.Error())
+								if len(matches) > 1 {
+									conflictingTagValue := matches[1]
+									for _, b := range bindings {
+										binding := b.(map[string]interface{})
+										if binding["tagValue"] == conflictingTagValue {
+											deleteUrl, deleteUrlErr := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}TagsLocationBasePath{{"}}"}}%s", binding["name"].(string)))
+											if deleteUrlErr == nil {
+												deleteRes, deleteErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+													Config:    config,
+													Method:    "DELETE",
+													Project:   billingProject,
+													RawURL:    deleteUrl,
+													UserAgent: userAgent,
+												})
+												if deleteErr == nil {
+													var delOpRes map[string]interface{}
+													err = TagsLocationOperationWaitTimeWithResponse(
+														config, deleteRes, &delOpRes, "Deleting conflicting LocationTagBinding", userAgent,
+														d.Timeout(schema.TimeoutCreate))
+													if err == nil {
+														break
+													}
+												}
 											}
 										}
 									}
