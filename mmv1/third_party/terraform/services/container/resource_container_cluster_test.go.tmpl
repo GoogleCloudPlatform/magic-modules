@@ -9553,10 +9553,6 @@ resource "google_container_cluster" "primary" {
     http_load_balancing {
       disabled = true
     }
-    cloudrun_config {
-      disabled = true
-      load_balancer_type = "LOAD_BALANCER_TYPE_UNSPECIFIED"
-    }
     horizontal_pod_autoscaling {
       disabled = true
     }
@@ -9637,10 +9633,6 @@ resource "google_container_cluster" "primary" {
   addons_config {
     http_load_balancing {
       disabled = false
-    }
-    cloudrun_config {
-      disabled = false
-      load_balancer_type = "LOAD_BALANCER_TYPE_EXTERNAL"
     }
     horizontal_pod_autoscaling {
       disabled = false
