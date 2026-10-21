@@ -13,6 +13,9 @@
 
 ---
 name: 'Boundary'
+api_variant_patterns:
+  - folders/{folder}/boundaries/{boundary}
+  - organizations/{organization}/boundaries/{boundary}
 description: |
   A Boundary is a collection of projects defined by filtering criteria on an
   organization or a folder. Descendant projects are dynamically included in the

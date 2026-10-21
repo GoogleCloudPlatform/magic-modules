@@ -45,7 +45,7 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 if err != nil {
-	return fmt.Errorf("Error clearing BoundaryConfig %q: %s", d.Id(), err)
+	return fmt.Errorf("Error clearing BoundaryConfig %q: %w", d.Id(), err)
 }
 
 // UpdateBoundaryConfig returns a long-running operation, so wait for it to
@@ -55,7 +55,7 @@ err = ResourceManagerV3OperationWaitTime(
 	config, res, "Clearing BoundaryConfig", userAgent,
 	d.Timeout(schema.TimeoutDelete))
 if err != nil {
-	return fmt.Errorf("Error waiting to clear BoundaryConfig %q: %s", d.Id(), err)
+	return fmt.Errorf("Error waiting to clear BoundaryConfig %q: %w", d.Id(), err)
 }
 
 log.Printf("[DEBUG] Finished clearing BoundaryConfig %q: %#v", d.Id(), res)

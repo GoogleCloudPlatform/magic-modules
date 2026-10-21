@@ -13,6 +13,9 @@
 
 ---
 name: 'BoundaryConfig'
+api_variant_patterns:
+  - folders/{folder}/boundaryConfig
+  - organizations/{organization}/boundaryConfig
 description: |
   A BoundaryConfig defines the common configuration for all Boundaries under a
   parent Organization or Folder, such as the partitioning tag key.
