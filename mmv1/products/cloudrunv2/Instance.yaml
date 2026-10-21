@@ -165,7 +165,7 @@ samples:
           cloud_run_instance_name: 'cloudrun-instance'
           kms_key_name: 'my-key'
         test_vars_overrides:
-          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-bootstrap-cloudrun-cmek").CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west4", "tf-bootstrap-cloudrun-cmek").CryptoKey.Name'
         ignore_read_extra:
           - 'conditions'
 parameters:
