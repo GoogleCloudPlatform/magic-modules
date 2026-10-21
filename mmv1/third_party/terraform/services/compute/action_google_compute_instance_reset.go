@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/registry"
 )
 
 const (
@@ -37,7 +36,7 @@ var (
 
 	// Instance states that will settle into RUNNING on their own. The action waits these out
 	// so that the triggering on the instance's own creation is not racy.
-	computeInstanceTransitionalSates = []string{"PROVISIONING", "STAGING", "REPAIRING"}
+	computeInstanceTransitionalStates = []string{"PROVISIONING", "STAGING", "REPAIRING"}
 )
 
 func init() {
@@ -252,7 +251,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 		Message: fmt.Sprintf("Resetting instance %s", instanceID),
 	})
 
-	op, err := transport_tpg.SendRequest(transport - tpg.SendRequestOptions{
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    a.config,
 		Method:    "POST",
 		Project:   billingProject,
