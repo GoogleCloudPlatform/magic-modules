@@ -435,7 +435,7 @@ func ResourceContainerCluster() *schema.Resource {
 									},
 									"load_balancer_type": {
 										Type:         schema.TypeString,
-										ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL", "LOAD_BALANCER_TYPE_EXTERNAL", "LOAD_BALANCER_TYPE_UNSPECIFIED"}, false),
 										Optional:     true,
 									},
 								},
@@ -973,7 +973,7 @@ func ResourceContainerCluster() *schema.Resource {
 													Optional:     true,
 													Computed:     true,
 													Description:  `Update strategy of the node pool.`,
-													ValidateFunc: validation.StringInSlice([]string{"NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED", "BLUE_GREEN", "SURGE"}, false),
+													ValidateFunc: validation.StringInSlice([]string{"NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED", "BLUE_GREEN", "SURGE", "SHORT_LIVED"}, false),
 												},
 												"blue_green_settings": {
 													Type:        schema.TypeList,
