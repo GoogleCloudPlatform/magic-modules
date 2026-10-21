@@ -31,6 +31,7 @@ autogen_async: true
 async:
   type: 'OpAsync'
   actions: ['create', 'update', 'delete']
+  include_project: true
   operation:
     base_url: '{{op_id}}'
   result:
@@ -39,7 +40,7 @@ custom_code:
   constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
   pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
-  pre_delete: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+  pre_delete: templates/terraform/pre_delete/serviceusagev2_consumer_policy.go.tmpl
   post_create_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
   post_update_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
   post_delete_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
@@ -51,17 +52,22 @@ parameters:
     description: |
      The name of the parent. It can be a project, folder or organization in the format of  projects/<project_id or project_number>, folders/<folder_number> or organizations/<org_number> .
     required: true
+    immutable: true
     url_param_only: true
   - name: 'name'
     type: String
     description: |
      The name of the policy. Currently only the “default” policy name is supported.
     required: true
+    immutable: true
     url_param_only: true
+    validation:
+      function: 'validation.StringInSlice([]string{"default"}, false)'
 properties:
   - name: 'enableRules'
     type: Array
     required: true
+    max_size: 1
     description: |
       The consumer policy rule that defines enabled services. The structure is documented below.
     custom_flatten: templates/terraform/custom_flatten/serviceusagev2_consumer_policy_enable_rules.go.tmpl
