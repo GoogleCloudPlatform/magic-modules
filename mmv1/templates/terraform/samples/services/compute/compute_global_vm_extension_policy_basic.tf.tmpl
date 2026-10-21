@@ -1,11 +1,12 @@
 resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.ResourceIdVars "policy_name"}}"
   description = "A basic global VM extension policy"
-  priority    = 10
+  priority    = {{index $.Vars "priority"}}
 
   extension_policies {
     extension_name = "ops-agent"
     pinned_version = "2.66.0"
+    string_config  = "{{index $.Vars "string_config"}}"
   }
 
   instance_selectors {
@@ -18,7 +19,9 @@ resource "google_compute_global_vm_extension_policy" "{{$.PrimaryResourceId}}" {
 
   rollout_operation {
     rollout_input {
-      predefined_rollout_plan = "FAST_ROLLOUT"
+      conflict_behavior       = "{{index $.Vars "conflict_behavior"}}"
+      predefined_rollout_plan = "{{index $.Vars "predefined_rollout_plan"}}"
+      retry_uuid              = "{{index $.Vars "retry_uuid"}}"
     }
   }
 }

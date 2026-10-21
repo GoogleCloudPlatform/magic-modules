@@ -111,6 +111,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-unreadable-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-identity", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
@@ -166,6 +167,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Breaking Change(s) Detected",
 				"## Errors",
 				"## Missing test report",
+				"## Unreadable test report",
 			},
 		},
 		"errors are displayed": {
@@ -283,6 +285,54 @@ func TestFormatDiffComment(t *testing.T) {
 				"generated some diffs",
 				"## Breaking Change(s) Detected",
 				"## Errors",
+			},
+		},
+		"new unreadable tests are displayed": {
+			data: diffCommentData{
+				UnreadableTests: &UnreadableTestsReport{
+					NewUnreadableTests: map[string]string{
+						"TestAccB": "failed to find variable declaration config",
+						"TestAccA": "errors parsing hcl",
+					},
+					StaleUnreadableTests: []string{},
+				},
+			},
+			expectedStrings: []string{
+				"## Unreadable test report",
+				"Missing test detection may be incomplete",
+				"- `TestAccA`: errors parsing hcl\n- `TestAccB`: failed to find variable declaration config",
+			},
+			notExpectedStrings: []string{
+				"These tests can now be read",
+				"## Errors",
+			},
+		},
+		"stale unreadable tests are displayed": {
+			data: diffCommentData{
+				UnreadableTests: &UnreadableTestsReport{
+					NewUnreadableTests:   map[string]string{},
+					StaleUnreadableTests: []string{"TestAccA", "TestAccB"},
+				},
+			},
+			expectedStrings: []string{
+				"## Unreadable test report",
+				"`KnownUnreadableTests` in `tools/diff-processor/detector/unreadable_tests.go`",
+				"`tools/diff-processor/detector/unreadable_tests.go`.\n\n- `TestAccA`\n- `TestAccB`",
+			},
+			notExpectedStrings: []string{
+				"Missing test detection may be incomplete",
+				"## Errors",
+			},
+		},
+		"empty unreadable test report is not displayed": {
+			data: diffCommentData{
+				UnreadableTests: &UnreadableTestsReport{
+					NewUnreadableTests:   map[string]string{},
+					StaleUnreadableTests: []string{},
+				},
+			},
+			notExpectedStrings: []string{
+				"## Unreadable test report",
 			},
 		},
 		"missing docs are displayed": {
@@ -600,6 +650,24 @@ func TestFileToResource(t *testing.T) {
 			got := fileToResource(tc.path)
 			assert.Equal(t, tc.want, got)
 		})
+	}
+}
+
+func TestChangedServices(t *testing.T) {
+	got := changedServices([]string{
+		"google-beta/services/compute/resource_compute_instance.go",
+		"google-beta/services/container/resource_container_cluster_test.go",
+		"google-beta/services/compute/resource_compute_disk_test.go",
+		"google-beta/provider/provider.go",
+		"website/docs/r/compute_instance.html.markdown",
+		"google-beta/services/README.md",
+		"",
+	})
+	if want := []string{"compute", "container"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("changedServices() = %v, want %v", got, want)
+	}
+	if got := changedServices(nil); len(got) != 0 {
+		t.Errorf("changedServices(nil) = %v, want no services", got)
 	}
 }
 

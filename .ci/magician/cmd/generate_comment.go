@@ -67,6 +67,12 @@ type MissingTestInfo struct {
 	Tests         []string
 }
 
+// The output of `diff-processor detect-unreadable-tests`.
+type UnreadableTestsReport struct {
+	NewUnreadableTests   map[string]string
+	StaleUnreadableTests []string
+}
+
 type MissingIdentityInfo struct {
 	MissingCRUD       []string `json:"MissingCRUD"`
 	MissingImportTest bool     `json:"MissingImportTest"`
@@ -94,6 +100,7 @@ type diffCommentData struct {
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
+	UnreadableTests      *UnreadableTestsReport
 	MissingDocs          *MissingDocsSummary
 	MissingIdentity      map[string]*MissingIdentityInfo
 	MultipleResources    []string
@@ -351,6 +358,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
 			}
 			data.MissingTests = missingTests
+
+			unreadableTests, err := detectUnreadableTests(diffProcessorPath, repo.Path, changedServices(repo.ChangedFiles), rnr)
+			if err != nil {
+				fmt.Println("Error running unreadable test detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The unreadable test detector failed to run.")
+			}
+			data.UnreadableTests = unreadableTests
 
 			missingDocs, err := detectMissingDocs(diffProcessorPath, repo.Path, rnr)
 			if err != nil {
@@ -631,6 +645,27 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 	return missingTests, rnr.PopDir()
 }
 
+// Run the unreadable test detector on the given services and return the
+// results: acceptance tests the missing test detector can't read that aren't
+// known to be unreadable, and tests known to be unreadable that it can now read.
+func detectUnreadableTests(diffProcessorPath, tpgbLocalPath string, services []string, rnr ExecRunner) (*UnreadableTestsReport, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	args := append([]string{"detect-unreadable-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, services...)
+	output, err := rnr.Run("bin/diff-processor", args, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var unreadableTests *UnreadableTestsReport
+	if err = json.Unmarshal([]byte(output), &unreadableTests); err != nil {
+		return nil, err
+	}
+	return unreadableTests, rnr.PopDir()
+}
+
 // Run the missing doc detector and return the results.
 func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (*MissingDocsSummary, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
@@ -735,6 +770,21 @@ func fileToResource(path string) string {
 		resource = "google_" + resource
 	}
 	return resource
+}
+
+// Return the sorted names of the beta provider services containing changed files.
+func changedServices(changedFiles []string) []string {
+	services := map[string]struct{}{}
+	for _, path := range changedFiles {
+		if rest, ok := strings.CutPrefix(path, "google-beta/services/"); ok {
+			if service, _, ok := strings.Cut(rest, "/"); ok {
+				services[service] = struct{}{}
+			}
+		}
+	}
+	sortedServices := maps.Keys(services)
+	sort.Strings(sortedServices)
+	return sortedServices
 }
 
 func pathChanged(path string, changedFiles []string) bool {

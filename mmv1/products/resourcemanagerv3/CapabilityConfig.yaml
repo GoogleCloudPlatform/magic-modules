@@ -49,19 +49,24 @@ samples:
       - name: resource_manager_capability_config_basic
         resource_id_vars:
           capability_config_id: capcfg
+        vars:
           display_name: capdisp
         test_env_vars:
           org_id: ORG_ID
-      - name: resource_manager_capability_config_update
+      - name: resource_manager_capability_config_basic
         resource_id_vars:
           capability_config_id: capcfg
+        vars:
+          display_name: "Updated Display Name"
         test_env_vars:
           org_id: ORG_ID
       # Verifies that an optional field can be updated from a non-zero value to
       # a zero value, i.e. that display_name can be removed once it is set.
-      - name: resource_manager_capability_config_no_display_name
+      - name: resource_manager_capability_config_basic
         resource_id_vars:
           capability_config_id: capcfg
+        vars:
+          display_name: null
         test_env_vars:
           org_id: ORG_ID
   - name: resource_manager_capability_config_folder
