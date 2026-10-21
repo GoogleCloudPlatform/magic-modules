@@ -1,0 +1,229 @@
+{{/*# The license inside this block applies to this file.
+  # Copyright 2026 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+*/}}
+{{/*
+  Ephemeral resources cannot use nested Attribute types (SingleNestedAttribute,
+  ListNestedAttribute, SetNestedAttribute, MapNestedAttribute) — protocol version 5
+  schema conversion rejects any fwschema.NestedAttribute with "protocol version 5
+  cannot have Attributes set". Blocks (SingleNestedBlock etc.) pass conversion but
+  have no Computed/Optional/Required concept, so they can't represent API response
+  data the practitioner didn't write in config. The confirmed working representation
+  is a plain Attribute whose value type is types.ObjectType (recursively, for
+  arbitrary nesting depth) — see ephemeral-resource-generator-phase0-writeup.md.
+*/}}
+
+{{/* Given a property, returns the Go expression for its attr.Type — used for
+  ElementType (List/Set/Map) and nested AttributeTypes map values. Recursive: a
+  NestedObject property's own sub-properties are walked the same way, so this
+  handles arbitrary nesting depth without synthesizing named Go types per level. */}}
+{{- define "AttrTypeEphemeralFW" -}}
+  {{- if eq .Type "NestedObject" -}}
+types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .}}}
+  {{- else if eq .Type "Array" -}}
+    {{- if eq .ItemType.Type "NestedObject" -}}
+      {{- if .IsSet -}}
+types.SetType{ElemType: types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .ItemType}}}}
+      {{- else -}}
+types.ListType{ElemType: types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .ItemType}}}}
+      {{- end -}}
+    {{- else -}}
+      {{- if .IsSet -}}
+types.SetType{ElemType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}{{template "AttrTypeEphemeralFW" .ItemType}}{{ end }}}
+      {{- else -}}
+types.ListType{ElemType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}{{template "AttrTypeEphemeralFW" .ItemType}}{{ end }}}
+      {{- end -}}
+    {{- end -}}
+  {{- else if hasPrefix .Type "KeyValue" -}}
+types.MapType{ElemType: types.StringType}
+  {{- else if eq .Type "Map" -}}
+    {{- if eq .ValueType.Type "NestedObject" -}}
+types.MapType{ElemType: types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .ValueType}}}}
+    {{- else -}}
+types.MapType{ElemType: {{ if or (eq .ValueType.Type "Enum") (eq .ValueType.Type "ResourceRef") }}types.StringType{{ else }}{{template "AttrTypeEphemeralFW" .ValueType}}{{ end }}}
+    {{- end -}}
+  {{- else if or (eq .Type "Enum") (eq .Type "ResourceRef") -}}
+types.StringType
+  {{- else -}}
+types.{{.GetFWType}}Type
+  {{- end -}}
+{{- end -}}
+
+{{/* Given a NestedObject-typed property (or an Array/Map's item/value type), emits
+  its map[string]attr.Type{...} body — the AttributeTypes for an ObjectAttribute, or
+  the inner type of a types.ObjectType{AttrTypes: ...} wrapper. Recurses through
+  AttrTypeEphemeralFW for every sub-property. */}}
+{{- define "AttrTypesMapEphemeralFW" -}}
+map[string]attr.Type{
+  {{- range $prop := .ResourceMetadata.OrderProperties .UserProperties }}
+  "{{underscore $prop.Name}}": {{template "AttrTypeEphemeralFW" $prop}},
+  {{- end }}
+}
+{{- end -}}
+
+{{/* Given a property, emits its schema.Attribute declaration for an ephemeral
+  resource schema. Structurally mirrors SchemaFieldsFW (schema_property_fw.go.tmpl)
+  branch-for-branch, but nested shapes become object-typed plain Attributes instead
+  of NestedAttribute/Block constructs, and there are no PlanModifiers (a resource-only
+  PF concept — ephemeral resources have no plan/apply diff cycle to modify). */}}
+{{- define "SchemaFieldsEphemeralFW"}}
+{{- if .FlattenObject -}}
+  {{- range $prop := .ResourceMetadata.OrderProperties .UserProperties -}}
+    {{ template "SchemaFieldsEphemeralFW" $prop }}
+  {{ end -}}
+{{- else -}}
+  {{- if eq .Type "NestedObject" -}}
+"{{underscore .Name -}}": schema.ObjectAttribute{
+  AttributeTypes: {{template "AttrTypesMapEphemeralFW" .}},
+  {{- else if eq .Type "Array" -}}
+    {{- if eq .ItemType.Type "NestedObject" -}}
+      {{- if .IsSet -}}
+"{{underscore .Name -}}": schema.SetAttribute{
+  ElementType: types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .ItemType}}},
+      {{- else -}}
+"{{underscore .Name -}}": schema.ListAttribute{
+  ElementType: types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .ItemType}}},
+      {{- end -}}
+    {{- else -}}
+      {{- if .IsSet -}}
+"{{underscore .Name -}}": schema.SetAttribute{
+  ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
+      {{- else -}}
+"{{underscore .Name -}}": schema.ListAttribute{
+  ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
+      {{- end -}}
+    {{- end -}}
+  {{- else if hasPrefix .Type "KeyValue" -}}
+"{{underscore .Name -}}": schema.MapAttribute{
+  ElementType: types.StringType,
+  {{- else if eq .Type "Map" -}}
+    {{- if eq .ValueType.Type "NestedObject" -}}
+"{{underscore .Name -}}": schema.MapAttribute{
+  ElementType: types.ObjectType{AttrTypes: {{template "AttrTypesMapEphemeralFW" .ValueType}}},
+    {{- else -}}
+"{{underscore .Name -}}": schema.MapAttribute{
+  ElementType: {{ if or (eq .ValueType.Type "Enum") (eq .ValueType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ValueType.GetFWType }}Type{{ end }},
+    {{- end -}}
+  {{- else -}}
+"{{underscore .Name -}}": schema.{{.GetFWType}}Attribute{
+  {{- end }}
+
+  {{/* An ephemeral resource has no create/update lifecycle — Required/Optional/
+    DefaultFromApi/Output roles from the base resource only matter for a
+    create/update body, which doesn't exist here. The only properties that can
+    ever be inputs are the ones needed to build the request URL (self_link for
+    a GET-based resource, create_url for an action-based one); everything else
+    is Computed-only regardless of its role in the base resource. Confirmed
+    against both Phase 0 hand-written spikes: storagecontrol's
+    `edition_config` (`default_from_api: true` in the base resource) is
+    Computed-only here since it's not a URL var, and publicca's
+    `location`/`project` (not `required` in the base resource, but URL vars)
+    are Optional+Computed here. */}}
+  {{- $propName := .Name -}}
+  {{- $url := .ResourceMetadata.SelfLinkUri -}}
+  {{- if .ResourceMetadata.ExcludeRead -}}{{- $url = .ResourceMetadata.CreateUrl -}}{{- end -}}
+  {{- $isUrlVar := false -}}
+  {{- range $id := .ResourceMetadata.ExtractIdentifiers $url -}}
+    {{- if eq $id $propName -}}{{- $isUrlVar = true -}}{{- end -}}
+  {{- end -}}
+  {{- if $isUrlVar }}
+    {{- if .Required }}
+  Required: true,
+    {{- else }}
+  Optional: true,
+  Computed: true,
+    {{- end }}
+  {{- else }}
+  Computed: true,
+  {{- end }}
+  {{/* Description is deliberately omitted, matching schema_property_fw.go.tmpl:
+    MMv1 YAML descriptions are almost always multi-line ("description: |"
+    blocks) and/or contain characters (quotes, backticks) that aren't safe to
+    interpolate directly into a Go double-quoted string literal without a
+    proper escaping helper, which doesn't exist in the template FuncMap. */}}
+  {{- if .DeprecationMessage }}
+  DeprecationMessage: "{{ .DeprecationMessage }}",
+  {{- end }}
+  {{- if .Sensitive }}
+  Sensitive: true,
+  {{- end }}
+},
+{{- end -}}
+{{- end -}}
+
+{{- define "RequestMappingEphemeralFW" -}}
+fwutils.EphemeralRequestField{
+  ApiName: {{printf "%q" .ApiName}},
+  AttrType: {{template "AttrTypeEphemeralFW" .}},
+  Required: {{.Required}},
+  Output: {{.Output}},
+  DefaultJSON: {{printf "%q" .EphemeralDefaultJSON}},
+  {{- if .MinSize }}
+  MinSize: {{.MinSize}},
+  {{- end }}
+  {{- if .MaxSize }}
+  MaxSize: {{.MaxSize}},
+  {{- end }}
+  {{- if .EnumValues }}
+  Enum: []string{ {{range .EnumValues}}{{printf "%q" .}},{{end}} },
+  {{- end }}
+  {{- if .Validation.Regex }}
+  Pattern: {{printf "%q" .Validation.Regex}},
+  {{- end }}
+  {{- if .UserProperties }}
+  Fields: map[string]fwutils.EphemeralRequestField{
+    {{- range .UserProperties }}
+    {{printf "%q" (underscore .Name)}}: {{template "RequestMappingEphemeralFW" .}},
+    {{- end }}
+  },
+  {{- end }}
+  {{- if eq .Type "Array" }}
+  Element: &{{template "RequestMappingEphemeralFW" .ItemType}},
+  {{- else if eq .Type "Map" }}
+  Element: &{{template "RequestMappingEphemeralFW" .ValueType}},
+  {{- end }}
+}
+{{- end -}}
+
+{{/* Given a property, emits the fwutils.EphemeralFieldMapping{...} literal that
+  describes how to flatten this field out of a raw API response — pairing the
+  JSON key (ApiName) with the attr.Type built above, and recursing into Fields
+  for nested/repeated/keyed object shapes. This is the single generated artifact
+  that drives the shared, non-generated recursive walk in
+  fwutils.FlattenEphemeralValue — the generated code never re-implements the
+  walk itself, only supplies this per-property description of it. */}}
+{{- define "FieldMappingEphemeralFW" -}}
+fwutils.EphemeralFieldMapping{
+  ApiName: "{{.ApiName}}",
+  AttrType: {{template "AttrTypeEphemeralFW" .}},
+  {{- if eq .Type "NestedObject" }}
+  Fields: {{template "FieldMappingsEphemeralFW" .}},
+  {{- else if and (eq .Type "Array") (eq .ItemType.Type "NestedObject") }}
+  Fields: {{template "FieldMappingsEphemeralFW" .ItemType}},
+  {{- else if and (eq .Type "Map") (eq .ValueType.Type "NestedObject") }}
+  Fields: {{template "FieldMappingsEphemeralFW" .ValueType}},
+  {{- end }}
+}
+{{- end -}}
+
+{{/* Given a NestedObject-typed property (or an Array/Map's item/value type),
+  emits its map[string]fwutils.EphemeralFieldMapping{...} body, keyed by
+  Terraform attribute name. Recurses through FieldMappingEphemeralFW for every
+  sub-property, mirroring AttrTypesMapEphemeralFW's structure exactly. */}}
+{{- define "FieldMappingsEphemeralFW" -}}
+map[string]fwutils.EphemeralFieldMapping{
+  {{- range $prop := .ResourceMetadata.OrderProperties .UserProperties }}
+  "{{underscore $prop.Name}}": {{template "FieldMappingEphemeralFW" $prop}},
+  {{- end }}
+}
+{{- end -}}
