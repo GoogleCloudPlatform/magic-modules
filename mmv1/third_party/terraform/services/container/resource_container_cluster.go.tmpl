@@ -2945,6 +2945,9 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
+{{- if eq $.TargetVersionName "ga" }}
+				ForceNew:    true,
+{{- end }}
 				MaxItems:    1,
 				Description: `Configuration for scheduled upgrades on the cluster.`,
 				Elem: &schema.Resource{
@@ -2952,6 +2955,9 @@ func ResourceContainerCluster() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Required:    true,
+{{- if eq $.TargetVersionName "ga" }}
+							ForceNew:    true,
+{{- end }}
 							Description: `Whether scheduled upgrades are enabled.`,
 						},
 					},

@@ -8020,7 +8020,7 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -8063,7 +8063,7 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -15979,7 +15979,6 @@ resource "google_container_cluster" "with_workload_alts_config" {
 func testAccContainerCluster_withScheduleUpgradeConfig(networkName, subnetworkName, name string, enable bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_schedule_upgrade_config" {
-
   name               = "%s"
   location           = "us-east1-b"
   initial_node_count = 1
