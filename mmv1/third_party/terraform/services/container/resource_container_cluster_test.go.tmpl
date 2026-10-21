@@ -8020,7 +8020,7 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -8063,7 +8063,7 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -8085,7 +8085,6 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_withScheduleUpgradeConfig(t *testing.T) {
 	t.Parallel()
 
@@ -8094,7 +8093,7 @@ func TestAccContainerCluster_withScheduleUpgradeConfig(t *testing.T) {
 	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -8122,7 +8121,6 @@ func TestAccContainerCluster_withScheduleUpgradeConfig(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccContainerCluster_withFleetConfig(name, projectID, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -15976,11 +15974,10 @@ resource "google_container_cluster" "with_workload_alts_config" {
 
 {{ end }}
 
-{{ if ne $.TargetVersionName "ga" -}}
 func testAccContainerCluster_withScheduleUpgradeConfig(networkName, subnetworkName, name string, enable bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_schedule_upgrade_config" {
-  provider           = google-beta
+
   name               = "%s"
   location           = "us-east1-b"
   initial_node_count = 1
@@ -15993,7 +15990,6 @@ resource "google_container_cluster" "with_schedule_upgrade_config" {
 }
 `, name, networkName, subnetworkName, enable)
 }
-{{- end }}
 
 func testAccContainerCluster_withAutopilotKubeletConfigBaseline(name, networkName, subnetworkName string) string {
   return fmt.Sprintf(`
