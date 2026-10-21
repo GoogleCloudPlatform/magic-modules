@@ -44,7 +44,7 @@ resource "google_compute_global_address" "apigee_range" {
   name          = "apigee-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = {{index $.Vars "prefix_length"}}
   network       = google_compute_network.apigee_network.id
   project       = google_project.project.project_id
 }
@@ -67,8 +67,10 @@ resource "google_apigee_organization" "apigee_org" {
 }
 
 resource "google_apigee_instance" "{{$.PrimaryResourceId}}" {
-  name     = "tf-test%{random_suffix}"
-  location = "us-central1"
-  org_id   = google_apigee_organization.apigee_org.id
+  name               = "tf-test%{random_suffix}"
+  location           = "us-central1"
+  org_id             = google_apigee_organization.apigee_org.id
+  peering_cidr_range = "{{index $.Vars "peering_cidr_range"}}"
+  ip_range           = "{{index $.Vars "ip_range"}}"
 }
 
