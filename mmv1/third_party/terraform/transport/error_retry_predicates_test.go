@@ -375,3 +375,52 @@ func TestIsAgentConnectivityTemplateInUse(t *testing.T) {
 		})
 	}
 }
+
+func TestIsAlloydbQueueError(t *testing.T) {
+	cases := map[string]struct {
+		err      error
+		expected bool
+	}{
+		"nil error": {
+			err:      nil,
+			expected: false,
+		},
+		"409 unable to queue in body": {
+			err: &googleapi.Error{
+				Code: 409,
+				Body: `{"error":{"code":409,"message":"unable to queue the operation","status":"ABORTED"}}`,
+			},
+			expected: true,
+		},
+		"409 unable to queue in message": {
+			err: &googleapi.Error{
+				Code:    409,
+				Message: "unable to queue the operation",
+			},
+			expected: true,
+		},
+		"409 other error": {
+			err: &googleapi.Error{
+				Code: 409,
+				Body: `{"error":{"code":409,"message":"already exists","status":"ALREADY_EXISTS"}}`,
+			},
+			expected: false,
+		},
+		"400 unable to queue": {
+			err: &googleapi.Error{
+				Code: 400,
+				Body: "unable to queue the operation",
+			},
+			expected: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			isRetryable, _ := IsAlloydbQueueError(tc.err)
+			if isRetryable != tc.expected {
+				t.Errorf("IsAlloydbQueueError(%v) = %v, want %v", tc.err, isRetryable, tc.expected)
+			}
+		})
+	}
+}
