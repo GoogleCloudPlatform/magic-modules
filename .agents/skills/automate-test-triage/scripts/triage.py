@@ -5,6 +5,8 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
+import urllib.request
 from collections import defaultdict
 
 def get_date_str(days_ago, base_date=None):
@@ -59,7 +61,7 @@ def has_actionable_error_context(msg_lower, raw_msg):
     that should prevent it from being dismissed as a generic non-actionable Internal Error.
     """
     actionable_patterns = [
-        r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b',
+        r'\b(?:panic:|runtime\s+error:|\b(?:sigsegv|nil\s+pointer\s+dereference)\b)',
         r'\b(?:plan\s+was\s+not\s+empty|inconsistent\s+(?:result|final\s+plan)|root\s+object\s+was\s+present,\s+but\s+now\s+absent)\b',
         r'\b(?:importstateverify|cannot\s+import\s+non-existent|check\s+failed|expected\s+to\s+be\s+set|expected\s+state)\b',
         r'\b(?:conflicting\s+configuration\s+arguments|invalid\s+resource\s+type|blocks\s+of\s+type|inconsistent\s+dependency\s+lock\s+file)\b',
@@ -89,12 +91,12 @@ def is_quota_or_stockout_error(msg_lower, raw_msg):
     if "you do not have quota" in msg_lower or "quota limit" in msg_lower or "has been exceeded" in msg_lower:
         return True
 
-    # Stockout & Capacity concept (e.g. "no resource available", "not enough resources available", "insufficient capacity")
-    if re.search(r'\b(insufficient|not\s+enough|no|lack\s+of)\b.*\b(capacity|resource|stock)s?\b', msg_lower):
+    # Stockout & Capacity concept (e.g. "no resource available", "not enough resources available", "does not have enough/sufficient resources", "insufficient capacity")
+    if re.search(r'\b(insufficient|not\s+(?:have\s+)?(?:enough|sufficient)|no|lack\s+of)\b.*\b(capacity|resource|stock)s?\b', msg_lower):
         return True
 
-    # Location / Zone / Region retry advice concept (e.g. "try a different zone, or try again later", "try again in a different zone")
-    if re.search(r'\btry\s+(again\s+in\s+|a\s+different\s+)?(later|zone|region|location)\b', msg_lower) and ("resource" in msg_lower or "capacity" in msg_lower or "available" in msg_lower):
+    # Location / Zone / Region retry advice concept (e.g. "try a different zone, or try again later", "try again in a different zone", "try again later or choose a different location")
+    if re.search(r'\btry\s+(?:again\s+(?:in\s+)?|a\s+different\s+)?(later|zone|region|location)\b', msg_lower) and ("resource" in msg_lower or "capacity" in msg_lower or "available" in msg_lower):
         return True
 
     return False
@@ -180,7 +182,7 @@ def is_generic_error(error_msg):
 
 SEVERITY_RULES = [
     # (Priority, Category ID, Display Badge, Matcher Function)
-    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b', raw_msg, re.IGNORECASE))),
+    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|\b(?:sigsegv|nil\s+pointer\s+dereference)\b)', raw_msg, re.IGNORECASE))),
     (90,  "API_ENV", "🚨 **CRITICAL (API Not Enabled in Test Env)**", lambda msg_lower, raw_msg: (
         bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled|reason:\s*"?service_disabled"?|api_not_enabled|enable\s+it\s+by\s+visiting)\b', msg_lower))
         and any(p in msg_lower for p in TEST_ENV_PROJECTS)
@@ -324,6 +326,46 @@ def sanitize_for_comparison(error_str):
     return s.strip()
 
 
+def fetch_github_issues_fallback():
+    issues = []
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "magic-modules-test-triage",
+    }
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    for page in range(1, 11):
+        params = urllib.parse.urlencode({
+            "labels": "test-failure",
+            "state": "open",
+            "per_page": 100,
+            "page": page,
+        })
+        url = f"https://api.github.com/repos/hashicorp/terraform-provider-google/issues?{params}"
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if not data:
+                    break
+                for item in data:
+                    if "pull_request" in item:
+                        continue
+                    issues.append({
+                        "number": item.get("number"),
+                        "title": item.get("title", ""),
+                        "url": item.get("html_url", ""),
+                    })
+                if len(data) < 100:
+                    break
+        except Exception as e:
+            print(f"Warning: GitHub REST API fallback failed on page {page}: {e}")
+            break
+    return issues
+
+
 def find_issue_link(test_name, issues):
     exact_target = f"Failing test(s): {test_name}"
     for issue in issues:
@@ -411,14 +453,19 @@ def main():
     # Fetch GitHub issues
     issues = []
     print("Fetching open test-failure issues from GitHub...")
-    gh_res = subprocess.run(["gh", "issue", "list", "--repo", "hashicorp/terraform-provider-google", "--label", "test-failure", "--state", "open", "--limit", "1000", "--json", "number,title,url"], capture_output=True, text=True)
-    if gh_res.returncode == 0:
-        try:
-            issues = json.loads(gh_res.stdout)
-        except Exception as e:
-            print(f"Failed to parse gh issue list JSON: {e}")
-    else:
-        print(f"Failed to fetch GitHub issues: {gh_res.stderr}")
+    try:
+        gh_res = subprocess.run(["gh", "issue", "list", "--repo", "hashicorp/terraform-provider-google", "--label", "test-failure", "--state", "open", "--limit", "1000", "--json", "number,title,url"], capture_output=True, text=True)
+        if gh_res.returncode == 0:
+            try:
+                issues = json.loads(gh_res.stdout)
+            except Exception as e:
+                print(f"Failed to parse gh issue list JSON: {e}")
+        else:
+            print(f"Failed to fetch GitHub issues via gh CLI: {gh_res.stderr}")
+            issues = fetch_github_issues_fallback()
+    except FileNotFoundError:
+        print("Warning: 'gh' CLI not found in PATH; falling back to GitHub REST API...")
+        issues = fetch_github_issues_fallback()
 
     report_date = beta_date or ga_date or get_date_str(0, base_date=base_date)
     output_file = f"tmp/test-status/test-report-{report_date}.md"
