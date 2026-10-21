@@ -130,6 +130,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 		google.IncrementResourceGenerated()
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		t.GenerateSingularDataSource(object, *templateData, outputFolder, generateCode, generateDocs)
+		t.GenerateEphemeralResource(object, *templateData, outputFolder, generateCode)
 
 		if generateCode {
 			// log.Printf("Generating %s tests", object.Name)
@@ -356,6 +357,21 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 		targetFolder := t.makeFolder(outputFolder, "website", "docs", "d")
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDataSourceDocumentationFile(targetFilePath, object)
+	}
+}
+
+// EXPERIMENTAL: ephemeral resource generation. Only produces code, no docs
+// template exists yet (parallel to GenerateDataSourceDocumentationFile) —
+// that's separate follow-on work, not part of this experimental first pass.
+func (t *Terraform) GenerateEphemeralResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode bool) {
+	if !object.ShouldGenerateEphemeralResource() {
+		return
+	}
+
+	if generateCode {
+		targetFolder := t.makeFolder(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("ephemeral_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateEphemeralResourceFile(targetFilePath, object)
 	}
 }
 
