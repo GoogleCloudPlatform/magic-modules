@@ -1255,3 +1255,93 @@ func TestResourceFirstRunnableTestConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestShouldGenerateEphemeralResource(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no ephemeral_experimental block returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "ephemeral_experimental present but generate false returns false",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate: false,
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "ephemeral_experimental with generate true returns true",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate: true,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateEphemeralResource(); got != tc.expected {
+				t.Errorf("ShouldGenerateEphemeralResource() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestShouldGenerateEphemeralResourceTests(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		expected    bool
+	}{
+		{
+			description: "no ephemeral_experimental block returns false",
+			resource:    api.Resource{},
+			expected:    false,
+		},
+		{
+			description: "exclude_test true returns false",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate:    true,
+					ExcludeTest: true,
+				},
+			},
+			expected: false,
+		},
+		{
+			description: "exclude_test false returns true",
+			resource: api.Resource{
+				Ephemeral: &resource.Ephemeral{
+					Generate:    true,
+					ExcludeTest: false,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateEphemeralResourceTests(); got != tc.expected {
+				t.Errorf("ShouldGenerateEphemeralResourceTests() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
