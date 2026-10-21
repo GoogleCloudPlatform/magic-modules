@@ -151,14 +151,15 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 			NetworkPerformanceConfig:             expandNetworkPerformanceConfig(d.Get("network_performance_config")),
 		},
-		MasterAuth:           expandMasterAuth(d.Get("master_auth")),
-		NotificationConfig:   expandNotificationConfig(d.Get("notification_config")),
-		ConfidentialNodes:    expandConfidentialNodes(d.Get("confidential_nodes")),
-		ResourceLabels:       tpgresource.ExpandStringMap(d, "effective_labels"),
-		NodePoolAutoConfig:   expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
-		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
-		EnableK8sBetaApis:    expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
-		SecretSyncConfig:     expandSecretSyncConfig(d.Get("secret_sync_config")),
+		MasterAuth:                 expandMasterAuth(d.Get("master_auth")),
+		NotificationConfig:         expandNotificationConfig(d.Get("notification_config")),
+		ConfidentialNodes:          expandConfidentialNodes(d.Get("confidential_nodes")),
+		ResourceLabels:             tpgresource.ExpandStringMap(d, "effective_labels"),
+		NodePoolAutoConfig:         expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
+		CostManagementConfig:       expandCostManagementConfig(d.Get("cost_management_config")),
+		EnableK8sBetaApis:          expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
+		SecretSyncConfig:           expandSecretSyncConfig(d.Get("secret_sync_config")),
+		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
 	}
 
 	v := d.Get("enable_shielded_nodes")
@@ -1786,5 +1787,23 @@ func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
 	}
 	return &container.DataplaneV2Config{
 		ScalabilityMode: s,
+	}
+}
+
+func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
+	if configured == nil {
+		return nil
+	}
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+	if l[0] == nil {
+		return &container.ManagedOpenTelemetryConfig{}
+	}
+	config := l[0].(map[string]interface{})
+	scope, _ := config["scope"].(string)
+	return &container.ManagedOpenTelemetryConfig{
+		Scope: scope,
 	}
 }
