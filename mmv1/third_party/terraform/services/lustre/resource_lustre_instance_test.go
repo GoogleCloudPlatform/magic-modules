@@ -481,11 +481,11 @@ func testAccLustreInstance_dynamicTierCreate(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
   instance_id                 = "tf-test-my-instance%{random_suffix}"
-  location                    = "us-east4-a"
+  location                    = "us-central1-c"
   filesystem                  = "testfs"
   network                     = data.google_compute_network.lustre-network.id
   gke_support_enabled         = false
-  capacity_gib                = 472000
+  capacity_gib                = 118000
   dynamic_tier_options {
     mode = "DEFAULT_CACHE"
   }
@@ -512,9 +512,9 @@ func testAccLustreInstance_dynamicTierUpdate(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
   instance_id                 = "tf-test-my-instance%{random_suffix}"
-  location                    = "us-east4-a"
+  location                    = "us-central1-c"
   filesystem                  = "testfs"
-  capacity_gib                = 472000
+  capacity_gib                = 118000
   network                     = data.google_compute_network.lustre-network.id
   description                 = "test-description"
   dynamic_tier_options {
