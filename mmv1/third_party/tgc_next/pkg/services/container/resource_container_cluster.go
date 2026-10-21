@@ -3151,19 +3151,6 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 	return false
 }
 
-func validateNodePoolAutoConfig(cluster *container.Cluster) error {
-	if cluster == nil || cluster.NodePoolAutoConfig == nil {
-		return nil
-	}
-	if cluster.NodePoolAutoConfig != nil && cluster.NodePoolAutoConfig.NetworkTags != nil && len(cluster.NodePoolAutoConfig.NetworkTags.Tags) > 0 {
-		if (cluster.Autopilot == nil || !cluster.Autopilot.Enabled) && (cluster.Autoscaling == nil || !cluster.Autoscaling.EnableNodeAutoprovisioning) {
-			return fmt.Errorf("node_pool_auto_config network tags can only be set if enable_autopilot or cluster_autoscaling is enabled")
-		}
-	}
-
-	return nil
-}
-
 func containerClusterSurgeSettingsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if v, ok := d.GetOk("cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.strategy"); ok {
 		if v != "SURGE" {
