@@ -22,8 +22,8 @@ if err != nil {
 	return nil
 }
 
-if v, ok := res["memoryConfig"]; ok && v != nil {
-	return fmt.Errorf("BigtableMemoryLayer still enabled at %s", url)
+if v, ok := res["state"]; ok && v != "DISABLED" {
+	return fmt.Errorf("BigtableMemoryLayer still enabled at %s (state=%v)", url, v)
 }
 
 return nil

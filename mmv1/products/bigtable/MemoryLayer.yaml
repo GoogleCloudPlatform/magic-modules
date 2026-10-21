@@ -19,7 +19,7 @@ description: |
   Creation of this resource enables the memory layer on the specified cluster (`EDITION_ENTERPRISE_PLUS` and `SSD` storage type required). Destruction of this resource disables the memory layer on the cluster.
 references:
   guides:
-  api: 'https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.clusters/getMemoryLayer'
+  api: 'https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/MemoryLayer'
 docs:
 base_url: 'projects/{{project}}/instances/{{instance}}/clusters/{{cluster}}/memoryLayer'
 self_link: 'projects/{{project}}/instances/{{instance}}/clusters/{{cluster}}/memoryLayer'
