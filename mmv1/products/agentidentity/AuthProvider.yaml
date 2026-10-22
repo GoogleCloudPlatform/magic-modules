@@ -35,7 +35,6 @@ iam_policy:
   method_name_separator: ':'
   allowed_iam_role: roles/agentidentity.viewer
   parent_resource_attribute: auth_provider_id
-  iam_conditions_request_type: QUERY_PARAM_NESTED
   import_format:
     - projects/{{project}}/locations/{{location}}/authProviders/{{auth_provider_id}}
     - '{{auth_provider_id}}'
