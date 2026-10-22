@@ -1,5 +1,4 @@
 package dataflow
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -42,5 +41,3 @@ func TestDataflowFlexJobWorkerMachineType(t *testing.T) {
 		})
 	}
 }
-
-{{ end }}
