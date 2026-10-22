@@ -16,7 +16,6 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -37,9 +36,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/parser"
-	"go.abhg.dev/goldmark/frontmatter"
+	"gopkg.in/yaml.v3"
 
 	_ "embed"
 )
@@ -806,20 +803,8 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 			continue
 		}
 
-		md := goldmark.New(
-			goldmark.WithExtensions(&frontmatter.Extender{}),
-		)
-
-		ctx := parser.NewContext()
-		var buff bytes.Buffer
-
-		err = md.Convert(src, &buff, parser.WithContext(ctx))
-		if err != nil {
-			errs = append(errs, "Error parsing file "+f)
-			continue
-		}
-		data := frontmatter.Get(ctx)
-		if data == nil {
+		fm, ok := extractFrontmatter(string(src))
+		if !ok {
 			errs = append(errs, fmt.Sprintf("No frontmatter found in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
 			continue
 		}
@@ -827,9 +812,24 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 		var metadata struct {
 			Subcategory string
 		}
-		if err := data.Decode(&metadata); err != nil {
+		if err := yaml.Unmarshal([]byte(fm), &metadata); err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
 		}
 	}
 	return errs
+}
+
+func extractFrontmatter(content string) (string, bool) {
+	normalized := strings.ReplaceAll(content, "\r\n", "\n")
+	trimmed := strings.TrimLeft(normalized, "\n")
+	lines := strings.Split(trimmed, "\n")
+	if len(lines) == 0 || strings.TrimRight(lines[0], " \t") != "---" {
+		return "", false
+	}
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimRight(lines[i], " \t") == "---" {
+			return strings.Join(lines[1:i], "\n"), true
+		}
+	}
+	return "", false
 }

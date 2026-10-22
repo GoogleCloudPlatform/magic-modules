@@ -24,8 +24,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	cp "github.com/otiai10/copy"
 )
 
 type Runner struct {
@@ -49,7 +47,33 @@ func (ar *Runner) GetCWD() string {
 }
 
 func (ar *Runner) Copy(src, dest string) error {
-	return cp.Copy(ar.abs(src), ar.abs(dest))
+	srcAbs := ar.abs(src)
+	destAbs := ar.abs(dest)
+	return filepath.WalkDir(srcAbs, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(srcAbs, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(destAbs, rel)
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return os.MkdirAll(target, info.Mode().Perm())
+		}
+		if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+			return err
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, data, info.Mode().Perm())
+	})
 }
 
 func (ar *Runner) Mkdir(path string) error {
