@@ -1,0 +1,27 @@
+resource "google_apihub_attribute" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  attribute_id = "{{index $.Vars "attribute_id"}}"
+  display_name = "Test Attribute Full"
+  description  = "A comprehensive test attribute with all fields"
+  scope        = "API"
+  data_type    = "ENUM"
+  cardinality  = 3
+  
+  allowed_values {
+    id           = "production"
+    display_name = "Production"
+    description  = "Production environment"
+  }
+  
+  allowed_values {
+    id           = "staging"
+    display_name = "Staging"
+    description  = "Staging environment"
+  }
+  
+  allowed_values {
+    id           = "development"
+    display_name = "Development"
+    description  = "Development environment"
+  }
+}
