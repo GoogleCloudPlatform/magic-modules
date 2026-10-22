@@ -1775,6 +1775,10 @@ be from 0 to 999,999,999 inclusive.`,
 			}),
 			// Boot disk size can only be increased in place; shrinking requires recreation.
 			customdiff.ForceNewIfChange("boot_disk.0.initialize_params.0.size", IsDiskShrinkage),
+			// Only hyperdisk supports updating provisioned IOPS in place (e.g. pd-extreme does not).
+			customdiff.ForceNewIf("boot_disk.0.initialize_params.0.provisioned_iops", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+				return d.HasChange("boot_disk.0.initialize_params.0.provisioned_iops") && !strings.Contains(d.Get("boot_disk.0.initialize_params.0.type").(string), "hyperdisk")
+			}),
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
 			tpgresource.SetLabelsDiff,
@@ -3509,7 +3513,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			if d.HasChange("boot_disk.0.initialize_params.0.size") {
 				obj["sizeGb"] = d.Get("boot_disk.0.initialize_params.0.size").(int)
-				err := updateDisk(d, config, userAgent, project, urlBase+"/resize", obj)
+				err := updateDisk(d, config, userAgent, project, "POST", urlBase+"/resize", obj)
 				if err != nil {
 					return err
 				}
@@ -3517,7 +3521,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if d.HasChange("boot_disk.0.initialize_params.0.labels") {
 				obj["labels"] = tpgresource.ConvertStringMap(d.Get("boot_disk.0.initialize_params.0.labels").(map[string]interface{}))
 				obj["labelFingerprint"] = disk["labelFingerprint"]
-				err := updateDisk(d, config, userAgent, project, urlBase+"/setLabels", obj)
+				err := updateDisk(d, config, userAgent, project, "POST", urlBase+"/setLabels", obj)
 				if err != nil {
 					return err
 				}
@@ -3539,7 +3543,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					perfObj["name"] = diskName
 				}
 				patchUrl := fmt.Sprintf("%s?paths=%s", urlBase, strings.Join(paths, "&paths="))
-				err := patchDisk(d, config, userAgent, project, patchUrl, perfObj)
+				err := updateDisk(d, config, userAgent, project, "PATCH", patchUrl, perfObj)
 				if err != nil {
 					return err
 				}
@@ -5037,20 +5041,20 @@ func CheckForCommonAliasIpv6(old, new map[string]interface{}) []interface{} {
 }
 {{- end }}
 
-func updateDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, patchUrl string, obj map[string]interface{}) error {
+func updateDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, method, patchUrl string, obj map[string]interface{}) error {
 	billingProject := project
 	url, err := tpgresource.ReplaceVars(d, config, patchUrl)
 	if err != nil {
 		return err
 	}
 	headers := make(http.Header)
-	if bp, err := tpgresource.GetBillingProject(d, config); err != nil {
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
-		Method:    "POST",
+		Method:    method,
 		Project:   billingProject,
 		RawURL:    url,
 		UserAgent: userAgent,
@@ -5063,37 +5067,6 @@ func updateDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent,
 	}
 	err = ComputeOperationWaitTime(
 		config, res, project, "Updating Disk", userAgent,
-		d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func patchDisk(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, patchUrl string, obj map[string]interface{}) error {
-	billingProject := project
-	url, err := tpgresource.ReplaceVars(d, config, patchUrl)
-	if err != nil {
-		return err
-	}
-	if bp, err := tpgresource.GetBillingProject(d, config); err != nil {
-		billingProject = bp
-	}
-
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "PATCH",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Body:      obj,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
-	})
-	if err != nil {
-		return fmt.Errorf("Error updating Disk %q performance: %s", d.Id(), err)
-	}
-	err = ComputeOperationWaitTime(
-		config, res, project, "Updating Disk Performance", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err

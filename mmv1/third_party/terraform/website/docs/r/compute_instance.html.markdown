@@ -346,7 +346,8 @@ is desired, you will need to modify your state file manually using
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: This is only supported for hyperdisk skus, and can be updated in place.
+    Note: Updating in place is only supported for hyperdisk skus; changing this
+    value on other disk types (e.g. pd-extreme) will force recreation of the instance.
     Hyperdisk allows for an update of IOPS every 4 hours; to update more
     frequently than that, you'll need to manually delete and recreate the disk.
 

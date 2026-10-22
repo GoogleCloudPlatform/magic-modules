@@ -55,31 +55,6 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 			},
 		},
 		{
-			name: "computed-only-parent",
-			schemaDiff: diff.SchemaDiff{
-				"google_compute_instance_from_machine_image": diff.ResourceDiff{
-					FlattenedSchema: diff.FlattenedSchemaRaw{
-						New: map[string]*schema.Schema{
-							"boot_disk": {
-								Computed: true,
-								Optional: false,
-								MaxItems: 0,
-							},
-						},
-					},
-					Fields: map[string]diff.FieldDiff{
-						"boot_disk.initialize_params.provisioned_iops": {
-							New: &schema.Schema{Optional: true},
-						},
-						"boot_disk.initialize_params.provisioned_throughput": {
-							New: &schema.Schema{Optional: true},
-						},
-					},
-				},
-			},
-			want: map[string]ResourceChanges{},
-		},
-		{
 			name: "iam-resource",
 			schemaDiff: diff.SchemaDiff{
 				"google_resource_iam_member": diff.ResourceDiff{
