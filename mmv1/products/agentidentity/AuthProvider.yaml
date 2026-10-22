@@ -30,6 +30,14 @@ custom_code:
   post_create: "templates/terraform/post_create/sleep.go.tmpl"
   post_update: "templates/terraform/post_create/sleep.go.tmpl"
   post_delete: "templates/terraform/post_delete/sleep.go.tmpl"
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: roles/agentidentity.viewer
+  parent_resource_attribute: auth_provider_id
+  iam_conditions_request_type: QUERY_PARAM_NESTED
+  import_format:
+    - projects/{{project}}/locations/{{location}}/authProviders/{{auth_provider_id}}
+    - '{{auth_provider_id}}'
 parameters:
   - name: location
     type: String
@@ -212,7 +220,6 @@ properties:
 samples:
   - name: "agent_identity_auth_provider_basic"
     primary_resource_id: "default"
-    exclude_test: true
     steps:
       - name: "agent_identity_auth_provider_basic"
         resource_id_vars:
