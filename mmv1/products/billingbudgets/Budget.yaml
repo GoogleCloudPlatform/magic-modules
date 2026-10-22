@@ -43,6 +43,8 @@ schema_version: 1
 state_upgraders: true
 custom_code:
   constants: templates/terraform/constants/billing_budget.tmpl
+custom_diff:
+  - customdiff.ForceNewIfChange("spend_cap", billingBudgetSpendCapPresenceChanged)
 samples:
   - name: billing_budget_basic
     primary_resource_id: budget
@@ -127,6 +129,16 @@ samples:
           display_name: '"Example Billing Budget" + randomSuffix'
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_spend_cap
+    primary_resource_id: budget
+    steps:
+      - name: billing_budget_spend_cap
+        resource_id_vars:
+          display_name: Example Billing Budget
+        test_vars_overrides:
+          display_name: '"Example Billing Budget" + randomSuffix'
+        test_env_vars:
+          billing_acct: MASTER_BILLING_ACCT
 parameters:
   - name: billingAccount
     type: String
@@ -173,6 +185,7 @@ properties:
           included in the budget. If omitted, the report will include
           all usage for the billing account, regardless of which project
           the usage occurred on.
+          When `spend_cap` is set, must contain exactly one project.
         is_set: true
         at_least_one_of:
           - budget_filter.0.projects
@@ -192,6 +205,7 @@ properties:
           specifying that usage from only this set of folders and organizations should be included in the budget.
           If omitted, the budget includes all usage that the billing account pays for. If the folder or organization
           contains projects that are paid for by a different Cloud Billing account, the budget doesn't apply to those projects.
+          Not supported when `spend_cap` is set.
         is_set: true
         at_least_one_of:
           - budget_filter.0.projects
@@ -209,6 +223,7 @@ properties:
         description: |
           Specifies how credits should be treated when determining spend
           for threshold calculations.
+          Must be `EXCLUDE_ALL_CREDITS` when `spend_cap` is set.
         at_least_one_of:
           - budget_filter.0.projects
           - budget_filter.0.resource_ancestors
@@ -232,6 +247,7 @@ properties:
           usage for all the services. The service names are available
           through the Catalog API:
           https://cloud.google.com/billing/v1/how-tos/catalog-api.
+          When `spend_cap` is set, must contain exactly one eligible service.
         default_from_api: true
         at_least_one_of:
           - budget_filter.0.projects
@@ -270,6 +286,7 @@ properties:
           the parent account, usage from the parent account will be included.
           If the field is omitted, the report will include usage from the parent
           account and all subaccounts, if they exist.
+          Not supported when `spend_cap` is set.
         at_least_one_of:
           - budget_filter.0.projects
           - budget_filter.0.resource_ancestors
@@ -286,6 +303,7 @@ properties:
         description: |
           A single label and value pair specifying that usage from only
           this set of labeled resources should be included in the budget.
+          Not supported when `spend_cap` is set.
         default_from_api: true
         at_least_one_of:
           - budget_filter.0.projects
@@ -304,6 +322,7 @@ properties:
           A CalendarPeriod represents the abstract concept of a recurring time period that has a
           canonical start. Grammatically, "the start of the current CalendarPeriod".
           All calendar times begin at 12 AM US and Canadian Pacific Time (UTC-8).
+          Must be `MONTH` when `spend_cap` is set.
 
           Exactly one of `calendar_period`, `custom_period` must be provided.
         at_least_one_of:
@@ -326,6 +345,7 @@ properties:
         description: |
           Specifies to track usage from any start date (required) to any end date (optional).
           This time period is static, it does not recur.
+          Not supported when `spend_cap` is set.
 
           Exactly one of `calendar_period`, `custom_period` must be provided.
         at_least_one_of:
@@ -396,6 +416,8 @@ properties:
     type: NestedObject
     description: |
       The budgeted amount for each usage period.
+      When `spend_cap` is set, `specified_amount` must be used and
+      `last_period_amount` is not supported.
     required: true
     update_mask_fields:
       - amount.specifiedAmount.currencyCode
@@ -451,6 +473,8 @@ properties:
       Rules that trigger alerts (notifications of thresholds being
       crossed) when spend exceeds the specified percentages of the
       budget.
+      When `spend_cap` is set, exactly three rules with thresholds of
+      0.5, 0.8 and 1.0 are required.
     item_type:
       type: NestedObject
       properties:
@@ -476,6 +500,10 @@ properties:
       Defines notifications that are sent on every update to the
       billing account's spend, regardless of the thresholds defined
       using threshold rules.
+      When `spend_cap` is set, this block is required,
+      `pubsub_topic` and `monitoring_notification_channels` must be empty,
+      `enable_project_level_recipients` must be `true` and
+      `disable_default_iam_recipients` must be `false`.
     api_name: notificationsRule
     update_mask_fields:
       - notificationsRule.pubsubTopic
@@ -491,9 +519,6 @@ properties:
           messages will be published, in the form
           projects/{project_id}/topics/{topic_id}. Updates are sent
           at regular intervals to the topic.
-        at_least_one_of:
-          - all_updates_rule.0.pubsub_topic
-          - all_updates_rule.0.monitoring_notification_channels
       - name: schemaVersion
         type: String
         description: |
@@ -509,9 +534,6 @@ properties:
           channel in the form
           projects/{project_id}/notificationChannels/{channel_id}.
           A maximum of 5 channels are allowed.
-        at_least_one_of:
-          - all_updates_rule.0.pubsub_topic
-          - all_updates_rule.0.monitoring_notification_channels
         item_type:
           type: String
         max_size: 5
@@ -537,7 +559,43 @@ properties:
     description: |
       The ownership scope of the budget. The ownership scope and users'
       IAM permissions determine who has full access to the budget's data.
+      Must be `OWNERSHIP_SCOPE_UNSPECIFIED` or `ALL_USERS` when `spend_cap` is set.
     enum_values:
       - OWNERSHIP_SCOPE_UNSPECIFIED
       - ALL_USERS
       - BILLING_ACCOUNT
+  - name: spendCap
+    type: NestedObject
+    description: |
+      The spend cap configured for this budget. When set, strict restrictions
+      apply to the other budget fields; see the
+      [API documentation](https://cloud.google.com/billing/docs/reference/budget/rest/v1/billingAccounts.budgets)
+      for details. Adding or removing this block forces recreation of the budget.
+      While the spend cap is `ENFORCED`, only `input_state` can be updated.
+    update_mask_fields:
+      - spendCap.inputState
+    properties:
+      - name: inputState
+        type: Enum
+        description: |
+          The desired state of the spend cap. Must be `CONFIGURED` when creating
+          a spend cap. Set to `AWAITING_NEXT_PERIOD` to lift an enforced spend cap.
+        required: true
+        enum_values:
+          - CONFIGURED
+          - AWAITING_NEXT_PERIOD
+      - name: outputState
+        type: Enum
+        description: |
+          The actual resting state of the spend cap.
+        output: true
+        enum_values:
+          - STATE_UNSPECIFIED
+          - CONFIGURED
+          - ENFORCED
+          - AWAITING_NEXT_PERIOD
+      - name: reconciling
+        type: Boolean
+        description: |
+          Whether the server is actively processing a state transition.
+        output: true
