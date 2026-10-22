@@ -27,14 +27,11 @@ cd "${GOPATH:-$HOME/go}/src/github.com/hashicorp/$REPO" && pwd
 ```
 
 ### 2. Run the test
-Stream `TF_LOG=DEBUG` output to a log file so failures can be parsed.
+List all `func TestAcc` functions in the target test file (`grep '^func TestAcc' <test_file>`) and explicitly run each relevant test. Stream `TF_LOG=DEBUG` output to a log file so failures can be parsed.
 
-To run a **single exact test** (using `$$` so `make` passes a literal `$` anchor to `go test`):
 ```bash
 TF_LOG=DEBUG make testacc TEST=./$PKG_DIR/services/<SERVICE_NAME> TESTARGS='-run=<TEST_NAME>$$' > test_output_$VERSION.log 2>&1
 ```
-
-When verifying a **newly generated or modified test file** (e.g. `iam_*_generated_test.go` or `resource_*_generated_test.go`), first list all test functions in the file (`grep '^func TestAcc' <test_file>`) and omit the `$$` anchor when running a prefix (e.g. `TESTARGS='-run=TestAcc<Resource>Iam'`) so suffix variants such as `_withCondition` or `_withAndWithoutCondition` are not accidentally skipped.
 
 `no tests to run` on GA usually means the test isn't generated for GA (still guarded or `min_version: beta`). That is a finding, not a pass.
 

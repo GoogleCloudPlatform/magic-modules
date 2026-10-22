@@ -31,16 +31,12 @@ Create the resources by adding the `iam_policy` block to the resource's metadata
 Use the `run-pre-gen-checks` skill to run pre-generation checks on the modified resource. If the checks fail, fix the issues and try again.
 
 ### 4. Generate Providers
-Use the `generate-provider` skill to generate the provider with the new IAM resources. There should be two new code/test files in each of the generated providers:
+Use the `generate-provider` skill to generate the provider with the new IAM resources. There should be two new files in each of the generated providers:
 
 * `[product]/iam_[product]_[resource].go`
 * `[product]/iam_[product]_[resource]_generated_test.go`
 
-Confirm that these files were created before proceeding to the next step.
-* Note: MMv1 only generates `iam_[product]_[resource]_generated_test.go` if the resource has at least one sample with `exclude_test: false` (default). If all samples in the resource YAML have `exclude_test: true` and the user confirms removing `exclude_test: true` from a sample, MMv1 will also generate `[product]/resource_[product]_[resource]_generated_test.go`. When that happens, inspect why the sample test was previously excluded (e.g., soft-delete requiring `custom_code.test_check_destroy`, or `ignore_read_extra` on the sample step), ensure the generated sample test passes, and deduplicate any overlapping basic tests or custom `CheckDestroy` helpers in `mmv1/third_party/terraform/services/[product]/`.
+Confirm that these files were created before proceeding to the next step. If the resource has no samples, the IAM test file will not be generated and a test will need to be handwritten.
 
 ### 5. Run Acceptance Tests
-Use the `run-acctests` skill to run acceptance tests for the new IAM resources:
-* List all `func TestAcc` functions across every newly created or modified `*_test.go` file (`grep '^func TestAcc' ...`) before running tests.
-* Run **all** generated test functions in `iam_[product]_[resource]_generated_test.go` (using a prefix regex like `-run=TestAcc<Resource>Iam` without a trailing `$` anchor so `_withCondition` and `_withAndWithoutCondition` variants are never skipped), as well as any newly generated sample tests in `resource_[product]_[resource]_generated_test.go`.
-* If the tests fail, fix the errors and try again using the `run-acctests` skill.
+Use the `run-acctests` skill to run acceptance tests for the new IAM resources. List all test functions in the newly created IAM test files (`grep '^func TestAcc' ...`) and explicitly run each one. If the tests fail, you will need to fix the errors and try again, using the `run-acctests` skill again to run the tests.
