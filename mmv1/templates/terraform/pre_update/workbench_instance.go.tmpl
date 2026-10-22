@@ -98,13 +98,8 @@ if stopInstance{
   state := d.Get("state").(string)
 
   if state != "STOPPED" {
-    dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
-    if err != nil {
+    if err := modifyWorkbenchInstanceStateAndWait(config, d, project, billingProject, userAgent, "stop"); err != nil {
       return err
-    }
-
-    if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
-      return fmt.Errorf("Error stopping Workbench Instance: %s", err)
     }
 
   } else {
