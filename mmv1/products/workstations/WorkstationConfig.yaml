@@ -127,6 +127,20 @@ samples:
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
+      - name: workstation_config_boost_update
+        min_version: beta
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          enable_automatic_failover: 'true'
+      - name: workstation_config_boost_update
+        min_version: beta
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          enable_automatic_failover: 'false'
   - name: workstation_config_encryption_key
     primary_resource_id: default
     steps:
@@ -398,6 +412,11 @@ properties:
                   type: Integer
                   description: Number of instances to pool for faster workstation boosting.
                   default_from_api: true
+                - name: enableAutomaticFailover
+                  type: Boolean
+                  description: |
+                    Indicates if this boost config is eligible for automatic failover when the service cannot provision the default VM type. Defaults to false.
+                  min_version: beta
                 - name: accelerators
                   type: Array
                   description: |

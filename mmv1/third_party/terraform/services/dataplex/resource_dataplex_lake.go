@@ -300,7 +300,6 @@ func resourceDataplexLakeRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	client := NewDCLDataplexClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
-		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
 		client.Config.BasePath = bp
@@ -400,7 +399,6 @@ func resourceDataplexLakeUpdate(d *schema.ResourceData, meta interface{}) error 
 	}
 	client := NewDCLDataplexClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
-		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
 		client.Config.BasePath = bp
@@ -410,8 +408,6 @@ func resourceDataplexLakeUpdate(d *schema.ResourceData, meta interface{}) error 
 	if _, ok := err.(dcl.DiffAfterApplyError); ok {
 		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
 	} else if err != nil {
-		// The resource didn't actually create
-		d.SetId("")
 		return fmt.Errorf("Error updating Lake: %s", err)
 	}
 
@@ -456,7 +452,6 @@ func resourceDataplexLakeDelete(d *schema.ResourceData, meta interface{}) error 
 	}
 	client := NewDCLDataplexClient(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
 	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
-		d.SetId("")
 		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
 	} else {
 		client.Config.BasePath = bp

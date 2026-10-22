@@ -354,6 +354,15 @@ properties:
               controls the randomness of the model's responses. Lower temperatures
               produce responses that are more predictable. Higher temperatures produce
               responses that are more creative.
+          - name: thinkingLevel
+            type: Enum
+            description: |-
+              The thinking level of the model.
+            enum_values:
+              - DEFAULT
+              - LOW
+              - MEDIUM
+              - HIGH
       - name: policyScope
         type: Enum
         required: true
@@ -427,6 +436,15 @@ properties:
                   controls the randomness of the model's responses. Lower temperatures
                   produce responses that are more predictable. Higher temperatures produce
                   responses that are more creative.
+              - name: thinkingLevel
+                type: Enum
+                description: |-
+                  The thinking level of the model.
+                enum_values:
+                  - DEFAULT
+                  - LOW
+                  - MEDIUM
+                  - HIGH
           - name: policyScope
             type: String
             required: true

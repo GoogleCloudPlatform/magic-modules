@@ -989,7 +989,14 @@ func ResourceDataprocCluster() *schema.Resource {
 															"disk_type": {
 																Type:        schema.TypeString,
 																Optional:    true,
+																Deprecated:  "`disk_type` is deprecated and will be removed in a future major release. Use `type` instead.",
 																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:    true,
+															},
+															"type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The disk type of the attached disk. Currently only supports Hyperdisks: "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-ml", "hyperdisk-throughput".`,
 																ForceNew:    true,
 															},
 															"provisioned_iops": {
@@ -1131,7 +1138,14 @@ func ResourceDataprocCluster() *schema.Resource {
 																					"disk_type": {
 																						Type:        schema.TypeString,
 																						Optional:    true,
+																						Deprecated:  "`disk_type` is deprecated and will be removed in a future major release. Use `type` instead.",
 																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:    true,
+																					},
+																					"type": {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: `The disk type of the attached disk. Currently only supports Hyperdisks: "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-ml", "hyperdisk-throughput".`,
 																						ForceNew:    true,
 																					},
 																					"provisioned_iops": {
@@ -1333,7 +1347,14 @@ func ResourceDataprocCluster() *schema.Resource {
 															"disk_type": {
 																Type:        schema.TypeString,
 																Optional:    true,
+																Deprecated:  "`disk_type` is deprecated and will be removed in a future major release. Use `type` instead.",
 																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:    true,
+															},
+															"type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The disk type of the attached disk. Currently only supports Hyperdisks: "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-ml", "hyperdisk-throughput".`,
 																ForceNew:    true,
 															},
 															"provisioned_iops": {
@@ -1494,7 +1515,14 @@ func ResourceDataprocCluster() *schema.Resource {
 																					"disk_type": {
 																						Type:        schema.TypeString,
 																						Optional:    true,
+																						Deprecated:  "`disk_type` is deprecated and will be removed in a future major release. Use `type` instead.",
 																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:    true,
+																					},
+																					"type": {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: `The disk type of the attached disk. Currently only supports Hyperdisks: "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-ml", "hyperdisk-throughput".`,
 																						ForceNew:    true,
 																					},
 																					"provisioned_iops": {
@@ -1667,7 +1695,14 @@ func ResourceDataprocCluster() *schema.Resource {
 															"disk_type": {
 																Type:        schema.TypeString,
 																Optional:    true,
+																Deprecated:  "`disk_type` is deprecated and will be removed in a future major release. Use `type` instead.",
 																Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																ForceNew:    true,
+															},
+															"type": {
+																Type:        schema.TypeString,
+																Optional:    true,
+																Description: `The disk type of the attached disk. Currently only supports Hyperdisks: "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-ml", "hyperdisk-throughput".`,
 																ForceNew:    true,
 															},
 															"provisioned_iops": {
@@ -1796,7 +1831,14 @@ func ResourceDataprocCluster() *schema.Resource {
 																					"disk_type": {
 																						Type:        schema.TypeString,
 																						Optional:    true,
+																						Deprecated:  "`disk_type` is deprecated and will be removed in a future major release. Use `type` instead.",
 																						Description: `The disk type of the attached disk. Such as "pd-ssd" or "pd-standard".`,
+																						ForceNew:    true,
+																					},
+																					"type": {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: `The disk type of the attached disk. Currently only supports Hyperdisks: "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-ml", "hyperdisk-throughput".`,
 																						ForceNew:    true,
 																					},
 																					"provisioned_iops": {
@@ -2480,23 +2522,49 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		return errors.New("zone is mandatory when region is set to 'global'")
 	}
 
-	// Create the cluster
-	op, err := NewClient(config, userAgent).Projects.Regions.Clusters.Create(
-		project, region, cluster).Do()
+	// Create the cluster, retrying if the subnetwork is not ready yet
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			op, reqErr := NewClient(config, userAgent).Projects.Regions.Clusters.Create(
+				project, region, cluster).Do()
+			if reqErr != nil {
+				return fmt.Errorf("Error creating Dataproc cluster: %s", reqErr)
+			}
+
+			d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster.ClusterName))
+
+			// Wait until it's created
+			waitErr := DataprocClusterOperationWait(config, op, "creating Dataproc cluster", userAgent, d.Timeout(schema.TimeoutCreate))
+			if waitErr != nil {
+				if isRetryable, _ := transport_tpg.IsSubnetworkNotReadyLROError(waitErr); isRetryable {
+					log.Printf("[DEBUG] Dataproc cluster %s creation failed with subnetwork not ready error, deleting partially created cluster before retrying", cluster.ClusterName)
+					delOp, delErr := NewClient(config, userAgent).Projects.Regions.Clusters.Delete(
+						project, region, cluster.ClusterName).Do()
+					if delErr == nil {
+						if delWaitErr := DataprocClusterOperationWait(config, delOp, "deleting failed Dataproc cluster", userAgent, d.Timeout(schema.TimeoutDelete)); delWaitErr != nil {
+							log.Printf("[WARN] Error waiting for deletion of failed Dataproc cluster %s: %s", cluster.ClusterName, delWaitErr)
+						} else {
+							d.SetId("")
+						}
+					} else if transport_tpg.IsGoogleApiErrorWithCode(delErr, 404) {
+						d.SetId("")
+					} else {
+						log.Printf("[WARN] Error deleting failed Dataproc cluster %s: %s", cluster.ClusterName, delErr)
+					}
+				}
+				// The resource didn't actually create
+				// Note that we do not remove the ID here - this resource tends to leave
+				// partially created clusters behind, so we'll let the next Read remove
+				// it.
+				return waitErr
+			}
+			return nil
+		},
+		Timeout:              d.Timeout(schema.TimeoutCreate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSubnetworkNotReadyLROError},
+	})
 	if err != nil {
-		return fmt.Errorf("Error creating Dataproc cluster: %s", err)
-	}
-
-	d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster.ClusterName))
-
-	// Wait until it's created
-	waitErr := DataprocClusterOperationWait(config, op, "creating Dataproc cluster", userAgent, d.Timeout(schema.TimeoutCreate))
-	if waitErr != nil {
-		// The resource didn't actually create
-		// Note that we do not remove the ID here - this resource tends to leave
-		// partially created clusters behind, so we'll let the next Read remove
-		// it.
-		return waitErr
+		return err
 	}
 
 	log.Printf("[INFO] Dataproc cluster %s has been created", cluster.ClusterName)
@@ -3917,13 +3985,27 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		return []map[string]interface{}{}
 	}
 
+	resourceManagerTags := gcc.ResourceManagerTags
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.resource_manager_tags"); ok {
+		cfgTags := v.(map[string]interface{})
+		if len(cfgTags) > 0 && resourceManagerTags != nil {
+			filteredTags := make(map[string]string, len(cfgTags))
+			for k, val := range resourceManagerTags {
+				if _, exists := cfgTags[k]; exists {
+					filteredTags[k] = val
+				}
+			}
+			resourceManagerTags = filteredTags
+		}
+	}
+
 	gceConfig := map[string]interface{}{
 		"tags":                  schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
 		"service_account":       gcc.ServiceAccount,
 		"zone":                  tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
 		"internal_ip_only":      gcc.InternalIpOnly,
 		"metadata":              gcc.Metadata,
-		"resource_manager_tags": gcc.ResourceManagerTags,
+		"resource_manager_tags": resourceManagerTags,
 	}
 
 	if gcc.NetworkUri != "" {
@@ -3961,10 +4043,20 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 		}
 	}
 	if gcc.ConfidentialInstanceConfig != nil {
+		enableConfidentialCompute := gcc.ConfidentialInstanceConfig.EnableConfidentialCompute
+		confidentialInstanceType := gcc.ConfidentialInstanceConfig.ConfidentialInstanceType
+		if !enableConfidentialCompute && confidentialInstanceType != "" {
+			if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.enable_confidential_compute"); ok && v.(bool) {
+				enableConfidentialCompute = true
+				if _, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.confidential_instance_type"); !ok {
+					confidentialInstanceType = ""
+				}
+			}
+		}
 		gceConfig["confidential_instance_config"] = []map[string]interface{}{
 			{
-				"enable_confidential_compute": gcc.ConfidentialInstanceConfig.EnableConfidentialCompute,
-				"confidential_instance_type":  gcc.ConfidentialInstanceConfig.ConfidentialInstanceType,
+				"enable_confidential_compute": enableConfidentialCompute,
+				"confidential_instance_type":  confidentialInstanceType,
 			},
 		}
 	}
@@ -4267,6 +4359,9 @@ func expandAttachedDiskConfig(l []interface{}) []*dataproc.AttachedDiskConfig {
 		if v, ok := rawMap["disk_type"]; ok {
 			c.DiskType = v.(string)
 		}
+		if v, ok := rawMap["type"]; ok {
+			c.Type = v.(string)
+		}
 		if v, ok := rawMap["provisioned_iops"]; ok && v.(int) > 0 {
 			c.ProvisionedIops = int64(v.(int))
 		}
@@ -4290,6 +4385,7 @@ func flattenAttachedDiskConfig(configs []*dataproc.AttachedDiskConfig) []map[str
 		m := make(map[string]interface{})
 		m["disk_size_gb"] = c.DiskSizeGb
 		m["disk_type"] = c.DiskType
+		m["type"] = c.Type
 		if c.ProvisionedIops > 0 {
 			m["provisioned_iops"] = c.ProvisionedIops
 		}

@@ -19,10 +19,10 @@ runs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.26'
+          go-version: '1.26.9'
           cache-dependency-path: |
-            mmv1/go.mod
-            tpgtools/go.mod
+            mmv1/go.sum
+            ${{ startsWith(inputs.repo, 'terraform-provider-google') && 'mmv1/third_party/terraform/go.sum' || '' }}
 
       - name: Build ${{ inputs.repo  }}
         shell: bash

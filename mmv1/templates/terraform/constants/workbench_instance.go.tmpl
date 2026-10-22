@@ -1,6 +1,9 @@
 var metadataDefaults = map[string]string{
         "enable-jupyterlab4": "true",
         "new-proxy-agent-enabled": "true",
+        "enable-opencode": "true",
+        "enable-opencode-web": "true",
+        "enable-antigravity": "true",
     }
 
 var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
@@ -230,6 +233,23 @@ func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceD
 	return nil
 }
 
+func modifyWorkbenchInstanceStateAndWait(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, state string) error {
+	return transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, state)
+			if err != nil {
+				return err
+			}
+			if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+				return fmt.Errorf("Error waiting to modify Workbench Instance state: %s", err)
+			}
+			return nil
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyLROError},
+	})
+}
+
 func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.ResourceData, project string, userAgent string, isBoot bool) (error) {
 	diskObj := make(map[string]interface{})
 	var sizeString string
@@ -251,29 +271,33 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 		return err
 	}
   
-	dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	  Config: config,
-	  Method: "POST",
-	  RawURL: resizeUrl,
-	  UserAgent: userAgent,
-	  Body: diskObj,
-	  Timeout: d.Timeout(schema.TimeoutUpdate),
-	  ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError},
+	return transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			dRes, reqErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:               config,
+				Method:               "POST",
+				RawURL:               resizeUrl,
+				UserAgent:            userAgent,
+				Body:                 diskObj,
+				Timeout:              d.Timeout(schema.TimeoutUpdate),
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError},
+			})
+			if reqErr != nil {
+				return fmt.Errorf("Error resizing disk: %s", reqErr)
+			}
+
+			var opRes map[string]interface{}
+			reqErr = WorkbenchOperationWaitTimeWithResponse(
+				config, dRes, &opRes, project, "Resizing disk", userAgent,
+				d.Timeout(schema.TimeoutUpdate))
+			if reqErr != nil {
+				return fmt.Errorf("Error resizing disk: %s", reqErr)
+			}
+			return nil
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError, transport_tpg.IsSubnetworkNotReadyLROError},
 	})
-  
-	if err != nil {
-	  return fmt.Errorf("Error resizing disk: %s", err)
-	}
-
-	var opRes map[string]interface{}
-	err = WorkbenchOperationWaitTimeWithResponse(
-	  config, dRes, &opRes, project, "Resizing disk", userAgent,
-	  d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-	  return fmt.Errorf("Error resizing disk: %s", err)
-	}
-
-	return nil
 }
 
 // mergeMaps takes two maps and returns a new map with the merged results.

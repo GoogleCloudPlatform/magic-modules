@@ -1,0 +1,151 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+obj := make(map[string]interface{})
+displayNameProp, err := expandVectorSearchIndexDisplayName(d.Get("display_name"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("display_name"); !tpgresource.IsEmptyValue(reflect.ValueOf(displayNameProp)) && (ok || !reflect.DeepEqual(v, displayNameProp)) {
+	obj["displayName"] = displayNameProp
+}
+descriptionProp, err := expandVectorSearchIndexDescription(d.Get("description"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	obj["description"] = descriptionProp
+}
+distanceMetricProp, err := expandVectorSearchIndexDistanceMetric(d.Get("distance_metric"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("distance_metric"); !tpgresource.IsEmptyValue(reflect.ValueOf(distanceMetricProp)) && (ok || !reflect.DeepEqual(v, distanceMetricProp)) {
+	obj["distanceMetric"] = distanceMetricProp
+}
+indexFieldProp, err := expandVectorSearchIndexIndexField(d.Get("index_field"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("index_field"); !tpgresource.IsEmptyValue(reflect.ValueOf(indexFieldProp)) && (ok || !reflect.DeepEqual(v, indexFieldProp)) {
+	obj["indexField"] = indexFieldProp
+}
+filterFieldsProp, err := expandVectorSearchIndexFilterFields(d.Get("filter_fields"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("filter_fields"); !tpgresource.IsEmptyValue(reflect.ValueOf(filterFieldsProp)) && (ok || !reflect.DeepEqual(v, filterFieldsProp)) {
+	obj["filterFields"] = filterFieldsProp
+}
+storeFieldsProp, err := expandVectorSearchIndexStoreFields(d.Get("store_fields"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("store_fields"); !tpgresource.IsEmptyValue(reflect.ValueOf(storeFieldsProp)) && (ok || !reflect.DeepEqual(v, storeFieldsProp)) {
+	obj["storeFields"] = storeFieldsProp
+}
+dedicatedInfrastructureProp, err := expandVectorSearchIndexDedicatedInfrastructure(d.Get("dedicated_infrastructure"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("dedicated_infrastructure"); !tpgresource.IsEmptyValue(reflect.ValueOf(dedicatedInfrastructureProp)) && (ok || !reflect.DeepEqual(v, dedicatedInfrastructureProp)) {
+	obj["dedicatedInfrastructure"] = dedicatedInfrastructureProp
+}
+denseScannProp, err := expandVectorSearchIndexDenseScann(d.Get("dense_scann"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("dense_scann"); !tpgresource.IsEmptyValue(reflect.ValueOf(denseScannProp)) && (ok || !reflect.DeepEqual(v, denseScannProp)) {
+	obj["denseScann"] = denseScannProp
+}
+effectiveLabelsProp, err := expandVectorSearchIndexEffectiveLabels(d.Get("effective_labels"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(effectiveLabelsProp)) && (ok || !reflect.DeepEqual(v, effectiveLabelsProp)) {
+	obj["labels"] = effectiveLabelsProp
+}
+
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/indexes?indexId={{index_id}}"}}")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Creating new Index: %#v", obj)
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for Index: %s", err)
+}
+billingProject = project
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+headers := make(http.Header)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "POST",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent,
+	Body:      obj,
+	Timeout:   d.Timeout(schema.TimeoutCreate),
+	Headers:   headers,
+})
+if err != nil {
+	return fmt.Errorf("Error creating Index: %s", err)
+}
+
+// Store the ID now. The Index resource name is fully derived from
+// project/location/collection_id/index_id (all user-supplied URL parameters),
+// so we can set it without waiting for the LRO to complete.
+id, err := tpgresource.ReplaceVars(d, config, "{{"projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/indexes/{{index_id}}"}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+if d.Get("skip_wait").(bool) {
+	// skip_wait=true: return as soon as the create request is accepted.
+	// The index will finish building asynchronously; users can poll the LRO
+	// or the resource state themselves. Subsequent `terraform apply` runs
+	// will refresh state from the API.
+	log.Printf("[DEBUG] skip_wait is set to true, not waiting on LRO for Index %q", d.Id())
+} else {
+	err = VectorSearchOperationWaitTime(
+		config, res, project, "Creating Index", userAgent,
+		d.Timeout(schema.TimeoutCreate))
+
+	if err != nil {
+		// The resource didn't actually create
+		d.SetId("")
+		return fmt.Errorf("Error waiting to create Index: %s", err)
+	}
+}
+
+log.Printf("[DEBUG] Finished creating Index %q: %#v", d.Id(), res)
+
+identity, err := d.Identity()
+if err == nil && identity != nil {
+	if locationValue, ok := d.GetOk("location"); ok && locationValue.(string) != "" {
+		if err = identity.Set("location", locationValue.(string)); err != nil {
+			return fmt.Errorf("Error setting location: %s", err)
+		}
+	}
+	if collectionIdValue, ok := d.GetOk("collection_id"); ok && collectionIdValue.(string) != "" {
+		if err = identity.Set("collection_id", collectionIdValue.(string)); err != nil {
+			return fmt.Errorf("Error setting collection_id: %s", err)
+		}
+	}
+	if indexIdValue, ok := d.GetOk("index_id"); ok && indexIdValue.(string) != "" {
+		if err = identity.Set("index_id", indexIdValue.(string)); err != nil {
+			return fmt.Errorf("Error setting index_id: %s", err)
+		}
+	}
+	if projectValue, ok := d.GetOk("project"); ok && projectValue.(string) != "" {
+		if err = identity.Set("project", projectValue.(string)); err != nil {
+			return fmt.Errorf("Error setting project: %s", err)
+		}
+	}
+} else {
+	log.Printf("[DEBUG] (Create) identity not set: %s", err)
+}
+
+return resourceVectorSearchIndexRead(d, meta)

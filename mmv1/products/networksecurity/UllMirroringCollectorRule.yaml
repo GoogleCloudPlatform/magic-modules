@@ -100,6 +100,13 @@ properties:
           Examples: "tcp", "udp", "icmp". If unset, matches any IP protocol.
         item_type:
           type: String
+      - name: primaryIpRanges
+        type: Array
+        description: |-
+          Primary IP ranges to match (for the capture point).
+          When unset, matches any primary IP.
+        item_type:
+          type: String
       - name: srcIpRanges
         type: Array
         description: Source IP ranges to match. When unset, matches any source IP range.

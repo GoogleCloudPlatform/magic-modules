@@ -257,12 +257,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Kinesis Data Streams.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: streamArn
             type: String
@@ -294,12 +288,6 @@ properties:
       - name: cloudStorage
         type: NestedObject
         description: Settings for ingestion from Cloud Storage.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: bucket
             type: String
@@ -393,12 +381,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Azure Event Hubs.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: resourceGroup
             type: String
@@ -434,12 +416,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Managed Streaming for Apache Kafka.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: clusterArn
             type: String
@@ -470,12 +446,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Confluent Cloud.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: bootstrapServer
             type: String

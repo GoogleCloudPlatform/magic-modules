@@ -148,7 +148,7 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 		opDesc = "Creating TagBindingCollection"
 	}
 
-	backoff := time.Second
+	backoff := config.SleepUnit
 	for {
 		// Step 1: Read current state
 		_, currentTags, currentEtag, err := getCurrentTagBindingCollectionState(d, config, userAgent, location, encodedResourceName)
@@ -199,7 +199,7 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 				log.Printf("[DEBUG] Concurrent ETag collision detected during %s, restarting read-modify-write cycle after %s", opDesc, backoff)
 				time.Sleep(backoff)
 				backoff = backoff * 2
-				if backoff > 30*time.Second {
+				if backoff > 30*config.SleepUnit {
 					return diag.Errorf("Error %s: Too many concurrent ETag modifications on parent %q. Final error: %s", opDesc, resourceName, err)
 				}
 				continue
@@ -234,7 +234,7 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 	opDesc := "Deleting Terraform-managed tags"
-	backoff := time.Second
+	backoff := config.SleepUnit
 
 	for {
 		// Read current state
@@ -278,7 +278,7 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 				log.Printf("[DEBUG] Concurrent ETag collision detected during %s, restarting read-modify-write cycle after %s", opDesc, backoff)
 				time.Sleep(backoff)
 				backoff = backoff * 2
-				if backoff > 30*time.Second {
+				if backoff > 30*config.SleepUnit {
 					return diag.Errorf("Error %s: Too many concurrent ETag modifications on parent %q. Final error: %s", opDesc, resourceName, err)
 				}
 				continue

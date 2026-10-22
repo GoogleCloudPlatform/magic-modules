@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -32,7 +33,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with replica count 1
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 1, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -41,7 +42,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// update replica count to 2
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 1, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -50,7 +51,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// update the replica count to 0
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -59,7 +60,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -103,7 +104,7 @@ func testAccMemorystoreInstance_automatedBackupConfig(context map[string]interfa
 resource "google_memorystore_instance" "test_abc" {
   instance_id                    = "tf-test-instance-abc-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
   replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
@@ -124,7 +125,7 @@ resource "google_memorystore_instance" "test_abc" {
 
 resource "google_network_connectivity_service_connection_policy" "primary_policy" {
   name                           = "tf-test-abc-policy-%{random_suffix}"
-  location                       = "us-west1"
+  location                       = "us-east4"
   service_class                  = "gcp-memorystore"
   description                    = "my basic service connection policy"
   network                        = google_compute_network.primary_producer_net.id
@@ -136,7 +137,7 @@ resource "google_network_connectivity_service_connection_policy" "primary_policy
 resource "google_compute_subnetwork" "primary_producer_subnet" {
   name                           = "tf-test-abc-%{random_suffix}"
   ip_cidr_range                  = "10.0.4.0/29"
-  region                         = "us-west1"
+  region                         = "us-east4"
   network                        = google_compute_network.primary_producer_net.id
 }
 
@@ -156,7 +157,7 @@ func testAccMemorystoreInstance_automatedBackupConfigWithout(context map[string]
 resource "google_memorystore_instance" "test_abc" {
   instance_id                    = "tf-test-instance-abc-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
   replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
@@ -169,7 +170,7 @@ resource "google_memorystore_instance" "test_abc" {
 
 resource "google_network_connectivity_service_connection_policy" "primary_policy" {
   name                           = "tf-test-abc-policy-%{random_suffix}"
-  location                       = "us-west1"
+  location                       = "us-east4"
   service_class                  = "gcp-memorystore"
   description                    = "my basic service connection policy"
   network                        = google_compute_network.primary_producer_net.id
@@ -181,7 +182,7 @@ resource "google_network_connectivity_service_connection_policy" "primary_policy
 resource "google_compute_subnetwork" "primary_producer_subnet" {
   name                           = "tf-test-abc-%{random_suffix}"
   ip_cidr_range                  = "10.0.4.0/29"
-  region                         = "us-west1"
+  region                         = "us-east4"
   network                        = google_compute_network.primary_producer_net.id
 }
 
@@ -225,7 +226,7 @@ func testAccMemorystoreInstance_deprecatedDesiredPscAutoConnections(context map[
 resource "google_memorystore_instance" "test_abc" {
   instance_id                    = "tf-test-instance-abc-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
   replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
@@ -238,7 +239,7 @@ resource "google_memorystore_instance" "test_abc" {
 
 resource "google_network_connectivity_service_connection_policy" "primary_policy" {
   name                           = "tf-test-abc-policy-%{random_suffix}"
-  location                       = "us-west1"
+  location                       = "us-east4"
   service_class                  = "gcp-memorystore"
   description                    = "my basic service connection policy"
   network                        = google_compute_network.primary_producer_net.id
@@ -250,7 +251,7 @@ resource "google_network_connectivity_service_connection_policy" "primary_policy
 resource "google_compute_subnetwork" "primary_producer_subnet" {
   name                           = "tf-test-abc-%{random_suffix}"
   ip_cidr_range                  = "10.0.4.0/29"
-  region                         = "us-west1"
+  region                         = "us-east4"
   network                        = google_compute_network.primary_producer_net.id
 }
 
@@ -276,7 +277,16 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster with shard count 3
+				// create cluster with shard count 1
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 1, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// update shard count to 3
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
@@ -285,17 +295,8 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// update shard count to 5
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -304,7 +305,6 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 // Validate that engineConfigs is updated for the instance
 func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 	t.Parallel()
-
 	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -316,7 +316,7 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 				// create instance
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
-					shardCount:           3,
+					shardCount:           1,
 					zoneDistributionMode: "MULTI_ZONE",
 					engineConfigs: map[string]string{
 						"maxmemory-policy": "volatile-ttl",
@@ -337,7 +337,7 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 				// add a new memorystore config key-value pair and update existing memorystore config
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
-					shardCount:           3,
+					shardCount:           1,
 					zoneDistributionMode: "MULTI_ZONE",
 					engineConfigs: map[string]string{
 						"maxmemory-policy":  "allkeys-lru",
@@ -359,7 +359,7 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 				// remove all memorystore configs
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
-					shardCount:           3,
+					shardCount:           1,
 					zoneDistributionMode: "MULTI_ZONE",
 					engineConfigs: map[string]string{
 						"maxmemory-policy":  "allkeys-lru",
@@ -391,7 +391,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 				// create instance with deletion protection true
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                      name,
-					shardCount:                3,
+					shardCount:                1,
 					zoneDistributionMode:      "MULTI_ZONE",
 					deletionProtectionEnabled: true,
 					maintenanceDay:            "MONDAY",
@@ -409,7 +409,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 				// update instance with deletion protection false
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                      name,
-					shardCount:                3,
+					shardCount:                1,
 					zoneDistributionMode:      "MULTI_ZONE",
 					deletionProtectionEnabled: false,
 					maintenanceDay:            "MONDAY",
@@ -427,7 +427,11 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 	})
 }
 
-// Validate that node type is updated for the instance
+// Validate that node type is updated for the instance, including when other
+// fields change in the same apply. The API requires exactly 1 update_mask field
+// per request, so the provider must split multi-field updates into separate
+// requests.
+// https://github.com/hashicorp/terraform-provider-google/issues/29428
 func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 	t.Parallel()
 
@@ -439,12 +443,15 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create instance with node type highmem medium
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
-					name:                 name,
-					shardCount:           3,
-					zoneDistributionMode: "MULTI_ZONE",
-					nodeType:             "HIGHMEM_MEDIUM",
+					name:             name,
+					shardCount:       1,
+					mode:             "CLUSTER_DISABLED",
+					nodeType:         "SHARED_CORE_NANO",
+					engineVersion:    "VALKEY_8_0",
+					engineConfigs:    map[string]string{"maxmemory-policy": "volatile-ttl"},
+					maintenanceDay:   "MONDAY",
+					maintenanceHours: 1,
 				}),
 			},
 			{
@@ -453,13 +460,28 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// update instance with node type standard small
+				// update node type together with engine version, engine configs and maintenance policy
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
-					name:                 name,
-					shardCount:           3,
-					zoneDistributionMode: "MULTI_ZONE",
-					nodeType:             "STANDARD_SMALL",
+					name:             name,
+					shardCount:       1,
+					mode:             "CLUSTER_DISABLED",
+					nodeType:         "CUSTOM_PICO",
+					engineVersion:    "VALKEY_9_0",
+					engineConfigs:    map[string]string{"maxmemory-policy": "noeviction"},
+					maintenanceDay:   "TUESDAY",
+					maintenanceHours: 2,
 				}),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_memorystore_instance.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "node_type", "CUSTOM_PICO"),
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "engine_version", "VALKEY_9_0"),
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "engine_configs.maxmemory-policy", "noeviction"),
+					resource.TestCheckResourceAttr("google_memorystore_instance.test", "maintenance_policy.0.weekly_maintenance_window.0.day", "TUESDAY"),
+				),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -485,7 +507,7 @@ func TestAccMemorystoreInstance_updateEngineVersion(t *testing.T) {
 				// create instance with engine version 7.2
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
-					shardCount:           3,
+					shardCount:           1,
 					zoneDistributionMode: "MULTI_ZONE",
 					engineVersion:        "VALKEY_7_2",
 				}),
@@ -499,7 +521,7 @@ func TestAccMemorystoreInstance_updateEngineVersion(t *testing.T) {
 				// update instance with engine version 8.0
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
-					shardCount:           3,
+					shardCount:           1,
 					zoneDistributionMode: "MULTI_ZONE",
 					engineVersion:        "VALKEY_8_0",
 				}),
@@ -526,7 +548,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with AOF enabled
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "AOF", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "AOF", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -535,7 +557,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// update persitence to RDB
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -544,7 +566,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -627,7 +649,7 @@ func TestAccMemorystoreInstance_updateInstanceEndpoints(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with no user created connections
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 0}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -637,7 +659,7 @@ func TestAccMemorystoreInstance_updateInstanceEndpoints(t *testing.T) {
 			},
 			{
 				// create instance with one user created connection
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 1}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 1}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -647,7 +669,7 @@ func TestAccMemorystoreInstance_updateInstanceEndpoints(t *testing.T) {
 			},
 			{
 				// update instance with 2 endpoints
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 2}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 2}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -657,7 +679,7 @@ func TestAccMemorystoreInstance_updateInstanceEndpoints(t *testing.T) {
 			},
 			{
 				// update instance with 1 endpoint
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 1}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 1}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -667,7 +689,7 @@ func TestAccMemorystoreInstance_updateInstanceEndpoints(t *testing.T) {
 			},
 			{
 				// update instance with 0 endpoints
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 0}),
 			},
 			{
 				ResourceName:            "google_memorystore_instance.test",
@@ -677,7 +699,7 @@ func TestAccMemorystoreInstance_updateInstanceEndpoints(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE", userEndpointCount: 0}),
 			},
 		},
 	})
@@ -725,7 +747,8 @@ func testAccMemorystoreInstance_managedBackupSourceSetup(context map[string]inte
 resource "google_memorystore_instance" "instance_mbs_main" {
   instance_id                    = "tf-test-mbs-main-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
+  node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
 }
 `, context)
@@ -736,14 +759,16 @@ func testAccMemorystoreInstance_managedBackupSourceImport(context map[string]int
 resource "google_memorystore_instance" "instance_mbs_main" {
   instance_id                    = "tf-test-mbs-main-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
+  node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
 }
 
 resource "google_memorystore_instance" "instance_mb_copy" {
   instance_id                    = "tf-test-mbs-copy-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
+  node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
    managed_backup_source {
     backup                       = join("", [google_memorystore_instance.instance_mbs_main.backup_collection , "/backups/%{back_up}"])
@@ -860,14 +885,15 @@ func testAccMemorystoreInstance_gcsSourceSetup(context map[string]interface{}) s
 resource "google_memorystore_instance" "instance_gbs_main" {
   instance_id                    =  "tf-test-gbs-main-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
+  node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
 }
 
 # Create a GCS bucket for exporting Memorystore backups
 resource "google_storage_bucket" "memorystore_backup_bucket" {
   name                           = "%{gcs_bucket}"
-  location                       = "us-west1"
+  location                       = "us-east4"
   uniform_bucket_level_access    = true
   force_destroy                  = true
 }
@@ -890,14 +916,15 @@ func testAccMemorystoreInstance_gcsSource(context map[string]interface{}) string
 resource "google_memorystore_instance" "instance_gbs_main" {
   instance_id                    = "tf-test-gbs-main-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
+  node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
 }
 
 # Reference the bucket created in the setup
 resource "google_storage_bucket" "memorystore_backup_bucket" {
   name                           = "tf-test-memorystore-backup-%{random_suffix}"
-  location                       = "us-west1"
+  location                       = "us-east4"
   uniform_bucket_level_access    = true
   force_destroy                  = true
 }
@@ -921,7 +948,8 @@ resource "google_storage_bucket_iam_member" "memorystore_backup_writer" {
 resource "google_memorystore_instance" "instance_gbs_copy" {
   instance_id                    = "tf-test-gbs-copy-%{random_suffix}"
   shard_count                    = 1
-  location                       = "us-west1"
+  location                       = "us-east4"
+  node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
   gcs_source {
     uris                         = [join("", ["gs://%{gcs_bucket}/" , data.google_storage_bucket_objects.backup.bucket_objects[0]["name"]])]
@@ -1080,6 +1108,7 @@ type InstanceParams struct {
 	shouldCreateSecondary     bool
 	secondaryInstanceName     string
 	icrRole                   string
+	mode                      string
 }
 
 func createSecondaryInstanceResource(params *InstanceParams) string {
@@ -1117,7 +1146,7 @@ resource "google_memorystore_instance" "test_secondary" {
 	replica_count = %d
 	shard_count = %d
 	node_type = "%s"
-	location         = "us-west1"
+	location         = "us-east4"
 	desired_auto_created_endpoints  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
@@ -1148,7 +1177,7 @@ func createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params *Ins
 		resource "google_memorystore_instance_desired_user_created_endpoints" "default" {
 
 		name                           = "%s"
-		region                         = "us-west1"
+		region                         = "us-east4"
 		desired_user_created_endpoints {
 			connections {
 				psc_connection {
@@ -1183,7 +1212,7 @@ func createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params *Ins
 	return fmt.Sprintf(`
 		resource "google_memorystore_instance_desired_user_created_endpoints" "default" {
 		name                           = "%s"
-		region                         = "us-west1"
+		region                         = "us-east4"
 		desired_user_created_endpoints {
 			connections {
 				psc_connection {
@@ -1238,7 +1267,7 @@ func createMemorystoreUserCreatedConnection1(params *InstanceParams) string {
 	return fmt.Sprintf(`
 		resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
 		name                          = "%s"
-		region                        = "us-west1"
+		region                        = "us-east4"
 		ip_address                    = google_compute_address.ip1_network1.id
 		load_balancing_scheme         = ""
 		network                       = google_compute_network.network1.id
@@ -1247,7 +1276,7 @@ func createMemorystoreUserCreatedConnection1(params *InstanceParams) string {
 
 		resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
 		name                          = "%s"
-		region                        = "us-west1"
+		region                        = "us-east4"
 		ip_address                    = google_compute_address.ip2_network1.id
 		load_balancing_scheme         = ""
 		network                       = google_compute_network.network1.id
@@ -1256,7 +1285,7 @@ func createMemorystoreUserCreatedConnection1(params *InstanceParams) string {
 
 		resource "google_compute_address" "ip1_network1" {
 		name                          = "%s"
-		region                        = "us-west1"
+		region                        = "us-east4"
 		subnetwork                    = google_compute_subnetwork.subnet_network1.id
 		address_type                  = "INTERNAL"
 		purpose                       = "GCE_ENDPOINT"
@@ -1264,7 +1293,7 @@ func createMemorystoreUserCreatedConnection1(params *InstanceParams) string {
 
 		resource "google_compute_address" "ip2_network1" {
 		name                         = "%s"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		subnetwork                   = google_compute_subnetwork.subnet_network1.id
 		address_type                 = "INTERNAL"
 		purpose                      = "GCE_ENDPOINT"
@@ -1273,7 +1302,7 @@ func createMemorystoreUserCreatedConnection1(params *InstanceParams) string {
 		resource "google_compute_subnetwork" "subnet_network1" {
 		name                         = "%s"
 		ip_cidr_range                = "10.0.0.248/29"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		network                      = google_compute_network.network1.id
 		}
 
@@ -1295,7 +1324,7 @@ func createMemorystoreUserCreatedConnection2(params *InstanceParams) string {
 	return fmt.Sprintf(`
 		resource "google_compute_forwarding_rule" "forwarding_rule1_network2" {
 		name                         = "%s"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		ip_address                   = google_compute_address.ip1_network2.id
 		load_balancing_scheme        = ""
 		network                      = google_compute_network.network2.id
@@ -1304,7 +1333,7 @@ func createMemorystoreUserCreatedConnection2(params *InstanceParams) string {
 
 		resource "google_compute_forwarding_rule" "forwarding_rule2_network2" {
 		name                         = "%s"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		ip_address                   = google_compute_address.ip2_network2.id
 		load_balancing_scheme        = ""
 		network                      = google_compute_network.network2.id
@@ -1313,7 +1342,7 @@ func createMemorystoreUserCreatedConnection2(params *InstanceParams) string {
 
 		resource "google_compute_address" "ip1_network2" {
 		name                         = "%s"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		subnetwork                   = google_compute_subnetwork.subnet_network2.id
 		address_type                 = "INTERNAL"     
 		purpose                      = "GCE_ENDPOINT"
@@ -1321,7 +1350,7 @@ func createMemorystoreUserCreatedConnection2(params *InstanceParams) string {
 
 		resource "google_compute_address" "ip2_network2" {
 		name                         = "%s"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		subnetwork                   = google_compute_subnetwork.subnet_network2.id
 		address_type                 = "INTERNAL"
 		purpose                      = "GCE_ENDPOINT"
@@ -1330,7 +1359,7 @@ func createMemorystoreUserCreatedConnection2(params *InstanceParams) string {
 		resource "google_compute_subnetwork" "subnet_network2" {
 		name                         = "%s"
 		ip_cidr_range                = "10.0.0.248/29"
-		region                       = "us-west1"
+		region                       = "us-east4"
 		network                      = google_compute_network.network2.id
 		}
 
@@ -1349,6 +1378,9 @@ func createMemorystoreUserCreatedConnection2(params *InstanceParams) string {
 }
 
 func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
+	if params.nodeType == "" {
+		params.nodeType = "SHARED_CORE_NANO"
+	}
 	lifecycleBlock := ""
 	if params.preventDestroy {
 		lifecycleBlock = `
@@ -1400,6 +1432,10 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 		// Create secondary instance resource
 		secondaryInstanceBlock = createSecondaryInstanceResource(params)
 	}
+	modeBlock := ``
+	if params.mode != "" {
+		modeBlock = fmt.Sprintf(`mode = "%s"`, params.mode)
+	}
 	if params.userEndpointCount == 2 {
 		createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params)
 	} else if params.userEndpointCount == 1 {
@@ -1412,7 +1448,7 @@ resource "google_memorystore_instance" "test" {
 	replica_count = %d
 	shard_count = %d
 	node_type = "%s"
-	location         = "us-west1"
+	location         = "us-east4"
 	desired_auto_created_endpoints  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
@@ -1422,6 +1458,7 @@ resource "google_memorystore_instance" "test" {
 	engine_configs = {
 		%s
 	}
+  %s
   %s
   %s
   %s
@@ -1435,7 +1472,7 @@ resource "google_memorystore_instance" "test" {
 
 resource "google_network_connectivity_service_connection_policy" "default" {
 	name = "%s"
-	location = "us-west1"
+	location = "us-east4"
 	service_class = "gcp-memorystore"
 	description   = "my basic service connection policy"
 	network = google_compute_network.producer_net.id
@@ -1447,7 +1484,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 resource "google_compute_subnetwork" "producer_subnet" {
 	name          = "%s"
 	ip_cidr_range = "10.0.0.248/29"
-	region        = "us-west1"
+	region        = "us-east4"
 	network       = google_compute_network.producer_net.id
 }
 
@@ -1458,7 +1495,7 @@ resource "google_compute_network" "producer_net" {
 
 data "google_project" "project" {
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, secondaryInstanceBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), modeBlock, zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, secondaryInstanceBlock, params.name, params.name, params.name)
 }
 
 func TestAccMemorystoreInstance_memorystoreInstanceTlsEnabled(t *testing.T) {
@@ -1467,7 +1504,7 @@ func TestAccMemorystoreInstance_memorystoreInstanceTlsEnabled(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		// Until https://github.com/hashicorp/terraform-provider-google/issues/23619 is fixed, use regions other than us-central1 to prevent issues like https://github.com/hashicorp/terraform-provider-google/issues/23543
-		"location": "us-west1",
+		"location": "us-east4",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1494,12 +1531,13 @@ func testAccMemorystoreInstance_memorystoreInstanceTlsEnabled(context map[string
 resource "google_memorystore_instance" "instance-tls" {
   instance_id = "tf-test-tls-instance%{random_suffix}"
   shard_count = 1
+  location                    = "%{location}"
+  node_type                   = "SHARED_CORE_NANO"
+  deletion_protection_enabled = false
   desired_auto_created_endpoints {
     network    = google_compute_network.producer_net.id
     project_id = data.google_project.project.project_id
   }
-  location                    = "%{location}"
-  deletion_protection_enabled = false
   maintenance_policy {
     weekly_maintenance_window {
       day = "MONDAY"
@@ -1550,7 +1588,7 @@ func TestAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(t *tes
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us-west1",
+		"location":      "us-east4",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1603,13 +1641,14 @@ func testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabledPscAuto
 resource "google_memorystore_instance" "instance-cluster-disabled" {
   instance_id                  = "tf-test-instance-psc%{random_suffix}"
   shard_count                  = 1
+  location                     = "%{location}"
+  node_type                    = "SHARED_CORE_NANO"
+  deletion_protection_enabled  = false
+  mode                         = "CLUSTER_DISABLED"
   desired_psc_auto_connections {
     network                    = google_compute_network.producer_net.id
     project_id                 = data.google_project.project.project_id
   }
-  location                     = "%{location}"
-  deletion_protection_enabled  = false
-  mode                         = "CLUSTER_DISABLED"
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
@@ -1648,6 +1687,10 @@ func testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled_bothCo
 resource "google_memorystore_instance" "instance-cluster-disabled" {
   instance_id                  = "tf-test-instance-psc%{random_suffix}"
   shard_count                  = 1
+  location                     = "%{location}"
+  node_type                    = "SHARED_CORE_NANO"
+  deletion_protection_enabled  = false
+  mode                         = "CLUSTER_DISABLED"
   desired_psc_auto_connections {
     network                    = google_compute_network.producer_net.id
     project_id                 = data.google_project.project.project_id
@@ -1656,9 +1699,6 @@ resource "google_memorystore_instance" "instance-cluster-disabled" {
     network                    = google_compute_network.producer_net.id
     project_id                 = data.google_project.project.project_id
   }
-  location                     = "%{location}"
-  deletion_protection_enabled  = false
-  mode                         = "CLUSTER_DISABLED"
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
@@ -1697,13 +1737,14 @@ func testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled_onlyAu
 resource "google_memorystore_instance" "instance-cluster-disabled" {
   instance_id                  = "tf-test-instance-psc%{random_suffix}"
   shard_count                  = 1
+  location                     = "%{location}"
+  node_type                    = "SHARED_CORE_NANO"
+  deletion_protection_enabled  = false
+  mode                         = "CLUSTER_DISABLED"
   desired_auto_created_endpoints {
     network                    = google_compute_network.producer_net.id
     project_id                 = data.google_project.project.project_id
   }
-  location                     = "%{location}"
-  deletion_protection_enabled  = false
-  mode                         = "CLUSTER_DISABLED"
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
@@ -1743,6 +1784,7 @@ resource "google_memorystore_instance" "instance-cluster-disabled" {
   instance_id                  = "tf-test-instance-psc%{random_suffix}"
   shard_count                  = 1
   location                     = "%{location}"
+  node_type                    = "SHARED_CORE_NANO"
   deletion_protection_enabled  = false
   mode                         = "CLUSTER_DISABLED"
   depends_on = [
@@ -1783,7 +1825,7 @@ func TestAccMemorystoreInstance_memorystoreInstanceMaintenanceVersion(t *testing
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us-west1",
+		"location":      "us-east4",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1844,7 +1886,7 @@ func TestAccMemorystoreInstance_customerManagedCas(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us-west1",
+		"location":      "us-east4",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1950,8 +1992,9 @@ resource "google_compute_network" "producer_net" {
 # 4. Memorystore Instance with Customer Managed CAS
 resource "google_memorystore_instance" "instance_cas" {
   instance_id = "tf-test-cas-%{random_suffix}"
-  shard_count = 3
+  shard_count = 1
   location    = "%{location}"
+  node_type   = "SHARED_CORE_NANO"
   
   desired_auto_created_endpoints {
     network    = google_compute_network.producer_net.id
@@ -1979,7 +2022,7 @@ func TestAccMemorystoreInstance_withAclPolicy(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us-west1",
+		"location":      "us-east4",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -2019,6 +2062,72 @@ resource "google_memorystore_acl_policy" "acl_policy" {
     rule     = "on allkeys +get"
     username = "default"
   }
+}
+`, context)
+}
+
+func TestAccMemorystoreInstance_withTokenAuth(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location":      "us-east4",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemorystoreInstance_withTokenAuth(context),
+			},
+			{
+				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "location"},
+			},
+			{
+				Config: testAccMemorystoreInstance_withTokenAuthUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_memorystore_instance.test", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_memorystore_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccMemorystoreInstance_withTokenAuth(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_memorystore_instance" "test" {
+  instance_id                  = "tf-test-instance-%{random_suffix}"
+  shard_count                  = 1
+  location                     = "%{location}"
+  deletion_protection_enabled  = false
+  node_type                    = "SHARED_CORE_NANO"
+  authorization_mode           = "AUTH_DISABLED"
+}
+`, context)
+}
+
+func testAccMemorystoreInstance_withTokenAuthUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_memorystore_instance" "test" {
+  instance_id                  = "tf-test-instance-%{random_suffix}"
+  shard_count                  = 1
+  location                     = "%{location}"
+  deletion_protection_enabled  = false
+  node_type                    = "SHARED_CORE_NANO"
+  authorization_mode           = "TOKEN_AUTH"
 }
 `, context)
 }

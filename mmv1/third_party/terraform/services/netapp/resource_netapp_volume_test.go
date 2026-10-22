@@ -349,7 +349,7 @@ func testAccNetappVolume_volumeBasicExample_updatesnapshot(context map[string]in
         depends_on = [google_netapp_volume.test_volume]
         location = google_netapp_volume.test_volume.location
         volume_name = google_netapp_volume.test_volume.name
-        name = "test-snapshot"
+        name = "tf-test-snapshot%{random_suffix}"
     }
 
     data "google_compute_network" "default" {
@@ -408,7 +408,7 @@ func testAccNetappVolume_volumeBasicExample_createclonevolume(context map[string
         depends_on = [google_netapp_volume.test_volume]
         location = google_netapp_volume.test_volume.location
         volume_name = google_netapp_volume.test_volume.name
-        name = "test-snapshot"
+        name = "tf-test-snapshot%{random_suffix}"
     }
 
     resource "google_netapp_volume" "test_volume_clone" {
@@ -623,7 +623,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 			backupCreateTimeStr := backup["createTime"].(string)
 			backupCreateTime, err := time.Parse(time.RFC3339, backupCreateTimeStr)
 			if err != nil {
-				fmt.Errorf("Failed to parse backup create time : %v", err)
+				return fmt.Errorf("Failed to parse backup create time : %v", err)
 			}
 			backupData := BackupData{
 				name:       backupName,
@@ -799,7 +799,7 @@ func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface
 	return acctest.Nprintf(`
     resource "google_netapp_storage_pool" "default" {
         name = "tf-test-pool%{random_suffix}"
-        location = "us-south1-a"
+        location = "us-east4-a"
         service_level = "FLEX"
         capacity_gib = "2048"
         network = data.google_compute_network.default.id
@@ -811,7 +811,7 @@ func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface
         enable_hot_tier_auto_resize = true
     }
     resource "google_netapp_volume" "test_volume" {
-        location = "us-south1-a"
+        location = "us-east4-a"
         name = "tf-test-volume%{random_suffix}"
         capacity_gib = "100"
         share_name = "tf-test-volume%{random_suffix}"
@@ -833,7 +833,7 @@ func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{
 	return acctest.Nprintf(`
     resource "google_netapp_storage_pool" "default" {
         name = "tf-test-pool%{random_suffix}"
-        location = "us-south1-a"
+        location = "us-east4-a"
         service_level = "FLEX"
         capacity_gib = "2048"
         network = data.google_compute_network.default.id
@@ -845,7 +845,7 @@ func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{
         enable_hot_tier_auto_resize = true
     }
     resource "google_netapp_volume" "test_volume" {
-        location = "us-south1-a"
+        location = "us-east4-a"
         name = "tf-test-volume%{random_suffix}"
         capacity_gib = "100"
         share_name = "tf-test-volume%{random_suffix}"

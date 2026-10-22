@@ -115,7 +115,7 @@ resource "google_ces_toolset" "ces_toolset_for_agent" {
 
 
 resource "google_ces_agent" "ces_child_agent" {
-  agent_id = "child-agent-id%{random_suffix}"
+  agent_id = "tf-test-child-agent-id%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_agent.app_id
   display_name = "child agent"
@@ -168,40 +168,52 @@ resource "google_ces_agent" "ces_agent_basic" {
 
   instruction = "You are a helpful assistant for this example."
 
+  model_settings {
+    model          = "gemini-3.0-flash-001"
+    temperature    = 0.5
+    thinking_level = "LOW"
+  }
+
   before_agent_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def before_agent_callback(callback_context): return None"
+    proactive_execution_enabled = false
   }
 
   after_agent_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def after_agent_callback(callback_context): return None"
+    proactive_execution_enabled = false
   }
 
   before_model_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def before_model_callback(callback_context, llm_request): return None"
+    proactive_execution_enabled = false
   }
 
   after_model_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def after_model_callback(callback_context, llm_response): return None"
+    proactive_execution_enabled = false
   }
 
   before_tool_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def before_tool_callback(tool, input, callback_context): return None"
+    proactive_execution_enabled = false
   }
 
   after_tool_callbacks {
     description = "Example callback"
     disabled    = true
     python_code = "def after_tool_callback(tool, input, callback_context, tool_response): return None"
+    proactive_execution_enabled = false
   }
 
   tools = [
@@ -311,7 +323,7 @@ resource "google_ces_toolset" "ces_toolset_for_agent" {
 
 
 resource "google_ces_agent" "ces_child_agent" {
-  agent_id = "child-agent-id%{random_suffix}"
+  agent_id = "tf-test-child-agent-id%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_agent.app_id
   display_name = "child agent"
@@ -357,40 +369,52 @@ resource "google_ces_agent" "ces_agent_basic" {
 
   instruction = "You are a helpful assistant for this example updated."
 
+  model_settings {
+    model          = "gemini-3.0-flash-001"
+    temperature    = 0.5
+    thinking_level = "HIGH"
+  }
+
   before_agent_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def before_agent_callback(callback_context): return None"
+    proactive_execution_enabled = true
   }
 
   after_agent_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def after_agent_callback(callback_context): return None"
+    proactive_execution_enabled = true
   }
 
   before_model_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def before_model_callback(callback_context, llm_request): return None"
+    proactive_execution_enabled = true
   }
 
   after_model_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def after_model_callback(callback_context, llm_response): return None"
+    proactive_execution_enabled = true
   }
 
   before_tool_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def before_tool_callback(tool, input, callback_context): return None"
+    proactive_execution_enabled = true
   }
 
   after_tool_callbacks {
     description = "Example callback"
     disabled    = false
     python_code = "def after_tool_callback(tool, input, callback_context, tool_response): return None"
+    proactive_execution_enabled = true
   }
 
   // tools = [

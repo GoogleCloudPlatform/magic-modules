@@ -1,8 +1,12 @@
 package reader
 
 import (
+	"go/ast"
+	"go/parser"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -141,6 +145,18 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 
 }
 
+func TestReadTableDrivenTestFile(t *testing.T) {
+	// A table-driven test ranges over a map of test cases, not test functions,
+	// so it must not be read as a serial test map.
+	tests, err := ReadTestFiles([]string{"testdata/service/table_driven_test.go"})
+	if err != nil {
+		t.Fatalf("error reading table driven test file: %v", err)
+	}
+	if len(tests) != 0 {
+		t.Errorf("unexpected tests read from table driven test file: %v", tests)
+	}
+}
+
 func TestReadCrossFileTests(t *testing.T) {
 	tests, err := ReadTestFiles([]string{"testdata/service/cross_file_1_test.go", "testdata/service/cross_file_2_test.go"})
 	if err != nil {
@@ -248,6 +264,295 @@ func TestReadBlockTypesTestFile(t *testing.T) {
 		},
 	}); !reflect.DeepEqual(step, expectedStep) {
 		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/whole_line_substitution_test.go"})
+	if err != nil {
+		t.Fatalf("error reading whole line substitution test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	// A substitution alone on its line is dropped, so neither the setup block
+	// it would have injected at the top level nor the field it would have
+	// injected inside a block body is recorded. Everything else still is.
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"whole_line_substitution": {
+				"resource": {
+					"field_one":              "\"value-one\"",
+					"field_three.field_five": "\"value-five\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestReadEscapedPercentTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/escaped_percent_test.go"})
+	if err != nil {
+		t.Fatalf("error reading escaped percent test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 3 {
+		t.Fatalf("unexpected number of test steps: %d, expected 3", len(tests[0].Steps))
+	}
+	expectedSteps := []Step{
+		// In a fmt.Sprintf template, an escaped percent sign is read as a
+		// single percent sign, including when a verb letter follows it, while
+		// a substitution is still replaced.
+		{
+			ResourceBlock: {
+				"escaped_percent": {
+					"resource": {
+						"field_one":   "parseint(\"ff\", 16) % pow(2, 32)",
+						"field_two":   "\"100%\"",
+						"field_three": "\"%d\"",
+						"field_four":  "\"true\"",
+					},
+				},
+			},
+		},
+		// In an acctest.Nprintf template, "%%" is not an escape, so the
+		// substitution after the first percent sign is still replaced.
+		{
+			ResourceBlock: {
+				"escaped_percent": {
+					"resource": {
+						"field_one": "\"name-%true\"",
+					},
+				},
+			},
+		},
+		// A key after an escaped percent sign in a fmt.Sprintf template is an
+		// acctest.Nprintf substitution once the template is formatted.
+		{
+			ResourceBlock: {
+				"escaped_percent": {
+					"resource": {
+						"field_one": "\"name-true\"",
+						"field_two": "\"true\"",
+					},
+				},
+			},
+		},
+	}
+	for i, expectedStep := range expectedSteps {
+		if step := tests[0].Steps[i]; !reflect.DeepEqual(step, expectedStep) {
+			t.Errorf("found unexpected step %d: %#v, expected %#v", i, step, expectedStep)
+		}
+	}
+}
+
+func TestReadExpectErrorTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/expect_error_test.go"})
+	if err != nil {
+		t.Fatalf("error reading expect error test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	// Steps with ExpectError, PlanOnly, Destroy, ImportState or RefreshState
+	// set are skipped, so only the step that applies cleanly is recorded and
+	// fields from the skipped steps are not.
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"expect_error_resource": {
+				"resource": {
+					"field_one": "\"value-one\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
+func TestReadFormattingCallTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/formatting_call_test.go"})
+	if err != nil {
+		t.Fatalf("error reading formatting call test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	// A config is read the same way wherever it is assembled: inline in the
+	// step or in a config func, from a literal, a shared base config, a
+	// concatenation of the two, or a call to another config func.
+	if expectedSteps := []Step{
+		{
+			ResourceBlock: {
+				"formatting_call_inline": {"inline": {"field_two": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_base":   {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_concat": {"concat": {"field_three": "\"true\""}},
+			},
+		},
+		{
+			// The string passed to the nested config func is a value to
+			// interpolate, not a config.
+			ResourceBlock: {
+				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_base":       {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_string_arg": {"string_arg": {"field_four": "\"true\""}},
+			},
+		},
+		{
+			ResourceBlock: {
+				"formatting_call_literal": {"literal": {"field_six": "\"value-six\""}},
+			},
+		},
+		{
+			// fmt.Sprint has no template: every argument is part of the config,
+			// so both the shared base resource in Args[0] and the resource in
+			// Args[1] must be recorded.
+			ResourceBlock: {
+				"formatting_call_base":   {"base": {"field_one": "\"value-one\""}},
+				"formatting_call_sprint": {"sprint": {"field_seven": "\"true\""}},
+			},
+		},
+	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
+		t.Errorf("found unexpected steps: %#v, expected %#v", tests[0].Steps, expectedSteps)
+	}
+}
+
+func TestReadNonFormattingCallTestFile(t *testing.T) {
+	// Only known formatting functions return their first argument's config;
+	// calling any other cross-package helper must return a "not a config
+	// formatting function" error rather than recording its first argument as
+	// coverage. This fixture is written to a temp dir because detector_test.go
+	// runs ReadAllTests over testdata/ and fails on any intentional read error.
+	testFile := filepath.Join(t.TempDir(), "non_formatting_call_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccNonFormattingCall(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: acctest.EchoResourceConfig(` + "`" + `
+resource "non_formatting_call_decoy" "decoy" {
+  field_one = "value-one"
+}
+` + "`" + `, "echo"),
+			},
+		},
+	})
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	tests, errs := ReadTestFiles([]string{testFile})
+	err, ok := errs["TestAccNonFormattingCall"]
+	if !ok {
+		t.Fatalf("expected an error for TestAccNonFormattingCall, got %v", errs)
+	}
+	if !strings.Contains(err.Error(), "is not a config formatting function") {
+		t.Errorf("unexpected error %q, expected it to contain %q", err.Error(), "is not a config formatting function")
+	}
+	if len(tests) != 1 || len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected tests %#v", tests)
+	}
+	if len(tests[0].Steps[0]) != 0 {
+		t.Errorf("expected empty step when config call is not a formatting function, got %#v", tests[0].Steps[0])
+	}
+}
+
+func TestReadConfigCallExpr(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		expr     string
+		expected string
+		wantErr  string
+	}{
+		{
+			name:     "sprintf-template",
+			expr:     "fmt.Sprintf(`resource \"a\" \"b\" {}`, name)",
+			expected: "resource \"a\" \"b\" {}",
+		},
+		{
+			name:     "nprintf-template",
+			expr:     "acctest.Nprintf(`resource \"a\" \"b\" {}`, context)",
+			expected: "resource \"a\" \"b\" {}",
+		},
+		{
+			// Sprint has no template: every argument is part of the config.
+			name:     "sprint-concatenation",
+			expr:     "fmt.Sprint(`resource \"a\" \"b\" {}`, `resource \"c\" \"d\" {}`)",
+			expected: "resource \"a\" \"b\" {}resource \"c\" \"d\" {}",
+		},
+		{
+			// Only a formatting function is known to return its first
+			// argument's config. Reading the first argument of anything else
+			// would report fields as covered that the test may never apply.
+			name:    "non-formatting-call",
+			expr:    "acctest.EchoResourceConfig(`resource \"a\" \"b\" {}`, \"echo\")",
+			wantErr: "is not a config formatting function",
+		},
+		{
+			name:    "undeclared-config-func",
+			expr:    "testAccUndeclared(\"name\")",
+			wantErr: "failed to find function declaration testAccUndeclared",
+		},
+		{
+			name:    "formatting-call-without-arguments",
+			expr:    "fmt.Sprintf()",
+			wantErr: "failed to find a config template in call to fmt.Sprintf",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			expr, err := parser.ParseExpr(tc.expr)
+			if err != nil {
+				t.Fatalf("error parsing %s: %v", tc.expr, err)
+			}
+			callExpr, ok := expr.(*ast.CallExpr)
+			if !ok {
+				t.Fatalf("%s is not a call expression", tc.expr)
+			}
+			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{})
+			if tc.wantErr != "" {
+				if err == nil {
+					t.Errorf("expected an error containing %q reading %s, read %q", tc.wantErr, tc.expr, configStr)
+				} else if !strings.Contains(err.Error(), tc.wantErr) {
+					t.Errorf("unexpected error %q reading %s, expected it to contain %q", err.Error(), tc.expr, tc.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("error reading %s: %v", tc.expr, err)
+			}
+			if configStr != tc.expected {
+				t.Errorf("read %q from %s, expected %q", configStr, tc.expr, tc.expected)
+			}
+		})
 	}
 }
 

@@ -164,7 +164,7 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				// For now, only allow single assignment variables for serial test maps.
 				// e.g. testCases := map[string]func(t *testing.T) {...
 				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
-					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok && isSerialTestMap(rhsCompLit) {
 						vars[ident.Name] = rhsCompLit
 					}
 				}
@@ -185,7 +185,20 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 	return tests, nil
 }
 
-// Reads a composite literal which is either a slice or a map of serialized test functions.
+// Report whether a composite literal is a serial test map: a map from test
+// names to test functions, e.g. map[string]func(t *testing.T){...}. Ranging
+// over a map is not enough to identify one, since table-driven tests range
+// over a map of test cases too.
+func isSerialTestMap(compLit *ast.CompositeLit) bool {
+	mapType, ok := compLit.Type.(*ast.MapType)
+	if !ok {
+		return false
+	}
+	_, ok = mapType.Value.(*ast.FuncType)
+	return ok
+}
+
+// Reads a composite literal which is a map of serialized test functions.
 func readSerialTestCompLit(varCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, []error) {
 	var tests []*Test
 	var errs []error
@@ -242,18 +255,16 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
 		if eltCompLit, ok := elt.(*ast.CompositeLit); ok {
+			if shouldSkipStep(eltCompLit) {
+				continue
+			}
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
-						var configStr string
-						var err error
-						if configCallExpr, ok := keyValueExpr.Value.(*ast.CallExpr); ok {
-							configStr, err = readConfigCallExpr(configCallExpr, funcDecls, varDecls)
-						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
-							if configVar, ok := varDecls[ident.Name]; ok {
-								configStr, err = strconv.Unquote(configVar.Value)
-							}
-						}
+						// A config is any expression that evaluates to a config
+						// string, and reads the same way here as it does in a
+						// config func's return statement.
+						configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls)
 						if err != nil {
 							errs = append(errs, err)
 						}
@@ -273,15 +284,79 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	return test, nil
 }
 
-// Read the call expression in the public test function that returns the config.
+// Report whether a test step composite literal does not apply its config, so
+// its fields should not count towards coverage: steps with ExpectError set
+// expect the config to be rejected, and steps with PlanOnly, Destroy,
+// ImportState or RefreshState set to true run a plan, destroy, import or
+// refresh rather than applying the config.
+func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
+	for _, elt := range stepCompLit.Elts {
+		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
+			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok {
+				switch ident.Name {
+				case "ExpectError":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); !ok || valIdent.Name != "nil" {
+						return true
+					}
+				case "PlanOnly", "Destroy", "ImportState", "RefreshState":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "true" {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+// Read a call expression that produces a config and return the config string.
+// The call is either to a config func declared in the same package, or to a
+// formatting function that builds a config out of its arguments.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	// Dispatch on the callee rather than on the shape of the arguments: a
+	// config func can take a string as its first argument, and that string is a
+	// value to interpolate, not a config.
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
 			return readConfigFunc(configFunc, funcDecls, varDecls)
 		}
 		return "", fmt.Errorf("failed to find function declaration %s", ident.Name)
 	}
-	return "", fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
+	selectorExpr, ok := configCallExpr.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return "", fmt.Errorf("failed to read config from call to %v (%T)", configCallExpr.Fun, configCallExpr.Fun)
+	}
+	// A function from another package can't be followed, so only the formatting
+	// functions below, whose result is known from their arguments, can be read.
+	// Reading the arguments of anything else would report fields as covered
+	// that the test may never apply.
+	switch selectorExpr.Sel.Name {
+	case "Sprintf", "Nprintf":
+		// The first argument is the config template and the rest are values
+		// interpolated into it.
+		if len(configCallExpr.Args) == 0 {
+			return "", fmt.Errorf("failed to find a config template in call to %s.%s", selectorExpr.X, selectorExpr.Sel.Name)
+		}
+		configStr, err := readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
+		if err != nil || selectorExpr.Sel.Name != "Sprintf" {
+			// Nprintf only replaces %{key}, so "%%" is not an escape there.
+			return configStr, err
+		}
+		return markEscapedPercents(configStr), nil
+	case "Sprint":
+		// Every argument is part of the config. This is used to join a shared
+		// setup config to the config under test.
+		var configStr strings.Builder
+		for _, arg := range configCallExpr.Args {
+			argConfigStr, err := readConfigFuncResult(arg, funcDecls, varDecls)
+			if err != nil {
+				return "", err
+			}
+			configStr.WriteString(argConfigStr)
+		}
+		return configStr.String(), nil
+	}
+	return "", fmt.Errorf("failed to read config from call to %s.%s, which is not a config formatting function", selectorExpr.X, selectorExpr.Sel.Name)
 }
 
 func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
@@ -300,8 +375,15 @@ func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl
 func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
 		return strconv.Unquote(basicLit.Value)
+	} else if ident, ok := result.(*ast.Ident); ok {
+		// A config declared as a package-level string, often a base config
+		// shared by several config funcs.
+		if configVar, ok := varDecls[ident.Name]; ok {
+			return strconv.Unquote(configVar.Value)
+		}
+		return "", fmt.Errorf("failed to find variable declaration %s", ident.Name)
 	} else if callExpr, ok := result.(*ast.CallExpr); ok {
-		return readConfigFuncCallExpr(callExpr, funcDecls, varDecls)
+		return readConfigCallExpr(callExpr, funcDecls, varDecls)
 	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
 		xConfigStr, err := readConfigFuncResult(binaryExpr.X, funcDecls, varDecls)
 		if err != nil {
@@ -316,28 +398,50 @@ func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, v
 	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
 }
 
-// Read the call expression in the config function that returns the config string.
-// The call expression can contain a nested call expression.
-// Return the config string.
-func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
-	if len(configFuncCallExpr.Args) > 0 {
-		if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-			return strconv.Unquote(basicLit.Value)
-		} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
-			return readConfigFuncCallExpr(nestedCallExpr, funcDecls, varDecls)
-		}
-	}
-	// Config string not readable from args, attempt to read call expression as a helper function.
-	return readConfigCallExpr(configFuncCallExpr, funcDecls, varDecls)
-}
+// A substitution: an acctest.Nprintf key or a fmt verb. An Nprintf key may
+// also follow a percent sign escaped in a fmt.Sprintf template, as in
+// acctest.Nprintf(fmt.Sprintf("%%{key}"), ...), which formats to "%{key}".
+var subPattern = regexp.MustCompile("(?:%|" + escapedPercent + "){[^{}]*}|%[vTtbcspqxXUeEfFgGdo]")
 
-var subPattern = regexp.MustCompile("%({[^{}]*}|[vTtbcspqxXUeEfFgGdo])")
+// A substitution alone on its line injects whole HCL statements rather than a
+// value: most often a shared "setup" block, sometimes a conditionally present
+// attribute or nested block. Substituting a value there leaves a bare token
+// where HCL requires an argument or block definition.
+var wholeLineSubPattern = regexp.MustCompile("(?m)^[ \t]*(?:" + subPattern.String() + ")[ \t]*$")
+
+// A substitution, or a percent sign escaped as "%%" in a fmt.Sprintf template.
+// Matching both in a single pass keeps an escaped percent sign followed by a
+// verb letter, such as "%%d", from being read as a percent sign followed by
+// the verb "%d".
+var sprintfEscapedPercentPattern = regexp.MustCompile("%%|" + subPattern.String())
+
+// Stands in for a percent sign escaped in a fmt.Sprintf template until the
+// substitutions have been removed, so it isn't read as part of one. It's a
+// private use character, so it doesn't occur in configs.
+const escapedPercent = "\uE000"
+
+// Mark the escaped percent signs in a fmt.Sprintf template, such as the one in
+// HCL's modulo operator written as "%%". readConfigStr turns them back into
+// percent signs.
+func markEscapedPercents(template string) string {
+	return sprintfEscapedPercentPattern.ReplaceAllStringFunc(template, func(match string) string {
+		if match == "%%" {
+			return escapedPercent
+		}
+		return match
+	})
+}
 
 // Read the config string and return a test step.
 func readConfigStr(configStr string) (Step, error) {
 	// Remove fmt substitutions because they interfere with hcl parsing.
+	// Drop whole-line substitutions entirely; whatever they inject is not
+	// counted as covered, but the rest of the config still parses instead of
+	// the whole test step being discarded.
+	configStr = wholeLineSubPattern.ReplaceAllString(configStr, "")
 	// Replace with a value that can be parsed outside quotation marks.
 	configStr = subPattern.ReplaceAllString(configStr, "true")
+	configStr = strings.ReplaceAll(configStr, escapedPercent, "%")
 	parser := hclparse.NewParser()
 	file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
 	if diagnostics.HasErrors() {

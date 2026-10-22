@@ -39,6 +39,8 @@ However, when adding any new **handwritten Go test function** (`resource_PRODUCT
 | **Scenario 6** | HTTP 400 `InvalidParameter: ... Not valid version` or outdated image/version string | Outdated / Deprecated API Parameter Version | Update outdated version strings in sample `.tf.tmpl` or handwritten test context maps to currently supported API versions |
 | **Scenario 7** | HTTP 400 `managedZoneDnsNameNotAvailable` or domain allocation limit error across concurrent tests | Shared Resource / Domain Allocation Conflict | Consolidate multiple separate test functions into a single acceptance test function that reuses the managed domain/resource |
 | **Scenario 8** | HTTP 403 `SERVICE_DISABLED` or error indicating API service has not been used in project before / is disabled | API Service Not Enabled in Target Project | For shared CI test projects (`ci-test-project-nightly-ga`/`beta`): run `gcloud services enable <service.googleapis.com> --project=<ci-project>`. For test-created or secondary projects: use Terraform resources (`google_project_service` / Go bootstrap utilities) in test config. |
+| **Scenario 9** | `Requested interaction not found` in VCR `REPLAYING` mode after `RECORDING` passed | Non-Deterministic HTTP Request Ordering or Payload | For user-facing doc samples (`mmv1/templates/terraform/samples/` without `exclude_basic_doc: true`): set `skip_vcr: true` with a `# reason` comment in product YAML. For test-only configs: order concurrent resources with `depends_on` or replace unseeded randomness with `acctest.RandString(t, 10)`. |
+| **Scenario 10** | `Error waiting for Creating/Updating/Deleting <Resource>: timeout while waiting for state to become ...` (e.g. `'done: true'` for standard GCP LROs, or `'DONE'` for Compute) | Long-Running Operation (LRO) Exceeding Resource Timeout | Retrieve the operation ID/URL from debug logs and poll/query the operation to find its total length (e.g. `metadata.endTime` - `metadata.createTime` or `endTime` - `startTime`); bump the resource timeouts (`timeouts:` in product YAML or `schema.ResourceTimeout` in handwritten Go + docs) to an appropriate higher interval (`20`, `30`, or a multiple of `30` minutes such as `60`, `90`, `120`). |
 
 ---
 
@@ -118,11 +120,33 @@ However, when adding any new **handwritten Go test function** (`resource_PRODUCT
   - **Shared CI Test Project (`ci-test-project-nightly-ga` / `ci-test-project-nightly-beta`)**: Automatically execute `gcloud services enable <service.googleapis.com> --project=<ci-project>` via `run_command` to enable the API directly in the target CI project. Do **not** modify test code in `magic-modules` for shared CI project API enablement.
   - **Test-Created / Secondary Project**: If the disabled API is for a secondary or test-created project, modify the test configuration (`mmv1/templates/terraform/samples/<service>/<sample>.tf.tmpl` or handwritten Go test `mmv1/third_party/terraform/services/<service>/<resource>_test.go.tmpl`) to include a `google_project_service` resource or call test bootstrapping helper functions (`EnableServiceUsageProjectServices` / `bootstrap_test_utils`) so that the Terraform test itself enables the required API in that project.
 
+### Scenario 9: VCR Replay Mismatch (`Requested interaction not found` in `REPLAYING` mode after `RECORDING` passed)
+* **Inspection:** Diff HTTP sequences between `recording_test/<pkg>.log` and `replaying_after_recording_test/<pkg>.log` (from `gs://ci-vcr-cassettes/.../build-log/`). `NewVcrMatcherFunc` (`acctest/vcr_utils.go`) matches the first unused cassette interaction with identical `(Method, normalized URL, reflect.DeepEqual(JSON body))` — JSON arrays in request bodies are order-sensitive.
+* **Common Root Causes:**
+  1. **Batched requests with parallel resources:** e.g., multiple `google_project_service` resources where goroutine scheduling changes the `serviceIds` array order in `services:batchEnable`.
+  2. **Concurrent fine-grained resources mutating the same parent:** e.g., multiple `google_*_iam_member` or `google_*_iam_binding` resources on the same parent, where read-modify-write scheduling alters intermediate `PUT`/`POST` bodies and etags.
+  3. **Unseeded randomness or timestamps:** `random_*` provider, `uuid()`, `timestamp()`, or `id.UniqueId()` instead of `acctest.RandString(t, 10)`.
+* **Remedies (Doc Samples vs. Test-Only Configs):**
+  - **User-Facing Documentation Samples** (`mmv1/templates/terraform/samples/**/*.tf.tmpl` without `exclude_basic_doc: true`): Do **not** add test-only `depends_on` chains that clutter public docs. Instead, set `skip_vcr: true` in the sample block of `mmv1/products/<product>/<Resource>.yaml` with a `# reason` comment above it.
+  - **Test-Only Configs** (handwritten `*_test.go` or samples with `exclude_basic_doc: true`): Fix non-determinism directly by chaining parallel resources that share a batch or parent policy with `depends_on`, or replacing unseeded randomness with `acctest.RandString(t, 10)`. Only use `acctest.SkipIfVcr(t)` / `skip_vcr: true` (with a `# reason` comment) when non-determinism cannot be ordered (e.g., clients bypassing the shared VCR HTTP transport or `ExternalProviders`).
+
+### Scenario 10: Operation Timeout (`timeout while waiting for state to become ...`)
+* **Inspection:**
+  1. **Retrieve Operation ID & URL:** Inspect the parsed debug log (`outline.txt`) or raw debug log from `gs://nightly-test-data/...` to locate the operation resource name / URL returned by the initial `POST`/`PATCH`/`PUT`/`DELETE` request and polled by subsequent `GET` requests (e.g., `https://<service>.googleapis.com/v1/projects/<project>/locations/<location>/operations/<op_id>` for standard GCP LROs, or `https://compute.googleapis.com/compute/v1/projects/<project>/<scope>/operations/<op_id>` for Compute). Record the operation's creation/start timestamp (`metadata.createTime` / `createTime` for standard LROs, or `insertTime` / `startTime` for Compute).
+  2. **Poll / Query the Operation for Total Length:** Run `.agents/scripts/query_operation.py` with the operation URL (`python3 .agents/scripts/query_operation.py "<operation_url>"`) to check whether it finished (`"done": true` for standard LROs, `"status": "DONE"` for Compute, or the target resource state) and retrieve its completion timestamp (`metadata.endTime` / `updateTime` / `endTime`).
+  3. **Calculate Total Length:** Compute the total elapsed duration from creation/start (`metadata.createTime` / `createTime` / `startTime` / `insertTime`) to completion (`metadata.endTime` / `updateTime` / `endTime`).
+     - If the operation ran in a temporary test-created project that was deleted during test teardown (returning `404`/`403`), check recent nightly history and sibling tests for the same resource to gauge typical duration.
+     - If the operation remains in-flight (`"done": false` / `"status": "RUNNING"`) indefinitely on the backend or terminated with a backend internal error, classify as **Scenario 1 (Non-Remediable Backend Error)** and report it rather than inflating timeouts.
+* **Remedies:**
+  - **Choose Target Interval:** Bump the resource timeout up to an appropriate higher interval that comfortably exceeds the total operation length — generally **`20`, `30`, or a multiple of `30` minutes** (e.g., `30`, `60`, `90`, `120`).
+  - **MMv1 Generated Resources** (`mmv1/products/<product>/<Resource>.yaml`): Update `timeouts:` and **always specify all three keys** (`insert_minutes`, `update_minutes`, `delete_minutes` — omitting any key in a non-nil `timeouts:` block unmarshals it as `0`, generating `0 * time.Minute`; set unchanged actions to `20` or the new timeout). If `async.operation.timeouts` is also present in the resource YAML, update all three keys there to match. Include a `bug` or `enhancement` release note (not `release-note:none`), since default timeout changes affect generated provider behavior and docs.
+  - **Handwritten Resources** (`mmv1/third_party/terraform/services/<service>/resource_<resource>.go`): Update `Timeouts: &schema.ResourceTimeout{ Create: schema.DefaultTimeout(30 * time.Minute), ... }` (or Framework `timeouts.Create(ctx, 30*time.Minute)`) and update the corresponding `## Timeouts` section in `mmv1/third_party/terraform/website/docs/r/<resource>.html.markdown`.
+
 ---
 
 ## Guidelines for Adding New Scenarios
 
 When a new failure pattern is identified:
-1. Assign a new sequential Scenario ID (e.g., Scenario 9).
+1. Assign a new sequential Scenario ID (e.g., Scenario 11).
 2. Document the symptom pattern, root cause category, and primary file location / remedy.
 3. Keep the catalog updated so all workflows can consult the latest patterns.

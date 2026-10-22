@@ -1,0 +1,18 @@
+resource "google_bigtable_instance" "instance" {
+  name          = "{{index $.ResourceIdVars "instance_name"}}"
+  instance_type = "PRODUCTION"
+  edition       = "ENTERPRISE_PLUS"
+  cluster {
+    cluster_id   = "{{index $.ResourceIdVars "cluster_id"}}"
+    zone         = "us-central1-b"
+    num_nodes    = 1
+    storage_type = "SSD"
+  }
+
+  deletion_protection = false
+}
+
+resource "google_bigtable_memory_layer" "{{$.PrimaryResourceId}}" {
+  instance = google_bigtable_instance.instance.name
+  cluster  = google_bigtable_instance.instance.cluster[0].cluster_id
+}
