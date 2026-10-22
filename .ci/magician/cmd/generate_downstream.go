@@ -334,6 +334,13 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 }
 
 func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullRequest, error) {
+	if message, err := gh.GetCommitMessage("GoogleCloudPlatform", "magic-modules", ref); err == nil {
+		if prNumber := parsePRNumberFromCommitMessage(message); prNumber != "" {
+			if pr, err := gh.GetPullRequest(prNumber); err == nil && pr.MergeCommitSha == ref {
+				return &pr, nil
+			}
+		}
+	}
 	prs, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
 	if err != nil {
 		return nil, err
