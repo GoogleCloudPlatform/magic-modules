@@ -1,9 +1,9 @@
 package dataflow_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -12,16 +12,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
-
-	compute "google.golang.org/api/compute/v0.beta"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
@@ -174,7 +173,7 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-		    "time": {},
+			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
@@ -346,11 +345,11 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 		{
 			Member: "serviceAccount:service-{project_number}@dataflow-service-producer-prod.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 	})
 
@@ -741,7 +740,6 @@ func TestAccDataflowFlexTemplateJob_workerPoolsFallback(t *testing.T) {
 	})
 }
 
-
 func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
@@ -858,7 +856,24 @@ func testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t *testing.T, re
 	}
 }
 
-func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *terraform.State, res string) (*compute.InstanceTemplate, error) {
+type dataflowFlexTemplateInstanceTemplate struct {
+	Properties *dataflowFlexTemplateInstanceTemplateProperties `json:"properties"`
+}
+
+type dataflowFlexTemplateInstanceTemplateProperties struct {
+	NetworkInterfaces []dataflowFlexTemplateNetworkInterface `json:"networkInterfaces"`
+}
+
+type dataflowFlexTemplateNetworkInterface struct {
+	Network    string `json:"network"`
+	Subnetwork string `json:"subnetwork"`
+}
+
+type dataflowFlexTemplateInstanceTemplatesResponse struct {
+	Items []dataflowFlexTemplateInstanceTemplate `json:"items"`
+}
+
+func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *terraform.State, res string) (*dataflowFlexTemplateInstanceTemplate, error) {
 	rs, ok := s.RootModule().Resources[res]
 	if !ok {
 		return nil, fmt.Errorf("resource %q not in state", res)
@@ -870,15 +885,30 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 
 	config := acctest.GoogleProviderConfig(t)
 
-	var instanceTemplate *compute.InstanceTemplate
+	var instanceTemplate *dataflowFlexTemplateInstanceTemplate
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		instanceTemplates, rerr := compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).RegionInstanceTemplates.
-			List(config.Project, config.Region).
-			Filter(filter).
-			MaxResults(2).
-			Fields("items/properties").Do()
+		query := url.Values{
+			"filter":     []string{filter},
+			"maxResults": []string{"2"},
+			"fields":     []string{"items/properties"},
+		}
+		rawURL := fmt.Sprintf("%sprojects/%s/regions/%s/instanceTemplates?%s", transport_tpg.BaseUrl(compute_tpg.Product, config), config.Project, config.Region, query.Encode())
+		response, rerr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    rawURL,
+			UserAgent: config.UserAgent,
+		})
 		if rerr != nil {
+			return resource.NonRetryableError(rerr)
+		}
+		responseJSON, rerr := json.Marshal(response)
+		if rerr != nil {
+			return resource.NonRetryableError(rerr)
+		}
+		var instanceTemplates dataflowFlexTemplateInstanceTemplatesResponse
+		if rerr := json.Unmarshal(responseJSON, &instanceTemplates); rerr != nil {
 			return resource.NonRetryableError(rerr)
 		}
 		if len(instanceTemplates.Items) == 0 {
@@ -887,7 +917,7 @@ func testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t *testing.T, s *te
 		if len(instanceTemplates.Items) > 1 {
 			return resource.NonRetryableError(fmt.Errorf("Wrong number of matching instance templates for dataflow job: %s, %d", rs.Primary.ID, len(instanceTemplates.Items)))
 		}
-		instanceTemplate = instanceTemplates.Items[0]
+		instanceTemplate = &instanceTemplates.Items[0]
 		if instanceTemplate == nil || instanceTemplate.Properties == nil {
 			return resource.NonRetryableError(fmt.Errorf("invalid instance template has no properties"))
 		}
@@ -923,15 +953,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -971,15 +1001,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1046,15 +1076,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1128,15 +1158,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1189,15 +1219,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1255,15 +1285,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1317,15 +1347,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1389,15 +1419,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1456,15 +1486,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1512,15 +1542,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1567,15 +1597,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1622,15 +1652,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1709,15 +1739,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1793,15 +1823,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -1879,15 +1909,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -2055,15 +2085,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -2110,15 +2140,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -2165,15 +2195,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -2233,15 +2263,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
 }
 EOF
 }
@@ -2276,5 +2306,3 @@ resource "google_dataflow_flex_template_job" "duplicate" {
 }
 `, topicName, bucket, job, job)
 }
-
-{{- end }}
