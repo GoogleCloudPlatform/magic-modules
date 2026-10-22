@@ -19,11 +19,9 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	UserAgent: config.UserAgent,
 })
 if err != nil {
-	return nil
+	continue
 }
 
 if v, ok := res["state"]; ok && v != "DISABLED" {
 	return fmt.Errorf("BigtableMemoryLayer still enabled at %s (state=%v)", url, v)
 }
-
-return nil
