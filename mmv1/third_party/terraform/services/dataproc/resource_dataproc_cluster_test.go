@@ -4228,7 +4228,7 @@ func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataprocCluster_flexibleConfig(rnd, 3, 0),
+				Config: testAccDataprocCluster_flexibleConfig(rnd, 3, 1),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster", plancheck.ResourceActionUpdate),
@@ -4237,8 +4237,8 @@ func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "0"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "0"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "1"),
 				),
 			},
 		},
