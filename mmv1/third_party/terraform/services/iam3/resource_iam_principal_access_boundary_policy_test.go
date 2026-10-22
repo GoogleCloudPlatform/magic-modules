@@ -77,6 +77,10 @@ resource "google_iam_principal_access_boundary_policy" "my-pab-policy" {
       description = "PAB rule%{random_suffix}"
       effect      = "ALLOW"
       resources   = ["//cloudresourcemanager.googleapis.com/projects/${google_project.project.project_id}"]
+      operation {
+        permissions          = ["resourcemanager.projects.get"]
+        excluded_permissions = ["resourcemanager.projects.delete"]
+      }
     }
     enforcement_version = "1"
   }
