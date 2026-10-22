@@ -508,9 +508,6 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if _, ok := d.GetOk("max_num_workers"); !ok && optionsMap["maxNumWorkers"] == nil || optionsMap["maxNumWorkers"] == 0 {
 		optionsMap["maxNumWorkers"] = job.Environment.WorkerPools[0].AutoscalingSettings.MaxNumWorkers
 	}
-	if _, ok := d.GetOk("machine_type"); !ok && optionsMap["workerMachineType"] == nil || optionsMap["workerMachineType"] == "" {
-		optionsMap["workerMachineType"] = job.Environment.WorkerPools[0].MachineType
-	}
 	if _, ok := d.GetOk("sdk_container_image"); !ok && optionsMap["sdkContainerImage"] == nil || optionsMap["sdkContainerImage"] == "" {
 		optionsMap["sdkContainerImage"] = job.Environment.WorkerPools[0].WorkerHarnessContainerImage
 	}
@@ -537,7 +534,7 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("subnetwork", job.Environment.WorkerPools[0].Subnetwork); err != nil {
 		return fmt.Errorf("Error setting subnetwork: %s", err)
 	}
-	if err := d.Set("machine_type", optionsMap["workerMachineType"]); err != nil {
+	if err := d.Set("machine_type", dataflowFlexJobWorkerMachineType(optionsMap, job.Environment.WorkerPools[0])); err != nil {
 		return fmt.Errorf("Error setting machine_type: %s", err)
 	}
 
@@ -878,6 +875,14 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 	}
 
 	return nil
+}
+
+// Beam Python records the machine type in sdkPipelineOptions as machine_type, not workerMachineType.
+func dataflowFlexJobWorkerMachineType(options map[string]interface{}, workerPool *dataflow.WorkerPool) string {
+	if v, _ := options["workerMachineType"].(string); v != "" {
+		return v
+	}
+	return workerPool.MachineType
 }
 
 func dataflowFlexJobTypeTransferVar(ename, pname string, updatedParameters map[string]string, d *schema.ResourceData) (string, map[string]string) {
