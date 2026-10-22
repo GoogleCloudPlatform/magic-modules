@@ -1,0 +1,78 @@
+---
+page_title: "Use Actions with the Terrafotm Provider for Google Cloud"
+description: |-
+  Learn how declare, trigger and invoke action in the Terrafotm Provider for Google Cloud.
+---
+
+# Terraform Actions in the Terrafotm Provider for Google Cloud
+
+Actions are preset operations built into the providers that let Terraform perform day-two operations
+on your infrastructure. Actions do not affect the resource state. The Terraform Provider for Google Cloud
+implements actions for operations that do not fit the resource lifecycle, such as resetting
+a Compute Engine Instance.
+
+Terraform Actions are available in Terraform v1.14 and later. For more information, see the [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
+
+---
+
+## Declare an action
+
+Declare an `action` block with the action type and a label. Put the action's arguement in a
+`config` block:
+
+```hcl
+action "<google_compute_instance_reset" "web"{
+  config {
+     instance = google_compute_instance.web.self_link
+  }
+}
+```
+
+An action block can also use Terraform meta-arguments such as `count` and `provider`. For the full
+syntax, see the [`action` block reference](https://developer.hashicorp.com/terraform/language/block/action).
+
+## Run an action on a resource lifecycle event
+
+To run an action when a resource changes, add an `action_trigger` block to the `lifecycle` block of
+that resource:
+```hcl
+resource "terraform_data" "config_version" {
+    input = var.Config_version
+
+    lifecycle {
+    action_trigger {
+      events  = ["after_update"]
+      actions = [action.google_compute_instance_reset.web]
+    }
+  }
+}
+```
+
+An `after_create` triggers runs the action when terraform first creates the resource. An 
+`after_update` triggers runs the action when Terraform updates the resource, including when it
+updates the resource to correct drift. For all supportedevents, see the
+[`action_trigger` reference](https://developer.hashicorp.com/terraform/language/block/resource#action_trigger).
+
+## Invoke an action from the CLI
+
+To run an action directly, pass its address to the `-invoke` flag:
+
+```shell
+terraform plan -invoke=action.google_compute_instance_reset.web
+terraform apply -invoke=action.google_compute_instance_reset.web
+```
+
+When you use `-invode`, Terraform runs only that action and does not change any resource in the 
+configuration.
+
+## Actions and managed resources
+
+Although actions do not write to Terraform state, they act on real infrastructure. An action can
+act on an object that a resource in your configuration also manages. Each action page in this 
+provider describes how the action interacts with the relatedresource and whether it can coause drift.
+
+## Available actions
+
+* [`google_compute_instance_reset`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/actions/compute_instance_reset) - Performs a hard reset of a running Compute Engine instance.
+
+---
