@@ -11331,7 +11331,7 @@ func TestAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(t *testing.T) 
 
 	instanceName := fmt.Sprintf("tf-test-sqlserver-pvp-%s", acctest.RandString(10))
 
-	vcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
@@ -11347,10 +11347,11 @@ func TestAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(t *testing.T) 
 				),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"root_password"},
+				ResourceName:      "google_sql_database_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// root_password is not returned by the API; deletion_protection is a Terraform-only field
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
 			{
 				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(instanceName, false),
@@ -11359,10 +11360,11 @@ func TestAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(t *testing.T) 
 				),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"root_password"},
+				ResourceName:      "google_sql_database_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// root_password is not returned by the API; deletion_protection is a Terraform-only field
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
 		},
 	})
@@ -11372,13 +11374,14 @@ func testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(instanceName s
 	if enabled {
 		return fmt.Sprintf(`
 resource "google_sql_database_instance" "default" {
-  name             = "%s"
-  database_version = "SQLSERVER_2022_STANDARD"
-  region           = "us-central1"
-  root_password    = "ComplexP@ssw0rd123!"
+  name                = "%s"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
 
   settings {
-    tier = "db-custom-2-7680"
+    tier = "db-custom-1-3840"
 
     sql_server_password_validation_policy {
       enable_password_policy  = true
@@ -11394,13 +11397,14 @@ resource "google_sql_database_instance" "default" {
 
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "default" {
-  name             = "%s"
-  database_version = "SQLSERVER_2022_STANDARD"
-  region           = "us-central1"
-  root_password    = "ComplexP@ssw0rd123!"
+  name                = "%s"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
 
   settings {
-    tier = "db-custom-2-7680"
+    tier = "db-custom-1-3840"
 
     sql_server_password_validation_policy {
       enable_password_policy = false
@@ -11409,3 +11413,4 @@ resource "google_sql_database_instance" "default" {
 }
 `, instanceName)
 }
+
