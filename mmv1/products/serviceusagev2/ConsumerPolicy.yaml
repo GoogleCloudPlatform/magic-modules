@@ -80,7 +80,7 @@ properties:
           send_empty_value: true
           is_set: true
           description: |
-            (Optional): List of service names to be enabled in the format of services/<service_name>
+            List of service names to be enabled in the format of services/<service_name>
           item_type:
             type: String
         - name: 'catalogs'
@@ -100,11 +100,11 @@ virtual_fields:
   - name: 'validate_dependencies'
     type: Boolean
     description: |
-      (Optional) Default value is true. If true, this flag enforces dependency management within the consumer policy. When adding a new service, it verifies that all its dependencies are already present/added in the policy. Conversely, when removing a service, it ensures that no other services within the policy depend on the service to be removed. If the validation fails, a comprehensive message will be presented, outlining the missing dependencies and providing instructions on how to address the issue.
+      Default value is true. If true, this flag enforces dependency management within the consumer policy. When adding a new service, it verifies that all its dependencies are already present/added in the policy. Conversely, when removing a service, it ensures that no other services within the policy depend on the service to be removed. If the validation fails, a comprehensive message will be presented, outlining the missing dependencies and providing instructions on how to address the issue.
     default_value: true
   - name: 'check_usage_on_remove'
     type: Boolean
     description: |
-      (Optional) Default value is false. This field is deprecated and has no effect.
+      Default value is false. This field is deprecated and has no effect.
     default_value: false
     deprecation_message: '`check_usage_on_remove` is deprecated and will be removed in a future major release.'
