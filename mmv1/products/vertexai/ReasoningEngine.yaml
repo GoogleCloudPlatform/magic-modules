@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 60
+sweeper:
+  query_string: "?force=true"
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
