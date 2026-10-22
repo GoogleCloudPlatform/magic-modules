@@ -583,6 +583,7 @@ properties:
           The actual resting state of the spend cap.
         output: true
         enum_values:
+          - STATE_UNSPECIFIED
           - CONFIGURED
           - ENFORCED
           - AWAITING_NEXT_PERIOD

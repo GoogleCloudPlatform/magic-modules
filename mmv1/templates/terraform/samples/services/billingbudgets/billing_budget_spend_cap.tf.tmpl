@@ -11,7 +11,7 @@ resource "google_billing_budget" "{{$.PrimaryResourceId}}" {
 
   budget_filter {
     projects               = ["projects/${data.google_project.project.number}"]
-    services               = ["services/C7E2-9256-1C43"] # Vertex AI
+    services               = ["services/C7E2-9256-1C43"] # Gemini Enterprise Agent Platform
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
   }
@@ -25,12 +25,15 @@ resource "google_billing_budget" "{{$.PrimaryResourceId}}" {
 
   threshold_rules {
     threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
   }
   threshold_rules {
     threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
   }
   threshold_rules {
     threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
   }
 
   all_updates_rule {
