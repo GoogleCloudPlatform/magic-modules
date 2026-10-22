@@ -30,10 +30,15 @@ ifneq ($(SKIP_CLEAN),)
 	endif
 endif
 
-# Default to bazel if available (and not on GHA)
+# Default to bazel if available (and not on GHA or in a git worktree)
 ifeq ($(GITHUB_ACTIONS),true)
 	_ := $(shell printf "\e[1;32mINFO:\e[0m Running in GitHub actions; not using bazel\n" 1>&2)
 	USE_BAZEL=0
+else ifeq ($(shell test -f .git && echo true),true)
+	ifneq ($(USE_BAZEL), 1)
+		_ := $(shell printf "\e[1;32mINFO:\e[0m Running in a git worktree; not using bazel (set USE_BAZEL=1 to override)\n" 1>&2)
+		USE_BAZEL=0
+	endif
 else ifneq ($(shell which bazel),)
 	ifneq ($(USE_BAZEL), 0)
 		_ := $(shell printf "\e[1;32mINFO:\e[0m bazel detected; set USE_BAZEL=0 to disable bazel usage\n" 1>&2)
@@ -44,7 +49,9 @@ endif
 ifeq ($(USE_BAZEL), 1)
 	MM_BINARY=../bazel-bin/mmv1/mmv1_/mmv1
 else
-	_ := $(shell printf "\e[1;33mWARNING:\e[0m magic-modules will start requiring installation of bazel for builds in the near future. You can opt in now by installing bazel (recommended: use bazelisk): https://bazel.build/install\n" 1>&2)
+	ifneq ($(USE_BAZEL), 0)
+		_ := $(shell printf "\e[1;33mWARNING:\e[0m magic-modules will start requiring installation of bazel for builds in the near future. You can opt in now by installing bazel (recommended: use bazelisk): https://bazel.build/install\n" 1>&2)
+	endif
 	MM_BINARY=../bin/mmv1
 endif
 
