@@ -49,6 +49,7 @@ docs:
       a URL.
 base_url: 'projects/{{project}}/global/routes'
 has_self_link: true
+generate_list_resource: true
 immutable: true
 mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
 timeouts:
