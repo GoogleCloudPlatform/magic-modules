@@ -22,7 +22,6 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.11.1
 	github.com/zclconf/go-cty v1.14.4
-	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
 )
 
 require (

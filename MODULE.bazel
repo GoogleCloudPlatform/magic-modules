@@ -14,5 +14,4 @@ use_repo(
     "com_github_google_go_cmp",
     "com_github_otiai10_copy",
     "in_gopkg_yaml_v3",
-    "org_golang_x_exp",
 )
