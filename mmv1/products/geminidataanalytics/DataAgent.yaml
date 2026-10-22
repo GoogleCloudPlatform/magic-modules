@@ -233,10 +233,6 @@ properties:
                                       Optional. A list of tags or keywords associated with the field, used for categorization.
                                     item_type:
                                       type: String
-                                  - name: 'displayName'
-                                    type: String
-                                    description: |-
-                                      Optional. Field display name.
                                   - name: 'subfields'
                                     type: String
                                     description: |-
@@ -395,10 +391,6 @@ properties:
                                       Optional. A list of tags or keywords associated with the field, used for categorization.
                                     item_type:
                                       type: String
-                                  - name: 'displayName'
-                                    type: String
-                                    description: |-
-                                      Optional. Field display name.
                                   - name: 'subfields'
                                     type: String
                                     description: |-
@@ -582,75 +574,6 @@ properties:
                       type: String
                       description: |-
                         Optional. Limit in the query.
-                    - name: 'dynamicFields'
-                      type: Array
-                      description: |-
-                        Optional. The dynamic fields used in the query.
-                      item_type:
-                        type: NestedObject
-                        properties:
-                          - name: 'category'
-                            type: String
-                            description: |-
-                              Optional. The type of dynamic field: dimension, measure, table_calculation.
-                          - name: 'name'
-                            type: String
-                            description: |-
-                              Optional. The name of the dynamic field in LookML.
-                          - name: 'label'
-                            type: String
-                            description: |-
-                              Optional. The label defines the display name of the dynamic field.
-                          - name: 'basedOn'
-                            type: String
-                            description: |-
-                              Optional. For custom measures, this identifies the measure the field is based on.
-                          - name: 'type'
-                            type: String
-                            description: |-
-                              Optional. For custom measures, this identifies the type of aggregation (e.g. sum).
-                          - name: 'description'
-                            type: String
-                            description: |-
-                              Optional. Description of the dynamic field.
-                          - name: 'expression'
-                            type: String
-                            description: |-
-                              Optional. Looker expression to create a table calculation.
-                          - name: 'filterExpression'
-                            type: String
-                            description: |-
-                              Optional. Looker expression to filter a base measure.
-                          - name: 'valueFormat'
-                            type: String
-                            description: |-
-                              Optional. Value format for the dynamic field.
-                          - name: 'valueFormatName'
-                            type: String
-                            description: |-
-                              Optional. Value format name for the dynamic field if using a default named format.
-                          - name: 'calculationType'
-                            type: String
-                            description: |-
-                              Optional. Calculation type for table calculations.
-                          - name: 'args'
-                            type: Array
-                            description: |-
-                              Optional. Arguments for custom groups, custom bins, or shortcut calculations.
-                            item_type:
-                              type: String
-                          - name: 'kindHint'
-                            type: String
-                            description: |-
-                              Optional. Identifies whether the dynamic field returns a dimension or measure.
-                          - name: 'typeHint'
-                            type: String
-                            description: |-
-                              Optional. Identifies the data type the dynamic field's expression should produce.
-                          - name: 'isDisabled'
-                            type: Boolean
-                            description: |-
-                              Optional. Whether the dynamic field is disabled.
                     - name: 'queryId'
                       type: String
                       description: |-
@@ -874,10 +797,6 @@ properties:
                                       Optional. A list of tags or keywords associated with the field, used for categorization.
                                     item_type:
                                       type: String
-                                  - name: 'displayName'
-                                    type: String
-                                    description: |-
-                                      Optional. Field display name.
                                   - name: 'subfields'
                                     type: String
                                     description: |-
@@ -1036,10 +955,6 @@ properties:
                                       Optional. A list of tags or keywords associated with the field, used for categorization.
                                     item_type:
                                       type: String
-                                  - name: 'displayName'
-                                    type: String
-                                    description: |-
-                                      Optional. Field display name.
                                   - name: 'subfields'
                                     type: String
                                     description: |-
@@ -1223,75 +1138,6 @@ properties:
                       type: String
                       description: |-
                         Optional. Limit in the query.
-                    - name: 'dynamicFields'
-                      type: Array
-                      description: |-
-                        Optional. The dynamic fields used in the query.
-                      item_type:
-                        type: NestedObject
-                        properties:
-                          - name: 'category'
-                            type: String
-                            description: |-
-                              Optional. The type of dynamic field: dimension, measure, table_calculation.
-                          - name: 'name'
-                            type: String
-                            description: |-
-                              Optional. The name of the dynamic field in LookML.
-                          - name: 'label'
-                            type: String
-                            description: |-
-                              Optional. The label defines the display name of the dynamic field.
-                          - name: 'basedOn'
-                            type: String
-                            description: |-
-                              Optional. For custom measures, this identifies the measure the field is based on.
-                          - name: 'type'
-                            type: String
-                            description: |-
-                              Optional. For custom measures, this identifies the type of aggregation (e.g. sum).
-                          - name: 'description'
-                            type: String
-                            description: |-
-                              Optional. Description of the dynamic field.
-                          - name: 'expression'
-                            type: String
-                            description: |-
-                              Optional. Looker expression to create a table calculation.
-                          - name: 'filterExpression'
-                            type: String
-                            description: |-
-                              Optional. Looker expression to filter a base measure.
-                          - name: 'valueFormat'
-                            type: String
-                            description: |-
-                              Optional. Value format for the dynamic field.
-                          - name: 'valueFormatName'
-                            type: String
-                            description: |-
-                              Optional. Value format name for the dynamic field if using a default named format.
-                          - name: 'calculationType'
-                            type: String
-                            description: |-
-                              Optional. Calculation type for table calculations.
-                          - name: 'args'
-                            type: Array
-                            description: |-
-                              Optional. Arguments for custom groups, custom bins, or shortcut calculations.
-                            item_type:
-                              type: String
-                          - name: 'kindHint'
-                            type: String
-                            description: |-
-                              Optional. Identifies whether the dynamic field returns a dimension or measure.
-                          - name: 'typeHint'
-                            type: String
-                            description: |-
-                              Optional. Identifies the data type the dynamic field's expression should produce.
-                          - name: 'isDisabled'
-                            type: Boolean
-                            description: |-
-                              Optional. Whether the dynamic field is disabled.
                     - name: 'queryId'
                       type: String
                       description: |-
