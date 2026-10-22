@@ -251,9 +251,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
 			activeDirectoryCustomizeDiff,
-			{{- if ne $.TargetVersionName "ga" }}
 			blueGreenDeploymentCustomizeDiff,
-			{{- end }}
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
@@ -1716,7 +1714,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 					},
 				},
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			"blue_green_deployment": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1792,7 +1789,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 					},
 				},
 			},
-			{{- end }}
 			//UDP schema start
 			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 			//UDP schema end
@@ -2156,14 +2152,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("blue_green_deployment") {
 		if err := handleBlueGreenDeploymentUpdate(d, config, project, region, d.Timeout(schema.TimeoutCreate), userAgent); err != nil {
 			return err
 		}
 		return resourceSqlDatabaseInstanceRead(d, meta)
 	}
-	{{- end }}
 
 	return nil
 }
@@ -2831,11 +2825,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
 	    return err
 	}
-	{{- if ne $.TargetVersionName "ga" }}
 	if err := readBlueGreenDeployment(d, config, project, instance, userAgent); err != nil {
 		return err
 	}
-	{{- end }}
 	
 
 	return nil
@@ -2887,7 +2879,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	{{- if ne $.TargetVersionName "ga" }}
 	if isBlueGreenDelete(d) {
 		if err := handleBlueGreenDeploymentDelete(d, config, project, d.Get("region").(string), d.Timeout(schema.TimeoutUpdate), userAgent); err != nil {
 			return err
@@ -2895,7 +2886,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	if !isBlueGreenSwitchover(d) {
-	{{- end }}
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 
@@ -3354,7 +3344,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
            return err
          }
       }
-	{{- if ne $.TargetVersionName "ga" }}
 	}
 
 	if d.HasChange("blue_green_deployment") && !isBlueGreenDelete(d) {
@@ -3363,7 +3352,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			return err
 		}
 	}
-	{{- end }}
 
       return resourceSqlDatabaseInstanceRead(d, meta)
 }
@@ -3507,7 +3495,6 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
 	}
 
-	{{- if ne $.TargetVersionName "ga" }}
 	if bgdStateMap := getExistingBgdStateMap(d); bgdStateMap != nil {
 		deploymentName, _ := bgdStateMap["deployment_name"].(string)
 		deleteOldSourceCfg, _ := bgdStateMap["delete_old_source_on_destroy"].(bool)
@@ -3515,7 +3502,6 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 			return err
 		}
 	}
-	{{- end }}
 
 	// Lock on the master_instance_name just in case deleting a replica causes
 	// operations on the master.
@@ -4409,7 +4395,6 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 	return fmt.Sprintf("%s:%s", project, drReplicaName)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if d.Id() != "" && d.HasChange("database_version") {
 		if _, n := d.GetChange("blue_green_deployment"); len(n.([]interface{})) > 0 && n.([]interface{})[0] != nil {
@@ -4935,7 +4920,6 @@ func deleteBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Con
 
 	return nil
 }
-{{- end }}
 
 func init() {
 	registry.Schema{
