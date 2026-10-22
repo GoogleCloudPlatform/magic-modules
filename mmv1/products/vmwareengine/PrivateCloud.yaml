@@ -351,6 +351,18 @@ properties:
               Minimum cool down period is 30m.
               Cool down period must be in whole minutes (for example, 30m, 31m, 50m).
               Mandatory for successful addition of autoscaling settings in cluster.
+      - name: vsanType
+        type: Enum
+        description: |
+          Optional. The type of the vSAN.
+          Possible values:
+          * `VSAN_TYPE_OSA`: Standard (OSA) vSAN.
+          * `VSAN_TYPE_ESA`: Express Storage Architecture (ESA) vSAN.
+        immutable: true
+        min_version: beta
+        enum_values:
+          - VSAN_TYPE_OSA
+          - VSAN_TYPE_ESA
   - name: hcx
     type: NestedObject
     description: |
