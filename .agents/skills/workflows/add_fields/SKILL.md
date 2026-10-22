@@ -52,30 +52,24 @@ Because you're adding fields to an existing resource, try to modify existing tes
 - Generated : `mmv1/templates/terraform/samples/services/<PRODUCT>/`
 - Handwritten resources: `mmv1/third_party/terraform/services/<PRODUCT>/resource_<product>_<resource>_test.go`
 
-### 4. Check for Corresponding Data Source
-
-- Use [`add-data-source-workflow`](.agents/skills/workflows/add_data_source/SKILL.md) (**Step 1**) to check whether a corresponding data source exists for the modified resource:
-  - If the data source **does not exist**, follow `add-data-source-workflow` to add the corresponding data source (or confirm with the user if out of scope).
-  - If the data source **already exists**, follow `add-data-source-workflow` (**Task Definition** & **Model Behavior**) to verify whether the newly added fields require any updates to the data source `Read` function (such as `ignore_read: true` fields, `labels`/`annotations`, or `virtual_fields`) and include the data source's acceptance tests in your test run.
-
-### 5. Run Pre-Gen Checks
+### 4. Run Pre-Gen Checks
 
 - Use [run-pre-gen-checks](.agents/skills/utils/run-pre-gen-checks/SKILL.md). If issues are found, analyze and fix them.
 
-### 6. Generate Provider
+### 5. Generate Provider
 
 - Use [generate-provider](.agents/skills/operations/generate-provider/SKILL.md).
 - Confirm that the provider was generated successfully.
 
-### 7. Test and Debug
+### 6. Test and Debug
 
 - Use [`repo-sync`](.agents/skills/operations/repo-sync/SKILL.md) to ensure the downstream repositories are in sync with magic-modules.
 - Use [`generate-provider`](.agents/skills/operations/generate-provider/SKILL.md) to generate the provider code into the downstream repositories.
-- Invoke [`qa-test-runner`](.agents/skills/operations/qa-test-runner/SKILL.md) (or delegate to the `qa-test-runner` subagent) to run all acceptance tests for the modified resource (and its corresponding data source).
-- Invoke [`test-fixer`](.agents/skills/workflows/test_fix/SKILL.md) (or delegate to the `test-fixer` subagent) to fix any issues found by the `qa-test-runner` skill. Return to step 5 after any changes.
+- Invoke [`qa-test-runner`](.agents/skills/operations/qa-test-runner/SKILL.md) (or delegate to the `qa-test-runner` subagent) to run all acceptance tests for the modified resource.
+- Invoke [`test-fixer`](.agents/skills/workflows/test_fix/SKILL.md) (or delegate to the `test-fixer` subagent) to fix any issues found by the `qa-test-runner` skill. Return to step 4 after any changes.
 
 ---
 
 ## The Loop
 
-Repeat steps 5-7 as needed until the primary task is complete.
+Repeat steps 4-6 as needed until the primary task is complete.
