@@ -45,6 +45,32 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceFromMachineImage_hyperdiskBootDisk_provisioned_iops_throughput(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	imageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	newInstanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.primary"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImageHyperdiskBootDiskProvisionedIopsThroughput(instanceName, imageName, newInstanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "boot_disk.0.initialize_params.0.provisioned_iops", "12000"),
+					resource.TestCheckResourceAttr(resourceName, "boot_disk.0.initialize_params.0.provisioned_throughput", "200"),
+				),
+			},
+		},
+	})
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 	t.Parallel()
@@ -530,6 +556,49 @@ resource "google_compute_instance_from_machine_image" "foobar" {
   }
 }
 `, instance, instance, newInstance)
+}
+
+func testAccComputeInstanceFromMachineImageHyperdiskBootDiskProvisionedIopsThroughput(instance, image, newInstance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "ubuntu-2204-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "source" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "h3-standard-88"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image                  = data.google_compute_image.my_image.self_link
+      type                   = "hyperdisk-balanced"
+      provisioned_iops       = 12000
+      provisioned_throughput = 200
+      size                   = 100
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_machine_image" "image" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.source.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "primary" {
+  provider             = google-beta
+  name                 = "%s"
+  zone                 = "us-central1-a"
+  source_machine_image = google_compute_machine_image.image.self_link
+}
+`, instance, image, newInstance)
 }
 
 func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigEnable(instance string, newInstance string) string {
