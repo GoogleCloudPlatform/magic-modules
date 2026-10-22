@@ -1,23 +1,23 @@
 ---
-page_title: "Use Actions with the Terrafotm Provider for Google Cloud"
+page_title: "Use Actions with the Terraform Provider for Google Cloud"
 description: |-
-  Learn how declare, trigger and invoke action in the Terrafotm Provider for Google Cloud.
+  Learn how declare, trigger and invoke actions in the Terraform Provider for Google Cloud.
 ---
 
-# Terraform Actions in the Terrafotm Provider for Google Cloud
+# Terraform Actions in the Terraform Provider for Google Cloud
 
-Actions are preset operations built into the providers that let Terraform perform day-two operations
+Actions are preset operations built into providers that let Terraform perform day-two operations
 on your infrastructure. Actions do not affect the resource state. The Terraform Provider for Google Cloud
 implements actions for operations that do not fit the resource lifecycle, such as resetting
-a Compute Engine Instance.
+a Compute Engine instance.
 
-Terraform Actions are available in Terraform v1.14 and later. For more information, see the [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
+Terraform Actions are available in Terraform v1.14 and later. For more information, see [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
 
 ---
 
 ## Declare an action
 
-Declare an `action` block with the action type and a label. Put the action's arguement in a
+Declare an `action` block with the action type and a label. Put the action's arguments in a
 `config` block:
 
 ```hcl
@@ -48,9 +48,9 @@ resource "terraform_data" "config_version" {
 }
 ```
 
-An `after_create` triggers runs the action when terraform first creates the resource. An 
-`after_update` triggers runs the action when Terraform updates the resource, including when it
-updates the resource to correct drift. For all supportedevents, see the
+An `after_create` trigger runs the action when Terraform first creates the resource. An 
+`after_update` trigger runs the action when Terraform updates the resource, including when it
+updates the resource to correct drift. For all supported events, see the
 [`action_trigger` reference](https://developer.hashicorp.com/terraform/language/block/resource#action_trigger).
 
 ## Invoke an action from the CLI
@@ -62,14 +62,14 @@ terraform plan -invoke=action.google_compute_instance_reset.web
 terraform apply -invoke=action.google_compute_instance_reset.web
 ```
 
-When you use `-invode`, Terraform runs only that action and does not change any resource in the 
+When you use `-invoke`, Terraform runs only that action and does not change any resource in the 
 configuration.
 
 ## Actions and managed resources
 
 Although actions do not write to Terraform state, they act on real infrastructure. An action can
 act on an object that a resource in your configuration also manages. Each action page in this 
-provider describes how the action interacts with the relatedresource and whether it can coause drift.
+provider describes how the action interacts with the related resource and whether it can cause drift.
 
 ## Available actions
 

@@ -6,21 +6,21 @@ description: |-
 
 # google_compute_instance_reset (action)
 
-Perfroms a hard reset of a running Compute Engine instance. This is equivalent to calling
+Performs a hard reset of a running Compute Engine instance. This is equivalent to calling
 [`instances.reset`](https://cloud.google.com/compute/docs/reference/rest/v1/instances/reset)
 or running `gcloud compute instances reset`. The action waits for the reset operation to complete.
 
-~> **Warning:** A reset is not a gracefull restart. The guest operating system is not shut down
+~> **Warning:** A reset is not a graceful restart. The guest operating system is not shut down
 first, and any data that has not been written to disk is lost. If your workloadneeds a clean shutdown, stop and start the instance instead.
 
-Actions require Terraform 1.14 or later. for an overview of how actions work in the Terraform 
+Actions require Terraform 1.14 or later. For an overview of how actions work in the Terraform 
 Provider for Google Cloud, see
 [Use actions with Terraform Provider for Google Cloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/using_actions).
 
-To get more information about the resetting instance, see:
+To get more information about the resetting an instance, see:
 
 * [API documentation](https://cloud.google.com/compute/docs/reference/rest/v1/instances/reset)
-* Hot-to Guides
+* How-to Guides
     * [Stop, start, or reset a VM](https://cloud.google.com/compute/docs/instances/stop-start-instance)
 
 ## Example Usage - Invoke from CLI
@@ -80,7 +80,7 @@ resource "terraform_data" "startup_script_version" {
 }
 ```
 
-## Example Usage -  Reference the instance by name
+## Example Usage - Reference the instance by name
 
 ```hcl
 action "google_compute_instance_reset" "example" {
@@ -95,9 +95,9 @@ action "google_compute_instance_reset" "example" {
 
 ## Argument Reference
 
-The following arguements are supported in the `config` block:
+The following arguments are supported in the `config` block:
 
-* `instance` - (Required) The instance to reset. Accepts  any off the following formats:
+* `instance` - (Required) The instance to reset. Accepts any off the following formats:
     * The instance name, for example `example-instance`.
     * A partial URI: `zones/{zone}/instances/{name}` or `projects/{project}/zones/{zone}/instances/{name}`.
     * A self link, such as the value of `google_compute_instance.example.self_link`.
@@ -110,16 +110,16 @@ The following arguements are supported in the `config` block:
 used, and then the provider zone. If you set both `zone` and a zone in `instance`, they must match.
 
 * `timeout` - (Optional) The maximum time to wait for the instance to be ready for a reset and for 
-the reset operation to complete, as a duration string such as "10m" or "1h". the value must be
-freater than zero. Defaults to `"20m"`.
+the reset operation to complete, as a duration string such as "10m" or "1h". The value must be
+greater than zero. Defaults to `"20m"`.
 
 ## Behaviour
 
-* If the instance is `RUNNING`,  the action resets it and waits for the operation to complete.
+* If the instance is `RUNNING`, the action resets it and waits for the operation to complete.
 * If the instance is `PROVISIONING`, `STAGING`, or `REPAIRING`, the action waits for it to reach
   `RUNNING` and then resets it.
-* if the instance is in any other state, such as `TERMINATED`, `SUSPENDED`, or `STOPPING`, the action
+* If the instance is in any other state, such as `TERMINATED`, `SUSPENDED`, or `STOPPING`, the action
   returns an error and does not reset the instance.
-* If the instance does not exist, the actions returns an error.
-* Each invocation performs a new reste. If an Invocation fails, you can retry it with
+* If the instance does not exist, the action returns an error.
+* Each invocation performs a new reset. If an invocation fails, you can retry it with
   `terraform apply -invoke`.
