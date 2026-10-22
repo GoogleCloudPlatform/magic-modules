@@ -219,6 +219,32 @@ properties:
                   description: |-
                     Optional. The SQL query that should be generated to answer
                     the natural language question.
+                - name: 'parameters'
+                  type: Array
+                  description: |-
+                    Optional. The parameters referenced in the SQL query, with the
+                    information an LLM needs to extract their values from the
+                    user's question.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        required: true
+                        description: |-
+                          Required. The name of the parameter reference in the SQL query.
+                      - name: 'description'
+                        type: String
+                        description: |-
+                          Optional. The description of the parameter that can be used by
+                          an LLM to extract the parameter value from the user question.
+                      - name: 'dataType'
+                        type: String
+                        required: true
+                        description: |-
+                          Required. The data type of the parameter, for example "STRING",
+                          "INT64" or "DATE". For valid values, see the
+                          [BigQuery documentation](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types).
           - name: 'glossaryTerms'
             type: Array
             description: |-
@@ -387,6 +413,32 @@ properties:
                   description: |-
                     Optional. The SQL query that should be generated to answer
                     the natural language question.
+                - name: 'parameters'
+                  type: Array
+                  description: |-
+                    Optional. The parameters referenced in the SQL query, with the
+                    information an LLM needs to extract their values from the
+                    user's question.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        required: true
+                        description: |-
+                          Required. The name of the parameter reference in the SQL query.
+                      - name: 'description'
+                        type: String
+                        description: |-
+                          Optional. The description of the parameter that can be used by
+                          an LLM to extract the parameter value from the user question.
+                      - name: 'dataType'
+                        type: String
+                        required: true
+                        description: |-
+                          Required. The data type of the parameter, for example "STRING",
+                          "INT64" or "DATE". For valid values, see the
+                          [BigQuery documentation](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types).
           - name: 'glossaryTerms'
             type: Array
             description: |-
