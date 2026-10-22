@@ -38,7 +38,7 @@ func DataSourceGoogleComputeAddress() *schema.Resource {
 			},
 
 			"address_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 
