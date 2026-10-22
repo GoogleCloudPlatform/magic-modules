@@ -18,11 +18,10 @@ package github
 import (
 	"fmt"
 	utils "magician/utility"
+	"maps"
 	"math/rand"
 	"slices"
 	"time"
-
-	"golang.org/x/exp/maps"
 )
 
 type UserType int64
@@ -94,8 +93,7 @@ func AvailableReviewers(excludedReviewers []string) []string {
 
 func available(nowTime time.Time, reviewerRotation map[string]ReviewerConfig, excludedReviewers []string) []string {
 	excludedReviewers = append(excludedReviewers, onVacation(nowTime, reviewerRotation)...)
-	ret := utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
-	slices.Sort(ret)
+	ret := utils.Removes(slices.Sorted(maps.Keys(reviewerRotation)), excludedReviewers)
 	return ret
 }
 

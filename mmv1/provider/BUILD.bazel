@@ -21,7 +21,6 @@ go_library(
         "//mmv1/google",
         "@com_github_otiai10_copy//:copy",
         "@in_gopkg_yaml_v3//:yaml_v3",
-        "@org_golang_x_exp//slices",
     ],
 )
 

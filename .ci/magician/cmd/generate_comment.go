@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -39,7 +40,6 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/parser"
 	"go.abhg.dev/goldmark/frontmatter"
-	"golang.org/x/exp/maps"
 
 	_ "embed"
 )
@@ -399,7 +399,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
-	breakingChangesSlice := maps.Values(uniqueBreakingChanges)
+	breakingChangesSlice := slices.Collect(maps.Values(uniqueBreakingChanges))
 	sort.Slice(breakingChangesSlice, func(i, j int) bool {
 		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
 	})
@@ -407,7 +407,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Check if multiple resources were added.
 	multipleResourcesState := "success"
-	data.MultipleResources = multipleResources(maps.Keys(uniqueAddedResources))
+	data.MultipleResources = multipleResources(slices.Collect(maps.Keys(uniqueAddedResources)))
 	if len(data.MultipleResources) > 1 {
 		multipleResourcesState = "failure"
 		for _, label := range pullRequest.Labels {
@@ -437,7 +437,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(changedFilesAffectedResources))
+	fmt.Printf("affected resources based on changed files: %v\n", slices.Collect(maps.Keys(changedFilesAffectedResources)))
 
 	// Compute service labels based on affected resources
 	uniqueServiceLabels := map[string]struct{}{}
@@ -447,7 +447,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
 	}
 	if len(regexpLabels) > 0 {
-		for _, label := range labeler.ComputeLabels(maps.Keys(uniqueAffectedResources), regexpLabels) {
+		for _, label := range labeler.ComputeLabels(slices.Collect(maps.Keys(uniqueAffectedResources)), regexpLabels) {
 			uniqueServiceLabels[label] = struct{}{}
 		}
 	}
@@ -462,7 +462,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 		if !hasServiceLabels {
-			serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
+			serviceLabelsSlice := slices.Collect(maps.Keys(uniqueServiceLabels))
 			sort.Strings(serviceLabelsSlice)
 			if len(serviceLabelsSlice) > 3 {
 				// Treat this as a cross-provider change
@@ -742,8 +742,7 @@ func multipleResources(resources []string) []string {
 		}
 	}
 
-	ret := maps.Keys(final)
-	slices.Sort(ret)
+	ret := slices.Sorted(maps.Keys(final))
 	return ret
 }
 
@@ -782,9 +781,7 @@ func changedServices(changedFiles []string) []string {
 			}
 		}
 	}
-	sortedServices := maps.Keys(services)
-	sort.Strings(sortedServices)
-	return sortedServices
+	return slices.Sorted(maps.Keys(services))
 }
 
 func pathChanged(path string, changedFiles []string) bool {

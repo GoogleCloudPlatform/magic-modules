@@ -20,12 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
-
-	"golang.org/x/exp/maps"
 )
 
 type ParameterList []any
@@ -45,7 +45,7 @@ type mockRunner struct {
 }
 
 func sortedEnvString(env map[string]string) string {
-	keys := maps.Keys(env)
+	keys := slices.Collect(maps.Keys(env))
 	sort.Strings(keys)
 	kvs := make([]string, len(keys))
 	for i, k := range keys {

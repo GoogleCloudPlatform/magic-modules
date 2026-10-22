@@ -16,13 +16,13 @@ package api
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 

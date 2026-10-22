@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"maps"
 	"math/rand/v2"
 	"net"
 	"net/url"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,7 +29,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"golang.org/x/exp/maps"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -383,8 +384,7 @@ func SortStringsByConfigOrder(configData, apiData []string) ([]string, error) {
 
 	// Sort set config indexes and convert to a slice of strings. This removes items present in the config
 	// but not present in the API response.
-	configIndexes := maps.Keys(byConfigIndex)
-	sort.Ints(configIndexes)
+	configIndexes := slices.Sorted(maps.Keys(byConfigIndex))
 	result := []string{}
 	for _, index := range configIndexes {
 		result = append(result, byConfigIndex[index])
