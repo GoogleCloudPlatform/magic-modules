@@ -1,0 +1,6 @@
+func TagsTagKeyPurposeDataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if k == "purpose_data.%" {
+		return old == new
+	}
+	return (old != "" && new != "") || old == new
+}
