@@ -7,9 +7,15 @@ update_verb: PATCH
 update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+async:
+  actions: []
 iam_policy:
   method_name_separator: ':'
   parent: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+  parent_resource_attribute: space_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+    - '{{space_id}}'
   fetch_iam_policy_verb: GET
 properties:
   - name: location
@@ -33,6 +39,7 @@ properties:
   - name: enableGcpSharedTemplates
     type: Boolean
     description: Whether to enable GCP shared templates.
+    send_empty_value: true
   - name: gcsBucket
     type: String
     description: The GCS bucket for the space.

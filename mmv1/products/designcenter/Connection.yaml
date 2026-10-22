@@ -17,6 +17,8 @@ base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicat
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections?connectionId={{connection_id}}'
 update_verb: 'PATCH'
 update_mask: true
+async:
+  actions: []
 description: |
   A connection between two components in an Application Design Center Application Template.
 import_format:

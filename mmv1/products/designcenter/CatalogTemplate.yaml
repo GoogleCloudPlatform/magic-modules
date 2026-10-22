@@ -20,7 +20,8 @@ update_verb: 'PATCH'
 update_mask: true
 description: |
   A Design Center Catalog Template.
-autogen_async: false
+async:
+  actions: ["delete"]
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}'
 properties:
@@ -57,7 +58,7 @@ properties:
     url_param_only: true
 
   - type: Enum
-    name: 'template_category'
+    name: 'templateCategory'
     description: |
       The category of the template.
     required: true
@@ -66,7 +67,7 @@ properties:
       - 'COMPONENT_TEMPLATE'
 
   - type: String
-    name: 'display_name'
+    name: 'displayName'
     description: |
       The display name of the catalog template.
 
@@ -93,19 +94,19 @@ properties:
     output: true
 
   - type: String
-    name: 'latest_revision_id'
+    name: 'latestRevisionId'
     description: |
       The ID of the latest revision of the template.
     output: true
 
   - type: Time
-    name: 'create_time'
+    name: 'createTime'
     description: |
       The time the catalog template was created.
     output: true
 
   - type: Time
-    name: 'update_time'
+    name: 'updateTime'
     description: |
       The time the catalog template was last updated.
     output: true

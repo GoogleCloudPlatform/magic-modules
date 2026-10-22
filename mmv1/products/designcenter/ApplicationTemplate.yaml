@@ -18,6 +18,8 @@ create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applic
 self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
 update_verb: 'PATCH'
 update_mask: true
+async:
+  actions: []
 description: |
   Application template in Application Design Center.
 import_format:
@@ -51,7 +53,7 @@ properties:
       Identifier. The resource name of the ApplicationTemplate. Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template_id}`
     output: true
   - type: String
-    name: 'display_name'
+    name: 'displayName'
     description: |
       Optional. User-defined display name.
   - type: String
@@ -59,11 +61,12 @@ properties:
     description: |
       Optional. User-defined description.
   - type: String
-    name: 'application_parameters'
+    name: 'applicationParameters'
     description: |
       Optional. Application parameters.
   - type: Enum
-    name: 'composition_type'
+    name: 'compositionType'
+    default_from_api: true
     description: |
       Optional. Composition type of the template.
     immutable: true
@@ -71,52 +74,55 @@ properties:
       - 'STANDARD'
       - 'COMPOSITE'
   - type: Array
-    name: 'root_input_variables'
+    name: 'rootInputVariables'
     description: |
       Optional. Root input variables.
     item_type:
       type: String
   - type: Array
-    name: 'root_output_variables'
+    name: 'rootOutputVariables'
     description: |
       Optional. Root output variables.
     item_type:
       type: String
   - type: String
-    name: 'saas_runtime_context'
+    name: 'saasRuntimeContext'
     description: |
       Optional. SaaS runtime context.
   - type: Boolean
-    name: 'inputs_as_root_module_variables'
+    name: 'inputsAsRootModuleVariables'
+    default_from_api: true
     description: |
       Optional. Inputs as root module variables.
   - type: String
-    name: 'iac_format'
+    name: 'iacFormat'
     output: true
     description: |
       Output only. IaC format.
   - type: String
-    name: 'serialized_application_template'
+    name: 'serializedApplicationTemplate'
     output: true
+    ignore_read: true
     description: |
       Output only. Serialized application template.
   - type: String
-    name: 'latest_revision'
+    name: 'latestRevision'
     output: true
     description: |
       Output only. Latest revision.
   - type: String
-    name: 'artifact_location'
+    name: 'artifactLocation'
     output: true
+    ignore_read: true
     description: |
       Output only. Artifact location.
   - type: Time
-    name: 'create_time'
+    name: 'createTime'
     output: true
     description: |
       Output only. The time the resource was created.
   - type: Time
-    name: 'update_time'
+    name: 'updateTime'
     output: true
     description: |
       Output only. The time the resource was last updated.

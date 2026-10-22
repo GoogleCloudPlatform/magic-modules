@@ -20,6 +20,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applica
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components?componentId={{component_id}}'
 update_verb: 'PATCH'
 update_mask: true
+async:
+  actions: []
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component_id}}'
 
@@ -63,14 +65,14 @@ properties:
       Identifier. The resource name of the component.
     output: true
 
-  - name: 'shared_template_revision_uri'
+  - name: 'sharedTemplateRevisionUri'
     type: 'String'
     description: |
       The URI of the shared template revision.
     required: true
     immutable: true
 
-  - name: 'display_name'
+  - name: 'displayName'
     type: 'String'
     description: |
       The display name of the component.
@@ -80,22 +82,22 @@ properties:
     description: |
       The parameters of the component.
 
-  - name: 'application_info'
+  - name: 'applicationInfo'
     type: 'KeyValuePairs'
     description: |
       The application info of the component.
 
-  - name: 'use_as_root_module'
+  - name: 'useAsRootModule'
     type: 'Boolean'
     description: |
       Whether to use as root module.
 
-  - name: 'input_variable_aliases'
+  - name: 'inputVariableAliases'
     type: 'KeyValuePairs'
     description: |
       The input variable aliases.
 
-  - name: 'application_template_revision_uri'
+  - name: 'applicationTemplateRevisionUri'
     type: 'String'
     description: |
       The application template revision URI.
@@ -116,25 +118,25 @@ properties:
       The APIs of the component.
     output: true
 
-  - name: 'connections_parameters'
+  - name: 'connectionsParameters'
     type: 'KeyValuePairs'
     description: |
       The connections parameters of the component.
     output: true
 
-  - name: 'component_parameter_schema'
+  - name: 'componentParameterSchema'
     type: 'String'
     description: |
       The component parameter schema.
     output: true
 
-  - name: 'create_time'
+  - name: 'createTime'
     type: 'Time'
     description: |
       [Output only] Create time stamp.
     output: true
 
-  - name: 'update_time'
+  - name: 'updateTime'
     type: 'Time'
     description: |
       [Output only] Update time stamp.

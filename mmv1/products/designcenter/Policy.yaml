@@ -19,6 +19,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applica
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies?policyId={{policy_id}}'
 update_verb: 'PATCH'
 update_mask: true
+async:
+  actions: []
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies/{{policy_id}}'
 

@@ -8,19 +8,19 @@ update_mask: true
 description: |
   Application Design Center Application.
 autogen_async: true
-async: 
-  operation: 
+async:
+  operation:
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: 
+  result:
     path: 'response'
-  status: 
+  status:
     path: 'done'
     complete: true
     allowed_value:
       - true
-  error: 
+  error:
     path: 'error'
     message: 'message'
   actions:
