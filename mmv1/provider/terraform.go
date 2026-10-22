@@ -886,7 +886,7 @@ func copyfileHeaderBytes(srcpath, target string, content []byte) ([]byte, bool) 
 	if filepath.Ext(target) == ".markdown" {
 		// insert the header after ---
 		templateFormat = "---\n" + strings.Replace(templateFormat, "//", "#", -1)
-		body = strings.TrimPrefix(srcStr, "---\n")
+		body = strings.TrimPrefix(strings.TrimPrefix(srcStr, "---\r\n"), "---\n")
 	}
 
 	return []byte(fmt.Sprintf(templateFormat, srcpath, body)), true
@@ -936,13 +936,14 @@ func (t Terraform) hashicorpCopyRightHeaderBytes(outputFolder, target string, co
 // shouldAddHashicorpCopyRightHeader reports whether target (relative to
 // outputFolder) is a file that should carry the HashiCorp copyright header.
 func (t Terraform) shouldAddHashicorpCopyRightHeader(outputFolder, target string) bool {
-	if !expectedOutputFolder(outputFolder) {
+	module := outputModulePath(outputFolder)
+	if !copyrightHeaderModules[module] && !expectedOutputFolder(outputFolder) {
 		log.Printf("Unexpected output folder (%s) detected "+
 			"when deciding to add HashiCorp copyright headers.\n"+
 			"Watch out for unexpected changes to copied files", outputFolder)
 	}
 	// only add copyright headers when generating TPG, TPGB, and TPGN
-	if !(strings.HasSuffix(outputFolder, "terraform-provider-google") || strings.HasSuffix(outputFolder, "terraform-provider-google-beta") || strings.HasSuffix(outputFolder, "terraform-provider-google-nightly")) {
+	if !isCopyrightHeaderOutput(outputFolder, module) {
 		return false
 	}
 
@@ -971,6 +972,52 @@ func (t Terraform) shouldAddHashicorpCopyRightHeader(outputFolder, target string
 	// e.g. .sh where headers are functional
 	// Also, this guards against new filetypes being added and triggering build errors
 	return languageFromFilename(target) != "unsupported"
+}
+
+// copyrightHeaderModules lists the go.mod module paths of the downstream
+// repositories whose files carry the HashiCorp copyright header.
+var copyrightHeaderModules = map[string]bool{
+	TERRAFORM_PROVIDER_GA:              true,
+	TERRAFORM_PROVIDER_BETA:            true,
+	TERRAFORM_PROVIDER_GA + "-nightly": true,
+}
+
+// outputModules caches outputModulePath results, keyed by output folder.
+var outputModules sync.Map
+
+// outputModulePath returns the module path declared in outputFolder's go.mod,
+// or "" if there is none. The result is cached for the life of the process so
+// every file in a run gets the same answer, even while generation rewrites
+// go.mod.
+func outputModulePath(outputFolder string) string {
+	if module, ok := outputModules.Load(outputFolder); ok {
+		return module.(string)
+	}
+	module := ""
+	if content, err := os.ReadFile(filepath.Join(outputFolder, "go.mod")); err == nil {
+		for _, line := range strings.Split(string(content), "\n") {
+			if fields := strings.Fields(line); len(fields) == 2 && fields[0] == "module" {
+				module = strings.Trim(fields[1], `"`)
+				break
+			}
+		}
+	}
+	actual, _ := outputModules.LoadOrStore(outputFolder, module)
+	return actual.(string)
+}
+
+// isCopyrightHeaderOutput reports whether outputFolder is a downstream
+// repository whose files carry the HashiCorp copyright header. The repository
+// is identified by its go.mod module path, so any directory layout (such as a
+// git worktree named after a task) works. Output folders without a go.mod fall
+// back to matching the folder name.
+func isCopyrightHeaderOutput(outputFolder, module string) bool {
+	if module != "" {
+		return copyrightHeaderModules[module]
+	}
+	return strings.HasSuffix(outputFolder, "terraform-provider-google") ||
+		strings.HasSuffix(outputFolder, "terraform-provider-google-beta") ||
+		strings.HasSuffix(outputFolder, "terraform-provider-google-nightly")
 }
 
 func expectedOutputFolder(outputFolder string) bool {

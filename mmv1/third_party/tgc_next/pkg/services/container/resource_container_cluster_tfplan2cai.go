@@ -151,14 +151,15 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 			NetworkPerformanceConfig:             expandNetworkPerformanceConfig(d.Get("network_performance_config")),
 		},
-		MasterAuth:           expandMasterAuth(d.Get("master_auth")),
-		NotificationConfig:   expandNotificationConfig(d.Get("notification_config")),
-		ConfidentialNodes:    expandConfidentialNodes(d.Get("confidential_nodes")),
-		ResourceLabels:       tpgresource.ExpandStringMap(d, "effective_labels"),
-		NodePoolAutoConfig:   expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
-		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
-		EnableK8sBetaApis:    expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
-		SecretSyncConfig:     expandSecretSyncConfig(d.Get("secret_sync_config")),
+		MasterAuth:                 expandMasterAuth(d.Get("master_auth")),
+		NotificationConfig:         expandNotificationConfig(d.Get("notification_config")),
+		ConfidentialNodes:          expandConfidentialNodes(d.Get("confidential_nodes")),
+		ResourceLabels:             tpgresource.ExpandStringMap(d, "effective_labels"),
+		NodePoolAutoConfig:         expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
+		CostManagementConfig:       expandCostManagementConfig(d.Get("cost_management_config")),
+		EnableK8sBetaApis:          expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
+		SecretSyncConfig:           expandSecretSyncConfig(d.Get("secret_sync_config")),
+		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
 	}
 
 	v := d.Get("enable_shielded_nodes")
@@ -966,7 +967,7 @@ func expandUpgradeOptions(configured interface{}) *container.AutoUpgradeOptions 
 
 func expandAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	result := &container.AuthenticatorGroupsConfig{}
@@ -1137,7 +1138,7 @@ func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
 	result := &container.NetworkPolicy{}
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return result
 	}
 	config := l[0].(map[string]interface{})
@@ -1228,7 +1229,7 @@ func expandControlPlaneEndpointsConfig(d tpgresource.TerraformResourceData) *con
 
 func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPodAutoscaling {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1239,7 +1240,7 @@ func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPod
 
 func expandServiceExternalIpsConfig(configured interface{}) *container.ServiceExternalIPsConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1251,7 +1252,7 @@ func expandServiceExternalIpsConfig(configured interface{}) *container.ServiceEx
 
 func expandMeshCertificates(configured interface{}) *container.MeshCertificates {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1263,7 +1264,7 @@ func expandMeshCertificates(configured interface{}) *container.MeshCertificates 
 
 func expandDatabaseEncryption(configured interface{}) *container.DatabaseEncryption {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
@@ -1332,6 +1333,9 @@ func expandWorkloadIdentityConfig(configured interface{}) *container.WorkloadIde
 func expandIdentityServiceConfig(configured interface{}) *container.IdentityServiceConfig {
 	l := configured.([]interface{})
 	v := &container.IdentityServiceConfig{}
+	if len(l) == 0 || l[0] == nil {
+		return v
+	}
 
 	config := l[0].(map[string]interface{})
 	v.Enabled = config["enabled"].(bool)
@@ -1441,7 +1445,7 @@ func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint 
 
 func expandCostManagementConfig(configured interface{}) *container.CostManagementConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return &container.CostManagementConfig{}
 	}
 
@@ -1783,5 +1787,23 @@ func expandDataplaneV2Config(v interface{}) *container.DataplaneV2Config {
 	}
 	return &container.DataplaneV2Config{
 		ScalabilityMode: s,
+	}
+}
+
+func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
+	if configured == nil {
+		return nil
+	}
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+	if l[0] == nil {
+		return &container.ManagedOpenTelemetryConfig{}
+	}
+	config := l[0].(map[string]interface{})
+	scope, _ := config["scope"].(string)
+	return &container.ManagedOpenTelemetryConfig{
+		Scope: scope,
 	}
 }

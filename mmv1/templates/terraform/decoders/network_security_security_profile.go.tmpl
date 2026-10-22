@@ -10,7 +10,6 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- if ne $.TargetVersionName "ga" }}
 // Once a wildfireAnalysisProfile has been set, the API keeps returning it
 // (with only default values, e.g. {"wildfireRealtimeLookup": false}) even
 // after it is cleared. If it carries no data and the user hasn't configured
@@ -48,5 +47,4 @@ if profile, ok := res["wildfireAnalysisProfile"]; ok {
 		delete(res, "wildfireAnalysisProfile")
 	}
 }
-{{- end }}
 return res, nil

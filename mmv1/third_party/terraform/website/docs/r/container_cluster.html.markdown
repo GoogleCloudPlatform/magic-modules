@@ -489,7 +489,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `workload_alts_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
   Configuration for [direct-path (via ALTS) with workload identity.](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#workloadaltsconfig). Structure is [documented below](#nested_workload_alts_config).
 
-* `schedule_upgrade_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
+* `schedule_upgrade_config` - (Optional)
   Configuration for [scheduled upgrades](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions#scheduled_upgrades). Structure is [documented below](#nested_schedule_upgrade_config).
 
 * `enterprise_config` - (Optional)
@@ -774,7 +774,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
-* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
+* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN, SURGE, or SHORT_LIVED. The default is value is SURGE.
 
 * `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
 
@@ -1641,7 +1641,9 @@ addresses to the cluster master(s) and the ILB VIP. This range must not overlap
 with any other ranges in use within the cluster's network, and it must be a /28
 subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters#req_res_lim)
 for more details. This field only applies to private clusters, when
-`enable_private_nodes` is `true`.
+`enable_private_nodes` is `true`. On GKE versions 1.29 and later, this field is
+optional when `private_endpoint_subnetwork` is specified. It is also optional for
+Autopilot clusters.
 
 * `private_endpoint_subnetwork` - (Optional) Subnetwork in cluster's network where master's endpoint will be provisioned.
 

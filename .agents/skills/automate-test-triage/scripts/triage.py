@@ -59,7 +59,7 @@ def has_actionable_error_context(msg_lower, raw_msg):
     that should prevent it from being dismissed as a generic non-actionable Internal Error.
     """
     actionable_patterns = [
-        r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b',
+        r'\b(?:panic:|runtime\s+error:|sigsegv\b|nil\s+pointer\s+dereference\b)',
         r'\b(?:plan\s+was\s+not\s+empty|inconsistent\s+(?:result|final\s+plan)|root\s+object\s+was\s+present,\s+but\s+now\s+absent)\b',
         r'\b(?:importstateverify|cannot\s+import\s+non-existent|check\s+failed|expected\s+to\s+be\s+set|expected\s+state)\b',
         r'\b(?:conflicting\s+configuration\s+arguments|invalid\s+resource\s+type|blocks\s+of\s+type|inconsistent\s+dependency\s+lock\s+file)\b',
@@ -89,12 +89,12 @@ def is_quota_or_stockout_error(msg_lower, raw_msg):
     if "you do not have quota" in msg_lower or "quota limit" in msg_lower or "has been exceeded" in msg_lower:
         return True
 
-    # Stockout & Capacity concept (e.g. "no resource available", "not enough resources available", "insufficient capacity")
-    if re.search(r'\b(insufficient|not\s+enough|no|lack\s+of)\b.*\b(capacity|resource|stock)s?\b', msg_lower):
+    # Stockout & Capacity concept (e.g. "no resource available", "not enough resources available", "does not have enough/sufficient resources", "insufficient capacity")
+    if re.search(r'\b(insufficient|not\s+(?:have\s+)?(?:enough|sufficient)|no|lack\s+of)\b.*\b(capacity|resource|stock)s?\b', msg_lower):
         return True
 
-    # Location / Zone / Region retry advice concept (e.g. "try a different zone, or try again later", "try again in a different zone")
-    if re.search(r'\btry\s+(again\s+in\s+|a\s+different\s+)?(later|zone|region|location)\b', msg_lower) and ("resource" in msg_lower or "capacity" in msg_lower or "available" in msg_lower):
+    # Location / Zone / Region retry advice concept (e.g. "try a different zone, or try again later", "try again in a different zone", "try again later or choose a different location")
+    if re.search(r'\btry\s+(?:again(?:\s+in)?\s+)?(?:a\s+different\s+)?(later|zone|region|location)\b', msg_lower) and ("resource" in msg_lower or "capacity" in msg_lower or "available" in msg_lower):
         return True
 
     return False
@@ -180,7 +180,7 @@ def is_generic_error(error_msg):
 
 SEVERITY_RULES = [
     # (Priority, Category ID, Display Badge, Matcher Function)
-    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|sigsegv|nil\s+pointer\s+dereference)\b', raw_msg, re.IGNORECASE))),
+    (100, "PANIC", "🚨 **CRITICAL (Panic/Crash)**", lambda msg_lower, raw_msg: bool(re.search(r'\b(?:panic:|runtime\s+error:|sigsegv\b|nil\s+pointer\s+dereference\b)', raw_msg, re.IGNORECASE))),
     (90,  "API_ENV", "🚨 **CRITICAL (API Not Enabled in Test Env)**", lambda msg_lower, raw_msg: (
         bool(re.search(r'\b(?:has\s+not\s+been\s+used\s+in\s+project|before\s+or\s+it\s+is\s+disabled|reason:\s*"?service_disabled"?|api_not_enabled|enable\s+it\s+by\s+visiting)\b', msg_lower))
         and any(p in msg_lower for p in TEST_ENV_PROJECTS)
@@ -322,7 +322,6 @@ def sanitize_for_comparison(error_str):
     s = re.sub(r'\bStep\s+\d+/\d+\b', 'Step X/Y', s)
     
     return s.strip()
-
 
 def find_issue_link(test_name, issues):
     exact_target = f"Failing test(s): {test_name}"

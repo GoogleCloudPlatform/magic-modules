@@ -50,9 +50,7 @@ samples:
       - name: integration_connectors_managed_zone
         resource_id_vars:
           managed_zone_name: test
-        test_vars_overrides:
-          # for backward compatible
-          managed_zone_name: '"test" + randomSuffix'
+          network_name: test-vpc
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT

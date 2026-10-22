@@ -84,6 +84,50 @@ func TestIsCommonRetryableErrorCode_otherError(t *testing.T) {
 	}
 }
 
+func TestIsResourceNotReadyError_retryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"The resource 'projects/test-project/regions/us-east1/serviceAttachments/test-psc-sa' is not ready","errors":[{"message":"The resource 'projects/test-project/regions/us-east1/serviceAttachments/test-psc-sa' is not ready","domain":"global","reason":"resourceNotReady"}]}}`,
+	}
+	isRetryable, _ := isResourceNotReadyError(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIsResourceNotReadyError_otherError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"Invalid value for field 'resource.name'","errors":[{"message":"Invalid value for field 'resource.name'","domain":"global","reason":"invalid"}]}}`,
+	}
+	isRetryable, _ := isResourceNotReadyError(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}
+
+func TestDataprocResourceNotReady_retryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"The resource 'projects/test-project/regions/us-south1/subnetworks/default' is not ready","status":"INVALID_ARGUMENT","errors":[{"message":"The resource 'projects/test-project/regions/us-south1/subnetworks/default' is not ready","domain":"global","reason":"badRequest"}]}}`,
+	}
+	isRetryable, _ := DataprocResourceNotReady(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestDataprocResourceNotReady_otherError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"Invalid value for field 'cluster.name'","status":"INVALID_ARGUMENT"}}`,
+	}
+	isRetryable, _ := DataprocResourceNotReady(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}
+
 func TestIsOperationReadQuotaError_quotaExceeded(t *testing.T) {
 	err := googleapi.Error{
 		Code: 403,
@@ -351,5 +395,21 @@ func TestIsAgentConnectivityTemplateInUse(t *testing.T) {
 				t.Errorf("IsAgentConnectivityTemplateInUse(%v) = (%v, %q), want (%v, %q)", tc.err, isRetryable, reason, tc.expected, tc.expectedReason)
 			}
 		})
+	}
+}
+
+func TestIsSubnetworkNotReadyLROError_retryable(t *testing.T) {
+	opErr := fmt.Errorf("Error code 9, message: The resource 'projects/test-project/regions/us-central1/subnetworks/default' is not ready")
+	isRetryable, _ := IsSubnetworkNotReadyLROError(opErr)
+	if !isRetryable {
+		t.Errorf("expected LRO error for subnetwork not ready to be retryable")
+	}
+}
+
+func TestIsSubnetworkNotReadyLROError_otherError(t *testing.T) {
+	opErr := fmt.Errorf("Error code 13, message: Internal error")
+	isRetryable, _ := IsSubnetworkNotReadyLROError(opErr)
+	if isRetryable {
+		t.Errorf("expected unrelated LRO error to not be retryable")
 	}
 }

@@ -110,41 +110,34 @@ samples:
         test_env_vars:
           org_id: 'ORG_ID'
   - name: 'network_security_security_profile_wildfire'
-    min_version: 'beta'
     primary_resource_id: 'default'
     steps:
       - name: 'network_security_security_profile_wildfire'
-        min_version: 'beta'
         resource_id_vars:
           resource_name: 'my-security-profile'
         test_env_vars:
           project: 'PROJECT_NAME'
       - name: 'network_security_security_profile_wildfire_update'
-        min_version: 'beta'
         resource_id_vars:
           resource_name: 'my-security-profile'
         test_env_vars:
           project: 'PROJECT_NAME'
       - name: 'network_security_security_profile_wildfire_remove_blocks'
-        min_version: 'beta'
         resource_id_vars:
           resource_name: 'my-security-profile'
         test_env_vars:
           project: 'PROJECT_NAME'
       - name: 'network_security_security_profile_wildfire_remove_profile'
-        min_version: 'beta'
         config_path: 'templates/terraform/samples/services/networksecurity/network_security_security_profile_wildfire_minimal.tf.tmpl'
         resource_id_vars:
           resource_name: 'my-security-profile'
         test_env_vars:
           project: 'PROJECT_NAME'
   - name: 'network_security_security_profile_wildfire_minimal'
-    min_version: 'beta'
     primary_resource_id: 'default'
     exclude_basic_doc: true
     steps:
       - name: 'network_security_security_profile_wildfire_minimal'
-        min_version: 'beta'
         resource_id_vars:
           resource_name: 'my-security-profile'
         test_env_vars:
@@ -396,7 +389,6 @@ properties:
       - 'wildfireAnalysisProfile'
   - name: 'wildfireAnalysisProfile'
     type: NestedObject
-    min_version: 'beta'
     description: |
       The wildfire analysis configuration for the security profile.
     conflicts:
@@ -621,7 +613,7 @@ properties:
                     The file name associated with the partial hash.
   - name: 'type'
     type: Enum
-    description: The type of security profile. `WILDFIRE_ANALYSIS` is beta-only.
+    description: The type of security profile.
     required: true
     immutable: true
     enum_values:
