@@ -37,6 +37,7 @@ func BootstrapConfig(t *testing.T) *Config {
 	}
 
 	config := &Config{
+		AccessToken:               envvar.MultiEnvSearch([]string{"GOOGLE_OAUTH_ACCESS_TOKEN"}),
 		Credentials:               envvar.GetTestCredsFromEnv(),
 		ImpersonateServiceAccount: envvar.GetTestImpersonateServiceAccountFromEnv(),
 		Project:                   envvar.GetTestProjectFromEnv(),

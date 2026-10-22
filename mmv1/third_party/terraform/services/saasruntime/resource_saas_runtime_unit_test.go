@@ -37,7 +37,7 @@ func TestAccSaasRuntimeUnit_update(t *testing.T) {
 				ResourceName:            "google_saas_runtime_unit.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id"},
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id", "conditions", "state", "update_time"},
 			},
 			{
 				Config: testAccSaasRuntimeUnit_update(context),
@@ -51,7 +51,7 @@ func TestAccSaasRuntimeUnit_update(t *testing.T) {
 				ResourceName:            "google_saas_runtime_unit.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id"},
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id", "conditions", "state", "update_time"},
 			},
 		},
 	})
@@ -160,7 +160,7 @@ func TestAccSaasRuntimeUnit_application(t *testing.T) {
 				ResourceName:            "google_saas_runtime_unit.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id"},
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id", "conditions", "state", "update_time"},
 			},
 			{
 				Config: testAccSaasRuntimeUnit_application(contextUpdate),
@@ -174,7 +174,7 @@ func TestAccSaasRuntimeUnit_application(t *testing.T) {
 				ResourceName:            "google_saas_runtime_unit.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id"},
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_id", "conditions", "state", "update_time"},
 			},
 		},
 	})

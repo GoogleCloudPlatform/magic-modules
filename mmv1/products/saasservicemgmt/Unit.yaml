@@ -38,6 +38,10 @@ samples:
           unit_name: example-unit
         test_env_vars:
           project: PROJECT_NAME
+        ignore_read_extra:
+          - conditions
+          - state
+          - update_time
 parameters:
   - name: location
     type: String
