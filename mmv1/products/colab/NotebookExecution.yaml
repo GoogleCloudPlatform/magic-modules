@@ -27,12 +27,17 @@ id_format: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{
 immutable: true
 generate_list_resource: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
+autogen_async: true
 async:
   type: 'OpAsync'
   operation:
+    base_url: '{{op_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 include_in_tgc_next: true
+error_retry_predicates:
+  - 'transport_tpg.IsSubnetworkNotReadyLROError'
+error_retry_on_async: true
 custom_code:
   post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'
   decoder: 'templates/terraform/decoders/colab_notebook_execution.go.tmpl'
@@ -53,6 +58,24 @@ samples:
       - name: 'colab_notebook_execution_custom_env'
         resource_id_vars:
           network_name: 'colab-test-default'
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+  - name: 'colab_notebook_execution_workbench_runtime_custom_container'
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_workbench_runtime_custom_container'
+        resource_id_vars:
+          bucket: 'my_bucket'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+  - name: 'colab_notebook_execution_workbench_runtime_custom_container_no_tag'
+    primary_resource_id: 'notebook-execution'
+    steps:
+      - name: 'colab_notebook_execution_workbench_runtime_custom_container_no_tag'
+        resource_id_vars:
           bucket: 'my_bucket'
         test_env_vars:
           project_id: 'PROJECT_NAME'
@@ -251,8 +274,10 @@ properties:
     properties:
       - name: vmImage
         type: NestedObject
-        required: true
         description: 'Custom Compute Engine VM image for the Workbench instance.'
+        exactly_one_of:
+          - workbench_runtime.0.vm_image
+          - workbench_runtime.0.custom_container_image
         properties:
           - name: family
             type: String
@@ -269,6 +294,26 @@ properties:
           - name: project
             type: String
             description: 'The name of the Google Cloud project that this VM image belongs to. Format: {project_id}'
+      - name: customContainerImage
+        type: NestedObject
+        description: 'Use a container image to start the workbench instance.'
+        exactly_one_of:
+          - workbench_runtime.0.vm_image
+          - workbench_runtime.0.custom_container_image
+        properties:
+          - name: repository
+            type: String
+            required: true
+            description: |
+              The path to the container image repository.
+              For example: gcr.io/{project_id}/{imageName}
+          - name: tag
+            type: String
+            description: |
+              The tag of the container image. If not specified, this defaults to the latest tag.
+  - name: 'kernelName'
+    type: String
+    description: 'The name of the kernel to use during notebook execution. If unset, the default kernel is used.'
   - name: 'gcsOutputUri'
     required: true
     type: String

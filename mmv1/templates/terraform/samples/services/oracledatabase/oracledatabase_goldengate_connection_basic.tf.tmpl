@@ -15,5 +15,9 @@ resource "google_oracle_database_goldengate_connection" "{{$.PrimaryResourceId}}
       password          = "GenerateWallet@123"
     }
   }
+  labels = {
+    "label-one" = "{{index $.Vars "label_value"}}"
+  }
+
   deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
 }

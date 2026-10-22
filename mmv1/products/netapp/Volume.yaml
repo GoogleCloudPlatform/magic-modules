@@ -58,6 +58,7 @@ sweeper:
     - location: northamerica-northeast1
     - location: us-south1-a
     - location: us-central1-a
+    - location: us-east4-a
   query_string: "?force=true"
 custom_code:
   constants: templates/terraform/constants/netapp_volume.go.tmpl

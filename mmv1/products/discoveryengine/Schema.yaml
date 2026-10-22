@@ -46,7 +46,7 @@ async:
   actions: [create, delete, update]
   result:
     resource_inside_response: false
-autogen_async: false
+autogen_async: true
 custom_code:
 samples:
   - name: discoveryengine_schema_basic

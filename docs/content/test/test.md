@@ -89,6 +89,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
    When defining variables for your steps, follow these guidelines:
    - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
    - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
+     - To unset a field in a step while reusing the same `.tf.tmpl` file, set its value to `null` (rendering `field = null` in generated tests and omitting the line in generated documentation and OiCS configs).
    - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
    samples:
@@ -245,6 +246,7 @@ An update test ensures that updatable fields can be changed without recreating t
        ...
    }
    ```
+   - **Tip:** If the steps only differ by field presence, you can reuse a single `testAcc*` template function with `acctest.Nprintf` instead of duplicating the function. Pass `nil` in `context` to unset a field in a step (rendering `field = null` in the test config).
 6. Modify the test as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
@@ -490,6 +492,7 @@ resource "google_project" "project" {
 }
 
 // Enable APIs in a deterministic order to avoid inconsistent VCR recordings
+// (use depends_on in handwritten/test-only configs; use skip_vcr: true on user-facing doc samples)
 resource "google_project_service" "servicenetworking" {
   project = google_project.project.project_id
   service = "servicenetworking.googleapis.com"
@@ -593,7 +596,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 
 | Problem                                          | How to fix/Other info  | Skip in VCR replaying? |
 | ------------------------------------------------ | ---------------------- |------------- |
-| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, such as by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
+| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test (such as the `random` provider, `uuid()`, or `timestamp()`), or non-deterministic parallel request ordering (such as multiple `google_project_service` resources batched in varying `serviceIds` order in `services:batchEnable`, or concurrent `google_*_iam_member` / `google_*_iam_binding` read-modify-write loops on the same parent). In handwritten or test-only configs (`exclude_basic_doc: true`), enforce deterministic ordering with `depends_on`. In user-facing documentation samples, do **not** add test-only `depends_on` noise—set `skip_vcr: true` with a reason comment instead. | Skip in VCR for user-facing doc samples, or if non-determinism cannot be avoided in test-only configs. |
 *Bigtable acceptance tests aren't working in VCR mode*. `Requested interaction not found` errors are seen during Bigtable tests run in REPLAYING mode | Currently the provider uses a separate client than the rest of the provider to interact with the Bigtable API. As HTTP traffic to the Bigtable API doesn't go via the shared client it cannot be recorded in RECORDING mode.| Skip the test in VCR for Bigtable. |
 | *Using multiple provider aliases doesn't work in VCR*. You may have two instances of the google provider in the test config but one of them doesn't seem to be using its provider arguments - for example, using the wrong default project. | See this GitHub issue: https://github.com/hashicorp/terraform-provider-google/issues/20019 . The problem is that, due to how the VCR system works, one provider instance will be configured and the other will be forced to reuse the first instance's configuration, despite them being given different provider arguments. |  Skip the test in VCR is using aliases is unavoidable. |
 | *Using multiple versions of the google/google-beta provider in a single test isn't working in VCR*. Unexpected test failures may occur during tests in REPLAYING mode where `ExternalProviders` is used to pull in past versions of the google/google-beta provider. | When ExternalProviders is used to pulling in other versions of the provider, any HTTP traffic through the external provider will not be recorded. If the HTTP traffic produces an unexpected result or returns an API error then the test will fail in REPLAYING mode. | Skip the test in VCR when testing the current provider behaviour versus previous released versions. |

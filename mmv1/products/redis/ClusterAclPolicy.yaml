@@ -27,6 +27,7 @@ sweeper:
   url_substitutions:
     - region: us-central1
     - region: us-west1
+    - region: us-east1
 async:
   actions: []
 parameters:

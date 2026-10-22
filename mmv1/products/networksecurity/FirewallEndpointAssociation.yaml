@@ -38,9 +38,9 @@ update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
 timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 sweeper:
   url_substitutions:
     - parent: projects/${PROJECT_NAME}

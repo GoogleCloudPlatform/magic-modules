@@ -21,15 +21,21 @@ references:
     'Official Documentation': 'https://docs.cloud.google.com/compute/docs/disks/configure-recycle-bin'
   api: 'https://docs.cloud.google.com/compute/docs/reference/rest/beta/snapshotRecycleBinPolicy'
 min_version: beta
-examples:
+samples:
   - name: 'snapshot_recycle_bin_policy_basic'
     primary_resource_id: 'default'
     min_version: 'beta'
     exclude_test: true
+    steps:
+      - name: 'snapshot_recycle_bin_policy_basic'
+        min_version: 'beta'
   - name: 'snapshot_recycle_bin_policy_multiple'
     primary_resource_id: 'multiple'
     min_version: 'beta'
     exclude_test: true
+    steps:
+      - name: 'snapshot_recycle_bin_policy_multiple'
+        min_version: 'beta'
 base_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 update_url: 'projects/{{project}}/global/snapshotRecycleBinPolicy'
 self_link: 'projects/{{project}}/global/snapshotRecycleBinPolicy'

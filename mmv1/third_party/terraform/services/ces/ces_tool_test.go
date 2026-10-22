@@ -392,6 +392,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             }
             snippets_config {
                 enable_snippets = true
+                max_snippets    = 5
             }
         }
 
@@ -492,6 +493,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             }
             snippets_config {
                 enable_snippets = false
+                max_snippets    = 10
             }
         }
 
@@ -767,7 +769,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_agent" "target_agent" {
-  agent_id     = "target-agent-%{random_suffix}"
+  agent_id     = "tf-test-target-agent-%{random_suffix}"
   location     = "us"
   app          = google_ces_app.my-app.app_id
   display_name = "Target Agent"
@@ -801,7 +803,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_agent" "target_agent" {
-  agent_id     = "target-agent-%{random_suffix}"
+  agent_id     = "tf-test-target-agent-%{random_suffix}"
   location     = "us"
   app          = google_ces_app.my-app.app_id
   display_name = "Target Agent"

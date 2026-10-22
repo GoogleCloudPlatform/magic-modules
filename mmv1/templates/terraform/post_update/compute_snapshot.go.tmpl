@@ -1,11 +1,10 @@
 // Nested fields aren't handled by the generated update. Runs after
 // d.Partial(false), so set d.Partial(true) on error to keep the old state.
 if d.HasChange("snapshot_encryption_key.0.kms_key_self_link") {
-	oldKey, newKey := d.GetChange("snapshot_encryption_key.0.kms_key_self_link")
-	kmsKeyObj, err := kmsKeyUpdateRequestBody(oldKey.(string), newKey.(string), d.Get("snapshot_encryption_key.0.kms_key_service_account").(string))
+	kmsKeyObj, err := kmsKeyUpdateRequestBody(d.Get("snapshot_encryption_key.0.kms_key_self_link").(string), d.Get("snapshot_encryption_key.0.kms_key_service_account").(string))
 	if err != nil {
 		d.Partial(true)
-		return fmt.Errorf("Error updating Snapshot %q KMS key: %s", d.Id(), err)
+		return fmt.Errorf("error updating Snapshot %q KMS key: %w", d.Id(), err)
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/snapshots/{{"{{"}}name{{"}}"}}/updateKmsKey")
@@ -29,7 +28,7 @@ if d.HasChange("snapshot_encryption_key.0.kms_key_self_link") {
 	})
 	if err != nil {
 		d.Partial(true)
-		return fmt.Errorf("Error updating Snapshot %q KMS key: %s", d.Id(), err)
+		return fmt.Errorf("error updating Snapshot %q KMS key: %w", d.Id(), err)
 	}
 
 	err = ComputeOperationWaitTime(config, res, project, "Updating Snapshot KMS Key", userAgent, d.Timeout(schema.TimeoutUpdate))

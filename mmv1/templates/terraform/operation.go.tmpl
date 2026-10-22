@@ -67,10 +67,17 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
   url := transport_tpg.BaseUrl(Product, w.Config)
   url += fmt.Sprintf("{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", w.CommonOperationWaiter.Op.Name)
 {{- if $.ProductMetadata.Version.HasRegionalUrl }}
-  if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") && w.Location == "" {
+  location := w.Location
+  if location == "" {
+    // Fall back to the location in the operation name
+    // (projects/PROJECT/locations/LOCATION/operations/OPERATION) for
+    // resources whose id doesn't contain a location.
+    location = tpgresource.LocationFromId(w.CommonOperationWaiter.Op.Name)
+  }
+  if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") && location == "" {
     return nil, fmt.Errorf("failed to find location for a resource with a regionalized endpoint %s", url)
   }
-  url = strings.ReplaceAll(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}", w.Location)
+  url = strings.ReplaceAll(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}", location)
 {{- end }}
   return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config: w.Config,

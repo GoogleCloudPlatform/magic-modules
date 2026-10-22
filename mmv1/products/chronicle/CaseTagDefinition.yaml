@@ -32,9 +32,23 @@ samples:
     primary_resource_id: example
     steps:
       - name: "chronicle_casetagdefinition_basic"
+        vars:
+          display_name: 'tag'
+          match_criteria: 'BY_VENDOR'
+          property_name: null
+          value: 'test_value'
+          comparison_type: 'EXACT'
+          can_be_case_title: false
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-      - name: "chronicle_casetagdefinition_full"
+      - name: "chronicle_casetagdefinition_basic"
+        vars:
+          display_name: 'updated_tag'
+          match_criteria: 'BY_ENTITY_PROPERTY_NAME'
+          property_name: 'test_property'
+          value: 'updated_value'
+          comparison_type: 'START_WITH'
+          can_be_case_title: true
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
 parameters:

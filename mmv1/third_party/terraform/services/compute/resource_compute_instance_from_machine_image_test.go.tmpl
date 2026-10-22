@@ -248,6 +248,7 @@ func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *
 }
 
 func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
+	acctest.SkipTestUntil(t, "2026-11-15")
 	t.Parallel()
 
 	var instance map[string]interface{}

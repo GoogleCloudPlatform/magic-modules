@@ -163,6 +163,33 @@ var schemaNodePool = map[string]*schema.Schema{
 		},
 	},
 
+	"best_effort_provisioning": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		ForceNew:    true,
+		MaxItems:    1,
+		Description: `Specifies the configuration for best effort provisioning.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type: schema.TypeBool,
+					// Marked Optional in tgc_next schema because the GKE API omits bestEffortProvisioning
+					// entirely when enabled = false, so compareHCLFields should treat enabled = false as a zero value.
+					Optional:    true,
+					ForceNew:    true,
+					Description: `Whether node pool creation ignores non-fatal errors like stockout to provision as many nodes as possible, eventually bringing up the target number of nodes.`,
+				},
+				"min_provision_nodes": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.IntAtLeast(0),
+					Description:  `Minimum number of nodes that must be provisioned for the creation to be considered successful. Can only be set when enabled is true.`,
+				},
+			},
+		},
+	},
+
 	"max_pods_per_node": {
 		Type:        schema.TypeInt,
 		Optional:    true,
@@ -452,6 +479,40 @@ var schemaNodePool = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Description: `When true, the provider ignores external changes (drift) to the node count by skipping GCE API queries to the Instance Group Managers. This is a performance optimization for large clusters that saves API quota. Setting this to true will result in missing managed_instance_group_urls in the state.`,
+	},
+
+	"maintenance_policy": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: `Maintenance policy for this NodePool.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"exclusion_until_end_of_support": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Description: `Maintenance exclusion until the end of support.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enabled": {
+								Type:        schema.TypeBool,
+								Optional:    true,
+								Description: `Whether to enable the maintenance exclusion until the end of support for this NodePool.`,
+							},
+							"start_time": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: `Start time of the maintenance exclusion.`,
+							},
+							"end_time": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: `End time of the maintenance exclusion.`,
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 }
 

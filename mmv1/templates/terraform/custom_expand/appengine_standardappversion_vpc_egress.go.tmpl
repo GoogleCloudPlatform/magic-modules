@@ -1,0 +1,16 @@
+// Both `egress_setting` (deprecated) and `vpc_egress` are Optional+Computed (`default_from_api: true`)
+// and flatten the same `vpcEgress` API field into state on Read, so both hold the same prior-state
+// value at the start of an Update. In `expandAppEngineStandardAppVersionVpcAccess`, `egress_setting`
+// is expanded before `vpc_egress`:
+//   - When transitioning from `vpc_egress` to `egress_setting`, omitting `vpc_egress` in HCL causes
+//     SDKv2 to retain its prior-state value in `v`. Checking `d.HasChange("vpc_access.0.egress_setting")`
+//     returns nil so the stale `vpc_egress` state value does not overwrite `egress_setting`.
+//   - When transitioning from `egress_setting` to `vpc_egress`, omitting `egress_setting` in HCL keeps
+//     its prior-state value (`HasChange == false`), so `vpc_egress` returns `v` and overwrites the
+//     stale `egress_setting` value.
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if d.HasChange("vpc_access.0.egress_setting") {
+		return nil, nil
+	}
+	return v, nil
+}

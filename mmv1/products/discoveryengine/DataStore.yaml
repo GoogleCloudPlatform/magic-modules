@@ -37,7 +37,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: false
+autogen_async: true
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -67,7 +67,7 @@ samples:
           data_store_id: 'data-store-id'
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-discoveryengine-datastore-key").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     steps:

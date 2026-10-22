@@ -31,6 +31,8 @@ Before creating a branch or generating the link, verify all of the following rul
 3. **No Downstream Artifacts in Magic Modules:**
    - Do NOT commit generated downstream provider code into `magic-modules`.
 4. **Workspace Cleanup:** Run `git status --porcelain` and ensure no untracked temporary test files exist before pushing.
+5. **Prefer Adding Commits on Subsequent Updates:**
+   - Once a branch has been pushed, always add new commits for follow-up changes rather than amending (`git commit --amend`), rebasing, or force-pushing (`-f`, `--force`, `--force-with-lease`) unless explicitly instructed otherwise.
 
 ---
 
@@ -38,7 +40,7 @@ Before creating a branch or generating the link, verify all of the following rul
 
 ### 1. Sync and Create Feature Branch
 
-Ensure the branch has a clean, `<short-descriptive-branch-name>` matching the change (never push internal worktree or task branch names; rename with `git branch -m "$BRANCH"` if already committed on a worktree branch):
+Ensure the branch has a clean, `<short-descriptive-branch-name>` matching the change (never push internal worktree or task branch names; rename with `git branch -m "$BRANCH"` if already committed on a worktree branch). If updating an already-pushed PR branch, check out or stay on that existing branch rather than recreating it from `$UPSTREAM_REMOTE/$BASE_BRANCH`:
 
 ```bash
 UPSTREAM_REMOTE=$(git remote -v | grep -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')

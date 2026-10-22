@@ -49,6 +49,8 @@ custom_code:
 # excluding identity due to name value inconsistency
 exclude_identity_generation: true
 sweeper:
+  dependencies:
+    - "ComputeNetworkEdgeSecurityService"
   url_substitutions:
     - region: "us-south1"
     - region: "us-west2"
@@ -56,6 +58,7 @@ sweeper:
     - region: "asia-southeast1"
     - region: "europe-west1"
     - region: "southamerica-west1"
+    - region: "southamerica-east1"
     - region: "us-central1"
 samples:
   - name: 'region_security_policy_basic'
@@ -448,6 +451,8 @@ properties:
                           api_name: val
                   - name: 'requestBody'
                     type: Array
+                    # requestBodiesToExclude is not present in CAI asset
+                    is_missing_in_cai: true
                     description: |
                       A list of request body fields to be excluded from inspection during preconfigured WAF evaluation.
                     api_name: requestBodiesToExclude

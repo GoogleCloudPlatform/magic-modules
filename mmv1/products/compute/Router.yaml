@@ -253,6 +253,8 @@ properties:
         required: true
   - name: 'nccGateway'
     type: ResourceRef
+    # nccGateway is not present in CAI asset
+    is_missing_in_cai: true
     description: |
       A URI of an NCC Gateway spoke
     immutable: true

@@ -1,0 +1,60 @@
+if v, ok := d.GetOk("deletion_policy"); ok && v.(string) == "FORCE" {
+	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Headers:   headers,
+	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("VertexAIPipelineJob %q", d.Id()))
+	}
+
+	state, _ := getRes["state"].(string)
+	switch state {
+	case "PIPELINE_STATE_QUEUED", "PIPELINE_STATE_PENDING", "PIPELINE_STATE_RUNNING", "PIPELINE_STATE_PAUSED":
+		cancelUrl := fmt.Sprintf("%s:cancel", url)
+		log.Printf("[DEBUG] Cancelling active PipelineJob %q (state: %s) before deletion", d.Id(), state)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    cancelUrl,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if err != nil && (!transport_tpg.IsGoogleApiErrorWithCode(err, 400) || !strings.Contains(err.Error(), "cannot be canceled")) {
+			return fmt.Errorf("Error cancelling PipelineJob %q before deletion: %s", d.Id(), err)
+		}
+	}
+
+	switch state {
+	case "PIPELINE_STATE_QUEUED", "PIPELINE_STATE_PENDING", "PIPELINE_STATE_RUNNING", "PIPELINE_STATE_PAUSED", "PIPELINE_STATE_CANCELLING":
+		waitFunc := func() (map[string]interface{}, error) {
+			return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: userAgent,
+				Headers:   headers,
+			})
+		}
+		err = transport_tpg.PollingWaitTime(waitFunc, func(pollRes map[string]interface{}, pollErr error) transport_tpg.PollResult {
+			if pollErr != nil {
+				return transport_tpg.ErrorPollResult(pollErr)
+			}
+			currState, _ := pollRes["state"].(string)
+			switch currState {
+			case "PIPELINE_STATE_CANCELLED", "PIPELINE_STATE_FAILED", "PIPELINE_STATE_SUCCEEDED":
+				return transport_tpg.SuccessPollResult()
+			default:
+				return transport_tpg.PendingStatusPollResult(currState)
+			}
+		}, "Cancelling PipelineJob", d.Timeout(schema.TimeoutDelete), 1)
+		if err != nil {
+			return fmt.Errorf("Error waiting for PipelineJob %q to reach terminal state before deletion: %s", d.Id(), err)
+		}
+	}
+}

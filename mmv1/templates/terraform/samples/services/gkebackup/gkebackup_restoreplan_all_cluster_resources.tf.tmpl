@@ -1,26 +1,6 @@
-resource "google_container_cluster" "primary" {
-  name               = "{{index $.ResourceIdVars "name"}}-cluster"
-  location           = "us-east1"
-  initial_node_count = 1
-  node_config {
-    machine_type = "n4-standard-2"
-  }
-  workload_identity_config {
-    workload_pool = "{{index $.TestEnvVars "project"}}.svc.id.goog"
-  }
-  addons_config {
-    gke_backup_agent_config {
-      enabled = true
-    }
-  }
-  deletion_protection  = {{index $.ResourceIdVars "deletion_protection"}}
-  network       = "{{index $.ResourceIdVars "network_name"}}"
-  subnetwork    = "{{index $.ResourceIdVars "subnetwork_name"}}"
-}
-
 resource "google_gke_backup_backup_plan" "basic" {
   name = "{{index $.ResourceIdVars "name"}}"
-  cluster = google_container_cluster.primary.id
+  cluster = "{{index $.ResourceIdVars "cluster"}}"
   location = "us-east1"
   backup_config {
     include_volume_data = true
@@ -33,7 +13,7 @@ resource "google_gke_backup_restore_plan" "all_cluster_resources" {
   name = "{{index $.ResourceIdVars "name"}}-rp"
   location = "us-east1"
   backup_plan = google_gke_backup_backup_plan.basic.id
-  cluster = google_container_cluster.primary.id
+  cluster = "{{index $.ResourceIdVars "cluster"}}"
   restore_config {
     no_namespaces = true
     namespaced_resource_restore_mode = "FAIL_ON_CONFLICT"
