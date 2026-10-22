@@ -65,7 +65,7 @@ type computeInstanceResetActionModel struct {
 }
 
 func (a *computeInstanceResetAction) Metadata(_ context.Context, req action.MetadataRequest, resp *action.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_google_compute_instance_reset"
+	resp.TypeName = req.ProviderTypeName + "_compute_instance_reset"
 }
 
 func (a *computeInstanceResetAction) Schema(_ context.Context, _ action.SchemaRequest, resp *action.SchemaResponse) {
@@ -318,3 +318,11 @@ func parseComputeInstanceRef(instance, project, zone string) (*tpgresource.Zonal
 
 	return ref, nil
 }
+
+// func TestScratchActionRegistered(t *testing.T) {
+// 	for _, f := range registry.FrameworkActionFuncs() {
+// 		resp := &action.MetadataResponse{}
+// 		f().Metadata(context.Background(), action.MetadataRequest{ProviderTypeName: "google"}, resp)
+// 		t.Log(resp.TypeName)
+// 	}
+// }
