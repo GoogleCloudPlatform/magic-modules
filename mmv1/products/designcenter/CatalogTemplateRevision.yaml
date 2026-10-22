@@ -47,17 +47,17 @@ properties:
     type: "String"
     output: true
     description: "The resource name of the revision."
-  - name: "display_name"
+  - name: "displayName"
     type: "String"
     description: "The display name of the revision."
   - name: "description"
     type: "String"
     description: "The description of the revision."
-  - name: "create_time"
+  - name: "createTime"
     type: "Time"
     output: true
     description: "The creation time of the revision."
-  - name: "update_time"
+  - name: "updateTime"
     type: "Time"
     output: true
     description: "The last update time of the revision."

@@ -1,3 +1,4 @@
+---
 name: Space
 description: A Space in the Application Design Center.
 base_url: projects/{{project}}/locations/{{location}}/spaces
