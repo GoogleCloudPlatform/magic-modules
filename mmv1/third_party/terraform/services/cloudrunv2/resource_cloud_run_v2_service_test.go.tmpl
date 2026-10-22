@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
   "github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/vpcaccess"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -2365,6 +2366,108 @@ resource "google_cloud_run_v2_service" "default" {
   }
 }
 `, context)
+}
+
+// An update that omits encryption_key_revocation_action must keep the action
+// the API stores. One omitted update runs while the action is PREVENT_NEW,
+// before the switch to SHUTDOWN: omitting the action only at SHUTDOWN passes
+// even if the update resets it to SHUTDOWN.
+func TestAccCloudRunV2Service_encryptionKeyRevocationAction(t *testing.T) {
+	t.Parallel()
+
+	// The Cloud Run service agent needs permission to use the key.
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@serverless-robot-prod.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	// The key must be in the same location as the service.
+	kmsKey := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"kms_key":       kmsKey,
+	}
+
+	address := "google_cloud_run_v2_service.default"
+	check := func(timeout, action string) resource.TestCheckFunc {
+		return resource.ComposeTestCheckFunc(
+			resource.TestCheckResourceAttr(address, "template.0.encryption_key", kmsKey),
+			resource.TestCheckResourceAttr(address, "template.0.timeout", timeout),
+			resource.TestCheckResourceAttr(address, "template.0.encryption_key_revocation_action", action),
+		)
+	}
+	updateInPlace := resource.ConfigPlanChecks{
+		PreApply: []plancheck.PlanCheck{
+			plancheck.ExpectResourceAction(address, plancheck.ResourceActionUpdate),
+		},
+	}
+	importStep := resource.TestStep{
+		ResourceName:      address,
+		ImportState:       true,
+		ImportStateVerify: true,
+		// name and location are URL-only fields that Read doesn't set, and
+		// import resets the provider-only deletion_protection to its default.
+		ImportStateVerifyIgnore: []string{"name", "location", "deletion_protection"},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_encryptionKeyRevocationAction(context, "300s", "PREVENT_NEW"),
+				Check:  check("300s", "PREVENT_NEW"),
+			},
+			importStep,
+			{
+				Config:           testAccCloudRunV2Service_encryptionKeyRevocationAction(context, "301s", nil),
+				ConfigPlanChecks: updateInPlace,
+				Check:            check("301s", "PREVENT_NEW"),
+			},
+			importStep,
+			{
+				Config:           testAccCloudRunV2Service_encryptionKeyRevocationAction(context, "301s", "SHUTDOWN"),
+				ConfigPlanChecks: updateInPlace,
+				Check:            check("301s", "SHUTDOWN"),
+			},
+			importStep,
+			{
+				Config:           testAccCloudRunV2Service_encryptionKeyRevocationAction(context, "302s", nil),
+				ConfigPlanChecks: updateInPlace,
+				Check:            check("302s", "SHUTDOWN"),
+			},
+			importStep,
+		},
+	})
+}
+
+// A nil action renders as null, which leaves the attribute out of the
+// configuration.
+func testAccCloudRunV2Service_encryptionKeyRevocationAction(context map[string]interface{}, timeout string, action interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name                = "tf-test-cloudrun-service%{random_suffix}"
+  location            = "us-central1"
+  deletion_protection = false
+
+  template {
+    timeout                          = "%{timeout}"
+    encryption_key                   = "%{kms_key}"
+    encryption_key_revocation_action = "%{revocation_action}"
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
+`, map[string]interface{}{
+		"random_suffix":     context["random_suffix"],
+		"kms_key":           context["kms_key"],
+		"timeout":           timeout,
+		"revocation_action": action,
+	})
 }
 
 
