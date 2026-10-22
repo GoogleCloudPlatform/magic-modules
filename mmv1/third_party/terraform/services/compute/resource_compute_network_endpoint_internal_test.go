@@ -200,8 +200,8 @@ func TestUnitComputeNetworkEndpoint_customImport(t *testing.T) {
 		if got := d.Get("port"); got != 90 {
 			t.Errorf("expected port 90, got %v", got)
 		}
-		if got := d.Id(); got != "my-proj/us-central1-a/my-neg/vm1//90" {
-			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1//90, got %s", got)
+		if got := d.Id(); got != "my-proj/us-central1-a/my-neg/vm1/2600:1900:4000:318::1/90" {
+			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1/2600:1900:4000:318::1/90, got %s", got)
 		}
 	})
 
@@ -224,25 +224,13 @@ func TestUnitComputeNetworkEndpoint_customImport(t *testing.T) {
 		}
 	})
 
-	t.Run("empty_ip_address_slot_from_ipv6_resource_id", func(t *testing.T) {
+	t.Run("empty_ip_address_slot_is_rejected", func(t *testing.T) {
 		t.Parallel()
 		d := ResourceComputeNetworkEndpoint().TestResourceData()
 		d.SetId("my-proj/us-central1-a/my-neg/vm1//90")
 
-		if _, err := resourceComputeNetworkEndpointImport(d, &transport_tpg.Config{}); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if got := d.Get("instance"); got != "vm1" {
-			t.Errorf("expected instance vm1, got %v", got)
-		}
-		if got := d.Get("ip_address"); got != "" {
-			t.Errorf("expected empty ip_address, got %v", got)
-		}
-		if got := d.Get("port"); got != 90 {
-			t.Errorf("expected port 90, got %v", got)
-		}
-		if got := d.Id(); got != "my-proj/us-central1-a/my-neg/vm1//90" {
-			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1//90, got %s", got)
+		if _, err := resourceComputeNetworkEndpointImport(d, &transport_tpg.Config{}); err == nil {
+			t.Fatalf("expected error for empty ip_address slot in import ID, got nil")
 		}
 	})
 }

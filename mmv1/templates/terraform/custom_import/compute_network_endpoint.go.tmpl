@@ -1,22 +1,21 @@
 config := meta.(*transport_tpg.Config)
-// instance is optional, and ip_address is empty in the generated resource id
-// ({project}/{zone}/{network_endpoint_group}/{instance}/{ip_address}/{port})
-// when ipv6_address is set instead of ip_address, so use * instead of + when reading the import id
+// instance is optional, so use * instead of + when reading the import id
 if err := tpgresource.ParseImportId([]string{
-    "projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/networkEndpointGroups/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]*)/(?P<port>[^/]+)",
-    "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]*)/(?P<port>[^/]+)",
-    "(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]*)/(?P<port>[^/]+)",
-    "(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]*)/(?P<port>[^/]+)",
+    "projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/networkEndpointGroups/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]+)/(?P<port>[^/]+)",
+    "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]+)/(?P<port>[^/]+)",
+    "(?P<zone>[^/]+)/(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]+)/(?P<port>[^/]+)",
+    "(?P<network_endpoint_group>[^/]+)/(?P<instance>[^/]*)/(?P<ip_address>[^/]+)/(?P<port>[^/]+)",
 }, d, config); err != nil {
 	return nil, err
 }
 
 if ipAddress, ok := d.GetOk("ip_address"); ok && strings.Contains(ipAddress.(string), ":") {
-	if err := d.Set("ipv6_address", tpgresource.CanonicalizeIp(ipAddress)); err != nil {
+	canonicalIpv6 := tpgresource.CanonicalizeIp(ipAddress)
+	if err := d.Set("ipv6_address", canonicalIpv6); err != nil {
 		return nil, fmt.Errorf("Error setting ipv6_address: %s", err)
 	}
-	if err := d.Set("ip_address", nil); err != nil {
-		return nil, fmt.Errorf("Error clearing ip_address: %s", err)
+	if err := d.Set("ip_address", canonicalIpv6); err != nil {
+		return nil, fmt.Errorf("Error setting ip_address for id: %s", err)
 	}
 }
 
@@ -26,5 +25,16 @@ if err != nil {
   return nil, fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id)
+
+if _, ok := d.GetOk("ipv6_address"); ok {
+	if err := d.Set("ip_address", nil); err != nil {
+		return nil, fmt.Errorf("Error clearing ip_address: %s", err)
+	}
+	if identity, err := d.Identity(); err == nil && identity != nil {
+		if err := identity.Set("ip_address", ""); err != nil {
+			return nil, fmt.Errorf("Error clearing identity ip_address: %s", err)
+		}
+	}
+}
 
 return []*schema.ResourceData{d}, nil

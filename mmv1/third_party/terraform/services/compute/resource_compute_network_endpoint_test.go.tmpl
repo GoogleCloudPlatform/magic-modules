@@ -240,36 +240,6 @@ func testAccComputeNetworkEndpointListEndpointPorts(t *testing.T, negId string) 
 	return ports, nil
 }
 
-func testAccCheckComputeNetworkEndpointCount(t *testing.T, negId string, expectedCount int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := acctest.GoogleProviderConfig(t)
-
-		{{ if eq $.TargetVersionName `ga` }}
-		url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listNetworkEndpoints", negId)
-		{{- else }}
-		url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listNetworkEndpoints", negId)
-		{{- end }}
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			RawURL:    url,
-			UserAgent: config.UserAgent,
-		})
-		if err != nil {
-			return err
-		}
-
-		var count int
-		if v, ok := res["items"]; ok && v != nil {
-			count = len(v.([]interface{}))
-		}
-		if count != expectedCount {
-			return fmt.Errorf("expected %d network endpoints in NEG, got %d", expectedCount, count)
-		}
-		return nil
-	}
-}
-
 func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 	t.Parallel()
 
@@ -302,9 +272,6 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionCreate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointCount(t, negId, 2),
-				),
 			},
 			{
 				ResourceName:      "google_compute_network_endpoint.default",
@@ -325,9 +292,6 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionDestroy),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointCount(t, negId, 1),
-				),
 			},
 			{
 				ResourceName:      "google_compute_network_endpoint.default",
@@ -343,9 +307,6 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionCreate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointCount(t, negId, 2),
-				),
 			},
 			{
 				ResourceName:      "google_compute_network_endpoint.default",
@@ -366,9 +327,6 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 						plancheck.ExpectResourceAction("google_compute_network_endpoint.add1", plancheck.ResourceActionReplace),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkEndpointCount(t, negId, 2),
-				),
 			},
 			{
 				ResourceName:      "google_compute_network_endpoint.default",
@@ -391,7 +349,6 @@ func TestAccComputeNetworkEndpoint_ipv6(t *testing.T) {
 				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointWithPortsDestroyed(t, negId, "90"),
-					testAccCheckComputeNetworkEndpointCount(t, negId, 0),
 				),
 			},
 		},

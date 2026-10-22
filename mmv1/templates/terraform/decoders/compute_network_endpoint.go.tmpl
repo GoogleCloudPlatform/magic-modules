@@ -10,6 +10,10 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+// listNetworkEndpoints wraps each endpoint in a "networkEndpoint" object alongside health status.
+// Unwrap the inner endpoint object, and when ipv6_address is set in state, compare canonicalized
+// IPv6 addresses so FindNestedObjectInList matches the right endpoint (since ipv6Address is not
+// part of the resource identity and the API returns compressed RFC 5952 IPv6 strings).
 v, ok := res["networkEndpoint"]
 if !ok || v == nil {
 	return res, nil
