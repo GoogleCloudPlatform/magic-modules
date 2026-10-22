@@ -42,6 +42,8 @@ include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
   constants: templates/terraform/constants/iam_workload_identity_pool_provider.go.tmpl
+  pre_create: templates/terraform/pre_create/iam_workload_identity_pool_provider.go.tmpl
+  post_create: templates/terraform/post_create/iam_workload_identity_pool_provider.go.tmpl
   test_check_destroy: templates/terraform/custom_check_destroy/iam_workload_identity_pool_provider.go.tmpl
   tgc_decoder: templates/tgc_next/decoders/iam_workload_identity_pool_provider.go.tmpl
 samples:

@@ -1,0 +1,56 @@
+	if wasUndeleted {
+		patchObj := make(map[string]interface{})
+		patchObj["displayName"] = displayNameProp
+		patchObj["description"] = descriptionProp
+		patchObj["disabled"] = disabledProp
+		patchObj["attributeMapping"] = attributeMappingProp
+		patchObj["attributeCondition"] = attributeConditionProp
+		updateMask := []string{"displayName", "description", "disabled", "attributeMapping", "attributeCondition"}
+
+		if !tpgresource.IsEmptyValue(reflect.ValueOf(awsProp)) {
+			patchObj["aws"] = awsProp
+			updateMask = append(updateMask, "aws")
+		}
+		if !tpgresource.IsEmptyValue(reflect.ValueOf(oidcProp)) {
+			patchObj["oidc"] = oidcProp
+			updateMask = append(updateMask, "oidc.allowedAudiences", "oidc.issuerUri", "oidc.jwksJson")
+		}
+		if !tpgresource.IsEmptyValue(reflect.ValueOf(samlProp)) {
+			patchObj["saml"] = samlProp
+			updateMask = append(updateMask, "saml")
+		}
+		if !tpgresource.IsEmptyValue(reflect.ValueOf(x509Prop)) {
+			patchObj["x509"] = x509Prop
+			updateMask = append(updateMask, "x509")
+		}
+
+		patchUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}IAMBetaBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/global/workloadIdentityPools/{{"{{"}}workload_identity_pool_id{{"}}"}}/providers/{{"{{"}}workload_identity_pool_provider_id{{"}}"}}")
+		if err != nil {
+			return err
+		}
+		patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+		if err != nil {
+			return err
+		}
+
+		patchRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "PATCH",
+			Project:   billingProject,
+			RawURL:    patchUrl,
+			UserAgent: userAgent,
+			Body:      patchObj,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+			Headers:   headers,
+		})
+		if err != nil {
+			return fmt.Errorf("updating WorkloadIdentityPoolProvider %q after undelete: %w", d.Id(), err)
+		}
+
+		err = IAMBetaOperationWaitTime(
+			config, patchRes, project, "Updating WorkloadIdentityPoolProvider", userAgent,
+			d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return fmt.Errorf("waiting to update WorkloadIdentityPoolProvider %q after undelete: %w", d.Id(), err)
+		}
+	}
