@@ -778,6 +778,7 @@ resource "google_compute_instance_from_template" "primary" {
   source_instance_template = google_compute_instance_template.template.self_link
 
   boot_disk {
+    auto_delete = true
     initialize_params {
       image                  = data.google_compute_image.my_image.self_link
       type                   = "hyperdisk-balanced"
