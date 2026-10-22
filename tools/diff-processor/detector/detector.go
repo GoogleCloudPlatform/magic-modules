@@ -84,6 +84,9 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 				// Skip deleted fields.
 				continue
 			}
+			if hasComputedOnlyAncestor(field, resourceDiff.FlattenedSchema.New) {
+				continue
+			}
 			if fieldDiff.New.Computed && !fieldDiff.New.Optional {
 				// Skip output-only fields.
 				continue
@@ -103,6 +106,21 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 		}
 	}
 	return changedFields
+}
+
+func hasComputedOnlyAncestor(field string, flattenedSchema map[string]*schema.Schema) bool {
+	for separator := strings.IndexByte(field, '.'); separator >= 0; {
+		ancestor := flattenedSchema[field[:separator]]
+		if ancestor != nil && ancestor.Computed && !ancestor.Optional {
+			return true
+		}
+		nextSeparator := strings.IndexByte(field[separator+1:], '.')
+		if nextSeparator < 0 {
+			return false
+		}
+		separator += nextSeparator + 1
+	}
+	return false
 }
 
 func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTests []*reader.Test) (map[string]*MissingTestInfo, error) {
