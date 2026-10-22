@@ -15,7 +15,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudVsanType(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":               "me-west1",
+		"region":               "europe-west9",
 		"random_suffix":        acctest.RandString(t, 10),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
 		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
@@ -103,7 +103,7 @@ func TestAccVmwareengineCluster_vmwareEngineClusterVsanType(t *testing.T) {
 	t.Parallel()
 
 	random_suffix := acctest.RandString(t, 10)
-	region_id := "me-west1"
+	region_id := "europe-west9"
 	context := map[string]interface{}{
 		"region":               region_id,
 		"random_suffix":        random_suffix,
