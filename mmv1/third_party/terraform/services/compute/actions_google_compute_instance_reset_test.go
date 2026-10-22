@@ -75,7 +75,7 @@ func TestAccComputeInstanceResetAction_noRunning(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeInstanceResetAction_terminated(context),
-				ExpectError: regexp.MustCompile("instance is not running"),
+				ExpectError: regexp.MustCompile("Instance is not RUNNING"),
 			},
 		},
 	})
@@ -195,7 +195,7 @@ resource "google_compute_instance" "test" {
 
 action "google_compute_instance_reset" "test" {
 	config {
-		instance = google_compute_instance.test.name}
+		instance = google_compute_instance.test.name
 		zone     = google_compute_instance.test.zone
 }
 }

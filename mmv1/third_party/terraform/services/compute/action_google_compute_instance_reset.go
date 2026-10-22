@@ -50,7 +50,7 @@ func NewComputeInstanceResetAction() action.Action {
 	return &computeInstanceResetAction{}
 }
 
-// computeInstanceResetAction performs a hard reset (instance.reset) on a eunning ComputeEngine
+// computeInstanceResetAction performs a hard reset (instance.reset) on a running ComputeEngine
 // instance. Reset leaves the instance RUNNING, so it does not drift any attribute that
 // google_compute_instance tracks (desired_status/ current_status).
 type computeInstanceResetAction struct {
@@ -242,7 +242,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 	}
 
 	if status != "RUNNING" {
-		resp.Diagnostics.AddError("Instance not in RUNNING state", fmt.Sprintf("Instance %s is in %s state and cannot be reset.", instanceID, status))
+		resp.Diagnostics.AddError("Instance is not RUNNING", fmt.Sprintf("Instance %s is in %s state and cannot be reset.", instanceID, status))
 		return
 	}
 
@@ -265,7 +265,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 	}
 
 	if err := ComputeOperationWaitTime(a.config, op, ref.Project, "Resetting Instance", userAgent, time.Until(deadline)); err != nil {
-		resp.Diagnostics.AddError("Error waiting for instance reset", fmt.Sprintf("Error waitingfor instance %s to reset: %v", instanceID, err))
+		resp.Diagnostics.AddError("Error waiting for instance reset", fmt.Sprintf("Error waiting for instance %s to reset: %v", instanceID, err))
 		return
 	}
 
@@ -318,11 +318,3 @@ func parseComputeInstanceRef(instance, project, zone string) (*tpgresource.Zonal
 
 	return ref, nil
 }
-
-// func TestScratchActionRegistered(t *testing.T) {
-// 	for _, f := range registry.FrameworkActionFuncs() {
-// 		resp := &action.MetadataResponse{}
-// 		f().Metadata(context.Background(), action.MetadataRequest{ProviderTypeName: "google"}, resp)
-// 		t.Log(resp.TypeName)
-// 	}
-// }
