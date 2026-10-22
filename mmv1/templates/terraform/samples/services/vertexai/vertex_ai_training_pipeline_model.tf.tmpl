@@ -89,7 +89,7 @@ resource "google_vertex_ai_training_pipeline" "{{.PrimaryResourceId}}" {
     }
   }
 
-  model_id = "test_model_{{index $.ResourceIdVars "model_id"}}"
+  model_id = "{{index $.ResourceIdVars "model_id"}}"
   parent_model = "{{index $.ResourceIdVars "parent_model"}}"
 
   labels = {
