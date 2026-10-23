@@ -1,0 +1,54 @@
+data "google_project" "project" {
+  project_id = "{{index $.ResourceIdVars "project"}}"
+}
+
+resource "google_oracle_database_autonomous_database" "target" {
+  autonomous_database_id = "{{index $.ResourceIdVars "autonomous_database_id"}}"
+  location               = "us-east4"
+  project                = "{{index $.ResourceIdVars "project"}}"
+  database               = "{{index $.ResourceIdVars "database_name"}}"
+  admin_password         = "{{index $.Vars "admin_password"}}"
+  odb_network            = "{{index $.ResourceIdVars "odb_network"}}"
+  odb_subnet             = "{{index $.ResourceIdVars "odb_subnet"}}"
+  properties {
+    compute_count            = "2"
+    data_storage_size_tb     = "1"
+    db_version               = "19c"
+    db_workload              = "OLTP"
+    license_type             = "LICENSE_INCLUDED"
+    mtls_connection_required = "false"
+  }
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}
+
+resource "google_secret_manager_secret" "password" {
+  project   = "{{index $.ResourceIdVars "project"}}"
+  secret_id = "{{index $.ResourceIdVars "password_secret"}}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "password" {
+  secret      = google_secret_manager_secret.password.id
+  secret_data = "{{index $.Vars "admin_password"}}"
+}
+
+resource "google_secret_manager_secret_iam_member" "password_accessor" {
+  project   = google_secret_manager_secret.password.project
+  secret_id = google_secret_manager_secret.password.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-oracledatabase.iam.gserviceaccount.com"
+}
+
+resource "google_oracle_database_database_connection" "{{$.PrimaryResourceId}}" {
+  database_connection_id  = "{{index $.ResourceIdVars "database_connection_id"}}"
+  location                = "us-east4"
+  project                 = "{{index $.ResourceIdVars "project"}}"
+  connection_string       = google_oracle_database_autonomous_database.target.properties[0].connection_strings[0].high
+  username                = "ADMIN"
+  password_secret_version = "projects/{{index $.ResourceIdVars "project"}}/secrets/${google_secret_manager_secret.password.secret_id}/versions/${google_secret_manager_secret_version.password.version}"
+  odb_network             = "{{index $.ResourceIdVars "odb_network"}}"
+
+  depends_on = [google_secret_manager_secret_iam_member.password_accessor]
+}
