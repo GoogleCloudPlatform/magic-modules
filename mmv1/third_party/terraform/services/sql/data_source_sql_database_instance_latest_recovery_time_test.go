@@ -44,7 +44,7 @@ resource "google_sql_database_instance" "main" {
   region           = "us-central1"
 
   settings {
-    tier = "db-g1-small"
+    tier = "db-f1-micro"
     backup_configuration {
       enabled                        = true
       point_in_time_recovery_enabled = true
