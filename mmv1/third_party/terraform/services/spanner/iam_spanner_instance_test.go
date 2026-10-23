@@ -123,7 +123,7 @@ resource "google_spanner_instance" "instance" {
   name         = "%s"
   config       = "regional-us-central1"
   display_name = "%s"
-  num_nodes    = 1
+  processing_units = 100
 }
 
 resource "google_spanner_instance_iam_binding" "foo" {
@@ -151,7 +151,7 @@ resource "google_spanner_instance" "instance" {
   name         = "%s"
   config       = "regional-us-central1"
   display_name = "%s"
-  num_nodes    = 1
+  processing_units = 100
 }
 
 resource "google_spanner_instance_iam_binding" "foo" {
@@ -177,7 +177,7 @@ resource "google_spanner_instance" "instance" {
   name         = "%s"
   config       = "regional-us-central1"
   display_name = "%s"
-  num_nodes    = 1
+  processing_units = 100
 }
 
 resource "google_spanner_instance_iam_member" "foo" {
@@ -204,7 +204,7 @@ resource "google_spanner_instance" "instance" {
   name         = "%s"
   config       = "regional-us-central1"
   display_name = "%s"
-  num_nodes    = 1
+  processing_units = 100
 }
 
 data "google_iam_policy" "foo" {

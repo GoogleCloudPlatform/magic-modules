@@ -45,7 +45,7 @@ resource "google_spanner_instance" "instance" {
   display_name = "Test spanner instance"
 
   config           = "regional-us-central1"
-  processing_units = 200
+  processing_units = 100
 }
 
 resource "google_spanner_database" "foo" {
