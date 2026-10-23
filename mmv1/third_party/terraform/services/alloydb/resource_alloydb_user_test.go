@@ -56,9 +56,14 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 func testAccAlloydbUser_updateRoles_BuiltIn(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "%{alloydb_instance_name}"
-  instance_type = "PRIMARY"
+  cluster           = google_alloydb_cluster.default.name
+  instance_id       = "%{alloydb_instance_name}"
+  instance_type     = "PRIMARY"
+  availability_type = "ZONAL"
+
+  machine_config {
+    cpu_count = 2
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -69,6 +74,10 @@ resource "google_alloydb_cluster" "default" {
   }
   initial_user {
     password = "%{alloydb_cluster_pass}"
+  }
+
+  continuous_backup_config {
+    enabled = false
   }
 
   deletion_protection = false
@@ -137,9 +146,14 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 func testAccAlloydbUser_updatePass_BuiltIn(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "%{alloydb_instance_name}"
-  instance_type = "PRIMARY"
+  cluster           = google_alloydb_cluster.default.name
+  instance_id       = "%{alloydb_instance_name}"
+  instance_type     = "PRIMARY"
+  availability_type = "ZONAL"
+
+  machine_config {
+    cpu_count = 2
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -150,6 +164,10 @@ resource "google_alloydb_cluster" "default" {
   }
   initial_user {
     password = "%{alloydb_cluster_pass}"
+  }
+
+  continuous_backup_config {
+    enabled = false
   }
 
   deletion_protection = false
@@ -217,9 +235,14 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 func testAccAlloydbUser_updateRoles_Iam(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "%{alloydb_instance_name}"
-  instance_type = "PRIMARY"
+  cluster           = google_alloydb_cluster.default.name
+  instance_id       = "%{alloydb_instance_name}"
+  instance_type     = "PRIMARY"
+  availability_type = "ZONAL"
+
+  machine_config {
+    cpu_count = 2
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -230,6 +253,10 @@ resource "google_alloydb_cluster" "default" {
   }
   initial_user {
     password = "%{alloydb_cluster_pass}"
+  }
+
+  continuous_backup_config {
+    enabled = false
   }
 
   deletion_protection = false
@@ -284,9 +311,14 @@ func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(t *testing.T) {
 func testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
+  cluster           = google_alloydb_cluster.default.name
+  instance_id       = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type     = "PRIMARY"
+  availability_type = "ZONAL"
+
+  machine_config {
+    cpu_count = 2
+  }
 }
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
@@ -296,6 +328,9 @@ resource "google_alloydb_cluster" "default" {
   }
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
+  }
+  continuous_backup_config {
+    enabled = false
   }
   deletion_protection = false
 }
@@ -348,9 +383,14 @@ func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(t *testing.T) {
 func testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
+  cluster           = google_alloydb_cluster.default.name
+  instance_id       = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type     = "PRIMARY"
+  availability_type = "ZONAL"
+
+  machine_config {
+    cpu_count = 2
+  }
 }
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
@@ -360,6 +400,9 @@ resource "google_alloydb_cluster" "default" {
   }
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
+  }
+  continuous_backup_config {
+    enabled = false
   }
   deletion_protection = false
 }
