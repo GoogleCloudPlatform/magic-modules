@@ -108,8 +108,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	if digest != "" {
 		// fetch image by digest
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
-		imageUrlSafe := url.QueryEscape(imageName)
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages/%s@%s", imageUrlSafe, digest))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages/%s", artifactResourceRef(imageName, "@", digest)))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
