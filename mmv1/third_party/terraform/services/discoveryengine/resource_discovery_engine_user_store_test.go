@@ -46,7 +46,7 @@ func testAccDiscoveryEngineUserStore_discoveryengineUserstoreBasicExample_basic(
 resource "google_discovery_engine_license_config" "basic" {
   location = "global"
   license_config_id = "tf-test-license-config-id%{random_suffix}"
-  license_count = 50
+  license_count = 1
   subscription_tier = "SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT"
   start_date {
     year = 2099
@@ -76,7 +76,7 @@ func testAccDiscoveryEngineUserStore_discoveryengineUserstoreBasicExample_update
 resource "google_discovery_engine_license_config" "basic" {
   location = "global"
   license_config_id = "tf-test-license-config-id%{random_suffix}"
-  license_count = 50
+  license_count = 1
   subscription_tier = "SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT"
   start_date {
     year = 2099
