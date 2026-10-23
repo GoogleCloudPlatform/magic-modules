@@ -4512,6 +4512,9 @@ var skipGreenComparisonFields = map[string]bool{
 	"replica_configuration": true, // Green carries replica configuration until switchover promotes it to primary.
 	"replica_names":         true, // Replica list is attached to the Blue primary until switchover swaps roles.
 	"replication_cluster":   true, // DR replication cluster metadata belongs to the primary until switchover.
+	// Password management fields that are never returned by the Cloud SQL Admin API:
+	"root_password":            true, // root_password is not returned by Cloud SQL Admin API and cannot be read on Green instance.
+	"root_password_wo_version": true, // Write-only version tracker for root_password is not returned by the API.
 	// Settings sub-fields expected to differ on the Green replica before switchover:
 	"settings.0.backup_configuration":        true, // Backups are disabled on the Green instance until switchover completes.
 	"settings.0.password_validation_policy":  true, // Password validation policy is not returned on the Green replica before switchover.
@@ -4584,7 +4587,13 @@ func compareConfiguredField(key string, rawVal cty.Value, fieldSchema *schema.Sc
 						continue
 					}
 					for subName, subSchema := range subRes.Schema {
-						compareConfiguredField(fmt.Sprintf("%s.%d.%s", key, i, subName), rawElem.GetAttr(subName), subSchema, d, greenData, mismatches)
+						effectiveSchema := subSchema
+						if fieldSchema.Sensitive && !subSchema.Sensitive {
+							copied := *subSchema
+							copied.Sensitive = true
+							effectiveSchema = &copied
+						}
+						compareConfiguredField(fmt.Sprintf("%s.%d.%s", key, i, subName), rawElem.GetAttr(subName), effectiveSchema, d, greenData, mismatches)
 					}
 				}
 				return
@@ -4609,7 +4618,11 @@ func compareConfiguredField(key string, rawVal cty.Value, fieldSchema *schema.Sc
 		equal = eq.Equal(greenVal)
 	}
 	if !equal {
-		*mismatches = append(*mismatches, fmt.Sprintf("%s (configured: %v, green instance: %v)", key, formatSchemaValue(cfgVal), formatSchemaValue(greenVal)))
+		if fieldSchema.Sensitive {
+			*mismatches = append(*mismatches, fmt.Sprintf("%s (configured: (sensitive), green instance: (sensitive))", key))
+		} else {
+			*mismatches = append(*mismatches, fmt.Sprintf("%s (configured: %v, green instance: %v)", key, formatSchemaValue(cfgVal), formatSchemaValue(greenVal)))
+		}
 	}
 }
 
