@@ -53,29 +53,71 @@ samples:
     primary_resource_id: default
     steps:
       - name: oracledatabase_database_connection_basic
+        vars:
+          admin_password: 123Abpassword
         resource_id_vars:
           project: my-project
           database_connection_id: my-connection
+          autonomous_database_id: my-adb
+          database_name: mydatabase
+          password_secret: my-password-secret
+          odb_network: projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          deletion_protection: "true"
         test_vars_overrides:
-          project: envvar.GetTestProjectFromEnv()
-          database_connection_id: fmt.Sprintf("tf-test-dbconn-%s", acctest.RandString(t, 10))
+          project: '"oasis-terraform-testing-prod"'
+          deletion_protection: "false"
+          database_connection_id: fmt.Sprintf("tf-test-dbconn-%s", randomSuffix)
+          database_name: fmt.Sprintf("tftestdatabase%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
   - name: oracledatabase_database_connection_full
     primary_resource_id: default
     steps:
+      # Step 1 -> create
       - name: oracledatabase_database_connection_full
+        vars:
+          admin_password: 123Abpassword
+          password_version: password_v1
+          label_value: initial
         resource_id_vars:
           project: my-project
           database_connection_id: my-connection
+          autonomous_database_id: my-adb
+          database_name: mydatabase
+          password_secret: my-password-secret
+          odb_network: projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          deletion_protection: "true"
         test_vars_overrides:
-          project: envvar.GetTestProjectFromEnv()
-          database_connection_id: fmt.Sprintf("tf-test-dbconn-%s", acctest.RandString(t, 10))
-      - name: oracledatabase_database_connection_full_update
+          project: '"oasis-terraform-testing-prod"'
+          deletion_protection: "false"
+          database_connection_id: fmt.Sprintf("tf-test-dbconn-%s", randomSuffix)
+          database_name: fmt.Sprintf("tftestdatabase%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+      # Step 2 -> in-place update of labels and password_secret_version
+      - name: oracledatabase_database_connection_full
+        vars:
+          admin_password: 123Abpassword
+          password_version: password_v2
+          label_value: updated
         resource_id_vars:
           project: my-project
           database_connection_id: my-connection
+          autonomous_database_id: my-adb
+          database_name: mydatabase
+          password_secret: my-password-secret
+          odb_network: projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          deletion_protection: "true"
         test_vars_overrides:
-          project: envvar.GetTestProjectFromEnv()
-          database_connection_id: fmt.Sprintf("tf-test-dbconn-%s", acctest.RandString(t, 10))
+          project: '"oasis-terraform-testing-prod"'
+          deletion_protection: "false"
+          database_connection_id: fmt.Sprintf("tf-test-dbconn-%s", randomSuffix)
+          database_name: fmt.Sprintf("tftestdatabase%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/us-east4/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
 parameters:
   - name: location
     type: String
