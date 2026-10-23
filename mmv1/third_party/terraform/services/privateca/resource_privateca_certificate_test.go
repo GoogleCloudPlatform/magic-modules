@@ -68,6 +68,7 @@ resource "google_privateca_certificate_authority" "default" {
 	certificate_authority_id = "tf-test-my-certificate-authority-%{random_suffix}"
 	deletion_protection = false
 	skip_grace_period = true
+	ignore_active_certificates_on_deletion = true
 	config {
 		subject_config {
 			subject {
