@@ -12,7 +12,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "instance" {
   name         = "tf-test-instance%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "us-central1-a"
 

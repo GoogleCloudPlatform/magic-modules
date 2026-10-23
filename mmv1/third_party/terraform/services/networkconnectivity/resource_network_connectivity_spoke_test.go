@@ -345,7 +345,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "router-instance1" {
   name         = "tf-test-router-instance1%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -366,7 +366,7 @@ resource "google_compute_instance" "router-instance1" {
 
 resource "google_compute_instance" "router-instance2" {
   name         = "tf-test-router-instance2%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -429,7 +429,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "router-instance1" {
   name         = "tf-test-router-instance1%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -450,7 +450,7 @@ resource "google_compute_instance" "router-instance1" {
 
 resource "google_compute_instance" "router-instance2" {
   name         = "tf-test-router-instance2%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -514,7 +514,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "router-instance1" {
   name         = "tf-test-router-instance1%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -535,7 +535,7 @@ resource "google_compute_instance" "router-instance1" {
 
 resource "google_compute_instance" "router-instance2" {
   name         = "tf-test-router-instance2%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -681,7 +681,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "router-instance1" {
   name         = "tf-test-router-instance1%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -744,7 +744,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "router-instance1" {
   name         = "tf-test-router-instance1%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -811,7 +811,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 resource "google_compute_instance" "router-instance1" {
   name         = "tf-test-router-instance1%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
@@ -832,7 +832,7 @@ resource "google_compute_instance" "router-instance1" {
 
 resource "google_compute_instance" "router-instance2" {
   name         = "tf-test-router-instance2%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   can_ip_forward = true
   zone         = "%{zone}"
 
