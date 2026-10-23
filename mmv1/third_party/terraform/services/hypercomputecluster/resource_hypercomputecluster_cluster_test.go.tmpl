@@ -374,7 +374,7 @@ resource "google_lustre_instance" "lustre_instance" {
   instance_id                 = "tf-test-lustre-%{random_suffix}"
   location                    = "us-central1-a"
   filesystem                  = "tffs"
-  capacity_gib                = 18000
+  capacity_gib                = 9000
   network                     = data.google_compute_network.vpc.id
   per_unit_storage_throughput = 1000
   timeouts {
@@ -563,7 +563,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     id = "lustre-new"
     config {
       new_lustre {
-        capacity_gb = "18000"
+        capacity_gb = "9000"
         description = "Lustre instance created via Terraform"
         filesystem = "lustrefs"
         lustre = "projects/${local.project_id}/locations/us-central1-a/instances/tf-test-lustre-%{random_suffix}"
