@@ -1,7 +1,7 @@
 resource "google_pubsub_lite_reservation" "{{$.PrimaryResourceId}}" {
   name = "{{index $.ResourceIdVars "reservation_name"}}"
   project = data.google_project.project.number
-  throughput_capacity = 2
+  throughput_capacity = 1
 }
 
 resource "google_pubsub_lite_topic" "{{$.PrimaryResourceId}}" {
@@ -12,7 +12,7 @@ resource "google_pubsub_lite_topic" "{{$.PrimaryResourceId}}" {
     count = 1
     capacity {
       publish_mib_per_sec = 4
-      subscribe_mib_per_sec = 8
+      subscribe_mib_per_sec = 4
     }
   }
 
