@@ -5,6 +5,7 @@ resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
   certificate_authority_id = "{{index $.ResourceIdVars "certificate_authority_id"}}"
   location = "{{index $.ResourceIdVars "pool_location"}}"
   deletion_protection = {{index $.ResourceIdVars "deletion_protection"}}
+  skip_grace_period = true
   config {
     subject_config {
       subject {

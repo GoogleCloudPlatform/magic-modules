@@ -42,6 +42,7 @@ resource "google_privateca_certificate_authority" "default" {
   location = "%{pool_location}"
   type = "SUBORDINATE"
   deletion_protection = false
+  skip_grace_period = true
   config {
     subject_config {
       subject {
