@@ -29,6 +29,25 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbInstance_alloydbInstanceBasic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.enabled"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.query_plans_per_minute"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.query_string_length"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.record_application_tags"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.record_client_address"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.enabled"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.max_query_string_length"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.preserve_comments"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.query_plans_per_minute"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.record_application_tags"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_active_queries"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_wait_event_types"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_wait_events"),
+{{- if ne $.TargetVersionName "ga" }}
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_client_address"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.assistive_experiences_enabled"),
+{{- end }}
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_instance.default",
@@ -38,6 +57,25 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 			},
 			{
 				Config: testAccAlloydbInstance_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.enabled"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.query_plans_per_minute"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.query_string_length"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.record_application_tags"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "query_insights_info.0.record_client_address"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.enabled"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.max_query_string_length"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.preserve_comments"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.query_plans_per_minute"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.record_application_tags"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_active_queries"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_wait_event_types"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_wait_events"),
+{{- if ne $.TargetVersionName "ga" }}
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_client_address"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.assistive_experiences_enabled"),
+{{- end }}
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_instance.default",
@@ -1581,8 +1619,6 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
-
 func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 	t.Parallel()
 	random_suffix := acctest.RandString(t, 10)
@@ -1599,8 +1635,10 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 		"record_application_tags":       true,
 		"query_plans_per_minute":        10,
 		"track_active_queries":          true,
+{{- if ne $.TargetVersionName "ga" }}
 		"track_client_address":          true,
 		"assistive_experiences_enabled": false,
+{{- end }}
 	}
 
 	contextDisable := map[string]interface{}{
@@ -1619,8 +1657,10 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 		"record_application_tags":       false,
 		"query_plans_per_minute":        5,
 		"track_active_queries":          false,
+{{- if ne $.TargetVersionName "ga" }}
 		"track_client_address":          false,
 		"assistive_experiences_enabled": false,
+{{- end }}
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1634,6 +1674,18 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "true"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "1024"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.max_query_string_length", "1024"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.preserve_comments", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.query_plans_per_minute", "10"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.record_application_tags", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.track_active_queries", "true"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "observability_instance_info.0.track_wait_event_types"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.track_wait_events", "true"),
+{{- if ne $.TargetVersionName "ga" }}
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.track_client_address", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.assistive_experiences_enabled", "false"),
+{{- end }}
 				),
 			},
 			{
@@ -1642,6 +1694,7 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "false"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "10240"), // Disabled default value
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.query_plans_per_minute", "20"),     // default value
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.enabled", "false"),
 				),
 			},
 			// Step 3: Mark enabled = true and turn all the other booleans to false
@@ -1652,6 +1705,14 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.preserve_comments", "false"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "false"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "2048"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.preserve_comments", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.track_wait_events", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.max_query_string_length", "2048"),
+{{- if ne $.TargetVersionName "ga" }}
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.track_client_address", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_instance_info.0.assistive_experiences_enabled", "false"),
+{{- end }}
 				),
 			},
 		},
@@ -1704,8 +1765,10 @@ resource "google_alloydb_instance" "default" {
     record_application_tags        = %{record_application_tags}
     query_plans_per_minute         = %{query_plans_per_minute}
     track_active_queries           = %{track_active_queries}
+{{- if ne $.TargetVersionName "ga" }}
     track_client_address           = %{track_client_address}
     assistive_experiences_enabled  = %{assistive_experiences_enabled}
+{{- end }}
   }
 }
 resource "google_alloydb_cluster" "default" {
@@ -1724,6 +1787,8 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
 
 // Regression test for https://github.com/hashicorp/terraform-provider-google/issues/22197
 // Verifies no permadiff occurs when network_config is set with enable_public_ip = false (the default).
