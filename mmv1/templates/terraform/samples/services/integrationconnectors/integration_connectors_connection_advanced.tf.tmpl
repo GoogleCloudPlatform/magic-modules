@@ -108,7 +108,7 @@ resource "google_integration_connectors_connection" "{{$.PrimaryResourceId}}" {
   }
   node_config {
     min_node_count = 2
-    max_node_count = 50
+    max_node_count = 3
   }
   labels = {
     foo = "bar"
