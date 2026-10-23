@@ -345,22 +345,22 @@ func TestAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(
 		CheckDestroy:             testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context, 2),
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context, 1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
-						"deploy_config.0.dedicated_resources.0.max_replica_count", "2"),
+						"deploy_config.0.dedicated_resources.0.max_replica_count", "1"),
 					captureEndpointAttribute(
 						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
 						"endpoint", &endpointBefore),
 				),
 			},
 			{
-				Config: testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context, 3),
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_updateReplicaCountInPlace(context, 2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
-						"deploy_config.0.dedicated_resources.0.max_replica_count", "3"),
+						"deploy_config.0.dedicated_resources.0.max_replica_count", "2"),
 					captureEndpointAttribute(
 						"google_vertex_ai_endpoint_with_model_garden_deployment.test_inplace",
 						"endpoint", &endpointAfter),
