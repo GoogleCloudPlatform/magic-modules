@@ -1,17 +1,17 @@
 ---
-page_title: "Use Actions with the Terraform Provider for Google Cloud"
+page_title: "Use actions with the Terraform Provider for Google Cloud"
 description: |-
-  Learn how declare, trigger and invoke actions in the Terraform Provider for Google Cloud.
+  Learn how to declare, trigger and invoke actions in the Terraform Provider for Google Cloud.
 ---
 
-# Terraform Actions in the Terraform Provider for Google Cloud
+# Use actions with the Terraform Provider for Google Cloud
 
 Actions are preset operations built into providers that let Terraform perform day-two operations
-on your infrastructure. Actions do not affect the resource state. The Terraform Provider for Google Cloud
+on your infrastructure. Actions do not affect resource state. The Terraform Provider for Google Cloud
 implements actions for operations that do not fit the resource lifecycle, such as resetting
 a Compute Engine instance.
 
-Terraform Actions are available in Terraform v1.14 and later. For more information, see [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
+Terraform actions are available in Terraform v1.14 and later. For more information, see [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
 
 ---
 
@@ -21,7 +21,7 @@ Declare an `action` block with the action type and a label. Put the action's arg
 `config` block:
 
 ```hcl
-action "<google_compute_instance_reset" "web"{
+action "google_compute_instance_reset" "web"{
   config {
      instance = google_compute_instance.web.self_link
   }
@@ -37,11 +37,11 @@ To run an action when a resource changes, add an `action_trigger` block to the `
 that resource:
 ```hcl
 resource "terraform_data" "config_version" {
-    input = var.Config_version
+    input = var.config_version
 
     lifecycle {
     action_trigger {
-      events  = ["after_update"]
+      events  = [after_update]
       actions = [action.google_compute_instance_reset.web]
     }
   }
@@ -62,7 +62,7 @@ terraform plan -invoke=action.google_compute_instance_reset.web
 terraform apply -invoke=action.google_compute_instance_reset.web
 ```
 
-When you use `-invoke`, Terraform runs only that action and does not change any resource in the 
+When you use `-invoke`, Terraform runs only that action and does not change any resources in the 
 configuration.
 
 ## Actions and managed resources

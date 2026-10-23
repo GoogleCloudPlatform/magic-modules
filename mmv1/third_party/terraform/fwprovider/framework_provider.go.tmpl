@@ -304,7 +304,7 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
 
 
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources, data sources,
-	// ephemeral resources, and list resources implemented using the plugin-framework. Their Configure functions receive this data via ConfigureRequest.ProviderData
+	// ephemeral resources, list resources, and actions implemented using the plugin-framework. Their Configure functions receive this data via ConfigureRequest.ProviderData
 	// (list resources use ConfigureResponse.ListResourceData — see terraform-plugin-framework list.ConfigureRequest).
 	meta := p.Primary.Meta().(*transport_tpg.Config)
 	resp.DataSourceData = meta

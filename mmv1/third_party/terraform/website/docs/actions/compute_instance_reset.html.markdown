@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-    Performs a hard reset of a running Compute Engine Instance.
+    Performs a hard reset of a running Compute Engine instance.
 ---
 
 # google_compute_instance_reset (action)
@@ -11,13 +11,13 @@ Performs a hard reset of a running Compute Engine instance. This is equivalent t
 or running `gcloud compute instances reset`. The action waits for the reset operation to complete.
 
 ~> **Warning:** A reset is not a graceful restart. The guest operating system is not shut down
-first, and any data that has not been written to disk is lost. If your workloadneeds a clean shutdown, stop and start the instance instead.
+first, and any data that has not been written to disk is lost. If your workload needs a clean shutdown, stop and start the instance instead.
 
 Actions require Terraform 1.14 or later. For an overview of how actions work in the Terraform 
 Provider for Google Cloud, see
 [Use actions with Terraform Provider for Google Cloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/using_actions).
 
-To get more information about the resetting an instance, see:
+To get more information about resetting instances, see:
 
 * [API documentation](https://cloud.google.com/compute/docs/reference/rest/v1/instances/reset)
 * How-to Guides
@@ -28,7 +28,7 @@ To get more information about the resetting an instance, see:
 
 ```hcl
 resource "google_compute_instance" "example" {
-  name         = "instance-example"
+  name         = "example-instance"
   machine_type = "e2-micro"
   zone         = "us-central1-a"
 
@@ -113,7 +113,7 @@ used, and then the provider zone. If you set both `zone` and a zone in `instance
 the reset operation to complete, as a duration string such as "10m" or "1h". The value must be
 greater than zero. Defaults to `"20m"`.
 
-## Behaviour
+## Behavior
 
 * If the instance is `RUNNING`, the action resets it and waits for the operation to complete.
 * If the instance is `PROVISIONING`, `STAGING`, or `REPAIRING`, the action waits for it to reach

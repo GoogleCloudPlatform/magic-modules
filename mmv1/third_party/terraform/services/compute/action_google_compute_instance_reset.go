@@ -46,6 +46,7 @@ func init() {
 		Func:        NewComputeInstanceResetAction,
 	}.Register()
 }
+
 func NewComputeInstanceResetAction() action.Action {
 	return &computeInstanceResetAction{}
 }
@@ -70,31 +71,34 @@ func (a *computeInstanceResetAction) Metadata(_ context.Context, req action.Meta
 
 func (a *computeInstanceResetAction) Schema(_ context.Context, _ action.SchemaRequest, resp *action.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Performs a hard reset on a running Compute Engine instance.",
+		Description: "Performs a hard reset of a running Compute Engine instance. The guest OS is not shut down gracefully.",
 		MarkdownDescription: "Performs a hard reset ([`instance.reset`](https://docs.cloud.google.com/compute/docs/reference/rest/v1/instances/reset)) " +
-			"on a running Compute Engine instance.",
+			"of a running Compute Engine instance. The guest OS is not shut down gracefully.",
 		Attributes: map[string]schema.Attribute{
 			"instance": schema.StringAttribute{
 				Description: "The Compute instance to reset. Accepts the instance name, a partial URI" +
-					"(e.g., `my-instance`) or full self-link (e.g., `projects/PROJECT/zones/ZONE/instances/INSTANCE`).",
+					"(projects/{project}/zones/{zone}/instances/{name} or /zones/{zone}/instances/{name}), or a self-link.",
 				MarkdownDescription: "The Compute instance to reset. Accepts the instance name, a partial URI" +
-					"(e.g., `my-instance`) or full self-link (e.g., `projects/PROJECT/zones/ZONE/instances/INSTANCE`).",
+					"(projects/{project}/zones/{zone}/instances/{name} or /zones/{zone}/instances/{name}), or a self-link.",
 				Required: true,
 				Validators: []validator.String{
 					fwvalidators.NonEmptyStringValidator(),
 				},
 			},
 			"project": schema.StringAttribute{
-				Description: "The project of the instance. Defaults to provider configuration if omitted.",
-				Optional:    true,
+				Description: "The project of the instance. If it is not provided, the project in `instance is used, " +
+					"and then the provider project.",
+				Optional: true,
 			},
 			"zone": schema.StringAttribute{
-				Description: "The zone of the instance. Defaults to provider configuration if omitted.",
-				Optional:    true,
+				Description: "The zone of the instance. If it is not provided, the zone in `instance is used, " +
+					"and then the provider zone.",
+				Optional: true,
 			},
 			"timeout": schema.StringAttribute{
-				Description: "Timeout in seconds for the operation (default: 600).",
-				Optional:    true,
+				Description: "How long to wait for the instance to be ready for a reset and for the reset operation " +
+					"to complete, as a duration string such as \"10m\". Defaults to \"20m\".",
+				Optional: true,
 				Validators: []validator.String{
 					fwvalidators.NonNegativeDurationValidator(),
 				},
@@ -213,7 +217,8 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 			resp.Diagnostics.AddError("Instance not found", fmt.Sprintf("instance %s does not exist.", instanceID))
 			return
 		}
-		resp.Diagnostics.AddError("Error reading instance", fmt.Sprintf("Failed to read instance %s: %v", instanceID, err))
+		resp.Diagnostics.AddError("Error reading instance", fmt.Sprintf("Error reading instance %s: %v", instanceID, err))
+		return
 	}
 
 	if tpgresource.StringInSlice(computeInstanceTransitionalStates, status) {

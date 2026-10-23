@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -29,7 +28,7 @@ func TestAccComputeInstanceResetAction_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(version.Must(version.NewVersion("1.14.0"))),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -69,7 +68,7 @@ func TestAccComputeInstanceResetAction_noRunning(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(version.Must(version.NewVersion("1.14.0"))),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -201,7 +200,7 @@ action "google_compute_instance_reset" "test" {
 }
 
 resource "terraform_data" "trigger" {
-	input = {google_compute_instance.test.instance_id
+	input = google_compute_instance.test.instance_id
 
 	lifecycle {
 	action_trigger {
