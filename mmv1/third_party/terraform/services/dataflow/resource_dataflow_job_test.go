@@ -1,10 +1,10 @@
 package dataflow_test
 
 import (
-    "context"
+	"context"
 	"fmt"
 	"path"
-    "strconv"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -12,22 +12,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
 	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	dataflowapi "google.golang.org/api/dataflow/v1b3"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-
-{{ if eq $.TargetVersionName `ga` }}
-	"google.golang.org/api/compute/v1"
-{{- else }}
-	compute "google.golang.org/api/compute/v0.beta"
-{{- end }}
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 const (
@@ -427,11 +422,11 @@ func TestAccDataflowJob_withKmsKey(t *testing.T) {
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 		{
 			Member: "serviceAccount:service-{project_number}@dataflow-service-producer-prod.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 	})
 
@@ -786,19 +781,22 @@ func testAccDataflowJobHasServiceAccount(t *testing.T, res, expectedId string) r
 		if err != nil {
 			return fmt.Errorf("Error getting dataflow job instance template: %s", err)
 		}
-		accounts := instanceTmpl.Properties.ServiceAccounts
+		props, _ := instanceTmpl["properties"].(map[string]interface{})
+		accounts, _ := props["serviceAccounts"].([]interface{})
 		if len(accounts) != 1 {
 			return fmt.Errorf("Found multiple service accounts (%d) for dataflow job %q, expected 1", len(accounts), res)
 		}
-		actualId := strings.Split(accounts[0].Email, "@")[0]
+		account, _ := accounts[0].(map[string]interface{})
+		email, _ := account["email"].(string)
+		actualId := strings.Split(email, "@")[0]
 		if expectedId != actualId {
-			return fmt.Errorf("service account mismatch, expected account ID = %q, actual email = %q", expectedId, accounts[0].Email)
+			return fmt.Errorf("service account mismatch, expected account ID = %q, actual email = %q", expectedId, email)
 		}
 		return nil
 	}
 }
 
-func testAccDataflowJobGetGeneratedInstanceTemplate(t *testing.T, s *terraform.State, res string) (*compute.InstanceTemplate, error) {
+func testAccDataflowJobGetGeneratedInstanceTemplate(t *testing.T, s *terraform.State, res string) (map[string]interface{}, error) {
 	rs, ok := s.RootModule().Resources[res]
 	if !ok {
 		return nil, fmt.Errorf("resource %q not in state", res)
@@ -810,25 +808,37 @@ func testAccDataflowJobGetGeneratedInstanceTemplate(t *testing.T, s *terraform.S
 
 	config := acctest.GoogleProviderConfig(t)
 
-	var instanceTemplate *compute.InstanceTemplate
+	var instanceTemplate map[string]interface{}
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		instanceTemplates, rerr := compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).RegionInstanceTemplates.
-			List(config.Project, config.Region).
-			Filter(filter).
-			MaxResults(2).
-			Fields("items/properties").Do()
+		listUrl := fmt.Sprintf("%sprojects/%s/regions/%s/instanceTemplates", transport_tpg.BaseUrl(compute_tpg.Product, config), config.Project, config.Region)
+		listUrl, rerr := transport_tpg.AddQueryParams(listUrl, map[string]string{
+			"filter":     filter,
+			"maxResults": "2",
+			"fields":     "items/properties",
+		})
 		if rerr != nil {
 			return resource.NonRetryableError(rerr)
 		}
-		if len(instanceTemplates.Items) == 0 {
+		instanceTemplates, rerr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    listUrl,
+			UserAgent: config.UserAgent,
+		})
+		if rerr != nil {
+			return resource.NonRetryableError(rerr)
+		}
+		items, _ := instanceTemplates["items"].([]interface{})
+		if len(items) == 0 {
 			return resource.RetryableError(fmt.Errorf("no instance template found for dataflow job 'projects/%s/regions/%s/jobs/%s'", config.Project, config.Region, rs.Primary.ID))
 		}
-		if len(instanceTemplates.Items) > 1 {
-			return resource.NonRetryableError(fmt.Errorf("Wrong number of matching instance templates for dataflow job: %s, %d", rs.Primary.ID, len(instanceTemplates.Items)))
+		if len(items) > 1 {
+			return resource.NonRetryableError(fmt.Errorf("Wrong number of matching instance templates for dataflow job: %s, %d", rs.Primary.ID, len(items)))
 		}
-		instanceTemplate = instanceTemplates.Items[0]
-		if instanceTemplate == nil || instanceTemplate.Properties == nil {
+		instanceTemplate, _ = items[0].(map[string]interface{})
+		if instanceTemplate == nil || instanceTemplate["properties"] == nil {
 			return resource.NonRetryableError(fmt.Errorf("invalid instance template has no properties"))
 		}
 		return nil
@@ -1440,6 +1450,3 @@ func TestResourceDataflowJobTemplateGcsPathDiffSuppress(t *testing.T) {
 		}
 	}
 }
-
-
-
