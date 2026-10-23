@@ -173,8 +173,8 @@ resource "google_cloud_run_v2_service" "default" {
         cpu_idle = true
         startup_cpu_boost = true
         limits = {
-          cpu = "4"
-          memory = "2Gi"
+          cpu = "1"
+          memory = "512Mi"
         }
       }
     }
@@ -242,7 +242,7 @@ resource "google_cloud_run_v2_service" "default" {
         startup_cpu_boost = false
         limits = {
           cpu = "2"
-          memory = "8Gi"
+          memory = "1Gi"
         }
       }
     }
@@ -269,7 +269,7 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
+  machine_type = "e2-micro"
   min_instances = 2
   max_instances = 3
   region        = "us-central1"
@@ -331,7 +331,7 @@ resource "google_cloud_run_v2_service" "default" {
   client_version = "client-version-1"
   scaling {
     min_instance_count = 1
-    max_instance_count = 3
+    max_instance_count = 2
   }
   template {
     labels = {
@@ -375,8 +375,8 @@ resource "google_cloud_run_v2_service" "default" {
         cpu_idle = true
         startup_cpu_boost = true
         limits = {
-          cpu = "4"
-          memory = "2Gi"
+          cpu = "1"
+          memory = "1Gi"
         }
       }
     }
