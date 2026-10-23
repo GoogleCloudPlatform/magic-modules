@@ -128,7 +128,6 @@ func testAccIntegrationsAuthConfig_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_integrations_client" "client" {
 	location = "southamerica-west1"
-	create_sample_integrations = true
 }
 
 resource "google_integrations_auth_config" "update_example" {
@@ -154,7 +153,6 @@ func testAccIntegrationsAuthConfig_update(context map[string]interface{}) string
 	return acctest.Nprintf(`
 resource "google_integrations_client" "client" {
 	location = "southamerica-west1"
-	create_sample_integrations = true
 }
 
 resource "google_integrations_auth_config" "update_example" {
