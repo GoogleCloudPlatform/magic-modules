@@ -18,7 +18,6 @@ var KnownUnreadableTests = []string{
 	"TestAccComputeNetwork_bgpModeAndMedInteractions",
 	"TestAccComputeNetwork_networkBgpStandardModeDeleteMed",
 	"TestAccComputeRouterNamedSet_updatePrefix",
-	"TestAccContainerCluster_resourceManagerTags",
 	"TestAccDNSManagedZone_update",
 	"TestAccEphemeralServiceAccountJwt_basic",
 	"TestAccEphemeralServiceAccountJwt_withDelegates",
@@ -30,7 +29,6 @@ var KnownUnreadableTests = []string{
 	"TestAccEphemeralServiceAccountToken_withCustomLifetime",
 	"TestAccEphemeralServiceAccountToken_withDelegates",
 	"TestAccPubsubTopic_schema",
-	"TestAccStorageTransferJob_azureBlobStorageDataSourcePrivateNetwork",
 }
 
 // The longest error message reported for a single unreadable test.
