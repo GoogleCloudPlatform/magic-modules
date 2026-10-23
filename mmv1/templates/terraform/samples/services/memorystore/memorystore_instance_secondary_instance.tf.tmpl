@@ -7,7 +7,7 @@ resource "google_memorystore_instance" "primary_instance" {
     project_id                   = data.google_project.project.project_id
   }
   location                       = "asia-east1"
-  replica_count                  = 1
+  replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   transit_encryption_mode        = "TRANSIT_ENCRYPTION_DISABLED"
   authorization_mode             = "AUTH_DISABLED"
@@ -68,7 +68,7 @@ resource "google_memorystore_instance" "secondary_instance" {
     project_id                   = data.google_project.project.project_id
   }
   location                       = "europe-north1"
-  replica_count                  = 1
+  replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   transit_encryption_mode        = "TRANSIT_ENCRYPTION_DISABLED"
   authorization_mode             = "AUTH_DISABLED"
