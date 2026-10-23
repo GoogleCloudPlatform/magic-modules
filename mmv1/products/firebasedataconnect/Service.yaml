@@ -28,6 +28,8 @@ import_format:
   - projects/{{project}}/locations/{{location}}/services/{{service_id}}
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
+sweeper:
+  query_string: "?force=true"
 async:
   type: OpAsync
   operation:
