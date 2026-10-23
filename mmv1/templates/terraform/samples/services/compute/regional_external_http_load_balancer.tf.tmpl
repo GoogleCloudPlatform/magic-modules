@@ -70,7 +70,7 @@ resource "google_compute_instance_template" "default" {
   labels = {
     managed-by-cnrm = "true"
   }
-  machine_type = "n1-standard-1"
+  machine_type = "e2-micro"
   metadata = {
     startup-script = "#! /bin/bash\nsudo apt-get update\nsudo apt-get install apache2 -y\nsudo a2ensite default-ssl\nsudo a2enmod ssl\nsudo vm_hostname=\"$(curl -H \"Metadata-Flavor:Google\" \\\nhttp://169.254.169.254/computeMetadata/v1/instance/name)\"\nsudo echo \"Page served from: $vm_hostname\" | \\\ntee /var/www/html/index.html\nsudo systemctl restart apache2"
   }
@@ -107,7 +107,7 @@ resource "google_compute_instance_group_manager" "default" {
     name              = "primary"
   }
   base_instance_name = "vm"
-  target_size        = 2
+  target_size        = 1
 }
 
 resource "google_compute_address" "default" {

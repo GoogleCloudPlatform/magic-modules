@@ -82,7 +82,7 @@ resource "google_compute_instance_group_manager" "igm" {
 resource "google_compute_instance_template" "instance_template" {
   provider     = google-beta
   name         = "{{index $.ResourceIdVars "backend_service_name"}}-template"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   network_interface {
     network = "default"

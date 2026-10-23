@@ -1,6 +1,6 @@
 resource "google_compute_instance_template" "{{$.PrimaryResourceId}}" {
   name         = "{{index $.ResourceIdVars "instance_name"}}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   disk {
     source_image = "debian-cloud/debian-13"
