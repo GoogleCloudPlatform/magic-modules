@@ -541,19 +541,17 @@ func GetSDKProvider(testName string) *schema.Provider {
 		}
 	} else {
 		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
-		if hasRequestWatcher(testName) {
-			old := prov.ConfigureContextFunc
-			prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-				c, diags := old(ctx, d)
-				if diags.HasError() {
-					return nil, diags
-				}
-				config := c.(*transport_tpg.Config)
-				if config != nil && config.Client != nil {
-					config.Client.Transport = wrapWithRequestWatcher(testName, config.Client.Transport)
-				}
-				return config, diags
+		old := prov.ConfigureContextFunc
+		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+			c, diags := old(ctx, d)
+			if diags.HasError() {
+				return nil, diags
 			}
+			config := c.(*transport_tpg.Config)
+			if config != nil && config.Client != nil {
+				config.Client.Transport = wrapWithRequestWatcher(testName, config.Client.Transport)
+			}
+			return config, diags
 		}
 	}
 	return prov
