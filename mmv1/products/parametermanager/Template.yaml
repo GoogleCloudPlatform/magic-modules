@@ -37,8 +37,6 @@ samples:
       - name: template_config_basic
         resource_id_vars:
           template_id: template
-        test_vars_overrides:
-          template_id: '"template" + randomSuffix'
   - name: template_with_format
     primary_resource_id: template-with-format
     min_version: beta
@@ -46,8 +44,6 @@ samples:
       - name: template_with_format
         resource_id_vars:
           template_id: template
-        test_vars_overrides:
-          template_id: '"template" + randomSuffix'
   - name: template_with_labels
     primary_resource_id: template-with-labels
     min_version: beta
@@ -55,13 +51,9 @@ samples:
       - name: template_with_labels
         resource_id_vars:
           template_id: template
-        test_vars_overrides:
-          template_id: '"template" + randomSuffix'
       - name: template_with_labels_update
         resource_id_vars:
           template_id: template
-        test_vars_overrides:
-          template_id: '"template" + randomSuffix'
 autogen_status: VGVtcGxhdGU=
 parameters:
   - name: templateId

@@ -143,6 +143,9 @@ samples:
         resource_id_vars:
           destination_alloydb: destination-alloydb
           destination_cp: destination-cp
+          network_name: destination-alloydb
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
 parameters:
   - name: connectionProfileId
     type: String

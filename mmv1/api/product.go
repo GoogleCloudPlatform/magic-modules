@@ -18,12 +18,12 @@ import (
 	"log"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 

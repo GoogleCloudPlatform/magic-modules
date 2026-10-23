@@ -62,6 +62,15 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: application
+    type: String
+    description: |-
+      Reference to the App Hub Application this Unit belongs to, in the format
+      `projects/{project}/locations/{location}/applications/{application}`.
+      All resources deployed in this Unit are associated with the specified
+      Application. If empty, the service sets it during any UnitOperation
+      when the UnitKind has `app_params.group` and App Hub is enabled.
+    default_from_api: true
   - name: conditions
     type: Array
     description: |-

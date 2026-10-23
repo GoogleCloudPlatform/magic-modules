@@ -1,0 +1,14 @@
+resource "google_saas_runtime_saas" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  saas_id  = "{{index $.ResourceIdVars "saas_name"}}"
+  location = "us-central1"
+
+  locations {
+    name = "us-central1"
+  }
+
+  application_template {
+    application_template = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/spaces/{{index $.ResourceIdVars "space_name"}}/applicationTemplates/{{index $.ResourceIdVars "template_name"}}"
+    revision             = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/spaces/{{index $.ResourceIdVars "space_name"}}/applicationTemplates/{{index $.ResourceIdVars "template_name"}}/revisions/r-1"
+  }
+}

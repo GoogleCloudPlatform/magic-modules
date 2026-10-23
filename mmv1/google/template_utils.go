@@ -18,13 +18,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"reflect"
 	"strings"
-
 	"text/template"
-
-	"github.com/golang/glog"
 )
 
 // Build a map(map[string]interface{}) from a list of paramerter
@@ -151,7 +149,7 @@ func (t functionsData) customTemplate(e any, templatePath string, appendNewline 
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 
 	rs := contents.String()

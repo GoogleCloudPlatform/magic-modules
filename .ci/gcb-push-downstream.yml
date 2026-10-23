@@ -6,7 +6,7 @@ steps:
     # and cloning the repo to the present directory.  We need to use
     # 'sh' to evaluate the '*' arguments, which otherwise would be
     # passed literally to 'rm'.
-    - name: 'alpine'
+    - name: 'alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6'
       args:
           - sh
           - -c
@@ -186,8 +186,23 @@ steps:
         - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN_CLASSIC"]
+      id: label-merged-pr
+      waitFor: ["build-magician-binary"]
+      allowFailure: true
+      timeout: 180s
+      env:
+        - BASE_BRANCH=$BRANCH_NAME
+        - BUILD_ID=$BUILD_ID
+        - PROJECT_ID=$PROJECT_ID
+      args:
+        - "label-merged-pr"
+        - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: magician-delete-branches
-      waitFor: ["vcr-merge"]
+      waitFor: ["vcr-merge", "label-merged-pr"]
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv:
         - "GITHUB_TOKEN_CLASSIC"

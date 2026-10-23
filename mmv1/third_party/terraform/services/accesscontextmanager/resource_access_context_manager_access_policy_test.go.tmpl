@@ -29,7 +29,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		"service_perimeter_nongcp_patterns":		testAccAccessContextManagerServicePerimeter_nonGcpServicePatternsTest,
 		"service_perimeters_nongcp_patterns":		testAccAccessContextManagerServicePerimeters_nonGcpServicePatternsTest,
 		"service_perimeter_resource":			testAccAccessContextManagerServicePerimeterResource_basicTest,
-		"service_perimeter_dry_run_resource":		testAccAccessContextManagerServicePerimeterResource_basicTest,
+		"service_perimeter_dry_run_resource":		testAccAccessContextManagerServicePerimeterDryRunResource_basicTest,
 		"access_level":					testAccAccessContextManagerAccessLevel_basicTest,
 		"access_level_full":				testAccAccessContextManagerAccessLevel_fullTest,
 		"access_level_custom":				testAccAccessContextManagerAccessLevel_customTest,
@@ -50,6 +50,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		"service_perimeters":				testAccAccessContextManagerServicePerimeters_basicTest,
 		"gcp_user_access_binding":			testAccAccessContextManagerGcpUserAccessBinding_basicTest,
 		"gcp_user_access_binding_principal":		testAccAccessContextManagerGcpUserAccessBinding_principalTest,
+		"gcp_user_access_binding_restricted_project":		testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest,
 		"authorized_orgs_desc":				testAccAccessContextManagerAuthorizedOrgsDesc_basicTest,
 		"data_source_access_policy_basic":          testAccDataSourceAccessContextManagerServicePerimeter_basicTest,
 		"data_source_access_policy_scoped":         testAccDataSourceAccessContextManagerServicePerimeter_scopedPolicyTest,
@@ -61,7 +62,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}

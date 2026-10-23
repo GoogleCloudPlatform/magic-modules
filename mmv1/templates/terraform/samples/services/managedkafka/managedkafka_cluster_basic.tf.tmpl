@@ -18,7 +18,6 @@ resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
   labels = {
     key = "value"
   }
-  kafka_version = "3.7.x"
 }
 
 data "google_project" "project" {

@@ -57,6 +57,32 @@ samples:
         resource_id_vars:
           index_id: example-dedicated-index
           collection_id: example-dedicated-collection
+  - name: vectorsearch_index_skip_wait
+    primary_resource_id: example-skip-wait-index
+    steps:
+      - name: vectorsearch_index_skip_wait
+        resource_id_vars:
+          index_id: example-skip-wait-index
+          collection_id: example-skip-wait-collection
+        ignore_read_extra:
+          - skip_wait
+custom_code:
+  custom_create: templates/terraform/custom_create/vector_search_index.go.tmpl
+virtual_fields:
+  - name: skip_wait
+    type: Boolean
+    default_value: false
+    description: |-
+      Whether to skip waiting for the index to be created. Building an ANN
+      index over a large collection can take several hours; setting `skip_wait`
+      to `true` causes Terraform to return as soon as the creation request is
+      accepted rather than blocking until the long-running build completes
+      (which can exceed CI/CD timeouts or short-lived Terraform runner
+      credentials). Leave this set to `false` (the default) if downstream
+      resources or workloads depend on the index being ready to serve queries
+      immediately after `terraform apply`, or if you want Terraform to fail
+      synchronously when an asynchronous index build fails.
+    ignore_read: true
 parameters:
   - name: location
     type: String

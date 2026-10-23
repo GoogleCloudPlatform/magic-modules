@@ -70,6 +70,15 @@ samples:
         test_env_vars:
           project: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
+  - name: 'bigquery_reservation_assignment_scheduling_policy'
+    primary_resource_id: 'assignment'
+    exclude_basic_doc: true
+    steps:
+      - name: 'bigquery_reservation_assignment_scheduling_policy'
+        resource_id_vars:
+          reservation_name: 'example-reservation'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
@@ -100,7 +109,9 @@ properties:
     type: String
     description: |
       Types of job, which could be specified when using the reservation. Possible values: JOB_TYPE_UNSPECIFIED, PIPELINE, QUERY, CONTINUOUS
-    required: true
+    exactly_one_of:
+      - job_type
+      - scheduling_policy
   - name: 'principal'
     type: String
     description: |
@@ -109,6 +120,34 @@ properties:
       * `principal://iam.googleapis.com/projects/-/serviceAccounts/SA_EMAIL_ADDRESS` for service accounts,
       * `principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/subject/SUBJECT_ID` for workload identity pool identities.
       * The special value `unknown_or_deleted_user` represents principals which cannot be read from the user info service, for example deleted users.
+  - name: 'schedulingPolicy'
+    type: NestedObject
+    description: |
+      The scheduling policy to use for jobs and queries of this assignee when
+      running under the associated reservation. The scheduling policy controls
+      how the reservation's resources are distributed. This overrides the default
+      scheduling policy specified on the reservation.
+    exactly_one_of:
+      - job_type
+      - scheduling_policy
+    properties:
+      - name: 'concurrency'
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the concurrency
+          of jobs running for any particular project within it to the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots
+      - name: 'maxSlots'
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the slot
+          consumption of queries running for any particular project within it to
+          the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots
   - name: 'state'
     type: String
     description: |

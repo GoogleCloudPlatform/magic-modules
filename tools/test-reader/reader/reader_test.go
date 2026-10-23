@@ -296,6 +296,92 @@ func TestReadWholeLineSubstitutionTestFile(t *testing.T) {
 	}
 }
 
+func TestReadEscapedPercentTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/escaped_percent_test.go"})
+	if err != nil {
+		t.Fatalf("error reading escaped percent test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	if len(tests[0].Steps) != 3 {
+		t.Fatalf("unexpected number of test steps: %d, expected 3", len(tests[0].Steps))
+	}
+	expectedSteps := []Step{
+		// In a fmt.Sprintf template, an escaped percent sign is read as a
+		// single percent sign, including when a verb letter follows it, while
+		// a substitution is still replaced.
+		{
+			ResourceBlock: {
+				"escaped_percent": {
+					"resource": {
+						"field_one":   "parseint(\"ff\", 16) % pow(2, 32)",
+						"field_two":   "\"100%\"",
+						"field_three": "\"%d\"",
+						"field_four":  "\"true\"",
+					},
+				},
+			},
+		},
+		// In an acctest.Nprintf template, "%%" is not an escape, so the
+		// substitution after the first percent sign is still replaced.
+		{
+			ResourceBlock: {
+				"escaped_percent": {
+					"resource": {
+						"field_one": "\"name-%true\"",
+					},
+				},
+			},
+		},
+		// A key after an escaped percent sign in a fmt.Sprintf template is an
+		// acctest.Nprintf substitution once the template is formatted.
+		{
+			ResourceBlock: {
+				"escaped_percent": {
+					"resource": {
+						"field_one": "\"name-true\"",
+						"field_two": "\"true\"",
+					},
+				},
+			},
+		},
+	}
+	for i, expectedStep := range expectedSteps {
+		if step := tests[0].Steps[i]; !reflect.DeepEqual(step, expectedStep) {
+			t.Errorf("found unexpected step %d: %#v, expected %#v", i, step, expectedStep)
+		}
+	}
+}
+
+func TestReadExpectErrorTestFile(t *testing.T) {
+	tests, err := ReadTestFiles([]string{"testdata/service/expect_error_test.go"})
+	if err != nil {
+		t.Fatalf("error reading expect error test file: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	// Steps with ExpectError, PlanOnly, Destroy, ImportState or RefreshState
+	// set are skipped, so only the step that applies cleanly is recorded and
+	// fields from the skipped steps are not.
+	if len(tests[0].Steps) != 1 {
+		t.Fatalf("unexpected number of test steps: %d, expected 1", len(tests[0].Steps))
+	}
+	step := tests[0].Steps[0]
+	if expectedStep := (Step{
+		ResourceBlock: {
+			"expect_error_resource": {
+				"resource": {
+					"field_one": "\"value-one\"",
+				},
+			},
+		},
+	}); !reflect.DeepEqual(step, expectedStep) {
+		t.Errorf("found unexpected step: %#v, expected %#v", step, expectedStep)
+	}
+}
+
 func TestReadFormattingCallTestFile(t *testing.T) {
 	tests, err := ReadTestFiles([]string{"testdata/service/formatting_call_test.go"})
 	if err != nil {

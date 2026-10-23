@@ -28,4 +28,6 @@ if err != nil {
 }
 
 log.Printf("[DEBUG] Updating RegionNetworkFirewallPolicyWithRules %q", d.Id())
-return resourceComputeRegionNetworkFirewallPolicyWithRulesUpdate(d, meta)
+if err := resourceComputeRegionNetworkFirewallPolicyWithRulesUpdate(d, meta); err != nil {
+  return err
+}

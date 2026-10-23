@@ -19,9 +19,9 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.26'
+          go-version: '1.26.9'
           cache-dependency-path: |
-            repo/tools/go-changelog/go.mod
+            repo/tools/go-changelog/go.sum
 
       - name: Build
         run: |
