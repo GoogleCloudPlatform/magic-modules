@@ -1,0 +1,6 @@
+// If the modelId is not provided by the user then it will be set by the API
+// Store that value in state
+if _, ok := d.GetOk("model_id"); !ok {
+    modelId := tpgresource.NameFromSelfLinkStateFunc(opRes["name"].(string))
+	d.Set("model_id", modelId)
+}
