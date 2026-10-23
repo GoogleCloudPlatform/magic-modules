@@ -16,12 +16,19 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	isCaseSensitive := tpgresource.IamPrincipalIsCaseSensitive(old) || tpgresource.IamPrincipalIsCaseSensitive(new)
-	if isCaseSensitive {
-		return old == new
+// iamMembersMatch reports whether two members name the same principal. Most
+// member types are case insensitive, but principal, principalSet,
+// principalHierarchy, allUsers and allAuthenticatedUsers are not, so those
+// only match exactly.
+func iamMembersMatch(a, b string) bool {
+	if tpgresource.IamPrincipalIsCaseSensitive(a) || tpgresource.IamPrincipalIsCaseSensitive(b) {
+		return a == b
 	}
-	return tpgresource.CaseDiffSuppress(k, old, new, d)
+	return strings.EqualFold(a, b)
+}
+
+func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return iamMembersMatch(old, new)
 }
 
 func validateIAMMember(i interface{}, k string) ([]string, []error) {
@@ -161,7 +168,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 			if b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle {
 				containsMember := false
 				for _, m := range b.Members {
-					if strings.ToLower(m) == strings.ToLower(member) {
+					if iamMembersMatch(m, member) {
 						containsMember = true
 					}
 				}
@@ -384,7 +391,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 		log.Printf("[DEBUG]: Looking for member %q in found binding", eMember.Members[0])
 		var member string
 		for _, m := range binding.Members {
-			if strings.ToLower(m) == strings.ToLower(eMember.Members[0]) {
+			if iamMembersMatch(m, eMember.Members[0]) {
 				member = m
 			}
 		}
