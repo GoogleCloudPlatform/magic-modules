@@ -52,7 +52,7 @@ tgc_tests:
   - name: TestAccTags/tagBindingNamespaced
 cai_asset_name_format: tagBindings/{{%parent}}/{{tag_value}}
 custom_code:
-  pre_create: templates/terraform/pre_create/tags_tag_binding.go.tmpl
+  custom_create: templates/terraform/custom_create/tags_tag_binding.go.tmpl
   post_read: templates/terraform/post_read/tags_tag_binding.go.tmpl
   custom_import: templates/terraform/custom_import/tags_tag_binding.go.tmpl
 samples:
