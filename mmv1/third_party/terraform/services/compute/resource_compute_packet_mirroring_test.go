@@ -64,7 +64,7 @@ func testAccComputePacketMirroring_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_instance" "mirror" {
   name         = "tf-test-my-instance%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   boot_disk {
     initialize_params {
@@ -155,7 +155,7 @@ func testAccComputePacketMirroring_update(context map[string]interface{}) string
 	return acctest.Nprintf(`
 resource "google_compute_instance" "mirror" {
   name         = "tf-test-my-instance%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   boot_disk {
     initialize_params {

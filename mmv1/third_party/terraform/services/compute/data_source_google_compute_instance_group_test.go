@@ -59,7 +59,7 @@ func TestAccDataSourceGoogleComputeInstanceGroup_fromIGM(t *testing.T) {
 			{
 				Config: testAccCheckDataSourceGoogleComputeInstanceGroup_fromIGM(fmt.Sprintf("tf-test-igm-%d", acctest.RandInt(t)), fmt.Sprintf("tf-test-igm-%d", acctest.RandInt(t))),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_compute_instance_group.test", "instances.#", "10"),
+					resource.TestCheckResourceAttr("data.google_compute_instance_group.test", "instances.#", "1"),
 				),
 			},
 		},
@@ -207,7 +207,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "test" {
   name         = "tf-test-%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -250,7 +250,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "test" {
   name         = "tf-test-%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -303,7 +303,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -324,7 +324,7 @@ resource "google_compute_instance_group_manager" "igm" {
   }
   base_instance_name = "igm"
   zone               = "us-central1-a"
-  target_size        = 10
+  target_size        = 1
 
   wait_for_instances = true
 }

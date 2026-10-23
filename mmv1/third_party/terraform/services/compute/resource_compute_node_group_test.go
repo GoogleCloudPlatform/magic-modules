@@ -157,7 +157,7 @@ resource "google_compute_node_group" "nodes" {
   autoscaling_policy {
     mode      = "ONLY_SCALE_OUT"
     min_nodes = 1
-    max_nodes = 10
+    max_nodes = 2
   }
   node_template = google_compute_node_template.%s.self_link
 }

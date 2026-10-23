@@ -106,7 +106,7 @@ resource "google_compute_subnetwork" "internal"{
 
 resource "google_compute_instance" "default" {
   name         = "tf-test-neg-%{random_suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   
   boot_disk {
     initialize_params {
