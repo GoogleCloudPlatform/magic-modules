@@ -306,7 +306,7 @@ resource "google_workbench_instance" "instance" {
   location = "us-east1-b"
 
   gce_setup {
-    machine_type = "n2-standard-4"
+    machine_type = "n2-standard-2"
     boot_disk {
       disk_type = "PD_BALANCED"
     }
@@ -369,7 +369,7 @@ resource "google_workbench_instance" "instance" {
   location = "us-east1-b"
 
   gce_setup {
-    machine_type = "n2-standard-4"
+    machine_type = "n2-standard-2"
     min_cpu_platform = "%{min_cpu_platform}"
   }
 }
