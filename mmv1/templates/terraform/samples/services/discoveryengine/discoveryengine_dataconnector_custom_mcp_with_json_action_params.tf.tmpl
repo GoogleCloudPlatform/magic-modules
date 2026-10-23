@@ -1,0 +1,22 @@
+resource "google_discovery_engine_data_connector" "custom-mcp" {
+  location                     = "global"
+  collection_id                = "{{index $.ResourceIdVars "collection_id"}}"
+  collection_display_name      = "Custom MCP"
+  data_source                  = "custom_mcp"
+  json_params                  = jsonencode({
+    "instance_uri" : "https://example.com/mcp"
+  })
+  refresh_interval             = "86400s"
+  connector_modes              = ["ACTIONS"]
+  action_config {
+    json_action_params = jsonencode({
+      "auth_type" : "OAUTH",
+      "mcp_server_source" : "BYO_MCP",
+      "instance_uri" : "https://example.com/mcp",
+      "client_id" : "SECRET_MANAGER_RESOURCE_NAME",
+      "client_secret" : "SECRET_MANAGER_RESOURCE_NAME",
+      "pkce_support_enabled" : true,
+      "client_secret_basic_override" : false
+    })
+  }
+}
