@@ -126,7 +126,7 @@ resource "google_compute_region_backend_service" "default" {
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "tf-test-l7-ilb-mig-template%{random_suffix}"
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
   tags         = ["http-server"]
 
   network_interface {
@@ -189,7 +189,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
   region   = "us-west1"
 
   base_instance_name = "vm"
-  target_size        = 2
+  target_size        = 1
 
   version {
     instance_template = google_compute_instance_template.instance_template.id
@@ -266,7 +266,7 @@ resource "google_network_services_lb_traffic_extension" "default" {
 resource "google_compute_instance" "callouts_instance" {
   name         = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
   zone         = "us-west1-a"
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
 
   labels = {
     "container-vm" = "cos-stable-109-17800-147-54"
@@ -445,7 +445,7 @@ resource "google_compute_region_backend_service" "default" {
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "tf-test-l7-ilb-mig-template%{random_suffix}"
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
   tags         = ["http-server"]
 
   network_interface {
@@ -508,7 +508,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
   region   = "us-west1"
 
   base_instance_name = "vm"
-  target_size        = 2
+  target_size        = 1
 
   version {
     instance_template = google_compute_instance_template.instance_template.id
@@ -604,7 +604,7 @@ resource "google_network_services_lb_traffic_extension" "default" {
 resource "google_compute_instance" "callouts_instance" {
   name         = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
   zone         = "us-west1-a"
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
 
   labels = {
     "container-vm" = "cos-stable-109-17800-147-54"
@@ -704,7 +704,7 @@ resource "google_compute_region_backend_service" "callouts_backend" {
 resource "google_compute_instance" "callouts_instance_2" {
   name         = "tf-test-l7-ilb-callouts-ins-2%{random_suffix}"
   zone         = "us-west1-a"
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
 
   labels = {
     "container-vm" = "cos-stable-109-17800-147-54"
@@ -923,7 +923,7 @@ resource "google_compute_backend_service" "default" {
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "tf-test-l7-gilb-mig-template%{random_suffix}"
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
   tags         = ["http-server"]
 
   network_interface {
@@ -984,7 +984,7 @@ resource "google_compute_instance_group_manager" "mig" {
     name              = "primary"
   }
   base_instance_name = "vm"
-  target_size        = 2
+  target_size        = 1
 }
 
 # allow all access from IAP and health check ranges
