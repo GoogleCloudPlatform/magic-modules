@@ -174,8 +174,32 @@ func TestAccContainerCluster_noDefaultNodePool_omittedInitialNodeCount(t *testin
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_noDefaultNodePoolOmittedWithRemoveDefaultNodePool(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_noDefaultNodePool(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_removeDefaultNodePool_migration(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_removeDefaultNodePoolWithInitialNodeCountAndNodeConfig(clusterName, networkName, subnetworkName),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "initial_node_count", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "remove_default_node_pool", "true"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.#", "0"),
 				),
@@ -193,7 +217,7 @@ func TestAccContainerCluster_noDefaultNodePool_omittedInitialNodeCount(t *testin
 				),
 			},
 			{
-				Config: testAccContainerCluster_noDefaultNodePool(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_noDefaultNodePoolOmitted(clusterName, networkName, subnetworkName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
@@ -9508,14 +9532,24 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_noDefaultNodePoolOmittedWithRemoveDefaultNodePool(name, networkName, subnetworkName string) string {
+func testAccContainerCluster_removeDefaultNodePoolWithInitialNodeCountAndNodeConfig(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name                     = "%s"
   location                 = "us-east1-b"
   remove_default_node_pool = true
-  network                  = "%s"
-  subnetwork               = "%s"
+  initial_node_count       = 1
+
+  node_config {
+    machine_type = "e2-small"
+  }
+
+  lifecycle {
+    ignore_changes = [node_config]
+  }
+
+  network    = "%s"
+  subnetwork = "%s"
 
   deletion_protection = false
 }
