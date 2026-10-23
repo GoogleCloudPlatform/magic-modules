@@ -17,6 +17,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     transformed["modalities"] = original["modalities"]
     transformed["filter_version_selector"] =
         flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FilterVersionSelector(original["filterVersionSelector"], d, config)
+    transformed["data_residency_compliant"] = original["dataResidencyCompliant"]
     return []interface{}{transformed}
 }
 
