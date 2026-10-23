@@ -48,6 +48,13 @@ const (
 	GithubOwner = "hashicorp"
 	GithubRepo  = "terraform-provider-google"
 	TotalDays   = 7
+
+	// ticketCreationEnabled controls whether GitHub test failure tickets are
+	// actually filed. When false, test failure data is still gathered
+	// (failure rates computed, error messages uploaded to GCS, existing
+	// tickets looked up), but no new tickets are created. Set back to true
+	// to re-enable ticket creation.
+	ticketCreationEnabled = false
 )
 
 var ctftRequiredEnvironmentVariables = [...]string{
@@ -193,6 +200,10 @@ func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 	// Create tickets
 	for _, testFailure := range testFailuresToday {
 		if shouldCreateTicket(testFailure, existTestNames, closedTestNames) {
+			if !ticketCreationEnabled {
+				fmt.Printf("Ticket creation disabled; would have created test failure ticket for %s\n", testFailure.TestName)
+				continue
+			}
 			err := createTicket(ctx, gh, testFailure, shepherd)
 			if err != nil {
 				return fmt.Errorf("error creating test failure ticket: %w", err)
