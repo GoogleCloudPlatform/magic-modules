@@ -198,6 +198,7 @@ resource "google_firebase_ai_logic_prompt_template" "complex" {
   location = "global"
   template_id = "tf-test-complex-%{random_suffix}"
   display_name = "%{display_name}"
+  regional_propagation_disabled = true
   template_string = <<EOF
 ---
 model: googleai/%{model_name}
