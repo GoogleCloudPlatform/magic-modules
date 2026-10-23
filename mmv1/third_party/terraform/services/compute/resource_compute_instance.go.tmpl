@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
+	"google.golang.org/api/googleapi"
 )
 
 func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -218,6 +220,63 @@ func ValidateInstanceMetadata(i interface{}, k string) ([]string, []error) {
 		warnings = append(warnings, "The option to deploy a container during VM creation using the container startup agent is deprecated. Use alternative services to run containers on your VMs. Learn more at https://cloud.google.com/compute/docs/containers/migrate-containers.")
 	}
 	return warnings, nil
+}
+
+func isComputeInstanceStockoutError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var operationError ComputeOperationError
+	if errors.As(err, &operationError) {
+		if rawErrors, ok := operationError["errors"].([]interface{}); ok {
+			for _, rawError := range rawErrors {
+				if errorDetails, ok := rawError.(map[string]interface{}); ok {
+					if code, ok := errorDetails["code"].(string); ok && isComputeInstanceStockoutCode(code) {
+						return true
+					}
+				}
+			}
+		}
+	}
+
+	var apiError *googleapi.Error
+	if errors.As(err, &apiError) {
+		for _, detail := range apiError.Errors {
+			if isComputeInstanceStockoutCode(detail.Reason) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func isComputeInstanceStockoutCode(code string) bool {
+	code = strings.ToLower(strings.ReplaceAll(code, "_", ""))
+	return code == "zoneresourcepoolexhausted" || code == "zoneresourcepoolexhaustedwithdetails"
+}
+
+func computeInstanceStockoutRetryDelay(retryNumber int) time.Duration {
+	const (
+		initialDelay = 5 * time.Second
+		maxDelay     = 30 * time.Second
+	)
+
+	delay := initialDelay
+	for attempt := 0; attempt < retryNumber; attempt++ {
+		if delay >= maxDelay/2 {
+			delay = maxDelay
+			break
+		}
+		delay *= 2
+	}
+
+	delay = time.Duration(float64(delay) * (0.8 + rand.Float64()*0.4))
+	if delay > maxDelay {
+		return maxDelay
+	}
+	return delay
 }
 
 func ResourceComputeInstance() *schema.Resource {
@@ -1141,6 +1200,19 @@ func ResourceComputeInstance() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If self_link is provided, this value is ignored. If neither self_link nor project are provided, the provider project is used.`,
+			},
+			"retry_on_stockout": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `Whether to retry instance creation when Compute Engine reports a zonal capacity exhaustion error.`,
+			},
+			"stockout_retry_timeout_seconds": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      300,
+				ValidateFunc: validation.IntAtLeast(1),
+				Description:  `How long to retry after the first stockout response, in seconds. Retries are also bounded by the create timeout. Only used when retry_on_stockout is true.`,
 			},
 
 			"scheduling": {
@@ -2176,27 +2248,94 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return fmt.Errorf("Error generating URL: %s", err)
 	}
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		Project:   project,
-		RawURL:    insertUrl,
-		UserAgent: userAgent,
-		Body:      instanceBody,
-	})
-	if err != nil {
-		return fmt.Errorf("Error creating instance: %s", err)
-	}
+	createTimeout := d.Timeout(schema.TimeoutCreate)
+	startTime := time.Now()
+	createDeadline := startTime.Add(createTimeout)
+	retryOnStockout := d.Get("retry_on_stockout").(bool)
+	stockoutRetryTimeout := time.Duration(d.Get("stockout_retry_timeout_seconds").(int)) * time.Second
+	var stockoutRetryDeadline time.Time
+	var lastStockoutError error
+	var res interface{}
+	retryNumber := 0
+	for {
+		if err := config.Context.Err(); err != nil {
+			d.SetId("")
+			return err
+		}
+		if !time.Now().Before(createDeadline) {
+			d.SetId("")
+			if lastStockoutError != nil {
+				return lastStockoutError
+			}
+			return fmt.Errorf("timed out creating instance")
+		}
+		if !stockoutRetryDeadline.IsZero() && !time.Now().Before(stockoutRetryDeadline) {
+			d.SetId("")
+			return lastStockoutError
+		}
 
-	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, d.Get("name").(string)))
+		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    insertUrl,
+			UserAgent: userAgent,
+			Body:      instanceBody,
+		})
+		if err != nil {
+			if !isComputeInstanceStockoutError(err) {
+				return fmt.Errorf("Error creating instance: %s", err)
+			}
+		} else {
+			// Store the ID while waiting for the operation to complete.
+			d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, d.Get("name").(string)))
 
-	// Wait for the operation to complete
-	waitErr := ComputeOperationWaitTime(config, res, project, "instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
-	if waitErr != nil {
-		// The resource didn't actually create
-		d.SetId("")
-		return waitErr
+			remaining := time.Until(createDeadline)
+			if remaining <= 0 {
+				d.SetId("")
+				return fmt.Errorf("timed out creating instance")
+			}
+			waitErr := ComputeOperationWaitTime(config, res, project, "instance to create", userAgent, remaining)
+			if waitErr == nil {
+				break
+			}
+			// A failed stockout operation did not create the instance; allow another insert attempt.
+			d.SetId("")
+			if !isComputeInstanceStockoutError(waitErr) {
+				return waitErr
+			}
+			err = waitErr
+		}
+
+		if !retryOnStockout {
+			d.SetId("")
+			return err
+		}
+		if stockoutRetryDeadline.IsZero() {
+			stockoutRetryDeadline = time.Now().Add(stockoutRetryTimeout)
+			if stockoutRetryDeadline.After(createDeadline) {
+				stockoutRetryDeadline = createDeadline
+			}
+		}
+		lastStockoutError = err
+		remaining := time.Until(stockoutRetryDeadline)
+		if remaining <= 0 {
+			return lastStockoutError
+		}
+
+		delay := computeInstanceStockoutRetryDelay(retryNumber)
+		if delay > remaining {
+			delay = remaining
+		}
+		timer := time.NewTimer(delay)
+		select {
+		case <-config.Context.Done():
+			timer.Stop()
+			d.SetId("")
+			return config.Context.Err()
+		case <-timer.C:
+		}
+		retryNumber++
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
