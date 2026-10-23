@@ -7,6 +7,7 @@ resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
     enabled = true
     topic   = google_pubsub_topic.{{$.PrimaryResourceId}}.id
   }
+  {{index $.ResourceIdVars "prober_test_run"}}
 }
 
 resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {

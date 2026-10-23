@@ -3,4 +3,5 @@ resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
   region = "us-central1"
   zone   = "us-central1-a"
   type   = "DEVELOPER"
+  {{index $.ResourceIdVars "prober_test_run"}}
 }

@@ -226,6 +226,10 @@ resource "google_data_fusion_instance" "instance" {
   name   = "tf-test-my-instance-%{random_suffix}"
   region = "us-central1"
   type   = "BASIC"
+  # Mark for testing to avoid service networking connection usage that is not cleaned up
+  options = {
+  	prober_test_run = "true"
+  }
   tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
