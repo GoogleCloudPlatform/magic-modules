@@ -20,8 +20,8 @@ resource "google_data_pipeline_pipeline" "primary" {
           "name" : "wrench"
         }
         environment {
-          num_workers                = 5
-          max_workers                = 5
+          num_workers                = 1
+          max_workers                = 1
           zone                       = "us-centra1-a"
           service_account_email      = google_service_account.service_account.email
           network                    = "default"
