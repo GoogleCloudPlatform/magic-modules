@@ -522,6 +522,7 @@ properties:
         output: true
       - name: crossCloudCacheOptions
         type: NestedObject
+        required: true
         description: Configuration options for cross-cloud caching of data and metadata files.
         properties:
           - name: enabled
