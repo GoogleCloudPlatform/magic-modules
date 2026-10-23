@@ -75,9 +75,9 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(funcResourceName,
 						"available_memory_mb", "128"),
 					resource.TestCheckResourceAttr(funcResourceName,
-						"max_instances", "10"),
+						"max_instances", "2"),
 					resource.TestCheckResourceAttr(funcResourceName,
-						"min_instances", "3"),
+						"min_instances", "1"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"ingress_settings", "ALLOW_INTERNAL_ONLY"),
 					resource.TestCheckResourceAttr(funcResourceName,
@@ -156,9 +156,9 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 					resource.TestCheckResourceAttr(funcResourceName,
 						"timeout", "91"),
 					resource.TestCheckResourceAttr(funcResourceName,
-						"max_instances", "15"),
+						"max_instances", "3"),
 					resource.TestCheckResourceAttr(funcResourceName,
-						"min_instances", "5"),
+						"min_instances", "2"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"ingress_settings", "ALLOW_ALL"),
 					resource.TestCheckResourceAttr(funcResourceName,
@@ -849,8 +849,8 @@ resource "google_cloudfunctions_function" "function" {
   build_environment_variables = {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
   }
-  max_instances = 10
-  min_instances = 3
+  max_instances = 2
+  min_instances = 1
 }
 `, bucketName, zipFilePath, functionName)
 }
@@ -895,8 +895,8 @@ resource "google_cloudfunctions_function" "function" {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
     NEW_ENV_VARIABLE  = "new-build-env-variable-value"
   }
-  max_instances = 15
-  min_instances = 5
+  max_instances = 3
+  min_instances = 2
   region = "us-central1"
 }
 
@@ -928,7 +928,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
   location = "%s"
   worker_config {
     disk_size_gb   = 100
-    machine_type   = "e2-standard-4"
+    machine_type   = "e2-medium"
     no_external_ip = false
   }
 }
@@ -1184,8 +1184,8 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = {
 	TEST_ENV_VARIABLE = "test-env-variable-value"
   }
-  max_instances = 10
-  min_instances = 3
+  max_instances = 2
+  min_instances = 1
   vpc_connector = google_vpc_access_connector.%s.self_link
   vpc_connector_egress_settings = "PRIVATE_RANGES_ONLY"
 }
@@ -1240,8 +1240,8 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = {
 	TEST_ENV_VARIABLE = "test-env-variable-value"
   }
-  max_instances = 10
-  min_instances = 3
+  max_instances = 2
+  min_instances = 1
   vpc_connector = google_vpc_access_connector.%s.self_link
   vpc_connector_egress_settings = "%s"
 }
@@ -1645,8 +1645,8 @@ resource "google_cloudfunctions_function" "function" {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
   }
   automatic_update_policy {}
-  max_instances = 10
-  min_instances = 3
+  max_instances = 2
+  min_instances = 1
 }
 `, bucketName, zipFilePath, functionName)
 }
@@ -1687,8 +1687,8 @@ resource "google_cloudfunctions_function" "function" {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
   }
   on_deploy_update_policy {}
-  max_instances = 10
-  min_instances = 3
+  max_instances = 2
+  min_instances = 1
 }
 `, bucketName, zipFilePath, functionName)
 }
