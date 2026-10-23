@@ -34,7 +34,7 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile("config is invalid: Too few cluster blocks: Should have at least 1 \"cluster\" block"),
 			},
 			{
-				Config: testAccBigtableInstance(instanceName, 3),
+				Config: testAccBigtableInstance(instanceName, 1),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -43,7 +43,7 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "labels", "terraform_labels"}, // we don't read instance type back
 			},
 			{
-				Config: testAccBigtableInstance(instanceName, 4),
+				Config: testAccBigtableInstance(instanceName, 2),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -68,7 +68,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableInstance_cluster(instanceName, 3),
+				Config: testAccBigtableInstance_cluster(instanceName, 1),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -77,7 +77,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "cluster"}, // we don't read instance type back
 			},
 			{
-				Config: testAccBigtableInstance_clusterReordered(instanceName, 5),
+				Config: testAccBigtableInstance_clusterReordered(instanceName, 2),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -87,7 +87,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "cluster"}, // we don't read instance type back
 			},
 			{
-				Config: testAccBigtableInstance_clusterModified(instanceName, 5),
+				Config: testAccBigtableInstance_clusterModified(instanceName, 2),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -96,7 +96,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "cluster", "labels", "terraform_labels"}, // we don't read instance type back
 			},
 			{
-				Config: testAccBigtableInstance_clusterReordered(instanceName, 5),
+				Config: testAccBigtableInstance_clusterReordered(instanceName, 2),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -106,7 +106,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "cluster"}, // we don't read instance type back
 			},
 			{
-				Config: testAccBigtableInstance_clusterModifiedAgain(instanceName, 5),
+				Config: testAccBigtableInstance_clusterModifiedAgain(instanceName, 2),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -156,7 +156,7 @@ func TestAccBigtableInstance_allowDestroy(t *testing.T) {
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableInstance_noAllowDestroy(instanceName, 3),
+				Config: testAccBigtableInstance_noAllowDestroy(instanceName, 1),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -165,12 +165,12 @@ func TestAccBigtableInstance_allowDestroy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
-				Config:      testAccBigtableInstance_noAllowDestroy(instanceName, 3),
+				Config:      testAccBigtableInstance_noAllowDestroy(instanceName, 1),
 				Destroy:     true,
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccBigtableInstance(instanceName, 3),
+				Config: testAccBigtableInstance(instanceName, 1),
 			},
 		},
 	})
@@ -192,7 +192,7 @@ func TestAccBigtableInstance_kms(t *testing.T) {
 		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableInstance_kms(pid, instanceName, kms1.CryptoKey.Name, 3),
+				Config: testAccBigtableInstance_kms(pid, instanceName, kms1.CryptoKey.Name, 1),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",
@@ -202,7 +202,7 @@ func TestAccBigtableInstance_kms(t *testing.T) {
 			},
 			// TODO: Verify that the instance can be recreated due to `kms_key_name` change.
 			{
-				Config:             testAccBigtableInstance_kms(pid, instanceName, kms2.CryptoKey.Name, 3),
+				Config:             testAccBigtableInstance_kms(pid, instanceName, kms2.CryptoKey.Name, 1),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -478,7 +478,7 @@ func TestAccBigtableInstance_MultipleClustersSameID(t *testing.T) {
 				ExpectError: regexp.MustCompile(fmt.Sprintf("duplicated cluster_id: %q", instanceName)),
 			},
 			{
-				Config: testAccBigtableInstance(instanceName, 3),
+				Config: testAccBigtableInstance(instanceName, 1),
 			},
 			{
 				ResourceName:            "google_bigtable_instance.instance",

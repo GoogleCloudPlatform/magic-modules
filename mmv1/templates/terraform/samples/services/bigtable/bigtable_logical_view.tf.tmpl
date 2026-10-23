@@ -3,7 +3,7 @@ resource "google_bigtable_instance" "instance" {
   cluster {
     cluster_id   = "cluster-1"
     zone         = "us-east1-b"
-    num_nodes    = 3
+    num_nodes    = 1
     storage_type = "HDD"
   }
 
