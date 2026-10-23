@@ -19,7 +19,8 @@ references:
   api: https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.autonomousDatabases
 docs:
 base_url: projects/{{project}}/locations/{{location}}/autonomousDatabases
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}
 create_url: projects/{{project}}/locations/{{location}}/autonomousDatabases?autonomousDatabaseId={{autonomous_database_id}}
 id_format: projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}
@@ -43,6 +44,7 @@ async:
 autogen_status: QXV0b25vbW91c0RhdGFiYXNl
 autogen_async: true
 custom_code:
+  pre_update: templates/terraform/pre_update/oracledatabase_autonomous_database.go.tmpl
   pre_delete: templates/terraform/pre_delete/oracledatabase_autonomous_database.go.tmpl
 samples:
   - name: oracledatabase_autonomous_database_basic
@@ -52,6 +54,8 @@ samples:
       - name: oracledatabase_autonomous_database_basic
         vars:
           label_value: value-one
+          local_data_guard_enabled: "true"
+          local_adg_auto_failover_max_data_loss_limit_duration: "30"
         resource_id_vars:
           project: my-project
           autonomous_database_id: my-instance
@@ -63,10 +67,32 @@ samples:
           deletion_protection: "false"
           project: '"oasis-terraform-testing-prod"'
           database_name: fmt.Sprintf("tftestdatabase%s", randomSuffix)
-      # Step 2 -> update test (in-place update of labels)
+      # Step 2 -> in-place update of labels and of the local Data Guard
+      # failover data loss limit (requires local Data Guard to stay enabled)
       - name: oracledatabase_autonomous_database_basic
         vars:
           label_value: value-two
+          local_data_guard_enabled: "true"
+          local_adg_auto_failover_max_data_loss_limit_duration: "60"
+        resource_id_vars:
+          project: my-project
+          autonomous_database_id: my-instance
+          database_name: mydatabase
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          database_name: fmt.Sprintf("tftestdatabase%s", randomSuffix)
+      # Step 3 -> in-place disable of local Data Guard.
+      # local_adg_auto_failover_max_data_loss_limit_duration is unset to
+      # verify it is optional.
+      - name: oracledatabase_autonomous_database_basic
+        vars:
+          label_value: value-two
+          local_data_guard_enabled: "false"
+          local_adg_auto_failover_max_data_loss_limit_duration: "null"
         resource_id_vars:
           project: my-project
           autonomous_database_id: my-instance
@@ -179,10 +205,12 @@ properties:
     description: "Identifier. The name of the Autonomous Database resource in the following format:\nprojects/{project}/locations/{region}/autonomousDatabases/{autonomous_database} "
     output: true
   - name: database
+    immutable: true
     type: String
     default_from_api: true
     description: "The name of the Autonomous Database. The database name must be unique in\nthe project. The name must begin with a letter and can\ncontain a maximum of 30 alphanumeric characters. "
   - name: displayName
+    immutable: true
     type: String
     description: "The display name for the Autonomous Database. The name does not have to\nbe unique within your project. "
     default_from_api: true
@@ -191,6 +219,7 @@ properties:
     description: "The ID of the subscription entitlement associated with the Autonomous\nDatabase. "
     output: true
   - name: adminPassword
+    immutable: true
     type: String
     description: 'The password for the default ADMIN user. '
     ignore_read: true
@@ -203,60 +232,117 @@ properties:
         type: String
         description: "OCID of the Autonomous Database.\nhttps://docs.oracle.com/en-us/iaas/Content/General/Concepts/identifiers.htm#Oracle "
         output: true
+      - name: encryptionKey
+        type: NestedObject
+        description: |-
+          The encryption key used to encrypt the Autonomous Database.
+          Updating this field will add a new entry in the
+          `encryption_key_history_entries` field with the former version.
+        default_from_api: true
+        properties:
+          - name: provider
+            type: Enum
+            description: The provider of the encryption key.
+            default_from_api: true
+            enum_values:
+              - 'GOOGLE_MANAGED'
+              - 'ORACLE_MANAGED'
+          - name: kmsKey
+            type: String
+            description: |-
+              The KMS key used to encrypt the Autonomous Database.
+              This field is required if the provider is GOOGLE_MANAGED.
+              The name of the KMS key resource in the following format:
+              `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+      - name: localDataGuardEnabled
+        type: Boolean
+        description: |-
+          Indicates whether the Autonomous Database has a local (in-region)
+          standby database. Not applicable to cross-region Data Guard or dedicated
+          Exadata infrastructure.
+        default_from_api: true
+      - name: localAdgAutoFailoverMaxDataLossLimitDuration
+        type: Integer
+        description: |-
+          This field indicates the maximum data loss limit for an
+          Autonomous Database, in seconds.
+        default_from_api: true
+      - name: refreshableClone
+        type: Boolean
+        description: |-
+          Indicates if the Autonomous Database is a refreshable clone. This
+          field is used in update flow to connect / disconnect a refreshable clone
+          from its source database.
+        default_from_api: true
       - name: computeCount
+        immutable: true
         type: Double
         description: 'The number of compute servers for the Autonomous Database. '
         default_from_api: true
       - name: cpuCoreCount
+        immutable: true
         type: Integer
         description: 'The number of CPU cores to be made available to the database. '
         default_from_api: true
       - name: dataStorageSizeTb
+        immutable: true
         type: Integer
         description: 'The size of the data stored in the database, in terabytes. '
         default_from_api: true
       - name: dataStorageSizeGb
+        immutable: true
         type: Integer
         description: 'The size of the data stored in the database, in gigabytes. '
         default_from_api: true
       - name: dbWorkload
+        immutable: true
         type: String
         description: " \n Possible values:\n DB_WORKLOAD_UNSPECIFIED\nOLTP\nDW\nAJD\nAPEX"
         required: true
       - name: dbEdition
+        immutable: true
         type: String
         description: "The edition of the Autonomous Databases. \n Possible values:\n DATABASE_EDITION_UNSPECIFIED\nSTANDARD_EDITION\nENTERPRISE_EDITION"
       - name: characterSet
+        immutable: true
         type: String
         description: 'The character set for the Autonomous Database. The default is AL32UTF8. '
         default_value: AL32UTF8
       - name: nCharacterSet
+        immutable: true
         type: String
         description: "The national character set for the Autonomous Database. The default is\nAL16UTF16. "
         default_value: AL16UTF16
       - name: privateEndpointIp
+        immutable: true
         type: String
         description: 'The private endpoint IP address for the Autonomous Database. '
         default_from_api: true
       - name: privateEndpointLabel
+        immutable: true
         type: String
         description: 'The private endpoint label for the Autonomous Database. '
         default_from_api: true
       - name: dbVersion
+        immutable: true
         type: String
         description: 'The Oracle Database version for the Autonomous Database. '
       - name: isAutoScalingEnabled
+        immutable: true
         type: Boolean
         description: "This field indicates if auto scaling is enabled for the Autonomous Database\nCPU core count. "
       - name: isStorageAutoScalingEnabled
+        immutable: true
         type: Boolean
         description: "This field indicates if auto scaling is enabled for the Autonomous Database\nstorage. "
         default_from_api: true
       - name: licenseType
+        immutable: true
         type: String
         description: "The license type used for the Autonomous Database. \n Possible values:\n LICENSE_TYPE_UNSPECIFIED\nLICENSE_INCLUDED\nBRING_YOUR_OWN_LICENSE"
         required: true
       - name: customerContacts
+        immutable: true
         type: Array
         description: 'The list of customer contacts. '
         item_type:
@@ -264,22 +350,28 @@ properties:
           properties:
             - name: email
               type: String
+              immutable: true
               description: "The email address used by Oracle to send notifications regarding databases\nand infrastructure. "
               required: true
       - name: secretId
+        immutable: true
         type: String
         description: 'The ID of the Oracle Cloud Infrastructure vault secret. '
       - name: vaultId
+        immutable: true
         type: String
         description: 'The ID of the Oracle Cloud Infrastructure vault. '
       - name: maintenanceScheduleType
+        immutable: true
         type: String
         description: "The maintenance schedule of the Autonomous Database. \n Possible values:\n MAINTENANCE_SCHEDULE_TYPE_UNSPECIFIED\nEARLY\nREGULAR"
         default_from_api: true
       - name: mtlsConnectionRequired
+        immutable: true
         type: Boolean
         description: 'This field specifies if the Autonomous Database requires mTLS connections. '
       - name: backupRetentionPeriodDays
+        immutable: true
         type: Integer
         description: "The retention period for the Autonomous Database. This field is specified\nin days, can range from 1 day to 60 days, and has a default value of\n60 days. "
         default_from_api: true
@@ -506,6 +598,7 @@ properties:
         description: "This field indicates the current mode of the Autonomous Database. \n Possible values:\n OPEN_MODE_UNSPECIFIED\nREAD_ONLY\nREAD_WRITE"
         output: true
       - name: operationsInsightsState
+        immutable: true
         type: String
         description: " \n Possible values:\n OPERATIONS_INSIGHTS_STATE_UNSPECIFIED\nENABLING\nENABLED\nDISABLING\nNOT_ENABLED\nFAILED_ENABLING\nFAILED_DISABLING"
         default_from_api: true
@@ -624,18 +717,19 @@ properties:
         output: true
   - name: labels
     type: KeyValueLabels
-    update_url: 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}?updateMask=labels'
-    update_verb: 'PATCH'
     description: 'The labels or tags associated with the Autonomous Database. '
   - name: network
+    immutable: true
     type: String
     description: "The name of the VPC network used by the Autonomous Database.\nFormat: projects/{project}/global/networks/{network} "
     required: false
   - name: cidr
+    immutable: true
     type: String
     description: 'The subnet CIDR range for the Autonmous Database. '
     required: false
   - name: odbNetwork
+    immutable: true
     type: String
     description: |-
       The name of the OdbNetwork associated with the Autonomous Database.
@@ -645,6 +739,7 @@ properties:
       the odb_subnet and backup_odb_subnet.
     default_from_api: true
   - name: odbSubnet
+    immutable: true
     type: String
     description: |-
       The name of the OdbSubnet associated with the Autonomous Database for
@@ -668,13 +763,16 @@ properties:
     item_type:
       type: String
   - name: sourceConfig
+    immutable: true
     type: NestedObject
     ignore_read: true
     description: The source Autonomous Database configuration for the standby Autonomous Database.
     properties:
       - name: autonomousDatabase
         type: String
+        immutable: true
         description: The name of the primary Autonomous Database that is used to create a Peer Autonomous Database from a source.
       - name: automaticBackupsReplicationEnabled
         type: Boolean
+        immutable: true
         description: This field specifies if the replication of automatic backups is enabled when creating a Data Guard.

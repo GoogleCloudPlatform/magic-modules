@@ -1,0 +1,31 @@
+// The generated update mask only contains top-level fields, but most fields
+// inside "properties" are immutable. Rebuild it from the specific fields that
+// changed so that only updatable fields are included.
+updateMask = []string{}
+
+if d.HasChange("effective_labels") {
+	updateMask = append(updateMask, "labels")
+}
+
+if d.HasChange("properties.0.encryption_key") {
+	updateMask = append(updateMask, "properties.encryptionKey")
+}
+
+if d.HasChange("properties.0.local_data_guard_enabled") {
+	updateMask = append(updateMask, "properties.localDataGuardEnabled")
+}
+
+if d.HasChange("properties.0.local_adg_auto_failover_max_data_loss_limit_duration") {
+	updateMask = append(updateMask, "properties.localAdgAutoFailoverMaxDataLossLimitDuration")
+}
+
+if d.HasChange("properties.0.refreshable_clone") {
+	updateMask = append(updateMask, "properties.refreshableClone")
+}
+
+// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+// won't set it
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}

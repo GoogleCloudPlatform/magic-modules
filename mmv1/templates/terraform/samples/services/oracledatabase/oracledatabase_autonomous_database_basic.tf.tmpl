@@ -12,6 +12,11 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
     db_version = "19c"
     db_workload = "OLTP"
     license_type = "LICENSE_INCLUDED"
+    encryption_key {
+      provider = "ORACLE_MANAGED"
+    }
+    local_data_guard_enabled = {{index $.Vars "local_data_guard_enabled"}}
+    local_adg_auto_failover_max_data_loss_limit_duration = {{index $.Vars "local_adg_auto_failover_max_data_loss_limit_duration"}}
     }
   labels = {
     "label-one" = "{{index $.Vars "label_value"}}"
