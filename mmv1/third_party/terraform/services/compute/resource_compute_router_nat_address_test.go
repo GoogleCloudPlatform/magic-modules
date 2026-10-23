@@ -31,7 +31,10 @@ func testAccCheckComputeRouterNatAddressDestroyProducer(t *testing.T) func(s *te
 				return err
 			}
 
-			routerName := rs.Primary.Attributes["router"]
+			routerName := rs.Primary.Attributes["name"]
+			if routerName == "" {
+				routerName = rs.Primary.ID
+			}
 
 			url := fmt.Sprintf("%sprojects/%s/regions/%s/routers/%s", transport_tpg.BaseUrl(compute.Product, config), project, region, routerName)
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
