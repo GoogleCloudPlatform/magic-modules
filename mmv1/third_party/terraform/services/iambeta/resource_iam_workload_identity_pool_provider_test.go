@@ -1,10 +1,19 @@
 package iambeta_test
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -330,4 +339,235 @@ resource "google_iam_workload_identity_pool_provider" "example" {
   }
 }
 `, context)
+}
+
+func TestAccIAMBetaWorkloadIdentityPoolProvider_undeleteOnCreate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]any{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIAMBetaWorkloadIdentityPoolProviderUndeleteInitial(context),
+			},
+			{
+				ResourceName:      "google_iam_workload_identity_pool_provider.my_provider",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccIAMBetaWorkloadIdentityPoolProviderUndeletePoolOnly(context),
+			},
+			{
+				Config: testAccIAMBetaWorkloadIdentityPoolProviderUndeleteRecreated(context),
+			},
+			{
+				ResourceName:      "google_iam_workload_identity_pool_provider.my_provider",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccIAMBetaWorkloadIdentityPoolProviderUndeleteInitial(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my_pool" {
+  workload_identity_pool_id = "tf-test-my-pool-%{random_suffix}"
+}
+
+resource "google_iam_workload_identity_pool_provider" "my_provider" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.my_pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "tf-test-my-provider-%{random_suffix}"
+  display_name                       = "Initial provider name"
+  description                        = "Initial OIDC provider"
+  disabled                           = true
+  attribute_mapping                  = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri = "https://sts.windows.net/initial-tenant-id"
+  }
+}
+`, context)
+}
+
+func testAccIAMBetaWorkloadIdentityPoolProviderUndeletePoolOnly(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my_pool" {
+  workload_identity_pool_id = "tf-test-my-pool-%{random_suffix}"
+}
+`, context)
+}
+
+func testAccIAMBetaWorkloadIdentityPoolProviderUndeleteRecreated(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my_pool" {
+  workload_identity_pool_id = "tf-test-my-pool-%{random_suffix}"
+}
+
+resource "google_iam_workload_identity_pool_provider" "my_provider" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.my_pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "tf-test-my-provider-%{random_suffix}"
+  display_name                       = "Recreated provider name"
+  description                        = "Recreated OIDC provider"
+  disabled                           = false
+  attribute_mapping                  = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri = "https://sts.windows.net/recreated-tenant-id"
+  }
+}
+`, context)
+}
+
+func TestResourceIAMBetaWorkloadIdentityPoolProviderCreate_undeleteWhenDeleted(t *testing.T) {
+	_ = t.Context()
+
+	var requests []recordedRequest
+	undeleted := false
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		var body map[string]any
+		if r.Body != nil {
+			raw, _ := io.ReadAll(r.Body)
+			if len(raw) > 0 {
+				_ = json.Unmarshal(raw, &body)
+			}
+		}
+
+		if strings.HasPrefix(r.URL.Path, "/v1/operations/") {
+			_, _ = w.Write([]byte(`{"name": "` + strings.TrimPrefix(r.URL.Path, "/v1/") + `", "done": true}`))
+			return
+		}
+
+		requests = append(requests, recordedRequest{
+			Method:     r.Method,
+			Path:       r.URL.Path,
+			UpdateMask: r.URL.Query().Get("updateMask"),
+			Body:       body,
+		})
+
+		switch {
+		case r.Method == "GET" && !undeleted:
+			_, _ = w.Write([]byte(`{
+				"name": "projects/test-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+				"state": "DELETED",
+				"displayName": "Old Provider Name",
+				"description": "Old Provider Description",
+				"disabled": true,
+				"attributeMapping": {
+					"google.subject": "assertion.sub"
+				},
+				"oidc": {
+					"issuerUri": "https://old.issuer.example.com"
+				}
+			}`))
+		case r.Method == "POST" && strings.HasSuffix(r.URL.Path, ":undelete"):
+			undeleted = true
+			_, _ = w.Write([]byte(`{"name": "operations/undelete-provider-op", "done": true}`))
+		case r.Method == "PATCH":
+			_, _ = w.Write([]byte(`{"name": "operations/patch-provider-op", "done": true}`))
+		case r.Method == "GET" && undeleted:
+			_, _ = w.Write([]byte(`{
+				"name": "projects/test-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+				"state": "ACTIVE",
+				"displayName": "Recreated Provider Name",
+				"description": "Recreated Provider Description",
+				"disabled": false,
+				"attributeMapping": {
+					"google.subject": "assertion.sub"
+				},
+				"attributeCondition": "assertion.sub != ''",
+				"oidc": {
+					"issuerUri": "https://new.issuer.example.com",
+					"allowedAudiences": ["aud1"]
+				}
+			}`))
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"error": "unexpected request"}`))
+		}
+	}))
+	defer ts.Close()
+
+	res := iambeta.ResourceIAMBetaWorkloadIdentityPoolProvider()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]any{
+		"project":                            "test-project",
+		"workload_identity_pool_id":          "my-pool",
+		"workload_identity_pool_provider_id": "my-provider",
+		"display_name":                       "Recreated Provider Name",
+		"description":                        "Recreated Provider Description",
+		"disabled":                           false,
+		"attribute_mapping": map[string]any{
+			"google.subject": "assertion.sub",
+		},
+		"attribute_condition": "assertion.sub != ''",
+		"oidc": []any{
+			map[string]any{
+				"issuer_uri":        "https://new.issuer.example.com",
+				"allowed_audiences": []any{"aud1"},
+			},
+		},
+	})
+
+	config := &transport_tpg.Config{
+		Client:       ts.Client(),
+		Project:      "test-project",
+		UserAgent:    "test-agent",
+		PollInterval: 1 * time.Millisecond,
+		CustomEndpoints: map[string]string{
+			"iam_beta_custom_endpoint": ts.URL + "/v1/",
+		},
+	}
+
+	if err := res.Create(d, config); err != nil {
+		t.Fatalf("ResourceIAMBetaWorkloadIdentityPoolProvider().Create(%q) returned unexpected error: %v", "my-provider", err)
+	}
+
+	wantRequests := []recordedRequest{
+		{
+			Method: "GET",
+			Path:   "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+		},
+		{
+			Method: "POST",
+			Path:   "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider:undelete",
+			Body:   map[string]any{},
+		},
+		{
+			Method:     "PATCH",
+			Path:       "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+			UpdateMask: "displayName,description,disabled,attributeMapping,attributeCondition,oidc.allowedAudiences,oidc.issuerUri,oidc.jwksJson",
+			Body: map[string]any{
+				"displayName":        "Recreated Provider Name",
+				"description":        "Recreated Provider Description",
+				"disabled":           false,
+				"attributeCondition": "assertion.sub != ''",
+				"attributeMapping": map[string]any{
+					"google.subject": "assertion.sub",
+				},
+				"oidc": map[string]any{
+					"allowedAudiences": []any{"aud1"},
+					"issuerUri":        "https://new.issuer.example.com",
+				},
+			},
+		},
+		{
+			Method: "GET",
+			Path:   "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+		},
+	}
+
+	if diff := cmp.Diff(wantRequests, requests); diff != "" {
+		t.Errorf("ResourceIAMBetaWorkloadIdentityPoolProvider().Create(%q) HTTP requests mismatch (-want +got):\n%s", "my-provider", diff)
+	}
 }

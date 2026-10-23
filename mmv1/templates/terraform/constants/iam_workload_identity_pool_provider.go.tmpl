@@ -43,3 +43,29 @@ func jwksJsonDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 
 	return reflect.DeepEqual(oldJson, newJson)
 }
+
+func isWorkloadIdentityPoolProviderInDeletedState(config *transport_tpg.Config, d *schema.ResourceData, billingProject string, userAgent string) (bool, error) {
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}IAMBetaBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/global/workloadIdentityPools/{{"{{"}}workload_identity_pool_id{{"}}"}}/providers/{{"{{"}}workload_identity_pool_provider_id{{"}}"}}")
+	if err != nil {
+		return false, err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return false, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("IAMBetaWorkloadIdentityPoolProvider %q", d.Id()))
+	}
+
+	if res != nil {
+		if state, ok := res["state"].(string); ok && state == "DELETED" {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
