@@ -543,7 +543,7 @@ func TestAccGKEHubFeature_Clusterupgrade(t *testing.T) {
 }
 
 func testAccGKEHubFeature_Clusterupgrade(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + gkeHubFeatureSecondProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "clusterupgrade"
   location = "global"
@@ -555,7 +555,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_gkehub_enablement_2]
   project = google_project.project.project_id
 }
 
@@ -570,14 +570,14 @@ resource "google_gke_hub_feature" "feature_2" {
       }
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_gkehub_enablement_2]
   project = google_project.project_2.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_ClusterupgradeUpdate(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + gkeHubFeatureSecondProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "clusterupgrade"
   location = "global"
@@ -599,7 +599,7 @@ resource "google_gke_hub_feature" "feature" {
     }
   }
   project = google_project.project.project_id
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_gkehub_enablement_2]
 }
 
 resource "google_gke_hub_feature" "feature_2" {
@@ -613,7 +613,7 @@ resource "google_gke_hub_feature" "feature_2" {
       }
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_gkehub_enablement_2]
   project = google_project.project_2.project_id
 }
 `, context)
@@ -1210,6 +1210,15 @@ resource "google_project_service" "gkehub" {
   depends_on = [google_project_service.anthos]
 }
 
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub]
+}
+`, context)
+}
+
+func gkeHubFeatureSecondProjectSetupForGA(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_project" "project_2" {
   name            = "tf-test-gkehub%{random_suffix}-2"
   project_id      = "tf-test-gkehub%{random_suffix}-2"
@@ -1235,9 +1244,9 @@ resource "google_project_service" "gkehub_2" {
   depends_on = [google_project_service.container_2]
 }
 
-resource "time_sleep" "wait_for_gkehub_enablement" {
+resource "time_sleep" "wait_for_gkehub_enablement_2" {
   create_duration = "150s"
-  depends_on = [google_project_service.gkehub, google_project_service.gkehub_2]
+  depends_on = [google_project_service.gkehub_2]
 }
 `, context)
 }
