@@ -69,6 +69,14 @@ samples:
       - name: designcenter_space_basic
         resource_id_vars:
           space_id: example-space
+        vars:
+          project: my-project-name
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
       - name: designcenter_space_update
         resource_id_vars:
           space_id: example-space
+        vars:
+          project: my-project-name
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)

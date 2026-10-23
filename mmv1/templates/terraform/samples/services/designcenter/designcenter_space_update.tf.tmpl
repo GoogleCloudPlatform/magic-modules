@@ -1,4 +1,5 @@
 resource "google_design_center_space" "example" {
+  project                     = "{{index $.Vars "project"}}"
   location                    = "us-central1"
   space_id                    = "{{index $.ResourceIdVars "space_id"}}"
   display_name                = "Updated Example Design Center Space"
@@ -7,6 +8,7 @@ resource "google_design_center_space" "example" {
 }
 
 resource "google_design_center_catalog" "example" {
+  project      = google_design_center_space.example.project
   location     = google_design_center_space.example.location
   space        = google_design_center_space.example.space_id
   catalog_id   = "example-catalog"
@@ -15,6 +17,7 @@ resource "google_design_center_catalog" "example" {
 }
 
 resource "google_design_center_catalog_template" "example" {
+  project             = google_design_center_space.example.project
   location            = google_design_center_space.example.location
   space               = google_design_center_space.example.space_id
   catalog             = google_design_center_catalog.example.catalog_id
@@ -25,6 +28,7 @@ resource "google_design_center_catalog_template" "example" {
 }
 
 resource "google_design_center_application_template" "example" {
+  project                 = google_design_center_space.example.project
   location                = google_design_center_space.example.location
   space                   = google_design_center_space.example.space_id
   application_template_id = "example-app-template"
@@ -33,6 +37,7 @@ resource "google_design_center_application_template" "example" {
 }
 
 resource "google_design_center_policy" "example" {
+  project              = google_design_center_space.example.project
   location             = google_design_center_space.example.location
   space                = google_design_center_space.example.space_id
   application_template = google_design_center_application_template.example.application_template_id
