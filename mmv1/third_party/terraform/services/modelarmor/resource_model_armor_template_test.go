@@ -159,7 +159,7 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
           custom_llm_response_safety_error_code    = 401
           enforcement_type                         = "INSPECT_ONLY"
           modalities                               = ["MODALITY_TEXT", "MODALITY_IMAGE"]
-          data_residency_compliant                 = false
+          data_residency_compliant                 = true
         }
       }
     `, context)

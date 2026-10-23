@@ -87,7 +87,7 @@ samples:
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: INSPECT_ONLY
           template_metadata_filter_version_selector_alias: FILTER_VERSION_ALIAS_LATEST
-          template_metadata_data_residency_compliant: false
+          template_metadata_data_residency_compliant: true
         test_vars_overrides:
           templateId: '"modelarmor3"'
           location: '"us"'
@@ -103,7 +103,7 @@ samples:
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: '"INSPECT_ONLY"'
           template_metadata_filter_version_selector_alias: '"FILTER_VERSION_ALIAS_LATEST"'
-          template_metadata_data_residency_compliant: false
+          template_metadata_data_residency_compliant: true
   - name: modelarmor_template_filter_version_selector
     primary_resource_id: template-filter-version-selector
     steps:
