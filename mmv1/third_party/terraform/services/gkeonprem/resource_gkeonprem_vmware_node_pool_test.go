@@ -103,7 +103,7 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string
     config {
         cpus = 4
         memory_mb = 8196
-        replicas = 3
+        replicas = 1
         image_type = "ubuntu_containerd"
         image = "image"
         boot_disk_size_gb = 10
@@ -128,7 +128,7 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string
     }
     node_pool_autoscaling {
         min_replicas = 1
-        max_replicas = 5
+        max_replicas = 2
     }
   }
 `, context)
@@ -188,7 +188,7 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context map[string]inte
     config {
         cpus = 5
         memory_mb = 4096
-        replicas = 3
+        replicas = 2
         image_type = "windows"
         image = "image-updated"
         boot_disk_size_gb = 12
@@ -213,7 +213,7 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context map[string]inte
     }
     node_pool_autoscaling {
         min_replicas = 2
-        max_replicas = 6
+        max_replicas = 3
     }
   }
 `, context)
