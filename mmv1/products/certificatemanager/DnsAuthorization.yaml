@@ -23,6 +23,7 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/dnsAuthorizations/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -42,11 +43,13 @@ schema_version: 1
 state_upgraders: true
 autogen_async: true
 include_in_tgc_next: true
+custom_code:
+  decoder: templates/terraform/decoders/colab_runtime.go.tmpl
 samples:
-  - name: certificate_manager_dns_authorization_basic
+  - name: certificate_manager_dns_authorization_regional
     primary_resource_id: default
     steps:
-      - name: certificate_manager_dns_authorization_basic
+      - name: certificate_manager_dns_authorization_regional
         resource_id_vars:
           dns_auth_name: dns-auth
           zone_name: my-zone
@@ -54,10 +57,9 @@ samples:
         test_vars_overrides:
           # for backward compatible
           subdomain: '"subdomain" + randomSuffix'
-  - name: certificate_manager_dns_authorization_regional
-    primary_resource_id: default
+  - name: certificate_manager_dns_authorization_basic
     steps:
-      - name: certificate_manager_dns_authorization_regional
+      - name: certificate_manager_dns_authorization_basic
         resource_id_vars:
           dns_auth_name: dns-auth
           zone_name: my-zone
@@ -75,6 +77,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: location
     type: String
     description: |

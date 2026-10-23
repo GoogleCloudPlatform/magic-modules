@@ -27,6 +27,7 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/trustConfigs/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/trustConfigs/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -44,11 +45,15 @@ async:
     resource_inside_response: false
 autogen_async: true
 include_in_tgc_next: true
+custom_code:
+  decoder: templates/terraform/decoders/colab_runtime.go.tmpl
 samples:
   - name: certificate_manager_trust_config
     primary_resource_id: default
     steps:
       - name: certificate_manager_trust_config
+        vars:
+          location: 'us-central1'
         resource_id_vars:
           trust_config_name: trust-config
   - name: certificate_manager_trust_config_allowlisted_certificates
@@ -65,6 +70,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: location
     type: String
     description: |
