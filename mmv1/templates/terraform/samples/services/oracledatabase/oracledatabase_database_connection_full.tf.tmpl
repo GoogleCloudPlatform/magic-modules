@@ -1,0 +1,13 @@
+resource "google_oracle_database_database_connection" "{{$.PrimaryResourceId}}" {
+  database_connection_id  = "{{index $.ResourceIdVars "database_connection_id"}}"
+  location                = "us-east4"
+  connection_string       = "dbhost.example.com:1521/ORCL"
+  display_name            = "My Connection"
+  username                = "admin"
+  password_secret_version = "projects/{{index $.ResourceIdVars "project"}}/secrets/my-secret/versions/1"
+  wallet_secret_version   = "projects/{{index $.ResourceIdVars "project"}}/secrets/my-wallet/versions/1"
+  odb_network             = "projects/{{index $.ResourceIdVars "project"}}/locations/us-east4/odbNetworks/default-odb-network"
+  labels = {
+    env = "initial"
+  }
+}
