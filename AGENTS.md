@@ -1,5 +1,36 @@
-## Workflows
+# Agent Instructions
 
-Structured workflows for specific tasks are available in `.agents/skills/workflows/` (see [.agents/WORKFLOWS.md](.agents/WORKFLOWS.md) for the menu).
+Magic Modules (MMv1) defines the Google Cloud Terraform providers: resource schemas in `mmv1/products/`,
+handwritten code and tests under `mmv1/third_party/terraform/`, generated into the downstream
+`terraform-provider-google` and `terraform-provider-google-beta` repositories. Changes are always made
+here, upstream — never in the downstream repos.
 
-This framework is strictly **opt-in**. Unless the user explicitly asks to use **Workflow Mode** or references these instructions, ignore these files and proceed normally. For Workflow Mode, you MUST first read [.agents/WORKFLOWS.md](.agents/WORKFLOWS.md) to understand the rules and menu before proceeding.
+## Entry points
+
+- **[.agents/WORKFLOWS.md](.agents/WORKFLOWS.md)** — the workflows for provider tasks (adding
+  resources/fields, fixing issues, syncing) and the rules that govern them. Read it before starting a
+  provider task.
+- **`.agents/skills/`** — reusable skills the workflows compose (generation, testing, log parsing,
+  troubleshooting). Each skill's `SKILL.md` frontmatter states when to use it.
+- **[.agents/knowledge/index.md](.agents/knowledge/index.md)** — the knowledge index: a short map of
+  where provider knowledge lives. Refer to this to check for relevant patterns or instructions.
+- **`.agents/archive/`** — parked tracks (currently TGC). Not maintained; do not use as reference.
+
+## Ground rules
+
+- **Never weaken baseline test coverage to make a test pass.** No disabling or skipping tests, and no test-dodging
+  behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent
+  comment justifying the API behavior that requires them.
+- **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.
+- **Prefer adding commits on PR updates**: once a branch is pushed or a PR is open, push new commits for subsequent
+  updates rather than amending, rebasing, or force-pushing unless instructed otherwise.
+
+## Parallel work
+
+- **Work in a git worktree**: do task work in a git worktree on its own branch. Before starting, `git fetch upstream`
+  and make sure the branch is based on current `upstream/main`. Don't switch branches or generate code in a shared
+  primary checkout.
+- **Keep the worktree until the PR is done**: push PR branches under a descriptive branch name, and keep the
+  magic-modules worktree so follow-up fixes and reviews have the checkout.
+- **Bazel in worktrees**: inside a worktree, `make` defaults to `USE_BAZEL=0` (set `USE_BAZEL=1` to override).
+- **Helper scripts**: prefer Go over Python or complex shell scripts.

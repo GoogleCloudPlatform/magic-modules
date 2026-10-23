@@ -15,24 +15,26 @@
 name: TraceScope
 description: A trace scope is a collection of resources whose traces are queried together
 base_url: projects/{{project}}/locations/{{location}}/traceScopes
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
 create_url: projects/{{project}}/locations/{{location}}/traceScopes?traceScopeId={{trace_scope_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
-examples:
-  - name: observability_trace_scope_basic
-    primary_resource_id: observability_trace_scope
-    vars:
-      trace_scope_id: test-scope
-    test_env_vars:
-      org_id: 'ORG_ID'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+samples:
+  - name: observability_trace_scope_basic
+    primary_resource_id: observability_trace_scope
+    steps:
+      - name: observability_trace_scope_basic
+        resource_id_vars:
+          trace_scope_id: test-scope
+        test_env_vars:
+          org_id: ORG_ID
 parameters:
   - name: location
     type: String

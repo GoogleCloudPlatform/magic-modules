@@ -1,0 +1,18 @@
+resource "google_firebase_ai_logic_prompt_template" "global_only" {
+  provider = google-beta
+  location = "global"
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  template_string = <<EOF
+---
+model: googleai/gemini-1.5-flash
+---
+Hello World
+EOF
+}
+
+resource "google_firebase_ai_logic_prompt_template_lock" "global_only_lock" {
+  provider = google-beta
+  location = google_firebase_ai_logic_prompt_template.global_only.location
+  template_id = google_firebase_ai_logic_prompt_template.global_only.template_id
+  regional_propagation_disabled = true
+}

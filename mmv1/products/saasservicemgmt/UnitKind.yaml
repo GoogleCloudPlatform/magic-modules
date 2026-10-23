@@ -15,30 +15,33 @@
 name: UnitKind
 description: A UnitKind serves as a template or type definition for a group of Units. Units that belong to the same UnitKind are managed together, follow the same release model, and are typically updated together through rollouts.
 base_url: projects/{{project}}/locations/{{location}}/unitKinds
-update_mask: true
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 create_url: projects/{{project}}/locations/{{location}}/unitKinds?unitKindId={{unit_kind_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
-min_version: beta
-examples:
-  - name: saas_runtime_unit_kind_basic
-    primary_resource_id: "example"
-    min_version: 'beta'
-    vars:
-      saas_name: example-saas
-      cluster_unitkind_name: cluster-unitkind
-      app_unitkind_name: app-unitkind
-      release_name: example-release
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
 autogen_status: VW5pdEtpbmQ=
+autogen_async: false
+samples:
+  - name: saas_runtime_unit_kind_basic
+    primary_resource_id: example
+    min_version: beta
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    steps:
+      - name: saas_runtime_unit_kind_basic
+        min_version: beta
+        resource_id_vars:
+          saas_name: example-saas
+          cluster_unitkind_name: cluster-unitkind
+          app_unitkind_name: app-unitkind
+          release_name: example-release
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -61,6 +64,68 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: appParams
+    type: NestedObject
+    description: |-
+      Parameters for creating an App Hub Application for the Units of this
+      UnitKind.
+    properties:
+      - name: group
+        type: String
+        description: |-
+          Grouping used to construct the name of the App Hub Application.
+          Multiple UnitKinds can specify the same group to use the same
+          Application across their respective Units. Corresponds to the
+          app_boundary_id in the ADC composite ApplicationTemplate. If empty,
+          the service creates no App Hub application.
+      - name: scope
+        type: NestedObject
+        description: |-
+          Corresponds to the scope in the ADC composite ApplicationTemplate.
+        properties:
+          - name: type
+            type: String
+            required: true
+            description: |-
+              Scope type.
+              Possible values:
+              TYPE_REGIONAL
+              TYPE_GLOBAL
+  - name: applicationTemplateComponent
+    type: NestedObject
+    description: |-
+      Reference to a component and revision in a composite Application Design
+      Center ApplicationTemplate.
+    properties:
+      - name: compositeRef
+        type: NestedObject
+        description: Reference to the composite ApplicationTemplate.
+        properties:
+          - name: applicationTemplate
+            type: String
+            required: true
+            description: |-
+              Reference to the ApplicationTemplate resource, in the format
+              `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{applicationTemplate}`.
+          - name: revision
+            type: String
+            description: |-
+              Revision of the ApplicationTemplate, as a full resource name
+              prefixed by `application_template`.
+          - name: syncOperation
+            type: String
+            description: Reference to the ongoing import and replication operation. Opaque for external usage.
+            output: true
+      - name: component
+        type: String
+        description: |-
+          Name of the component in the composite ApplicationTemplate (the root
+          module ID, e.g. a composite component ID or `native-components`).
+      - name: revision
+        type: String
+        description: |-
+          Revision of the component. If the component does not have a revision,
+          this is the revision of the composite ApplicationTemplate.
   - name: createTime
     type: String
     description: The timestamp when the resource was created.

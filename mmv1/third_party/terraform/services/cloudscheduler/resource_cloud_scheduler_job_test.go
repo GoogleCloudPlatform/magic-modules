@@ -1,19 +1,19 @@
 package cloudscheduler_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/cloudscheduler"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccCloudSchedulerJob_schedulerPausedExample(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -21,14 +21,55 @@ func TestAccCloudSchedulerJob_schedulerPausedExample(t *testing.T) {
 		CheckDestroy:             testAccCheckCloudSchedulerJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudSchedulerJob_schedulerPaused(context),
+				Config: testAccCloudSchedulerJob_schedulerPaused(map[string]interface{}{
+					"random_suffix": randomSuffix,
+					"paused":        true,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "paused", "true"),
 					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "state", "PAUSED"),
 				),
 			},
 			{
-				Config: testAccCloudSchedulerJob_schedulerUnPaused(context),
+				Config: testAccCloudSchedulerJob_schedulerPaused(map[string]interface{}{
+					"random_suffix": randomSuffix,
+					"paused":        false,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "paused", "false"),
+					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "state", "ENABLED"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCloudSchedulerJob_pausedRemovedResumes(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudSchedulerJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudSchedulerJob_schedulerPaused(map[string]interface{}{
+					"random_suffix": randomSuffix,
+					"paused":        true,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "paused", "true"),
+					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "state", "PAUSED"),
+				),
+			},
+			{
+				// Removing the paused attribute must resume the job (documented default).
+				Config: testAccCloudSchedulerJob_schedulerPaused(map[string]interface{}{
+					"random_suffix": randomSuffix,
+					"paused":        nil,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "paused", "false"),
 					resource.TestCheckResourceAttr("google_cloud_scheduler_job.job", "state", "ENABLED"),
@@ -80,7 +121,7 @@ func TestUnitCloudSchedulerJob_LastSlashDiffSuppress(t *testing.T) {
 func testAccCloudSchedulerJob_schedulerPaused(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_scheduler_job" "job" {
-  paused           = true
+  paused           = %{paused}
   name             = "tf-test-test-job%{random_suffix}"
   description      = "test http job with updated fields"
   schedule         = "*/8 * * * *"
@@ -101,26 +142,33 @@ resource "google_cloud_scheduler_job" "job" {
 `, context)
 }
 
-func testAccCloudSchedulerJob_schedulerUnPaused(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_cloud_scheduler_job" "job" {
-  paused           = false # Has been flipped 
-  name             = "tf-test-test-job%{random_suffix}"
-  description      = "test http job with updated fields"
-  schedule         = "*/8 * * * *"
-  time_zone        = "America/New_York"
-  attempt_deadline = "320s"
-  region           = "us-west2"
+func TestUnitCloudSchedulerJob_Is409SyncMutateCannotBeQueuedError(t *testing.T) {
+	cases := map[string]struct {
+		Err      error
+		Expected bool
+	}{
+		"sync mutate cannot be queued error": {
+			Err:      fmt.Errorf("googleapi: Error 409: sync mutate calls cannot be queued"),
+			Expected: true,
+		},
+		"operation in progress error": {
+			Err:      fmt.Errorf("googleapi: Error 409: operationInProgress"),
+			Expected: false,
+		},
+		"generic error": {
+			Err:      fmt.Errorf("some generic error"),
+			Expected: false,
+		},
+		"nil error": {
+			Err:      nil,
+			Expected: false,
+		},
+	}
 
-  retry_config {
-    retry_count = 1
-  }
-
-  http_target {
-    http_method = "POST"
-    uri         = "https://example.com/ping"
-    body        = base64encode("{\"foo\":\"bar\"}")
-  }
-}
-`, context)
+	for tn, tc := range cases {
+		retry, _ := transport_tpg.Is409SyncMutateCannotBeQueuedError(tc.Err)
+		if retry != tc.Expected {
+			t.Fatalf("bad: %s, expected %t got %t", tn, tc.Expected, retry)
+		}
+	}
 }

@@ -37,11 +37,13 @@ error_retry_predicates:
   - transport_tpg.IsAppEngineRetryableError
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.tmpl
-examples:
+samples:
   - name: app_engine_application_url_dispatch_rules_basic
     primary_resource_id: web_service
-    vars:
-      bucket_name: appengine-test-bucket
+    steps:
+      - name: app_engine_application_url_dispatch_rules_basic
+        resource_id_vars:
+          bucket_name: appengine-test-bucket
 properties:
   - name: dispatchRules
     type: Array

@@ -6,15 +6,16 @@ import (
 	"log"
 	"path/filepath"
 	"reflect"
+	"runtime"
+	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	apiresource "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
-	"golang.org/x/exp/slices"
 )
 
 type Loader struct {
@@ -102,6 +103,48 @@ func (l *Loader) LoadProducts() {
 	}
 
 	l.Products = l.batchLoadProducts(allProductFiles)
+
+	// Set up ResourcePrefixPkgMap now that all products are loaded.
+	runtime := api.Runtime{
+		// Hardcode a few unusually-named handwritten resources. These are among the oldest resources
+		// in the provider; we shouldn't be adding more to this list.
+		ResourcePrefixPkgMap: map[string]string{
+			"google_project":         "services/resourcemanager",
+			"google_folder":          "services/resourcemanager",
+			"google_organization":    "services/resourcemanager",
+			"google_service_account": "services/resourcemanager",
+		},
+	}
+	prefixCount := map[string]int{}
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		runtime.ResourcePrefixPkgMap[prefix] = "services/" + strings.ToLower(p.ApiName)
+		prefixCount[prefix] += 1
+		if prefixCount[prefix] > 1 {
+			delete(runtime.ResourcePrefixPkgMap, prefix)
+		}
+		// Always add resources with legacy_name
+		for _, r := range p.Objects {
+			if r.LegacyName != "" && !strings.HasPrefix(r.LegacyName, prefix) {
+				runtime.ResourcePrefixPkgMap[r.LegacyName] = "services/" + strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	// For products that share a prefix, add the individual resources instead.
+	for _, p := range l.Products {
+		prefix := fmt.Sprintf("google_%s_", p.TerraformName())
+		if prefixCount[prefix] > 1 {
+			for _, r := range p.Objects {
+				runtime.ResourcePrefixPkgMap[r.TerraformName()] = "services/" + strings.ToLower(p.ApiName)
+			}
+		}
+	}
+	for _, p := range l.Products {
+		p.Runtime = runtime
+		for _, r := range p.Objects {
+			r.Runtime = runtime
+		}
+	}
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
@@ -126,7 +169,9 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 		go func(name string) {
 			defer wg.Done()
 
+			start := time.Now()
 			product, err := l.LoadProduct(name)
+			google.LogVerbose("%s: loaded in %s", name, time.Since(start).Round(time.Millisecond))
 			productChan <- loadResult{
 				name:    name,
 				product: product,
@@ -237,9 +282,12 @@ func NewVarsReplacingFS(inner google.ReadDirReadFileFS) google.ReadDirReadFileFS
 	return varsReplacingFS{inner}
 }
 
+// resourceLoadSem bounds how many resources are loaded concurrently across all products.
+var resourceLoadSem = make(chan struct{}, runtime.GOMAXPROCS(0))
+
 // loadResources loads all resources for a product
 func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
-	var resources []*api.Resource = make([]*api.Resource, 0)
+	var resources []*api.Resource
 
 	// Get base resource files
 	resourceFiles, err := filepath.Glob(filepath.Join(l.baseDirectory, product.PackagePath, "*"))
@@ -247,7 +295,8 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 		return nil, fmt.Errorf("cannot get resource files: %v", err)
 	}
 
-	// Compile base resources (skip those that will be merged with overrides)
+	// Collect base resources to compile (skip those that will be merged with overrides)
+	var baseResourcePaths []string
 	for _, resourceYamlPath := range resourceFiles {
 		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
 			continue
@@ -264,10 +313,25 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 				continue
 			}
 		}
-
-		resource := l.loadResource(product, resourceYamlPath, "")
-		resources = append(resources, resource)
+		baseResourcePaths = append(baseResourcePaths, resourceYamlPath)
 	}
+
+	// Compile base resources concurrently. Loading a resource only touches that
+	// resource (and reads the product), so resources within a product are
+	// independent. Products already load in parallel with one another, but the
+	// largest product would otherwise be the critical path of the load phase.
+	resources = make([]*api.Resource, len(baseResourcePaths))
+	var wg sync.WaitGroup
+	for i, resourceYamlPath := range baseResourcePaths {
+		wg.Add(1)
+		go func(i int, resourceYamlPath string) {
+			defer wg.Done()
+			resourceLoadSem <- struct{}{}
+			defer func() { <-resourceLoadSem }()
+			resources[i] = l.loadResource(product, resourceYamlPath, "")
+		}(i, resourceYamlPath)
+	}
+	wg.Wait()
 
 	// Compile override resources
 	if l.overrideDirectory != "" {
@@ -347,7 +411,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	// Convert Examples to Samples in memory after overrides are applied
 	if len(resource.Examples) > 0 {
-
+		var convertedSamples []*apiresource.Sample
 		for _, e := range resource.Examples {
 			// Create an in-memory custom wrapper over the fs for legacy template files
 			if e.ConfigPath == "" {
@@ -383,8 +447,9 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 				TGCSkipTest:         e.TGCSkipTest,
 				Steps:               steps,
 			}
-			resource.Samples = append(resource.Samples, sample)
+			convertedSamples = append(convertedSamples, sample)
 		}
+		resource.Samples = append(convertedSamples, resource.Samples...)
 		resource.Examples = nil
 	}
 
@@ -394,7 +459,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	for _, e := range resource.Examples {
 		if err := e.LoadHCLText(l.sysfs); err != nil {
-			glog.Exit(err)
+			log.Fatal(err)
 		}
 	}
 
@@ -422,15 +487,49 @@ func (l *Loader) Validate() {
 		log.Fatalln("products have not been loaded into memory")
 	}
 
+	var allErrs []error
 	for _, product := range l.Products {
+		ver := product.VersionObjOrClosest(l.version)
 		for _, resource := range product.Objects {
+			resource.ExcludeIfNotInVersion(ver)
 			es := resource.Validate()
 			if len(es) > 0 {
 				es = utils.TransformErrs(func(e error) error {
 					return fmt.Errorf("%s%s%s: %w", utils.ColorRed, resource.SourceYamlFile, utils.ColorReset, e)
 				}, es)
-				log.Fatalf("%v", errors.Join(es...))
+				allErrs = append(allErrs, es...)
 			}
 		}
 	}
+	if len(allErrs) > 0 {
+		log.Fatalf("%v", errors.Join(allErrs...))
+	}
+}
+
+// CountProductsAndResources returns the number of products and resources that will be generated
+// based on the productsToGenerate list and optional resourceToGenerate filter.
+func (l *Loader) CountProductsAndResources(productsToGenerate []string, resourceToGenerate string) (int, int) {
+	if l.Products == nil {
+		return 0, 0
+	}
+
+	var productCount, resourceCount int
+	for _, productApi := range l.Products {
+		if len(productsToGenerate) > 0 && !slices.Contains(productsToGenerate, productApi.PackagePath) {
+			continue
+		}
+		productCount++
+		ver := productApi.VersionObjOrClosest(l.version)
+		for _, object := range productApi.Objects {
+			object.ExcludeIfNotInVersion(ver)
+			if resourceToGenerate != "" && object.Name != resourceToGenerate {
+				continue
+			}
+			if !object.IsExcluded() {
+				resourceCount++
+			}
+		}
+	}
+
+	return productCount, resourceCount
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/gkebackup"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -40,7 +41,7 @@ func testAccGKEBackupRestoreChannel_basic(context map[string]interface{}) string
 	return acctest.Nprintf(`
 resource "google_gke_backup_restore_channel" "basic" {
   name = "tf-test-basic-channel%{random_suffix}"
-  location = "us-central1"
+  location = "us-east1"
   description = ""
   destination_project = "%{destination_project}"
   labels = { "key": "some-value" }

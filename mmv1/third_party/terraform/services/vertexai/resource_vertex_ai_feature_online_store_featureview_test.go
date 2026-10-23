@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 )
 
 func TestAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeatureview_updated(t *testing.T) {
@@ -306,7 +309,7 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
           # The source table must have a column named 'feature_timestamp' of type TIMESTAMP.
           input_uri = "bq://${google_bigquery_table.sample_table.project}.${google_bigquery_table.sample_table.dataset_id}.${google_bigquery_table.sample_table.table_id}"
       }
-      entity_id_columns = ["feature_id"]
+      entity_id_columns = ["entity_id"]
     }
   }
   
@@ -433,7 +436,7 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
           # The source table must have a column named 'feature_timestamp' of type TIMESTAMP.
           input_uri = "bq://${google_bigquery_table.sample_table.project}.${google_bigquery_table.sample_table.dataset_id}.${google_bigquery_table.sample_table.table_id}"
       }
-      entity_id_columns = ["feature_id"]
+      entity_id_columns = ["entity_id"]
     }
   }
   

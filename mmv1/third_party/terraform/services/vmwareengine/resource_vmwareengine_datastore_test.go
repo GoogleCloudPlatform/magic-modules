@@ -11,8 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/filestore"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/netapp"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
+	"github.com/hashicorp/terraform-provider-google/google/services/vmwareengine"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -173,8 +177,8 @@ func TestAccVmwareengineDatastore_vmwareEngineDatastoreNetapp_update(t *testing.
 	})
 
 	context := map[string]interface{}{
-		"region":        envvar.GetTestRegionFromEnv(),
-		"zone":          envvar.GetTestZoneFromEnv(),
+		"region":        "us-east4",
+		"zone":          "us-east4-a",
 		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "datastore-test", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -233,7 +237,7 @@ resource "google_netapp_storage_pool" "test_pool" {
 resource "google_netapp_volume" "test_volume" {
   location            = "%{region}"
   name                = "tf-test-netapp-volume%{random_suffix}"
-  capacity_gib        = "1024"
+  capacity_gib        = "100"
   share_name          = "share1"
   storage_pool        = google_netapp_storage_pool.test_pool.name
   protocols           = [ "NFSV3" ]
@@ -268,7 +272,7 @@ func testAccCheckVmwareengineDatastoreDestroyProducer(t *testing.T) func(s *terr
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VmwareengineBasePath}}projects/{{project}}/locations/{{location}}/datastores/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vmwareengine.Product, config)+"projects/{{project}}/locations/{{location}}/datastores/{{name}}")
 			if err != nil {
 				return err
 			}

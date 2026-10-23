@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -94,7 +96,7 @@ resource "google_vertex_ai_index" "index" {
       algorithm_config {
         tree_ah_config {
           leaf_node_embedding_count = 500
-          leaf_nodes_to_search_percent = 7
+          fraction_leaf_nodes_to_search = 0.005
         }
       }
     }
@@ -151,7 +153,7 @@ resource "google_vertex_ai_index" "index" {
       algorithm_config {
         tree_ah_config {
           leaf_node_embedding_count = 500
-          leaf_nodes_to_search_percent = 7
+          fraction_leaf_nodes_to_search = 0.005
         }
       }
     }
@@ -173,7 +175,7 @@ func testAccCheckVertexAIIndexDestroyProducer_basic(t *testing.T) func(s *terraf
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{region}}/indexes/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"projects/{{project}}/locations/{{region}}/indexes/{{name}}")
 			if err != nil {
 				return err
 			}

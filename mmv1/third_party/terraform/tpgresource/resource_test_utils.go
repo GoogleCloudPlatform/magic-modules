@@ -88,6 +88,8 @@ type ResourceDiffMock struct {
 	Cleared    map[string]interface{}
 	Schema     map[string]*schema.Schema
 	IsForceNew bool
+	RawConfig  cty.Value
+	KeysPrefix []string
 }
 
 func (d *ResourceDiffMock) GetChange(key string) (interface{}, interface{}) {
@@ -159,6 +161,9 @@ func ReplaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceStat
 
 	if strings.Contains(linkTmpl, "{{region}}") {
 		region = GetResourceNameFromSelfLink(rs.Primary.Attributes["region"])
+		if region == "" {
+			region = GetResourceNameFromSelfLink(rs.Primary.Attributes["location"])
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
@@ -234,4 +239,11 @@ func GetResourceAttributes(n string, s *terraform.State) (map[string]string, err
 	}
 
 	return rs.Primary.Attributes, nil
+}
+
+func (d *ResourceDiffMock) GetChangedKeysPrefix(prefix string) []string {
+	return d.KeysPrefix
+}
+func (d *ResourceDiffMock) GetRawConfig() cty.Value {
+	return d.RawConfig
 }

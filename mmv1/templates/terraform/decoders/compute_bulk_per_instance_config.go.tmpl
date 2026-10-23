@@ -1,0 +1,22 @@
+if managedInstances, ok := res["managedInstances"]; ok && managedInstances != nil {
+    original := managedInstances.([]interface{})
+    transformed := make([]interface{}, 0, len(original))
+
+    for _, raw := range original {
+      if raw == nil {
+        continue
+      }
+
+      rawMap := raw.(map[string]interface{})
+      transformedMap := make(map[string]interface{})
+
+      // Extract the name.
+      if name, ok := rawMap["name"]; ok {
+        transformedMap["name"] = name
+      }
+
+      transformed = append(transformed, transformedMap)
+    }
+    res["instances"] = transformed
+}
+return res, nil

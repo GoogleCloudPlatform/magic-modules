@@ -117,6 +117,7 @@ func testAccDataSourceComputeAddressCheck(t *testing.T, data_source_name string,
 		address_attrs_to_test := []string{
 			"name",
 			"address",
+			"address_id",
 		}
 
 		for _, attr_to_check := range address_attrs_to_test {
@@ -160,7 +161,7 @@ func testAccCheckDataSourceComputeAddressDestroy(t *testing.T, name string) reso
 				return err
 			}
 
-			_, err = compute.NewClient(config, config.UserAgent).Addresses.Get(
+			_, err = compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Addresses.Get(
 				config.Project, addressId.Region, addressId.Name).Do()
 			if err == nil {
 				return fmt.Errorf("Address still exists")

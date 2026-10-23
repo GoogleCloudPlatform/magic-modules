@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'ResourceManager'
-display_name: 'Resource Manager'
-versions:
-  - name: 'ga'
-    base_url: 'https://cloudresourcemanager.googleapis.com/v1/'
+name: ResourceManager
+display_name: Resource Manager
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://cloudresourcemanager.googleapis.com/v1/

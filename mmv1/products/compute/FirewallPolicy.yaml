@@ -44,13 +44,17 @@ custom_diff:
   - 'tpgresource.DefaultProviderProject'
 # excluding identity due to name value inconsistency
 exclude_identity_generation: true
-examples:
+samples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+      - name: 'firewall_policy'
+        resource_id_vars:
+          policy_name: 'my-policy'
+        test_env_vars:
+          org_id: 'ORG_ID'
+iam_policy:
+  parent_resource_attribute: 'name'
 parameters:
 properties:
   - name: 'creationTimestamp'

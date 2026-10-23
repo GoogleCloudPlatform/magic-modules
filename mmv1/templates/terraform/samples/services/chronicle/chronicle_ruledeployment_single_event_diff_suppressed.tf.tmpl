@@ -1,0 +1,24 @@
+resource "google_chronicle_rule" "my-single-event-rule" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ text = <<-EOT
+             rule test_single_event_rule {
+               meta:
+                 description = "test single event rule for diff suppression"
+               events:
+                 $e.metadata.event_type = "USER_LOGIN"
+               condition:
+                 $e
+             }
+         EOT
+}
+
+resource "google_chronicle_rule_deployment" "{{$.PrimaryResourceId}}" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ rule = element(split("/", resource.google_chronicle_rule.my-single-event-rule.name), length(split("/", resource.google_chronicle_rule.my-single-event-rule.name)) - 1)
+ enabled = true
+ alerting = true
+ archived = false
+ run_frequency = "HOURLY"
+}

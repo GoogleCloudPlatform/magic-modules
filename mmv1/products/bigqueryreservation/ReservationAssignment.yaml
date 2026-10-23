@@ -42,20 +42,43 @@ nested_query:
 custom_code:
   pre_create: 'templates/terraform/pre_create/bigquery_reservation_assignment.go.tmpl'
 legacy_long_form_project: true
-examples:
+samples:
   - name: 'bigquery_reservation_assignment_basic'
     primary_resource_id: 'assignment'
-    vars:
-      reservation_name: 'example-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'bigquery_reservation_assignment_basic'
+        resource_id_vars:
+          reservation_name: 'example-reservation'
+        test_env_vars:
+          project: 'PROJECT_NAME'
   - name: 'bigquery_reservation_assignment_full'
     primary_resource_id: 'assignment'
-    vars:
-      reservation_name: 'example-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
+    exclude_basic_doc: true
+    steps:
+      - name: 'bigquery_reservation_assignment_full'
+        resource_id_vars:
+          reservation_name: 'example-reservation'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+  - name: 'bigquery_reservation_assignment_full_with_principal'
+    primary_resource_id: 'assignment'
+    exclude_basic_doc: true
+    steps:
+      - name: 'bigquery_reservation_assignment_full_with_principal'
+        resource_id_vars:
+          reservation_name: 'example-reservation'
+        test_env_vars:
+          project: 'PROJECT_NAME'
+          service_account: 'SERVICE_ACCT'
+  - name: 'bigquery_reservation_assignment_scheduling_policy'
+    primary_resource_id: 'assignment'
+    exclude_basic_doc: true
+    steps:
+      - name: 'bigquery_reservation_assignment_scheduling_policy'
+        resource_id_vars:
+          reservation_name: 'example-reservation'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
@@ -86,7 +109,45 @@ properties:
     type: String
     description: |
       Types of job, which could be specified when using the reservation. Possible values: JOB_TYPE_UNSPECIFIED, PIPELINE, QUERY, CONTINUOUS
-    required: true
+    exactly_one_of:
+      - job_type
+      - scheduling_policy
+  - name: 'principal'
+    type: String
+    description: |
+      Optional. Represents the principal for this assignment. If not empty, jobs run by this principal will utilize the associated reservation. Otherwise, jobs will fall back to using the reservation assigned to the project, folder, or organization (in that order). If no reservation is assigned at any of these levels, on-demand capacity will be used. The supported formats are:
+      * `principal://goog/subject/USER_EMAIL_ADDRESS` for users,
+      * `principal://iam.googleapis.com/projects/-/serviceAccounts/SA_EMAIL_ADDRESS` for service accounts,
+      * `principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/subject/SUBJECT_ID` for workload identity pool identities.
+      * The special value `unknown_or_deleted_user` represents principals which cannot be read from the user info service, for example deleted users.
+  - name: 'schedulingPolicy'
+    type: NestedObject
+    description: |
+      The scheduling policy to use for jobs and queries of this assignee when
+      running under the associated reservation. The scheduling policy controls
+      how the reservation's resources are distributed. This overrides the default
+      scheduling policy specified on the reservation.
+    exactly_one_of:
+      - job_type
+      - scheduling_policy
+    properties:
+      - name: 'concurrency'
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the concurrency
+          of jobs running for any particular project within it to the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots
+      - name: 'maxSlots'
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the slot
+          consumption of queries running for any particular project within it to
+          the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots
   - name: 'state'
     type: String
     description: |

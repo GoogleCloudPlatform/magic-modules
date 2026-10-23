@@ -1,0 +1,132 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+if shareSettingsVal, ok := res["shareSettings"]; ok && shareSettingsVal != nil {
+	shareSettings := shareSettingsVal.(map[string]interface{})
+
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	// 1. Gather all unique project identifier strings from config
+	uniqueConfigProjects := make(map[string]bool)
+	
+	// Config items from project_map
+	configProjectMapItems := make([]map[string]interface{}, 0)
+	if val, ok := d.GetOk("share_settings.0.project_map"); ok && val != nil {
+		for _, raw := range val.(*schema.Set).List() {
+			item := raw.(map[string]interface{})
+			configProjectMapItems = append(configProjectMapItems, item)
+			if id, ok := item["id"].(string); ok && id != "" {
+				uniqueConfigProjects[id] = true
+			}
+			if projId, ok := item["project_id"].(string); ok && projId != "" {
+				uniqueConfigProjects[projId] = true
+			}
+		}
+	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	// Projects from projects array
+	configProjectsList := make([]string, 0)
+	if val, ok := d.GetOk("share_settings.0.projects"); ok && val != nil {
+		for _, raw := range val.([]interface{}) {
+			if proj, ok := raw.(string); ok && proj != "" {
+				configProjectsList = append(configProjectsList, proj)
+				uniqueConfigProjects[proj] = true
+			}
+		}
+	}
+{{- end }}
+
+	// 2. Resolve all unique project identifiers to project numbers
+	projectToNumber := make(map[string]string)
+	for p := range uniqueConfigProjects {
+		_, err := strconv.Atoi(p)
+		if err != nil {
+			// Resolve to project number
+			proj, err := rmClient.NewClient(config, userAgent).Projects.Get(p).Do()
+			if err != nil {
+				log.Printf("[WARN] Failed to retrieve project metadata for %s: %s", p, err)
+				continue
+			}
+			projNumStr := strconv.FormatInt(proj.ProjectNumber, 10)
+			projectToNumber[p] = projNumStr
+		} else {
+			projectToNumber[p] = p
+		}
+	}
+
+	// Helper function to get project number for any configured string
+	getProjectNumber := func(p string) string {
+		if num, ok := projectToNumber[p]; ok {
+			return num
+		}
+		return p
+	}
+
+	// 3. Build lookup maps based on project numbers
+	configProjectMapItemsByNumber := make(map[string]map[string]interface{})
+	for _, item := range configProjectMapItems {
+		id := item["id"].(string)
+		idNum := getProjectNumber(id)
+		configProjectMapItemsByNumber[idNum] = item
+	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	configProjectsByNumber := make(map[string]string)
+	for _, proj := range configProjectsList {
+		projNum := getProjectNumber(proj)
+		configProjectsByNumber[projNum] = proj
+	}
+{{- end }}
+
+	// 4. Update API response projectMap using the lookup map
+	if apiProjectMapVal, ok := shareSettings["projectMap"]; ok && apiProjectMapVal != nil {
+		apiProjectMap := apiProjectMapVal.(map[string]interface{})
+		resolvedProjectMap := make(map[string]interface{})
+		for id, raw := range apiProjectMap {
+			originalMapItem := raw.(map[string]interface{})
+			
+			resolvedID := id
+			resolvedProjID := originalMapItem["projectId"].(string)
+
+			// Look up in config using the API key (which is a project number)
+			if cfgItem, ok := configProjectMapItemsByNumber[id]; ok {
+				resolvedID = cfgItem["id"].(string)
+				resolvedProjID = cfgItem["project_id"].(string)
+			}
+
+			resolvedMapItem := make(map[string]interface{})
+			for k, v := range originalMapItem {
+				resolvedMapItem[k] = v
+			}
+			resolvedMapItem["projectId"] = resolvedProjID
+
+			resolvedProjectMap[resolvedID] = resolvedMapItem
+		}
+		shareSettings["projectMap"] = resolvedProjectMap
+	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	// 5. Update API response projects array
+	if apiProjectsVal, ok := shareSettings["projects"]; ok && apiProjectsVal != nil {
+		apiProjects := apiProjectsVal.([]interface{})
+		resolvedProjects := make([]interface{}, 0, len(apiProjects))
+		for _, raw := range apiProjects {
+			projNumStr := raw.(string)
+			resolvedProjID := projNumStr
+			if cfgProj, ok := configProjectsByNumber[projNumStr]; ok {
+				resolvedProjID = cfgProj
+			}
+			resolvedProjects = append(resolvedProjects, resolvedProjID)
+		}
+		shareSettings["projects"] = resolvedProjects
+	}
+{{- end }}
+
+	res["shareSettings"] = shareSettings
+}
+{{- end }}
+
+return res, nil

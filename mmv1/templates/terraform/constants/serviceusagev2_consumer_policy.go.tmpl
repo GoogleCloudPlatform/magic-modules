@@ -1,0 +1,147 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+import "errors"
+
+type ApiError = string
+
+const (
+	ApiErrorSuConflictingConcurrentModification = "SU_CONFLICTING_CONCURRENT_MODIFICATION"
+)
+
+type ImpactType = string
+
+const (
+	ImpactTypeDepenencyMissing = "DEPENDENCY_MISSING_DEPENDENCIES"
+)
+
+const (
+	AnalysisTypeDependency = "ANALYSIS_TYPE_DEPENDENCY"
+)
+
+type ProposedPolicy struct {
+	Name        string                `json:"name"`
+	EnableRules []map[string][]string `json:"enableRules"`
+}
+
+func NewAnalysisRequest(name string, services []string, catalogs []string) map[string]any {
+	rule := map[string][]string{
+		"services": services,
+	}
+	if len(catalogs) > 0 {
+		rule["catalogs"] = catalogs
+	}
+	enableRules := []map[string][]string{
+		rule,
+	}
+	return map[string]any{
+		"proposedPolicy": ProposedPolicy{Name: name, EnableRules: enableRules},
+		"analysisTypes":  AnalysisTypeDependency}
+}
+
+type AnalysisWarning struct {
+	Detail     string
+	ImpactType ImpactType
+}
+
+type AnalysisResult struct {
+	Warnings []AnalysisWarning
+}
+
+type AnalysisReportDetails struct {
+	AnalysisResult AnalysisResult
+	DisplayName    string
+	Service        string
+}
+type AnalysisResponse struct {
+	Analysis []AnalysisReportDetails
+}
+
+func parseObject(obj any, resp interface{}) error {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, resp); err != nil {
+		return err
+	}
+	return nil
+}
+
+func hasImpactType(result AnalysisResult, impactType ImpactType) bool {
+	return slices.ContainsFunc(result.Warnings, func(warning AnalysisWarning) bool {
+		return warning.ImpactType == impactType
+	})
+}
+
+func getServices(rules interface{}) []string {
+	var output []string
+	for _, enableRules := range rules.([]interface{}) {
+		if enableRules == nil {
+			continue
+		}
+		if services, ok := enableRules.(map[string]interface{})["services"]; ok {
+			if servicesSet, ok := services.(*schema.Set); ok {
+				for _, service := range servicesSet.List() {
+					output = append(output, service.(string))
+				}
+			} else if servicesSlice, ok := services.([]interface{}); ok {
+				for _, service := range servicesSlice {
+					output = append(output, service.(string))
+				}
+			}
+		}
+	}
+	return output
+}
+
+func getCatalogs(rules interface{}) []string {
+	var output []string
+	for _, enableRules := range rules.([]interface{}) {
+		if enableRules == nil {
+			continue
+		}
+		if catalogs, ok := enableRules.(map[string]interface{})["catalogs"]; ok {
+			if catalogsSet, ok := catalogs.(*schema.Set); ok {
+				for _, catalog := range catalogsSet.List() {
+					output = append(output, catalog.(string))
+				}
+			} else if catalogsSlice, ok := catalogs.([]interface{}); ok {
+				for _, catalog := range catalogsSlice {
+					output = append(output, catalog.(string))
+				}
+			}
+		}
+	}
+	return output
+}
+
+func isCommonOpError(err error, apiError ApiError) (bool, string) {
+	var opError *tpgresource.CommonOpError
+	if errors.As(err, &opError) {
+		for _, detail := range opError.Details {
+			errInfo := make(map[string]interface{})
+			if err := json.Unmarshal(detail, &errInfo); err != nil {
+				return false, ""
+			}
+			if errInfo["reason"] == apiError {
+				return true, opError.Message
+			}
+		}
+	}
+	return false, ""
+}
+
+func isTimeoutError(err error) bool {
+	var timeoutErr *retry.TimeoutError
+	return errors.As(err, &timeoutErr)
+}

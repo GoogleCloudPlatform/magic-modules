@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 	tpgstorage "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -26,7 +27,7 @@ func TestAccStorageNotification_basic(t *testing.T) {
 
 	var notification storage.Notification
 	bucketName := acctest.TestBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
+	topicName := fmt.Sprintf("tf-test-pstopic-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -70,7 +71,7 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 
 	var notification storage.Notification
 	bucketName := acctest.TestBucketName(t)
-	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
+	topicName := fmt.Sprintf("tf-test-pstopic-%d", acctest.RandInt(t))
 	topic := fmt.Sprintf("projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 	eventType1 := "OBJECT_FINALIZE"
 	eventType2 := "OBJECT_ARCHIVE"

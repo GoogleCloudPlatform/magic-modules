@@ -13,7 +13,7 @@
 
 ---
 # This is the plural of `AccessLevel`, any changes here should be made to `AccessLevel` as well
-name: 'AccessLevels'
+name: AccessLevels
 api_resource_type_kind: AccessLevel
 description: |
   Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
@@ -21,8 +21,8 @@ description: |
   thus causing a permadiff if used alongside `google_access_context_manager_access_level` on the same parent.
 references:
   guides:
-    'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
+    Access Policy Quickstart: https://cloud.google.com/access-context-manager/docs/quickstart
+  api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels
 docs:
   warning: |
     This resource is authoritative over the access levels under an access policy. Due to a limitation in Terraform,
@@ -30,42 +30,44 @@ docs:
     the left side of plan. To prevent this, we recommend importing the resource before applying it if overwriting
     preexisting rules, as the plan will correctly display the complete changes to your access policy if the
     resource is present in state.
-id_format: '{{parent}}/accessLevels'
 base_url: '{{parent}}/accessLevels:replaceAll'
 self_link: '{{parent}}/accessLevels'
 update_url: '{{parent}}/accessLevels:replaceAll'
-update_verb: 'POST'
+update_verb: POST
+id_format: '{{parent}}/accessLevels'
 import_format:
   - '{{parent}}/accessLevels'
-mutex: '{{parent}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-custom_code:
-  custom_delete: 'templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
+mutex: '{{parent}}'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_access_levels_basic'
-    primary_resource_id: 'access-levels'
-    vars:
-      access_level_name1: 'chromeos_no_lock'
-      access_level_name2: 'mac_no_lock'
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+  custom_delete: templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.tmpl
+  custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl
+samples:
+  - name: access_context_manager_access_levels_basic
+    primary_resource_id: access-levels
     exclude_test: true
+    steps:
+      - name: access_context_manager_access_levels_basic
+        resource_id_vars:
+          access_level_name1: chromeos_no_lock
+          access_level_name2: mac_no_lock
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The AccessPolicy this AccessLevel lives in.
@@ -75,7 +77,7 @@ parameters:
     immutable: true
     ignore_read: true
 properties:
-  - name: 'accessLevels'
+  - name: accessLevels
     type: Array
     description: |
       The desired Access Levels that should replace all existing Access Levels in the Access Policy.
@@ -83,7 +85,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'name'
+        - name: name
           type: String
           description: |
             Resource name for the Access Level. The short_name component must begin
@@ -91,23 +93,23 @@ properties:
             Format: accessPolicies/{policy_id}/accessLevels/{short_name}
           required: true
           immutable: true
-        - name: 'title'
+        - name: title
           type: String
           description: |
             Human readable title. Must be unique within the Policy.
           required: true
-        - name: 'description'
+        - name: description
           type: String
           description: |
             Description of the AccessLevel and its use. Does not affect behavior.
-        - name: 'basic'
+        - name: basic
           type: NestedObject
           description: |
             A set of predefined conditions for the access level and a combining function.
           # conflicts:
           #   - custom
           properties:
-            - name: 'combiningFunction'
+            - name: combiningFunction
               type: Enum
               description: |
                 How the conditions list should be combined to determine if a request
@@ -115,14 +117,14 @@ properties:
                 conditions must be satisfied for the AccessLevel to be applied. If
                 OR is used, at least one Condition in conditions must be satisfied
                 for the AccessLevel to be applied.
-              custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-              default_value: "AND"
+              custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+              default_value: AND
               enum_values:
-                - 'AND'
-                - 'OR'
+                - AND
+                - OR
             # All of the false defaults below here are omitted on purpose.
             # Let's keep this as simple as possible, since they will all be set by the API.
-            - name: 'conditions'
+            - name: conditions
               type: Array
               description: |
                 A set of requirements for the AccessLevel to be granted.
@@ -130,7 +132,7 @@ properties:
               item_type:
                 type: NestedObject
                 properties:
-                  - name: 'ipSubnetworks'
+                  - name: ipSubnetworks
                     type: Array
                     description: |
                       A list of CIDR block IP subnetwork specification. May be IPv4
@@ -145,7 +147,7 @@ properties:
                       If empty, all IP addresses are allowed.
                     item_type:
                       type: String
-                  - name: 'requiredAccessLevels'
+                  - name: requiredAccessLevels
                     type: Array
                     description: |
                       A list of other access levels defined in the same Policy,
@@ -155,7 +157,7 @@ properties:
                       Format: accessPolicies/{policy_id}/accessLevels/{short_name}
                     item_type:
                       type: String
-                  - name: 'members'
+                  - name: members
                     type: Array
                     description: |
                       An allowed list of members (users, service accounts).
@@ -168,26 +170,26 @@ properties:
                       Formats: `user:{emailid}`, `serviceAccount:{emailid}`
                     item_type:
                       type: String
-                  - name: 'negate'
+                  - name: negate
                     type: Boolean
                     description: |
                       Whether to negate the Condition. If true, the Condition becomes
                       a NAND over its non-empty fields, each field must be false for
                       the Condition overall to be satisfied. Defaults to false.
-                  - name: 'devicePolicy'
+                  - name: devicePolicy
                     type: NestedObject
                     description: |
                       Device specific restrictions, all restrictions must hold for
                       the Condition to be true. If not specified, all devices are
                       allowed.
                     properties:
-                      - name: 'requireScreenLock'
+                      - name: requireScreenLock
                         type: Boolean
                         description: |
                           Whether or not screenlock is required for the DevicePolicy
                           to be true. Defaults to false.
                         api_name: requireScreenlock
-                      - name: 'allowedEncryptionStatuses'
+                      - name: allowedEncryptionStatuses
                         type: Array
                         description: |
                           A list of allowed encryptions statuses.
@@ -198,11 +200,11 @@ properties:
                             This field only has a name and description because of MM
                             limitations. It should not appear in downstreams.
                           enum_values:
-                            - 'ENCRYPTION_UNSPECIFIED'
-                            - 'ENCRYPTION_UNSUPPORTED'
-                            - 'UNENCRYPTED'
-                            - 'ENCRYPTED'
-                      - name: 'allowedDeviceManagementLevels'
+                            - ENCRYPTION_UNSPECIFIED
+                            - ENCRYPTION_UNSUPPORTED
+                            - UNENCRYPTED
+                            - ENCRYPTED
+                      - name: allowedDeviceManagementLevels
                         type: Array
                         description: |
                           A list of allowed device management levels.
@@ -213,11 +215,11 @@ properties:
                             This field only has a name and description because of MM
                             limitations. It should not appear in downstreams.
                           enum_values:
-                            - 'MANAGEMENT_UNSPECIFIED'
-                            - 'NONE'
-                            - 'BASIC'
-                            - 'COMPLETE'
-                      - name: 'osConstraints'
+                            - MANAGEMENT_UNSPECIFIED
+                            - NONE
+                            - BASIC
+                            - COMPLETE
+                      - name: osConstraints
                         type: Array
                         description: |
                           A list of allowed OS versions.
@@ -225,34 +227,34 @@ properties:
                         item_type:
                           type: NestedObject
                           properties:
-                            - name: 'minimumVersion'
+                            - name: minimumVersion
                               type: String
                               description: |
                                 The minimum allowed OS version. If not set, any version
                                 of this OS satisfies the constraint.
                                 Format: "major.minor.patch" such as "10.5.301", "9.2.1".
-                            - name: 'osType'
+                            - name: osType
                               type: Enum
                               description: |
                                 The operating system type of the device.
                               required: true
                               enum_values:
-                                - 'OS_UNSPECIFIED'
-                                - 'DESKTOP_MAC'
-                                - 'DESKTOP_WINDOWS'
-                                - 'DESKTOP_LINUX'
-                                - 'DESKTOP_CHROME_OS'
-                                - 'ANDROID'
-                                - 'IOS'
-                      - name: 'requireAdminApproval'
+                                - OS_UNSPECIFIED
+                                - DESKTOP_MAC
+                                - DESKTOP_WINDOWS
+                                - DESKTOP_LINUX
+                                - DESKTOP_CHROME_OS
+                                - ANDROID
+                                - IOS
+                      - name: requireAdminApproval
                         type: Boolean
                         description: |
                           Whether the device needs to be approved by the customer admin.
-                      - name: 'requireCorpOwned'
+                      - name: requireCorpOwned
                         type: Boolean
                         description: |
                           Whether the device needs to be corp owned.
-                  - name: 'regions'
+                  - name: regions
                     type: Array
                     description: |
                       The request must originate from one of the provided
@@ -260,27 +262,27 @@ properties:
                       Format: A valid ISO 3166-1 alpha-2 code.
                     item_type:
                       type: String
-                  - name: 'vpcNetworkSources'
+                  - name: vpcNetworkSources
                     type: Array
-                    description: 'The request must originate from one of the provided VPC networks in Google Cloud. Cannot specify this field together with `ip_subnetworks`.'
+                    description: The request must originate from one of the provided VPC networks in Google Cloud. Cannot specify this field together with `ip_subnetworks`.
                     item_type:
                       type: NestedObject
                       properties:
-                        - name: 'vpcSubnetwork'
+                        - name: vpcSubnetwork
                           type: NestedObject
-                          description: 'Sub networks within a VPC network.'
+                          description: Sub networks within a VPC network.
                           properties:
-                            - name: 'network'
+                            - name: network
                               type: String
-                              description: 'Required. Network name to be allowed by this Access Level. Networks of foreign organizations requires `compute.network.get` permission to be granted to caller.'
+                              description: Required. Network name to be allowed by this Access Level. Networks of foreign organizations requires `compute.network.get` permission to be granted to caller.
                               required: true
-                            - name: 'vpcIpSubnetworks'
+                            - name: vpcIpSubnetworks
                               type: Array
-                              description: 'CIDR block IP subnetwork specification. Must be IPv4.'
+                              description: CIDR block IP subnetwork specification. Must be IPv4.
                               item_type:
                                 type: String
               min_size: 1
-        - name: 'custom'
+        - name: custom
           type: NestedObject
           description: |
             Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request.
@@ -288,7 +290,7 @@ properties:
           # conflicts:
           #   - basic
           properties:
-            - name: 'expr'
+            - name: expr
               type: NestedObject
               description: |
                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
@@ -296,22 +298,16 @@ properties:
                 custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
               required: true
               properties:
-                - name: 'expression'
+                - name: expression
                   type: String
-                  description:
-                    Textual representation of an expression in Common Expression
-                    Language syntax.
+                  description: Textual representation of an expression in Common Expression Language syntax.
                   required: true
-                - name: 'title'
+                - name: title
                   type: String
-                  description:
-                    Title for the expression, i.e. a short string describing its
-                    purpose.
-                - name: 'description'
+                  description: Title for the expression, i.e. a short string describing its purpose.
+                - name: description
                   type: String
                   description: Description of the expression
-                - name: 'location'
+                - name: location
                   type: String
-                  description:
-                    String indicating the location of the expression for error
-                    reporting, e.g. a file name and a position in the file
+                  description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file

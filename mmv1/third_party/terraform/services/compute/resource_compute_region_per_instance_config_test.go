@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -20,10 +21,10 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	context := map[string]interface{}{
 		"rigm_name":     rigmName,
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name3":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name4":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name3":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name4":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 	}
 	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s",
 		envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), rigmName)
@@ -96,7 +97,7 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -133,7 +134,7 @@ func TestAccComputeRegionPerInstanceConfig_statefulIps(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 		"network":       fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
 		"subnetwork":    fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
 		"address1":      fmt.Sprintf("tf-test-rigm-address%s", acctest.RandString(t, 10)),
@@ -175,8 +176,8 @@ func TestAccComputeRegionPerInstanceConfig_removeInstanceOnDestroy(t *testing.T)
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"rigm_name":     rigmName,
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 		"network":       fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
 		"subnetwork":    fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10)),
 		"address1":      fmt.Sprintf("tf-test-rigm-address%s", acctest.RandString(t, 10)),
@@ -331,7 +332,7 @@ resource "google_compute_region_per_instance_config" "add2" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
   image = "debian-8-jessie-v20170523"
@@ -339,15 +340,15 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   physical_block_size_bytes = 4096
 }
 
 resource "google_compute_disk" "disk2" {
-  name  = "test-disk3-%{random_suffix}"
+  name  = "tf-test-test-disk3-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
   image = "https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/centos-7-v20210217"
@@ -359,7 +360,7 @@ resource "google_compute_disk" "disk2" {
 func testAccComputeRegionPerInstanceConfig_rigm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -466,7 +467,7 @@ resource "google_compute_region_per_instance_config" "config_one" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
   image = "debian-8-jessie-v20170523"
@@ -474,10 +475,10 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   physical_block_size_bytes = 4096
 }
 
@@ -570,7 +571,7 @@ resource "google_compute_region_per_instance_config" "default" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
   image = "debian-8-jessie-v20170523"
@@ -578,10 +579,10 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   physical_block_size_bytes = 4096
 }
 `, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
@@ -646,7 +647,7 @@ resource "google_compute_region_per_instance_config" "default" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
   image = "debian-8-jessie-v20170523"
@@ -654,10 +655,10 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = "us-central1-c"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   physical_block_size_bytes = 4096
 }
 `, context) + testAccComputeRegionPerInstanceConfig_rigm(context)

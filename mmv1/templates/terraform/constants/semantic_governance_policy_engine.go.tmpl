@@ -1,0 +1,37 @@
+// Helper functions for the SemanticGovernancePolicyEngine (SGPE) resource,
+// referenced from the resource YAML's custom_code.constants key.
+
+// sgpePostReadDispatch runs after the standard Read has fetched the engine
+// into `res`, but before the schema is flattened from it (per resource.go.tmpl
+// ordering). The API returns 200 + INACTIVE (not 404) for a deprovisioned or
+// uninitialized singleton, so this translates INACTIVE into "gone" by clearing
+// the ID; every other state is left in state. A missing or non-string `state`
+// is a backend contract break and returns an error.
+//
+// It reads `res["state"]` directly because the schema flatten has not yet
+// populated d.Get("state") at this point, and accepts the minimal
+// sgpeResourceID interface rather than *schema.ResourceData so unit tests can
+// substitute a fake.
+type sgpeResourceID interface {
+	Id() string
+	SetId(string)
+}
+
+func sgpePostReadDispatch(d sgpeResourceID, res map[string]interface{}) error {
+	state, ok := res["state"].(string)
+	if !ok {
+		return fmt.Errorf("SGPE response is missing or has malformed state field; backend regression.")
+	}
+	// Only INACTIVE clears the ID (treat as deleted; next apply re-creates).
+	// Every other state — including FAILED and any unrecognized state a newer
+	// backend may add — is intentionally left in state. FAILED is a real
+	// terminal state (per the SGPE API a FAILED engine may be re-provisioned
+	// or deprovisioned), so we surface it via the Computed `state` attribute
+	// and let the user choose to destroy (deprovision) or re-apply
+	// (re-provision).
+	if state == "INACTIVE" {
+		log.Printf("[WARN] SemanticGovernancePolicyEngine %q is INACTIVE; treating as deleted, next apply will re-create", d.Id())
+		d.SetId("")
+	}
+	return nil
+}

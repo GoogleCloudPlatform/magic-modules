@@ -13,10 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	storage_tpg "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
 	"google.golang.org/api/googleapi"
@@ -62,6 +65,39 @@ func TestAccStorageBucket_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	project := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "project", project),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "name", bucketName),
+				),
+			},
+			{
+				ResourceName:       "google_storage_bucket.bucket",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -1390,7 +1426,7 @@ func TestAccStorageBucket_retentionPolicy(t *testing.T) {
 func TestAccStorageBucket_website(t *testing.T) {
 	t.Parallel()
 
-	bucketSuffix := fmt.Sprintf("tf-website-test-%d", acctest.RandInt(t))
+	bucketSuffix := fmt.Sprintf("tf-test-website-%d", acctest.RandInt(t))
 	errRe := regexp.MustCompile("one of\n`website.0.main_page_suffix,website.0.not_found_page` must be specified")
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1861,7 +1897,7 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 		}
 
 		// Wait 10 seconds and delete again
-		time.Sleep(10000 * time.Millisecond)
+		acctest.Sleep(10 * time.Second)
 
 		if err := storage_tpg.NewClient(config, config.UserAgent).Objects.Delete(bucketName, object.Name).Do(); err == nil {
 			log.Printf("[INFO] Deleted object %v at location %v\n\n", object.Name, object.SelfLink)
@@ -2429,7 +2465,7 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       matches_storage_class = []
-      age = 10
+      age                   = 10
     }
   }
   lifecycle_rule {
@@ -2500,6 +2536,17 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       age = 1
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+	   age              = 5
+       size_above_bytes = 100
+	   size_below_bytes = 500
     }
   }
 }
@@ -2591,6 +2638,17 @@ resource "google_storage_bucket" "bucket" {
     condition {
       matches_suffix = ["test"]
       age            = 2
+    }
+  }
+	lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+	  age              = 5
+      size_above_bytes = 200
+	  size_below_bytes = 1000
     }
   }
 }
@@ -2938,7 +2996,7 @@ resource "google_compute_subnetwork" "ipfilter_1" {
 }
 
 resource "google_project_iam_custom_role" "ipfilter_exempt_role" {
-  role_id     = "_%s"
+  role_id     = "tf_test_%s"
   title       = "IP Filter Exempt Role"
   description = "A custom role to bypass IP Filtering on GCS bucket."
   permissions = ["storage.buckets.exemptFromIpFilter"]
@@ -2985,7 +3043,7 @@ resource "google_compute_subnetwork" "ipfilter_1" {
 }
 
 resource "google_project_iam_custom_role" "ipfilter_exempt_role" {
-  role_id     = "_%s"
+  role_id     = "tf_test_%s"
   title       = "IP Filter Exempt Role"
   description = "A custom role to bypass IP Filtering on GCS bucket."
   permissions = ["storage.buckets.exemptFromIpFilter"]
@@ -3042,7 +3100,7 @@ resource "google_compute_subnetwork" "ipfilter_2" {
 }
 
 resource "google_project_iam_custom_role" "ipfilter_exempt_role" {
-  role_id     = "_%s"
+  role_id     = "tf_test_%s"
   title       = "IP Filter Exempt Role"
   description = "A custom role to bypass IP Filtering on GCS bucket."
   permissions = ["storage.buckets.exemptFromIpFilter"]
@@ -3187,7 +3245,7 @@ func TestAccStorageBucket_encryptionCmek(t *testing.T) {
 func TestAccStorageBucket_encryptionCsek(t *testing.T) {
 
 	t.Parallel()
-	bucketName := "tf-bucket-name" + acctest.RandString(t, 5)
+	bucketName := "tf-test-bucket-name" + acctest.RandString(t, 5)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

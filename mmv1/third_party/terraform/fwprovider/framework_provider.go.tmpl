@@ -5,6 +5,7 @@ import (
 
     sdk_schema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+    "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
     "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/ephemeral"
@@ -216,9 +217,23 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
+
+            // Generated Products. Although these will only be _populated_ for registered products, they
+            // must always be present to match the ProviderModel struct.
+            {{- range $product := $.Products }}
+            "{{ underscore $product.Name }}_custom_endpoint": &schema.StringAttribute{
+                Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            {{- end }}
         },
         Blocks: map[string]schema.Block{
             "batching": schema.ListNestedBlock{
+                Validators: []validator.List{
+                    listvalidator.SizeAtMost(1),
+                },
                 NestedObject: schema.NestedBlockObject{
                     Attributes: map[string]schema.Attribute{
                         "send_after": schema.StringAttribute{
@@ -234,6 +249,9 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 },
             },
             "external_credentials": schema.ListNestedBlock{
+                Validators: []validator.List{
+                    listvalidator.SizeAtMost(1),
+                },
                 NestedObject: schema.NestedBlockObject{
                     Attributes: map[string]schema.Attribute{
                         "audience": schema.StringAttribute{
@@ -259,14 +277,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
         },
     }
-	for _, p := range registry.ListProducts() {
-        resp.Schema.Attributes[p.CustomEndpointField] = &schema.StringAttribute{
-            Optional:     true,
-            Validators: []validator.String{
-                transport_tpg.CustomEndpointValidator(),
-            },
-        }
-	}
 }
 
 // Configure prepares the metadata/'meta' required for data sources and resources to function.

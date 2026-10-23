@@ -60,107 +60,178 @@ custom_code:
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/compute_backend_service.go.tmpl'
 schema_version: 1
-examples:
+samples:
   - name: 'backend_service_basic'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_basic'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_external_iap'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'tf-test-backend-service-external'
+    steps:
+      - name: 'backend_service_external_iap'
+        resource_id_vars:
+          backend_service_name: 'tf-test-backend-service-external'
   - name: 'backend_service_cache_simple'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_cache_simple'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_cache_include_http_headers'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_cache_include_http_headers'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
   - name: 'backend_service_cache_include_named_cookies'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_cache_include_named_cookies'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
   - name: 'backend_service_cache'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_cache'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_cache_bypass_cache_on_request_headers'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_cache_bypass_cache_on_request_headers'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_traffic_director_round_robin'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_traffic_director_round_robin'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_traffic_director_ring_hash'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_stateful_session_affinity'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_network_endpoint'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      neg_name: 'network-endpoint'
+    steps:
+      - name: 'backend_service_network_endpoint'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          neg_name: 'network-endpoint'
   - name: 'backend_service_in_flight'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_in_flight'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+          network_name: 'custom-vpc'
+          subnetwork_name: 'custom-subnet'
+          instance_template_name: 'instance-template'
+          igm_name: 'instance-group-manager'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    steps:
+      - name: 'backend_service_external_managed'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
   - name: 'backend_service_ip_address_selection_policy'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_ip_address_selection_policy'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
   - name: 'backend_service_custom_metrics'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'health-check'
-      network_name: 'network'
-    test_vars_overrides:
-      # for backward compatible
-      network_name: '"network" + randomSuffix'
+    steps:
+      - name: 'backend_service_custom_metrics'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          default_neg_name: 'network-endpoint'
+          health_check_name: 'health-check'
+          network_name: 'network'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
-    test_vars_overrides:
-      # for backward compatible
-      authentication_name: '"authentication" + randomSuffix'
+    steps:
+      - name: 'backend_service_tls_settings'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+          authentication_name: 'authentication'
+  - name: 'backend_service_identity'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'backend_service_identity'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+        vars:
+          description: 'description'
+      - name: 'backend_service_identity'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+          health_check_name: 'health-check'
+        vars:
+          description: 'updated description'
   - name: 'backend_service_dynamic_backends'
     primary_resource_id: 'default'
-    vars:
-      url_map_name: 'url_map'
     exclude_test: true
+    steps:
+      - name: 'backend_service_dynamic_backends'
+        resource_id_vars:
+          url_map_name: 'url_map'
   - name: 'backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
     min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+      - name: 'backend_service_dynamic_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+  - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
+  - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+        min_version: 'beta'
+        resource_id_vars:
+          backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -735,16 +806,19 @@ properties:
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'maxTtl'
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'clientTtl'
         type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_cdn_policy_ttl.go.tmpl'
       - name: 'negativeCaching'
         type: Boolean
         description: |
@@ -868,9 +942,7 @@ properties:
     max_size: 1
   - name: 'generated_id'
     type: Integer
-    description:
-      'The unique identifier for the resource. This identifier is defined by the
-      server.'
+    description: 'The unique identifier for the resource. This identifier is defined by the server.'
     api_name: id
     output: true
   - name: 'iap'
@@ -878,7 +950,7 @@ properties:
     description: |
       Settings for enabling Cloud Identity Aware Proxy.
       If OAuth client is not set, the Google-managed OAuth client is used.
-    default_from_api: true
+    diff_suppress_func: 'suppressIapDiffWhenUnset'
     send_empty_value: true
     properties:
       - name: 'enabled'
@@ -890,7 +962,9 @@ properties:
         type: String
         description: |
           OAuth2 Client ID for IAP
+        ignore_read: true
         send_empty_value: true
+        write_only: true
         diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress(" ")'
       - name: 'oauth2ClientSecret'
         type: String
@@ -900,6 +974,7 @@ properties:
         sensitive: true
         send_empty_value: true
         is_missing_in_cai: true
+        write_only: true
       - name: 'oauth2ClientSecretSha256'
         type: String
         description: |
@@ -921,7 +996,7 @@ properties:
       external load balancing. A backend service created for one type of
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
-    default_value: "EXTERNAL"
+    default_value: "EXTERNAL_MANAGED"
     # If you're modifying this value, it probably means Global ILB is now
     # an option. If that's the case, all of the documentation is based on
     # this resource supporting external load balancing only.
@@ -1612,11 +1687,37 @@ properties:
           For example: orca_load_report, tls.protocol
         item_type:
           type: String
+      - name: 'requestHeaders'
+        api_name: 'loggingHttpRequestHeaders'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and if the BackendService protocol is one of HTTP, HTTPS, HTTP2 and GRPC. Contains a list of request headers to be logged.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: |
+                The header name to match on for logging.
+              required: true
+      - name: 'responseHeaders'
+        api_name: 'loggingHttpResponseHeaders'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and if the BackendService protocol is one of HTTP, HTTPS, HTTP2 and GRPC. Contains a list of response headers to be logged.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: |
+                The header name to match on for logging.
+              required: true
   - name: 'serviceLbPolicy'
     type: String
     description: |
       URL to networkservices.ServiceLbPolicy resource.
-      Can only be set if load balancing scheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED and the scope is global.
+      Can only be set if load balancing scheme is EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED for a global backend service, and EXTERNAL_MANAGED or INTERNAL_MANAGED for a regional backend service. For a global backend service, the service lb policy must be global. For a regional backend service, the service lb policy must be regional and in the same region.
   - name: 'tlsSettings'
     type: NestedObject
     description: |
@@ -1629,6 +1730,8 @@ properties:
           TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
           server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
           regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
+        conflicts:
+          - 'tls_settings.0.identity'
       - name: 'subjectAltNames'
         type: Array
         description: |
@@ -1637,6 +1740,8 @@ properties:
           and requires that at least one SAN match one of the subjectAltNames in the list. This field is limited to 5 entries.
           When both sni and subjectAltNames are specified, the load balancer matches the backend certificate's SAN only to
           subjectAltNames.
+        conflicts:
+          - 'tls_settings.0.identity'
         item_type:
           type: NestedObject
           properties:
@@ -1658,6 +1763,21 @@ properties:
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
           Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
           Can only be specified if authenticationMode is not NONE.
+        conflicts:
+          - 'tls_settings.0.identity'
+        diff_suppress_func: 'suppressAuthenticationConfigWhenIdentitySet'
+      - name: 'identity'
+        type: String
+        description: |
+          The fully-specified SPIFFE ID without the spiffe:// scheme. Must be in the format //<trust_domain>/ns/<namespace>/sa/<subject>.
+          The load balancer uses certificates and roots of trust provisioned by the Managed Workload Identity system for this identity.
+          The Trust Domain within the identity must refer to a valid Workload Identity Pool, from which the TrustConfig and CertificateIssuanceConfig are inherited.
+          If set, you cannot configure sni, subjectAltNames, or authenticationConfig manually.
+        immutable: true
+        conflicts:
+          - 'tls_settings.0.authentication_config'
+          - 'tls_settings.0.subject_alt_names'
+          - 'tls_settings.0.sni'
   - name: 'maxStreamDuration'
     type: NestedObject
     description: |
@@ -1729,6 +1849,30 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+      - name: 'forwardProxy'
+        type: NestedObject
+        description: |
+          Dynamic Forwarding Proxy configuration.
+        min_version: beta
+        immutable: true
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling dynamic forwarding proxy.
+            immutable: true
+            required: true
+          - name: 'proxyMode'
+            type: Enum
+            min_version: beta
+            description: |
+              Determines the dynamic forwarding proxy mode
+            enum_values:
+              - 'DIRECT_FORWARDING'
+              - 'CLOUD_RUN'
+            immutable: true
+            required: true
   - name: 'params'
     type: NestedObject
     ignore_read: true

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/developerconnect"
 )
 
 func TestAccDeveloperConnectConnection_developerConnectConnectionGithubUpdate(t *testing.T) {
@@ -411,16 +412,16 @@ resource "google_developer_connect_connection" "my-connection" {
   }
 
   gitlab_enterprise_config {
-    host_uri = "https://gle-old.gcb-test.com"
+    host_uri = "https://gle-asia.gcb-test.com"
 
     webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/gitlab-enterprise-webhook/versions/latest"
 
     read_authorizer_credential {
-      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/gitlab-enterprise-read-cred-update/versions/latest"
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/tf-gle-asia-read/versions/latest"
     }
 
     authorizer_credential {
-      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/gitlab-enterprise-auth-cred-update/versions/latest"
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/tf-gle-asia-api/versions/latest"
     }
   }
 }

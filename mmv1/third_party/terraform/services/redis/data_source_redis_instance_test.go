@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/redis"
 )
 
 func TestAccRedisInstanceDatasource_basic(t *testing.T) {
@@ -30,6 +31,7 @@ func testAccRedisInstanceDatasourceConfig(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_redis_instance" "redis" {
   name               = "redis-test-%s"
+  region             = "us-east1"
   memory_size_gb     = 1
 
   labels   = {
@@ -38,7 +40,8 @@ resource "google_redis_instance" "redis" {
 }
 
 data "google_redis_instance" "redis" {
-  name = google_redis_instance.redis.name
+  name   = google_redis_instance.redis.name
+  region = "us-east1"
 }
 `, suffix)
 }

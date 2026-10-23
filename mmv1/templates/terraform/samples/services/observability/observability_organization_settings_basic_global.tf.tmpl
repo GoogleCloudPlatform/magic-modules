@@ -1,0 +1,10 @@
+data "google_observability_organization_settings" "settings_data" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  location     = "global"
+}
+
+resource "google_observability_organization_settings" "primary_global" {
+  location                 = "global"
+  organization             = "{{index $.TestEnvVars "org_id"}}"
+  default_storage_location = "us"
+}

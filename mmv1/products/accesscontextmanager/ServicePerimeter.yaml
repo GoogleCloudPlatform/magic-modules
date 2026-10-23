@@ -13,7 +13,7 @@
 
 ---
 # This is the singular of `ServicePerimeters`, any changes here should be made to `ServicePerimeters` as well
-name: 'ServicePerimeter'
+name: ServicePerimeter
 description: |
   ServicePerimeter describes a set of GCP resources which can freely import
   and export data amongst themselves, but not export outside of the
@@ -21,14 +21,14 @@ description: |
   has a target outside of the ServicePerimeter, the request will be blocked.
   Otherwise the request is allowed. There are two types of Service Perimeter
   - Regular and Bridge. Regular Service Perimeters cannot overlap, a single
-  GCP project can only belong to a single regular Service Perimeter. Service
+  GCP project, folder, or VPC network can only belong to a single regular Service Perimeter. Service
   Perimeter Bridges can contain only GCP projects as members, a single GCP
   project may belong to multiple Service Perimeter Bridges.
 references:
   guides:
-    'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
-    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
+    Service Perimeter Quickstart: https://cloud.google.com/vpc-service-controls/docs/quickstart
+    Guide to Ingress and Egress Rules: https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules
+  api: https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters
 docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
@@ -36,8 +36,7 @@ docs:
     in the provider configuration. Otherwise the ACM API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-id_format: '{{name}}'
-base_url: ''
+base_url: ""
 self_link: '{{name}}'
 # This is an unusual API, so we need to use a few fields to map the methods
 # to the right URL.
@@ -45,56 +44,65 @@ self_link: '{{name}}'
 # base_url is the Get and Delete and Patch URL. It is empty on purpose.
 # List won't work yet. It should share a URL with Create.
 create_url: '{{parent}}/servicePerimeters'
-update_verb: 'PATCH'
 update_mask: true
-mutex: '{{parent}}'
+update_verb: PATCH
+id_format: '{{name}}'
 import_format:
   - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-custom_code:
-  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
-  encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
+mutex: '{{parent}}'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
-examples:
-  - name: 'access_context_manager_service_perimeter_basic'
-    primary_resource_id: 'service-perimeter'
-    vars:
-      access_level_name: 'chromeos_no_lock'
-      service_perimeter_name: 'restrict_storage'
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+  encoder: templates/terraform/encoders/access_level_never_send_parent.go.tmpl
+  constants: templates/terraform/constants/access_context_manager.go.tmpl
+  custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl
+  pre_update: templates/terraform/pre_update/access_context_manager_service_perimeter.go.tmpl
+samples:
+  - name: access_context_manager_service_perimeter_basic
+    primary_resource_id: service-perimeter
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_secure_data_exchange'
-    primary_resource_id: 'secure-data-exchange'
-    vars:
-      access_level_name: 'secure_data_exchange'
+    steps:
+      - name: access_context_manager_service_perimeter_basic
+        resource_id_vars:
+          access_level_name: chromeos_no_lock
+          service_perimeter_name: restrict_storage
+  - name: access_context_manager_service_perimeter_secure_data_exchange
+    primary_resource_id: secure-data-exchange
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_dry-run'
-    primary_resource_id: 'service-perimeter'
-    vars:
-      service_perimeter_name: 'restrict_bigquery_dryrun_storage'
+    steps:
+      - name: access_context_manager_service_perimeter_secure_data_exchange
+        resource_id_vars:
+          access_level_name: secure_data_exchange
+  - name: access_context_manager_service_perimeter_dry-run
+    primary_resource_id: service-perimeter
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_granular_controls'
-    primary_resource_id: 'service-perimeter'
-    vars:
-      service_perimeter_name: 'granular_controls'
+    steps:
+      - name: access_context_manager_service_perimeter_dry-run
+        resource_id_vars:
+          service_perimeter_name: restrict_bigquery_dryrun_storage
+  - name: access_context_manager_service_perimeter_granular_controls
+    primary_resource_id: service-perimeter
     exclude_test: true
+    steps:
+      - name: access_context_manager_service_perimeter_granular_controls
+        resource_id_vars:
+          service_perimeter_name: granular_controls
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
-  - name: 'parent'
+  - name: parent
     type: String
     description: |
       The AccessPolicy this ServicePerimeter lives in.
@@ -102,7 +110,7 @@ parameters:
     required: true
     immutable: true
     ignore_read: true
-  - name: 'name'
+  - name: name
     type: String
     description: |
       Resource name for the ServicePerimeter. The short_name component must
@@ -111,27 +119,32 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'title'
+  - name: title
     type: String
     description: |
       Human readable title. Must be unique within the Policy.
     required: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       Description of the ServicePerimeter and its use. Does not affect
       behavior.
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the AccessPolicy was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the AccessPolicy was updated in UTC.
     output: true
-  - name: 'perimeterType'
+  - name: etag
+    type: Fingerprint
+    description: |
+      The etag for the version of the ServicePerimeter that this request is based on.
+    output: true
+  - name: perimeterType
     type: Enum
     description: |
       Specifies the type of the Perimeter. There are two types: regular and
@@ -151,32 +164,34 @@ properties:
       with a common perimeter, but should not be able to share data among
       themselves.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-    default_value: "PERIMETER_TYPE_REGULAR"
+    custom_flatten: templates/terraform/custom_flatten/default_if_empty.tmpl
+    default_value: PERIMETER_TYPE_REGULAR
     enum_values:
-      - 'PERIMETER_TYPE_REGULAR'
-      - 'PERIMETER_TYPE_BRIDGE'
-  - name: 'status'
+      - PERIMETER_TYPE_REGULAR
+      - PERIMETER_TYPE_BRIDGE
+  - name: status
     type: NestedObject
     description: |
       ServicePerimeter configuration. Specifies sets of resources,
       restricted services and access levels that determine
       perimeter content and boundaries.
     properties:
-      - name: 'resources'
+      - name: resources
         type: Array
         description: |
           A list of GCP resources that are inside of the service perimeter.
-          Currently only projects are allowed.
-          Format: projects/{project_number}
+          Projects, folders, and VPC networks are allowed.
+          Project format: `projects/{project_number}`
+          Folder format: `folders/{folder_number}`
+          VPC network format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`
         is_set: true
         at_least_one_of:
-          - 'status.0.resources'
-          - 'status.0.access_levels'
-          - 'status.0.restricted_services'
+          - status.0.resources
+          - status.0.access_levels
+          - status.0.restricted_services
         item_type:
           type: String
-      - name: 'accessLevels'
+      - name: accessLevels
         type: Array
         description: |
           A list of AccessLevel resource names that allow resources within
@@ -191,12 +206,12 @@ properties:
           Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
         is_set: true
         at_least_one_of:
-          - 'status.0.resources'
-          - 'status.0.access_levels'
-          - 'status.0.restricted_services'
+          - status.0.resources
+          - status.0.access_levels
+          - status.0.restricted_services
         item_type:
           type: String
-      - name: 'restrictedServices'
+      - name: restrictedServices
         type: Array
         description: |
           GCP services that are subject to the Service Perimeter
@@ -206,23 +221,23 @@ properties:
           restrictions.
         is_set: true
         at_least_one_of:
-          - 'status.0.resources'
-          - 'status.0.access_levels'
-          - 'status.0.restricted_services'
+          - status.0.resources
+          - status.0.access_levels
+          - status.0.restricted_services
         item_type:
           type: String
-      - name: 'vpcAccessibleServices'
+      - name: vpcAccessibleServices
         type: NestedObject
         description: |
           Specifies how APIs are allowed to communicate within the Service
           Perimeter.
         properties:
-          - name: 'enableRestriction'
+          - name: enableRestriction
             type: Boolean
             description: |
               Whether to restrict API calls within the Service Perimeter to the
               list of APIs specified in 'allowedServices'.
-          - name: 'allowedServices'
+          - name: allowedServices
             type: Array
             description: |
               The list of APIs usable within the Service Perimeter.
@@ -230,7 +245,47 @@ properties:
             is_set: true
             item_type:
               type: String
-      - name: 'ingressPolicies'
+          - name: allowedServicePatterns
+            type: Array
+            description: |
+              Specifies which Google services are allowed to be accessed from
+              VPC networks in the service perimeter.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: service
+                  type: String
+                  description: 'Supported service to allow.'
+                - name: pattern
+                  type: String
+                  description: 'URL pattern to allow.'
+                - name: modifiers
+                  type: Array
+                  description: 'Modifiers to apply to the requests that match the URL pattern.'
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: addRequestHeader
+                        type: NestedObject
+                        description: 'Adds additional HTTP request headers.'
+                        properties:
+                          - name: key
+                            type: String
+                            required: true
+                            description: 'HTTP header key.'
+                          - name: value
+                            type: String
+                            required: true
+                            description: 'HTTP header value.'
+          - name: servicePatternsEnforcementScopes
+            type: Array
+            description: |
+              Defines the enforcement scopes of service patterns.
+            item_type:
+              type: Enum
+              enum_values:
+                - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
+      - name: ingressPolicies
         type: Array
         description: |
           List of `IngressPolicies` to apply to the perimeter. A perimeter may
@@ -240,25 +295,25 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'ingressFrom'
+            - name: ingressFrom
               type: NestedObject
               description: |
                 Defines the conditions on the source of a request causing this `IngressPolicy`
                 to apply.
               properties:
-                - name: 'identityType'
+                - name: identityType
                   type: Enum
                   description: |
                     Specifies the type of identities that are allowed access from outside the
                     perimeter. If left unspecified, then members of `identities` field will be
                     allowed access.
                   enum_values:
-                    - 'IDENTITY_TYPE_UNSPECIFIED'
-                    - 'ANY_IDENTITY'
-                    - 'ANY_USER_ACCOUNT'
-                    - 'ANY_SERVICE_ACCOUNT'
+                    - IDENTITY_TYPE_UNSPECIFIED
+                    - ANY_IDENTITY
+                    - ANY_USER_ACCOUNT
+                    - ANY_SERVICE_ACCOUNT
                   diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
-                - name: 'identities'
+                - name: identities
                   type: Array
                   description: |
                     Identities can be an individual user, service account, Google group,
@@ -269,14 +324,14 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-                - name: 'sources'
+                - name: sources
                   type: Array
                   description: |
                     Sources that this `IngressPolicy` authorizes access from.
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'accessLevel'
+                      - name: accessLevel
                         type: String
                         description: |
                           An `AccessLevel` resource name that allow resources within the
@@ -287,29 +342,42 @@ properties:
                           with request origins within the perimeter.
                           Example `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL.`
                           If * is specified, then all IngressSources will be allowed.
-                      - name: 'resource'
+                      - name: resource
                         type: String
                         description: |
                           A Google Cloud resource that is allowed to ingress the perimeter.
                           Requests from these resources will be allowed to access perimeter data.
-                          Currently only projects and VPCs are allowed.
-                          Project format: `projects/{projectNumber}`
-                          VPC network format:
-                          `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`.
-                          The project may be in any Google Cloud organization, not just the
+                          Projects, folders, organizations, and VPC networks are allowed.
+                          Project format: `projects/{project_number}`
+                          Folder format: `folders/{folder_number}`
+                          Organization format: `organizations/{organization_number}`
+                          VPC network format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`.
+                          The resource may be in any Google Cloud organization, not just the
                           organization that the perimeter is defined in. `*` is not allowed, the case
                           of allowing all Google Cloud resources only is not supported.
-            - name: 'ingressTo'
+                      - name: 'pscEndpoint'
+                        type: NestedObject
+                        description: |
+                          A Private Service Connect endpoint that is allowed to access the perimeter.
+                          The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+                        properties:
+                          - name: 'forwardingRule'
+                            type: String
+                            description: |
+                              The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+                              Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
+            - name: ingressTo
               type: NestedObject
               description: |
                 Defines the conditions on the `ApiOperation` and request destination that cause
                 this `IngressPolicy` to apply.
               properties:
-                - name: 'resources'
+                - name: resources
                   type: Array
                   description: |
-                    A list of resources, currently only projects in the form
-                    `projects/<projectnumber>`, protected by this `ServicePerimeter`
+                    A list of resources protected by this `ServicePerimeter`, in the form
+                    `projects/{project_number}`, `folders/{folder_number}`, or
+                    `organizations/{organization_number}`,
                     that are allowed to be accessed by sources defined in the
                     corresponding `IngressFrom`. A request matches if it contains
                     a resource in this list. If `*` is specified for resources,
@@ -319,7 +387,7 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-                - name: 'roles'
+                - name: roles
                   type: Array
                   item_type:
                     type: String
@@ -327,7 +395,7 @@ properties:
                     A list of IAM roles that represent the set of operations that the sources
                     specified in the corresponding `IngressFrom`
                     are allowed to perform.
-                - name: 'operations'
+                - name: operations
                   type: Array
                   description: |
                     A list of `ApiOperations` the sources specified in corresponding `IngressFrom`
@@ -335,13 +403,13 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'serviceName'
+                      - name: serviceName
                         type: String
                         description: |
                           The name of the API whose methods or permissions the `IngressPolicy` or
                           `EgressPolicy` want to allow. A single `ApiOperation` with `serviceName`
                           field set to `*` will allow all methods AND permissions for all services.
-                      - name: 'methodSelectors'
+                      - name: methodSelectors
                         type: Array
                         description: |
                           API methods or permissions to allow. Method or permission must belong to
@@ -351,22 +419,22 @@ properties:
                         item_type:
                           type: NestedObject
                           properties:
-                            - name: 'method'
+                            - name: method
                               type: String
                               description: |
                                 Value for method should be a valid method name for the corresponding
                                 serviceName in `ApiOperation`. If `*` used as value for `method`, then
                                 ALL methods and permissions are allowed.
-                            - name: 'permission'
+                            - name: permission
                               type: String
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
-            - name: 'title'
+            - name: title
               type: String
               description: |
                 Human readable title. Must be unique within the perimeter. Does not affect behavior.
-      - name: 'egressPolicies'
+      - name: egressPolicies
         type: Array
         description: |
           List of EgressPolicies to apply to the perimeter. A perimeter may
@@ -376,49 +444,63 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'egressFrom'
+            - name: egressFrom
               type: NestedObject
               description: |
                 Defines conditions on the source of a request causing this `EgressPolicy` to apply.
               properties:
-                - name: 'identityType'
+                - name: identityType
                   type: Enum
                   description: |
                     Specifies the type of identities that are allowed access to outside the
                     perimeter. If left unspecified, then members of `identities` field will
                     be allowed access.
                   enum_values:
-                    - 'IDENTITY_TYPE_UNSPECIFIED'
-                    - 'ANY_IDENTITY'
-                    - 'ANY_USER_ACCOUNT'
-                    - 'ANY_SERVICE_ACCOUNT'
+                    - IDENTITY_TYPE_UNSPECIFIED
+                    - ANY_IDENTITY
+                    - ANY_USER_ACCOUNT
+                    - ANY_SERVICE_ACCOUNT
                   diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
-                - name: 'sources'
+                - name: sources
                   type: Array
-                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  description: Sources that this EgressPolicy authorizes access from.
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'accessLevel'
+                      - name: accessLevel
                         type: String
-                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
-                      - name: 'resource'
+                        description: An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.
+                      - name: resource
                         type: String
                         description: |
                           A Google Cloud resource that is allowed to egress the perimeter.
                           Requests from these resources are allowed to access data outside the perimeter.
-                          Currently only projects are allowed. Project format: `projects/{project_number}`.
+                          Projects, folders, and organizations are allowed.
+                          Project format: `projects/{project_number}`
+                          Folder format: `folders/{folder_number}`
+                          Organization format: `organizations/{organization_number}`
                           The resource may be in any Google Cloud organization, not just the
                           organization that the perimeter is defined in. `*` is not allowed, the
                           case of allowing all Google Cloud resources only is not supported.
-                - name: 'sourceRestriction'
+                      - name: 'pscEndpoint'
+                        type: NestedObject
+                        description: |
+                          A Private Service Connect endpoint that is allowed to access data outside the perimeter.
+                          The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+                        properties:
+                          - name: 'forwardingRule'
+                            type: String
+                            description: |
+                              The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+                              Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
+                - name: sourceRestriction
                   type: Enum
-                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  description: Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.
                   enum_values:
-                    - 'SOURCE_RESTRICTION_UNSPECIFIED'
-                    - 'SOURCE_RESTRICTION_ENABLED'
-                    - 'SOURCE_RESTRICTION_DISABLED'
-                - name: 'identities'
+                    - SOURCE_RESTRICTION_UNSPECIFIED
+                    - SOURCE_RESTRICTION_ENABLED
+                    - SOURCE_RESTRICTION_DISABLED
+                - name: identities
                   type: Array
                   description: |
                     Identities can be an individual user, service account, Google group,
@@ -429,24 +511,25 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-            - name: 'egressTo'
+            - name: egressTo
               type: NestedObject
               description: |
                 Defines the conditions on the `ApiOperation` and destination resources that
                 cause this `EgressPolicy` to apply.
               properties:
-                - name: 'resources'
+                - name: resources
                   type: Array
                   description: |
-                    A list of resources, currently only projects in the form
-                    `projects/<projectnumber>`, that match this to stanza. A request matches
+                    A list of resources, in the form `projects/{project_number}`,
+                    `folders/{folder_number}`, or `organizations/{organization_number}`,
+                    that match this to stanza. A request matches
                     if it contains a resource in this list. If * is specified for resources,
                     then this `EgressTo` rule will authorize access to all resources outside
                     the perimeter.
                   is_set: true
                   item_type:
                     type: String
-                - name: 'externalResources'
+                - name: externalResources
                   type: Array
                   description: |
                     A list of external resources that are allowed to be accessed. A request
@@ -455,7 +538,7 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-                - name: 'roles'
+                - name: roles
                   type: Array
                   item_type:
                     type: String
@@ -463,7 +546,7 @@ properties:
                     A list of IAM roles that represent the set of operations that the sources
                     specified in the corresponding `EgressFrom`
                     are allowed to perform.
-                - name: 'operations'
+                - name: operations
                   type: Array
                   description: |
                     A list of `ApiOperations` that this egress rule applies to. A request matches
@@ -471,13 +554,13 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'serviceName'
+                      - name: serviceName
                         type: String
                         description: |
                           The name of the API whose methods or permissions the `IngressPolicy` or
                           `EgressPolicy` want to allow. A single `ApiOperation` with serviceName
                           field set to `*` will allow all methods AND permissions for all services.
-                      - name: 'methodSelectors'
+                      - name: methodSelectors
                         type: Array
                         description: |
                           API methods or permissions to allow. Method or permission must belong
@@ -487,22 +570,22 @@ properties:
                         item_type:
                           type: NestedObject
                           properties:
-                            - name: 'method'
+                            - name: method
                               type: String
                               description: |
                                 Value for `method` should be a valid method name for the corresponding
                                 `serviceName` in `ApiOperation`. If `*` used as value for method,
                                 then ALL methods and permissions are allowed.
-                            - name: 'permission'
+                            - name: permission
                               type: String
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
-            - name: 'title'
+            - name: title
               type: String
               description: |
                 Human readable title. Must be unique within the perimeter. Does not affect behavior.
-  - name: 'spec'
+  - name: spec
     type: NestedObject
     description: |
       Proposed (or dry run) ServicePerimeter configuration.
@@ -510,20 +593,22 @@ properties:
       without enforcing actual access restrictions. Only allowed to be set when
       the `useExplicitDryRunSpec` flag is set.
     properties:
-      - name: 'resources'
+      - name: resources
         type: Array
         description: |
           A list of GCP resources that are inside of the service perimeter.
-          Currently only projects are allowed.
-          Format: projects/{project_number}
+          Projects, folders, and VPC networks are allowed.
+          Project format: `projects/{project_number}`
+          Folder format: `folders/{folder_number}`
+          VPC network format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`
         is_set: true
         at_least_one_of:
-          - 'spec.0.resources'
-          - 'spec.0.access_levels'
-          - 'spec.0.restricted_services'
+          - spec.0.resources
+          - spec.0.access_levels
+          - spec.0.restricted_services
         item_type:
           type: String
-      - name: 'accessLevels'
+      - name: accessLevels
         type: Array
         description: |
           A list of AccessLevel resource names that allow resources within
@@ -538,12 +623,12 @@ properties:
           Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
         is_set: true
         at_least_one_of:
-          - 'spec.0.resources'
-          - 'spec.0.access_levels'
-          - 'spec.0.restricted_services'
+          - spec.0.resources
+          - spec.0.access_levels
+          - spec.0.restricted_services
         item_type:
           type: String
-      - name: 'restrictedServices'
+      - name: restrictedServices
         type: Array
         description: |
           GCP services that are subject to the Service Perimeter
@@ -553,23 +638,23 @@ properties:
           restrictions.
         is_set: true
         at_least_one_of:
-          - 'spec.0.resources'
-          - 'spec.0.access_levels'
-          - 'spec.0.restricted_services'
+          - spec.0.resources
+          - spec.0.access_levels
+          - spec.0.restricted_services
         item_type:
           type: String
-      - name: 'vpcAccessibleServices'
+      - name: vpcAccessibleServices
         type: NestedObject
         description: |
           Specifies how APIs are allowed to communicate within the Service
           Perimeter.
         properties:
-          - name: 'enableRestriction'
+          - name: enableRestriction
             type: Boolean
             description: |
               Whether to restrict API calls within the Service Perimeter to the
               list of APIs specified in 'allowedServices'.
-          - name: 'allowedServices'
+          - name: allowedServices
             type: Array
             description: |
               The list of APIs usable within the Service Perimeter.
@@ -577,7 +662,47 @@ properties:
             is_set: true
             item_type:
               type: String
-      - name: 'ingressPolicies'
+          - name: allowedServicePatterns
+            type: Array
+            description: |
+              Specifies which Google services are allowed to be accessed from
+              VPC networks in the service perimeter.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: service
+                  type: String
+                  description: 'Supported service to allow.'
+                - name: pattern
+                  type: String
+                  description: 'URL pattern to allow.'
+                - name: modifiers
+                  type: Array
+                  description: 'Modifiers to apply to the requests that match the URL pattern.'
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: addRequestHeader
+                        type: NestedObject
+                        description: 'Adds additional HTTP request headers.'
+                        properties:
+                          - name: key
+                            type: String
+                            required: true
+                            description: 'HTTP header key.'
+                          - name: value
+                            type: String
+                            required: true
+                            description: 'HTTP header value.'
+          - name: servicePatternsEnforcementScopes
+            type: Array
+            description: |
+              Defines the enforcement scopes of service patterns.
+            item_type:
+              type: Enum
+              enum_values:
+                - 'GOOGLE_APIS_VIA_PRIVATE_PATH'
+      - name: ingressPolicies
         type: Array
         description: |
           List of `IngressPolicies` to apply to the perimeter. A perimeter may
@@ -587,25 +712,25 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'ingressFrom'
+            - name: ingressFrom
               type: NestedObject
               description: |
                 Defines the conditions on the source of a request causing this `IngressPolicy`
                 to apply.
               properties:
-                - name: 'identityType'
+                - name: identityType
                   type: Enum
                   description: |
                     Specifies the type of identities that are allowed access from outside the
                     perimeter. If left unspecified, then members of `identities` field will be
                     allowed access.
                   enum_values:
-                    - 'IDENTITY_TYPE_UNSPECIFIED'
-                    - 'ANY_IDENTITY'
-                    - 'ANY_USER_ACCOUNT'
-                    - 'ANY_SERVICE_ACCOUNT'
+                    - IDENTITY_TYPE_UNSPECIFIED
+                    - ANY_IDENTITY
+                    - ANY_USER_ACCOUNT
+                    - ANY_SERVICE_ACCOUNT
                   diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
-                - name: 'identities'
+                - name: identities
                   type: Array
                   description: |
                     A list of identities that are allowed access through this ingress policy.
@@ -614,14 +739,14 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-                - name: 'sources'
+                - name: sources
                   type: Array
                   description: |
                     Sources that this `IngressPolicy` authorizes access from.
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'accessLevel'
+                      - name: accessLevel
                         type: String
                         description: |
                           An `AccessLevel` resource name that allow resources within the
@@ -632,26 +757,42 @@ properties:
                           with request origins within the perimeter.
                           Example `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL.`
                           If * is specified, then all IngressSources will be allowed.
-                      - name: 'resource'
+                      - name: resource
                         type: String
                         description: |
                           A Google Cloud resource that is allowed to ingress the perimeter.
                           Requests from these resources will be allowed to access perimeter data.
-                          Currently only projects are allowed. Format `projects/{project_number}`
-                          The project may be in any Google Cloud organization, not just the
+                          Projects, folders, organizations, and VPC networks are allowed.
+                          Project format: `projects/{project_number}`
+                          Folder format: `folders/{folder_number}`
+                          Organization format: `organizations/{organization_number}`
+                          VPC network format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`
+                          The resource may be in any Google Cloud organization, not just the
                           organization that the perimeter is defined in. `*` is not allowed, the case
                           of allowing all Google Cloud resources only is not supported.
-            - name: 'ingressTo'
+                      - name: 'pscEndpoint'
+                        type: NestedObject
+                        description: |
+                          A Private Service Connect endpoint that is allowed to access the perimeter.
+                          The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+                        properties:
+                          - name: 'forwardingRule'
+                            type: String
+                            description: |
+                              The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+                              Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
+            - name: ingressTo
               type: NestedObject
               description: |
                 Defines the conditions on the `ApiOperation` and request destination that cause
                 this `IngressPolicy` to apply.
               properties:
-                - name: 'resources'
+                - name: resources
                   type: Array
                   description: |
-                    A list of resources, currently only projects in the form
-                    `projects/<projectnumber>`, protected by this `ServicePerimeter`
+                    A list of resources protected by this `ServicePerimeter`, in the form
+                    `projects/{project_number}`, `folders/{folder_number}`, or
+                    `organizations/{organization_number}`,
                     that are allowed to be accessed by sources defined in the
                     corresponding `IngressFrom`. A request matches if it contains
                     a resource in this list. If `*` is specified for resources,
@@ -661,7 +802,7 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-                - name: 'roles'
+                - name: roles
                   type: Array
                   item_type:
                     type: String
@@ -669,7 +810,7 @@ properties:
                     A list of IAM roles that represent the set of operations that the sources
                     specified in the corresponding `IngressFrom`
                     are allowed to perform.
-                - name: 'operations'
+                - name: operations
                   type: Array
                   description: |
                     A list of `ApiOperations` the sources specified in corresponding `IngressFrom`
@@ -677,13 +818,13 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'serviceName'
+                      - name: serviceName
                         type: String
                         description: |
                           The name of the API whose methods or permissions the `IngressPolicy` or
                           `EgressPolicy` want to allow. A single `ApiOperation` with `serviceName`
                           field set to `*` will allow all methods AND permissions for all services.
-                      - name: 'methodSelectors'
+                      - name: methodSelectors
                         type: Array
                         description: |
                           API methods or permissions to allow. Method or permission must belong to
@@ -693,22 +834,22 @@ properties:
                         item_type:
                           type: NestedObject
                           properties:
-                            - name: 'method'
+                            - name: method
                               type: String
                               description: |
                                 Value for method should be a valid method name for the corresponding
                                 serviceName in `ApiOperation`. If `*` used as value for `method`, then
                                 ALL methods and permissions are allowed.
-                            - name: 'permission'
+                            - name: permission
                               type: String
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
-            - name: 'title'
+            - name: title
               type: String
               description: |
                 Human readable title. Must be unique within the perimeter. Does not affect behavior.
-      - name: 'egressPolicies'
+      - name: egressPolicies
         type: Array
         description: |
           List of EgressPolicies to apply to the perimeter. A perimeter may
@@ -718,49 +859,63 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'egressFrom'
+            - name: egressFrom
               type: NestedObject
               description: |
                 Defines conditions on the source of a request causing this `EgressPolicy` to apply.
               properties:
-                - name: 'identityType'
+                - name: identityType
                   type: Enum
                   description: |
                     Specifies the type of identities that are allowed access to outside the
                     perimeter. If left unspecified, then members of `identities` field will
                     be allowed access.
                   enum_values:
-                    - 'IDENTITY_TYPE_UNSPECIFIED'
-                    - 'ANY_IDENTITY'
-                    - 'ANY_USER_ACCOUNT'
-                    - 'ANY_SERVICE_ACCOUNT'
+                    - IDENTITY_TYPE_UNSPECIFIED
+                    - ANY_IDENTITY
+                    - ANY_USER_ACCOUNT
+                    - ANY_SERVICE_ACCOUNT
                   diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
-                - name: 'sources'
+                - name: sources
                   type: Array
-                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  description: Sources that this EgressPolicy authorizes access from.
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'accessLevel'
+                      - name: accessLevel
                         type: String
-                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
-                      - name: 'resource'
+                        description: An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.
+                      - name: resource
                         type: String
                         description: |
                           A Google Cloud resource that is allowed to egress the perimeter.
                           Requests from these resources are allowed to access data outside the perimeter.
-                          Currently only projects are allowed. Project format: `projects/{project_number}`.
+                          Projects, folders, and organizations are allowed.
+                          Project format: `projects/{project_number}`
+                          Folder format: `folders/{folder_number}`
+                          Organization format: `organizations/{organization_number}`
                           The resource may be in any Google Cloud organization, not just the
                           organization that the perimeter is defined in. `*` is not allowed, the
                           case of allowing all Google Cloud resources only is not supported.
-                - name: 'sourceRestriction'
+                      - name: 'pscEndpoint'
+                        type: NestedObject
+                        description: |
+                          A Private Service Connect endpoint that is allowed to access data outside the perimeter.
+                          The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+                        properties:
+                          - name: 'forwardingRule'
+                            type: String
+                            description: |
+                              The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+                              Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
+                - name: sourceRestriction
                   type: Enum
-                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  description: Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.
                   enum_values:
-                    - 'SOURCE_RESTRICTION_UNSPECIFIED'
-                    - 'SOURCE_RESTRICTION_ENABLED'
-                    - 'SOURCE_RESTRICTION_DISABLED'
-                - name: 'identities'
+                    - SOURCE_RESTRICTION_UNSPECIFIED
+                    - SOURCE_RESTRICTION_ENABLED
+                    - SOURCE_RESTRICTION_DISABLED
+                - name: identities
                   type: Array
                   description: |
                     A list of identities that are allowed access through this `EgressPolicy`.
@@ -769,24 +924,25 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-            - name: 'egressTo'
+            - name: egressTo
               type: NestedObject
               description: |
                 Defines the conditions on the `ApiOperation` and destination resources that
                 cause this `EgressPolicy` to apply.
               properties:
-                - name: 'resources'
+                - name: resources
                   type: Array
                   description: |
-                    A list of resources, currently only projects in the form
-                    `projects/<projectnumber>`, that match this to stanza. A request matches
+                    A list of resources, in the form `projects/{project_number}`,
+                    `folders/{folder_number}`, or `organizations/{organization_number}`,
+                    that match this to stanza. A request matches
                     if it contains a resource in this list. If * is specified for resources,
                     then this `EgressTo` rule will authorize access to all resources outside
                     the perimeter.
                   is_set: true
                   item_type:
                     type: String
-                - name: 'externalResources'
+                - name: externalResources
                   type: Array
                   description: |
                     A list of external resources that are allowed to be accessed. A request
@@ -795,7 +951,7 @@ properties:
                   is_set: true
                   item_type:
                     type: String
-                - name: 'roles'
+                - name: roles
                   type: Array
                   item_type:
                     type: String
@@ -803,7 +959,7 @@ properties:
                     A list of IAM roles that represent the set of operations that the sources
                     specified in the corresponding `EgressFrom`
                     are allowed to perform.
-                - name: 'operations'
+                - name: operations
                   type: Array
                   description: |
                     A list of `ApiOperations` that this egress rule applies to. A request matches
@@ -811,13 +967,13 @@ properties:
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: 'serviceName'
+                      - name: serviceName
                         type: String
                         description: |
                           The name of the API whose methods or permissions the `IngressPolicy` or
                           `EgressPolicy` want to allow. A single `ApiOperation` with serviceName
                           field set to `*` will allow all methods AND permissions for all services.
-                      - name: 'methodSelectors'
+                      - name: methodSelectors
                         type: Array
                         description: |
                           API methods or permissions to allow. Method or permission must belong
@@ -827,22 +983,22 @@ properties:
                         item_type:
                           type: NestedObject
                           properties:
-                            - name: 'method'
+                            - name: method
                               type: String
                               description: |
                                 Value for `method` should be a valid method name for the corresponding
                                 `serviceName` in `ApiOperation`. If `*` used as value for method,
                                 then ALL methods and permissions are allowed.
-                            - name: 'permission'
+                            - name: permission
                               type: String
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
-            - name: 'title'
+            - name: title
               type: String
               description: |
                 Human readable title. Must be unique within the perimeter. Does not affect behavior.
-  - name: 'useExplicitDryRunSpec'
+  - name: useExplicitDryRunSpec
     type: Boolean
     description: |
       Use explicit dry run spec flag. Ordinarily, a dry-run spec implicitly exists

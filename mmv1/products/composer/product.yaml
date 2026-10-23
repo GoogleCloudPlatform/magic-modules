@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'Composer'
-display_name: 'Cloud Composer'
-versions:
-  - name: 'ga'
-    base_url: 'https://composer.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://composer.googleapis.com/v1beta1/'
+name: Composer
+display_name: Cloud Composer
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://composer.googleapis.com/v1/
+  - name: beta
+    base_url: https://composer.googleapis.com/v1beta1/

@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -36,20 +38,20 @@ func TestAccComputeBackendBucketSignedUrlKey_basic(t *testing.T) {
 func testAccComputeBackendBucketSignedUrlKey_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_backend_bucket_signed_url_key" "backend_key" {
-  name           = "test-key-%{random_suffix}"
+  name           = "tf-test-test-key-%{random_suffix}"
   key_value      = "iAmAFakeKeyRandomBytes=="
   backend_bucket = google_compute_backend_bucket.test_backend.name
 }
 
 resource "google_compute_backend_bucket" "test_backend" {
-  name        = "test-signed-backend-bucket-%{random_suffix}"
+  name        = "tf-test-test-signed-backend-bucket-%{random_suffix}"
   description = "Contains beautiful images"
   bucket_name = google_storage_bucket.bucket.name
   enable_cdn  = true
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "test-storage-bucket-%{random_suffix}"
+  name     = "tf-test-test-storage-bucket-%{random_suffix}"
   location = "EU"
 }
 `, context)
@@ -93,7 +95,7 @@ func checkComputeBackendBucketSignedUrlKeyExists(t *testing.T, s *terraform.Stat
 		config := acctest.GoogleProviderConfig(t)
 		keyName := rs.Primary.Attributes["name"]
 
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/backendBuckets/{{backend_bucket}}")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(compute.Product, config)+"projects/{{project}}/global/backendBuckets/{{backend_bucket}}")
 		if err != nil {
 			return false, err
 		}

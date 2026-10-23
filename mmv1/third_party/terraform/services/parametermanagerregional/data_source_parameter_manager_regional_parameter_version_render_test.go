@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanagerregional"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanagerregional"
 )
 
 func TestAccDataSourceParameterManagerRegionalRegionalParameterVersionRender_basicWithResourceReference(t *testing.T) {
@@ -32,7 +34,7 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameterVersionRender_bas
 				// of the parameter and it can take up to 7 minutes for the role to take effect. For more information
 				// see the access change propagation documentation: https://cloud.google.com/iam/docs/access-change-propagation.
 				PreConfig: func() {
-					time.Sleep(7 * time.Minute)
+					acctest.Sleep(7 * time.Minute)
 				},
 				Config: testAccParameterManagerRegionalRegionalParameterVersionRender_basicWithResourceReferenceWithDatasource(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -139,7 +141,7 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameterVersionRender_wit
 				// of the parameter and it can take up to 7 minutes for the role to take effect. For more information
 				// see the access change propagation documentation: https://cloud.google.com/iam/docs/access-change-propagation.
 				PreConfig: func() {
-					time.Sleep(7 * time.Minute)
+					acctest.Sleep(7 * time.Minute)
 				},
 				Config: testAccParameterManagerRegionalRegionalParameterVersionRender_withJsonDataWithDatasource(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -247,7 +249,7 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameterVersionRender_wit
 				// of the parameter and it can take up to 7 minutes for the role to take effect. For more information
 				// see the access change propagation documentation: https://cloud.google.com/iam/docs/access-change-propagation.
 				PreConfig: func() {
-					time.Sleep(7 * time.Minute)
+					acctest.Sleep(7 * time.Minute)
 				},
 				Config: testAccParameterManagerRegionalRegionalParameterVersionRender_withYamlDataWithDatasource(context),
 				Check: resource.ComposeTestCheckFunc(

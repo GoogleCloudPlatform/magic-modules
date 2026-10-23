@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
@@ -67,7 +68,7 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
   }
 }
 resource "google_compute_network" "network1" {
-  name                    = "network1%s"
+  name                    = "tf-test-network1%s"
   auto_create_subnetworks = false
 }
 `, suffix, key, value, suffix)
@@ -119,7 +120,7 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
 }
 
 resource "google_compute_network" "network1" {
-  name                    = "network1%{suffix}"
+  name                    = "tf-test-network1%{suffix}"
   auto_create_subnetworks = false
 }
 `, context)

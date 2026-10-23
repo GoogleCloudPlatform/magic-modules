@@ -37,11 +37,14 @@ iam_policy:
   parent_resource_attribute: 'instance'
   iam_conditions_request_type: 'REQUEST_BODY'
 custom_code:
-examples:
+samples:
   - name: 'instance_basic'
     primary_resource_id: 'tunnelvm'
-    vars:
-      instance_name: 'tunnel-vm'
+    steps:
+      - name: 'instance_basic'
+        config_path: templates/terraform/samples/services/compute/instance_basic.tf.tmpl
+        resource_id_vars:
+          instance_name: 'tunnel-vm'
 parameters:
 properties:
   - name: 'name'

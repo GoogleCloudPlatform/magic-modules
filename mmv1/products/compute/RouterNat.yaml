@@ -61,49 +61,57 @@ custom_code:
 custom_diff:
   - 'resourceComputeRouterNatDrainNatIpsCustomDiff'
 exclude_tgc: true
-examples:
+samples:
   # These examples are not used to autogenerate tests, as fine-grained
   # resources do not fit the normal test flow - we need to test deletion
   # in a test step while parent resource still exists vs in CheckDestroy
   # when all resources have been deleted.
   - name: 'router_nat_basic'
     primary_resource_id: 'nat'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
     exclude_test: true
+    steps:
+      - name: 'router_nat_basic'
+        resource_id_vars:
+          router_name: 'my-router'
+          nat_name: 'my-router-nat'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
   - name: 'router_nat_manual_ips'
     primary_resource_id: 'nat_manual'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name: 'nat-manual-ip'
     exclude_test: true
+    steps:
+      - name: 'router_nat_manual_ips'
+        resource_id_vars:
+          router_name: 'my-router'
+          nat_name: 'my-router-nat'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
+          address_name: 'nat-manual-ip'
   - name: 'router_nat_rules'
     primary_resource_id: 'nat_rules'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name1: 'nat-address1'
-      address_name2: 'nat-address2'
-      address_name3: 'nat-address3'
     exclude_test: true
+    steps:
+      - name: 'router_nat_rules'
+        resource_id_vars:
+          router_name: 'my-router'
+          nat_name: 'my-router-nat'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
+          address_name1: 'nat-address1'
+          address_name2: 'nat-address2'
+          address_name3: 'nat-address3'
   - name: 'router_nat_private'
     primary_resource_id: 'nat_type'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      hub_name: 'my-hub'
-      spoke_name: 'my-spoke'
     exclude_test: true
+    steps:
+      - name: 'router_nat_private'
+        resource_id_vars:
+          router_name: 'my-router'
+          nat_name: 'my-router-nat'
+          network_name: 'my-network'
+          subnet_name: 'my-subnetwork'
+          hub_name: 'my-hub'
+          spoke_name: 'my-spoke'
 parameters:
   - name: 'router'
     type: ResourceRef
@@ -413,8 +421,7 @@ properties:
           required: true
         - name: 'action'
           type: NestedObject
-          description:
-            'The action to be enforced for traffic that matches this rule.'
+          description: 'The action to be enforced for traffic that matches this rule.'
           default_from_api: true
           properties:
             - name: 'sourceNatActiveIps'
@@ -430,8 +437,7 @@ properties:
               item_type:
                 name: 'address'
                 type: ResourceRef
-                description:
-                  'A reference to an address associated with this NAT'
+                description: 'A reference to an address associated with this NAT'
                 resource: 'Address'
                 imports: 'selfLink'
             - name: 'sourceNatDrainIps'
@@ -448,16 +454,15 @@ properties:
               item_type:
                 name: 'address'
                 type: ResourceRef
-                description:
-                  'A reference to an address associated with this NAT'
+                description: 'A reference to an address associated with this NAT'
                 resource: 'Address'
                 imports: 'selfLink'
             - name: 'sourceNatActiveRanges'
               type: Array
               description: |
-                  A list of URLs of the subnetworks used as source ranges for this NAT Rule.
-                  These subnetworks must have purpose set to PRIVATE_NAT.
-                  This field is used for private NAT.
+                A list of URLs of the subnetworks used as source ranges for this NAT Rule.
+                These subnetworks must have purpose set to PRIVATE_NAT.
+                This field is used for private NAT.
               is_set: true
               set_hash_func: computeRouterNatRulesSubnetHash
               custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl'
@@ -465,8 +470,7 @@ properties:
               item_type:
                 name: 'subnet'
                 type: ResourceRef
-                description:
-                  'A reference to a subnetwork address associated with this NAT'
+                description: 'A reference to a subnetwork address associated with this NAT'
                 resource: 'Subnetwork'
                 imports: 'selfLink'
             - name: 'sourceNatDrainRanges'
@@ -482,8 +486,7 @@ properties:
               item_type:
                 name: 'subnet'
                 type: ResourceRef
-                description:
-                  'A reference to a subnetwork address associated with this NAT'
+                description: 'A reference to a subnetwork address associated with this NAT'
                 resource: 'Subnetwork'
                 imports: 'selfLink'
   - name: 'enableEndpointIndependentMapping'

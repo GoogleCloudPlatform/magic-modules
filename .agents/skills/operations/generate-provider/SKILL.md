@@ -20,9 +20,7 @@ Set your variables and run the commands in sequence.
 # 1. Define Variables
 VERSION="beta" # or "ga"
 PROVIDER_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta" # or "terraform-provider-google" for GA
-
-# Verify we are in /Users/camthornton/magic-modules
-pwd
+MAGIC_MODULES_PATH="$(pwd)"
 
 # Verify no uncommitted changes exist in the downstream provider directory. 
 # Stop if there are uncommitted changes and alert the user.
@@ -30,7 +28,7 @@ cd "$PROVIDER_PATH"
 git status --porcelain
 
 # 2. Code Generation (Run from Magic Modules root)
-cd /Users/camthornton/magic-modules
+cd "$MAGIC_MODULES_PATH"
 make provider VERSION=$VERSION OUTPUT_PATH="$PROVIDER_PATH"
 
 # 3. Verify Changes (Run from Downstream Provider root)

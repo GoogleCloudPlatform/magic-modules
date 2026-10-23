@@ -1,0 +1,36 @@
+---
+subcategory: "Oracle Database"
+description: |-
+  List all ExascaleDbStorageVaults.
+---
+
+# google_oracle_database_exascale_db_storage_vaults
+
+List all ExascaleDbStorageVaults.
+
+For more information see the
+[API](https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.exascaleDbStorageVaults).
+
+## Example Usage
+
+```hcl
+data "google_oracle_database_exascale_db_storage_vaults" "my_vaults"{
+  location = "us-east4"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `location` - (Required) The location of the resource.
+
+- - -
+* `project` - (Optional) The project to which the resource belongs. If it
+    is not provided, the provider project is used.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `exascale_db_storage_vaults` - A list of ExascaleDbStorageVaults. See [google_oracle_database_exascale_db_storage_vault](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/oracle_database_exascale_db_storage_vault#argument-reference) resource for details of the available attributes.

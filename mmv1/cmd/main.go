@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
@@ -21,9 +22,12 @@ var resourceOverrideFlag = flag.String("resource_override", "", "path to a resou
 var outputPathFlag = flag.String("output", "", "output path for generated files")
 var typeFlag = flag.String("type", "", "type of output to generate [product|resource|operation]")
 var providerFlag = flag.String("provider", "", "target provider")
+var verboseFlag = flag.Bool("verbose", false, "enable verbose logging")
 
 func main() {
 	flag.Parse()
+
+	google.VerboseLogging = *verboseFlag
 
 	if *versionFlag == "" {
 		log.Fatal("--version is required")

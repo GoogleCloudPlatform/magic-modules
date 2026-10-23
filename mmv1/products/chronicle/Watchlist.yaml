@@ -29,26 +29,29 @@ update_mask: true
 autogen_status: V2F0Y2hsaXN0
 custom_code:
   encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
-examples:
+samples:
   - name: 'chronicle_watchlist_basic'
     primary_resource_id: 'example'
-    vars:
-      name: watchlist_name
-      watchlist_id: watchlist-id
-      description: watchlist-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
+    steps:
+      - name: 'chronicle_watchlist_basic'
+        resource_id_vars:
+          name: watchlist_name
+          watchlist_id: watchlist-id
+          description: watchlist-description
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
   - name: 'chronicle_watchlist_without_id'
     primary_resource_id: 'example'
-    vars:
-      name: watchlist-name
-      description: watchlist-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    # The watchlist_id is an optional field. If watchlist_id is not provided, the system will generate one.
-    # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids
-    exclude_import_test: true
-
+    steps:
+      - name: 'chronicle_watchlist_without_id'
+        resource_id_vars:
+          name: watchlist-name
+          description: watchlist-description
+        test_env_vars:
+          chronicle_id: 'CHRONICLE_ID'
+        # The watchlist_id is an optional field. If watchlist_id is not provided, the system will generate one.
+        # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids
+        exclude_import_test: true
 parameters:
   - name: location
     type: String
@@ -116,8 +119,7 @@ properties:
         default_from_api: true
         allow_empty_object: true
         send_empty_value: true
-        properties:
-          []   # Meant to be an empty object with no properties.
+        properties: [] # Meant to be an empty object with no properties.
   - name: entityCount
     type: NestedObject
     description: Count of different types of entities in the watchlist.

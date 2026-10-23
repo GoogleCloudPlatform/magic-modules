@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securitycenterv2"
 )
 
 func TestAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
@@ -68,11 +70,12 @@ resource "google_pubsub_topic" "scc_v2_project_notification" {
 }
 
 resource "google_scc_v2_project_notification_config" "custom_notification_config" {
-  config_id    = "%{config_id}"
-  project      = "%{project}"
-  description  = "My custom Cloud Security Command Center Finding Notification Configuration"
-  pubsub_topic =  google_pubsub_topic.scc_v2_project_notification.id
-  location     = "%{location}"
+  config_id                      = "%{config_id}"
+  project                        = "%{project}"
+  description                    = "My custom Cloud Security Command Center Finding Notification Configuration"
+  pubsub_topic                   =  google_pubsub_topic.scc_v2_project_notification.id
+  location                       = "%{location}"
+  deletion_notifications_enabled = true
 
   streaming_config {
     filter = "category = \"OPEN_FIREWALL\""
@@ -88,11 +91,12 @@ resource "google_pubsub_topic" "scc_v2_project_notification" {
 }
 
 resource "google_scc_v2_project_notification_config" "custom_notification_config" {
-  config_id    = "%{config_id}"
-  project      = "%{project}"
-  description  = "My custom Cloud Security Command Center Finding Notification Configuration"
-  pubsub_topic =  google_pubsub_topic.scc_v2_project_notification.id
-  location     = "%{location}"
+  config_id                      = "%{config_id}"
+  project                        = "%{project}"
+  description                    = "My custom Cloud Security Command Center Finding Notification Configuration"
+  pubsub_topic                   =  google_pubsub_topic.scc_v2_project_notification.id
+  location                       = "%{location}"
+  deletion_notifications_enabled = false
 
   streaming_config {
     filter = ""
@@ -104,7 +108,7 @@ resource "google_scc_v2_project_notification_config" "custom_notification_config
 func testAccSecurityCenterV2ProjectNotificationConfig_withLocation(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_project_notification" {
-  name =   name = "%{topic_name}"
+  name = "%{topic_name}"
 }
 
 resource "google_scc_v2_project_notification_config" "custom_notification_config" {

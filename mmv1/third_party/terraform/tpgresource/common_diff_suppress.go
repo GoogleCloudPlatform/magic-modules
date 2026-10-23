@@ -3,8 +3,10 @@
 package tpgresource
 
 import (
+	"net"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -160,4 +162,33 @@ func Base64DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 
 func CaseInsensitiveHash(v interface{}) int {
 	return Hashcode(strings.ToLower(v.(string)))
+}
+
+// Suppress diffs where the API returns a larger or equal major revision ID than configured.
+// This handles cases where the server automatically upgrades the major revision of a control.
+func SuppressMajorRevisionId(_, old, new string, _ *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	oldVal, err1 := strconv.Atoi(old)
+	newVal, err2 := strconv.Atoi(new)
+	if err1 == nil && err2 == nil {
+		return oldVal >= newVal
+	}
+	return false
+}
+
+// IpAddressDiffSuppress compares two IP addresses for semantic equality,
+// suppressing diffs caused by different IPv6 string representations
+// (e.g. RFC 5952 zero-compression, leading zeros, or hex casing).
+func IpAddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return old == new
+	}
+	oldIP := net.ParseIP(old)
+	newIP := net.ParseIP(new)
+	if oldIP != nil && newIP != nil {
+		return oldIP.Equal(newIP)
+	}
+	return old == new
 }

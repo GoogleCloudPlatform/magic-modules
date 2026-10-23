@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
   {{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
   {{- end }}
@@ -92,16 +93,10 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update(template1, target1, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "DO_NOTHING"),
-
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
-					{{- end }}
 
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.force_update_on_repair", "NO"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_repair.0.allow_changing_zone", "NO"),
-					{{- end }}
-
 				),
 			},
 			{
@@ -114,16 +109,10 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update2(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
-
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
-					{{- end }}
 
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.force_update_on_repair", "YES"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_repair.0.allow_changing_zone", "YES"),
-					{{- end }}
-
 				),
 			},
 			{
@@ -136,16 +125,10 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update3(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
-
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
-					{{- end }}
 
-					{{- if ne $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.force_update_on_repair", "YES"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_repair.0.allow_changing_zone", "YES"),
-					{{- end }}
-
 				),
 			},
 			{
@@ -516,7 +499,6 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(t *testing.T) {
   t.Parallel()
 
@@ -536,6 +518,34 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
     Steps: []resource.TestStep{
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(context),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_1",
+              "disks.0.device_name": "boot-disk",
+              "disks.0.boot":        "true",
+              "disks.0.auto_delete": "true",
+              "disks.1.device_name": "additional-disk-with-resource-policy",
+              "disks.1.boot":        "false",
+              "disks.1.auto_delete": "true",
+              "disks.2.device_name": "local-ssd-disk",
+              "disks.2.boot":        "false",
+              "disks.2.auto_delete": "true",
+            },
+          ),
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_2",
+              "disks.0.device_name": "additional-disk",
+              "disks.0.boot":        "false",
+              "disks.0.auto_delete": "true",
+            },
+          ),
+        ),
       },
       {
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -545,6 +555,23 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
       },
       {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverridesUpdate(context),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckTypeSetElemNestedAttrs(
+            "google_compute_region_instance_group_manager.igm-basic",
+            "instance_flexibility_policy.0.instance_selections.*",
+            map[string]string{
+              "name":                "instance_selection_name_1",
+              "disks.0.device_name": "boot-disk",
+              "disks.0.boot":        "true",
+              "disks.0.auto_delete": "true",
+              "disks.1.boot":        "false",
+              "disks.1.auto_delete": "true",
+              "disks.2.device_name": "additional-disk",
+              "disks.2.boot":        "false",
+              "disks.2.auto_delete": "true",
+            },
+          ),
+        ),
       },
       {
         ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -564,7 +591,6 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
     },
   })
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
@@ -644,7 +670,7 @@ func testAccCheckRegionInstanceGroupManagerDestroyProducer(t *testing.T) func(s 
 func testAccRegionInstanceGroupManager_basic(template, target, igm1, igm2 string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -709,7 +735,7 @@ resource "google_compute_region_instance_group_manager" "igm-no-tp" {
 func testAccRegionInstanceGroupManager_targetSizeZero(template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -752,7 +778,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_update(template, target, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -811,17 +837,10 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
   }
 
   instance_lifecycle_policy {
-    {{- if ne $.TargetVersionName "ga" }}
     force_update_on_repair = "NO"
-    {{- else }}
-    force_update_on_repair = "YES"
-    {{- end }}
 
     default_action_on_failure = "DO_NOTHING"
-
-    {{- if ne $.TargetVersionName "ga" }}
     on_failed_health_check = "DO_NOTHING"
-    {{- end }}
   }
 }
 `, template, target, igm)
@@ -831,7 +850,7 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 func testAccRegionInstanceGroupManager_update2(template1, target1, target2, template2, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -929,22 +948,12 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 
   instance_lifecycle_policy {
     default_action_on_failure = "REPAIR"
-
-    {{- if ne $.TargetVersionName "ga" }}
     on_failed_health_check = "REPAIR"
-    {{- end }}
 
-    {{- if ne $.TargetVersionName "ga" }}
     force_update_on_repair = "YES"
-    {{- else }}
-    force_update_on_repair = "NO"
-    {{- end }}
-
-    {{- if ne $.TargetVersionName "ga" }}
     on_repair {
         allow_changing_zone = "YES"
     }
-    {{- end }}
 
   }
 }
@@ -955,7 +964,7 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 func testAccRegionInstanceGroupManager_update3(template1, target1, target2, template2, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1041,7 +1050,7 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 func testAccRegionInstanceGroupManager_updateLifecycle(tag, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1092,7 +1101,7 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 func testAccRegionInstanceGroupManager_separateRegions(igm1, igm2 string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1149,7 +1158,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic-2" {
 func testAccRegionInstanceGroupManager_autoHealingPolicies(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1207,7 +1216,7 @@ resource "google_compute_http_health_check" "zero" {
 func testAccRegionInstanceGroupManager_autoHealingPoliciesRemoved(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1261,7 +1270,7 @@ resource "google_compute_http_health_check" "zero" {
 func testAccRegionInstanceGroupManager_versions(primaryTemplate string, canaryTemplate string, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1329,7 +1338,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_distributionPolicyEmpty(template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1375,7 +1384,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_distributionPolicy(template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1422,7 +1431,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_distributionPolicyUpdate(template, igm string, zones []string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1470,7 +1479,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1528,7 +1537,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 func testAccRegionInstanceGroupManager_rollingUpdatePolicySetToDefault(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1587,7 +1596,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy2(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1640,7 +1649,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy3(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1698,7 +1707,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 func testAccRegionInstanceGroupManager_stateful(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 resource "google_compute_network" "igm-basic" {
@@ -1772,7 +1781,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_statefulUpdate(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 resource "google_compute_network" "igm-basic" {
@@ -1846,7 +1855,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_statefulRemoved(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 resource "google_compute_network" "igm-basic" {
@@ -1903,7 +1912,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_statefulUnordered(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1990,7 +1999,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2045,7 +2054,7 @@ resource "google_compute_region_instance_group_manager" "sr-igm" {
 func testAccRegionInstanceGroupManager_stoppedSuspendedTargetSizeUpdate(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2099,7 +2108,7 @@ resource "google_compute_region_instance_group_manager" "sr-igm" {
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-11"
+	family  = "debian-13"
 	project = "debian-cloud"
 }
 
@@ -2160,7 +2169,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyUpdate(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-11"
+	family  = "debian-13"
 	project = "debian-cloud"
 }
 
@@ -2219,7 +2228,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyUpdateToEmptyBlock(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-11"
+	family  = "debian-13"
 	project = "debian-cloud"
 }
 
@@ -2270,7 +2279,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyRemove(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-11"
+	family  = "debian-13"
 	project = "debian-cloud"
 }
 
@@ -2316,17 +2325,16 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, network, template, igm)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverrides(context map[string]any) string {
 	return acctest.Nprintf(`
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
 resource "google_compute_resource_policy" "test-snapshot-policy" {
-  name    = "test-policy-%{random_suffix}"
+  name    = "tf-test-test-policy-%{random_suffix}"
   snapshot_schedule_policy {
     schedule {
       hourly_schedule {
@@ -2427,7 +2435,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
           value = "terraform-insert"
         }
         mode = "READ_WRITE"
-        type = "SCRATCH"
+        type = "PERSISTENT"
         source_image_encryption_key {
           raw_key = "%{raw_key}"
         }
@@ -2442,7 +2450,7 @@ func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
 	return acctest.Nprintf(`
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2557,7 +2565,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
           value = "terraform-update"
         }
         mode = "READ_WRITE"
-        type = "SCRATCH"
+        type = "PERSISTENT"
       }
     }
     instance_selections {
@@ -2574,7 +2582,7 @@ func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyAdditionalOverri
 	return acctest.Nprintf(`
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2633,7 +2641,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, context)
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_targetSizePolicy(t *testing.T) {
 	t.Parallel()
@@ -2665,7 +2672,7 @@ func TestAccRegionInstanceGroupManager_targetSizePolicy(t *testing.T) {
 func testAccRegionInstanceGroupManager_targetSizePolicy(template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2736,7 +2743,7 @@ resource "google_compute_region_instance_group_manager" "igm-tsp" {
 func testAccRegionInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2834,7 +2841,7 @@ func TestAccRegionInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate(t *t
 func testAccRegionInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate(suffix, workloadPolicy string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2858,7 +2865,7 @@ resource "google_compute_resource_policy" "workload_policy_2" {
 
 
 resource "google_compute_instance_template" "igm-basic" {
-  name           = "igm-instance-template-%s"
+  name           = "tf-test-igm-instance-template-%s"
   machine_type   = "ct6e-standard-1t"
   can_ip_forward = false
   tags           = ["foo", "bar"]
@@ -2890,7 +2897,7 @@ resource "google_compute_instance_template" "igm-basic" {
 
 resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
   description = "Terraform test instance group manager"
-  name        = "igm-basic-workload-policy-%s"
+  name        = "tf-test-igm-basic-workload-policy-%s"
 
   instance_lifecycle_policy {
     default_action_on_failure = "DO_NOTHING"
@@ -2928,12 +2935,12 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
 func testAccRegionInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate2(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "igm-basic" {
-  name           = "tmpl-%s"
+  name           = "tf-test-tmpl-%s"
   machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
@@ -2964,7 +2971,7 @@ resource "google_compute_instance_template" "igm-basic" {
 
 resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
   description = "Terraform test instance group manager"
-  name        = "igm-basic-workload-policy-%s"
+  name        = "tf-test-igm-basic-workload-policy-%s"
 
   instance_lifecycle_policy {
     default_action_on_failure = "DO_NOTHING"
@@ -2992,3 +2999,97 @@ resource "google_compute_region_instance_group_manager" "igm-workload-policy" {
 `, suffix, suffix)
 }
 
+func TestAccRegionInstanceGroupManager_deletionPolicyForce(t *testing.T) {
+	t.Parallel()
+
+	templateName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+	igmName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRegionInstanceGroupManager_deletionPolicyForce(templateName, igmName, "DELETE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-force", "deletion_policy", "DELETE"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-force",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_deletionPolicyForce(templateName, igmName, "FORCE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-force", "deletion_policy", "FORCE"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_group_manager.igm-force",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_policy is a client-side field that defaults to DELETE on import
+				ImportStateVerifyIgnore: []string{"status", "deletion_policy"},
+			},
+		},
+	})
+}
+
+func testAccRegionInstanceGroupManager_deletionPolicyForce(template, igm, deletionPolicy string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-force" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+{{- if ne $.TargetVersionName "ga" }}
+
+  scheduling {
+    graceful_shutdown {
+      enabled = true
+      max_duration {
+        seconds = 60
+      }
+    }
+  }
+{{- end }}
+}
+
+resource "google_compute_region_instance_group_manager" "igm-force" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-force"
+  region             = "us-central1"
+  target_size        = 1
+  deletion_policy    = "%s"
+
+  version {
+    name              = "primary"
+    instance_template = google_compute_instance_template.igm-force.self_link
+  }
+}
+`, template, igm, deletionPolicy)
+}

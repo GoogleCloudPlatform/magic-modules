@@ -1,0 +1,31 @@
+resource "google_chronicle_parser_extension" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  log_type = "AKAMAI_DHCP" # Unique log type to prevent CI parallel test collisions
+  validation_skipped = true
+  log = "ZHVtbXkgbG9n"
+  
+  field_extractors {
+    log_format             = "JSON"
+    append_repeated_fields = true
+
+    preprocess_config {
+      grok_regex = "(?P<message>.*)"
+      target     = "message"
+    }
+
+    extractors {
+      field_path       = "$.user"
+      destination_path = "udm.principal.user.userid"
+      value            = "static-override"
+    }
+
+    extractors {
+      field_path         = "$.event"
+      destination_path   = "udm.metadata.event_type"
+      precondition_op    = "EQUALS"
+      precondition_path  = "$.event"
+      precondition_value = "login"
+    }
+  }
+}

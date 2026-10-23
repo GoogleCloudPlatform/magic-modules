@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 
@@ -51,7 +52,7 @@ func TestAccOrganizationIamMembersAndBindings(t *testing.T) {
 func testAccOrganizationIamBinding_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	roleId := "tfIamTest" + acctest.RandString(t, 10)
+	roleId := "tf_test_Iam" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -90,7 +91,7 @@ func testAccOrganizationIamBinding_basic(t *testing.T) {
 func testAccOrganizationIamBinding_condition(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	roleId := "tfIamTest" + acctest.RandString(t, 10)
+	roleId := "tf_test_Iam" + acctest.RandString(t, 10)
 	conditionTitle := "expires_after_2019_12_31"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

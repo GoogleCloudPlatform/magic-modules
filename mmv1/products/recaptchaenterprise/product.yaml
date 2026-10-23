@@ -12,9 +12,9 @@
 # limitations under the License.
 
 ---
-name: 'RecaptchaEnterprise'
-versions:
-  - name: 'ga'
-    base_url: 'https://recaptchaenterprise.googleapis.com/v1/'
+name: RecaptchaEnterprise
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://recaptchaenterprise.googleapis.com/v1/

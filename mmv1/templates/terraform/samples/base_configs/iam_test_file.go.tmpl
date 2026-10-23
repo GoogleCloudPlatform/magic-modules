@@ -19,8 +19,8 @@ import (
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
 	"{{ $.ImportPath }}/tpgresource"
-{{- if $.FirstTestConfig.Sample.BootstrapIam }}
-	"{{ $.ImportPath }}/services/resourcemanager"
+{{- range $pkg, $alias := ($.FirstTestConfig.Sample.TestDependencies $.Runtime.ResourcePrefixPkgMap) }}
+	{{ $alias }} "{{ $.ImportPath  }}/{{ $pkg }}"
 {{- end }}
 )
 

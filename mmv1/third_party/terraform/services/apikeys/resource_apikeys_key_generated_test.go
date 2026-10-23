@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/apikeys"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	dcl "github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
 )
 
@@ -193,6 +194,65 @@ func TestAccApikeysKey_ServiceAccountKeyHandWritten(t *testing.T) {
 				ResourceName:      "google_apikeys_key.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccApikeysKey_CheckExistingUsage(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]any{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApikeysKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApikeysKey_CheckExistingUsage(context),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"check_existing_usage"},
+			},
+			{
+				Config: testAccApikeysKey_CheckExistingUsageUpdate(context),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"check_existing_usage"},
+			},
+		},
+	})
+}
+
+func TestAccApikeysKey_DeletionPolicyForce(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]any{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApikeysKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApikeysKey_DeletionPolicyForce(context),
+			},
+			{
+				ResourceName:            "google_apikeys_key.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy"},
 			},
 		},
 	})
@@ -411,6 +471,35 @@ resource "google_service_account" "key_service_account" {
   account_id   = "tf-test-app%{random_suffix}"
   project      = google_project.project.project_id
   display_name = "Test Service Account"
+}
+`, context)
+}
+
+func testAccApikeysKey_CheckExistingUsage(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_apikeys_key" "primary" {
+  name         = "tf-test-key%{random_suffix}"
+  display_name = "sample-key"
+}
+`, context)
+}
+
+func testAccApikeysKey_CheckExistingUsageUpdate(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_apikeys_key" "primary" {
+  name                 = "tf-test-key%{random_suffix}"
+  display_name         = "sample-key-updated"
+  check_existing_usage = "CHECK"
+}
+`, context)
+}
+
+func testAccApikeysKey_DeletionPolicyForce(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_apikeys_key" "primary" {
+  name            = "tf-test-key%{random_suffix}"
+  display_name    = "sample-key"
+  deletion_policy = "FORCE"
 }
 `, context)
 }

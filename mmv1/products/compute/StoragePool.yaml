@@ -39,21 +39,25 @@ iam_policy:
     - "projects/{{project}}/zones/{{zone}}/storagePools/{{name}}"
   iam_conditions_request_type: "QUERY_PARAM"
   allowed_iam_role: "roles/compute.viewer"
-examples:
+samples:
   - name: "compute_storage_pool_basic"
     primary_resource_id: "test-storage-pool-basic"
-    vars:
-      storage_pool_name: "storage-pool-basic"
-    ignore_read_extra:
-      - "deletion_protection"
     exclude_test: true
+    steps:
+      - name: "compute_storage_pool_basic"
+        resource_id_vars:
+          storage_pool_name: "storage-pool-basic"
+        ignore_read_extra:
+          - "deletion_protection"
   - name: "compute_storage_pool_full"
     primary_resource_id: "test-storage-pool-full"
-    vars:
-      storage_pool_name: "storage-pool-full"
-    ignore_read_extra:
-      - "deletion_protection"
     exclude_test: true
+    steps:
+      - name: "compute_storage_pool_full"
+        resource_id_vars:
+          storage_pool_name: "storage-pool-full"
+        ignore_read_extra:
+          - "deletion_protection"
 parameters:
   - name: "zone"
     type: ResourceRef

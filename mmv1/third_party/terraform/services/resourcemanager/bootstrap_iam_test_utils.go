@@ -1,6 +1,8 @@
 package resourcemanager
 
 import (
+	"log"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -43,21 +45,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	}
 
 	if len(projectMembers) > 0 {
-		// Get the project since we need its number, id, and policy.
-		project, err := client.Projects.Get(envvar.GetTestProjectFromEnv()).Do()
-		if err != nil {
-			t.Fatalf("Error getting project with id %q: %s", project.ProjectId, err)
-		}
-
-		var projectBindings []*cloudresourcemanager.Binding
-		for _, pm := range projectMembers {
-			replacedMember := strings.ReplaceAll(pm.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
-			projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
-				Role:    pm.Role,
-				Members: []string{replacedMember},
-			})
-		}
-		applyProjectIamBindings(t, client, project.ProjectId, projectBindings)
+		bootstrapProjectIamMembers(t, client, envvar.GetTestProjectFromEnv(), projectMembers)
 	}
 
 	if len(orgMembers) > 0 {
@@ -80,6 +68,36 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	}
 }
 
+// BootstrapProjectIamMembers is like BootstrapIamMembers, but for project-level
+// members of the given project (for example, a project created with
+// BootstrapProject). Members will have `{project_number}` replaced with that
+// project's number.
+func BootstrapProjectIamMembers(t *testing.T, projectId string, members []IamMember) {
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap a config for BootstrapProjectIamMembers.")
+	}
+	bootstrapProjectIamMembers(t, rmClient.NewClient(config, config.UserAgent), projectId, members)
+}
+
+func bootstrapProjectIamMembers(t *testing.T, client *cloudresourcemanager.Service, projectId string, members []IamMember) {
+	// Get the project since we need its number, id, and policy.
+	project, err := client.Projects.Get(projectId).Do()
+	if err != nil {
+		t.Fatalf("Error getting project with id %q: %s", projectId, err)
+	}
+
+	var projectBindings []*cloudresourcemanager.Binding
+	for _, pm := range members {
+		replacedMember := strings.ReplaceAll(pm.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
+		projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
+			Role:    pm.Role,
+			Members: []string{replacedMember},
+		})
+	}
+	applyProjectIamBindings(t, client, project.ProjectId, projectBindings)
+}
+
 func applyProjectIamBindings(t *testing.T,
 	client *cloudresourcemanager.Service,
 	projectId string,
@@ -91,7 +109,7 @@ func applyProjectIamBindings(t *testing.T,
 		getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
 		policy, err := client.Projects.GetIamPolicy(projectId, getPolicyRequest).Do()
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 429) {
-			t.Logf("[DEBUG] 429 while attempting to read policy for project %s, waiting %v before attempting again", projectId, backoff)
+			log.Printf("[DEBUG] 429 while attempting to read policy for project %s, waiting %v before attempting again", projectId, backoff)
 			time.Sleep(backoff)
 			continue
 		} else if err != nil {
@@ -101,7 +119,7 @@ func applyProjectIamBindings(t *testing.T,
 		mergedBindings := tpgiamresource.MergeBindings(append(policy.Bindings, newBindings...))
 
 		if tpgiamresource.CompareBindings(policy.Bindings, mergedBindings) {
-			t.Logf("[DEBUG] All bindings already present for project %s", projectId)
+			log.Printf("[DEBUG] All bindings already present for project %s", projectId)
 			break
 		}
 		// The policy must change.
@@ -109,12 +127,14 @@ func applyProjectIamBindings(t *testing.T,
 		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
 		policy, err = client.Projects.SetIamPolicy(projectId, setPolicyRequest).Do()
 		if err == nil {
-			t.Logf("[DEBUG] Waiting for IAM bootstrapping to propagate for project %s.", projectId)
-			time.Sleep(3 * time.Minute)
+			if os.Getenv("VCR_MODE") != "REPLAYING" {
+				log.Printf("[DEBUG] Waiting for IAM bootstrapping to propagate for project %s.", projectId)
+				time.Sleep(3 * time.Minute)
+			}
 			break
 		}
 		if tpgresource.IsConflictError(err) {
-			t.Logf("[DEBUG]: Concurrent policy changes, restarting read-modify-write after %s", backoff)
+			log.Printf("[DEBUG] Concurrent policy changes, restarting read-modify-write after %s", backoff)
 			time.Sleep(backoff)
 			backoff = backoff * 2
 			if backoff > 30*time.Second {
@@ -138,7 +158,7 @@ func applyOrgIamBindings(
 		getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
 		policy, err := client.Organizations.GetIamPolicy(orgName, getPolicyRequest).Do()
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 429) {
-			t.Logf("[DEBUG] 429 while attempting to read policy for org %s, waiting %v before attempting again", orgName, backoff)
+			log.Printf("[DEBUG] 429 while attempting to read policy for org %s, waiting %v before attempting again", orgName, backoff)
 			time.Sleep(backoff)
 			continue
 		} else if err != nil {
@@ -148,7 +168,7 @@ func applyOrgIamBindings(
 		mergedBindings := tpgiamresource.MergeBindings(append(policy.Bindings, newBindings...))
 
 		if tpgiamresource.CompareBindings(policy.Bindings, mergedBindings) {
-			t.Logf("[DEBUG] All bindings already present for org %s", orgName)
+			log.Printf("[DEBUG] All bindings already present for org %s", orgName)
 			break
 		}
 		// The policy must change.
@@ -156,12 +176,14 @@ func applyOrgIamBindings(
 		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
 		policy, err = client.Organizations.SetIamPolicy(orgName, setPolicyRequest).Do()
 		if err == nil {
-			t.Logf("[DEBUG] Waiting for IAM bootstrapping to propagate for org %s.", orgName)
-			time.Sleep(3 * time.Minute)
+			if os.Getenv("VCR_MODE") != "REPLAYING" {
+				log.Printf("[DEBUG] Waiting for IAM bootstrapping to propagate for org %s.", orgName)
+				time.Sleep(3 * time.Minute)
+			}
 			break
 		}
 		if tpgresource.IsConflictError(err) {
-			t.Logf("[DEBUG]: Concurrent policy changes, restarting read-modify-write after %s", backoff)
+			log.Printf("[DEBUG] Concurrent policy changes, restarting read-modify-write after %s", backoff)
 			time.Sleep(backoff)
 			backoff = backoff * 2
 			if backoff > 30*time.Second {

@@ -38,11 +38,12 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// GCE Error codes- we don't have a way to add these to all GCE resources
 	// easily, so add them globally.
 
-	// GCE Subnetworks are considered unready for a brief period when certain
-	// operations are performed on them, and the scope is likely too broad to
-	// apply a mutex. If we attempt an operation w/ an unready subnetwork, retry
-	// it.
-	isSubnetworkUnreadyError,
+	// GCE resources (such as subnetworks, networks, routers, serviceAttachments,
+	// backendServices, securityPolicies, etc.) are considered unready for a brief
+	// period when certain operations are performed on them, and the scope is
+	// likely too broad to apply a mutex. If we attempt an operation w/ an unready
+	// resource, retry it.
+	isResourceNotReadyError,
 
 	// As of February 2022 GCE seems to have added extra quota enforcement on
 	// reads, causing significant failure for our CI and for large customers.
@@ -54,12 +55,6 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// when too many operations are in flight. This is transient and clears
 	// once in-flight operations complete.
 	is403ConcurrentOperationsQuotaError,
-
-	// GCE Networks are considered unready for a brief period when certain
-	// operations are performed on them, and the scope is likely too broad to
-	// apply a mutex. If we attempt an operation w/ an unready network, retry
-	// it.
-	isNetworkUnreadyError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -141,28 +136,15 @@ func IsCodeRepositoryIndexUnreadyError(err error) (bool, string) {
 	return false, ""
 }
 
-func isSubnetworkUnreadyError(err error) (bool, string) {
+func isResourceNotReadyError(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)
 	if !ok {
 		return false, ""
 	}
 
-	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "subnetworks") {
-		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ `subnetwork`: %s", err)
-		return true, "Subnetwork not ready"
-	}
-	return false, ""
-}
-
-func isNetworkUnreadyError(err error) (bool, string) {
-	gerr, ok := err.(*googleapi.Error)
-	if !ok {
-		return false, ""
-	}
-
-	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "networks") {
-		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ 'networks': %s", err)
-		return true, "Network not ready"
+	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady': %s", err)
+		return true, "Resource not ready"
 	}
 	return false, ""
 }
@@ -445,10 +427,10 @@ func FirestoreIndex409Retry(err error) (bool, string) {
 	return false, ""
 }
 
-func IapClient409Operation(err error) (bool, string) {
+func FirestoreUserCreds409Retry(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation was aborted") {
-			return true, "operation was aborted possibly due to concurrency issue - retrying"
+		if gerr.Code == 409 {
+			return true, "The operation was aborted."
 		}
 	}
 	return false, ""
@@ -471,24 +453,6 @@ func IsCloudRunCreationConflict(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 {
 			return true, "saw a 409 - waiting until background deletion completes"
-		}
-	}
-
-	return false, ""
-}
-
-// If a service account is deleted in the middle of updating an IAM policy
-// it can cause the API to return an error. In fine-grained IAM resources we
-// read the policy, modify it, then send it back to the API. Retrying is
-// useful particularly in high-traffic projects.
-// We don't want to retry _every_ time we see this error because the
-// user-provided SA could trigger this too. At the callsite, we should check
-// if the current etag matches the old etag and short-circuit if they do as
-// that indicates the new config is the likely problem.
-func IamServiceAccountNotFound(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 400 && strings.Contains(gerr.Body, "Service account") && strings.Contains(gerr.Body, "does not exist") {
-			return true, "service account not found in IAM"
 		}
 	}
 
@@ -699,6 +663,81 @@ func IsDataplex1PEntryNotFoundError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 404 && strings.Contains(gerr.Body, "Entry `") && strings.Contains(gerr.Body, "` does not exist.") && (strings.Contains(gerr.Body, "@dataplex/entries/") || strings.Contains(gerr.Body, "@bigquery/entries/")) {
 			return true, fmt.Sprintf("Retry 404s for Dataplex Entry Ingestion")
+		}
+	}
+	return false, ""
+}
+
+// Retry on Cloud Scheduler 'Sync Mutate Cannot Be Queued'
+func Is409SyncMutateCannotBeQueuedError(err error) (bool, string) {
+	if err == nil {
+		return false, ""
+	}
+	errStr := err.Error()
+	if strings.Contains(errStr, "Error 409") && strings.Contains(errStr, "sync mutate calls cannot be queued") {
+		return true, "sync mutate calls cannot be queued"
+	}
+	return false, ""
+}
+
+// Retry when the Bigtable API instructs us to.
+func IsBigtableTableCreatingOrDeletingError(err error) (bool, string) {
+	if err != nil && strings.Contains(err.Error(), "is either creating or deleting, please try again") {
+		return true, "Parent table is either creating or deleting, retrying"
+	}
+	return false, ""
+}
+
+// Retry on Agent Gateway 400 error when the gateway is still in use by a dependent resource being deleted.
+func IsAgentGatewayInUseError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "is already being used by resource") {
+			return true, "Agent Gateway is still being used by another resource"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "is already being used by resource") {
+		return true, "Agent Gateway is still being used by another resource"
+	}
+	return false, ""
+}
+
+// Retry on Network Attachment 412 error when the attachment still has connected endpoints being deleted.
+func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 412 && strings.Contains(gerr.Body, "Network Attachment with connected endpoints cannot be deleted") {
+			return true, "Network Attachment still has connected endpoints"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "Network Attachment with connected endpoints cannot be deleted") {
+		return true, "Network Attachment still has connected endpoints"
+	}
+	return false, ""
+}
+
+// Retry when waiting for an AgentConnectivityTemplate to be disassociated from dependent resources.
+func IsAgentConnectivityTemplateInUse(err error) (bool, string) {
+	if err != nil && strings.Contains(err.Error(), "is already being used by resource(s)") {
+		return true, "waiting for AgentConnectivityTemplate to no longer be referenced"
+	}
+	return false, ""
+}
+
+// Retry when a referenced subnetwork is not ready yet during an async LRO.
+// This is a post-operation error so it uses tpgresource.CommonOpError instead of googleapi.Error.
+func IsSubnetworkNotReadyLROError(err error) (bool, string) {
+	if err != nil && strings.Contains(err.Error(), "subnetworks") && strings.Contains(err.Error(), "is not ready") {
+		return true, "Subnetwork is not ready"
+	}
+	return false, ""
+}
+
+// Dataproc returns a 400 error with reason "badRequest" (instead of GCE's "resourceNotReady")
+// when a referenced GCE resource such as a subnetwork or network is not yet ready.
+func DataprocResourceNotReady(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "The resource") && strings.Contains(gerr.Body, "is not ready") {
+			log.Printf("[DEBUG] Dismissed error as a retryable operation: %s", err)
+			return true, "Waiting for Dataproc resource dependency to be ready"
 		}
 	}
 	return false, ""

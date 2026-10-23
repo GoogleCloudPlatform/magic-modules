@@ -32,6 +32,7 @@ docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots'
 has_self_link: true
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -52,12 +53,14 @@ sweeper:
   url_substitutions:
     - zone: "us-central1-a"
 include_in_tgc_next: true
-examples:
+samples:
   - name: 'instant_snapshot_basic'
     primary_resource_id: 'default'
-    vars:
-      instance_name: 'instant-snapshot'
-      disk_name: 'example-disk'
+    steps:
+      - name: 'instant_snapshot_basic'
+        resource_id_vars:
+          instance_name: 'instant-snapshot'
+          disk_name: 'example-disk'
 parameters:
   - name: 'sourceDisk'
     type: ResourceRef
@@ -124,7 +127,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

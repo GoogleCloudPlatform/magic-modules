@@ -1,0 +1,31 @@
+resource "google_chronicle_big_query_export" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.Vars "location"}}"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  big_query_export_package = "BIG_QUERY_EXPORT_PACKAGE_BYOBQ"
+
+  udm_events_settings {
+    enabled        = true
+    retention_days = 7
+  }
+
+  entity_graph_settings {
+    enabled        = true
+    retention_days = 7
+  }
+
+  ioc_matches_settings {
+    enabled        = true
+    retention_days = 7
+  }
+
+  rule_detections_settings {
+    enabled        = true
+    retention_days = 7
+  }
+
+  udm_events_aggregates_settings {
+    enabled        = true
+    retention_days = 7
+  }
+}

@@ -1,0 +1,41 @@
+// Custom flattener for scheduleCustomizations.
+//
+// In Proto3 / Google API JSON responses, boolean fields with value `false` (such as ensureEnrichmentCompleteness)
+// are omitted from the JSON response body (or returned as an empty map `{}`).
+//
+// If the default flattener receives a nil/empty map, it passes nil to Terraform state. When HCL specifies
+// ensure_enrichment_completeness = false, comparing state (nil) against HCL (false) produces false plan diffs
+// ("+ ensure_enrichment_completeness = false") and causes import verification failures.
+//
+// This flattener checks if schedule_customizations is active in Terraform configuration (d.GetOk).
+// If active and ensureEnrichmentCompleteness is omitted by the API, it explicitly sets ensure_enrichment_completeness = false
+// in Terraform state to preserve state parity with HCL.
+func flattenChronicleRuleDeploymentScheduleCustomizations(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		if _, ok := d.GetOk("schedule_customizations"); ok {
+			transformed := make(map[string]interface{})
+			transformed["ensure_enrichment_completeness"] = false
+			return []interface{}{transformed}
+		}
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		if _, ok := d.GetOk("schedule_customizations"); ok {
+			transformed := make(map[string]interface{})
+			transformed["ensure_enrichment_completeness"] = false
+			return []interface{}{transformed}
+		}
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	if val, ok := original["ensureEnrichmentCompleteness"]; ok && val != nil {
+		transformed["ensure_enrichment_completeness"] = val
+	} else if _, ok := d.GetOk("schedule_customizations"); ok {
+		transformed["ensure_enrichment_completeness"] = false
+	}
+	if val, ok := original["lateArrivingDataAdjustment"]; ok && val != nil {
+		transformed["late_arriving_data_adjustment"] = val
+	}
+	return []interface{}{transformed}
+}

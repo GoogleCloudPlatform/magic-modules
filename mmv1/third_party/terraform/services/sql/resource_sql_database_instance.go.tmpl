@@ -123,6 +123,25 @@ var (
 		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
 
+{{- if ne $.TargetVersionName "ga" }}
+    performanceCaptureConfigKeys = []string{
+		"settings.0.performance_capture_config.0.enabled",
+		"settings.0.performance_capture_config.0.probing_interval_seconds",
+		"settings.0.performance_capture_config.0.probe_threshold",
+		"settings.0.performance_capture_config.0.running_threads_threshold",
+		"settings.0.performance_capture_config.0.seconds_behind_source_threshold",
+		"settings.0.performance_capture_config.0.transaction_duration_threshold",
+		"settings.0.performance_capture_config.0.cpu_utilization_threshold_percent",
+		"settings.0.performance_capture_config.0.memory_usage_threshold_percent",
+		"settings.0.performance_capture_config.0.history_list_length_threshold_count",
+		"settings.0.performance_capture_config.0.semaphore_wait_threshold_count",
+		"settings.0.performance_capture_config.0.transaction_lock_wait_threshold_count",
+		"settings.0.performance_capture_config.0.transaction_kill_threshold_seconds",
+		"settings.0.performance_capture_config.0.transaction_kill_type",
+		"settings.0.performance_capture_config.0.transaction_kill_excluded_user_hosts",
+	}
+{{- end }}
+
 	sqlServerAuditConfigurationKeys = []string{
 		"settings.0.sql_server_audit_config.0.bucket",
 		"settings.0.sql_server_audit_config.0.retention_interval",
@@ -194,12 +213,9 @@ func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta inte
 		return nil
 	}
 
-	// If we are here, we are trying to shrink the disk with auto resize disabled and no ignore changes on disk size.
-	// This will force a new resource.
-	if err := d.ForceNew(key); err != nil {
-		return err
-	}
-
+	// If we are here, we are shrinking the disk with auto resize disabled. Keep the diff so
+	// the update performs an in-place storage shrink (Instances.PerformDiskShrink) rather than
+	// recreating the instance.
 	return nil
 }
 
@@ -234,6 +250,10 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 			autoUpgradeEnabledCustomizeDiff,
+			activeDirectoryCustomizeDiff,
+			{{- if ne $.TargetVersionName "ga" }}
+			blueGreenDeploymentCustomizeDiff,
+			{{- end }}
 			tpgresource.DefaultProviderDeletionPolicy("DELETE"),
 		),
 
@@ -250,6 +270,13 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Default:     true,
 				Optional:    true,
 				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
+			},
+			"enforce_new_sql_network_architecture": {
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: sqlNetworkArchitectureDiffSuppress,
+				Description:      `Whether to enforce the new SQL network architecture.`,
 			},
 			"final_backup_description": {
 				Type:        schema.TypeString,
@@ -330,6 +357,28 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 										Required:    true,
 										Description: `Domain name of the Active Directory for SQL Server (e.g., mydomain.com).`,
 									},
+									"mode": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"MANAGED_ACTIVE_DIRECTORY", "CUSTOMER_MANAGED_ACTIVE_DIRECTORY"}, false),
+										Description:  `The mode of the Active Directory configuration. Can be MANAGED_ACTIVE_DIRECTORY or CUSTOMER_MANAGED_ACTIVE_DIRECTORY.`,
+									},
+									"dns_servers": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `Domain controller IPv4 addresses used to bootstrap Active Directory.`,
+									},
+									"admin_credential_secret_name": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The secret manager key storing the administrator credential. (e.g., projects/{project}/secrets/{secret}).`,
+									},
+									"organizational_unit": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The organizational unit distinguished name. This is the full hierarchical path to the organizational unit.`,
+									},
 								},
 							},
 						},
@@ -340,14 +389,16 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"end_date": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: `End date before which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: denyMaintenancePeriodDateDiffSuppress,
+										Description:      `End date before which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
 									},
 									"start_date": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: `Start date after which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: denyMaintenancePeriodDateDiffSuppress,
+										Description:      `Start date after which maintenance will not take place. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01`,
 									},
 									"time": {
 										Type:        schema.TypeString,
@@ -535,17 +586,15 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for PD_SSD, PD_HDD and 20GB for HYPERDISK_BALANCED.`,
+							Description: `The size of data disk, in GB. The size of a running instance can be increased, or reduced when disk_autoresize is disabled (this triggers an in-place storage shrink, which restarts the instance). The minimum value is 10GB for PD_SSD, PD_HDD and 20GB for HYPERDISK_BALANCED.`,
 						},
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
 							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -558,7 +607,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Computed:    true,
 							Description: `Provisioned throughput measured in MiB per second for the data disk. This field is only used for HYPERDISK_BALANCED disk types.`,
 						},
-{{- end }}
+						"replication_lag_max_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: `The acceptable replication lag, in seconds, after which a read replica recreates itself. The lag must persist for at least five minutes before recreation is triggered. This is a replica level field, and must be between 300 seconds (five minutes) and 31536000 seconds (one year).`,
+						},
 						"connection_pool_config": {
 							Type:     schema.TypeSet,
 							Optional: true,
@@ -633,6 +687,24 @@ API (for read pools, effective_availability_type may differ from availability_ty
 													Optional:    true,
 													Description: `Whether PSC connectivity is enabled for this instance.`,
 												},
+												"psc_auto_dns_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether PSC auto DNS is enabled for this instance.`,
+												},
+												"psc_write_endpoint_dns_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether PSC write endpoint DNS is enabled for this instance.`,
+												},
+												"psc_auto_connection_policy_enabled": {
+												        Type:        schema.TypeBool,
+												        Optional:    true,
+												        Computed:    true,
+												        Description: `Whether a service connection policy is created for the auto connections configured for the instance.`,
+												},
 												"allowed_consumer_projects": {
 													Type:     schema.TypeSet,
 													Optional: true,
@@ -655,6 +727,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
                                                                                                                         "consumer_service_project_id": {
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Optional:     true,
+                                                                                                                                Computed:     true,
                                                                                                                                 Description:  `The project ID of consumer service project of this consumer endpoint.`,
                                                                                                                         },
                                                                                                                         "consumer_network": {
@@ -667,6 +740,16 @@ API (for read pools, effective_availability_type may differ from availability_ty
                                                                                                                                 Computed:     true,
                                                                                                                                 Description:  `The connection policy status of the consumer network.`,
                                                                                                                         },
+                                                                                                                        "instance_auto_dns_status": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The status of the automated DNS provisioning for the instance.`,
+                                                                                                                        },
+                                                                                                                        "write_endpoint_auto_dns_status": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The status of the automated DNS provisioning for the write endpoint.`,
+                                                                                                                        },
                                                                                                                         "ip_address": {
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Computed:     true,
@@ -676,6 +759,16 @@ API (for read pools, effective_availability_type may differ from availability_ty
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Computed:     true,
                                                                                                                                 Description:  `The connection status of the consumer endpoint.`,
+                                                                                                                        },
+                                                                                                                        "service_connection_policy": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The service connection policy created for the auto connection.`,
+                                                                                                                        },
+                                                                                                                        "service_connection_policy_creation_result": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The result of the service connection policy creation.`,
                                                                                                                         },
                                                                                                                 },
 													},
@@ -848,6 +941,118 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 							Description: `Configuration of Query Insights.`,
 						},
+{{- if ne $.TargetVersionName "ga" }}
+						"performance_capture_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `Enable or disable the Performance Capture.`,
+									},
+									"probing_interval_seconds": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The time interval in seconds between any two probes.`,
+									},
+									"probe_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of consecutive readings above threshold that triggers instance state capture.`,
+									},
+									"running_threads_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of server threads running to trigger the capture on primary.`,
+									},
+									"seconds_behind_source_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of seconds replica must be lagging behind primary to trigger capture on replica.`,
+									},
+									"transaction_duration_threshold": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The amount of time in seconds that a transaction needs to have been open before getting recorded.`,
+									},
+									"cpu_utilization_threshold_percent": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum percentage of CPU utilization that triggers the performance capture. Valid range is 10 to 99. 0 disables the check.`,
+									},
+									"memory_usage_threshold_percent": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum percentage of memory usage that triggers the performance capture. Valid range is 10 to 99. 0 disables the check.`,
+									},
+									"history_list_length_threshold_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of undo log entries in the history list length that triggers the performance capture. Valid range is 10000 to 10000000. 0 disables the check.`,
+									},
+									"semaphore_wait_threshold_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of semaphore waits that triggers the performance capture. Valid range is 10 to 10000. 0 disables the check.`,
+									},
+									"transaction_lock_wait_threshold_count": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The minimum number of transactions in lock wait state that triggers the performance capture. Valid range is 10 to 10000. 0 disables the check.`,
+									},
+									"transaction_kill_threshold_seconds": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Description:  `The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it. Valid range is 60 to 604800. 0 disables termination.`,
+									},
+									"transaction_kill_type": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										ValidateFunc: validation.StringInSlice([]string{"TRANSACTION_KILL_TYPE_UNSPECIFIED", "READ_ONLY_TRANSACTIONS", "ALL_TRANSACTIONS"}, false),
+										Description:  `Determines which transactions are allowed to be terminated when they exceed transaction_kill_threshold_seconds. Possible values are: "TRANSACTION_KILL_TYPE_UNSPECIFIED", "READ_ONLY_TRANSACTIONS", "ALL_TRANSACTIONS".`,
+									},
+									"transaction_kill_excluded_user_hosts": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: performanceCaptureConfigKeys,
+										Elem:         &schema.Schema{Type: schema.TypeString},
+										Description:  `A list of users to exclude from transaction termination. Entries can be in the format 'user@host' or just 'user'.`,
+									},
+								},
+							},
+							Description: `Configuration of Performance Capture.`,
+						},
+{{- end }}
 						"entraid_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1057,11 +1262,28 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Description:      `The MySQL, PostgreSQL or SQL Server version to use. Supported values include MYSQL_5_6, MYSQL_5_7, MYSQL_8_0, MYSQL_8_4, POSTGRES_9_6, POSTGRES_10, POSTGRES_11, POSTGRES_12, POSTGRES_13, POSTGRES_14, POSTGRES_15, POSTGRES_16, POSTGRES_17, POSTGRES_18, SQLSERVER_2022_STANDARD, SQLSERVER_2022_ENTERPRISE, SQLSERVER_2022_EXPRESS, SQLSERVER_2022_WEB, SQLSERVER_2025_STANDARD, SQLSERVER_2025_ENTERPRISE, SQLSERVER_2025_EXPRESS, SQLSERVER_2025_WEB. Database Version Policies includes an up-to-date reference of supported versions.`,
 				DiffSuppressFunc: databaseVersionDiffSuppress,
 			},
+			"switch_transaction_logs_to_cloud_storage_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When set to true, Cloud SQL instances can switch storing point-in-time recovery transaction logs from a data disk to Cloud Storage, freeing up data disk space and enabling longer retention windows. This is an input-only field that is not persisted in the API.`,
+			},
+			"include_replicas_for_major_version_upgrade": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When this parameter is set to true, Cloud SQL instances can perform in-place major version upgrades of read replicas along with the primary instance when 'database_version' is updated. This is an input-only field that is not persisted in the API and only takes effect during a major version upgrade.`,
+			},
 			"encryption_key_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+			},
+			"encryption_confidential_mode": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: `Enables Confidential Mode on Hyperdisk storage for enhanced security. Only supported on Zonal C4A PG and MySQL instances.`,
 			},
 			"root_password": {
 				Type:        schema.TypeString,
@@ -1494,6 +1716,83 @@ API (for read pools, effective_availability_type may differ from availability_ty
 					},
 				},
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			"blue_green_deployment": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Configuration for Blue-Green Deployment to perform near-zero downtime major version upgrades.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"deployment_name": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringIsNotEmpty,
+							Description:  `A unique identifier for the blue-green deployment within the project and region.`,
+						},
+						"target_database_version": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The target database version for Major Version Upgrades (e.g., MYSQL_8_4 or POSTGRES_15).`,
+						},
+						"active_environment": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "SOURCE",
+							ValidateFunc: validation.StringInSlice([]string{"SOURCE", "TARGET"}, false),
+							Description:  `Permissible values: "SOURCE" (default) or "TARGET". Changing to "TARGET" triggers the atomic switchover.`,
+						},
+						"delete_old_source_on_destroy": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: `Defaults to false. If true, removing the blue_green_deployment block after switchover automatically deletes the former Blue (Source) instance from GCP.`,
+						},
+						"target_instance_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The auto-generated name of the Green instance (e.g., my-prod-mysql-target-xxxx).`,
+						},
+						"target_instance_connection_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The Cloud SQL Auth Proxy connection string for the Green instance.`,
+						},
+						"target_instance_ip_addresses": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: `Standard Cloud SQL IP address list for the Green instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_address": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"time_to_retire": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"old_source_instance_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Renamed GCP identifier of the former Blue (Source) instance post-switchover.`,
+						},
+						"old_source_instance_connection_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Auth Proxy connection string for the former Blue instance post-switchover.`,
+						},
+					},
+				},
+			},
+			{{- end }}
 			//UDP schema start
 			"deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
 			//UDP schema end
@@ -1534,6 +1833,25 @@ func autoUpgradeEnabledCustomizeDiff(_ context.Context, d *schema.ResourceDiff, 
 	return nil
 }
 
+func activeDirectoryCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if v, ok := d.GetOk("settings.0.active_directory_config"); ok {
+		l := v.([]interface{})
+		if len(l) > 0 && l[0] != nil {
+			config := l[0].(map[string]interface{})
+			if mode, ok := config["mode"].(string); ok && mode == "CUSTOMER_MANAGED_ACTIVE_DIRECTORY" {
+				dnsServers, _ := config["dns_servers"].([]interface{})
+				secretName, _ := config["admin_credential_secret_name"].(string)
+				ou, _ := config["organizational_unit"].(string)
+
+				if len(dnsServers) == 0 || secretName == "" || ou == "" {
+					return fmt.Errorf("dns_servers, admin_credential_secret_name, and organizational_unit must all be provided when mode is CUSTOMER_MANAGED_ACTIVE_DIRECTORY")
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // helper function to see if string within list contains a particular substring
 func stringContainsSlice(arr []string, str string) bool {
 	for _, i := range arr {
@@ -1556,6 +1874,14 @@ func pitrSupportDbCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v 
 		return fmt.Errorf("point_in_time_recovery_enabled is only available for the following %v. You may want to consider using binary_log_enabled instead and remove point_in_time_recovery_enabled (removing point_in_time_recovery_enabled and adding binary_log_enabled will enable pitr for MYSQL)", dbVersionPitrValid)
 	}
 	return nil
+}
+
+func sqlNetworkArchitectureDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// By default, new Cloud SQL instances created in projects created after August 2021 use the new network architecture.
+	// If the state is true and the config is false, suppress the diff.
+	// This follows the gcloud pattern where the flag is an irreversible opt-in.
+	// See https://docs.cloud.google.com/sql/docs/mysql/upgrade-cloud-sql-instance-new-network-architecture#new-arch
+	return old == "true" && new == "false"
 }
 
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -1606,6 +1932,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
+	if d.Get("enforce_new_sql_network_architecture").(bool) {
+		instance.SqlNetworkArchitecture = "NEW_NETWORK_ARCHITECTURE"
+	}
+
 	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
 	
 	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
@@ -1637,6 +1967,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if _, ok := d.GetOk("node_count"); ok {
 		instance.NodeCount = int64(d.Get("node_count").(int))
 	}
+	if v, ok := d.GetOk("switch_transaction_logs_to_cloud_storage_enabled"); ok {
+		instance.SwitchTransactionLogsToCloudStorageEnabled = v.(bool)
+	}
 	if _, ok := d.GetOk("root_password_wo_version"); ok {
 		instance.RootPassword = tpgresource.GetRawConfigAttributeAsString(d, "root_password_wo")
 	} else if _, ok := d.GetOk("root_password"); ok {
@@ -1652,9 +1985,16 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	if k, ok := d.GetOk("encryption_key_name"); ok {
-		instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{
-			KmsKeyName: k.(string),
+		if instance.DiskEncryptionConfiguration == nil {
+			instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{}
 		}
+		instance.DiskEncryptionConfiguration.KmsKeyName = k.(string)
+	}
+	if v, ok := d.GetOk("encryption_confidential_mode"); ok {
+		if instance.DiskEncryptionConfiguration == nil {
+			instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{}
+		}
+		instance.DiskEncryptionConfiguration.ConfidentialMode = v.(bool)
 	}
 
 	var patchData *sqladmin.DatabaseInstance
@@ -1816,6 +2156,15 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, region, d.Timeout(schema.TimeoutCreate), userAgent); err != nil {
+			return err
+		}
+		return resourceSqlDatabaseInstanceRead(d, meta)
+	}
+	{{- end }}
+
 	return nil
 }
 
@@ -1846,10 +2195,9 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DataApiAccess:                 _settings["data_api_access"].(string),
 		DataDiskSizeGb:                int64(_settings["disk_size"].(int)),
 		DataDiskType:                  _settings["disk_type"].(string),
-{{- if ne $.TargetVersionName "ga" }}
 		DataDiskProvisionedIops:       int64(_settings["data_disk_provisioned_iops"].(int)),
 		DataDiskProvisionedThroughput: int64(_settings["data_disk_provisioned_throughput"].(int)),
-{{- end }}
+		ReplicationLagMaxSeconds:      int64(_settings["replication_lag_max_seconds"].(int)),
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
@@ -1865,6 +2213,9 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
 		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
+{{- if ne $.TargetVersionName "ga" }}
+		PerformanceCaptureConfig:      expandPerformanceCaptureConfig(_settings["performance_capture_config"].([]interface{})),
+{{- end }}
 		ReadPoolAutoScaleConfig:       expandReadPoolAutoScaleConfig(_settings["read_pool_auto_scale_config"].([]interface{})),
 	}
 
@@ -1943,10 +2294,13 @@ func expandMaintenanceWindow(configured []interface{}) *sqladmin.MaintenanceWind
 
 	window := configured[0].(map[string]interface{})
 	return &sqladmin.MaintenanceWindow{
-		Day:             int64(window["day"].(int)),
-		Hour:            int64(window["hour"].(int)),
-		UpdateTrack:     window["update_track"].(string),
-		ForceSendFields: []string{"Hour"},
+		Day:         int64(window["day"].(int)),
+		Hour:        int64(window["hour"].(int)),
+		UpdateTrack: window["update_track"].(string),
+		// Hour must be sent even when 0 (midnight). The API rejects a window
+		// that contains hour without day ("Day of week is unspecified"), so Day
+		// must always be sent alongside it; day = 0 means "any day".
+		ForceSendFields: []string{"Day", "Hour"},
 	}
 }
 
@@ -2015,10 +2369,14 @@ func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 	for _, _pscConfig := range configured {
 		_entry := _pscConfig.(map[string]interface{})
 		return &sqladmin.PscConfig{
-			PscEnabled:              _entry["psc_enabled"].(bool),
-			AllowedConsumerProjects: tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
+			PscEnabled:                 _entry["psc_enabled"].(bool),
+			PscAutoDnsEnabled:          _entry["psc_auto_dns_enabled"].(bool),
+			PscWriteEndpointDnsEnabled: _entry["psc_write_endpoint_dns_enabled"].(bool),
+			PscAutoConnectionPolicyEnabled: _entry["psc_auto_connection_policy_enabled"].(bool),
+			AllowedConsumerProjects:    tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
 			NetworkAttachmentUri:    _entry["network_attachment_uri"].(string),
 			PscAutoConnections:      expandPscAutoConnectionConfig(_entry["psc_auto_connections"].([]interface{})),
+			ForceSendFields:         []string{"AllowedConsumerProjects"},
 		}
 	}
 
@@ -2141,14 +2499,29 @@ func expandBackupRetentionSettings(configured interface{}) *sqladmin.BackupReten
 
 func expandActiveDirectoryConfig(configured interface{}) *sqladmin.SqlActiveDirectoryConfig {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 
 	config := l[0].(map[string]interface{})
-	return &sqladmin.SqlActiveDirectoryConfig{
+	adConfig := &sqladmin.SqlActiveDirectoryConfig{
 		Domain: config["domain"].(string),
 	}
+
+	if v, ok := config["mode"].(string); ok && v != "" {
+		adConfig.Mode = v
+	}
+	if v, ok := config["dns_servers"].([]interface{}); ok && len(v) > 0 {
+		adConfig.DnsServers = tpgresource.ConvertStringArr(v)
+	}
+	if v, ok := config["admin_credential_secret_name"].(string); ok && v != "" {
+		adConfig.AdminCredentialSecretName = v
+	}
+	if v, ok := config["organizational_unit"].(string); ok && v != "" {
+		adConfig.OrganizationalUnit = v
+	}
+
+	return adConfig
 }
 
 func expandDenyMaintenancePeriod(configured []interface{}) []*sqladmin.DenyMaintenancePeriod {
@@ -2231,6 +2604,33 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		ForceSendFields: []string{"EnhancedQueryInsightsEnabled"},
 	}
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandPerformanceCaptureConfig(configured []interface{}) *sqladmin.PerformanceCaptureConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_performanceCaptureConfig := configured[0].(map[string]interface{})
+	return &sqladmin.PerformanceCaptureConfig{
+		Enabled:                      _performanceCaptureConfig["enabled"].(bool),
+		ProbingIntervalSeconds:       int64(_performanceCaptureConfig["probing_interval_seconds"].(int)),
+		ProbeThreshold:               int64(_performanceCaptureConfig["probe_threshold"].(int)),
+		RunningThreadsThreshold:      int64(_performanceCaptureConfig["running_threads_threshold"].(int)),
+		SecondsBehindSourceThreshold: int64(_performanceCaptureConfig["seconds_behind_source_threshold"].(int)),
+		TransactionDurationThreshold: int64(_performanceCaptureConfig["transaction_duration_threshold"].(int)),
+		CpuUtilizationThresholdPercent:    int64(_performanceCaptureConfig["cpu_utilization_threshold_percent"].(int)),
+		MemoryUsageThresholdPercent:       int64(_performanceCaptureConfig["memory_usage_threshold_percent"].(int)),
+		HistoryListLengthThresholdCount:   int64(_performanceCaptureConfig["history_list_length_threshold_count"].(int)),
+		SemaphoreWaitThresholdCount:       int64(_performanceCaptureConfig["semaphore_wait_threshold_count"].(int)),
+		TransactionLockWaitThresholdCount: int64(_performanceCaptureConfig["transaction_lock_wait_threshold_count"].(int)),
+		TransactionKillThresholdSeconds:   int64(_performanceCaptureConfig["transaction_kill_threshold_seconds"].(int)),
+		TransactionKillType:               _performanceCaptureConfig["transaction_kill_type"].(string),
+		TransactionKillExcludedUserHosts:  tpgresource.ConvertStringArr(_performanceCaptureConfig["transaction_kill_excluded_user_hosts"].([]interface{})),
+		ForceSendFields:              []string{"Enabled"},
+	}
+}
+{{- end }}
 
 func expandPasswordValidationPolicy(configured []interface{}) *sqladmin.PasswordValidationPolicy {
 	if len(configured) == 0 || configured[0] == nil {
@@ -2344,6 +2744,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("instance_type", instance.InstanceType); err != nil {
 		return fmt.Errorf("Error setting instance_type: %s", err)
 	}
+	if err := d.Set("enforce_new_sql_network_architecture", instance.SqlNetworkArchitecture == "NEW_NETWORK_ARCHITECTURE"); err != nil {
+		return fmt.Errorf("Error setting enforce_new_sql_network_architecture: %s", err)
+	}
 	if err := d.Set("node_count", instance.NodeCount); err != nil {
 		return fmt.Errorf("Error setting node_count: %s", err)
 	}
@@ -2353,6 +2756,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if instance.DiskEncryptionConfiguration != nil {
 		if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
 			return fmt.Errorf("Error setting encryption_key_name: %s", err)
+		}
+		if err := d.Set("encryption_confidential_mode", instance.DiskEncryptionConfiguration.ConfidentialMode); err != nil {
+			return fmt.Errorf("Error setting encryption_confidential_mode: %s", err)
 		}
 	}
 
@@ -2425,6 +2831,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "DELETE"); err != nil{
 	    return err
 	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if err := readBlueGreenDeployment(d, config, project, instance, userAgent); err != nil {
+		return err
+	}
+	{{- end }}
 	
 
 	return nil
@@ -2476,7 +2887,9 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	desiredSetting := d.Get("settings")
+	{{- if ne $.TargetVersionName "ga" }}
+	if !isBlueGreenSwitchover(d) {
+	{{- end }}
 	var op *sqladmin.Operation
 	var instance *sqladmin.DatabaseInstance
 
@@ -2506,10 +2919,39 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// We check for HasChange because we only want to trigger the network architecture upgrade
+	// if the configuration has explicitly changed. We also check the current value to ensure
+	// it's true, as this is an irreversible opt-in.
+	if d.HasChange("enforce_new_sql_network_architecture") && d.Get("enforce_new_sql_network_architecture").(bool) {
+		instance = &sqladmin.DatabaseInstance{SqlNetworkArchitecture: "NEW_NETWORK_ARCHITECTURE"}
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (rerr error) {
+				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				return rerr
+			},
+			Timeout:              d.Timeout(schema.TimeoutUpdate),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			return fmt.Errorf("Error, failed to patch instance settings for %s: %s", d.Get("name").(string), err)
+		}
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Check if the database version is being updated, because patching database version is an atomic operation and can not be
 	// performed with other fields, we first patch database version before updating the rest of the fields.
 	if d.HasChange("database_version") {
-		instance = &sqladmin.DatabaseInstance{DatabaseVersion: databaseVersion}
+		instance = &sqladmin.DatabaseInstance{
+			DatabaseVersion:                       databaseVersion,
+			IncludeReplicasForMajorVersionUpgrade: d.Get("include_replicas_for_major_version_upgrade").(bool),
+		}
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
 				op, rerr = NewClient(config, userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
@@ -2573,7 +3015,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 		transport_tpg.MutexStore.Lock(instanceMutexKey(project, instance))
-		defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
 			op, err = NewClient(config, userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
@@ -2585,6 +3026,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		})
 
 		if err != nil {
+			transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
 				return fmt.Errorf("Error re-setting root_password: %s", err)
 			}
@@ -2592,6 +3034,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 		err = SqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
+		transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instance))
 
 		if err != nil {
 			if err := d.Set("root_password", oldPwd.(string)); err != nil {
@@ -2722,21 +3165,22 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
     	}
 	}
 
+	desiredSetting := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
 
+	// A disk_size decrease is a storage shrink, which is carried out by the dedicated
+	// Instances.PerformDiskShrink operation below rather than by the settings update. For a
+	// shrink, keep the current (larger) size on the update call so disk size is unchanged
+	// there, and record that a shrink must be performed. Increases are already applied via
+	// the expanded settings (DataDiskSizeGb) on the update call.
+	diskShrink := false
 	if d.HasChange("settings.0.disk_size") {
-		autoResize := true
-		_, autoResizeI := d.GetChange("settings.0.disk_autoresize")
-		if autoResizeI != nil {
-			autoResize = autoResizeI.(bool)
-		}
 		oldDiskSizeI, newDiskSizeI := d.GetChange("settings.0.disk_size")
-		if !autoResize || newDiskSizeI.(int) > oldDiskSizeI.(int) {
-			// If auto resize is not enabled - set the disk size as requested, even if it's a decrease - let it fail.
-			// Otherwise, allow increasing even if auto resize is enabled.
-			instance.Settings.DataDiskSizeGb = int64(newDiskSizeI.(int))
+		if newDiskSizeI.(int) < oldDiskSizeI.(int) {
+			diskShrink = true
+			instance.Settings.DataDiskSizeGb = int64(oldDiskSizeI.(int))
 		}
 	}
 
@@ -2796,6 +3240,11 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// switch_transaction_logs_to_cloud_storage_enabled is input-only; send it only when toggled.
+	if d.HasChange("switch_transaction_logs_to_cloud_storage_enabled") {
+		instance.SwitchTransactionLogsToCloudStorageEnabled = d.Get("switch_transaction_logs_to_cloud_storage_enabled").(bool)
+	}
+
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
 			op, rerr = NewClient(config, userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
@@ -2811,6 +3260,51 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	err = SqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
+	}
+
+	// Perform an in-place storage shrink if disk_size was reduced. This is a dedicated,
+	// disruptive operation (the instance restarts) and is run after the settings update.
+	if diskShrink {
+		name := d.Get("name").(string)
+		targetSizeGb := int64(d.Get("settings.0.disk_size").(int))
+
+		// Pre-flight: the smallest size an instance can shrink to depends on its current
+		// storage usage. Fetch that minimum and surface a clear error up front instead of
+		// letting the shrink operation start and then fail.
+		var shrinkConfig *sqladmin.SqlInstancesGetDiskShrinkConfigResponse
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (rerr error) {
+				shrinkConfig, rerr = NewClient(config, userAgent).Projects.Instances.GetDiskShrinkConfig(project, name).Do()
+				return rerr
+			},
+			Timeout:              d.Timeout(schema.TimeoutUpdate),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			return fmt.Errorf("Error, failed to get storage shrink config for %s: %s", name, err)
+		}
+		if targetSizeGb < shrinkConfig.MinimalTargetSizeGb {
+			return fmt.Errorf("Error, cannot shrink storage of %s to %d GB: the minimum size this instance can currently shrink to is %d GB", name, targetSizeGb, shrinkConfig.MinimalTargetSizeGb)
+		}
+
+		shrinkContext := &sqladmin.PerformDiskShrinkContext{
+			TargetSizeGb: targetSizeGb,
+		}
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (rerr error) {
+				op, rerr = NewClient(config, userAgent).Projects.Instances.PerformDiskShrink(project, name, shrinkContext).Do()
+				return rerr
+			},
+			Timeout:              d.Timeout(schema.TimeoutUpdate),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			return fmt.Errorf("Error, failed to perform storage shrink for %s: %s", name, err)
+		}
+		err = SqlAdminOperationWaitTime(config, op, project, "Perform Disk Shrink", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
 	}
 
 	// Perform a backup restore if the backup context exists and has changed
@@ -2854,6 +3348,16 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
            return err
          }
       }
+	{{- if ne $.TargetVersionName "ga" }}
+	}
+
+	if d.HasChange("blue_green_deployment") {
+		if err := handleBlueGreenDeploymentUpdate(d, config, project, d.Get("region").(string), d.Timeout(schema.TimeoutUpdate), userAgent); err != nil {
+			_ = resourceSqlDatabaseInstanceRead(d, meta)
+			return err
+		}
+	}
+	{{- end }}
 
       return resourceSqlDatabaseInstanceRead(d, meta)
 }
@@ -2936,6 +3440,42 @@ func serverCertificateRotationModeDiffSuppress(_, oldMode, newMode string, _ *sc
 	return false
 }
 
+func parseDenyMaintenancePeriodDate(date string) (int, int, int, bool) {
+	date = strings.TrimPrefix(date, "0-")
+	parts := strings.Split(date, "-")
+	switch len(parts) {
+	case 2:
+		month, errM := strconv.Atoi(parts[0])
+		day, errD := strconv.Atoi(parts[1])
+		if errM != nil || errD != nil || month < 1 || month > 12 || day < 1 || day > 31 {
+			return 0, 0, 0, false
+		}
+		return 0, month, day, true
+	case 3:
+		year, errY := strconv.Atoi(parts[0])
+		month, errM := strconv.Atoi(parts[1])
+		day, errD := strconv.Atoi(parts[2])
+		if errY != nil || errM != nil || errD != nil || year < 0 || month < 1 || month > 12 || day < 1 || day > 31 {
+			return 0, 0, 0, false
+		}
+		return year, month, day, true
+	default:
+		return 0, 0, 0, false
+	}
+}
+
+func denyMaintenancePeriodDateDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	oldYear, oldMonth, oldDay, oldOk := parseDenyMaintenancePeriodDate(old)
+	newYear, newMonth, newDay, newOk := parseDenyMaintenancePeriodDate(new)
+	if !oldOk || !newOk {
+		return false
+	}
+	return oldYear == newYear && oldMonth == newMonth && oldDay == newDay
+}
+
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	
 	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil{
@@ -2960,6 +3500,16 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
 	}
+
+	{{- if ne $.TargetVersionName "ga" }}
+	if bgdStateMap := getExistingBgdStateMap(d); bgdStateMap != nil {
+		deploymentName, _ := bgdStateMap["deployment_name"].(string)
+		deleteOldSourceCfg, _ := bgdStateMap["delete_old_source_on_destroy"].(bool)
+		if err := deleteBlueGreenDeployment(d, config, project, d.Get("name").(string), d.Get("region").(string), deploymentName, deleteOldSourceCfg, d.Timeout(schema.TimeoutDelete), userAgent); err != nil {
+			return err
+		}
+	}
+	{{- end }}
 
 	// Lock on the master_instance_name just in case deleting a replica causes
 	// operations on the master.
@@ -3034,10 +3584,9 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"data_api_access":                  settings.DataApiAccess,
 		"disk_type":                        settings.DataDiskType,
 		"disk_size":                        settings.DataDiskSizeGb,
-{{- if ne $.TargetVersionName "ga" }}
 		"data_disk_provisioned_iops":       settings.DataDiskProvisionedIops,
 		"data_disk_provisioned_throughput": settings.DataDiskProvisionedThroughput,
-{{- end }}
+		"replication_lag_max_seconds":      settings.ReplicationLagMaxSeconds,
 		"pricing_plan":                     settings.PricingPlan,
 		"user_labels":                      settings.UserLabels,
 		"password_validation_policy":       settings.PasswordValidationPolicy,
@@ -3087,7 +3636,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
 	}
 
-	if settings.ConnectionPoolConfig != nil {
+	// When connection_pooling_enabled=false the API returns nil for ConnectionPoolConfig.
+	// We still need to flatten if the user has configured the block to avoid a permadiff.
+	poolConfigSet, _ := d.Get("settings.0.connection_pool_config").(*schema.Set)
+	if settings.ConnectionPoolConfig != nil || (poolConfigSet != nil && poolConfigSet.Len() > 0) {
 		data["connection_pool_config"] = flattenConnectionPoolConfig(settings.ConnectionPoolConfig)
 	}
 
@@ -3106,6 +3658,12 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 	if settings.InsightsConfig != nil {
 		data["insights_config"] = flattenInsightsConfig(settings.InsightsConfig)
 	}
+
+{{- if ne $.TargetVersionName "ga" }}
+	if settings.PerformanceCaptureConfig != nil {
+		data["performance_capture_config"] = flattenPerformanceCaptureConfig(settings.PerformanceCaptureConfig)
+	}
+{{- end }}
 
 	if settings.ReadPoolAutoScaleConfig != nil {
 		data["read_pool_auto_scale_config"] = flattenReadPoolAutoScaleConfig(settings.ReadPoolAutoScaleConfig)
@@ -3209,7 +3767,11 @@ func flattenActiveDirectoryConfig(sqlActiveDirectoryConfig *sqladmin.SqlActiveDi
 	}
 	return []map[string]interface{}{
 		{
-			"domain": sqlActiveDirectoryConfig.Domain,
+			"domain":                       sqlActiveDirectoryConfig.Domain,
+			"mode":                         sqlActiveDirectoryConfig.Mode,
+			"dns_servers":                  sqlActiveDirectoryConfig.DnsServers,
+			"admin_credential_secret_name": sqlActiveDirectoryConfig.AdminCredentialSecretName,
+			"organizational_unit":          sqlActiveDirectoryConfig.OrganizationalUnit,
 		},
 	}
 }
@@ -3364,9 +3926,13 @@ func flattenPscAutoConnections(pscAutoConnections []*sqladmin.PscAutoConnectionC
                 data := map[string]interface{}{
                         "consumer_network":   flag.ConsumerNetwork,
                         "consumer_network_status":   flag.ConsumerNetworkStatus,
+                        "instance_auto_dns_status":   flag.InstanceAutoDnsStatus,
+                        "write_endpoint_auto_dns_status":   flag.WriteEndpointAutoDnsStatus,
                         "consumer_service_project_id":   flag.ConsumerProject,
                         "ip_address":   flag.IpAddress,
                         "status":   flag.Status,
+                        "service_connection_policy":   flag.ServiceConnectionPolicy,
+                        "service_connection_policy_creation_result":   flag.ServiceConnectionPolicyCreationResult,
                 }
 
                 flags = append(flags, data)
@@ -3377,8 +3943,11 @@ func flattenPscAutoConnections(pscAutoConnections []*sqladmin.PscAutoConnectionC
 
 func flattenPscConfigs(pscConfig *sqladmin.PscConfig) interface{} {
 	data := map[string]interface{}{
-		"psc_enabled":               pscConfig.PscEnabled,
-		"allowed_consumer_projects": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
+		"psc_enabled":                    pscConfig.PscEnabled,
+		"psc_auto_dns_enabled":           pscConfig.PscAutoDnsEnabled,
+		"psc_write_endpoint_dns_enabled": pscConfig.PscWriteEndpointDnsEnabled,
+		"psc_auto_connection_policy_enabled": pscConfig.PscAutoConnectionPolicyEnabled,
+		"allowed_consumer_projects":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
 		"network_attachment_uri":    pscConfig.NetworkAttachmentUri,
 		"psc_auto_connections":      flattenPscAutoConnections(pscConfig.PscAutoConnections),
 	}
@@ -3516,6 +4085,29 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 
 	return []map[string]interface{}{data}
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func flattenPerformanceCaptureConfig(performanceCaptureConfig *sqladmin.PerformanceCaptureConfig) interface{} {
+	data := map[string]interface{}{
+		"enabled":                         performanceCaptureConfig.Enabled,
+		"probing_interval_seconds":        performanceCaptureConfig.ProbingIntervalSeconds,
+		"probe_threshold":                 performanceCaptureConfig.ProbeThreshold,
+		"running_threads_threshold":       performanceCaptureConfig.RunningThreadsThreshold,
+		"seconds_behind_source_threshold": performanceCaptureConfig.SecondsBehindSourceThreshold,
+		"transaction_duration_threshold":  performanceCaptureConfig.TransactionDurationThreshold,
+		"cpu_utilization_threshold_percent":     performanceCaptureConfig.CpuUtilizationThresholdPercent,
+		"memory_usage_threshold_percent":        performanceCaptureConfig.MemoryUsageThresholdPercent,
+		"history_list_length_threshold_count":   performanceCaptureConfig.HistoryListLengthThresholdCount,
+		"semaphore_wait_threshold_count":        performanceCaptureConfig.SemaphoreWaitThresholdCount,
+		"transaction_lock_wait_threshold_count": performanceCaptureConfig.TransactionLockWaitThresholdCount,
+		"transaction_kill_threshold_seconds":    performanceCaptureConfig.TransactionKillThresholdSeconds,
+		"transaction_kill_type":                 performanceCaptureConfig.TransactionKillType,
+		"transaction_kill_excluded_user_hosts":  performanceCaptureConfig.TransactionKillExcludedUserHosts,
+	}
+
+	return []map[string]interface{}{data}
+}
+{{- end }}
 
 func flattenTargetMetrics(targetMetrics []*sqladmin.TargetMetric) []interface{} {
 	if len(targetMetrics) == 0 { // Handles nil or empty slice
@@ -3810,6 +4402,509 @@ func normalizeDRReplicaName(drReplicaName, project string) string {
 	}
 	return fmt.Sprintf("%s:%s", project, drReplicaName)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func blueGreenDeploymentCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("database_version") {
+		if _, n := d.GetChange("blue_green_deployment"); len(n.([]interface{})) > 0 && n.([]interface{})[0] != nil {
+			if n.([]interface{})[0].(map[string]interface{})["active_environment"] != "TARGET" {
+				return fmt.Errorf("cannot change database_version while active_environment is \"SOURCE\"; to perform a switchover, you must update both active_environment to \"TARGET\" and database_version together")
+			}
+		}
+	}
+
+	if !d.HasChange("blue_green_deployment") {
+		return nil
+	}
+
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	oldList := oldVal.([]interface{})
+	newList := newVal.([]interface{})
+
+	// Ensure active_environment is only "SOURCE" during creation of a new Blue-Green Deployment.
+	if len(oldList) == 0 && len(newList) > 0 && newList[0] != nil {
+		newMap := newList[0].(map[string]interface{})
+		newName, _ := newMap["deployment_name"].(string)
+		newEnv, _ := newMap["active_environment"].(string)
+		if newEnv == "TARGET" {
+			return fmt.Errorf(
+				"cannot create deployment %q with active_environment %q: initial value must be \"SOURCE\"",
+				newName, newEnv,
+			)
+		}
+	}
+
+	// Validate changes to an existing Blue-Green Deployment.
+	if len(oldList) > 0 && len(newList) > 0 && oldList[0] != nil && newList[0] != nil {
+		oldMap := oldList[0].(map[string]interface{})
+		newMap := newList[0].(map[string]interface{})
+
+		// deployment_name cannot be changed for an existing Blue-Green Deployment; only one deployment can exist at a time.
+		oldName, _ := oldMap["deployment_name"].(string)
+		newName, _ := newMap["deployment_name"].(string)
+		if oldName != "" && newName != "" && oldName != newName {
+			return fmt.Errorf(
+				"Source instance '%s' already has a blue-green deployment.",
+				d.Get("name").(string),
+			)
+		}
+
+		// target_database_version is immutable and cannot be changed after the Blue-Green Deployment is created.
+		oldDbVer, _ := oldMap["target_database_version"].(string)
+		newDbVer, _ := newMap["target_database_version"].(string)
+		if oldDbVer != newDbVer {
+			return fmt.Errorf(
+				"target_database_version is immutable and cannot be changed from %q to %q (deployment: %q)",
+				oldDbVer, newDbVer, oldName,
+			)
+		}
+
+		// active_environment cannot be reverted from "TARGET" back to "SOURCE" once switchover has occurred.
+		oldEnv, _ := oldMap["active_environment"].(string)
+		newEnv, _ := newMap["active_environment"].(string)
+		if oldEnv == "TARGET" && newEnv == "SOURCE" {
+			return fmt.Errorf(
+				"switchover is irreversible: cannot revert active_environment from %q to %q on deployment %q",
+				oldEnv, newEnv, oldName,
+			)
+		}
+
+		// When switching over (active_environment changing from "SOURCE" to "TARGET"),
+		// the resource configuration must match the Green (target) instance configuration.
+		if oldEnv == "SOURCE" && newEnv == "TARGET" {
+			targetInstanceName, _ := oldMap["target_instance_name"].(string)
+			if meta != nil && targetInstanceName != "" {
+				if config, ok := meta.(*transport_tpg.Config); ok && config != nil {
+					if err := validateSwitchoverMatchesGreenInstance(d, config, oldName, targetInstanceName); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func isBlueGreenSwitchover(d *schema.ResourceData) bool {
+	if !d.HasChange("blue_green_deployment") {
+		return false
+	}
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	oldList, okOld := oldVal.([]interface{})
+	newList, okNew := newVal.([]interface{})
+	if !okOld || !okNew || len(oldList) == 0 || len(newList) == 0 || oldList[0] == nil || newList[0] == nil {
+		return false
+	}
+	oldMap := oldList[0].(map[string]interface{})
+	newMap := newList[0].(map[string]interface{})
+	oldEnv, _ := oldMap["active_environment"].(string)
+	newEnv, _ := newMap["active_environment"].(string)
+	return oldEnv == "SOURCE" && newEnv == "TARGET"
+}
+
+var skipGreenComparisonFields = map[string]bool{
+	// Top-level fields expected to differ on the Green instance before switchover because Green is a BGD target replica of Blue:
+	"name":                  true, // Green has an auto-generated target name until switchover swaps the Blue and Green names.
+	"blue_green_deployment": true, // The BGD configuration block itself is being updated to trigger the switchover.
+	"instance_type":         true, // Green is a READ_REPLICA_INSTANCE until switchover promotes it to CLOUD_SQL_INSTANCE.
+	"master_instance_name":  true, // Green points to the Blue instance as its master until switchover promotes it to primary.
+	"replica_configuration": true, // Green carries replica configuration until switchover promotes it to primary.
+	"replica_names":         true, // Replica list is attached to the Blue primary until switchover swaps roles.
+	"replication_cluster":   true, // DR replication cluster metadata belongs to the primary until switchover.
+	// Settings sub-fields expected to differ on the Green replica before switchover:
+	"settings.0.backup_configuration":        true, // Backups are disabled on the Green instance until switchover completes.
+	"settings.0.password_validation_policy":  true, // Password validation policy is not returned on the Green replica before switchover.
+	"settings.0.ip_configuration":            true, // IP and PSC configuration can differ between Blue and Green before switchover.
+	"settings.0.replication_lag_max_seconds": true, // Replica-only setting populated on Green while replicating from Blue.
+	"settings.0.location_preference":         true, // Primary zone preference can differ between Blue and Green instances.
+}
+
+func validateSwitchoverMatchesGreenInstance(d *schema.ResourceDiff, config *transport_tpg.Config, deploymentName, targetInstanceName string) error {
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return nil
+	}
+
+	project, err := tpgresource.GetProjectFromDiff(d, config)
+	if err != nil {
+		return err
+	}
+
+	resourceSchema := ResourceSqlDatabaseInstance().Schema
+	greenData := ResourceSqlDatabaseInstance().Data(nil)
+	for k := range resourceSchema {
+		oldVal, _ := d.GetChange(k)
+		_ = greenData.Set(k, oldVal)
+	}
+	_ = greenData.Set("project", project)
+	_ = greenData.Set("name", targetInstanceName)
+	greenData.SetId(targetInstanceName)
+
+	if err := resourceSqlDatabaseInstanceRead(greenData, config); err != nil {
+		return fmt.Errorf("Error reading green instance %q to validate switchover for deployment %q: %s", targetInstanceName, deploymentName, err)
+	}
+	if greenData.Id() == "" {
+		return nil
+	}
+
+	var mismatches []string
+	for k, fieldSchema := range resourceSchema {
+		compareConfiguredField(k, rawConfig.GetAttr(k), fieldSchema, d, greenData, &mismatches)
+	}
+
+	slices.Sort(mismatches)
+	if len(mismatches) > 0 {
+		return fmt.Errorf(
+			"cannot switchover deployment %q: update terraform configuration to match green instance %q. Mismatched fields:\n - %s",
+			deploymentName, targetInstanceName, strings.Join(mismatches, "\n - "),
+		)
+	}
+
+	return nil
+}
+
+func compareConfiguredField(key string, rawVal cty.Value, fieldSchema *schema.Schema, d *schema.ResourceDiff, greenData *schema.ResourceData, mismatches *[]string) {
+	if !rawVal.IsKnown() || skipGreenComparisonFields[key] || fieldSchema.WriteOnly || (!fieldSchema.Optional && !fieldSchema.Required) {
+		return
+	}
+
+	isUnsetInConfig := rawVal.IsNull() || ((fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet) && len(rawVal.AsValueSlice()) == 0)
+	if isUnsetInConfig && fieldSchema.Computed {
+		return
+	}
+
+	if fieldSchema.Type == schema.TypeList {
+		if subRes, ok := fieldSchema.Elem.(*schema.Resource); ok && !isUnsetInConfig {
+			rawSlice := rawVal.AsValueSlice()
+			greenSlice, okGreen := greenData.Get(key).([]interface{})
+			if okGreen && len(greenSlice) == len(rawSlice) {
+				for i, rawElem := range rawSlice {
+					if rawElem.IsNull() || !rawElem.IsKnown() {
+						continue
+					}
+					for subName, subSchema := range subRes.Schema {
+						compareConfiguredField(fmt.Sprintf("%s.%d.%s", key, i, subName), rawElem.GetAttr(subName), subSchema, d, greenData, mismatches)
+					}
+				}
+				return
+			}
+		}
+	}
+
+	cfgVal, greenVal := d.Get(key), greenData.Get(key)
+	if key == "settings.0.disk_size" && greenData.Get("settings.0.disk_autoresize").(bool) && greenVal.(int) > cfgVal.(int) {
+		return
+	}
+	if fieldSchema.DiffSuppressFunc != nil {
+		if cfgStr, ok1 := cfgVal.(string); ok1 {
+			if greenStr, ok2 := greenVal.(string); ok2 && fieldSchema.DiffSuppressFunc(key, greenStr, cfgStr, greenData) {
+				return
+			}
+		}
+	}
+
+	equal := reflect.DeepEqual(cfgVal, greenVal)
+	if eq, ok := cfgVal.(schema.Equal); ok {
+		equal = eq.Equal(greenVal)
+	}
+	if !equal {
+		*mismatches = append(*mismatches, fmt.Sprintf("%s (configured: %v, green instance: %v)", key, formatSchemaValue(cfgVal), formatSchemaValue(greenVal)))
+	}
+}
+
+func formatSchemaValue(v interface{}) interface{} {
+	if s, ok := v.(*schema.Set); ok {
+		v = s.List()
+	}
+	if list, ok := v.([]interface{}); ok {
+		res := make([]interface{}, len(list))
+		for i, elem := range list {
+			res[i] = formatSchemaValue(elem)
+		}
+		return res
+	}
+	if m, ok := v.(map[string]interface{}); ok {
+		res := make(map[string]interface{}, len(m))
+		for k, val := range m {
+			res[k] = formatSchemaValue(val)
+		}
+		return res
+	}
+	return v
+}
+
+func getExistingBgdStateMap(d *schema.ResourceData) map[string]interface{} {
+	if v, ok := d.GetOk("blue_green_deployment"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+		return v.([]interface{})[0].(map[string]interface{})
+	}
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	if newVal != nil {
+		if newList, ok := newVal.([]interface{}); ok && len(newList) > 0 && newList[0] != nil {
+			return newList[0].(map[string]interface{})
+		}
+	}
+	if oldVal != nil {
+		if oldList, ok := oldVal.([]interface{}); ok && len(oldList) > 0 && oldList[0] != nil {
+			return oldList[0].(map[string]interface{})
+		}
+	}
+	return nil
+}
+
+func readBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project string, instance *sqladmin.DatabaseInstance, userAgent string) error {
+	bgdStateMap := getExistingBgdStateMap(d)
+	deploymentName := ""
+	if instance != nil && instance.DeploymentInfo != nil && instance.DeploymentInfo.DeploymentId != "" {
+		deploymentName = instance.DeploymentInfo.DeploymentId
+	}
+
+	if deploymentName == "" {
+		if err := d.Set("blue_green_deployment", nil); err != nil {
+			return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
+		}
+		return nil
+	}
+
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, instance.Region, deploymentName)
+	bgdRes, err := NewClient(config, userAgent).BlueGreenDeployments.Get(bgdName).Do()
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			if err := d.Set("blue_green_deployment", nil); err != nil {
+				return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
+			}
+			return nil
+		}
+		return fmt.Errorf("Error reading BlueGreenDeployment %q: %s", deploymentName, err)
+	}
+
+	targetDbVersion := ""
+	if bgdRes.RequestedConfig != nil && bgdRes.RequestedConfig.DatabaseVersion != "" {
+		targetDbVersion = bgdRes.RequestedConfig.DatabaseVersion
+	}
+	if targetDbVersion == "" && bgdStateMap != nil {
+		if dbVer, ok := bgdStateMap["target_database_version"].(string); ok {
+			targetDbVersion = dbVer
+		}
+	}
+
+	activeEnv := "SOURCE"
+	if bgdRes.State == "SWITCHOVER_COMPLETED" {
+		activeEnv = "TARGET"
+	} else if bgdRes.State == "DELETING" && bgdStateMap != nil {
+		if prevEnv, ok := bgdStateMap["active_environment"].(string); ok && prevEnv != "" {
+			activeEnv = prevEnv
+		}
+	}
+
+	if (activeEnv == "SOURCE" && bgdRes.SourceInstance != "" && bgdRes.SourceInstance != instance.Name) ||
+		(activeEnv == "TARGET" && bgdRes.SwitchoverTargetInstance != "" && bgdRes.SwitchoverTargetInstance != instance.Name) {
+		if err := d.Set("blue_green_deployment", nil); err != nil {
+			return fmt.Errorf("Error clearing blue_green_deployment: %s", err)
+		}
+		return nil
+	}
+
+	deleteOldSource := false
+	if bgdStateMap != nil {
+		if val, ok := bgdStateMap["delete_old_source_on_destroy"].(bool); ok {
+			deleteOldSource = val
+		}
+	}
+
+	targetInstanceName := bgdRes.SwitchoverTargetInstance
+	targetConnName := ""
+	targetIpAddresses := []map[string]interface{}{}
+	oldSourceInstanceName := ""
+	oldSourceConnName := ""
+	if activeEnv == "TARGET" {
+		oldSourceInstanceName = bgdRes.SourceInstance
+	}
+
+	for _, mapping := range bgdRes.DeploymentMappings {
+		if mapping == nil {
+			continue
+		}
+		if mapping.Target != nil && (targetInstanceName == "" || mapping.Target.Instance == targetInstanceName) {
+			if targetInstanceName == "" {
+				targetInstanceName = mapping.Target.Instance
+			}
+			targetConnName = mapping.Target.Connection
+			targetIpAddresses = flattenIpAddresses(mapping.Target.IpMappings)
+		}
+		if activeEnv == "TARGET" && mapping.Source != nil && (oldSourceInstanceName == "" || mapping.Source.Instance == oldSourceInstanceName) {
+			if oldSourceInstanceName == "" {
+				oldSourceInstanceName = mapping.Source.Instance
+			}
+			oldSourceConnName = mapping.Source.Connection
+		}
+	}
+
+	bgdMap := map[string]interface{}{
+		"deployment_name":                     deploymentName,
+		"target_database_version":             targetDbVersion,
+		"active_environment":                  activeEnv,
+		"delete_old_source_on_destroy":        deleteOldSource,
+		"target_instance_name":                targetInstanceName,
+		"target_instance_connection_name":     targetConnName,
+		"target_instance_ip_addresses":        targetIpAddresses,
+		"old_source_instance_name":            oldSourceInstanceName,
+		"old_source_instance_connection_name": oldSourceConnName,
+	}
+
+	if err := d.Set("blue_green_deployment", []map[string]interface{}{bgdMap}); err != nil {
+		return fmt.Errorf("Error setting blue_green_deployment: %s", err)
+	}
+
+	return nil
+}
+
+func handleBlueGreenDeploymentUpdate(d *schema.ResourceData, config *transport_tpg.Config, project, region string, timeout time.Duration, userAgent string) error {
+	oldVal, newVal := d.GetChange("blue_green_deployment")
+	oldList := oldVal.([]interface{})
+	newList := newVal.([]interface{})
+
+	instanceName := d.Get("name").(string)
+
+	// Case 1: Adding a new blue_green_deployment block
+	if len(oldList) == 0 && len(newList) > 0 && newList[0] != nil {
+		newMap := newList[0].(map[string]interface{})
+		deploymentName, _ := newMap["deployment_name"].(string)
+		targetDbVersion, _ := newMap["target_database_version"].(string)
+
+		return createBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, targetDbVersion, timeout, userAgent)
+	}
+
+	// Case 2: Removing an existing blue_green_deployment block (or deleting out-of-band BGD in Scenario A)
+	if len(oldList) > 0 && len(newList) == 0 && oldList[0] != nil {
+		oldMap := oldList[0].(map[string]interface{})
+		deploymentName, _ := oldMap["deployment_name"].(string)
+		deleteOldSourceCfg, _ := oldMap["delete_old_source_on_destroy"].(bool)
+
+		return deleteBlueGreenDeployment(d, config, project, instanceName, region, deploymentName, deleteOldSourceCfg, d.Timeout(schema.TimeoutUpdate), userAgent)
+	}
+
+	// Case 3: Modifying an existing blue_green_deployment block
+	if len(oldList) > 0 && len(newList) > 0 && oldList[0] != nil && newList[0] != nil {
+		oldMap := oldList[0].(map[string]interface{})
+		newMap := newList[0].(map[string]interface{})
+		newName, _ := newMap["deployment_name"].(string)
+
+		oldEnv, _ := oldMap["active_environment"].(string)
+		newEnv, _ := newMap["active_environment"].(string)
+		if oldEnv == "SOURCE" && newEnv == "TARGET" {
+			return switchoverBlueGreenDeployment(d, config, project, instanceName, region, newName, userAgent)
+		}
+	}
+
+	return nil
+}
+
+func switchoverBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, userAgent string) error {
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instanceName))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instanceName))
+
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Switchover(bgdName, &sqladmin.SwitchoverBlueGreenDeploymentRequest{}).Do()
+			return rerr
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error switching over Blue-Green Deployment %q on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	err = SqlAdminOperationWaitTime(
+		config, op, project, "Switching Over Blue-Green Deployment", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName, targetDbVersion string, timeout time.Duration, userAgent string) error {
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instanceName))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instanceName))
+
+	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
+	bgdReq := &sqladmin.BlueGreenDeployment{
+		SourceInstance: instanceName,
+	}
+	if targetDbVersion != "" {
+		bgdReq.RequestedConfig = &sqladmin.RequestedConfig{
+			DatabaseVersion: targetDbVersion,
+		}
+	}
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Create(parent, bgdReq).BlueGreenDeploymentId(deploymentName).Do()
+			return rerr
+		},
+		Timeout:              timeout,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error creating Blue-Green Deployment %q on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	err = SqlAdminOperationWaitTime(
+		config, op, project, "Creating Blue-Green Deployment", userAgent,
+		timeout)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deleteBlueGreenDeployment(d *schema.ResourceData, config *transport_tpg.Config, project, instanceName, region, deploymentName string, deleteOldSource bool, timeout time.Duration, userAgent string) error {
+	if deploymentName == "" {
+		return nil
+	}
+
+	transport_tpg.MutexStore.Lock(instanceMutexKey(project, instanceName))
+	defer transport_tpg.MutexStore.Unlock(instanceMutexKey(project, instanceName))
+
+	bgdName := fmt.Sprintf("projects/%s/locations/%s/blueGreenDeployments/%s", project, region, deploymentName)
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			op, rerr = NewClient(config, userAgent).BlueGreenDeployments.Delete(bgdName).DeleteOldSource(deleteOldSource).Do()
+			return rerr
+		},
+		Timeout:              timeout,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			log.Printf("[DEBUG] Blue-Green Deployment %q on instance %q already deleted, ignoring 404", deploymentName, instanceName)
+			return nil
+		}
+		return fmt.Errorf("Error deleting Blue-Green Deployment %q on instance %q: %s", deploymentName, instanceName, err)
+	}
+
+	if op != nil && op.Name != "" {
+		err = SqlAdminOperationWaitTime(
+			config, op, project, "Deleting Blue-Green Deployment", userAgent,
+			timeout)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+{{- end }}
 
 func init() {
 	registry.Schema{

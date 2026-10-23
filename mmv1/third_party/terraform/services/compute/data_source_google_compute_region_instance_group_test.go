@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"testing"
 )
 
@@ -36,7 +37,7 @@ resource "google_compute_target_pool" "foo" {
 
 data "google_compute_image" "debian" {
   project = "debian-cloud"
-  name    = "debian-11-bullseye-v20220719"
+  name    = "debian-13-trixie-v20260827"
 }
 
 resource "google_compute_instance_template" "foo" {

@@ -13,7 +13,6 @@
 
 ---
 name: 'RegionDisk'
-api_resource_type_kind: Disk
 kind: 'compute#disk'
 description: |
   Persistent disks are durable storage devices that function similarly to
@@ -44,6 +43,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because pre_delete must detach the regional disk from any attached instances before deletion.
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -71,26 +72,53 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
+  - 'kmsKeyUpdateCustomDiff("disk_encryption_key.0.kms_key_name", "", "disk_encryption_key.0.sha256")'
+samples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-disk'
-      disk_name: 'my-disk'
-      snapshot_name: 'my-snapshot'
+    steps:
+      - name: 'region_disk_basic'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_disk_encryption_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_disk_encryption_key_wo'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
+  - name: 'region_disk_rsa_encrypted_key_wo'
+    primary_resource_id: 'regiondisk'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'region_disk_rsa_encrypted_key_wo'
+        resource_id_vars:
+          region_disk_name: 'my-region-disk'
+          disk_name: 'my-disk'
+          snapshot_name: 'my-snapshot'
   - name: 'region_disk_async'
     primary_resource_id: 'primary'
-    vars:
-      region_disk_name: 'primary-region-disk'
-      secondary_region_disk_name: 'secondary-region-disk'
+    steps:
+      - name: 'region_disk_async'
+        resource_id_vars:
+          region_disk_name: 'primary-region-disk'
+          secondary_region_disk_name: 'secondary-region-disk'
   - name: 'region_disk_features'
     primary_resource_id: 'regiondisk'
-    vars:
-      region_disk_name: 'my-region-features-disk'
+    steps:
+      - name: 'region_disk_features'
+        resource_id_vars:
+          region_disk_name: 'my-region-features-disk'
   - name: 'region_disk_hyperdisk_balanced_ha_write_many'
     primary_resource_id: 'primary'
-    vars:
-      region_disk_name: 'my-region-hyperdisk'
+    steps:
+      - name: 'region_disk_hyperdisk_balanced_ha_write_many'
+        resource_id_vars:
+          region_disk_name: 'my-region-hyperdisk'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -147,14 +175,22 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
+
+      ~>**NOTE** `kms_key_name` can be added or changed in place. Removing it
+      fails at plan time. Other changes to this block recreate the disk.
+    # NOOP: makes the block updatable without generating an update call.
+    # The key is sent by custom_update; see kmsKeyUpdateCustomDiff.
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/updateKmsKey'
+    update_verb: 'NOOP'
     properties:
       - name: 'rawKey'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        immutable: true
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
@@ -162,7 +198,9 @@ properties:
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        immutable: true
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'sha256'
         type: String
@@ -175,6 +213,10 @@ properties:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
+
+          Specify the key without a `/cryptoKeyVersions/` suffix.
+        validation:
+          function: 'verify.ValidateKmsKeyWithoutVersion'
   - name: 'sourceImageEncryptionKey'
     type: NestedObject
     description: |
@@ -433,12 +475,14 @@ properties:
             - 'VIRTIO_SCSI_MULTIQUEUE'
             - 'WINDOWS'
             - 'GVNIC'
+            - 'IDPF'
             - 'SEV_LIVE_MIGRATABLE'
             - 'SEV_SNP_CAPABLE'
             - 'SUSPEND_RESUME_COMPATIBLE'
             - 'TDX_CAPABLE'
             - 'SEV_LIVE_MIGRATABLE_V2'
             - 'SNP_SVSM_CAPABLE'
+            - 'SUSPEND_SAFE_FPR'
   - name: 'licenses'
     type: Array
     description: Any applicable license URI.

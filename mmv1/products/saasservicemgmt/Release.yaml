@@ -15,30 +15,33 @@
 name: Release
 description: A version to be propagated and deployed to Units. It points to a specific version of a Blueprint that can be applied to Units, for example, via a Rollout.
 base_url: projects/{{project}}/locations/{{location}}/releases
-update_mask: true
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 create_url: projects/{{project}}/locations/{{location}}/releases?releaseId={{release_id}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
-min_version: beta
-examples:
-  - name: saas_runtime_release_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      unitkind_name: example-unitkind
-      release_name: example-release
-      previous_release_name: previous-release
-    test_env_vars:
-      project: "PROJECT_NAME"
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
 autogen_status: UmVsZWFzZQ==
+autogen_async: false
+samples:
+  - name: saas_runtime_release_basic
+    primary_resource_id: example
+    min_version: beta
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    steps:
+      - name: saas_runtime_release_basic
+        min_version: beta
+        resource_id_vars:
+          saas_name: example-saas
+          unitkind_name: example-unitkind
+          release_name: example-release
+          previous_release_name: previous-release
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -61,6 +64,41 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: applicationTemplateComponent
+    type: NestedObject
+    description: |-
+      Reference to a component and revision in a composite Application Design
+      Center ApplicationTemplate. Set by the service on Releases created by an
+      ApplicationTemplate import.
+    output: true
+    properties:
+      - name: compositeRef
+        type: NestedObject
+        description: Reference to the composite ApplicationTemplate.
+        output: true
+        properties:
+          - name: applicationTemplate
+            type: String
+            description: Reference to the ApplicationTemplate resource.
+            output: true
+          - name: revision
+            type: String
+            description: Revision of the ApplicationTemplate.
+            output: true
+          - name: syncOperation
+            type: String
+            description: Reference to the ongoing import and replication operation. Opaque for external usage.
+            output: true
+      - name: component
+        type: String
+        description: Name of the component in the composite ApplicationTemplate.
+        output: true
+      - name: revision
+        type: String
+        description: |-
+          Revision of the component. If the component does not have a revision,
+          this is the revision of the composite ApplicationTemplate.
+        output: true
   - name: blueprint
     type: NestedObject
     description: |-
@@ -103,12 +141,12 @@ properties:
       properties:
         - name: type
           type: Enum
-          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          description: Name of a supported variable type. Supported types are STRING, INT, BOOL.
           enum_values:
-            - "TYPE_UNSPECIFIED"
-            - "STRING"
-            - "INT"
-            - "BOOL"
+            - TYPE_UNSPECIFIED
+            - STRING
+            - INT
+            - BOOL
           immutable: true
         - name: value
           type: String
@@ -129,12 +167,12 @@ properties:
       properties:
         - name: type
           type: Enum
-          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          description: Name of a supported variable type. Supported types are STRING, INT, BOOL.
           enum_values:
-            - "TYPE_UNSPECIFIED"
-            - "STRING"
-            - "INT"
-            - "BOOL"
+            - TYPE_UNSPECIFIED
+            - STRING
+            - INT
+            - BOOL
           immutable: true
         - name: value
           type: String
@@ -168,12 +206,12 @@ properties:
       properties:
         - name: type
           type: Enum
-          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          description: Name of a supported variable type. Supported types are STRING, INT, BOOL.
           enum_values:
-            - "TYPE_UNSPECIFIED"
-            - "STRING"
-            - "INT"
-            - "BOOL"
+            - TYPE_UNSPECIFIED
+            - STRING
+            - INT
+            - BOOL
           immutable: true
         - name: value
           type: String

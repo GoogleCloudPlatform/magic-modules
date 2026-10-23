@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 )
 
 func TestAccDataSourceVertexAIReasoningEngineQuery_basic(t *testing.T) {
@@ -29,7 +30,7 @@ func TestAccDataSourceVertexAIReasoningEngineQuery_basic(t *testing.T) {
 func testAccDataSourceVertexAIReasoningEngineQuery_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_reasoning_engine" "default" {
-  display_name = "vertex-mds-%{random_suffix}"
+  display_name = "tf-test-vertex-mds-%{random_suffix}"
   description  = "Retrieves tenant project number"
   region       = "us-central1"
 

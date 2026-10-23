@@ -7,6 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
@@ -59,7 +63,7 @@ data "google_project" "project" {
 
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
@@ -96,7 +100,7 @@ data "google_project" "project" {
 
 resource "google_compute_network" "default" {
   provider                = google-beta
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 

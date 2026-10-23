@@ -46,7 +46,9 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
+    {{- if and $.IdentityUpgraders (not $.IsTgcCompiler) }}
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    {{- end }}
     "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -117,11 +119,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
+            Create: schema.DefaultTimeout({{ $.GetTimeouts.InsertMinutes -}} * time.Minute),
 {{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
-            Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
+            Update: schema.DefaultTimeout({{ $.GetTimeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
-            Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
+            Delete: schema.DefaultTimeout({{ $.GetTimeouts.DeleteMinutes -}} * time.Minute),
         },
 {{ if $.SchemaVersion }}
         SchemaVersion: {{ $.SchemaVersion -}},
@@ -141,7 +143,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{-       end }}
         },
 {{- end }}
-{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff $.UnorderedListProperties }}
         CustomizeDiff: customdiff.All(
 {{-   if $.UnorderedListProperties }}
 {{-     range $prop := $.UnorderedListProperties }}
@@ -315,12 +317,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.CreateUri}}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.CreateUri}}")
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -370,9 +372,23 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.CustomCode.PreCreate }}
     {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
-    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+{{- if $.ErrorRetryOnAsync }}
+    var res map[string]interface{}
+    err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() error {
+            var err error
+{{- end}}
+{{- if $.RPCCreateMethod }}
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCCreateMethod -}}",
+{{- else }}
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -388,7 +404,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     })
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
@@ -414,19 +430,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
@@ -496,17 +512,17 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{ end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
@@ -518,6 +534,21 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
+{{- if $.ErrorRetryOnAsync }}
+            return nil
+        },
+        Timeout: d.Timeout(schema.TimeoutCreate),
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+        return err
+    }
+{{- end}}
 {{if $.CustomCode.PostCreate -}} 
     {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
@@ -532,7 +563,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{-        else }}
 {{- if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
 {{- end}}
@@ -575,13 +606,13 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
         if err != nil {
             return nil, err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+        if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
+            return nil, fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
         }
 {{- end }}
 
@@ -615,9 +646,17 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
+{{ if $.RPCReadMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -663,7 +702,6 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
 {{if $.ExcludeRead -}}
   // This resource could not be read from the API.
-  return nil
 {{  else  -}}
     config := meta.(*transport_tpg.Config)
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -671,12 +709,12 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}{{$.ReadQueryParams}}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -710,9 +748,17 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     {{- if $.CustomCode.PreRead }}
         {{ customTemplate $ $.CustomCode.PreRead false -}}
     {{- end }}
+{{- if $.RPCReadMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -852,7 +898,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)}}
+{{-     if and (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude)) (not $.BypassClientsideUpdateCheck)}}
     clientSideFields := map[string]bool{"deletion_policy": true}
     clientSideOnly := true
     for field := range Resource{{ $.ResourceName -}}().Schema {
@@ -955,12 +1001,12 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $.UpdateUri }}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
         return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -969,9 +1015,6 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 	headers := make(http.Header)
 {{-              if $.UpdateMask }}
 {{ customTemplate $ "templates/terraform/update_mask.go.tmpl" false -}}
-{{              end}}
-{{-             if $.CustomCode.PreUpdate -}}{{""}}
-    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
 {{              end}}
 {{              if $.NestedQuery -}}
 {{                  if $.NestedQuery.ModifyByPatch -}}
@@ -982,6 +1025,9 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     }
 {{-                 end}}
 {{-             end}}
+{{-             if $.CustomCode.PreUpdate -}}{{""}}
+    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
+{{              end}}
 {{-              if $.SupportsIndirectUserProjectOverride -}}
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
@@ -997,9 +1043,21 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 {{-             end}}
+{{- if $.ErrorRetryOnAsync }}
+    err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() error {
+{{- end}}
+{{- if $.RPCUpdateMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ $.UpdateVerb -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1015,6 +1073,9 @@ if len(updateMask) > 0 {
     })
 
     if err != nil {
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{- end}}
         return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
     } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1022,15 +1083,18 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
+{{- if $.CustomCode.PostUpdateFailure -}}
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{- end}}
         return err
     }
 {{-             if not $.FieldSpecificUpdateMethods }}
@@ -1042,11 +1106,29 @@ if len(updateMask) > 0 {
 {{                      if $.GetAsync.SuppressError -}}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{                      else -}}
+{{- if $.CustomCode.PostUpdateFailure -}}
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{ end -}}
         return err
 {{-                     end}}
     }
 {{-                 end}}
 {{-             end}}
+{{- if $.ErrorRetryOnAsync }}
+            return nil
+        },
+        Timeout: d.Timeout(schema.TimeoutUpdate),
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+        return err
+    }
+{{- end}}
 {{-              if $.UpdateMask -}}
   }
 {{-             end}}
@@ -1058,12 +1140,12 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
-        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.SelfLinkUri}}"))
+        getUrl, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
         if err != nil {
             return err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+        if strings.Contains(getUrl, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
             return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
         }
 {{- end }}
@@ -1078,9 +1160,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCReadMethod -}}
+        getRes, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCReadMethod -}}",
+{{- else }}
         getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ upper $.ReadVerb -}}",
+{{- end}}
             Project: billingProject,
             RawURL: getUrl,
             UserAgent: userAgent,
@@ -1145,12 +1235,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{ $group.UpdateUrl }}"))
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $group.UpdateUrl }}")
         if err != nil {
             return err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+        if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
             return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
         }
 {{- end }}
@@ -1170,9 +1260,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         billingProject = bp
         }
 
+{{ if $.RPCUpdateMethod -}}
+        res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+            Config: config,
+            Product: "{{ $.ProductMetadata.Name -}}",
+            RPCService: "{{ $.RPCService -}}",
+            Method: "{{ $.RPCUpdateMethod -}}",
+{{- else }}
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
             Method: "{{ $group.UpdateVerb }}",
+{{- end}}
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
@@ -1187,6 +1285,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 			Headers:   headers,
         })
         if err != nil {
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+            err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{- end}}
             return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
         } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1194,14 +1295,17 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
+{{- if $.CustomCode.PostUpdateFailure -}}
+	        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{- end}}
 	        return err
 	    }
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
@@ -1210,6 +1314,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
 {{-                          else -}}
+{{- if $.CustomCode.PostUpdateFailure -}}
+	        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{ end -}}
 	        return err
 {{-                         end}}
         }
@@ -1285,12 +1392,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, fmt.Sprintf("%s%s", transport_tpg.BaseUrl(Product, config), "{{$.DeleteUri}}"))
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.DeleteUri}}")
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -1327,9 +1434,17 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+{{- if $.RPCDeleteMethod }}
+    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+        Config: config,
+        Product: "{{ $.ProductMetadata.Name -}}",
+        RPCService: "{{ $.RPCService -}}",
+        Method: "{{ $.RPCDeleteMethod -}}",
+{{- else }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ camelize $.DeleteVerb "upper" -}}",
+{{- end}}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1344,6 +1459,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- end }}
     })
     if err != nil {
+{{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
+{{- end}}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
@@ -1353,19 +1471,25 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
             {{- else }}
+{{- if $.CustomCode.PostDeleteFailure -}}
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
+{{- end}}
         return fmt.Errorf("Error waiting to delete {{ $.Name }}: %s", err)
             {{- end }}
     }
         {{- else }}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
+{{- if $.CustomCode.PostDeleteFailure -}}
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
+{{- end}}
         return err
     }
     {{- end }}
@@ -1448,8 +1572,21 @@ func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_create_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostCreateFailure false -}}
+}
+{{- end }}
+{{- if $.CustomCode.PostUpdateFailure }}
+func resource{{ $.ResourceName -}}PostUpdateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_update_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostUpdateFailure false -}}
+}
+{{- end }}
+{{- if $.CustomCode.PostDeleteFailure }}
+func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_delete_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostDeleteFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
@@ -1458,7 +1595,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 {{- end }}
 
 {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
-    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
 {{- end }}
 
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
@@ -1546,8 +1683,10 @@ if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName
 {{- end}}
 {{- end}}
 {{if $.HasSelfLink -}}
-    if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    if selfLink, ok := res["selfLink"].(string); ok && selfLink != "" {
+        if err = d.Set("self_link", tpgresource.ConvertSelfLinkToV1(selfLink)); err != nil {
+            return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+        }
     }
 {{- end }}
     return nil

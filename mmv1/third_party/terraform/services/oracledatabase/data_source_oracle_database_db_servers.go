@@ -126,7 +126,7 @@ func DataSourceOracleDatabaseDbServersRead(d *schema.ResourceData, meta interfac
 		billingProject = bp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OracleDatabaseBasePath}}projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}/dbServers")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}/dbServers")
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,11 @@ func DataSourceOracleDatabaseDbServersRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("error setting dbserver: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}/dbServers")
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("error setting project: %s", err)
+	}
+
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure}}/dbServers")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

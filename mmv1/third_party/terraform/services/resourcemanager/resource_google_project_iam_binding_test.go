@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 func projectIamBindingImportStep(resourceName, pid, role string) resource.TestStep {
@@ -28,6 +30,9 @@ func TestAccProjectIamBinding_basic(t *testing.T) {
 	role := "roles/compute.instanceAdmin"
 	member := "user:admin@hashicorptest.com"
 	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -43,6 +48,11 @@ func TestAccProjectIamBinding_basic(t *testing.T) {
 				Config: testAccProjectAssociateBindingBasic(pid, org, role, member),
 			},
 			projectIamBindingImportStep("google_project_iam_binding.acceptance", pid, role),
+			{
+				ResourceName:    "google_project_iam_binding.acceptance",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
 		},
 	})
 }

@@ -25,16 +25,20 @@ update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/reservations/{{name}}
 exclude_sweeper: true
-examples:
+samples:
   - name: bigquery_reservation_basic
     primary_resource_id: reservation
-    vars:
-      name: my-reservation
+    steps:
+      - name: bigquery_reservation_basic
+        resource_id_vars:
+          name: my-reservation
   - name: bigquery_reservation_with_disaster_recovery
     primary_resource_id: reservation
-    exclude_docs: true
-    vars:
-      name: my-reservation
+    exclude_basic_doc: true
+    steps:
+      - name: bigquery_reservation_with_disaster_recovery
+        resource_id_vars:
+          name: my-reservation
 parameters:
   - name: location
     type: String
@@ -255,3 +259,35 @@ properties:
     resource: ReservationGroup
     imports: name
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      The labels associated with this reservation. You can use these to
+      organize and group your reservations.
+  - name: schedulingPolicy
+    type: NestedObject
+    description: |
+      The scheduling policy to use for jobs and queries running under this
+      reservation. The scheduling policy controls how the reservation's resources
+      are distributed.
+    update_mask_fields:
+      - schedulingPolicy.concurrency
+      - schedulingPolicy.maxSlots
+    properties:
+      - name: concurrency
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the concurrency
+          of jobs running for any particular project within it to the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots
+      - name: maxSlots
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the slot
+          consumption of queries running for any particular project within it to
+          the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots

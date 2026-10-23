@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDataSourceGoogleDiscoveryEngineDataStore_basic(t *testing.T) {
@@ -28,6 +29,7 @@ func TestAccDataSourceGoogleDiscoveryEngineDataStore_basic(t *testing.T) {
 						[]string{
 							"create_advanced_site_search",
 							"skip_default_schema_creation",
+							"acl_enabled",
 						},
 					),
 				),
@@ -57,6 +59,7 @@ func TestAccDataSourceGoogleDiscoveryEngineDataStore_byDisplayName(t *testing.T)
 						[]string{
 							"create_advanced_site_search",
 							"skip_default_schema_creation",
+							"acl_enabled",
 						},
 					),
 				),

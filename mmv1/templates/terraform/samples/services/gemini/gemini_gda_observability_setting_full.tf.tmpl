@@ -1,0 +1,11 @@
+resource "google_gemini_gda_observability_setting" "{{$.PrimaryResourceId}}" {
+    gda_observability_setting_id = "{{index $.ResourceIdVars "gda_observability_setting_id"}}"
+    location = "global"
+    labels = {"initial_key": "initial_value"}
+    conversational_analytics_setting {
+        feedback_enabled = false
+        logging_enabled = false
+        metrics_enabled = false
+        traces_enabled = false
+    }
+}

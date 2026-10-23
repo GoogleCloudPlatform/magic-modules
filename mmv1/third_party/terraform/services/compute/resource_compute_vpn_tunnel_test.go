@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
@@ -217,7 +218,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -347,7 +348,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -404,7 +405,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
@@ -462,7 +463,7 @@ resource "google_compute_ha_vpn_gateway" "foobar" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  name            = "external-gateway-%[1]s"
+  name            = "tf-test-external-gateway-%[1]s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {

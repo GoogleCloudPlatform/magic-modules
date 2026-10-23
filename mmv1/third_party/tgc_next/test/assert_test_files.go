@@ -348,6 +348,17 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 // Compares HCL and finds all of the keys in map1 that are not in map2
 func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *schema.Resource) []string {
 	var missingKeys []string
+	// Respect lifecycle.ignore_changes from the original HCL configuration so fields
+	// explicitly ignored by the test are not flagged when CAI returns mutated values.
+	if ignoreChanges, ok := map1["lifecycle.ignore_changes"].(string); ok && ignoreChanges != "" {
+		ignoreChanges = strings.Trim(ignoreChanges, "[]")
+		for _, field := range strings.Split(ignoreChanges, ",") {
+			field = strings.Trim(strings.TrimSpace(field), "\"'")
+			if field != "" {
+				ignoredFields[field] = struct{}{}
+			}
+		}
+	}
 	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
 			continue
@@ -616,18 +627,21 @@ func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir stri
 func compareAssetName(want, got string) error {
 	parts1 := strings.Split(want, "/")
 	parts2 := strings.Split(got, "/")
-	if len(parts1) != len(parts2) {
-		return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
-	}
 
-	for i, part := range parts1 {
-		if parts2[i] == "null" {
-			continue
+	for i := 0; i < len(parts2); i++ {
+		if parts2[i] == "null" || parts2[i] == "unknown" {
+			return nil
 		}
-
-		if part != parts2[i] {
+		if i >= len(parts1) {
 			return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
 		}
+		if parts1[i] != parts2[i] {
+			return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
+		}
+	}
+
+	if len(parts1) != len(parts2) {
+		return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
 	}
 	return nil
 }

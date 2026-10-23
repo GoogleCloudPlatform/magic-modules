@@ -1,6 +1,7 @@
 // Build custom mask since the notebooks API does not support gce_setup as a valid mask
 restartRequiredKeys := []string{
             "disable-mixer",
+            "disable-bigquery",
             "notebook-disable-terminal",
             "notebook-disable-downloads",
             "notebook-disable-nbconvert",
@@ -9,6 +10,9 @@ restartRequiredKeys := []string{
             "enable-jupyterlab4",
             "geminicli-disabled",
             "geminicli-tc-accepted",
+            "enable-opencode",
+            "enable-opencode-web",
+            "enable-antigravity",
     }
 
 stopInstance := false
@@ -50,9 +54,18 @@ if d.HasChange("gce_setup.0.metadata") {
 if d.HasChange("effective_labels") {
     newUpdateMask = append(newUpdateMask, "labels")
 }
+if d.HasChange("enable_deletion_protection") {
+    newUpdateMask = append(newUpdateMask, "enable_deletion_protection")
+}
 if d.HasChange("gce_setup.0.container_image") {
     newUpdateMask = append(newUpdateMask, "gce_setup.container_image")
     stopInstance = true
+}
+if d.HasChange("gce_setup.0.min_cpu_platform") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.min_cpu_platform")
+}
+if d.HasChange("gce_setup.0.data_disks.0.resource_policies") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.data_disks.resource_policies")
 }
 updateMask = newUpdateMask
 // Overwrite the previously set mask.
@@ -85,13 +98,8 @@ if stopInstance{
   state := d.Get("state").(string)
 
   if state != "STOPPED" {
-    dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
-    if err != nil {
+    if err := modifyWorkbenchInstanceStateAndWait(config, d, project, billingProject, userAgent, "stop"); err != nil {
       return err
-    }
-
-    if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
-      return fmt.Errorf("Error stopping Workbench Instance: %s", err)
     }
 
   } else {

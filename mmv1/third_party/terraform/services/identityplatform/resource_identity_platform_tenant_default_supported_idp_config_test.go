@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/identityplatform"
 )
 
 func TestAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTenantDefaultSupportedIdpConfigUpdate(t *testing.T) {
@@ -44,7 +45,7 @@ func TestAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTena
 func testAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTenantDefaultSupportedIdpConfigBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_identity_platform_tenant" "tenant" {
-  display_name  = "tenant"
+  display_name  = "tf-test-tenant"
 }
 
 resource "google_identity_platform_tenant_default_supported_idp_config" "idp_config" {
@@ -60,7 +61,7 @@ resource "google_identity_platform_tenant_default_supported_idp_config" "idp_con
 func testAccIdentityPlatformTenantDefaultSupportedIdpConfig_identityPlatformTenantDefaultSupportedIdpConfigUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_identity_platform_tenant" "tenant" {
-  display_name  = "tenant"
+  display_name  = "tf-test-tenant"
 }
 
 resource "google_identity_platform_tenant_default_supported_idp_config" "idp_config" {

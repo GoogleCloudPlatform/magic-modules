@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'AccessApproval'
-display_name: 'Access Approval'
-versions:
-  - name: 'ga'
-    base_url: 'https://accessapproval.googleapis.com/v1/'
+name: AccessApproval
+display_name: Access Approval
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://accessapproval.googleapis.com/v1/

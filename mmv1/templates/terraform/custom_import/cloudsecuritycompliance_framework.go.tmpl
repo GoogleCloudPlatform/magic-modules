@@ -1,0 +1,20 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+	"^(?P<parent>.*)/locations/(?P<location>[^/]+)/frameworks/(?P<framework_id>[^/]+)$",
+	"^organizations/(?P<organization>[^/]+)/locations/(?P<location>[^/]+)/frameworks/(?P<framework_id>[^/]+)$",
+}, d, config); err != nil {
+	return nil, err
+}
+
+if d.Get("organization").(string) == "" && d.Get("parent").(string) != "" {
+	if strings.HasPrefix(d.Get("parent").(string), "organizations/") {
+		d.Set("organization", strings.TrimPrefix(d.Get("parent").(string), "organizations/"))
+	}
+} else if d.Get("parent").(string) == "" && d.Get("organization").(string) != "" {
+	d.Set("parent", "organizations/" + d.Get("organization").(string))
+}
+
+id := fmt.Sprintf("%s/locations/%s/frameworks/%s", d.Get("parent").(string), d.Get("location").(string), d.Get("framework_id").(string))
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

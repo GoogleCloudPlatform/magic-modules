@@ -1,0 +1,14 @@
+resource "google_chronicle_parser_extension" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  log_type = "AKAMAI_DHCP" # Unique log type to prevent CI parallel test collisions
+  validation_skipped = true
+  log = "ZHVtbXkgbG9n"
+
+  dynamic_parsing {
+    opted_fields {
+      path         = "$.ip"
+      sample_value = "1.1.1.1"
+    }
+  }
+}

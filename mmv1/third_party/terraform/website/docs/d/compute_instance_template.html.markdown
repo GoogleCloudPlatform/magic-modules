@@ -208,6 +208,10 @@ The `disk_encryption_key` block supports:
 
 * `network_interface` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.  s
 
+* `enable_vpc_scoped_dns` - If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
+
+* `service_class_id` - Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
+
 * `subnetwork_project` - The ID of the project in which the subnetwork belongs.
     If it is not provided, the provider project is used.
 
@@ -279,9 +283,9 @@ The `disk_encryption_key` block supports:
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
 
-* `host_error_timeout_seconds` - [Beta](../guides/provider_versions.html.markdown) Time in seconds for host error detection.
+* `host_error_timeout_seconds` - Time in seconds for host error detection.
 
-* `provisioning_model` - Describe the type of preemptible VM. 
+* `provisioning_model` - Describe the type of provisioning model for the instance. Can be `STANDARD`, `SPOT`, `FLEX_START`, or `RESERVATION_BOUND`.
 
 * `instance_termination_action` - Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
 

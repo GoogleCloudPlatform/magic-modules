@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
 )
 
 func TestAccCESExample_update(t *testing.T) {
@@ -152,9 +153,16 @@ resource "google_ces_example" "my-example" {
             }
         }
         chunks {
+            blob {
+                mime_type = "text/plain"
+                data = base64encode("This is some sample plain text blob data.")
+            }
+        }
+        chunks {
             image {
                 mime_type = "image/png"
                 data = base64encode("This is some fake image binary data.")
+                alt_text = "alt text"
             }
         }
         chunks {
@@ -321,9 +329,16 @@ resource "google_ces_example" "my-example" {
             }
         }
         chunks {
+            blob {
+                mime_type = "text/plain"
+                data = base64encode("This is some updated sample plain text blob data.")
+            }
+        }
+        chunks {
             image {
                 mime_type = "image/png"
                 data = base64encode("This is some fake image binary data.")
+                alt_text = "updated alt text"
             }
         }
         chunks {

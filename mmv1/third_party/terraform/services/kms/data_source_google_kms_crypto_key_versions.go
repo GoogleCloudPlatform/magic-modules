@@ -108,7 +108,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 		return nil
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{crypto_key}}")
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 	}
 
 	if res["purpose"] == "ASYMMETRIC_SIGN" || res["purpose"] == "ASYMMETRIC_DECRYPT" {
-		url, err = tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions/%d/publicKey", d.Get("versions.0.version")))
+		url, err = tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"{{crypto_key}}/cryptoKeyVersions/%d/publicKey", d.Get("versions.0.version")))
 		if err != nil {
 			return err
 		}
@@ -158,7 +158,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{crypto_key}}/cryptoKeyVersions")
 	if err != nil {
 		return nil, err
 	}

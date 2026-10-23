@@ -6,12 +6,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccStorageHmacKey_update(t *testing.T) {
 	t.Parallel()
 
-	saName := fmt.Sprintf("%v%v", "service-account", acctest.RandString(t, 10))
+	saName := fmt.Sprintf("%v%v", "tf-test-sa-", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

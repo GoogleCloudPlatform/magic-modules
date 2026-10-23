@@ -1,0 +1,13 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    if v == nil {
+    	return ""
+    }
+
+    b, err := json.Marshal(v)
+    if err != nil {
+    	log.Printf("[ERROR] Failed to marshal {{$.TitlelizeProperty}} to JSON: %s", err)
+    	return ""
+    }
+
+    return string(b)
+}

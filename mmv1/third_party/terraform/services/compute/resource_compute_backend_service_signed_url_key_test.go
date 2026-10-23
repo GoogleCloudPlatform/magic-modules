@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -36,18 +37,18 @@ func TestAccComputeBackendServiceSignedUrlKey_basic(t *testing.T) {
 func testAccComputeBackendServiceSignedUrlKey_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_backend_service_signed_url_key" "backend_key" {
-  name            = "testkey-%{random_suffix}"
+  name            = "tf-test-testkey-%{random_suffix}"
   key_value       = "iAmAFakeKeyRandomBytes=="
   backend_service = google_compute_backend_service.test_bs.name
 }
 
 resource "google_compute_backend_service" "test_bs" {
-  name          = "testbs-%{random_suffix}"
+  name          = "tf-test-testbs-%{random_suffix}"
   health_checks = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
-  name               = "test-check-%{random_suffix}"
+  name               = "tf-test-test-check-%{random_suffix}"
   request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
@@ -93,7 +94,7 @@ func checkComputeBackendServiceSignedUrlKeyExists(t *testing.T, s *terraform.Sta
 		config := acctest.GoogleProviderConfig(t)
 		keyName := rs.Primary.Attributes["name"]
 
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/backendServices/{{backend_service}}")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(compute.Product, config)+"projects/{{project}}/global/backendServices/{{backend_service}}")
 		if err != nil {
 			return false, err
 		}

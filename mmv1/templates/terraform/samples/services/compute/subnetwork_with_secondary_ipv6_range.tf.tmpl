@@ -1,0 +1,33 @@
+resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
+  provider         = google-beta
+  name             = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  region           = "us-central1"
+  network          = google_compute_network.custom-test.id
+  stack_type       = "IPV6_ONLY"
+  ipv6_access_type = "INTERNAL"
+
+  secondary_ip_range {
+    range_name    = "v6-ula"
+    ip_version    = "IPV6"
+  }
+
+  secondary_ip_range {
+    range_name    = "v6-byogua-auto"
+    ip_version    = "IPV6"
+    ip_collection = "{{index $.ResourceIdVars "ip_collection_url"}}"
+  }
+
+  secondary_ip_range {
+    range_name    = "v6-byogua-manual"
+    ip_version    = "IPV6"
+    ip_collection = "{{index $.ResourceIdVars "ip_collection_url"}}"
+    ip_cidr_range = "{{index $.ResourceIdVars "secondary_ipv6_cidr"}}"
+  }
+}
+
+resource "google_compute_network" "custom-test" {
+  provider                 = google-beta
+  name                     = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks  = false
+  enable_ula_internal_ipv6 = true
+}

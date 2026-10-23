@@ -1,6 +1,0 @@
-resource "google_compute_interconnect_attachment_group" "{{$.PrimaryResourceId}}" {
-  name   = "{{index $.Vars "interconnect_attachment_group_name"}}"
-  intent {
-    availability_sla = "NO_SLA"
-  }
-}

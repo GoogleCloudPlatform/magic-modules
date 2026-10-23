@@ -21,6 +21,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/apphub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/developerconnect"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
@@ -47,7 +50,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				ResourceName:            "google_developer_connect_insights_config.insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "workload"},
+				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "update_time", "workload"},
 			},
 			{
 				Config: testAccDeveloperConnectInsightsConfig_update(context),
@@ -61,7 +64,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				ResourceName:            "google_developer_connect_insights_config.insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "workload"},
+				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "update_time", "workload"},
 			},
 		},
 	})

@@ -11,6 +11,9 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -195,7 +198,7 @@ func testAccCheckComputeStoragePoolDestroyProducer(t *testing.T) func(s *terrafo
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/storagePools/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(compute.Product, config)+"projects/{{project}}/zones/{{zone}}/storagePools/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -252,19 +255,19 @@ func testAccComputeStoragePool_resourceManagerTags(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "tag_key" {
   parent      = "projects/%{project_id}"
-  short_name  = "storage-pool-tag-%{random_suffix}"
+  short_name  = "tf-test-storage-pool-tag-%{random_suffix}"
   description = "Tag key for storage pool acceptance tests"
 }
 
 resource "google_tags_tag_value" "tag_value_1" {
   parent      = google_tags_tag_key.tag_key.id
-  short_name  = "value-one-%{random_suffix}"
+  short_name  = "tf-test-value-one-%{random_suffix}"
   description = "First tag value for storage pool acceptance tests"
 }
 
 resource "google_tags_tag_value" "tag_value_2" {
   parent      = google_tags_tag_key.tag_key.id
-  short_name  = "value-two-%{random_suffix}"
+  short_name  = "tf-test-value-two-%{random_suffix}"
   description = "Second tag value for storage pool acceptance tests"
 
   # Serialize value creation for stable VCR recordings.

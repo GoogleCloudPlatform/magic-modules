@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'VPCAccess'
-display_name: 'Serverless VPC Access'
-versions:
-  - name: 'ga'
-    base_url: 'https://vpcaccess.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://vpcaccess.googleapis.com/v1beta1/'
+name: VPCAccess
+display_name: Serverless VPC Access
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://vpcaccess.googleapis.com/v1/
+  - name: beta
+    base_url: https://vpcaccess.googleapis.com/v1beta1/

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceGoogleComputeInstanceGroupManager(t *testing.T) {
@@ -95,7 +96,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context map[strin
     }
 
     data "google_compute_image" "my_image" {
-        family  = "debian-11"
+        family  = "debian-13"
         project = "debian-cloud"
     }
 
@@ -172,7 +173,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context map[strin
     }
 
     data "google_compute_image" "my_image" {
-        family  = "debian-11"
+        family  = "debian-13"
         project = "debian-cloud"
     }
 

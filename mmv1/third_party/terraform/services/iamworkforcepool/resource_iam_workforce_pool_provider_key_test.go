@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/iamworkforcepool"
 )
 
 func TestAccIAMWorkforcePoolWorkforcePoolProviderKey_update(t *testing.T) {
@@ -48,7 +49,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderKey_update(t *testing.T) {
 func testAccIAMWorkforcePoolWorkforcePoolProviderKey_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "default" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
 }
@@ -56,7 +57,7 @@ resource "google_iam_workforce_pool" "default" {
 resource "google_iam_workforce_pool_provider" "default" {
   workforce_pool_id  = google_iam_workforce_pool.default.workforce_pool_id
   location           = google_iam_workforce_pool.default.location
-  provider_id        = "my-provider-%{random_suffix}"
+  provider_id        = "tf-test-my-provider-%{random_suffix}"
   attribute_mapping  = {
     "google.subject" = "assertion.sub"
   }
@@ -69,7 +70,7 @@ resource "google_iam_workforce_pool_provider_key" "default" {
   workforce_pool_id  = google_iam_workforce_pool.default.workforce_pool_id
   location           = google_iam_workforce_pool.default.location
   provider_id        = google_iam_workforce_pool_provider.default.provider_id
-  key_id             = "my-key-%{random_suffix}"
+  key_id             = "tf-test-my-key-%{random_suffix}"
   
   key_data {
     key_spec = "RSA_2048"
@@ -82,7 +83,7 @@ resource "google_iam_workforce_pool_provider_key" "default" {
 func testAccIAMWorkforcePoolWorkforcePoolProviderKey_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "default" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
 }
@@ -90,7 +91,7 @@ resource "google_iam_workforce_pool" "default" {
 resource "google_iam_workforce_pool_provider" "default" {
   workforce_pool_id  = google_iam_workforce_pool.default.workforce_pool_id
   location           = google_iam_workforce_pool.default.location
-  provider_id        = "my-provider-%{random_suffix}"
+  provider_id        = "tf-test-my-provider-%{random_suffix}"
   attribute_mapping  = {
     "google.subject" = "assertion.sub"
   }
@@ -103,7 +104,7 @@ resource "google_iam_workforce_pool_provider_key" "default" {
   workforce_pool_id  = google_iam_workforce_pool.default.workforce_pool_id
   location           = google_iam_workforce_pool.default.location
   provider_id        = google_iam_workforce_pool_provider.default.provider_id
-  key_id             = "my-other-key-%{random_suffix}"
+  key_id             = "tf-test-my-other-key-%{random_suffix}"
   
   key_data {
     key_spec = "RSA_3072"
@@ -116,7 +117,7 @@ resource "google_iam_workforce_pool_provider_key" "default" {
 func testAccIAMWorkforcePoolWorkforcePoolProviderKey_destroy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "default" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
+  workforce_pool_id = "tf-test-my-pool-%{random_suffix}"
   parent            = "organizations/%{org_id}"
   location          = "global"
 }
@@ -124,7 +125,7 @@ resource "google_iam_workforce_pool" "default" {
 resource "google_iam_workforce_pool_provider" "default" {
   workforce_pool_id  = google_iam_workforce_pool.default.workforce_pool_id
   location           = google_iam_workforce_pool.default.location
-  provider_id        = "my-provider-%{random_suffix}"
+  provider_id        = "tf-test-my-provider-%{random_suffix}"
   attribute_mapping  = {
     "google.subject" = "assertion.sub"
   }

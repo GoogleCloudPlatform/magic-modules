@@ -33,31 +33,34 @@ autogen_async: true
 include_in_tgc_next: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/memcache_instance.go.tmpl
-  test_constants: 'templates/terraform/test_constants/import_servicenetworking.go.tmpl'
-examples:
+samples:
   - name: memcache_instance_basic
     primary_resource_id: instance
-    ignore_read_extra:
-      - deletion_protection
     exclude_test: true
-    vars:
-      address_name: address
-      instance_name: test-instance
-      network_name: test-network
-    test_vars_overrides:
-      # for backward compatible
-      address_name: '"address" + randomSuffix'
+    steps:
+      - name: memcache_instance_basic
+        ignore_read_extra:
+          - deletion_protection
+        resource_id_vars:
+          address_name: address
+          instance_name: test-instance
+          network_name: test-network
+        test_vars_overrides:
+          # for backward compatible
+          address_name: '"address" + randomSuffix'
   - name: memcache_instance_basic_test
     primary_resource_id: instance
-    exclude_docs: true
-    vars:
-      address_name: address
-      instance_name: test-instance
-      network_name: test-network
-    test_vars_overrides:
-      network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
-      # for backward compatible
-      address_name: '"address" + randomSuffix'
+    exclude_basic_doc: true
+    steps:
+      - name: memcache_instance_basic_test
+        resource_id_vars:
+          address_name: address
+          instance_name: test-instance
+          network_name: test-network
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+          # for backward compatible
+          address_name: '"address" + randomSuffix'
 virtual_fields:
   - name: deletion_protection
     type: Boolean

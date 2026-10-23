@@ -32,7 +32,7 @@ if v, ok := d.GetOkExists("ingest_on_write"); ok {
 }
 
 
-url, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{bucket}}/anywhereCaches/"}}")
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"b/{{bucket}}/anywhereCaches/"}}")
 if err != nil {
     return err
 }

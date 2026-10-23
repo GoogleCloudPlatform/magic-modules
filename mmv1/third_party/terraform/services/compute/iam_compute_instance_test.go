@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 // Even though the resource has generated tests, keep this one around until we are able to generate
@@ -64,7 +65,7 @@ func testAccComputeInstanceIamPolicy_basic(zone, instanceName, roleId string) st
 
     boot_disk {
       initialize_params {
-        image = "debian-cloud/debian-11"
+        image = "debian-cloud/debian-13"
       }
     }
 

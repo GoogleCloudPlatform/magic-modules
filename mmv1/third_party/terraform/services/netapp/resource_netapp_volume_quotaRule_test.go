@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/netapp"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 )
 
@@ -103,7 +105,7 @@ resource "google_netapp_volume_quota_rule" "test_default_user_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-default-user-quota-rule%{random_suffix}"
+  name = "tf-test-default-user-quota-rule%{random_suffix}"
   description = "This is a test description"
   type = "DEFAULT_USER_QUOTA"
   disk_limit_mib = 15
@@ -113,7 +115,7 @@ resource "google_netapp_volume_quota_rule" "test_default_group_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-default-group-quota-rule%{random_suffix}"
+  name = "tf-test-default-group-quota-rule%{random_suffix}"
   description = "This is a test description"
   labels = {
     key   = "test"
@@ -127,7 +129,7 @@ resource "google_netapp_volume_quota_rule" "test_individual_user_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-individual-user-quota-rule%{random_suffix}"
+  name = "tf-test-individual-user-quota-rule%{random_suffix}"
   description = "This is a test description"
   type = "INDIVIDUAL_USER_QUOTA"
   disk_limit_mib = 25
@@ -138,7 +140,7 @@ resource "google_netapp_volume_quota_rule" "test_individual_group_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-individual-group-quota-rule%{random_suffix}"
+  name = "tf-test-individual-group-quota-rule%{random_suffix}"
   description = "This is a test description"
   type = "INDIVIDUAL_GROUP_QUOTA"
   disk_limit_mib = 30
@@ -174,7 +176,7 @@ resource "google_netapp_volume_quota_rule" "test_default_user_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-default-user-quota-rule%{random_suffix}"
+  name = "tf-test-default-user-quota-rule%{random_suffix}"
   description = "This is a test description"
   type = "DEFAULT_USER_QUOTA"
   disk_limit_mib = 35
@@ -184,7 +186,7 @@ resource "google_netapp_volume_quota_rule" "test_default_group_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-default-group-quota-rule%{random_suffix}"
+  name = "tf-test-default-group-quota-rule%{random_suffix}"
   description = "This is a test description"
   labels = {
     key   = "test"
@@ -198,7 +200,7 @@ resource "google_netapp_volume_quota_rule" "test_individual_user_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-individual-user-quota-rule%{random_suffix}"
+  name = "tf-test-individual-user-quota-rule%{random_suffix}"
   description = "This is a test description"
   type = "INDIVIDUAL_USER_QUOTA"
   disk_limit_mib = 45
@@ -209,7 +211,7 @@ resource "google_netapp_volume_quota_rule" "test_individual_group_quota_rule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  name = "tf-individual-group-quota-rule%{random_suffix}"
+  name = "tf-test-individual-group-quota-rule%{random_suffix}"
   description = "This is a test description"
   type = "INDIVIDUAL_GROUP_QUOTA"
   disk_limit_mib = 50

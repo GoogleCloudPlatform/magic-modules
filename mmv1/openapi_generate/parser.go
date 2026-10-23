@@ -227,6 +227,7 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 	apiVersion := &product.Version{}
 
 	apiVersion.BaseUrl = fmt.Sprintf("%s/%s/", server, version)
+	apiVersion.RepUrl = repUrl(root.Servers, version)
 	// TODO figure out how to tell the API version
 	apiVersion.Name = "ga"
 	apiProduct.Versions = []*product.Version{apiVersion}
@@ -264,6 +265,32 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 		log.Fatalf("error closing product file %v", err)
 	}
 	return productPath
+}
+
+func repUrl(servers openapi3.Servers, version string) string {
+	for _, s := range servers {
+		if s == nil {
+			continue
+		}
+		if dep, ok := s.Extensions["x-google-deprecated"]; ok && anyToBool(dep) {
+			continue
+		}
+		if s.Description == "Regional Endpoint" || strings.Contains(s.URL, ".rep.") {
+			u := strings.TrimSuffix(s.URL, "/")
+			if loc, ok := s.Extensions["x-google-endpoint-location"].(string); ok && loc != "" {
+				if strings.Contains(u, "."+loc+".") {
+					u = strings.Replace(u, "."+loc+".", ".{{location}}.", 1)
+				} else {
+					u = strings.Replace(u, loc, "{{location}}", 1)
+				}
+			} else if !strings.Contains(u, "{{location}}") {
+				re := regexp.MustCompile(`\.[^.]+\.rep\.`)
+				u = re.ReplaceAllString(u, ".{{location}}.rep.")
+			}
+			return fmt.Sprintf("%s/%s/", u, version)
+		}
+	}
+	return ""
 }
 
 func baseUrl(resourcePath string) string {
@@ -394,12 +421,17 @@ func attachStandardFunctionality(resource api.Resource) api.Resource {
 	resource.IdFormat = resource.SelfLink
 	resource.ImportFormat = []string{resource.SelfLink}
 
-	example := r.Examples{}
-	example.Name = "name_of_example_file"
-	example.PrimaryResourceId = "example"
-	example.Vars = map[string]string{"resource_name": "test-resource"}
+	sample := r.Sample{}
+	sample.Name = "name_of_sample_file"
+	sample.PrimaryResourceId = "example"
 
-	resource.Examples = []*r.Examples{&example}
+	step := r.Step{}
+	step.Name = "name_of_sample_file"
+	step.Vars = map[string]string{"resource_name": "test-resource"}
+
+	sample.Steps = []*r.Step{&step}
+
+	resource.Samples = []*r.Sample{&sample}
 
 	resourceNameBytes := []byte(resource.Name)
 	// Write the status as an encoded string to flag when a YAML file has been
@@ -416,6 +448,7 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 	returnArray := []any{}
 
 	seenRefs := make(map[string]bool)
+	seenPointers := make(map[*openapi3.Schema]bool)
 
 	parameters := []*api.Type{}
 	var idParam string
@@ -423,12 +456,16 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true, seenRefs)
+		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true, seenRefs, seenPointers)
 		description := param.Value.Description
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
 		}
 		paramObj.Description = trimDescription(description)
+
+		if strings.HasPrefix(paramObj.Description, "Deprecated.") {
+			continue
+		}
 
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" || paramObj.Name == "updateMask" {
 			continue
@@ -439,7 +476,12 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 		parameters = append(parameters, &paramObj)
 	}
 
-	properties := buildProperties(op.RequestBody.Value.Content["application/json"].Schema.Value.Properties, op.RequestBody.Value.Content["application/json"].Schema.Value.Required, seenRefs)
+	var properties []*api.Type
+	if op.RequestBody != nil && op.RequestBody.Value != nil && op.RequestBody.Value.Content != nil {
+		if mediaType, ok := op.RequestBody.Value.Content["application/json"]; ok && mediaType != nil && mediaType.Schema != nil && mediaType.Schema.Value != nil {
+			properties = buildProperties(mediaType.Schema.Value.Properties, mediaType.Schema.Value.Required, seenRefs, seenPointers)
+		}
+	}
 
 	returnArray = append(returnArray, parameters)
 	returnArray = append(returnArray, properties)
@@ -449,14 +491,25 @@ func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []a
 }
 
 func propType(prop *openapi3.SchemaRef) openapi3.Types {
-	if len(prop.Value.AllOf) > 0 {
-		return *prop.Value.AllOf[0].Value.Type
-	} else {
-		return *prop.Value.Type
+	if prop.Value == nil {
+		return openapi3.Types{"object"}
 	}
+	if len(prop.Value.AllOf) > 0 && prop.Value.AllOf[0].Value != nil && prop.Value.AllOf[0].Value.Type != nil {
+		return *prop.Value.AllOf[0].Value.Type
+	}
+	if prop.Value.Type == nil {
+		if len(prop.Value.Properties) > 0 {
+			return openapi3.Types{"object"}
+		}
+		if prop.Value.Items != nil {
+			return openapi3.Types{"array"}
+		}
+		return openapi3.Types{"object"}
+	}
+	return *prop.Value.Type
 }
 
-func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool, seenRefs map[string]bool) api.Type {
+func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) api.Type {
 	var field api.Type
 
 	switch name {
@@ -486,6 +539,25 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 		newSeenRefs[obj.Ref] = true
 		seenRefs = newSeenRefs
+	}
+
+	if obj.Value != nil {
+		if seenPointers[obj.Value] {
+			var field api.Type
+			field.Name = name
+			field.Type = "String"
+			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
+			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Description = "Recursive field represented as JSON"
+			return field
+		}
+		// Copy map to isolate branches
+		newSeenPointers := make(map[*openapi3.Schema]bool)
+		for k, v := range seenPointers {
+			newSeenPointers[k] = v
+		}
+		newSeenPointers[obj.Value] = true
+		seenPointers = newSeenPointers
 	}
 
 	if len(obj.Value.AllOf) > 0 {
@@ -538,15 +610,15 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			field.KeyName = "TODO: CHANGEME"
 			var valueType api.Type
 			valueType.Type = "NestedObject"
-			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required, seenRefs)
+			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required, seenRefs, seenPointers)
 			field.ValueType = &valueType
 		} else {
-			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required, seenRefs)
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required, seenRefs, seenPointers)
 		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
-		typ := *obj.Value.Items.Value.Type
+		typ := propType(obj.Value.Items)
 		switch typ[0] {
 		case "string":
 			subField.Type = "String"
@@ -558,7 +630,7 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			subField.Type = "Boolean"
 		case "object":
 			subField.Type = "NestedObject"
-			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required, seenRefs)
+			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required, seenRefs, seenPointers)
 		}
 		field.ItemType = &subField
 	default:
@@ -594,14 +666,34 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		field.Immutable = true
 	}
 
+	if field.Output {
+		makeOutputOnly(&field)
+	}
+
 	return field
 }
 
-func buildProperties(props openapi3.Schemas, required []string, seenRefs map[string]bool) []*api.Type {
+func makeOutputOnly(t *api.Type) {
+	if t == nil {
+		return
+	}
+	t.Output = true
+	for _, p := range t.Properties {
+		makeOutputOnly(p)
+	}
+	if t.ItemType != nil {
+		makeOutputOnly(t.ItemType)
+	}
+	if t.ValueType != nil {
+		makeOutputOnly(t.ValueType)
+	}
+}
+
+func buildProperties(props openapi3.Schemas, required []string, seenRefs map[string]bool, seenPointers map[*openapi3.Schema]bool) []*api.Type {
 	properties := []*api.Type{}
 	for _, k := range slices.Sorted(maps.Keys(props)) {
 		prop := props[k]
-		propObj := WriteObject(k, prop, propType(prop), false, seenRefs)
+		propObj := WriteObject(k, prop, propType(prop), false, seenRefs, seenPointers)
 		if slices.Contains(required, k) {
 			propObj.Required = true
 		}
@@ -623,5 +715,6 @@ func trimDescription(description string) string {
 	for _, line := range lines {
 		trimmedDescription = append(trimmedDescription, strings.Trim(line, " "))
 	}
+
 	return strings.Join(trimmedDescription, "\n")
 }

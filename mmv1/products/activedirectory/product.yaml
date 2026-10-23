@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'ActiveDirectory'
-display_name: 'Managed Microsoft Active Directory'
-versions:
-  - name: 'ga'
-    base_url: 'https://managedidentities.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://managedidentities.googleapis.com/v1beta1/'
+name: ActiveDirectory
+display_name: Managed Microsoft Active Directory
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://managedidentities.googleapis.com/v1/
+  - name: beta
+    base_url: https://managedidentities.googleapis.com/v1beta1/

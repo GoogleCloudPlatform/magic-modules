@@ -2,11 +2,16 @@ package compute_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccComputeSnapshot_encryption(t *testing.T) {
@@ -35,8 +40,6 @@ func TestAccComputeSnapshot_encryption(t *testing.T) {
 
 func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	t.Parallel()
-	// KMS causes errors due to rotation
-	acctest.SkipIfVcr(t)
 
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -60,10 +63,212 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 	})
 }
 
+func TestAccComputeSnapshot_encryptionCMEKUpdate(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	key2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-kms-update-key2").CryptoKey.Name
+	suffix := acctest.RandString(t, 10)
+	snapshotName := fmt.Sprintf("tf-test-%s", suffix)
+	diskName := fmt.Sprintf("tf-test-%s", suffix)
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1),
+			},
+			{
+				ResourceName:      "google_compute_snapshot.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Not returned by the API.
+				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
+			},
+			{
+				Config: testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_snapshot.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_snapshot.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Not returned by the API.
+				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
+			},
+			{
+				Config:      testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key2+"/cryptoKeyVersions/1"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("remove the /cryptoKeyVersions/ suffix"),
+			},
+			{
+				Config:      testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("removing the Cloud KMS key isn't supported"),
+			},
+		},
+	})
+}
+
+func TestAccComputeSnapshot_encryptionCMEKAdd(t *testing.T) {
+	t.Skip("updateKmsKey doesn't support adding a key to a snapshot yet; see b/550374864")
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	suffix := acctest.RandString(t, 10)
+	snapshotName := fmt.Sprintf("tf-test-%s", suffix)
+	diskName := fmt.Sprintf("tf-test-%s", suffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName),
+			},
+			{
+				Config: testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, key1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_snapshot.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_snapshot.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Not returned by the API.
+				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
+			},
+		},
+	})
+}
+
+// updateKmsKey drops kms_key_service_account, so key changes with a service account set fail at plan time.
+func TestAccComputeSnapshot_encryptionCMEKUpdateWithServiceAccount(t *testing.T) {
+	t.Parallel()
+
+	key1 := kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+	key2 := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-kms-update-key2").CryptoKey.Name
+	suffix := acctest.RandString(t, 10)
+	snapshotName := fmt.Sprintf("tf-test-%s", suffix)
+	diskName := fmt.Sprintf("tf-test-%s", suffix)
+
+	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+		{
+			Member: "serviceAccount:{project_number}-compute@developer.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+	serviceAccount := fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectNumberFromEnv())
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_encryptionCMEKUpdateKeyWithServiceAccount(snapshotName, diskName, key1, serviceAccount),
+			},
+			{
+				ResourceName:      "google_compute_snapshot.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Not returned by the API.
+				ImportStateVerifyIgnore: []string{"zone", "source_disk"},
+			},
+			{
+				Config:      testAccComputeSnapshot_encryptionCMEKUpdateKeyWithServiceAccount(snapshotName, diskName, key2, serviceAccount),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("while kms_key_service_account is set"),
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_encryptionCMEKUpdateNoKey(snapshotName, diskName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "%s"
+  source_disk = google_compute_disk.foobar.name
+  zone        = "us-central1-a"
+}
+`, diskName, snapshotName)
+}
+
+func testAccComputeSnapshot_encryptionCMEKUpdateKey(snapshotName, diskName, kmsKey string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "%s"
+  source_disk = google_compute_disk.foobar.name
+  zone        = "us-central1-a"
+
+  snapshot_encryption_key {
+    kms_key_self_link = "%s"
+  }
+}
+`, diskName, snapshotName, kmsKey)
+}
+
+func testAccComputeSnapshot_encryptionCMEKUpdateKeyWithServiceAccount(snapshotName, diskName, kmsKey, serviceAccount string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "foobar" {
+  name = "%s"
+  size = 10
+  type = "pd-balanced"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "%s"
+  source_disk = google_compute_disk.foobar.name
+  zone        = "us-central1-a"
+
+  snapshot_encryption_key {
+    kms_key_self_link       = "%s"
+    kms_key_service_account = "%s"
+  }
+}
+`, diskName, snapshotName, kmsKey, serviceAccount)
+}
+
 func testAccComputeSnapshot_encryption(snapshotName string, diskName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -191,7 +396,7 @@ resource "google_compute_snapshot" "snapshot" {
 }
 
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -201,6 +406,71 @@ resource "google_compute_disk" "persistent" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+}
+`, context)
+}
+
+func TestAccComputeSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	pid := envvar.GetTestProjectFromEnv()
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    pid,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSnapshot_resourceManagerTags(context),
+			},
+		},
+	})
+}
+
+func testAccComputeSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "projects/%{project_id}"
+  short_name = "tf-test-key-%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = "tagKeys/${google_tags_tag_key.tag_key.name}"
+  short_name = "tf-test-value-%{random_suffix}"
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "tf-test-disk-%{random_suffix}"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_instant_snapshot" "foobar" {
+  name        = "tf-test-instant-snapshot-%{random_suffix}"
+  zone        = "us-central1-a"
+  source_disk = google_compute_disk.foobar.id
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name                    = "tf-test-snapshot-%{random_suffix}"
+  zone                    = "us-central1-a"
+  source_instant_snapshot = google_compute_instant_snapshot.foobar.id
+  params {
+    resource_manager_tags = {
+      "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
+    }
+  }
 }
 `, context)
 }

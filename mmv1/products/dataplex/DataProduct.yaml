@@ -12,135 +12,162 @@
 # limitations under the License.
 
 ---
-name: 'DataProduct'
+name: DataProduct
 description: |
   A data product is a curated collection of data assets, packaged to address
   specific use cases.
 references:
   guides:
-    'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
-  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts'
-min_version: beta
-
-base_url: 'projects/{{project}}/locations/{{location}}/dataProducts'
-self_link: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/dataProducts?dataProductId={{data_product_id}}'
-id_format: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
-
-update_verb: 'PATCH'
+    Introduction to Data Products: https://cloud.google.com/dataplex/docs/data-products-overview
+  api: https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts
+base_url: projects/{{project}}/locations/{{location}}/dataProducts
+self_link: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataProducts?dataProductId={{data_product_id}}
 update_mask: true
-autogen_async: true
-
+update_verb: PATCH
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  parent_resource_attribute: data_product_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
+    - '{{data_product_id}}'
+  method_name_suffix: DataProduct
+id_format: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
 timeouts:
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
-
 # Added async block to wait for background creation/updates
 async:
-  actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
-
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
-
-examples:
-  - name: 'dataplex_data_product_basic'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
-  - name: 'dataplex_data_product_full'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
-
+  actions: [create, update, delete]
+autogen_async: true
+samples:
+  - name: dataplex_data_product_basic
+    primary_resource_id: example
+    steps:
+      - name: dataplex_data_product_basic
+        resource_id_vars:
+          data_product_id: data-product-basic
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          data_product_id: fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))
+  - name: dataplex_data_product_full
+    primary_resource_id: example
+    steps:
+      - name: dataplex_data_product_full
+        resource_id_vars:
+          data_product_id: data-product-full
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          data_product_id: fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The location for the data product.
-  - name: 'data_product_id'
+  - name: data_product_id
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
       The ID of the data product.
-
 properties:
-  - name: 'uid'
+  - name: name
     type: String
     output: true
-    description: 'System generated unique ID.'
-  - name: 'displayName'
+    description: The relative resource name of the data product.
+  - name: uid
+    type: String
+    output: true
+    description: System generated unique ID.
+  - name: accessApprovalConfig
+    type: NestedObject
+    description: Configuration for access approval for the data product.
+    properties:
+      - name: approverEmails
+        type: Array
+        item_type:
+          type: String
+        description: Specifies the email addresses of users who are potential approvers.
+  - name: displayName
     type: String
     required: true
-    description: 'User-friendly display name.'
-  - name: 'createTime'
+    description: User-friendly display name.
+  - name: createTime
     type: String
     output: true
-    description: 'Creation timestamp.'
-  - name: 'updateTime'
+    description: Creation timestamp.
+  - name: updateTime
     type: String
     output: true
-    description: 'Last update timestamp.'
-  - name: 'etag'
+    description: Last update timestamp.
+  - name: etag
     type: String
     output: true
-    description: 'Checksum for concurrency control.'
-  - name: 'labels'
+    description: Checksum for concurrency control.
+  - name: labels
     type: KeyValueLabels
-    description: 'User-defined labels.'
-  - name: 'description'
+    description: User-defined labels.
+  - name: description
     type: String
-    description: 'Description of the data product.'
-  - name: 'ownerEmails'
+    description: Description of the data product.
+  - name: icon
+    type: String
+    description: |
+      Base64 encoded image representing the data product. Max Size: 3.0MiB
+      Expected image dimensions are 512x512 pixels, however the API only
+      performs validation on size of the encoded data.
+      Note: For byte fields, the content of the fields are base64-encoded (which
+      increases the size of the data by 33-36%) when using JSON on the wire.
+  - name: ownerEmails
     type: Array
     item_type:
       type: String
     required: true
-    description: 'Emails of the owners.'
-  - name: 'assetCount'
+    description: Emails of the owners.
+  - name: assetCount
     type: Integer
     output: true
-    description: 'Number of associated data assets.'
-  - name: 'accessGroups'
+    description: Number of associated data assets.
+  - name: accessGroups
     type: Map
-    key_name: 'id'
+    key_name: id
     description: |
       Custom user defined access groups at the data product level.
     value_type:
       type: NestedObject
       properties:
-        - name: 'group_id'
-          api_name: 'id'
+        - name: group_id
+          api_name: id
           type: String
           required: true
-          description: 'Unique identifier of the access group.'
-        - name: 'displayName'
+          description: Unique identifier of the access group.
+        - name: displayName
           type: String
           required: true
-          description: 'User friendly display name.'
-        - name: 'description'
+          description: User friendly display name.
+        - name: description
           type: String
-          description: 'Description of the access group.'
-        - name: 'principal'
+          description: Description of the access group.
+        - name: principal
           type: NestedObject
           required: true
-          description: 'The principal entity.'
+          description: The principal entity.
           properties:
-            - name: 'googleGroup'
+            - name: googleGroup
               type: String
-              description: 'Email of the Google Group.'
+              description: Email of the Google Group.
+            - name: serviceAccount
+              type: String
+              description: Specifies the email of the producer service account.

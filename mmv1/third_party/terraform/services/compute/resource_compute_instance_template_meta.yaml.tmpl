@@ -129,6 +129,12 @@ fields:
     api_field: 'properties.networkInterfaces.aliasIpRanges.ipCidrRange'
   - field: 'network_interface.alias_ip_range.subnetwork_range_name'
     api_field: 'properties.networkInterfaces.aliasIpRanges.subnetworkRangeName'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'network_interface.alias_ipv6_range.ip_cidr_range'
+    api_field: 'properties.networkInterfaces.aliasIpv6Ranges.ipCidrRange'
+  - field: 'network_interface.alias_ipv6_range.subnetwork_range_name'
+    api_field: 'properties.networkInterfaces.aliasIpv6Ranges.subnetworkRangeName'
+{{- end }}
   - field: 'network_interface.internal_ipv6_prefix_length'
     api_field: 'properties.networkInterfaces.internalIpv6PrefixLength'
   - field: 'network_interface.ipv6_access_config.external_ipv6'
@@ -151,6 +157,10 @@ fields:
     api_field: 'properties.networkInterfaces.network'
   - field: 'network_interface.network_attachment'
     api_field: 'properties.networkInterfaces.networkAttachment'
+  - field: 'network_interface.enable_vpc_scoped_dns'
+    api_field: 'properties.networkInterfaces.enableVpcScopedDns'
+  - field: 'network_interface.service_class_id'
+    api_field: 'properties.networkInterfaces.serviceClassId'
   - api_field: 'networkInterfaces.parentNicName'
     field: 'network_interface.parent_nic_name'
   - api_field: 'networkInterfaces.vlan'
@@ -203,10 +213,8 @@ fields:
   - api_field: 'properties.scheduling.gracefulShutdown.maxDuration.seconds'
     field: 'scheduling.graceful_shutdown.max_duration.seconds'
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'scheduling.host_error_timeout_seconds'
     api_field: 'properties.scheduling.hostErrorTimeoutSeconds'
-{{- end }}
   - field: 'scheduling.instance_termination_action'
     api_field: 'properties.scheduling.instanceTerminationAction'
   - field: 'scheduling.local_ssd_recovery_timeout.nanos'
@@ -240,11 +248,11 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'properties.scheduling.skipGuestOsShutdown'
     field: 'scheduling.skip_guest_os_shutdown'
+{{- end }}
   - field: 'scheduling.preemption_notice_duration.nanos'
     api_field: 'properties.scheduling.preemptionNoticeDuration.nanos'
   - field: 'scheduling.preemption_notice_duration.seconds'
     api_field: 'properties.scheduling.preemptionNoticeDuration.seconds'
-{{- end }}
   - api_field: 'properties.scheduling.terminationTime'
     field: 'scheduling.termination_time'
   - api_field: 'selfLink'
@@ -266,3 +274,7 @@ fields:
     api_field: 'properties.tags.fingerprint'
   - field: 'terraform_labels'
     provider_only: true
+  - field: 'workload_identity_config.identity'
+    api_field: 'properties.workloadIdentityConfig.identity'
+  - field: 'workload_identity_config.identity_certificate_enabled'
+    api_field: 'properties.workloadIdentityConfig.identityCertificateEnabled'

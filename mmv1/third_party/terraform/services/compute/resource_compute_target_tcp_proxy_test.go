@@ -13,9 +13,9 @@ import (
 func TestAccComputeTargetTcpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("ttcp-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("ttcp-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("ttcp-test-%s", acctest.RandString(t, 10))
+	target := fmt.Sprintf("tf-test-ttcp-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-ttcp-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-ttcp-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -54,7 +54,7 @@ func testAccCheckComputeTargetTcpProxyExists(t *testing.T, n string) resource.Te
 		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute.NewClient(config, config.UserAgent).TargetTcpProxies.Get(
+		found, err := compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).TargetTcpProxies.Get(
 			config.Project, name).Do()
 		if err != nil {
 			return err

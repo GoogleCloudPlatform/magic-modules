@@ -42,7 +42,7 @@ var manageTestFailureTicketCmd = &cobra.Command{
 	 It performs the following operations:
 	 1. Lists out GitHub issues with test-failure and forward/review labels.
 	 2. Removes forward/review labels from these issues.
-	 3. Closes 100% test ticket if it starts to pass for 3 days
+	 3. Closes 100% test tickets if they pass for 3 days, and 50% test tickets if they pass for 14 days.
  
 	 The following environment variables are required:
  ` + listMTFTRequiredEnvironmentVariables(),
@@ -102,20 +102,39 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 		}
 	}
 
-	// Get Test status for past 3 days
+	// Get Test status for past 14 days
 	gaTestFailuresMap := make(map[string][]bool)
 	betaTestFailuresMap := make(map[string][]bool)
 
-	lastNDaysTestNonSuccessMap(provider.GA, 3, now, gcs, gaTestFailuresMap)
-	lastNDaysTestNonSuccessMap(provider.Beta, 3, now, gcs, betaTestFailuresMap)
+	err = lastNDaysTestNonSuccessMap(provider.GA, 14, now, gcs, gaTestFailuresMap)
+	if err != nil {
+		return err
+	}
+	err = lastNDaysTestNonSuccessMap(provider.Beta, 14, now, gcs, betaTestFailuresMap)
+	if err != nil {
+		return err
+	}
 
-	// Get 100% failing test tickets
-	opts = &github.IssueListByRepoOptions{
+	err = closeResolvedTickets(ctx, gh, "test-failure-100", 3, gaTestFailuresMap, betaTestFailuresMap)
+	if err != nil {
+		return err
+	}
+
+	err = closeResolvedTickets(ctx, gh, "test-failure-50", 14, gaTestFailuresMap, betaTestFailuresMap)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func closeResolvedTickets(ctx context.Context, gh *github.Client, label string, daysToCheck int, gaTestFailuresMap, betaTestFailuresMap map[string][]bool) error {
+	opts := &github.IssueListByRepoOptions{
 		State:       "open",
-		Labels:      []string{"test-failure-100"},
+		Labels:      []string{label},
 		ListOptions: github.ListOptions{PerPage: 100},
 	}
-	issues, err = ListIssuesWithOpts(ctx, gh, opts)
+	issues, err := ListIssuesWithOpts(ctx, gh, opts)
 	if err != nil {
 		return err
 	}
@@ -133,12 +152,12 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 			continue
 		}
 
-		if shouldCloseTestTicket(tests, gaTestFailuresMap, betaTestFailuresMap) {
+		if shouldCloseTestTicket(tests, gaTestFailuresMap, betaTestFailuresMap, daysToCheck) {
 			shouldCloseTickets = append(shouldCloseTickets, issue.GetNumber())
 		}
 	}
 
-	comment := "All failing tests listed in this ticket have passed in the last three consecutive nightly runs. Closing the ticket."
+	comment := fmt.Sprintf("All failing tests listed in this ticket have passed in the last %d consecutive nightly runs. Closing the ticket.", daysToCheck)
 	for _, ticketNumber := range shouldCloseTickets {
 		fmt.Println("Closing ticket ", ticketNumber)
 		issueComment := &github.IssueComment{
@@ -178,7 +197,7 @@ func lastNDaysTestNonSuccessMap(pVersion provider.Version, n int, now time.Time,
 	return nil
 }
 
-func shouldCloseTestTicket(tests []string, gaTestFailuresMap, betaTestFailuresMap map[string][]bool) bool {
+func shouldCloseTestTicket(tests []string, gaTestFailuresMap, betaTestFailuresMap map[string][]bool, daysToCheck int) bool {
 	for _, test := range tests {
 		gaFailures, foundGaTest := gaTestFailuresMap[test]
 		betaFailures, foundBetaTest := betaTestFailuresMap[test]
@@ -189,15 +208,15 @@ func shouldCloseTestTicket(tests []string, gaTestFailuresMap, betaTestFailuresMa
 		}
 
 		if foundGaTest {
-			for _, fail := range gaFailures {
-				if fail {
+			for i := 0; i < daysToCheck; i++ {
+				if gaFailures[i] {
 					return false
 				}
 			}
 		}
 		if foundBetaTest {
-			for _, fail := range betaFailures {
-				if fail {
+			for i := 0; i < daysToCheck; i++ {
+				if betaFailures[i] {
 					return false
 				}
 			}

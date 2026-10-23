@@ -6,12 +6,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceComputeHaVpnGateway(t *testing.T) {
 	t.Parallel()
 
-	gwName := fmt.Sprintf("tf-%s", acctest.RandString(t, 10))
+	gwName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	gatewayIpVersion := "IPV6"
 	stackType := "IPV6_ONLY"
 

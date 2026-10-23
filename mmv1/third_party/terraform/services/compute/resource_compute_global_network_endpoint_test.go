@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccComputeGlobalNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
@@ -17,7 +18,7 @@ func TestAccComputeGlobalNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 		"default_port":  90,
 		"modified_port": 100,
 	}
-	negId := fmt.Sprintf("projects/%s/global/networkEndpointGroups/neg-%s",
+	negId := fmt.Sprintf("projects/%s/global/networkEndpointGroups/tf-test-neg-%s",
 		envvar.GetTestProjectFromEnv(), context["random_suffix"])
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -81,7 +82,7 @@ resource "google_compute_global_network_endpoint" "default" {
 func testAccComputeGlobalNetworkEndpoint_noNetworkEndpoints(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_global_network_endpoint_group" "neg" {
-  name                  = "neg-%{random_suffix}"
+  name                  = "tf-test-neg-%{random_suffix}"
   default_port          = "%{default_port}"
   network_endpoint_type = "INTERNET_IP_PORT"
 }

@@ -14,13 +14,17 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
 
@@ -43,8 +47,10 @@ func NewCaiToTerraformConversion(product *api.Product, versionName string, start
 		templateFS:        templateFS,
 	}
 
-	for _, r := range t.Product.Objects {
-		r.ImportPath = ImportPathFromVersion(versionName)
+	if product != nil {
+		for _, r := range t.Product.Objects {
+			r.ImportPath = ImportPathFromVersion(versionName)
+		}
 	}
 
 	return t
@@ -60,13 +66,25 @@ func (cai2hcl CaiToTerraformConversion) CopyCommonFiles(outputFolder string, gen
 	if !generateCode {
 		return
 	}
-	log.Print("Copying cai2hcl common files")
+	google.LogVerbose("Copying cai2hcl common files")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
 
-	if err := copy.Copy("third_party/cai2hcl", outputFolder); err != nil {
-		log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
+	if cai2hcl.Product != nil {
+		srcDir := filepath.Join("third_party/cai2hcl/services", cai2hcl.Product.ApiName)
+		dstDir := filepath.Join(outputFolder, "services", cai2hcl.Product.ApiName)
+		if err := copy.Copy(srcDir, dstDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Println(fmt.Errorf("error copying service directory %v: %v", srcDir, err))
+		}
+	} else {
+		if err := copy.Copy("third_party/cai2hcl", outputFolder, copy.Options{
+			Skip: func(srcinfo os.FileInfo, src, dest string) (bool, error) {
+				return strings.Contains(src, "/services/"), nil
+			},
+		}); err != nil {
+			log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
+		}
 	}
 }

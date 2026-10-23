@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 // Test that a service account key can be created and destroyed
@@ -15,7 +16,7 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + acctest.RandString(t, 10)
+	accountID := "tf-test-a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,7 +40,7 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + acctest.RandString(t, 10)
+	accountID := "tf-test-a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -63,7 +64,7 @@ func TestAccServiceAccountKey_fromCertificate(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + acctest.RandString(t, 10)
+	accountID := "tf-test-a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

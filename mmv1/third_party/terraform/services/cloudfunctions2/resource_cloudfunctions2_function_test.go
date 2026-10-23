@@ -7,7 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/binaryauthorization"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/cloudfunctions2"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccCloudFunctions2Function_update(t *testing.T) {
@@ -701,7 +704,7 @@ locals {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "${local.project}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
+  name     = "tf-test-gcf-source%{random_suffix}-${local.project}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -750,7 +753,7 @@ locals {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "${local.project}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
+  name     = "tf-test-gcf-source%{random_suffix}-${local.project}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }

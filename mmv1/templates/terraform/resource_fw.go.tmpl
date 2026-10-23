@@ -270,7 +270,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
 {{- end }}
 
-    createTimeout, diags := data.Timeouts.Create(ctx, {{ $.Timeouts.InsertMinutes }}*time.Minute)
+    createTimeout, diags := data.Timeouts.Create(ctx, {{ $.GetTimeouts.InsertMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -307,7 +307,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
 {{- end}}
         return 
     }
@@ -487,7 +487,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	}
 {{- end }}
 
-    updateTimeout, diags := plan.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
+    updateTimeout, diags := plan.Timeouts.Update(ctx, {{ $.GetTimeouts.UpdateMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -526,6 +526,9 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 {{- end}}
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
+{{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
+        err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
+{{- end}}
         return 
     }
 
@@ -629,7 +632,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 
 	obj := make(map[string]interface{})
 
-    deleteTimeout, diags := data.Timeouts.Delete(ctx, {{ $.Timeouts.DeleteMinutes }}*time.Minute)
+    deleteTimeout, diags := data.Timeouts.Delete(ctx, {{ $.GetTimeouts.DeleteMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -667,6 +670,9 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 {{- end}}
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
+{{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
+        err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
+{{- end}}
 		diags.AddError(fmt.Sprintf("Error deleting {{ $.Name -}}: %s", data.Id.ValueString()), err.Error())
         return 
     }

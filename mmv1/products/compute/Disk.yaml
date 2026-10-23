@@ -38,10 +38,13 @@ docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/disks'
 has_self_link: true
 immutable: true
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because pre_delete must detach the disk from any attached instances before deletion, and a handwritten sweeper is used instead.
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -70,20 +73,41 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
+  - 'kmsKeyUpdateCustomDiff("disk_encryption_key.0.kms_key_self_link", "disk_encryption_key.0.kms_key_service_account", "disk_encryption_key.0.sha256")'
+samples:
   - name: 'disk_basic'
     primary_resource_id: 'default'
-    vars:
-      disk_name: 'test-disk'
+    steps:
+      - name: 'disk_basic'
+        resource_id_vars:
+          disk_name: 'test-disk'
+  - name: 'disk_basic_wo'
+    primary_resource_id: 'default'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'disk_basic_wo'
+        resource_id_vars:
+          disk_name: 'test-disk'
+  - name: 'disk_rsa_encrypted_key_wo'
+    primary_resource_id: 'default'
+    tgc_skip_test: write-only fields are not generated for TGC
+    steps:
+      - name: 'disk_rsa_encrypted_key_wo'
+        resource_id_vars:
+          disk_name: 'test-disk'
   - name: 'disk_async'
     primary_resource_id: 'secondary'
-    vars:
-      disk_name: 'async-test-disk'
-      secondary_disk_name: 'async-secondary-test-disk'
+    steps:
+      - name: 'disk_async'
+        resource_id_vars:
+          disk_name: 'async-test-disk'
+          secondary_disk_name: 'async-secondary-test-disk'
   - name: 'disk_features'
     primary_resource_id: 'default'
-    vars:
-      disk_name: 'test-disk-features'
+    steps:
+      - name: 'disk_features'
+        resource_id_vars:
+          disk_name: 'test-disk-features'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -191,14 +215,23 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
+
+      ~>**NOTE** `kms_key_self_link` can be added or changed in place.
+      Removing it, or changing it while `kms_key_service_account` is set,
+      fails at plan time. Other changes to this block recreate the disk.
+    # NOOP: makes the block updatable without generating an update call.
+    # The key is sent by custom_update; see kmsKeyUpdateCustomDiff.
+    update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/updateKmsKey'
+    update_verb: 'NOOP'
     properties:
       - name: 'rawKey'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        immutable: true
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
@@ -206,7 +239,9 @@ properties:
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
+        immutable: true
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
       - name: 'sha256'
         type: String
@@ -222,13 +257,18 @@ properties:
           (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
           See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+
+          Specify the key without a `/cryptoKeyVersions/` suffix.
         api_name: kmsKeyName
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        validation:
+          function: 'verify.ValidateKmsKeyWithoutVersion'
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+        immutable: true
   - name: 'sourceSnapshotEncryptionKey'
     type: NestedObject
     description: |
@@ -451,9 +491,7 @@ properties:
     item_type:
       name: 'resourcePolicy'
       type: ResourceRef
-      description:
-        'A resource policy applied to this disk for automatic snapshot
-        creations.'
+      description: 'A resource policy applied to this disk for automatic snapshot creations.'
       resource: 'ResourcePolicy'
       imports: 'selfLink'
   - name: 'enableConfidentialCompute'
@@ -506,7 +544,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
 )
 
 func TestAccCESGuardrail_cesGuardrailBasicExample_update(t *testing.T) {
@@ -334,6 +335,7 @@ resource "google_ces_guardrail" "ces_guardrail_generative_answer_llm_prompt_secu
       model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 50
+        thinking_level = "LOW"
       }
       prompt = "example_prompt"
       policy_scope = "USER_QUERY"
@@ -382,6 +384,7 @@ resource "google_ces_guardrail" "ces_guardrail_generative_answer_llm_prompt_secu
       model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 49
+        thinking_level = "HIGH"
       }
       prompt = "example_prompt_updated"
       policy_scope = "USER_QUERY"
@@ -468,21 +471,25 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback"
         disabled    = false
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
     after_agent_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
     before_model_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
     after_model_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
   }
 }
@@ -525,21 +532,25 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
     after_agent_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
     before_model_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
     after_model_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
   }
 }
@@ -621,6 +632,7 @@ resource "google_ces_guardrail" "ces_guardrail_llm_policy" {
     model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 50
+        thinking_level = "LOW"
     }
     prompt = "example_prompt"
     policy_scope = "USER_QUERY"
@@ -667,11 +679,124 @@ resource "google_ces_guardrail" "ces_guardrail_llm_policy" {
     model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 45
+        thinking_level = "HIGH"
     }
     prompt = "example_prompt_updated"
     policy_scope = "USER_QUERY"
     fail_open = false
     allow_short_utterance = false
+  }
+}
+`, context)
+}
+
+func TestAccCESGuardrail_cesGuardrailLlmPromptSecurityFailOpenExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESGuardrailDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESGuardrail_cesGuardrailLlmPromptSecurityFailOpenExample_full(context),
+			},
+			{
+				ResourceName:            "google_ces_guardrail.ces_guardrail_llm_prompt_security_fail_open",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id", "guardrail_id"},
+			},
+			{
+				Config: testAccCESGuardrail_cesGuardrailLlmPromptSecurityFailOpenExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_guardrail.ces_guardrail_llm_prompt_security_fail_open", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_guardrail.ces_guardrail_llm_prompt_security_fail_open",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id", "guardrail_id"},
+			},
+		},
+	})
+}
+
+func testAccCESGuardrail_cesGuardrailLlmPromptSecurityFailOpenExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_for_guardrail" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Guardrail example"
+  display_name = "tf-test-my-app%{random_suffix}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_guardrail" "ces_guardrail_llm_prompt_security_fail_open" {
+  guardrail_id = "tf-test-guardrail-id%{random_suffix}"
+  location     = google_ces_app.ces_app_for_guardrail.location
+  app          = google_ces_app.ces_app_for_guardrail.app_id
+  display_name = "tf-test-my-guardrail%{random_suffix}"
+  description  = "Guardrail description"
+  action {
+    generative_answer {
+        prompt = "example_prompt"
+    }
+  }
+  enabled = true
+}
+`, context)
+}
+
+func testAccCESGuardrail_cesGuardrailLlmPromptSecurityFailOpenExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_for_guardrail" {
+  app_id = "tf-test-app-id%{random_suffix}"
+  location = "us"
+  description = "App used as parent for CES Guardrail example"
+  display_name = "tf-test-my-app%{random_suffix}"
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_guardrail" "ces_guardrail_llm_prompt_security_fail_open" {
+  guardrail_id = "tf-test-guardrail-id%{random_suffix}"
+  location     = google_ces_app.ces_app_for_guardrail.location
+  app          = google_ces_app.ces_app_for_guardrail.app_id
+  display_name = "tf-test-my-guardrail%{random_suffix}"
+  description  = "Guardrail description"
+  action {
+    generative_answer {
+        prompt = "example_prompt"
+    }
+  }
+  enabled = true
+  llm_prompt_security {
+    fail_open = true
   }
 }
 `, context)

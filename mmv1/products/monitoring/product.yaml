@@ -12,10 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Monitoring'
-display_name: 'Cloud (Stackdriver) Monitoring'
-versions:
-  - name: 'ga'
-    base_url: 'https://monitoring.googleapis.com/'
+name: Monitoring
+display_name: Cloud (Stackdriver) Monitoring
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://monitoring.googleapis.com/

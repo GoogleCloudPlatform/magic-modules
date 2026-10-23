@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securitycenterv2"
 )
 
 func TestAccSecurityCenterV2FolderBigQueryExportConfig_basic(t *testing.T) {
@@ -86,12 +89,13 @@ resource "time_sleep" "wait_1_minute" {
 }
 
 resource "google_scc_v2_folder_scc_big_query_export" "default" {
-  big_query_export_id    = "%{big_query_export_id}"
-  folder 	   = google_folder.folder.folder_id
-  dataset      = google_bigquery_dataset.default.id
-  location     = "global"
-  description  = "Cloud Security Command Center Findings Big Query Export Config"
-  filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  big_query_export_id            = "%{big_query_export_id}"
+  folder                         = google_folder.folder.folder_id
+  dataset                        = google_bigquery_dataset.default.id
+  location                       = "global"
+  description                    = "Cloud Security Command Center Findings Big Query Export Config"
+  filter                         = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  deletion_notifications_enabled = true
 
   lifecycle {
 	ignore_changes = [name]
@@ -136,12 +140,13 @@ resource "google_bigquery_dataset" "default" {
 }
 
 resource "google_scc_v2_folder_scc_big_query_export" "default" {
-  big_query_export_id    = "%{big_query_export_id}"
-  folder 	   = google_folder.folder.folder_id
-  dataset      = google_bigquery_dataset.default.id
-  location     = "global"
-  description  = "SCC Findings Big Query Export Update"
-  filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  big_query_export_id            = "%{big_query_export_id}"
+  folder                         = google_folder.folder.folder_id
+  dataset                        = google_bigquery_dataset.default.id
+  location                       = "global"
+  description                    = "SCC Findings Big Query Export Update"
+  filter                         = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  deletion_notifications_enabled = false
 
   lifecycle {
 	ignore_changes = [name]

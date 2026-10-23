@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -386,7 +387,8 @@ resource "google_folder_iam_audit_config" "acceptance" {
   folder = google_folder.acceptance.name
   service = "%s"
   audit_log_config {
-    log_type = "DATA_READ"%s
+    log_type = "DATA_READ"
+%s
   }
 }
 `, org, fname, service, memberStr)

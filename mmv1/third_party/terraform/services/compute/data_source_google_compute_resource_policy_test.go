@@ -50,7 +50,7 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 
 			policyAttrs := rs.Primary.Attributes
 
-			_, err := compute.NewClient(config, config.UserAgent).ResourcePolicies.Get(
+			_, err := compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).ResourcePolicies.Get(
 				config.Project, policyAttrs["region"], policyAttrs["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Resource Policy still exists")
@@ -64,7 +64,7 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name strin
 func testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_resource_policy" "%s" {
-  name   = "policy-%s"
+  name   = "tf-test-policy-%s"
   region = "us-central1"
   snapshot_schedule_policy {
     schedule {

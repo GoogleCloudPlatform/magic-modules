@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
 )
 
 func TestAccDataSourceParameterManagerParameterVersionRender_basicWithResourceReference(t *testing.T) {
@@ -42,7 +44,7 @@ resource "google_parameter_manager_parameter" "parameter-basic" {
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "tf-temp-secret-basic%{random_suffix}"
+  secret_id = "tf-test-secret-basic%{random_suffix}"
   replication {
     auto {}
   }
@@ -105,7 +107,7 @@ resource "google_parameter_manager_parameter" "parameter-basic" {
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "tf-temp-secret-json-data%{random_suffix}"
+  secret_id = "tf-test-secret-json-data%{random_suffix}"
   replication {
     auto {}
   }
@@ -168,7 +170,7 @@ resource "google_parameter_manager_parameter" "parameter-basic" {
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "tf-temp-secret-yaml-data%{random_suffix}"
+  secret_id = "tf-test-secret-yaml-data%{random_suffix}"
   replication {
     auto {}
   }

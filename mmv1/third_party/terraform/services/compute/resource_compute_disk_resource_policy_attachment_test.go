@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccComputeDiskResourcePolicyAttachment_update(t *testing.T) {
@@ -43,7 +44,7 @@ func TestAccComputeDiskResourcePolicyAttachment_update(t *testing.T) {
 func testAccComputeDiskResourcePolicyAttachment_basic(diskName, policyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -83,7 +84,7 @@ resource "google_compute_disk_resource_policy_attachment" "foobar" {
 func testAccComputeDiskResourcePolicyAttachment_update(diskName, policyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 

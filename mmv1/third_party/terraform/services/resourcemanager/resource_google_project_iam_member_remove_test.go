@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -47,6 +48,7 @@ func TestAccProjectIamMemberRemove_basic(t *testing.T) {
 
 func TestAccProjectIamMemberRemove_multipleMembersInBinding(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t) // Multiple parallel members
 
 	org := envvar.GetTestOrgFromEnv(t)
 	randomSuffix := acctest.RandString(t, 10)
@@ -237,9 +239,10 @@ resource "google_project_iam_binding" "bar" {
 }
 
 resource "google_project_iam_binding" "baz" {
-  project = google_project.project.project_id
-  members = ["user:gterraformtest1@gmail.com"]
-  role    = "roles/viewer"
+  project    = google_project.project.project_id
+  members    = ["user:gterraformtest1@gmail.com"]
+  role       = "roles/viewer"
+  depends_on = [google_project_iam_binding.bar]
 }
 
 resource "time_sleep" "wait_20s" {
@@ -272,9 +275,10 @@ resource "google_project_iam_binding" "bar" {
 }
 
 resource "google_project_iam_binding" "baz" {
-  project = google_project.project.project_id
-  members = ["user:gterraformtest1@gmail.com"]
-  role    = "roles/viewer"
+  project    = google_project.project.project_id
+  members    = ["user:gterraformtest1@gmail.com"]
+  role       = "roles/viewer"
+  depends_on = [google_project_iam_binding.bar]
 }
 
 resource "time_sleep" "wait_20s" {

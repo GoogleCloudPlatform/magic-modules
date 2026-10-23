@@ -7,13 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccDataSourceGoogleOrganizationIamCustomRoles_basic(t *testing.T) {
 	t.Parallel()
 
 	orgId := envvar.GetTestOrgFromEnv(t)
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

@@ -24,6 +24,10 @@ if d.HasChange("enable_rbac") {
     updateMask = append(updateMask, "enableRbac")
 }
 
+if d.HasChange("maintenance_policy") {
+    updateMask = append(updateMask, "maintenancePolicy")
+}
+
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 

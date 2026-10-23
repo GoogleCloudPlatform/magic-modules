@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccProviderFunction_region_from_zone(t *testing.T) {
@@ -51,7 +52,7 @@ resource "google_compute_disk" "default" {
 	name  = "%{resource_name}"
 	type  = "pd-ssd"
 	zone  = "%{resource_location}"
-	image = "debian-11-bullseye-v20220719"
+	image = "debian-13-trixie-v20260827"
 	labels = {
 	  environment = "dev"
 	}

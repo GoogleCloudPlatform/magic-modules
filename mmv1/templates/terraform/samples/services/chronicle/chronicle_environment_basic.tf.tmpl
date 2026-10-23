@@ -1,0 +1,24 @@
+resource "google_chronicle_environment" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "MyEnvironment"
+  description = "MyEnvironment is managed with Terraform"
+  contact = "Contact"
+  contact_emails = "example@example.com"
+  contact_phone = "00000"
+  aliases_json            = jsonencode([])
+  data_access_scopes_json = jsonencode([])
+  retention_duration = 3
+
+  base64_image = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABHNCSVQICAgIfAhkiAAAAA1JREFUCJljYPjPUA8AA4EBf4abPZ0AAAAASUVORK5CYII="
+  dynamic_parameters {
+    dynamic_parameter_id = 123
+    value = "value1"
+  }
+  instance_uri = "https://test.backstory.chronicle.security?foo=bar"
+  parallel_instance = "projects/{{index $.TestEnvVars "project_name"}}/locations/us/instances/00000000-0000-0000-0000-000000000001"
+  weight = 1
+
+  deletion_protection  = false
+}

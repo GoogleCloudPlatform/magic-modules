@@ -29,9 +29,13 @@ func NewProjectCai2hclConverter(provider *tfschema.Provider) models.Cai2hclConve
 }
 
 // Convert converts asset resource data.
-func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ProjectCai2hclConverter) Convert(assets []caiasset.Asset, options *models.ResourceConverterOptions) ([]*models.TerraformResourceBlock, error) {
+	if len(assets) > 1 {
+		return nil, fmt.Errorf("multiple assets are not supported")
+	}
+
 	var blocks []*models.TerraformResourceBlock
-	block, err := c.convertResourceData(asset)
+	block, err := c.convertResourceData(assets[0], options)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +43,7 @@ func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.Terra
 	return blocks, nil
 }
 
-func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset, options *models.ResourceConverterOptions) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -60,8 +64,14 @@ func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset) (*mo
 	if err != nil {
 		return nil, err
 	}
+	var hclBlockName string
+	if options != nil && options.ResourceName != "" {
+		hclBlockName = options.ResourceName
+	} else {
+		hclBlockName = assetResourceData["projectId"].(string)
+	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, assetResourceData["projectId"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }

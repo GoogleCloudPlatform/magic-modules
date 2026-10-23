@@ -4,6 +4,7 @@ import (
   "testing"
 
   "github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
   "github.com/hashicorp/terraform-provider-google/google/envvar"
   "github.com/hashicorp/terraform-plugin-testing/helper/resource"
   "github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -125,7 +126,7 @@ func testAccComputeInstanceGroupMembership_noInstanceGroupMembership(context map
 
       boot_disk {
         initialize_params {
-          image = "debian-cloud/debian-11"
+          image = "debian-cloud/debian-13"
         }
       }
 
@@ -140,7 +141,7 @@ func testAccComputeInstanceGroupMembership_noInstanceGroupMembership(context map
 
       boot_disk {
         initialize_params {
-          image = "debian-cloud/debian-11"
+          image = "debian-cloud/debian-13"
         }
       }
 
@@ -155,7 +156,7 @@ func testAccComputeInstanceGroupMembership_noInstanceGroupMembership(context map
 
       boot_disk {
         initialize_params {
-          image = "debian-cloud/debian-11"
+          image = "debian-cloud/debian-13"
         }
       }
 

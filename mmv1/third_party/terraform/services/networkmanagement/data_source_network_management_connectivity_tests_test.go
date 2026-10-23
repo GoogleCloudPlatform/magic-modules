@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkmanagement"
 )
 
 func TestAccNetworkManagementConnectivityTests_basic(t *testing.T) {
@@ -128,18 +130,18 @@ resource "google_network_management_connectivity_test" "conn-test-2" {
 }
 
 resource "google_compute_network" "vpc" {
-  name = "connectivity-vpc%{random_suffix}"
+  name = "tf-test-connectivity-vpc%{random_suffix}"
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  name          = "connectivity-vpc-subnet%{random_suffix}"
+  name          = "tf-test-connectivity-vpc-subnet%{random_suffix}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.vpc.id
 }
 
 resource "google_compute_address" "source-addr" {
-  name         = "src-addr%{random_suffix}"
+  name         = "tf-test-src-addr%{random_suffix}"
   subnetwork   = google_compute_subnetwork.subnet.id
   address_type = "INTERNAL"
   address      = "10.0.42.42"
@@ -147,7 +149,7 @@ resource "google_compute_address" "source-addr" {
 }
 
 resource "google_compute_address" "dest-addr" {
-  name         = "dest-addr%{random_suffix}"
+  name         = "tf-test-dest-addr%{random_suffix}"
   subnetwork   = google_compute_subnetwork.subnet.id
   address_type = "INTERNAL"
   address      = "10.0.43.43"

@@ -1,0 +1,15 @@
+resource "google_gke_backup_backup_plan" "nslabels" {
+  name = "{{index $.ResourceIdVars "name"}}"
+  cluster = "{{index $.ResourceIdVars "cluster"}}"
+  location = "us-east1"
+  backup_config {
+    include_volume_data = true
+    include_secrets = true
+    selected_namespace_labels {
+      resource_labels {
+        key = "key1"
+        value ="value1"
+     }
+    }
+  }
+}

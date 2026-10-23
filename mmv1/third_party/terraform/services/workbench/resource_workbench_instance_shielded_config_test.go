@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/workbench"
 )
 
 func TestAccWorkbenchInstance_shielded_config_update(t *testing.T) {
@@ -30,7 +31,7 @@ func TestAccWorkbenchInstance_shielded_config_update(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_true(context),
@@ -43,7 +44,7 @@ func TestAccWorkbenchInstance_shielded_config_update(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 		},
 	})
@@ -71,7 +72,7 @@ func TestAccWorkbenchInstance_shielded_config_remove(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_none(context),
@@ -84,7 +85,7 @@ func TestAccWorkbenchInstance_shielded_config_remove(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 		},
 	})
@@ -112,7 +113,7 @@ func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_none(context),
@@ -125,7 +126,7 @@ func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_false(context),
@@ -138,7 +139,7 @@ func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_false(context),
@@ -151,7 +152,7 @@ func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_true(context),
@@ -164,7 +165,7 @@ func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 			{
 				Config: testAccWorkbenchInstance_shielded_config_true(context),
@@ -177,7 +178,7 @@ func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.boot_disk.0.disk_type"},
 			},
 		},
 	})
@@ -187,9 +188,13 @@ func testAccWorkbenchInstance_shielded_config_true(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
-  location = "us-central1-a"
+  location = "us-east1-b"
 
   gce_setup {
+    machine_type = "n4-standard-2"
+    boot_disk {
+      disk_type = "HYPERDISK_BALANCED"
+    }
     shielded_instance_config {
       enable_secure_boot = true
       enable_vtpm = true
@@ -204,9 +209,13 @@ func testAccWorkbenchInstance_shielded_config_false(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
-  location = "us-central1-a"
+  location = "us-east1-b"
 
   gce_setup {
+    machine_type = "n4-standard-2"
+    boot_disk {
+      disk_type = "HYPERDISK_BALANCED"
+    }
     shielded_instance_config {
       enable_secure_boot = false
       enable_vtpm = false
@@ -222,7 +231,14 @@ func testAccWorkbenchInstance_shielded_config_none(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
-  location = "us-central1-a"
+  location = "us-east1-b"
+
+  gce_setup {
+    machine_type = "n4-standard-2"
+    boot_disk {
+      disk_type = "HYPERDISK_BALANCED"
+    }
+  }
 }
 `, context)
 }

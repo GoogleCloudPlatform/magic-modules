@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securitycenter"
 )
 
 func TestAccSecurityCenterNotificationConfig_updateStreamingConfigFilter(t *testing.T) {
@@ -63,10 +65,11 @@ resource "google_pubsub_topic" "scc_notification" {
 }
 
 resource "google_scc_notification_config" "custom_notification_config" {
-  config_id    = "%{config_id}"
-  organization = "%{org_id}"
-  description  = "My custom Cloud Security Command Center Finding Notification Configuration"
-  pubsub_topic =  google_pubsub_topic.scc_notification.id
+  config_id                      = "%{config_id}"
+  organization                   = "%{org_id}"
+  description                    = "My custom Cloud Security Command Center Finding Notification Configuration"
+  pubsub_topic                   =  google_pubsub_topic.scc_notification.id
+  deletion_notifications_enabled = true
 
   streaming_config {
     filter = "category = \"OPEN_FIREWALL\""
@@ -82,10 +85,11 @@ resource "google_pubsub_topic" "scc_notification" {
 }
 
 resource "google_scc_notification_config" "custom_notification_config" {
-  config_id    = "%{config_id}"
-  organization = "%{org_id}"
-  description  = "My custom Cloud Security Command Center Finding Notification Configuration"
-  pubsub_topic =  google_pubsub_topic.scc_notification.id
+  config_id                      = "%{config_id}"
+  organization                   = "%{org_id}"
+  description                    = "My custom Cloud Security Command Center Finding Notification Configuration"
+  pubsub_topic                   =  google_pubsub_topic.scc_notification.id
+  deletion_notifications_enabled = false
 
   streaming_config {
     filter = ""

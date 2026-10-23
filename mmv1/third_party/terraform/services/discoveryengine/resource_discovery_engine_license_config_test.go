@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineLicenseConfig_discoveryengineLicenseconfigBasicExample_update(t *testing.T) {
@@ -30,6 +31,9 @@ func TestAccDiscoveryEngineLicenseConfig_discoveryengineLicenseconfigBasicExampl
 			},
 			{
 				Config: testAccDiscoveryEngineLicenseConfig_discoveryengineLicenseconfigBasicExample_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_discovery_engine_license_config.basic", "last_user_update_time", "2026-08-19T20:00:00Z"),
+				),
 			},
 			{
 				ResourceName:            "google_discovery_engine_license_config.basic",
@@ -81,6 +85,7 @@ resource "google_discovery_engine_license_config" "basic" {
     day = 1
   }
   subscription_term = "SUBSCRIPTION_TERM_ONE_YEAR"
+  last_user_update_time = "2026-08-19T20:00:00Z"
 }
 `, context)
 }

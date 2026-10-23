@@ -1,0 +1,210 @@
+package compute_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestAccComputeInstantSnapshot_basicFeatures(t *testing.T) {
+	var is map[string]interface{}
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstantSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstantSnapshot_basicFeatures(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstantSnapshotExists(t, "google_compute_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstantSnapshot_labelsUpdate(t *testing.T) {
+	var is map[string]interface{}
+	context_1 := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"label_key":     "test-1",
+		"label_value":   "test-1",
+	}
+	context_2 := map[string]interface{}{
+		"random_suffix": context_1["random_suffix"],
+		"label_key":     "test-1",
+		"label_value":   "test-2",
+	}
+	context_3 := map[string]interface{}{
+		"random_suffix": context_1["random_suffix"],
+		"label_key":     "test-2",
+		"label_value":   "test-2",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstantSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstantSnapshot_labelsUpdate(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstantSnapshotExists(t, "google_compute_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+			{
+				Config: testAccComputeInstantSnapshot_labelsUpdate(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstantSnapshotExists(t, "google_compute_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+			{
+				Config: testAccComputeInstantSnapshot_labelsUpdate(context_3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstantSnapshotExists(t, "google_compute_instant_snapshot.foobar", envvar.GetTestProjectFromEnv(), &is),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckComputeInstantSnapshotExists(t *testing.T, n, p string, is *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		zone := tpgresource.GetResourceNameFromSelfLink(rs.Primary.Attributes["zone"])
+
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/instantSnapshots/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), p, zone, rs.Primary.Attributes["name"])
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   p,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return err
+		}
+
+		if foundName, ok := found["name"].(string); !ok || foundName != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Instant Snapshot not found")
+		}
+
+		*is = found
+
+		return nil
+	}
+}
+
+func testAccComputeInstantSnapshot_basicFeatures(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-standard"
+  zone = "us-central1-a"
+  size = 10
+}
+
+resource "google_compute_instant_snapshot" "foobar" {
+  name = "tf-test-instant-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.disk.self_link
+  zone = google_compute_disk.disk.zone
+
+  description = "A test snapshot"
+  labels = {
+	foo = "bar"
+  }
+}
+`, context)
+}
+
+func testAccComputeInstantSnapshot_labelsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-standard"
+  zone = "us-central1-a"
+  size = 10
+}
+
+resource "google_compute_instant_snapshot" "foobar" {
+  name = "tf-test-instant-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.disk.self_link
+  zone = google_compute_disk.disk.zone
+
+  labels = {
+	%{label_key} = "%{label_value}"
+  }
+}
+`, context)
+}
+
+func TestAccComputeInstantSnapshot_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := tags.BootstrapSharedTestTagKeyDetails(t, "crm-instant-snapshots-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagKey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := tags.BootstrapSharedTestTagValueDetails(t, "crm-instant-snapshots-tagvalue", sharedTagKey, org)
+
+	context := map[string]interface{}{
+		"random_suffix": suffix,
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstantSnapshotDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstantSnapshot_resourceManagerTags(context),
+			},
+		},
+	})
+}
+
+func testAccComputeInstantSnapshot_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_disk" "disk" {
+  name = "tf-test-disk-%{random_suffix}"
+  type = "pd-standard"
+  zone = "us-central1-a"
+  size = 10
+}
+
+resource "google_compute_instant_snapshot" "foobar" {
+  name        = "tf-test-instant-snapshot-%{random_suffix}"
+  source_disk = google_compute_disk.disk.self_link
+  zone        = google_compute_disk.disk.zone
+  params {
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
+  }
+}
+`, context)
+}

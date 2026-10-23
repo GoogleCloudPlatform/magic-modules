@@ -15,17 +15,17 @@ package provider
 
 import (
 	"bytes"
-	"fmt"
 	"go/format"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
-	"text/template"
+	"strings"
+	"text/template" // NOLINT
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -78,13 +78,13 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
 	metadata := metadata.FromResource(resource)
-	bytes, err := yaml.Marshal(metadata)
+	metadataBytes, err := yaml.Marshal(metadata)
 	if err != nil {
-		glog.Exit("error marshalling yaml %v: %v", filePath)
+		log.Fatalf("error marshalling yaml %v: %v", filePath, err)
 	}
-	err = os.WriteFile(filePath, bytes, 0644)
+	err = os.WriteFile(filePath, metadataBytes, 0644)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 }
 
@@ -122,66 +122,36 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateTestFileLegacy(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
+func (td *TemplateData) GenerateListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/list_resource.html.markdown.tmpl"
 	templates := []string{
-		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
 	}
-	tmplInput := TestInput{
-		Res:                  resource,
-		ImportPath:           resource.ImportPath,
-		PROJECT_NAME:         "my-project-name",
-		CREDENTIALS:          "my/credentials/filename.json",
-		REGION:               "us-west1",
-		ORG_ID:               "123456789",
-		ORG_DOMAIN:           "example.com",
-		ORG_TARGET:           "123456789",
-		PROJECT_NUMBER:       "1111111111111",
-		BILLING_ACCT:         "000000-0000000-0000000-000000",
-		MASTER_BILLING_ACCT:  "000000-0000000-0000000-000000",
-		SERVICE_ACCT:         "my@service-account.com",
-		CUST_ID:              "A01b123xz",
-		IDENTITY_USER:        "cloud_identity_user",
-		PAP_DESCRIPTION:      "description",
-		CHRONICLE_ID:         "00000000-0000-0000-0000-000000000000",
-		VMWAREENGINE_PROJECT: "my-vmwareengine-project",
-	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
 
-	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
+// GenerateIamListResourceDocumentationFile emits one docs page covering every IAM
+// list kind the resource opts into, mirroring resource_iam.hyml.markdown.tmpl.
+func (td *TemplateData) GenerateIamListResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_list_resource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateDataSourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/datasource.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/property_documentation.html.markdown.tmpl",
+		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
 func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/samples/base_configs/test_file.go.tmpl"
-	templates := []string{
-		"templates/terraform/env_var_context.go.tmpl",
-		templatePath,
-	}
-	tmplInput := TestInput{
-		Res:                  resource,
-		ImportPath:           resource.ImportPath,
-		PROJECT_NAME:         "my-project-name",
-		CREDENTIALS:          "my/credentials/filename.json",
-		REGION:               "us-west1",
-		ORG_ID:               "123456789",
-		ORG_DOMAIN:           "example.com",
-		ORG_TARGET:           "123456789",
-		PROJECT_NUMBER:       "1111111111111",
-		BILLING_ACCT:         "000000-0000000-0000000-000000",
-		MASTER_BILLING_ACCT:  "000000-0000000-0000000-000000",
-		SERVICE_ACCT:         "my@service-account.com",
-		CUST_ID:              "A01b123xz",
-		IDENTITY_USER:        "cloud_identity_user",
-		PAP_DESCRIPTION:      "description",
-		CHRONICLE_ID:         "00000000-0000-0000-0000-000000000000",
-		VMWAREENGINE_PROJECT: "my-vmwareengine-project",
-	}
-
-	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
-}
-
-func (td *TemplateData) GenerateDataSourceTestFileLegacy(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/base_configs/datasource_test_file.go.tmpl"
 	templates := []string{
 		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
@@ -262,22 +232,33 @@ func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, 
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateIamPolicyTestFileLegacy(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
-	templates := []string{
-		templatePath,
-		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/iam_test_setup_legacy.go.tmpl",
-	}
-	td.GenerateFile(filePath, templatePath, resource, true, templates...)
-}
-
 func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
 		"templates/terraform/iam/iam_test_setup.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+// GenerateQueryTestFile emits a Terraform query-mode acceptance test for list resources (generate_list_resource).
+func (td *TemplateData) GenerateQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/query_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+// GenerateIamQueryTestFile emits a Terraform query-mode acceptance test for every Iam
+// list kind the resource opts into (iam_policy.generate_list_resource)
+func (td *TemplateData) GenerateIamQueryTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/iam_list_query_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -322,46 +303,70 @@ func (td *TemplateData) GenerateTGCNextTestFile(filePath string, resource api.Re
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
+	sourceByte := td.renderFile(filePath, templatePath, input, templates...)
+	if sourceByte == nil {
+		return
+	}
+
+	if goFormat {
+		sourceByte = formatGoSource(filePath, sourceByte)
+	}
+
+	err := os.WriteFile(filePath, sourceByte, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// renderFile executes templatePath (parsed together with templates) against
+// input and returns the rendered bytes. It returns nil if the rendered output
+// is empty or whitespace-only, in which case no file should be written.
+// filePath is used only for error messages.
+func (td *TemplateData) renderFile(filePath, templatePath string, input any, templates ...string) []byte {
 	templateFileName := filepath.Base(templatePath)
 	if templatePath == "templates/terraform/examples/base_configs/iam_test_file.go.tmpl" {
 		templatePath = "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
 	}
 
-	funcMap := template.FuncMap{
-		"TemplatePath": func() string { return templatePath },
-	}
-	for k, v := range google.TemplateFunctions(td.templateFS) {
-		funcMap[k] = v
+	// The TemplatePath function closes over templatePath, so it is part of the cache key.
+	funcs := func() template.FuncMap {
+		funcMap := template.FuncMap{
+			"TemplatePath": func() string { return templatePath },
+		}
+		for k, v := range google.TemplateFunctions(td.templateFS) {
+			funcMap[k] = v
+		}
+		return funcMap
 	}
 
-	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFS(td.templateFS, templates...)
+	cacheKey := "GenerateFile:" + templatePath + ":" + strings.Join(templates, "|")
+	tmpl, err := google.ParseTemplatesCached(td.templateFS, cacheKey, templateFileName, funcs, templates...)
 	if err != nil {
-		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
+		log.Fatalf("error parsing %s for filepath %s: %v", templateFileName, filePath, err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templateFileName, filePath), err)
+		log.Fatalf("error executing %s for filepath %s: %v", templateFileName, filePath, err)
 	}
 
 	sourceByte := contents.Bytes()
-	if len(sourceByte) == 0 {
-		return
+	if len(bytes.TrimSpace(sourceByte)) == 0 {
+		return nil
 	}
+	return sourceByte
+}
 
-	if goFormat {
-		formattedByte, err := format.Source(sourceByte)
-		if err != nil {
-			glog.Error(fmt.Errorf("error formatting %s: %s", filePath, err))
-		} else {
-			sourceByte = formattedByte
-		}
-	}
-
-	err = os.WriteFile(filePath, sourceByte, 0644)
+// formatGoSource runs gofmt over source. On failure the error is logged and
+// the input is returned unchanged, matching the generator's historical
+// behavior of still emitting unformatted output for inspection.
+func formatGoSource(filePath string, source []byte) []byte {
+	formattedByte, err := format.Source(source)
 	if err != nil {
-		glog.Exit(err)
+		log.Printf("error formatting %s: %v", filePath, err)
+		return source
 	}
+	return formattedByte
 }
 
 type TestInput struct {

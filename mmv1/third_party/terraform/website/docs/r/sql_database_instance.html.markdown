@@ -355,6 +355,10 @@ SQL Server version to use. Supported values include `MYSQL_5_6`,
 [Database Version Policies](https://cloud.google.com/sql/docs/db-versions)
 includes an up-to-date reference of supported versions.
 
+* `switch_transaction_logs_to_cloud_storage_enabled` - (Optional) When set to `true`, Cloud SQL instances can switch storing point-in-time recovery transaction logs from a data disk to Cloud Storage, freeing up data disk space and enabling longer retention windows. This is an input-only field that is not persisted in the API.
+
+* `include_replicas_for_major_version_upgrade` - (Optional) When this parameter is set to `true`, Cloud SQL instances can perform in-place major version upgrades of read replicas along with the primary instance when `database_version` is updated. This is an input-only field that is not persisted in the API and only takes effect during a major version upgrade.
+
 * `name` - (Optional, Computed) The name of the instance. If the name is left
     blank, Terraform will randomly generate one when the instance is first
     created. This is done because after a name is used, it cannot be reused for
@@ -392,12 +396,20 @@ includes an up-to-date reference of supported versions.
     That service account needs the `Cloud KMS > Cloud KMS CryptoKey Encrypter/Decrypter` role on your
     key - please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey).
 
+* `encryption_confidential_mode` - (Optional)
+    Enables Confidential Mode on Hyperdisk storage for enhanced security. Only supported on C4A instances.
+
 * `deletion_protection` - (Optional) Whether Terraform will be prevented from destroying the instance.
     When the field is set to true or unset in Terraform state, a `terraform apply`
     or `terraform destroy` that would delete the instance will fail.
     When the field is set to false, deleting the instance is allowed.
 
   ~> **NOTE:** This flag only protects instances from deletion within Terraform. To protect your instances from accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform), use the API flag `settings.deletion_protection_enabled`.
+
+* `enforce_new_sql_network_architecture` - (Optional) Whether to enforce the new SQL network architecture. 
+    By default, new Cloud SQL instances created in projects created after August 2021 use the new network architecture. 
+    This follows the gcloud pattern where the flag is an irreversible opt-in.
+    See [official documentation](https://docs.cloud.google.com/sql/docs/mysql/upgrade-cloud-sql-instance-new-network-architecture#new-arch) for more details.
 
 * `final_backup_description` - (Optional) The description of final backup. Only set this field when `final_backup_config.enabled` is true.
 
@@ -426,14 +438,24 @@ includes an up-to-date reference of supported versions.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
     When set to "DELETE", deleting the resource is allowed.
+
+* `blue_green_deployment` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The configuration for a Cloud SQL Blue-Green Deployment on this instance. The configuration is detailed below.
+  ~> **WARNING:** Because `blue_green_deployment` is authoritatively managed by Terraform on the primary instance resource, if a Blue-Green Deployment is created on this instance outside of Terraform (for example, via `gcloud` or the Cloud Console) and the `blue_green_deployment` block is not present in your Terraform configuration, running `terraform apply` will delete the out-of-band Blue-Green Deployment along with its green target instance.
     
 The `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
     for more details and supported versions. Postgres supports only shared-core machine types,
-    and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types.
+    and custom machine types such as `db-custom-2-13312`. See the [Custom Machine Type Documentation](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#create) to learn about specifying custom machine types. Note that shared-core and custom machine types are valid only under the `ENTERPRISE` edition; PostgreSQL 16+ instances default to `ENTERPRISE_PLUS` when `edition` is unset (see the `edition` argument below).
 
-* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`.
+* `edition` - (Optional) The edition of the instance, can be `ENTERPRISE` or `ENTERPRISE_PLUS`. If `edition`
+    is not set, the Cloud SQL API determines the default based on `database_version`: instances with
+    `database_version` `POSTGRES_16` or later default to `ENTERPRISE_PLUS`, while all others default to
+    `ENTERPRISE`. Note that `ENTERPRISE_PLUS` supports only predefined `db-perf-optimized-N-*` machine
+    types (the `N2`/`C4A` series); shared-core and custom tiers such as `db-g1-small`, `db-f1-micro`, and
+    `db-custom-*` require `edition = "ENTERPRISE"`. Omitting `edition` on a PostgreSQL 16+ instance while
+    setting a shared-core or custom `tier` therefore fails at create time with
+    `Invalid Tier (...) for (ENTERPRISE_PLUS) Edition`.
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
@@ -474,11 +496,13 @@ The `settings` block supports:
 
 * `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for `PD_SSD`, `PD_HDD` and 20GB for `HYPERDISK_BALANCED`. Note that this value will override the resizing from `disk_autoresize` if that feature is enabled. To avoid this, set `lifecycle.ignore_changes` on this field.
 
-* `disk_type` - (Optional) The type of data disk: `PD_SSD`, `PD_HDD`, or `HYPERDISK_BALANCED`. Defaults to `PD_SSD`. `HYPERDISK_BALANCED` is preview.
+* `disk_type` - (Optional) The type of data disk: `PD_SSD`, `PD_HDD`, or `HYPERDISK_BALANCED`. Defaults to `PD_SSD`.
 
-* `data_disk_provisioned_iops` - (Optional, Beta) Provisioned number of I/O operations per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
+* `data_disk_provisioned_iops` - (Optional) Provisioned number of I/O operations per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
-* `data_disk_provisioned_throughput` - (Optional, Beta) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
+* `data_disk_provisioned_throughput` - (Optional) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
+
+* `replication_lag_max_seconds` - (Optional) The acceptable replication lag, in seconds, after which a read replica recreates itself. The lag must persist for at least five minutes before recreation is triggered. This is a replica level field, and must be between `300` (five minutes) and `31536000` (one year).
 
 * `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
@@ -506,8 +530,15 @@ The optional `settings.database_flags` sublist supports:
 
 The optional `settings.active_directory_config` subblock supports:
 
-* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com).
-    Can only be used with SQL Server.
+* `domain` - (Required) The domain name for the active directory (e.g., mydomain.com). Can only be used with SQL Server.
+
+* `mode` - (Optional) The mode of the Active Directory configuration. Can be `MANAGED_ACTIVE_DIRECTORY` or `CUSTOMER_MANAGED_ACTIVE_DIRECTORY`.
+
+* `dns_servers` - (Optional) Domain controller IPv4 addresses used to bootstrap Active Directory.
+
+* `admin_credential_secret_name` - (Optional) The secret manager key storing the administrator credential. (e.g., `projects/{project}/secrets/{secret}`).
+
+* `organizational_unit` - (Optional) The organizational unit distinguished name. This is the full hierarchical path to the organizational unit.
 
 The optional `settings.entraid_config` block supports:
 
@@ -602,6 +633,12 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `psc_enabled` - (Optional) Whether PSC connectivity is enabled for this instance.
 
+* `psc_auto_dns_enabled` - (Optional) Whether PSC auto DNS is enabled for this instance.
+
+* `psc_write_endpoint_dns_enabled` - (Optional) Whether PSC write endpoint DNS is enabled for this instance. This is only supported for Enterprise Plus edition instances.
+
+* `settings.ip_configuration.psc_config.psc_auto_connection_policy_enabled` - (Optional) Whether a service connection policy is created for the auto connections configured for the instance.
+
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 
 * The optional `psc_config.psc_auto_connections` subblock - (Optional) A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.
@@ -681,6 +718,36 @@ The optional `settings.password_validation_policy` subblock for instances declar
 * `password_change_interval` - Specifies the minimum duration after which you can change the password.
 
 * `enable_password_policy` - Enables or disable the password validation policy.
+
+The optional `settings.performance_capture_config` (Beta) subblock for instances declares Performance Capture configuration. It contains:
+
+* `enabled` - (Beta) True if the Performance Capture feature is enabled.
+
+* `probing_interval_seconds` - (Beta) The time interval in seconds between any two probes.
+
+* `probe_threshold` - (Beta) The minimum number of consecutive readings above threshold that triggers instance state capture.
+
+* `running_threads_threshold` - (Beta) The minimum number of server threads running to trigger the capture on primary.
+
+* `seconds_behind_source_threshold` - (Beta) The minimum number of seconds replica must be lagging behind primary to trigger capture on replica.
+
+* `transaction_duration_threshold` - (Beta) The amount of time in seconds that a transaction needs to have been open before the watcher starts recording it.
+
+* `cpu_utilization_threshold_percent` - (Beta) The minimum percentage of CPU utilization that triggers the performance capture. Valid range is 10 to 99. `0` disables the check.
+
+* `memory_usage_threshold_percent` - (Beta) The minimum percentage of memory usage that triggers the performance capture. Valid range is 10 to 99. `0` disables the check.
+
+* `history_list_length_threshold_count` - (Beta) The minimum number of undo log entries in the history list length that triggers the performance capture. Valid range is 10000 to 10000000. `0` disables the check.
+
+* `semaphore_wait_threshold_count` - (Beta) The minimum number of semaphore waits that triggers the performance capture. Valid range is 10 to 10000. `0` disables the check.
+
+* `transaction_lock_wait_threshold_count` - (Beta) The minimum number of transactions in lock wait state that triggers the performance capture. Valid range is 10 to 10000. `0` disables the check.
+
+* `transaction_kill_threshold_seconds` - (Beta) The amount of time in seconds that a transaction needs to have been open before the watcher starts terminating it. Valid range is 60 to 604800. `0` disables termination.
+
+* `transaction_kill_type` - (Beta) Determines which transactions are allowed to be terminated when they exceed `transaction_kill_threshold_seconds`. Possible values are: `TRANSACTION_KILL_TYPE_UNSPECIFIED`, `READ_ONLY_TRANSACTIONS`, `ALL_TRANSACTIONS`.
+
+* `transaction_kill_excluded_user_hosts` - (Beta) A list of users to exclude from transaction termination. Entries can be in the format `user@host` or just `user`.
 
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated and supports:
@@ -800,6 +867,34 @@ The optional `settings.connection_pool_config.flags` sublist supports:
 
 * `value` - (Required) Value of the flag.
 
+The optional `blue_green_deployment` ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) block supports:
+
+* `deployment_name` - (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The user-defined name for the Blue-Green Deployment. Must be 1-63 characters, start with a lowercase letter, and contain only lowercase letters, numbers, and hyphens. Cannot be changed while the deployment is active.
+
+* `target_database_version` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target database version for the green environment (for example, `MYSQL_8_0` or `POSTGRES_16`). If omitted, the green environment inherits the source instance's `database_version`. Cannot be changed while the deployment is active.
+
+* `active_environment` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Controls which environment is currently serving primary traffic. Valid values are `SOURCE` and `TARGET`. Defaults to `SOURCE`. Must be `SOURCE` when first creating a Blue-Green Deployment; changing this field from `SOURCE` to `TARGET` triggers the Blue-Green Deployment switchover.
+
+* `delete_old_source_on_destroy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Whether to also delete the old source (blue) instance when deleting the Blue-Green Deployment after a switchover (`active_environment = "TARGET"`). Defaults to `false`.
+
+* `target_instance_name` - (Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The name of the green (target) instance created for the Blue-Green Deployment.
+
+* `target_instance_connection_name` - (Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The connection name of the green (target) instance.
+
+* `target_instance_ip_addresses` - (Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The IP addresses assigned to the green (target) instance. Structure is documented below.
+
+* `old_source_instance_name` - (Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The name of the old source (blue) instance, populated after switchover (`active_environment = "TARGET"`).
+
+* `old_source_instance_connection_name` - (Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The connection name of the old source (blue) instance, populated after switchover (`active_environment = "TARGET"`).
+
+The `blue_green_deployment.target_instance_ip_addresses` sublist supports:
+
+* `ip_address` - (Computed) The IPv4 address assigned to the target instance.
+
+* `time_to_retire` - (Computed) The time this IP address will be retired, in RFC 3339 format.
+
+* `type` - (Computed) The type of this IP address (`PRIMARY`, `OUTGOING`, or `PRIVATE`).
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -862,9 +957,17 @@ performing filtering in a Terraform config.
 
 * `settings.ip_configuration.psc_config.psc_auto_connections.consumer_network_status` - (Output) The connection policy status of the consumer network.
 
+* `settings.ip_configuration.psc_config.psc_auto_connections.instance_auto_dns_status` - (Output) The status of the automated DNS provisioning for the instance.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.write_endpoint_auto_dns_status` - (Output) The status of the automated DNS provisioning for the write endpoint.
+
 * `settings.ip_configuration.psc_config.psc_auto_connections.ip_address` - (Output) The IP address of the consumer endpoint.
 
 * `settings.ip_configuration.psc_config.psc_auto_connections.status` - (Output) The connection status of the consumer endpoint.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.service_connection_policy` - (Output) The service connection policy created for the auto connection.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.service_connection_policy_creation_result` - (Output) The result of the service connection policy creation.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
@@ -884,6 +987,22 @@ performing filtering in a Terraform config.
 * `server_ca_cert.0.expiration_time` - Expiration time of the CA Cert.
 
 * `server_ca_cert.0.sha1_fingerprint` - SHA Fingerprint of the CA Cert.
+
+* `blue_green_deployment.target_instance_name` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The name of the green (target) instance created for the Blue-Green Deployment.
+
+* `blue_green_deployment.target_instance_connection_name` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The connection name of the green (target) instance.
+
+* `blue_green_deployment.target_instance_ip_addresses` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The IP addresses assigned to the green (target) instance.
+
+* `blue_green_deployment.target_instance_ip_addresses.ip_address` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The IPv4 address assigned to the green (target) instance.
+
+* `blue_green_deployment.target_instance_ip_addresses.time_to_retire` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The time this IP address will be retired, in RFC 3339 format.
+
+* `blue_green_deployment.target_instance_ip_addresses.type` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The type of this IP address.
+
+* `blue_green_deployment.old_source_instance_name` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The name of the old source (blue) instance after a Blue-Green Deployment switchover.
+
+* `blue_green_deployment.old_source_instance_connection_name` - (Output, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The connection name of the old source (blue) instance after a Blue-Green Deployment switchover.
 
 ## Switchover
 Users can perform a switchover on a replica by following the steps below.
@@ -920,6 +1039,77 @@ SQL Server: Create a `cascadable` replica in a different region from the primary
 - Every resource **"will be updated in-place"**
 - Only the 2 instances involved in switchover have planned changes
 - (Recommended) Use `deletion_protection` on instances as a safety measure
+
+## Blue-Green Deployment (Beta)
+
+You can manage the full lifecycle of a Cloud SQL Blue-Green Deployment using the `blue_green_deployment` block on the primary `google_sql_database_instance` resource across a 4-step workflow:
+
+~> **WARNING:** `blue_green_deployment` is authoritatively managed on the primary instance resource. If a Blue-Green Deployment is created on the instance outside of Terraform (for example, via `gcloud` or the Cloud Console) and the `blue_green_deployment` block is not included in your Terraform configuration, running `terraform apply` will delete the out-of-band Blue-Green Deployment along with its green target instance.
+
+### 4-Step Workflow
+
+1. **Create the Blue-Green Deployment (`active_environment = "SOURCE"`)**:
+   Add the `blue_green_deployment` block to your primary instance with `active_environment = "SOURCE"` (the default) and an optional `target_database_version`, then run `terraform apply`. Cloud SQL provisions and synchronizes the green (target) environment.
+
+   ```hcl
+   resource "google_sql_database_instance" "primary" {
+     provider         = google-beta
+     name             = "my-primary-instance"
+     database_version = "MYSQL_5_7"
+     region           = "us-central1"
+
+     settings {
+       tier = "db-n1-standard-2"
+       backup_configuration {
+         enabled            = true
+         binary_log_enabled = true
+       }
+     }
+
+     blue_green_deployment {
+       deployment_name         = "my-bgd-upgrade"
+       target_database_version = "MYSQL_8_0"
+       active_environment      = "SOURCE"
+     }
+   }
+   ```
+
+2. **Verify the Green Target Instance**:
+   After creation completes, inspect the computed attributes `blue_green_deployment.0.target_instance_name`, `blue_green_deployment.0.target_instance_connection_name`, and `blue_green_deployment.0.target_instance_ip_addresses` to connect to and validate the green instance before switching traffic.
+
+3. **Switchover (`active_environment = "TARGET"`)**:
+   Update `active_environment` from `"SOURCE"` to `"TARGET"`. If `target_database_version` differs from the source `database_version`, also update the top-level `database_version` to match `target_database_version` in the same configuration change, then run `terraform apply`.
+
+   ~> **NOTE:** If a switchover fails or times out, Terraform refreshes the state (`active_environment` remains `"SOURCE"` if the switchover did not complete) and you can retry the switchover simply by running `terraform apply` again.
+
+   ```hcl
+   resource "google_sql_database_instance" "primary" {
+     provider         = google-beta
+     name             = "my-primary-instance"
+     database_version = "MYSQL_8_0"
+     region           = "us-central1"
+
+     settings {
+       tier = "db-n1-standard-2"
+       backup_configuration {
+         enabled            = true
+         binary_log_enabled = true
+       }
+     }
+
+     blue_green_deployment {
+       deployment_name              = "my-bgd-upgrade"
+       target_database_version      = "MYSQL_8_0"
+       active_environment           = "TARGET"
+       delete_old_source_on_destroy = true
+     }
+   }
+   ```
+
+4. **Clean Up / Delete the Blue-Green Deployment**:
+   Once you have verified the new primary after switchover (or if you wish to abort a deployment before switchover while `active_environment = "SOURCE"`), remove the `blue_green_deployment` block from your configuration and run `terraform apply`.
+   * If removed before switchover (`active_environment = "SOURCE"`), the Blue-Green Deployment is aborted and the green target instance is deleted.
+   * If removed after switchover (`active_environment = "TARGET"`), the Blue-Green Deployment is deleted; if `delete_old_source_on_destroy = true` was previously applied in state, the old source (blue) instance is also deleted.
 
 ## Timeouts
 

@@ -1,5 +1,0 @@
-resource "google_parameter_manager_regional_parameter" "{{$.PrimaryResourceId}}" {
-  parameter_id = "{{index $.Vars "parameter_id"}}"
-  location = "us-central1"
-  format = "JSON"
-}

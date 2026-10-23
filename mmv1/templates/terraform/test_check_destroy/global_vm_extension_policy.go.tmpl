@@ -1,0 +1,30 @@
+config := acctest.GoogleProviderConfig(t)
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(compute.Product, config)+"projects/{{"{{"}}project{{"}}"}}/global/vmExtensionPolicies/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+	if err == nil {
+		return resource.RetryableError(fmt.Errorf("GlobalVmExtensionPolicy still exists at %s", url))
+	}
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		return nil
+	}
+	return resource.NonRetryableError(err)
+})
+if err != nil {
+	return err
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
@@ -200,7 +201,7 @@ func testAccCheckDataSourceGoogleComputeInstanceGroup(dataSourceName string) res
 func testAccCheckDataSourceGoogleComputeInstanceGroupConfig(instanceName, igName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -243,7 +244,7 @@ data "google_compute_instance_group" "test" {
 func testAccCheckDataSourceGoogleComputeInstanceGroupConfigWithNamedPort(instanceName, igName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -296,7 +297,7 @@ data "google_compute_instance_group" "test" {
 func testAccCheckDataSourceGoogleComputeInstanceGroup_fromIGM(igmName, secondIgmName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 

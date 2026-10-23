@@ -1,0 +1,18 @@
+resource "google_model_armor_template" "template-filter-version-selector" {
+  location    = "{{index $.ResourceIdVars "location"}}"
+  template_id = "{{index $.ResourceIdVars "templateId"}}"
+
+  filter_config {
+    rai_settings {
+      rai_filters {
+        filter_type      = "{{index $.ResourceIdVars "filter_config_rai_settings_rai_filters_0_filter_type"}}"
+        confidence_level = "{{index $.ResourceIdVars "filter_config_rai_settings_rai_filters_0_confidence_level"}}"
+      }
+    }
+  }
+  template_metadata {
+    filter_version_selector {
+      version = "{{index $.ResourceIdVars "template_metadata_filter_version_selector_version"}}"
+    }
+  }
+}

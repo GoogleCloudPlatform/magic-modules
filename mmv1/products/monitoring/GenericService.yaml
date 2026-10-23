@@ -12,9 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'GenericService'
+name: GenericService
 api_resource_type_kind: Service
-legacy_name: 'google_monitoring_service'
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,
   designed to solve an individual concern. In Cloud Monitoring,
@@ -22,34 +21,36 @@ description: |
   the service are accessible
 references:
   guides:
-    'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
-    'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
-    'Service-orientation on Wikipedia': 'https://en.wikipedia.org/wiki/Service-orientation'
-  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+    Service Monitoring: https://cloud.google.com/monitoring/service-monitoring
+    Monitoring API Documentation: https://cloud.google.com/monitoring/api/v3/
+    Service-orientation on Wikipedia: https://en.wikipedia.org/wiki/Service-orientation
+  api: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services
 docs:
-id_format: 'projects/{{project}}/services/{{service_id}}'
-base_url: 'v3/projects/{{project}}/services'
-self_link: 'v3/projects/{{project}}/services/{{service_id}}'
-create_url: 'v3/projects/{{project}}/services?serviceId={{service_id}}'
-update_verb: 'PATCH'
+base_url: v3/projects/{{project}}/services
+self_link: v3/projects/{{project}}/services/{{service_id}}
+create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
 update_mask: true
+update_verb: PATCH
+legacy_name: google_monitoring_service
+id_format: projects/{{project}}/services/{{service_id}}
 import_format:
-  - 'projects/{{project}}/services/{{service_id}}'
+  - projects/{{project}}/services/{{service_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
 error_retry_predicates:
-
-  - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_service_example'
-    primary_resource_id: 'my_service'
-    vars:
-      service_id: 'my-service'
+  - transport_tpg.IsMonitoringConcurrentEditError
+custom_code:
+samples:
+  - name: monitoring_service_example
+    primary_resource_id: my_service
+    steps:
+      - name: monitoring_service_example
+        resource_id_vars:
+          service_id: my-service
 parameters:
-  - name: 'serviceId'
+  - name: serviceId
     type: String
     description: |
       An optional service ID to use. If not given, the server will generate a
@@ -58,17 +59,17 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The full resource name for this service. The syntax is:
       projects/[PROJECT_ID]/services/[SERVICE_ID].
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       Name used for UI elements listing this Service.
-  - name: 'userLabels'
+  - name: userLabels
     type: KeyValuePairs
     description: |
       Labels which have been used to annotate the service. Label keys must start
@@ -78,20 +79,20 @@ properties:
       label entries may be stored. For labels which do not have a semantic value,
       the empty string may be supplied for the label value.
     send_empty_value: true
-  - name: 'telemetry'
+  - name: telemetry
     type: NestedObject
     description: |
       Configuration for how to query telemetry on a Service.
     # Non custom service have non-editable telemetry
     output: true
     properties:
-      - name: 'resourceName'
+      - name: resourceName
         type: String
         description: |
           The full name of the resource that defines this service.
           Formatted as described in
           https://cloud.google.com/apis/design/resource_names.
-  - name: 'basicService'
+  - name: basicService
     type: NestedObject
     description: |
       A well-known service type, defined by its service type and service labels.
@@ -100,12 +101,12 @@ properties:
     # BasicService info can be set on creation but is then immutable.
     immutable: true
     properties:
-      - name: 'serviceType'
+      - name: serviceType
         type: String
         description: |
           The type of service that this basic service defines, e.g.
           APP_ENGINE service type
-      - name: 'serviceLabels'
+      - name: serviceLabels
         type: KeyValuePairs
         description: |
           Labels that specify the resource that emits the monitoring data

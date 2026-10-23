@@ -89,6 +89,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
    When defining variables for your steps, follow these guidelines:
    - **Use `resource_id_vars` for resource identifiers** (like names or IDs) that need to be unique. Values automatically receive a `tf-test` prefix and random suffix, unless they contain an underscore `_`, in which case they receive a `tf_test` prefix and random suffix. If a resource name doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
    - **Use `vars` only for fields that vary between steps** (for example, to test the update functionality of specific fields).
+     - To unset a field in a step while reusing the same `.tf.tmpl` file, set its value to `null` (rendering `field = null` in generated tests and omitting the line in generated documentation and OiCS configs).
    - **Hardcode all other values** directly in the `.tf.tmpl` configuration file. Don't use `vars` for values that remain constant across all steps.
    ```yaml
    samples:
@@ -109,14 +110,14 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              network_name: "example-network"
            # test_vars_overrides contains literal overrides for variables in tests.
            test_vars_overrides:
-             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+             network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
          # Subsequent steps define update configurations.
          - name: "pubsub_topic_full"
            resource_id_vars:
              resource_name: "example-resource"
              network_name: "example-network"
            test_vars_overrides:
-             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+             network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
            # vars should ONLY be used for fields that vary between steps.
            # Fields that stay constant across steps should be hardcoded in the .tf.tmpl file.
            vars: 
@@ -126,7 +127,7 @@ An **acceptance test** verifies that a resource can be created, updated, and des
              resource_name: "example-resource"
              network_name: "example-network"
            test_vars_overrides:
-             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
+             network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "pubsub-topic-network-config")'
            vars:
              display_name: "Updated Display Name" # The new value for the updatable field
    ```
@@ -245,6 +246,7 @@ An update test ensures that updatable fields can be changed without recreating t
        ...
    }
    ```
+   - **Tip:** If the steps only differ by field presence, you can reuse a single `testAcc*` template function with `acctest.Nprintf` instead of duplicating the function. Pass `nil` in `context` to unset a field in a step (rendering `field = null` in the test config).
 6. Modify the test as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Modify the template function ending in `_update` so that updatable fields are changed or removed. This may require additions to the `context` map in the test function.
@@ -257,64 +259,6 @@ An update test ensures that updatable fields can be changed without recreating t
 
 {{< /tab >}}
 {{% /tabs %}}
-
-## Legacy: Examples-based Framework
-
-> [!WARNING]
-> The `examples` block is legacy and has been replaced by `samples`. This footprint is still supported for approximately 2 months to allow for transition. New tests should use the `samples` framework.
-
-Tests within the legacy `examples` generator are configured directly on the resource YAML. **Note that this legacy framework only supports generating create tests;** multi-step update tests must be configured via the new `samples` framework or handwritten manual testing procedures.
-
-### Steps
-
-1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
-   ```yaml
-   examples:
-     # name must correspond to a configuration file that you'll create in the next step.
-     # The name should include the product name, resource name, and a basic description
-     # of the test. This will be used to generate the test name and the documentation
-     # header.
-     - name: "PRODUCT_RESOURCE_basic"
-       # primary_resource_id will be used for the Terraform resource id in the configuration file.
-       primary_resource_id: "example"
-       # vars contains key/value pairs of variables to inject into the configuration file.
-       # These can be referenced in the configuration file as a key inside `{{$.Vars}}`.
-       # All resource IDs (even for resources not under test) should be declared
-       # with variables that contain a `-` or `_`; this will ensure that, in tests,
-       # the resources are created with a `tf-test` prefix to allow automatic cleanup
-       # of dangling resources and a random suffix to avoid name collisions.
-       vars:
-         network_name: "example-network"
-       # test_vars_overrides contains key/value pairs of literal overrides for
-       # variables used in tests. This can be used to call functions to
-       # generate or determine a variable's value – for example, bootstrapping
-       # a shared network for your product to avoid test failures due to limits
-       # on the default network.
-       test_vars_overrides:
-         network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
-       # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
-       min_version: beta
-   ```
-
-2. Create a `.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should match the name of the example created in the previous step. For example, `PRODUCT_RESOURCE_basic.tf.tmpl`.
-3. In that file, write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
-   ```tf
-   resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
-     name          = "{{index $.Vars "subnetwork_name"}}"
-     ip_cidr_range = "10.1.0.0/16"
-     region        = "us-central1"
-     network       = google_compute_network.network.name
-   }
-
-   resource "google_compute_network" "network" {
-     name                    = "{{index $.Vars "network_name"}}"
-     auto_create_subnetworks = false
-   }
-   ```
-4. If the resource or the example is beta-only:
-   - Add `provider = google-beta` to every resource in the file.
-
-For instructions on how to migrate existing `examples` over to `samples`, see the [Test Template Migration Guide]({{< ref "/reference/update-test-changes" >}}).
 
 ## Bootstrap API resources {#bootstrapping}
 
@@ -347,16 +291,20 @@ samples:
         resource_id_vars:
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKey(t).CryptoKey.Name'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ```go
+import (
+  "github.com/hashicorp/terraform-provider-google/google/services/kms"
+)
+
 func TestAccProductResource_update(t *testing.T) {
    t.Parallel()
 
    context := map[string]interface{}{
-      "kms": acctest.BootstrapKMSKey(t).CryptoKey.Name,
+      "kms": kms.BootstrapKMSKey(t).CryptoKey.Name,
       // other variables
    }
    // rest of test
@@ -406,13 +354,13 @@ samples:
 ```go
 // Project-level IAM
 import (
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccProductResource_update(t *testing.T) {
     t.Parallel()
 
-    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+    resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
         {
             Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
             Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -424,14 +372,14 @@ func TestAccProductResource_update(t *testing.T) {
 ```go
 // Org-level IAM
 import (
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccProductResource_update(t *testing.T) {
     t.Parallel()
 
-    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+    resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
         {
             Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
             Role:   "roles/osconfig.serviceAgent",
@@ -471,20 +419,24 @@ samples:
           network_name: 'default'
           subnetwork_name: 'default'
         test_vars_overrides:
-          network_name: 'acctest.BootstrapSharedTestNetwork(t, "network-identifier")'
-          subnetwork_name: 'acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier"))'
+          network_name: 'tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier")'
+          subnetwork_name: 'tpgcompute.BootstrapSubnet(t, "subnet-identifier", tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier"))'
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ```go
+import (
+  tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+)
+
 func TestAccProductResource_update(t *testing.T) {
    t.Parallel()
 
    networkName := 
    subnetName := 
    context := map[string]interface{}{
-      "network_name": acctest.BootstrapSharedTestNetwork(t, "network-identifier"),
-      "subnetwork_name": acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier")),
+      "network_name": tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier"),
+      "subnetwork_name": tpgcompute.BootstrapSubnet(t, "subnet-identifier", tpgcompute.BootstrapSharedTestNetwork(t, "network-identifier")),
       // other variables
    }
    // rest of test
@@ -502,8 +454,8 @@ import (
 
 
   "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 func TestAccProductResourceName_update(t *testing.T) {
 	t.Parallel()
@@ -540,6 +492,7 @@ resource "google_project" "project" {
 }
 
 // Enable APIs in a deterministic order to avoid inconsistent VCR recordings
+// (use depends_on in handwritten/test-only configs; use skip_vcr: true on user-facing doc samples)
 resource "google_project_service" "servicenetworking" {
   project = google_project.project.project_id
   service = "servicenetworking.googleapis.com"
@@ -643,7 +596,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 
 | Problem                                          | How to fix/Other info  | Skip in VCR replaying? |
 | ------------------------------------------------ | ---------------------- |------------- |
-| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, such as by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
+| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test (such as the `random` provider, `uuid()`, or `timestamp()`), or non-deterministic parallel request ordering (such as multiple `google_project_service` resources batched in varying `serviceIds` order in `services:batchEnable`, or concurrent `google_*_iam_member` / `google_*_iam_binding` read-modify-write loops on the same parent). In handwritten or test-only configs (`exclude_basic_doc: true`), enforce deterministic ordering with `depends_on`. In user-facing documentation samples, do **not** add test-only `depends_on` noise—set `skip_vcr: true` with a reason comment instead. | Skip in VCR for user-facing doc samples, or if non-determinism cannot be avoided in test-only configs. |
 *Bigtable acceptance tests aren't working in VCR mode*. `Requested interaction not found` errors are seen during Bigtable tests run in REPLAYING mode | Currently the provider uses a separate client than the rest of the provider to interact with the Bigtable API. As HTTP traffic to the Bigtable API doesn't go via the shared client it cannot be recorded in RECORDING mode.| Skip the test in VCR for Bigtable. |
 | *Using multiple provider aliases doesn't work in VCR*. You may have two instances of the google provider in the test config but one of them doesn't seem to be using its provider arguments - for example, using the wrong default project. | See this GitHub issue: https://github.com/hashicorp/terraform-provider-google/issues/20019 . The problem is that, due to how the VCR system works, one provider instance will be configured and the other will be forced to reuse the first instance's configuration, despite them being given different provider arguments. |  Skip the test in VCR is using aliases is unavoidable. |
 | *Using multiple versions of the google/google-beta provider in a single test isn't working in VCR*. Unexpected test failures may occur during tests in REPLAYING mode where `ExternalProviders` is used to pull in past versions of the google/google-beta provider. | When ExternalProviders is used to pulling in other versions of the provider, any HTTP traffic through the external provider will not be recorded. If the HTTP traffic produces an unexpected result or returns an API error then the test will fail in REPLAYING mode. | Skip the test in VCR when testing the current provider behaviour versus previous released versions. |

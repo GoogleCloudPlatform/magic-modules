@@ -6,13 +6,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceGoogleForwardingRule(t *testing.T) {
 	t.Parallel()
 
-	poolName := fmt.Sprintf("tf-%s", acctest.RandString(t, 10))
-	ruleName := fmt.Sprintf("tf-%s", acctest.RandString(t, 10))
+	poolName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	ruleName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

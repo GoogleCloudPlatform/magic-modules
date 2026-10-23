@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/healthcare"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
+func TestHealthcareDicomStoreIdParsing(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {

@@ -12,38 +12,42 @@
 # limitations under the License.
 
 ---
-name: 'Processor'
+name: Processor
 description: |
   The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
-  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors'
+    Official Documentation: https://cloud.google.com/document-ai/docs/overview
+  api: https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/processors'
+base_url: projects/{{project}}/locations/{{location}}/processors
 immutable: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/documentai_processor.go.tmpl'
 sweeper:
   url_substitutions:
-    - region: "us"
-    - region: "eu"
-examples:
-  - name: 'documentai_processor'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
-  - name: 'documentai_processor_eu'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
-    exclude_docs: true
+    - region: us
+    - region: eu
+custom_code:
+  test_check_destroy: templates/terraform/custom_check_destroy/documentai_processor.go.tmpl
+samples:
+  - name: documentai_processor
+    primary_resource_id: processor
+    steps:
+      - name: documentai_processor
+        resource_id_vars:
+          processor_name: test-processor
+  - name: documentai_processor_eu
+    primary_resource_id: processor
+    exclude_basic_doc: true
+    steps:
+      - name: documentai_processor_eu
+        resource_id_vars:
+          processor_name: test-processor
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the resource.
@@ -51,25 +55,25 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the processor.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'type'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: type
     type: String
     description: |
       The type of processor. For possible types see the [official list](https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations/fetchProcessorTypes#google.cloud.documentai.v1.DocumentProcessorService.FetchProcessorTypes)
     required: true
     immutable: true
-  - name: 'displayName'
+  - name: displayName
     type: String
     description: |
       The display name. Must be unique.
     required: true
     immutable: true
-  - name: 'kmsKeyName'
+  - name: kmsKeyName
     type: String
     description: |
       The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.

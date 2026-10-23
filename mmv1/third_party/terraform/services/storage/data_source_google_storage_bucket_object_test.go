@@ -7,13 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccDataSourceGoogleStorageBucketObject_basic(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	bucket := "tf-bucket-object-test-" + acctest.RandString(t, 10)
+	bucket := "tf-test-bucket-object-test-" + acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
 		"bucket":      bucket,

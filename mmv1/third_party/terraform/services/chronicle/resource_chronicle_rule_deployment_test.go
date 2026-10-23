@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/chronicle"
 )
 
 func TestAccChronicleRuleDeployment_chronicleRuledeploymentBasicExample_update(t *testing.T) {
@@ -60,7 +61,7 @@ resource "google_chronicle_rule_deployment" "example" {
  enabled = true
  alerting = true
  archived = false
- run_frequency = "DAILY"
+ run_frequency = "LIVE"
 }
 `, context)
 }
@@ -82,7 +83,7 @@ resource "google_chronicle_rule_deployment" "example" {
  enabled = false
  alerting = false
  archived = false
- run_frequency = "HOURLY"
+ run_frequency = "LIVE"
 }
 `, context)
 }

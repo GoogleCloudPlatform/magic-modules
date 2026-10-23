@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 // TestAccServiceAccountListResource_queryIdentity lists service accounts via the
@@ -20,7 +21,7 @@ import (
 func TestAccServiceAccountListResource_queryIdentity(t *testing.T) {
 	t.Parallel()
 
-	accountId := "a" + acctest.RandString(t, 10)
+	accountId := "tf-test-a" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
 	listDisplayName := acctest.ListDisplayName{}

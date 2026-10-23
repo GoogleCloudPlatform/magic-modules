@@ -156,6 +156,12 @@ fields:
     field: 'network_interface.alias_ip_range.ip_cidr_range'
   - api_field: 'networkInterfaces.aliasIpRanges.subnetworkRangeName'
     field: 'network_interface.alias_ip_range.subnetwork_range_name'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'networkInterfaces.aliasIpv6Ranges.ipCidrRange'
+    field: 'network_interface.alias_ipv6_range.ip_cidr_range'
+  - api_field: 'networkInterfaces.aliasIpv6Ranges.subnetworkRangeName'
+    field: 'network_interface.alias_ipv6_range.subnetwork_range_name'
+{{- end }}
   - api_field: 'networkInterfaces.internalIpv6PrefixLength'
     field: 'network_interface.internal_ipv6_prefix_length'
   - api_field: 'networkInterfaces.ipv6AccessConfigs.externalIpv6'
@@ -186,6 +192,10 @@ fields:
     field: 'network_interface.network'
   - api_field: 'networkInterfaces.networkAttachment'
     field: 'network_interface.network_attachment'
+  - api_field: 'networkInterfaces.enableVpcScopedDns'
+    field: 'network_interface.enable_vpc_scoped_dns'
+  - api_field: 'networkInterfaces.serviceClassId'
+    field: 'network_interface.service_class_id'
   - api_field: 'networkInterfaces.parentNicName'
     field: 'network_interface.parent_nic_name'
   - api_field: 'networkInterfaces.vlan'
@@ -231,9 +241,7 @@ fields:
   - api_field: 'scheduling.gracefulShutdown.maxDuration.nanos'
   - api_field: 'scheduling.gracefulShutdown.maxDuration.seconds'
 {{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'scheduling.hostErrorTimeoutSeconds'
-{{- end }}
   - api_field: 'scheduling.instanceTerminationAction'
   - api_field: 'scheduling.localSsdRecoveryTimeout.nanos'
   - api_field: 'scheduling.localSsdRecoveryTimeout.seconds'
@@ -252,9 +260,9 @@ fields:
   - api_field: 'scheduling.provisioningModel'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'scheduling.skipGuestOsShutdown'
+{{- end }}
   - api_field: 'scheduling.preemptionNoticeDuration.nanos'
   - api_field: 'scheduling.preemptionNoticeDuration.seconds'
-{{- end }}
   - api_field: 'scheduling.terminationTime'
   - api_field: 'disks.deviceName'
     field: 'scratch_disk.device_name'
@@ -276,6 +284,8 @@ fields:
     field: 'tags_fingerprint'
   - field: 'terraform_labels'
     provider_only: true
+  - api_field: 'workloadIdentityConfig.identity'
+  - api_field: 'workloadIdentityConfig.identityCertificateEnabled'
   - api_field: 'zone'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'eraseWindowsVssSignature'

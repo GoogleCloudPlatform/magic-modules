@@ -1,0 +1,27 @@
+/*
+ * Expands an empty ttlConfig terraform block into an empty object.
+ *
+ * Used to differentiate a user specifying an empty block versus a null/unset block.
+ *
+ * This is unique from send_empty_value, which will send an explicit null value
+ * for empty configuration blocks.
+ */
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+    if v == nil {
+        return nil, nil
+    }
+    l := v.([]interface{})
+    if len(l) == 0 {
+        return nil, nil
+    }
+    // A set (but possibly) empty value.
+    transformed := make(map[string]interface{})
+    if (l[0] != nil) {
+        original := l[0].(map[string]interface{})
+        originalValue := original["expiration_offset"]
+        if val := reflect.ValueOf(originalValue); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+            transformed["expiration_offset"] = originalValue
+        }
+    }
+    return transformed, nil
+}

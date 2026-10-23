@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/kms"
 )
 
 func TestAccDataSourceGoogleKmsKeyHandles_basic(t *testing.T) {
@@ -59,12 +60,11 @@ func validateKeyHandleName(dataSourceName string, expectedKeyHandleName string) 
 	}
 }
 func testAccDataSourceGoogleKmsKeyHandles_basic(project string, location string, filter string) string {
-	str := fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_kms_key_handles" "mykeyhandles" {
   project = "%s"
   location = "%s"
   resource_type_selector = "%s"
 }
 `, project, location, filter)
-	return str
 }

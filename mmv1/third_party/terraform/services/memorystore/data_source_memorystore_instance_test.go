@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/memorystore"
 )
 
 func TestAccMemorystoreInstanceDatasourceConfig(t *testing.T) {
@@ -34,13 +35,14 @@ func testAccMemorystoreInstanceDatasourceConfig(context map[string]interface{}) 
 resource "google_memorystore_instance" "instance-basic" {
   instance_id                 = "tf-test-memorystore-instance%{random_suffix}"
   shard_count                 = 1
-  location                    = "us-central1"
+  location                    = "us-east4"
+  node_type                   = "SHARED_CORE_NANO"
   deletion_protection_enabled = false
 }
 
 data "google_memorystore_instance" "default" {
   instance_id                 = google_memorystore_instance.instance-basic.instance_id
-  location                    = "us-central1"
+  location                    = "us-east4"
 }
 `, context)
 }

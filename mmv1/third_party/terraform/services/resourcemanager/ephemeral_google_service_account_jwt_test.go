@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccEphemeralServiceAccountJwt_basic(t *testing.T) {
@@ -22,7 +23,7 @@ func TestAccEphemeralServiceAccountJwt_basic(t *testing.T) {
 		"sub":                     targetServiceAccountEmail,
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
@@ -59,7 +60,7 @@ func TestAccEphemeralServiceAccountJwt_withDelegates(t *testing.T) {
 		"sub":                     targetServiceAccountEmail,
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
@@ -92,7 +93,7 @@ func TestAccEphemeralServiceAccountJwt_withExpiresIn(t *testing.T) {
 		"expires_in":              "3600",
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),

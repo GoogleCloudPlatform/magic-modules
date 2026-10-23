@@ -12,11 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'DeploymentManager'
-display_name: 'Cloud Deployment Manager'
-versions:
-  - name: 'ga'
-    base_url: 'https://www.googleapis.com/deploymentmanager/v2/'
-    cai_base_url: 'https://deploymentmanager.googleapis.com/v2/'
+name: DeploymentManager
+display_name: Cloud Deployment Manager
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://www.googleapis.com/deploymentmanager/v2/
+    cai_base_url: https://deploymentmanager.googleapis.com/v2/

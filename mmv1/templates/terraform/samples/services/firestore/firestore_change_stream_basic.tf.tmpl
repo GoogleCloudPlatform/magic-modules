@@ -1,0 +1,26 @@
+resource "google_firestore_database" "database" {
+  project          = "{{index $.TestEnvVars "project_id"}}"
+  name             = "{{index $.ResourceIdVars "database_id"}}"
+  location_id      = "nam5"
+  type             = "FIRESTORE_NATIVE"
+  database_edition = "ENTERPRISE"
+
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [google_firestore_database.database]
+
+  create_duration = "30s"
+}
+
+resource "google_firestore_change_stream" "{{$.PrimaryResourceId}}" {
+  project          = "{{index $.TestEnvVars "project_id"}}"
+  database         = google_firestore_database.database.name
+  name             = "{{index $.ResourceIdVars "change_stream_id"}}"
+  retention_period = "86400s"
+
+  database_scope {}
+
+  depends_on = [time_sleep.wait_30_seconds]
+}

@@ -1,0 +1,12 @@
+resource "google_chronicle_case_tag_definition" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+
+  display_name = "{{index $.Vars "display_name"}}_%{random_suffix}"
+  match_criteria = "{{index $.Vars "match_criteria"}}"
+  property_name = "{{index $.Vars "property_name"}}"
+  value = "{{index $.Vars "value"}}"
+  comparison_type = "{{index $.Vars "comparison_type"}}"
+  priority = 1
+  can_be_case_title = {{index $.Vars "can_be_case_title"}}
+}

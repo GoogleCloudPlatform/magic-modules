@@ -1,0 +1,9 @@
+if d.Get("parent").(string) == "" && d.Get("organization").(string) != "" {
+    if err := d.Set("parent", "organizations/"+d.Get("organization").(string)); err != nil {
+        return err
+    }
+}
+url, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+if err != nil {
+    return err
+}

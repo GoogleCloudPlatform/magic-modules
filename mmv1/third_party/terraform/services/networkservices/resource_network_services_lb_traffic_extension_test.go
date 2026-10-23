@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkservices"
 )
 
 func TestAccNetworkServicesLbTrafficExtension_update(t *testing.T) {
@@ -825,7 +827,7 @@ func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension
 				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",
@@ -1084,7 +1086,7 @@ func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *t
 				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",

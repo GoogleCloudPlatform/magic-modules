@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -420,7 +421,8 @@ resource "google_project_iam_audit_config" "acceptance" {
   project = google_project.acceptance.project_id
   service = "%s"
   audit_log_config {
-    log_type = "DATA_READ"%s
+    log_type = "DATA_READ"
+%s
   }
 }
 `, pid, pid, org, service, memberStr)

@@ -1,0 +1,10 @@
+resource "google_gke_backup_backup_plan" "basic" {
+  name = "{{index $.ResourceIdVars "name"}}"
+  cluster = "{{index $.ResourceIdVars "cluster"}}"
+  location = "us-east1"
+  backup_config {
+    include_volume_data = true
+    include_secrets = true
+    all_namespaces = true
+  }
+}

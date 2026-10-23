@@ -7,6 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networksecurity"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccComputeFirewallPolicyWithRules_update(t *testing.T) {
@@ -179,7 +183,7 @@ resource "google_tags_tag_value" "basic_value" {
 }
 
 resource "google_compute_network" "network" {
-  name                    = "tf-network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 

@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigtable"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccBigtableInstanceIamBinding(t *testing.T) {
@@ -18,9 +20,9 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
-		"instance": "tf-bigtable-iam-" + randomString,
+		"instance": "tf-test-bt-iam-" + randomString,
 		"cluster":  "c-" + randomString,
-		"account":  "tf-bigtable-iam-" + randomString,
+		"account":  "tf-test-bt-iam-" + randomString,
 		"role":     "roles/bigtable.user",
 	}
 
@@ -67,9 +69,9 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
-		"instance": "tf-bigtable-iam-" + randomString,
+		"instance": "tf-test-bt-iam-" + randomString,
 		"cluster":  "c-" + randomString,
-		"account":  "tf-bigtable-iam-" + randomString,
+		"account":  "tf-test-bt-iam-" + randomString,
 		"role":     "roles/bigtable.user",
 	}
 
@@ -111,9 +113,9 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
-		"instance": "tf-bigtable-iam-" + randomString,
+		"instance": "tf-test-bt-iam-" + randomString,
 		"cluster":  "c-" + randomString,
-		"account":  "tf-bigtable-iam-" + randomString,
+		"account":  "tf-test-bt-iam-" + randomString,
 		"role":     "roles/bigtable.user",
 	}
 
@@ -147,9 +149,9 @@ func TestAccBigtableInstanceIamBinding_withCondition(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 	conditionExpression := "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
 	context := map[string]interface{}{
-		"instance":        "tf-bigtable-iam-" + randomString,
+		"instance":        "tf-test-bt-iam-" + randomString,
 		"cluster":         "c-" + randomString,
-		"account":         "tf-bigtable-iam-" + randomString,
+		"account":         "tf-test-bt-iam-" + randomString,
 		"role":            "roles/bigtable.user",
 		"condition_title": "expires_after_2019_12_31",
 		"condition_expr":  strconv.Quote(conditionExpression),
@@ -195,9 +197,9 @@ func TestAccBigtableInstanceIamMember_withCondition(t *testing.T) {
 
 	conditionExpression := "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
 	context := map[string]interface{}{
-		"instance":        "tf-bigtable-iam-" + randomString,
+		"instance":        "tf-test-bt-iam-" + randomString,
 		"cluster":         "c-" + randomString,
-		"account":         "tf-bigtable-iam-" + randomString,
+		"account":         "tf-test-bt-iam-" + randomString,
 		"role":            "roles/bigtable.user",
 		"condition_title": "expires_after_2019_12_31",
 		"condition_expr":  strconv.Quote(conditionExpression),
@@ -244,9 +246,9 @@ func TestAccBigtableInstanceIamPolicy_withCondition(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 	conditionExpression := "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
 	context := map[string]interface{}{
-		"instance":        "tf-bigtable-iam-" + randomString,
+		"instance":        "tf-test-bt-iam-" + randomString,
 		"cluster":         "c-" + randomString,
-		"account":         "tf-bigtable-iam-" + randomString,
+		"account":         "tf-test-bt-iam-" + randomString,
 		"role":            "roles/bigtable.user",
 		"condition_title": "expires_after_2019_12_31",
 		"condition_expr":  strconv.Quote(conditionExpression),

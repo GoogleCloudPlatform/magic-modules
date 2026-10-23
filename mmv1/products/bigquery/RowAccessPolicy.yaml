@@ -22,13 +22,15 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/bigquery_row_access_policy.go.tmpl'
 # exluding resource_identity due to dataset_id fields
 exclude_identity_generation: true
-examples:
+samples:
   - name: 'bigquery_row_access_policy_basic'
     primary_resource_id: 'example'
-    vars:
-      dataset_id: dataset_id
-      policy_id: policy_id
-      table_id: table_id
+    steps:
+      - name: 'bigquery_row_access_policy_basic'
+        resource_id_vars:
+          dataset_id: dataset_id
+          policy_id: policy_id
+          table_id: table_id
 properties:
   - name: rowAccessPolicyReference
     type: NestedObject

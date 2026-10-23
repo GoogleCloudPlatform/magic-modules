@@ -381,3 +381,66 @@ func TestValidateTagKeyAllowedValuesRegex(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateServiceAccountName(t *testing.T) {
+	// This is the anchored alternation the service account credential data
+	// sources (access_token / id_token / jwt) apply to target_service_account.
+	re := "^(" + strings.Join(PossibleServiceAccountNames, "|") + ")$"
+	cases := []StringValidationTestCase{
+		{TestName: "user managed", Value: "my-service@my-project.iam.gserviceaccount.com"},
+		{TestName: "compute default", Value: "123456789-compute@developer.gserviceaccount.com"},
+		{TestName: "app engine default", Value: "my-project@appspot.gserviceaccount.com"},
+
+		{TestName: "traversal prefix", Value: "attacker/../123456789-compute@developer.gserviceaccount.com", ExpectError: true},
+		{TestName: "trailing path segments", Value: "123456789-compute@developer.gserviceaccount.com/../../projects/victim/serviceAccounts/svc", ExpectError: true},
+		{TestName: "embedded newline", Value: "my-service@my-project.iam.gserviceaccount.com\nx@y.iam.gserviceaccount.com", ExpectError: true},
+	}
+
+	es := TestStringValidationCases(cases, ValidateRegexp(re))
+	if len(es) > 0 {
+		t.Errorf("Failed to validate service account names: %v", es)
+	}
+}
+
+func TestValidateServiceAccountLinkFull(t *testing.T) {
+	// Anchored form used for the delegates fields.
+	re := "^" + ServiceAccountLinkRegex + "$"
+	cases := []StringValidationTestCase{
+		{TestName: "user managed", Value: "projects/my-project/serviceAccounts/my-service@my-project.iam.gserviceaccount.com"},
+		{TestName: "compute default", Value: "projects/-/serviceAccounts/123456789-compute@developer.gserviceaccount.com"},
+
+		{TestName: "traversal prefix", Value: "evil/projects/-/serviceAccounts/my-service@my-project.iam.gserviceaccount.com", ExpectError: true},
+		{TestName: "trailing path segments", Value: "projects/-/serviceAccounts/123456789-compute@developer.gserviceaccount.com/../../evil", ExpectError: true},
+	}
+
+	es := TestStringValidationCases(cases, ValidateRegexp(re))
+	if len(es) > 0 {
+		t.Errorf("Failed to validate service account links: %v", es)
+	}
+}
+
+func TestValidateServiceAccountKeyName(t *testing.T) {
+	cases := []StringValidationTestCase{
+		{TestName: "valid", Value: "projects/my-project/serviceAccounts/svcacct@my-project.iam.gserviceaccount.com/keys/abcd1234"},
+		{TestName: "valid with unique id account", Value: "projects/my-project/serviceAccounts/123456789012345/keys/abcd1234"},
+
+		{TestName: "traversal prefix", Value: "../../../../projects/-/serviceAccounts/x@y.iam.gserviceaccount.com/keys/1", ExpectError: true},
+		{TestName: "trailing path segments", Value: "projects/-/serviceAccounts/x@y.iam.gserviceaccount.com/keys/1/../../otherproj/keys/2", ExpectError: true},
+		{TestName: "missing keys segment", Value: "projects/-/serviceAccounts/x@y.iam.gserviceaccount.com", ExpectError: true},
+	}
+
+	es := TestStringValidationCases(cases, ValidateRegexp(ServiceAccountKeyNameRegex))
+	if len(es) > 0 {
+		t.Errorf("Failed to validate service account key names: %v", es)
+	}
+}
+
+func TestValidateKmsKeyWithoutVersion(t *testing.T) {
+	key := "projects/p/locations/us-central1/keyRings/r/cryptoKeys/k"
+	if _, errs := ValidateKmsKeyWithoutVersion(key, "k"); len(errs) != 0 {
+		t.Errorf("unexpected errors for %q: %v", key, errs)
+	}
+	if _, errs := ValidateKmsKeyWithoutVersion(key+"/cryptoKeyVersions/1", "k"); len(errs) != 1 {
+		t.Errorf("expected an error for a versioned key, got %v", errs)
+	}
+}

@@ -38,6 +38,7 @@ docs:
 base_url: 'projects/{{project}}/global/firewalls'
 has_self_link: true
 update_verb: 'PATCH'
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -59,18 +60,22 @@ custom_diff:
   - 'resourceComputeFirewallSourceFieldsCustomizeDiff'
 schema_version: 1
 migrate_state: 'resourceComputeFirewallMigrateState'
-examples:
+samples:
   - name: 'firewall_basic'
     primary_resource_id: 'default'
-    vars:
-      firewall_name: 'test-firewall'
-      network_name: 'test-network'
+    steps:
+      - name: 'firewall_basic'
+        resource_id_vars:
+          firewall_name: 'test-firewall'
+          network_name: 'test-network'
   - name: 'firewall_with_target_tags'
     primary_resource_id: 'rules'
-    vars:
-      firewall_name: 'my-firewall-rule'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+      - name: 'firewall_with_target_tags'
+        resource_id_vars:
+          firewall_name: 'my-firewall-rule'
+        test_env_vars:
+          project: 'PROJECT_NAME'
 parameters:
 properties:
   # TODO: [nice to have] Make the format here simpler to use, in
@@ -338,7 +343,7 @@ properties:
     ignore_read: true
     immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs

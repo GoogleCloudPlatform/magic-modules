@@ -1,0 +1,4 @@
+// Forcefully delete any retrohunts and any detections associated with the rule.
+if d.Get("deletion_protection").(bool) {
+    return fmt.Errorf("Deleting or modifing an environment will remove all data assosiated with this environment. Deleting environments via terraform destroy or terraform apply will only succeed if `deletion_protection = false` in the environemnt state.")
+}

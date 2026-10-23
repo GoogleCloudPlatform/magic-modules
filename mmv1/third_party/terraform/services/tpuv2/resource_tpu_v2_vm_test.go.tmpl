@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tpuv2"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccTpuV2Vm_update(t *testing.T) {
@@ -93,7 +95,7 @@ resource "google_compute_disk" "disk" {
   provider = google-beta
 
   name  = "tf-test-tpu-disk-%{random_suffix}"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-c"
@@ -148,7 +150,7 @@ resource "google_compute_disk" "disk" {
   provider = google-beta
 
   name  = "tf-test-tpu-disk-%{random_suffix}"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-c"
@@ -158,7 +160,7 @@ resource "google_compute_disk" "disk2" {
   provider = google-beta
 
   name  = "tf-test-tpu-disk2-%{random_suffix}"
-  image = "debian-cloud/debian-11"
+  image = "debian-cloud/debian-13"
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-c"

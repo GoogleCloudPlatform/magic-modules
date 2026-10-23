@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securitycenter"
 )
 
 func TestAccSecurityCenterFolderNotificationConfig_basic(t *testing.T) {
@@ -78,10 +81,11 @@ resource "google_pubsub_topic" "scc_folder_notification_config" {
 }
 
 resource "google_scc_folder_notification_config" "default" {
-  config_id    = "tf-test-config-%{random_suffix}"
-  folder 	   = google_folder.folder.folder_id
-  description  = "A test folder notification config"
-  pubsub_topic = google_pubsub_topic.scc_folder_notification_config.id
+  config_id                      = "tf-test-config-%{random_suffix}"
+  folder                         = google_folder.folder.folder_id
+  description                    = "A test folder notification config"
+  pubsub_topic                   = google_pubsub_topic.scc_folder_notification_config.id
+  deletion_notifications_enabled = true
 
   streaming_config {
     filter = "severity = \"HIGH\""
@@ -106,10 +110,11 @@ resource "google_pubsub_topic" "scc_folder_notification_config" {
 }
 
 resource "google_scc_folder_notification_config" "default" {
-  config_id    = "tf-test-config-%{random_suffix}"
-  folder 	   = google_folder.folder.folder_id
-  description  = "An updated test folder notification config"
-  pubsub_topic = google_pubsub_topic.scc_folder_notification_config.id
+  config_id                      = "tf-test-config-%{random_suffix}"
+  folder                         = google_folder.folder.folder_id
+  description                    = "An updated test folder notification config"
+  pubsub_topic                   = google_pubsub_topic.scc_folder_notification_config.id
+  deletion_notifications_enabled = false
 
   streaming_config {
     filter = "severity = \"CRITICAL\""

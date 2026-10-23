@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccDataSourceGoogleTagsTagValue_default(t *testing.T) {
@@ -36,7 +37,7 @@ func TestAccDataSourceGoogleTagsTagValue_dot(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s", org)
 	keyShortName := "tf-testkey-" + acctest.RandString(t, 10)
-	shortName := "terraform.test." + acctest.RandString(t, 10)
+	shortName := "tf-test-terraform.test." + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

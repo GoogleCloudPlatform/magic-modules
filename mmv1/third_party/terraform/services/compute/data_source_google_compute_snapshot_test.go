@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccSnapshotDatasource_name(t *testing.T) {
@@ -74,11 +75,11 @@ func TestAccSnapshotDatasource_filterMostRecent(t *testing.T) {
 func testAccSnapshot_name(project, suffix string) string {
 	return acctest.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
-		name  = "debian-disk-%{suffix}"
+		name  = "tf-test-debian-disk-%{suffix}"
 		image = data.google_compute_image.tf-test-image.self_link
 		size  = 10
 		type  = "pd-ssd"
@@ -106,11 +107,11 @@ func testAccSnapshot_name(project, suffix string) string {
 func testAccSnapshot_filter(project, suffix string) string {
 	return acctest.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
-		name  = "debian-disk-%{suffix}"
+		name  = "tf-test-debian-disk-%{suffix}"
 		image = data.google_compute_image.tf-test-image.self_link
 		size  = 10
 		type  = "pd-ssd"
@@ -157,11 +158,11 @@ func testAccSnapshot_filter(project, suffix string) string {
 func testAccSnapshot_filter_mostRecent(project, suffix string) string {
 	return acctest.Nprintf(`
 	data "google_compute_image" "tf-test-image" {
-		family  = "debian-11"
+		family  = "debian-13"
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
-		name  = "debian-disk-%{suffix}"
+		name  = "tf-test-debian-disk-%{suffix}"
 		image = data.google_compute_image.tf-test-image.self_link
 		size  = 10
 		type  = "pd-ssd"

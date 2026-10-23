@@ -6,16 +6,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -55,10 +57,38 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 	})
 }
 
+// TestAccProjectIamCustomRole_importWithIdentity exercises plannable import using the resource identity block (Terraform 1.12+).
+func TestAccProjectIamCustomRole_importWithIdentity(t *testing.T) {
+	t.Parallel()
+
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleProjectIamCustomRoleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckGoogleProjectIamCustomRole_basic(roleId),
+				Check: resource.TestCheckResourceAttr(
+					"google_project_iam_custom_role.foo", "role_id", roleId),
+			},
+			{
+				ResourceName:    "google_project_iam_custom_role.foo",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
 func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -98,7 +128,7 @@ func TestAccProjectIamCustomRole_undelete(t *testing.T) {
 func TestAccProjectIamCustomRole_createAfterDestroy(t *testing.T) {
 	t.Parallel()
 
-	roleId := "tfIamCustomRole" + acctest.RandString(t, 10)
+	roleId := "tf_test_IamCustomRole" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

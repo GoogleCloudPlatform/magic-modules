@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccDataSourceComputeRegionSslCertificate(t *testing.T) {
@@ -34,7 +35,7 @@ func TestAccDataSourceComputeRegionSslCertificate(t *testing.T) {
 func testAccDataSourceComputeRegionSslCertificateConfig(certName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_ssl_certificate" "foobar" {
-  name        = "cert-test-%s"
+  name        = "tf-test-cert-%s"
   region      = "us-central1"
   description = "really descriptive"
   private_key = file("test-fixtures/test.key")

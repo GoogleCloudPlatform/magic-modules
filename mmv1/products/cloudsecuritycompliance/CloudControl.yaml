@@ -14,33 +14,83 @@
 ---
 name: CloudControl
 description: Cloud controls are the building blocks that make up frameworks. Each cloud control is a unit encapsulating various platform-specific logic for prevention, detection, and audit.
+api_variant_patterns:
+  - organizations/{organization}/locations/{location}/cloudControls/{cloudControl}
+  - projects/{project}/locations/{location}/cloudControls/{cloudControl}
 references:
   api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.cloudControls
-base_url: organizations/{{organization}}/locations/{{location}}/cloudControls
+base_url: '{{parent}}/locations/{{location}}/cloudControls'
 update_mask: true
-self_link: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
-create_url: organizations/{{organization}}/locations/{{location}}/cloudControls?cloudControlId={{cloud_control_id}}
+self_link: '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}'
+create_url: '{{parent}}/locations/{{location}}/cloudControls?cloudControlId={{cloud_control_id}}'
 update_verb: PATCH
-id_format: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
+id_format: '{{parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}'
 import_format:
-  - organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
-examples:
-  - name: "cloudsecuritycompliance_cloudcontrol_basic"
+  - "organizations/{{%organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
+  - "{{%parent}}/locations/{{location}}/cloudControls/{{cloud_control_id}}"
+samples:
+  - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
     primary_resource_id: "example"
-    vars:
-      cloudcontrol_name: "example-cloudcontrol"
-    test_env_vars:
-      org_id: "ORG_ID"
+    steps:
+      - name: "cloudsecuritycompliance_cloudcontrol_org_basic"
+        resource_id_vars:
+          cloudcontrol_name: "example-cloudcontrol"
+        test_env_vars:
+          org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_cloudcontrol_project_basic"
+    primary_resource_id: "example"
+    steps:
+      - name: "cloudsecuritycompliance_cloudcontrol_project_basic"
+        resource_id_vars:
+          cloudcontrol_name: "example-cloudcontrol"
+  - name: "cloudsecuritycompliance_cloudcontrol_org_basic_backward"
+    primary_resource_id: "example"
+    steps:
+      - name: "cloudsecuritycompliance_cloudcontrol_org_basic_backward"
+        resource_id_vars:
+          cloudcontrol_name: "example-cloudcontrol"
+        test_env_vars:
+          org_id: "ORG_ID"
+identity_schema_version: 2
+identity_upgraders: true
 autogen_status: Q2xvdWRDb250cm9s
 custom_code:
+  custom_identity:
+    - parent
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_cloudcontrol.go.tmpl"
+  pre_create: "templates/terraform/pre_create/cloudsecuritycompliance_pre_create.go.tmpl"
+  pre_read: "templates/terraform/pre_read/cloudsecuritycompliance_pre_read.go.tmpl"
+  pre_update: "templates/terraform/pre_update/cloudsecuritycompliance_pre_update.go.tmpl"
+  pre_delete: "templates/terraform/pre_delete/cloudsecuritycompliance_pre_delete.go.tmpl"
+  post_import: "templates/terraform/post_import/cloudsecuritycompliance_post_import.go.tmpl"
+  custom_import: "templates/terraform/custom_import/cloudsecuritycompliance_cloudcontrol.go.tmpl"
 parameters:
+  - name: parent
+    type: String
+    description: |
+      The parent resource in which to create the resource.
+      Must be in one of the following formats:
+      * `projects/{{project}}`
+      * `organizations/{{organization}}`
+    immutable: true
+    default_from_api: true
+    url_param_only: true
+    ignore_read: true
+    exactly_one_of:
+      - parent
+      - organization
   - name: organization
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
+    default_from_api: true
+    ignore_read: true
+    deprecation_message: "Use `parent` instead."
+    exactly_one_of:
+      - parent
+      - organization
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122. Currently, only "global" is supported as a location.
@@ -128,6 +178,44 @@ properties:
                     - name: numberValue
                       type: Double
                       description: Represents a double value.
+                    - name: oneofValue
+                      type: NestedObject
+                      description: Sub-parameter values.
+                      properties:
+                        - name: name
+                          type: String
+                          description: The name of the parameter.
+                        - name: parameterValue
+                          type: NestedObject
+                          description: The value of the parameter.
+                          properties:
+                            - name: boolValue
+                              type: Boolean
+                              description: Represents a boolean value.
+                            - name: numberValue
+                              type: Double
+                              description: Represents a double value.
+                            - name: oneofValue
+                              type: String
+                              description: Sub-parameter values, in JSON format.
+                              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                              custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                              validation:
+                                function: validation.StringIsJSON
+                            - name: stringListValue
+                              type: NestedObject
+                              description: A list of strings.
+                              properties:
+                                - name: values
+                                  type: Array
+                                  description: The strings in the list.
+                                  required: true
+                                  item_type:
+                                    type: String
+                            - name: stringValue
+                              type: String
+                              description: Represents a string value.
                     - name: stringListValue
                       type: NestedObject
                       description: A list of strings.
@@ -223,6 +311,44 @@ properties:
                           - name: numberValue
                             type: Double
                             description: Represents a double value.
+                          - name: oneofValue
+                            type: NestedObject
+                            description: Sub-parameter values.
+                            properties:
+                              - name: name
+                                type: String
+                                description: The name of the parameter.
+                              - name: parameterValue
+                                type: NestedObject
+                                description: The value of the parameter.
+                                properties:
+                                  - name: boolValue
+                                    type: Boolean
+                                    description: Represents a boolean value.
+                                  - name: numberValue
+                                    type: Double
+                                    description: Represents a double value.
+                                  - name: oneofValue
+                                    type: String
+                                    description: Sub-parameter values, in JSON format.
+                                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                                    custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                                    validation:
+                                      function: validation.StringIsJSON
+                                  - name: stringListValue
+                                    type: NestedObject
+                                    description: A list of strings.
+                                    properties:
+                                      - name: values
+                                        type: Array
+                                        description: The strings in the list.
+                                        required: true
+                                        item_type:
+                                          type: String
+                                  - name: stringValue
+                                    type: String
+                                    description: Represents a string value.
                           - name: stringListValue
                             type: NestedObject
                             description: A list of strings.
@@ -323,6 +449,44 @@ properties:
                                     - name: numberValue
                                       type: Double
                                       description: Represents a double value.
+                                    - name: oneofValue
+                                      type: NestedObject
+                                      description: Sub-parameter values.
+                                      properties:
+                                        - name: name
+                                          type: String
+                                          description: The name of the parameter.
+                                        - name: parameterValue
+                                          type: NestedObject
+                                          description: The value of the parameter.
+                                          properties:
+                                            - name: boolValue
+                                              type: Boolean
+                                              description: Represents a boolean value.
+                                            - name: numberValue
+                                              type: Double
+                                              description: Represents a double value.
+                                            - name: oneofValue
+                                              type: String
+                                              description: Sub-parameter values, in JSON format.
+                                              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                                              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                                              custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                                              validation:
+                                                function: validation.StringIsJSON
+                                            - name: stringListValue
+                                              type: NestedObject
+                                              description: A list of strings.
+                                              properties:
+                                                - name: values
+                                                  type: Array
+                                                  description: The strings in the list.
+                                                  required: true
+                                                  item_type:
+                                                    type: String
+                                            - name: stringValue
+                                              type: String
+                                              description: Represents a string value.
                                     - name: stringListValue
                                       type: NestedObject
                                       description: A list of strings.
@@ -369,6 +533,220 @@ properties:
                         type: String
                         description: Regex Pattern to match the value(s) of parameter.
                         required: true
+              - name: subParameters
+                type: Array
+                description: The parameter spec of the cloud control.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: defaultValue
+                      type: NestedObject
+                      description: Possible parameter value types.
+                      properties:
+                        - name: boolValue
+                          type: Boolean
+                          description: Represents a boolean value.
+                        - name: numberValue
+                          type: Double
+                          description: Represents a double value.
+                        - name: oneofValue
+                          type: NestedObject
+                          description: Sub-parameter values.
+                          properties:
+                            - name: name
+                              type: String
+                              description: The name of the parameter.
+                            - name: parameterValue
+                              type: NestedObject
+                              description: The value of the parameter.
+                              properties:
+                                - name: boolValue
+                                  type: Boolean
+                                  description: Represents a boolean value.
+                                - name: numberValue
+                                  type: Double
+                                  description: Represents a double value.
+                                - name: oneofValue
+                                  type: String
+                                  description: Sub-parameter values, in JSON format.
+                                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                                  custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                                  validation:
+                                    function: validation.StringIsJSON
+                                - name: stringListValue
+                                  type: NestedObject
+                                  description: A list of strings.
+                                  properties:
+                                    - name: values
+                                      type: Array
+                                      description: The strings in the list.
+                                      required: true
+                                      item_type:
+                                        type: String
+                                - name: stringValue
+                                  type: String
+                                  description: Represents a string value.
+                        - name: stringListValue
+                          type: NestedObject
+                          description: A list of strings.
+                          properties:
+                            - name: values
+                              type: Array
+                              description: The strings in the list.
+                              required: true
+                              item_type:
+                                type: String
+                        - name: stringValue
+                          type: String
+                          description: Represents a string value.
+                    - name: description
+                      type: String
+                      description: The description of the parameter. The maximum length is 2000 characters.
+                    - name: displayName
+                      type: String
+                      description: The display name of the parameter. The maximum length is 200 characters.
+                    - name: isRequired
+                      type: Boolean
+                      description: if the parameter is required
+                      required: true
+                    - name: name
+                      type: String
+                      description: The name of the parameter.
+                      required: true
+                    - name: substitutionRules
+                      type: Array
+                      description: List of parameter substitutions.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: attributeSubstitutionRule
+                            type: NestedObject
+                            description: Attribute at the given path is substituted entirely.
+                            properties:
+                              - name: attribute
+                                type: String
+                                description: |-
+                                  Fully qualified proto attribute path (in dot notation).
+                                  Example: rules[0].cel_expression.resource_types_values
+                          - name: placeholderSubstitutionRule
+                            type: NestedObject
+                            description: Placeholder is substituted in the rendered string.
+                            properties:
+                              - name: attribute
+                                type: String
+                                description: Fully qualified proto attribute path (e.g., dot notation)
+                    - name: subParameters
+                      type: String
+                      description: The parameter spec of the cloud control, in JSON format.
+                      state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                      custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                      custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                      validation:
+                        function: validation.StringIsJSON
+                    - name: validation
+                      type: NestedObject
+                      description: Validation of the parameter.
+                      properties:
+                        - name: allowedValues
+                          type: NestedObject
+                          description: Allowed set of values for the parameter.
+                          properties:
+                            - name: values
+                              type: Array
+                              description: List of allowed values for the parameter.
+                              required: true
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: boolValue
+                                    type: Boolean
+                                    description: Represents a boolean value.
+                                  - name: numberValue
+                                    type: Double
+                                    description: Represents a double value.
+                                  - name: oneofValue
+                                    type: NestedObject
+                                    description: Sub-parameter values.
+                                    properties:
+                                      - name: name
+                                        type: String
+                                        description: The name of the parameter.
+                                      - name: parameterValue
+                                        type: NestedObject
+                                        description: The value of the parameter.
+                                        properties:
+                                          - name: boolValue
+                                            type: Boolean
+                                            description: Represents a boolean value.
+                                          - name: numberValue
+                                            type: Double
+                                            description: Represents a double value.
+                                          - name: oneofValue
+                                            type: String
+                                            description: Sub-parameter values, in JSON format.
+                                            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                                            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                                            custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                                            validation:
+                                              function: validation.StringIsJSON
+                                          - name: stringListValue
+                                            type: NestedObject
+                                            description: A list of strings.
+                                            properties:
+                                              - name: values
+                                                type: Array
+                                                description: The strings in the list.
+                                                required: true
+                                                item_type:
+                                                  type: String
+                                          - name: stringValue
+                                            type: String
+                                            description: Represents a string value.
+                                  - name: stringListValue
+                                    type: NestedObject
+                                    description: A list of strings.
+                                    properties:
+                                      - name: values
+                                        type: Array
+                                        description: The strings in the list.
+                                        required: true
+                                        item_type:
+                                          type: String
+                                  - name: stringValue
+                                    type: String
+                                    description: Represents a string value.
+                        - name: intRange
+                          type: NestedObject
+                          description: Number range for number parameters.
+                          properties:
+                            - name: max
+                              type: String
+                              description: Maximum allowed value for the numeric parameter (inclusive).
+                              required: true
+                            - name: min
+                              type: String
+                              description: Minimum allowed value for the numeric parameter (inclusive).
+                              required: true
+                        - name: regexpPattern
+                          type: NestedObject
+                          description: Regular Expression Validator for parameter values.
+                          properties:
+                            - name: pattern
+                              type: String
+                              description: Regex Pattern to match the value(s) of parameter.
+                              required: true
+                    - name: valueType
+                      type: String
+                      description: |-
+                        Parameter value type.
+                        Possible values:
+                        STRING
+                        BOOLEAN
+                        STRINGLIST
+                        NUMBER
+                        ONEOF
+                      required: true
               - name: valueType
                 type: String
                 description: |-
@@ -418,6 +796,44 @@ properties:
                               - name: numberValue
                                 type: Double
                                 description: Represents a double value.
+                              - name: oneofValue
+                                type: NestedObject
+                                description: Sub-parameter values.
+                                properties:
+                                  - name: name
+                                    type: String
+                                    description: The name of the parameter.
+                                  - name: parameterValue
+                                    type: NestedObject
+                                    description: The value of the parameter.
+                                    properties:
+                                      - name: boolValue
+                                        type: Boolean
+                                        description: Represents a boolean value.
+                                      - name: numberValue
+                                        type: Double
+                                        description: Represents a double value.
+                                      - name: oneofValue
+                                        type: String
+                                        description: Sub-parameter values, in JSON format.
+                                        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                                        custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                                        validation:
+                                          function: validation.StringIsJSON
+                                      - name: stringListValue
+                                        type: NestedObject
+                                        description: A list of strings.
+                                        properties:
+                                          - name: values
+                                            type: Array
+                                            description: The strings in the list.
+                                            required: true
+                                            item_type:
+                                              type: String
+                                      - name: stringValue
+                                        type: String
+                                        description: Represents a string value.
                               - name: stringListValue
                                 type: NestedObject
                                 description: A list of strings.

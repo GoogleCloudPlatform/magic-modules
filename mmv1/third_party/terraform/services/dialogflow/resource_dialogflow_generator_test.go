@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dialogflow"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -77,7 +78,7 @@ func testAccDialogflowGenerator_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dialogflow_generator" "summarization_generator" {
   location = "global"
-  description = "A v4.0 summarization generator with customized section."
+  description = "A v6.0 summarization generator with customized section."
   published_model = "gemini-2.0-flash-001"
   inference_parameter {
     max_output_tokens = 1024
@@ -111,6 +112,19 @@ resource "google_dialogflow_generator" "summarization_generator" {
             summary = "John"
           }
         }
+        tool_call_info {
+          tool_call {
+            tool   = "projects/example-project/locations/global/tools/initial-tool"
+            action = "initialAction"
+          }
+          tool_call_result {
+            action = "initialAction"
+            error {
+              message   = "test error"
+              retryable = true
+            }
+          }
+        }
       }
       summarization_section_list {
         summarization_sections {
@@ -125,7 +139,7 @@ resource "google_dialogflow_generator" "summarization_generator" {
       key        = "Redaction"
       type       = "CUSTOMER_DEFINED"
     }
-    version = "4.0"
+    version = "6.0"
     output_language_code = "en"
   }
   trigger_event = "MANUAL_CALL"
@@ -137,7 +151,7 @@ func testAccDialogflowGenerator_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dialogflow_generator" "summarization_generator" {
   location = "global"
-  description = "A v3.0 summarization generator with customized section."
+  description = "A v5.0 summarization generator with customized section."
   published_model = "gemini-1.0-pro-002"
   inference_parameter {
     max_output_tokens = 2048
@@ -171,6 +185,19 @@ resource "google_dialogflow_generator" "summarization_generator" {
             summary = "Jeff"
           }
         }
+        tool_call_info {
+          tool_call {
+            tool   = "projects/example-project/locations/global/tools/updated-tool"
+            action = "updatedAction"
+          }
+          tool_call_result {
+            action = "updatedAction"
+            error {
+              message   = "updated error"
+              retryable = false
+            }
+          }
+        }
       }
       summarization_section_list {
         summarization_sections {
@@ -185,7 +212,7 @@ resource "google_dialogflow_generator" "summarization_generator" {
       key        = "Redaction"
       type       = "CUSTOMER_DEFINED"
     }
-    version = "3.0"
+    version = "5.0"
     output_language_code = "es"
   }
   trigger_event = "MANUAL_CALL"
@@ -206,7 +233,7 @@ resource "google_dialogflow_generator" "summarization_generator" {
     top_p             = 0.95
   }
   summarization_context {
-    version = "4.0"
+    version = "6.0"
     output_language_code = "en"
   }
   trigger_event = "MANUAL_CALL"

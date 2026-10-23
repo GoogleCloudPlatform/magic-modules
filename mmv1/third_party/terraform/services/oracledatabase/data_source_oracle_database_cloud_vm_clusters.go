@@ -43,7 +43,7 @@ func dataSourceOracleDatabaseCloudVmClustersRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{OracleDatabaseBasePath}}projects/{{project}}/locations/{{location}}/cloudVmClusters")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/cloudVmClusters")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -96,18 +96,19 @@ func flattenOracleDatabaseCloudVmClusters(v interface{}, d *schema.ResourceData,
 	for _, raw := range l {
 		original := raw.(map[string]interface{})
 		transformed = append(transformed, map[string]interface{}{
-			"name":                   flattenOracleDatabaseCloudVmClusterName(original["name"], d, config),
-			"exadata_infrastructure": flattenOracleDatabaseCloudVmClusterExadataInfrastructure(original["exadataInfrastructure"], d, config),
-			"display_name":           flattenOracleDatabaseCloudVmClusterDisplayName(original["displayName"], d, config),
-			"gcp_oracle_zone":        flattenOracleDatabaseCloudVmClusterGcpOracleZone(original["gcpOracleZone"], d, config),
-			"properties":             flattenOracleDatabaseCloudVmClusterProperties(original["properties"], d, config),
-			"labels":                 flattenOracleDatabaseCloudVmClusterLabels(original["labels"], d, config),
-			"create_time":            flattenOracleDatabaseCloudVmClusterCreateTime(original["createTime"], d, config),
-			"cidr":                   flattenOracleDatabaseCloudVmClusterCidr(original["cidr"], d, config),
-			"backup_subnet_cidr":     flattenOracleDatabaseCloudVmClusterBackupSubnetCidr(original["backupSubnetCidr"], d, config),
-			"network":                flattenOracleDatabaseCloudVmClusterNetwork(original["network"], d, config),
-			"terraform_labels":       flattenOracleDatabaseCloudVmClusterTerraformLabels(original["labels"], d, config),
-			"effective_labels":       flattenOracleDatabaseCloudVmClusterEffectiveLabels(original["labels"], d, config),
+			"name":                      flattenOracleDatabaseCloudVmClusterName(original["name"], d, config),
+			"exadata_infrastructure":    flattenOracleDatabaseCloudVmClusterExadataInfrastructure(original["exadataInfrastructure"], d, config),
+			"display_name":              flattenOracleDatabaseCloudVmClusterDisplayName(original["displayName"], d, config),
+			"gcp_oracle_zone":           flattenOracleDatabaseCloudVmClusterGcpOracleZone(original["gcpOracleZone"], d, config),
+			"properties":                flattenOracleDatabaseCloudVmClusterProperties(original["properties"], d, config),
+			"labels":                    flattenOracleDatabaseCloudVmClusterLabels(original["labels"], d, config),
+			"create_time":               flattenOracleDatabaseCloudVmClusterCreateTime(original["createTime"], d, config),
+			"cidr":                      flattenOracleDatabaseCloudVmClusterCidr(original["cidr"], d, config),
+			"backup_subnet_cidr":        flattenOracleDatabaseCloudVmClusterBackupSubnetCidr(original["backupSubnetCidr"], d, config),
+			"network":                   flattenOracleDatabaseCloudVmClusterNetwork(original["network"], d, config),
+			"exascale_db_storage_vault": flattenOracleDatabaseCloudVmClusterExascaleDbStorageVault(original["exascaleDbStorageVault"], d, config),
+			"terraform_labels":          flattenOracleDatabaseCloudVmClusterTerraformLabels(original["labels"], d, config),
+			"effective_labels":          flattenOracleDatabaseCloudVmClusterEffectiveLabels(original["labels"], d, config),
 		})
 	}
 	return transformed

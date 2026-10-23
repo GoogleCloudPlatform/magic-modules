@@ -40,12 +40,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func IsVcrEnabled() bool {
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
 	return envPath != "" && vcrMode != ""
+}
+
+// IsVcrReplaying returns true if VCR is enabled and running in REPLAYING mode.
+func IsVcrReplaying() bool {
+	return IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING"
 }
 
 var configsLock = sync.RWMutex{}
@@ -159,7 +165,9 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 	}
 
-	c = extendWithTGCData(t, c)
+	if !(IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING") {
+		c = extendWithTGCData(t, c)
+	}
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
@@ -170,9 +178,18 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "terraform_labels") {
 			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "terraform_labels")
 		}
-		if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
+		if IsVcrReplaying() {
 			re := regexp.MustCompile(`create_duration = "\d+[sm]"`)
 			s.Config = re.ReplaceAllString(s.Config, `create_duration = "1s"`)
+			re = regexp.MustCompile(`destroy_duration = "\d+[sm]"`)
+			s.Config = re.ReplaceAllString(s.Config, `destroy_duration = "1s"`)
+			// During RECORDING, extendWithTGCData attaches a non-nil Check function to steps
+			// containing resources, which causes terraform-plugin-testing to run a pre-destroy
+			// refresh on Destroy: true steps. Since extendWithTGCData is skipped in REPLAYING
+			// mode, set a no-op Check to preserve the recorded pre-destroy refresh behavior.
+			if s.Destroy && s.Config != "" && !s.PlanOnly && s.Check == nil && strings.Contains(s.Config, "resource \"") {
+				s.Check = func(*terraform.State) error { return nil }
+			}
 		}
 		// deletion_policy is a universal virtual attribute for managing the behavior of resources when a delete is attempted
 		// in Terraform. Because it is a virtual attribute, it needs to be excluded from these ImportStateVerifys.
@@ -203,7 +220,7 @@ func closeRecorder(t *testing.T) {
 	configsLock.RUnlock()
 	if ok {
 		// We did not cache the config if it does not use VCR
-		if !t.Failed() && IsVcrEnabled() {
+		if !t.Failed() && IsVcrEnabled() && os.Getenv("VCR_MODE") == "RECORDING" {
 			// If a test succeeds, write new seed/yaml to files
 			err := config.Client.Transport.(*recorder.Recorder).Stop()
 			if err != nil {
@@ -237,7 +254,7 @@ func closeRecorder(t *testing.T) {
 //   - Setting the recording/replaying mode
 //   - Determining the path to the file API interactions will be recorded to/read from
 //   - Determining the logic used to match requests against recorded HTTP interactions (see rec.SetMatcher)
-func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper http.RoundTripper, pollInterval time.Duration) (time.Duration, http.RoundTripper, fwDiags.Diagnostics) {
+func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper http.RoundTripper, pollInterval time.Duration, sleepUnit time.Duration) (time.Duration, time.Duration, http.RoundTripper, fwDiags.Diagnostics) {
 	var diags fwDiags.Diagnostics
 	var vcrMode recorder.Mode
 	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
@@ -245,29 +262,30 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		vcrMode = recorder.ModeRecording
 	case "REPLAYING":
 		vcrMode = recorder.ModeReplaying
-		// When replaying, set the poll interval low to speed up tests
+		// When replaying, set the poll interval and sleep unit low to speed up tests
 		pollInterval = 10 * time.Millisecond
+		sleepUnit = time.Millisecond
 	default:
 		tflog.Debug(ctx, fmt.Sprintf("No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv))
-		return pollInterval, rndTripper, diags
+		return pollInterval, sleepUnit, rndTripper, diags
 	}
 
 	envPath := os.Getenv("VCR_PATH")
 	if envPath == "" {
 		tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
-		return pollInterval, rndTripper, diags
+		return pollInterval, sleepUnit, rndTripper, diags
 	}
 	path := filepath.Join(envPath, vcrFileName(testName))
 
 	rec, err := recorder.NewAsMode(path, vcrMode, rndTripper)
 	if err != nil {
 		diags.AddError("error creating record as new mode", err.Error())
-		return pollInterval, rndTripper, diags
+		return pollInterval, sleepUnit, rndTripper, diags
 	}
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
-	return pollInterval, rec, diags
+	return pollInterval, sleepUnit, rec, diags
 }
 
 // NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
@@ -425,7 +443,7 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 
 	var fwD fwDiags.Diagnostics
 	config := c.(*transport_tpg.Config)
-	config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
+	config.PollInterval, config.SleepUnit, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval, config.SleepUnit)
 	if fwD.HasError() {
 		diags = append(diags, *tpgresource.FrameworkDiagsToSdkDiags(fwD)...)
 		return nil, diags

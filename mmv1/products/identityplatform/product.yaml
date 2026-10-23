@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'IdentityPlatform'
-display_name: 'Identity Platform'
-versions:
-  - name: 'ga'
-    base_url: 'https://identitytoolkit.googleapis.com/v2/'
+name: IdentityPlatform
+display_name: Identity Platform
 scopes:
-  - 'https://www.googleapis.com/auth/identitytoolkit'
-  - 'https://www.googleapis.com/auth/firebase'
-  - 'https://www.googleapis.com/auth/cloud-platform'
+  - https://www.googleapis.com/auth/identitytoolkit
+  - https://www.googleapis.com/auth/firebase
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - name: ga
+    base_url: https://identitytoolkit.googleapis.com/v2/

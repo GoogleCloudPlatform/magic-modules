@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/redis"
 )
 
 func TestAccRedisClusterDatasource(t *testing.T) {
@@ -33,14 +34,15 @@ func testAccRedisClusterDatasourceConfig(context map[string]interface{}) string 
 resource "google_redis_cluster" "cluster" {
   name                           = "tf-test-redis-cluster-%{random_suffix}"
   shard_count                    = 1
-  region                         = "us-central1"
+  node_type                      = "REDIS_SHARED_CORE_NANO"
+  region                         = "us-east1"
   deletion_protection_enabled    = false 
   
 }   
 
 data "google_redis_cluster" "default" {
   name   = google_redis_cluster.cluster.name
-  region = "us-central1"
+  region = "us-east1"
 }
 `, context)
 }

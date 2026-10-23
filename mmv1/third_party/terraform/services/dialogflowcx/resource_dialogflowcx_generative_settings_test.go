@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dialogflowcx"
 )
 
 func TestAccDialogflowCXGenerativeSettings_update(t *testing.T) {
@@ -85,7 +86,7 @@ func testAccDialogflowCXGenerativeSettings_full(context map[string]interface{}) 
     language_code = "en"
 
     llm_model_settings {
-      model = "gemini-2.0-flash-001"
+      model = "gemini-2.5-flash"
       prompt_text = "example prompt text"
     }
   }

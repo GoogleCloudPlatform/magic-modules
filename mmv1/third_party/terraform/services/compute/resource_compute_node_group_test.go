@@ -12,13 +12,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccComputeNodeGroup_update(t *testing.T) {
 	t.Parallel()
 
-	groupName := fmt.Sprintf("group--%d", acctest.RandInt(t))
-	tmplPrefix := fmt.Sprintf("tmpl--%d", acctest.RandInt(t))
+	groupName := fmt.Sprintf("tf-test-group--%d", acctest.RandInt(t))
+	tmplPrefix := fmt.Sprintf("tf-test-tmpl--%d", acctest.RandInt(t))
 
 	var timeCreated time.Time
 	acctest.VcrTest(t, resource.TestCase{
@@ -57,8 +58,8 @@ func TestAccComputeNodeGroup_update(t *testing.T) {
 func TestAccComputeNodeGroup_fail(t *testing.T) {
 	t.Parallel()
 
-	groupName := fmt.Sprintf("group--%d", acctest.RandInt(t))
-	tmplPrefix := fmt.Sprintf("tmpl--%d", acctest.RandInt(t))
+	groupName := fmt.Sprintf("tf-test-group--%d", acctest.RandInt(t))
+	tmplPrefix := fmt.Sprintf("tf-test-tmpl--%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

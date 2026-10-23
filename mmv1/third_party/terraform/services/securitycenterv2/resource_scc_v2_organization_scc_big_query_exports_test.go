@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/securitycenterv2"
 )
 
 func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T) {
@@ -82,13 +84,14 @@ resource "time_sleep" "wait_1_minute" {
 }
 
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
-  name		   = "%{name}"
-  big_query_export_id    = "%{big_query_export_id}"
-  organization = "%{org_id}"
-  dataset      = google_bigquery_dataset.default.id
-  location     = "global"
-  description  = "Cloud Security Command Center Findings Big Query Export Config"
-  filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  name                           = "%{name}"
+  big_query_export_id            = "%{big_query_export_id}"
+  organization                   = "%{org_id}"
+  dataset                        = google_bigquery_dataset.default.id
+  location                       = "global"
+  description                    = "Cloud Security Command Center Findings Big Query Export Config"
+  filter                         = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  deletion_notifications_enabled = true
 
   depends_on = [time_sleep.wait_1_minute]
 }
@@ -127,13 +130,14 @@ resource "time_sleep" "wait_1_minute" {
 }
 
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
-  name		   = "%{name}"
-  big_query_export_id    = "%{big_query_export_id}"
-  organization = "%{org_id}"
-  dataset      = google_bigquery_dataset.default.id
-  location     = "global"
-  description  = "SCC Findings Big Query Export Update"
-  filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  name                           = "%{name}"
+  big_query_export_id            = "%{big_query_export_id}"
+  organization                   = "%{org_id}"
+  dataset                        = google_bigquery_dataset.default.id
+  location                       = "global"
+  description                    = "SCC Findings Big Query Export Update"
+  filter                         = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+  deletion_notifications_enabled = false
 
   depends_on = [time_sleep.wait_1_minute]  
 }

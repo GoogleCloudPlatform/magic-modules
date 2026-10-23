@@ -6,6 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/datalossprevention"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/sql"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccDataLossPreventionDiscoveryConfig_Update(t *testing.T) {
@@ -30,7 +37,7 @@ func TestAccDataLossPreventionDiscoveryConfig_Update(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}
@@ -884,6 +891,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 				inspect_template_modified_cadence {
 					frequency = "UPDATE_FREQUENCY_DAILY"
 				}
+				refresh_frequency = "UPDATE_FREQUENCY_DAILY"
 			}
 		}
 	}

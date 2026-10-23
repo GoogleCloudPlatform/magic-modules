@@ -169,7 +169,7 @@ properties:
       group. The group uses this template to create all new instances in the
       managed instance group.
     required: true
-  # kind is internal transport detail
+    # kind is internal transport detail
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'InstanceTemplate'
     imports: 'selfLink'
@@ -182,9 +182,7 @@ properties:
   # TODO: Make namedPorts a NameValue(name[string], port[integer])
   - name: 'namedPorts'
     type: Array
-    description:
-      Named ports configured for the Instance Groups complementary to this
-      Instance Group Manager.
+    description: Named ports configured for the Instance Groups complementary to this Instance Group Manager.
     item_type:
       type: NestedObject
       properties:
@@ -195,8 +193,7 @@ properties:
             long, and comply with RFC1035.
         - name: 'port'
           type: Integer
-          description:
-            The port number, which can be a value between 1 and 65535.
+          description: The port number, which can be a value between 1 and 65535.
   - name: 'targetPools'
     type: Array
     description: |

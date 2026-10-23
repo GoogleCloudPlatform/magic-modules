@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/monitoring"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -31,7 +32,7 @@ func TestAccMonitoringAlertPolicy(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}

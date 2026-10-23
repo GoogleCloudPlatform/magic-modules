@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/databasemigrationservice"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -123,7 +125,7 @@ data "google_compute_network" "default" {
 resource "google_database_migration_service_connection_profile" "alloydbprofile" {
   location = "us-central1"
   connection_profile_id = "tf-test-my-profileid%{random_suffix}"
-  display_name = "tf-test-my-profileid%{random_suffix}_display"
+  display_name = "tf-test-my-profileid%{random_suffix}-display"
   labels = { 
     foo = "bar" 
   }

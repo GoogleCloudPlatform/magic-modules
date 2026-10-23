@@ -12,12 +12,10 @@
 # limitations under the License.
 
 ---
-
 name: 'Runtime'
 api_resource_type_kind: NotebookRuntime
 description: |
   'A runtime is a Google-provisioned virtual machine (VM) that can run the code in your notebook (IPYNB file).'
-
 references:
   guides:
     'Create a runtime': 'https://cloud.google.com/colab/docs/create-runtime'
@@ -25,40 +23,54 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes:assign?notebook_runtime_id={{name}}'
+generate_list_resource: true
+autogen_async: true
 async:
   type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
 include_in_tgc_next: true
+error_retry_predicates:
+  - 'transport_tpg.IsSubnetworkNotReadyLROError'
+error_retry_on_async: true
 custom_code:
   encoder: 'templates/terraform/encoders/colab_runtime.go.tmpl'
   post_create: 'templates/terraform/post_create/colab_runtime.go.tmpl'
+  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
   custom_update: 'templates/terraform/custom_update/colab_runtime.go.tmpl'
   constants: 'templates/terraform/constants/colab_runtime.go.tmpl'
-  test_constants: 'templates/terraform/test_constants/import_kms.go.tmpl'
-examples:
+  decoder: 'templates/terraform/decoders/colab_runtime.go.tmpl'
+samples:
   - name: 'colab_runtime_basic'
     primary_resource_id: 'runtime'
     region_override: 'us-central1'
-    vars:
-      runtime_name: 'colab-runtime'
+    steps:
+      - name: 'colab_runtime_basic'
+        resource_id_vars:
+          runtime_name: 'colab-runtime'
   - name: 'colab_runtime_stopped'
     primary_resource_id: 'runtime'
     region_override: 'us-central1'
-    vars:
-      runtime_name: 'colab-runtime'
-    ignore_read_extra:
-      - 'desired_state'
+    steps:
+      - name: 'colab_runtime_stopped'
+        resource_id_vars:
+          runtime_name: 'colab-runtime'
+        ignore_read_extra:
+          - 'desired_state'
   - name: 'colab_runtime_full'
     primary_resource_id: 'runtime'
     region_override: 'us-central1'
-    vars:
-      runtime_name: 'colab-runtime'
-      key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'desired_state'
-      - 'auto_upgrade'
-      - 'expiration_time'
+    steps:
+      - name: 'colab_runtime_full'
+        resource_id_vars:
+          runtime_name: 'colab-runtime'
+          key_name: 'my-crypto-key'
+        test_vars_overrides:
+          key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        ignore_read_extra:
+          - 'desired_state'
+          - 'auto_upgrade'
+          - 'expiration_time'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -85,7 +97,7 @@ properties:
   - name: notebookRuntimeTemplateRef
     type: NestedObject
     description: |
-     'Runtime specific information used for NotebookRuntime creation.'
+      'Runtime specific information used for NotebookRuntime creation.'
     properties:
       - name: 'notebookRuntimeTemplate'
         type: String
@@ -101,8 +113,7 @@ properties:
   - name: 'displayName'
     type: String
     immutable: true
-    description:
-      Required. The display name of the Runtime.
+    description: Required. The display name of the Runtime.
     required: true
   - name: description
     type: String

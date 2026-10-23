@@ -51,7 +51,7 @@ var (
 	}
 	ServiceAccountLinkRegex = ServiceAccountLinkRegexPrefix + "(" + strings.Join(PossibleServiceAccountNames, "|") + ")"
 
-	ServiceAccountKeyNameRegex = ServiceAccountLinkRegexPrefix + "(.+)/keys/(.+)"
+	ServiceAccountKeyNameRegex = "^" + ServiceAccountLinkRegexPrefix + "([^/]+)/keys/([^/]+)$"
 
 	// Format of service accounts created through the API
 	CreatedServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, "{4,28}") + "@" + ProjectNameInDNSFormRegex + "\\.iam\\.gserviceaccount\\.com$"
@@ -80,6 +80,15 @@ var Rfc1918Networks = []string{
 	"10.0.0.0/8",
 	"172.16.0.0/12",
 	"192.168.0.0/16",
+}
+
+// ValidateKmsKeyWithoutVersion rejects Cloud KMS key names that include a
+// crypto key version.
+func ValidateKmsKeyWithoutVersion(v interface{}, k string) (ws []string, errors []error) {
+	if strings.Contains(v.(string), "/cryptoKeyVersions/") {
+		errors = append(errors, fmt.Errorf("%q must specify a KMS Key, not a KMS KeyVersion; remove the /cryptoKeyVersions/ suffix", k))
+	}
+	return
 }
 
 // validateGCEName ensures that a field matches the requirements for Compute Engine resource names
