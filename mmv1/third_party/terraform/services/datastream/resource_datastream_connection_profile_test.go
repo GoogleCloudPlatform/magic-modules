@@ -414,7 +414,7 @@ resource "google_sql_user" "user" {
 
 resource "google_compute_instance" "default" {
 	name         = "tf-test-instance-%{random_suffix}"
-	machine_type = "e2-small"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 	boot_disk {
 		initialize_params {
