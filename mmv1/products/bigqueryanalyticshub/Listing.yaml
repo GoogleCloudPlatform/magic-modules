@@ -308,6 +308,25 @@ properties:
                 Output-only. Indicates that this replica is the primary replica.
                 Possible values: PRIMARY_STATE_UNSPECIFIED, PRIMARY_REPLICA
               output: true
+      - name: restrictedExportPolicy
+        type: NestedObject
+        description: |
+          If set, restricted export policy will be propagated and enforced on the linked dataset.
+        default_from_api: true
+        properties:
+          - name: enabled
+            type: Boolean
+            description: |
+              If true, enable restricted export.
+            send_empty_value: true
+          - name: restrictDirectTableAccess
+            type: Boolean
+            description: |
+              If true, restrict direct table access(read api/tabledata.list) on linked table.
+          - name: restrictQueryResult
+            type: Boolean
+            description: |
+              If true, restrict export of query result derived from restricted linked dataset table.
   - name: pubsubTopic
     type: NestedObject
     description: Pub/Sub topic source.
@@ -332,6 +351,7 @@ properties:
   - name: restrictedExportConfig
     type: NestedObject
     description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
+    default_from_api: true
     properties:
       - name: enabled
         type: Boolean
@@ -383,3 +403,23 @@ properties:
               Commercial state of the Marketplace Data Product.
               Possible values: COMMERCIAL_STATE_UNSPECIFIED, ONBOARDING, ACTIVE
             output: true
+  - name: storedProcedureConfig
+    type: NestedObject
+    description: |
+      If set, stored procedure configuration will be propagated and enforced on the linked dataset.
+    immutable: true
+    properties:
+      - name: enabled
+        type: Boolean
+        description: |
+          If true, enable sharing of stored procedure.
+        immutable: true
+        send_empty_value: true
+      - name: allowedStoredProcedureTypes
+        type: Array
+        description: |
+          Output only. Types of stored procedure supported to share.
+          Possible values: STORED_PROCEDURE_TYPE_UNSPECIFIED, SQL_PROCEDURE.
+        output: true
+        item_type:
+          type: String
