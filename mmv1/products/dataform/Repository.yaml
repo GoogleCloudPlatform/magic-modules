@@ -54,11 +54,11 @@ samples:
         ignore_read_extra:
           - deletion_policy
         exclude_import_test: true
-  - name: dataform_repository_with_cloudsource_repo
+  - name: dataform_repository_with_github_repo
     primary_resource_id: dataform_repository
     exclude_basic_doc: true
     steps:
-      - name: dataform_repository_with_cloudsource_repo
+      - name: dataform_repository_with_github_repo
         resource_id_vars:
           dataform_repository_name: dataform_repository
           data: secret-data
@@ -68,11 +68,11 @@ samples:
         ignore_read_extra:
           - deletion_policy
         exclude_import_test: true
-  - name: dataform_repository_with_cloudsource_repo_and_ssh
+  - name: dataform_repository_with_github_repo_and_ssh
     primary_resource_id: dataform_repository
     exclude_basic_doc: true
     steps:
-      - name: dataform_repository_with_cloudsource_repo_and_ssh
+      - name: dataform_repository_with_github_repo_and_ssh
         resource_id_vars:
           dataform_repository_name: dataform_repository
           data: secret-data

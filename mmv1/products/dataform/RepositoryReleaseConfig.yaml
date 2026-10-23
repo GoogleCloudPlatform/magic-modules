@@ -18,7 +18,7 @@ description: A resource represents a Dataform release configuration
 references:
   guides:
     Official Documentation: https://cloud.google.com/dataform/docs/release-configurations
-  api: https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories.releaseConfigs
+  api: https://cloud.google.com/dataform/reference/rest/v1/projects.locations.repositories.releaseConfigs
 base_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs
 create_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs?releaseConfigId={{name}}
 update_verb: PATCH
