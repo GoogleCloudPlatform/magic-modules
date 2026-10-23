@@ -128,8 +128,6 @@ resource "google_dataproc_cluster" "ho_cluster" {
 }
 ```
 
-~> **Note:** High Obtainability (HO) mode flexible blocks (`master_flexible_config`, `worker_flexible_config`, `secondary_worker_flexible_config`) are mutually exclusive with standard instance group blocks (`master_config`, `worker_config`, `preemptible_worker_config`). When using HO mode, `gce_cluster_config.zone` must not be set because AutoZone placement is mandatory. `master_flexible_config` is required whenever any flexible block is used. For master instances, `num_instances` must be `1`. For all flexible groups, `core_count` must be one of 2, 4, 8, 16, or 32.
-
 ~> **Tip:** When an autoscaling policy is attached to an HO cluster, use `lifecycle { ignore_changes = [cluster_config[0].worker_flexible_config[0].num_instances, cluster_config[0].secondary_worker_flexible_config[0].num_instances] }` to avoid fighting the autoscaler.
 
 ## Example Usage - Using a GPU accelerator
@@ -860,8 +858,6 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
 <a name="nested_master_flexible_config"></a>The `cluster_config.master_flexible_config` block supports:
 
-~> **Note:** High Obtainability (HO) mode flexible blocks are mutually exclusive with standard instance group blocks (`master_config`, `worker_config`, `preemptible_worker_config`). When using HO mode, `gce_cluster_config.zone` must not be set because AutoZone placement is mandatory. `master_flexible_config` is required whenever any flexible block is used. For master instances, `num_instances` must be `1`. For all flexible groups, `core_count` must be one of 2, 4, 8, 16, or 32.
-
 ```hcl
 cluster_config {
   master_flexible_config {
@@ -887,10 +883,6 @@ cluster_config {
 - - -
 
 <a name="nested_worker_flexible_config"></a>The `cluster_config.worker_flexible_config` block supports:
-
-~> **Note:** High Obtainability (HO) mode flexible blocks are mutually exclusive with standard instance group blocks (`master_config`, `worker_config`, `preemptible_worker_config`). When using HO mode, `gce_cluster_config.zone` must not be set because AutoZone placement is mandatory. `master_flexible_config` is required whenever any flexible block is used. For all flexible groups, `core_count` must be one of 2, 4, 8, 16, or 32.
-
-~> **Tip:** When an autoscaling policy is attached to an HO cluster, use `lifecycle { ignore_changes = [cluster_config[0].worker_flexible_config[0].num_instances, cluster_config[0].secondary_worker_flexible_config[0].num_instances] }` to avoid fighting the autoscaler.
 
 ```hcl
 cluster_config {
@@ -918,10 +910,6 @@ cluster_config {
 - - -
 
 <a name="nested_secondary_worker_flexible_config"></a>The `cluster_config.secondary_worker_flexible_config` block supports:
-
-~> **Note:** High Obtainability (HO) mode flexible blocks are mutually exclusive with standard instance group blocks (`master_config`, `worker_config`, `preemptible_worker_config`). When using HO mode, `gce_cluster_config.zone` must not be set because AutoZone placement is mandatory. `master_flexible_config` is required whenever any flexible block is used. For all flexible groups, `core_count` must be one of 2, 4, 8, 16, or 32.
-
-~> **Tip:** When an autoscaling policy is attached to an HO cluster, use `lifecycle { ignore_changes = [cluster_config[0].worker_flexible_config[0].num_instances, cluster_config[0].secondary_worker_flexible_config[0].num_instances] }` to avoid fighting the autoscaler.
 
 ```hcl
 cluster_config {
@@ -1072,8 +1060,6 @@ Only resource names including projectid and location (region) are valid. Example
 `https://www.googleapis.com/compute/v1/projects/[projectId]/locations/[dataproc_region]/autoscalingPolicies/[policy_id]`
 `projects/[projectId]/locations/[dataproc_region]/autoscalingPolicies/[policy_id]`
 Note that the policy must be in the same project and Cloud Dataproc region.
-
-~> **Tip:** When an autoscaling policy is attached to a High Obtainability (HO) cluster, use `lifecycle { ignore_changes = [cluster_config[0].worker_flexible_config[0].num_instances, cluster_config[0].secondary_worker_flexible_config[0].num_instances] }` to avoid fighting the autoscaler.
 
 - - -
 
