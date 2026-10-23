@@ -312,9 +312,7 @@ is desired, you will need to modify your state file manually using
 <a name="nested_initialize_params"></a>The `initialize_params` block supports:
 
 * `size` - (Optional) The size of the image in gigabytes. If not specified, it
-    will inherit the size of its base image. Increasing this value updates the disk
-    in place; decreasing it is not supported by the API and will force recreation
-    of the instance.
+    will inherit the size of its base image.
 
 * `type` - (Optional) The GCE disk type. Such as pd-standard, pd-balanced or pd-ssd.
 

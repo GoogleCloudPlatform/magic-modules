@@ -3171,14 +3171,6 @@ func TestAccComputeInstance_hyperdiskBootDisk_provisioned_iops_throughput(t *tes
 		"provisioned_throughput": 250,
 	}
 
-	contextShrink := map[string]interface{}{
-		"instance_name":          context["instance_name"],
-		"zone":                   context["zone"],
-		"size":                   100,
-		"provisioned_iops":       15000,
-		"provisioned_throughput": 250,
-	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -3199,17 +3191,6 @@ func TestAccComputeInstance_hyperdiskBootDisk_provisioned_iops_throughput(t *tes
 				},
 			},
 			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
-			{
-				Config:             testAccComputeInstanceHyperDiskBootDiskProvisionedIopsThroughput_update(contextShrink),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PostApplyPostRefresh: []plancheck.PlanCheck{
-						// The API can't shrink a disk, so this must recreate the instance
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionReplace),
-					},
-				},
-			},
 		},
 	})
 }

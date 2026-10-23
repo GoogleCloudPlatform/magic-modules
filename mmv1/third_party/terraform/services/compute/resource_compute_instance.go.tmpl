@@ -1773,8 +1773,6 @@ be from 0 to 999,999,999 inclusive.`,
 			customdiff.ForceNewIf("metadata_startup_script", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				return isGracefulMetadataStartupSwitch(d)
 			}),
-			// Boot disk size can only be increased in place; shrinking requires recreation.
-			customdiff.ForceNewIfChange("boot_disk.0.initialize_params.0.size", IsDiskShrinkage),
 			// Only hyperdisk supports updating provisioned IOPS in place (e.g. pd-extreme does not).
 			customdiff.ForceNewIf("boot_disk.0.initialize_params.0.provisioned_iops", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				return d.HasChange("boot_disk.0.initialize_params.0.provisioned_iops") && !strings.Contains(d.Get("boot_disk.0.initialize_params.0.type").(string), "hyperdisk")
