@@ -1221,6 +1221,15 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigSchema
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
+			"multi_zone_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Optional. Multi-zone cluster configuration.",
+				MaxItems:    1,
+				Elem:        DataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSchema(),
+			},
+
 			"network": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -1302,6 +1311,20 @@ func DataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigSchema
 				Optional:    true,
 				ForceNew:    true,
 				Description: "Optional. The zone where the Compute Engine cluster will be located. On a create request, it is required in the \"global\" region. If omitted in a non-global Dataproc region, the service will pick a zone in the corresponding Compute Engine region. On a get request, zone will always be present. A full URL, partial URI, or short name are valid. Examples: * `https://www.googleapis.com/compute/v1/projects/[project_id]/zones/[zone]` * `projects/[project_id]/zones/[zone]` * `us-central1-f`",
+			},
+		},
+	}
+}
+
+func DataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"target_shape": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ANY"}, false),
+				Description:  "Required. Target shape of the cluster. Possible values: `ANY`",
 			},
 		},
 	}
@@ -3908,6 +3931,7 @@ func expandDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig
 	return &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig{
 		InternalIPOnly:          dcl.Bool(obj["internal_ip_only"].(bool)),
 		Metadata:                tpgresource.CheckStringMap(obj["metadata"]),
+		MultiZoneConfig:         expandDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(obj["multi_zone_config"]),
 		Network:                 dcl.String(obj["network"].(string)),
 		NodeGroupAffinity:       expandDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(obj["node_group_affinity"]),
 		PrivateIPv6GoogleAccess: WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigPrivateIPv6GoogleAccessEnumRef(obj["private_ipv6_google_access"].(string)),
@@ -3928,6 +3952,7 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 	transformed := map[string]interface{}{
 		"internal_ip_only":           obj.InternalIPOnly,
 		"metadata":                   obj.Metadata,
+		"multi_zone_config":          flattenDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(obj.MultiZoneConfig),
 		"network":                    obj.Network,
 		"node_group_affinity":        flattenDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(obj.NodeGroupAffinity),
 		"private_ipv6_google_access": obj.PrivateIPv6GoogleAccess,
@@ -3938,6 +3963,32 @@ func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 		"subnetwork":                 obj.Subnetwork,
 		"tags":                       obj.Tags,
 		"zone":                       obj.Zone,
+	}
+
+	return []interface{}{transformed}
+
+}
+
+func expandDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(o interface{}) *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	if o == nil {
+		return EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	}
+	objArr := o.([]interface{})
+	if len(objArr) == 0 || objArr[0] == nil {
+		return EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	}
+	obj := objArr[0].(map[string]interface{})
+	return &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{
+		TargetShape: dcl.String(obj["target_shape"].(string)),
+	}
+}
+
+func flattenDataprocWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(obj *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) interface{} {
+	if obj == nil || obj.Empty() {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"target_shape": obj.TargetShape,
 	}
 
 	return []interface{}{transformed}

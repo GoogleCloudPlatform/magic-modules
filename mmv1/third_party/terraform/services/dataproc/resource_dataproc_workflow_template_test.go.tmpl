@@ -597,6 +597,82 @@ resource "google_dataproc_workflow_template" "template" {
 `, context)
 }
 
+func TestAccDataprocWorkflowTemplate_withMultiZoneConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"version":       "2.2-debian12",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             funcAccTestDataprocWorkflowTemplateCheckDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocWorkflowTemplate_withMultiZoneConfig(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_workflow_template.template", "placement.0.managed_cluster.0.config.0.gce_cluster_config.0.multi_zone_config.0.target_shape", "ANY"),
+				),
+			},
+			{
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ResourceName:            "google_dataproc_workflow_template.template",
+			},
+		},
+	})
+}
+
+func testAccDataprocWorkflowTemplate_withMultiZoneConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_workflow_template" "template" {
+  name     = "tf-test-workflow-%{random_suffix}"
+  location = "us-central1"
+  placement {
+    managed_cluster {
+      cluster_name = "tf-test-cluster-%{random_suffix}"
+      config {
+        gce_cluster_config {
+          multi_zone_config {
+            target_shape = "ANY"
+          }
+        }
+        software_config {
+          image_version = "%{version}"
+        }
+        master_config {
+          num_instances = 1
+          machine_type  = "n4-standard-2"
+          disk_config {
+            boot_disk_type    = "hyperdisk-balanced"
+            boot_disk_size_gb = 64
+          }
+        }
+        worker_config {
+          num_instances = 2
+          machine_type  = "n4-standard-2"
+          disk_config {
+            boot_disk_type    = "hyperdisk-balanced"
+            boot_disk_size_gb = 64
+          }
+        }
+      }
+    }
+  }
+  jobs {
+    step_id = "someJob"
+    spark_job {
+      main_class = "SomeClass"
+    }
+  }
+}
+`, context)
+}
+
 func funcAccTestDataprocWorkflowTemplateCheckDestroy(t *testing.T) func(s *terraform.State) error {
   return func(s *terraform.State) error {
     for name, rs := range s.RootModule().Resources {

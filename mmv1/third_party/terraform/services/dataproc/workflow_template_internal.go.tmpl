@@ -146,6 +146,11 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfig) validate
 			return err
 		}
 	}
+	if !dcl.IsEmptyValueIndirect(r.MultiZoneConfig) {
+		if err := r.MultiZoneConfig.validate(); err != nil {
+			return err
+		}
+	}
 	if !dcl.IsEmptyValueIndirect(r.ShieldedInstanceConfig) {
 		if err := r.ShieldedInstanceConfig.validate(); err != nil {
 			return err
@@ -158,6 +163,12 @@ func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservatio
 }
 func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity) validate() error {
 	if err := dcl.Required(r, "nodeGroup"); err != nil {
+		return err
+	}
+	return nil
+}
+func (r *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) validate() error {
+	if err := dcl.Required(r, "targetShape"); err != nil {
 		return err
 	}
 	return nil
@@ -1556,6 +1567,7 @@ func canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig(d
 	}
 	cDes.ReservationAffinity = canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity(des.ReservationAffinity, initial.ReservationAffinity, opts...)
 	cDes.NodeGroupAffinity = canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(des.NodeGroupAffinity, initial.NodeGroupAffinity, opts...)
+	cDes.MultiZoneConfig = canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(des.MultiZoneConfig, initial.MultiZoneConfig, opts...)
 	cDes.ShieldedInstanceConfig = canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig(des.ShieldedInstanceConfig, initial.ShieldedInstanceConfig, opts...)
 
 	return cDes
@@ -1617,6 +1629,7 @@ func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 	}
 	nw.ReservationAffinity = canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity(c, des.ReservationAffinity, nw.ReservationAffinity)
 	nw.NodeGroupAffinity = canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(c, des.NodeGroupAffinity, nw.NodeGroupAffinity)
+	nw.MultiZoneConfig = canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, des.MultiZoneConfig, nw.MultiZoneConfig)
 	nw.ShieldedInstanceConfig = canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig(c, des.ShieldedInstanceConfig, nw.ShieldedInstanceConfig)
 
 	return nw
@@ -1910,6 +1923,121 @@ func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 	for i, d := range des {
 		n := nw[i]
 		items = append(items, *canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(c, &d, &n))
+	}
+
+	return items
+}
+
+func canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(des, initial *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, opts ...dcl.ApplyOption) *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	if des == nil {
+		return initial
+	}
+	if des.empty {
+		return des
+	}
+
+	if initial == nil {
+		return des
+	}
+
+	cDes := &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+
+	if dcl.IsZeroValue(des.TargetShape) || (dcl.IsEmptyValueIndirect(des.TargetShape) && dcl.IsEmptyValueIndirect(initial.TargetShape)) {
+		// Desired and initial values are equivalent, so set canonical desired value to initial value.
+		cDes.TargetShape = initial.TargetShape
+	} else {
+		cDes.TargetShape = des.TargetShape
+	}
+
+	return cDes
+}
+
+func canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSlice(des, initial []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, opts ...dcl.ApplyOption) []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	if dcl.IsEmptyValueIndirect(des) {
+		return initial
+	}
+
+	if len(des) != len(initial) {
+
+		items := make([]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, 0, len(des))
+		for _, d := range des {
+			cd := canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(&d, nil, opts...)
+			if cd != nil {
+				items = append(items, *cd)
+			}
+		}
+		return items
+	}
+
+	items := make([]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, 0, len(des))
+	for i, d := range des {
+		cd := canonicalizeWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(&d, &initial[i], opts...)
+		if cd != nil {
+			items = append(items, *cd)
+		}
+	}
+	return items
+
+}
+
+func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c *DclClient, des, nw *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+
+	if des == nil {
+		return nw
+	}
+
+	if nw == nil {
+		if dcl.IsEmptyValueIndirect(des) {
+			c.Config.Logger.Info("Found explicitly empty value for WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig while comparing non-nil desired to nil actual.  Returning desired object.")
+			return des
+		}
+		return nil
+	}
+
+	return nw
+}
+
+func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSet(c *DclClient, des, nw []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	if des == nil {
+		return nw
+	}
+
+	// Find the elements in des that are also in nw and canonicalize them. Remove matched elements from nw.
+	var items []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	for _, d := range des {
+		matchedIndex := -1
+		for i, n := range nw {
+			if diffs, _ := compareWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigNewStyle(&d, &n, dcl.FieldName{}); len(diffs) == 0 {
+				matchedIndex = i
+				break
+			}
+		}
+		if matchedIndex != -1 {
+			items = append(items, *canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, &d, &nw[matchedIndex]))
+			nw = append(nw[:matchedIndex], nw[matchedIndex+1:]...)
+		}
+	}
+	// Also include elements in nw that are not matched in des.
+	items = append(items, nw...)
+
+	return items
+}
+
+func canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSlice(c *DclClient, des, nw []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	if des == nil {
+		return nw
+	}
+
+	// Lengths are unequal. A diff will occur later, so we shouldn't canonicalize.
+	// Return the original array.
+	if len(des) != len(nw) {
+		return nw
+	}
+
+	var items []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	for i, d := range des {
+		n := nw[i]
+		items = append(items, *canonicalizeNewWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, &d, &n))
 	}
 
 	return items
@@ -9843,6 +9971,13 @@ func compareWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNewStyl
 		diffs = append(diffs, ds...)
 	}
 
+	if ds, err := dcl.Diff(desired.MultiZoneConfig, actual.MultiZoneConfig, dcl.DiffInfo{ObjectFunction: compareWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigNewStyle, EmptyObject: EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("MultiZoneConfig")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
 	if ds, err := dcl.Diff(desired.ShieldedInstanceConfig, actual.ShieldedInstanceConfig, dcl.DiffInfo{ObjectFunction: compareWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfigNewStyle, EmptyObject: EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig, OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("ShieldedInstanceConfig")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
@@ -9916,6 +10051,35 @@ func compareWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGro
 	}
 
 	if ds, err := dcl.Diff(desired.NodeGroup, actual.NodeGroup, dcl.DiffInfo{Type: "ReferenceType", OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("NodeGroupUri")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig)
+	if !ok {
+		desiredNotPointer, ok := d.(WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig or *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig)
+	if !ok {
+		actualNotPointer, ok := a.(WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.TargetShape, actual.TargetShape, dcl.DiffInfo{OperationSelector: dcl.RequiresRecreate()}, fn.AddNest("TargetShape")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -13784,6 +13948,11 @@ func expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig(c *DclC
 	} else if !dcl.IsEmptyValueIndirect(v) {
 		m["nodeGroupAffinity"] = v
 	}
+	if v, err := expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, f.MultiZoneConfig, res); err != nil {
+		return nil, fmt.Errorf("error expanding MultiZoneConfig into multiZoneConfig: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["multiZoneConfig"] = v
+	}
 	if v, err := expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig(c, f.ShieldedInstanceConfig, res); err != nil {
 		return nil, fmt.Errorf("error expanding ShieldedInstanceConfig into shieldedInstanceConfig: %w", err)
 	} else if !dcl.IsEmptyValueIndirect(v) {
@@ -13817,6 +13986,7 @@ func flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfig(c *Dcl
 	r.Metadata = dcl.FlattenKeyValuePairs(m["metadata"])
 	r.ReservationAffinity = flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReservationAffinity(c, m["reservationAffinity"], res)
 	r.NodeGroupAffinity = flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity(c, m["nodeGroupAffinity"], res)
+	r.MultiZoneConfig = flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, m["multiZoneConfig"], res)
 	r.ShieldedInstanceConfig = flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig(c, m["shieldedInstanceConfig"], res)
 
 	return r
@@ -14054,6 +14224,120 @@ func flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGro
 		return EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity
 	}
 	r.NodeGroup = dcl.FlattenString(m["nodeGroupUri"])
+
+	return r
+}
+
+// expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigMap expands the contents of WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig into a JSON
+// request object.
+func expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigMap(c *DclClient, f map[string]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, res *WorkflowTemplate) (map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+
+	items := make(map[string]interface{})
+	for k, item := range f {
+		i, err := expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+		if i != nil {
+			items[k] = i
+		}
+	}
+
+	return items, nil
+}
+
+// expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSlice expands the contents of WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig into a JSON
+// request object.
+func expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSlice(c *DclClient, f []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, res *WorkflowTemplate) ([]map[string]interface{}, error) {
+	if f == nil {
+		return nil, nil
+	}
+
+	items := []map[string]interface{}{}
+	for _, item := range f {
+		i, err := expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, &item, res)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, i)
+	}
+
+	return items, nil
+}
+
+// flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigMap flattens the contents of WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig from a JSON
+// response object.
+func flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigMap(c *DclClient, i interface{}, res *WorkflowTemplate) map[string]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	a, ok := i.(map[string]interface{})
+	if !ok {
+		return map[string]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+	}
+
+	if len(a) == 0 {
+		return map[string]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+	}
+
+	items := make(map[string]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig)
+	for k, item := range a {
+		items[k] = *flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, item.(map[string]interface{}), res)
+	}
+
+	return items
+}
+
+// flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSlice flattens the contents of WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig from a JSON
+// response object.
+func flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigSlice(c *DclClient, i interface{}, res *WorkflowTemplate) []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	a, ok := i.([]interface{})
+	if !ok {
+		return []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+	}
+
+	if len(a) == 0 {
+		return []WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+	}
+
+	items := make([]WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, 0, len(a))
+	for _, item := range a {
+		items = append(items, *flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c, item.(map[string]interface{}), res))
+	}
+
+	return items
+}
+
+// expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig expands an instance of WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig into a JSON
+// request object.
+func expandWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c *DclClient, f *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig, res *WorkflowTemplate) (map[string]interface{}, error) {
+	if dcl.IsEmptyValueIndirect(f) {
+		return nil, nil
+	}
+
+	m := make(map[string]interface{})
+	if v := f.TargetShape; !dcl.IsEmptyValueIndirect(v) {
+		m["targetShape"] = v
+	}
+
+	return m, nil
+}
+
+// flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig flattens an instance of WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig from a JSON
+// response object.
+func flattenWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig(c *DclClient, i interface{}, res *WorkflowTemplate) *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig {
+	m, ok := i.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	r := &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+
+	if dcl.IsEmptyValueIndirect(i) {
+		return EmptyWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig
+	}
+	r.TargetShape = dcl.FlattenString(m["targetShape"])
 
 	return r
 }
@@ -21990,6 +22274,17 @@ func extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigFields(
 	if !dcl.IsEmptyValueIndirect(vNodeGroupAffinity) {
 		o.NodeGroupAffinity = vNodeGroupAffinity
 	}
+	vMultiZoneConfig := o.MultiZoneConfig
+	if vMultiZoneConfig == nil {
+		// note: explicitly not the empty object.
+		vMultiZoneConfig = &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+	}
+	if err := extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigFields(r, vMultiZoneConfig); err != nil {
+		return err
+	}
+	if !dcl.IsEmptyValueIndirect(vMultiZoneConfig) {
+		o.MultiZoneConfig = vMultiZoneConfig
+	}
 	vShieldedInstanceConfig := o.ShieldedInstanceConfig
 	if vShieldedInstanceConfig == nil {
 		// note: explicitly not the empty object.
@@ -22007,6 +22302,9 @@ func extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigReserva
 	return nil
 }
 func extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityFields(r *WorkflowTemplate, o *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity) error {
+	return nil
+}
+func extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigFields(r *WorkflowTemplate, o *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) error {
 	return nil
 }
 func extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfigFields(r *WorkflowTemplate, o *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig) error {
@@ -22730,6 +23028,17 @@ func postReadExtractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 	if !dcl.IsEmptyValueIndirect(vNodeGroupAffinity) {
 		o.NodeGroupAffinity = vNodeGroupAffinity
 	}
+	vMultiZoneConfig := o.MultiZoneConfig
+	if vMultiZoneConfig == nil {
+		// note: explicitly not the empty object.
+		vMultiZoneConfig = &WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig{}
+	}
+	if err := extractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigFields(r, vMultiZoneConfig); err != nil {
+		return err
+	}
+	if !dcl.IsEmptyValueIndirect(vMultiZoneConfig) {
+		o.MultiZoneConfig = vMultiZoneConfig
+	}
 	vShieldedInstanceConfig := o.ShieldedInstanceConfig
 	if vShieldedInstanceConfig == nil {
 		// note: explicitly not the empty object.
@@ -22747,6 +23056,9 @@ func postReadExtractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfi
 	return nil
 }
 func postReadExtractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinityFields(r *WorkflowTemplate, o *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigNodeGroupAffinity) error {
+	return nil
+}
+func postReadExtractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfigFields(r *WorkflowTemplate, o *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigMultiZoneConfig) error {
 	return nil
 }
 func postReadExtractWorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfigFields(r *WorkflowTemplate, o *WorkflowTemplatePlacementManagedClusterConfigGceClusterConfigShieldedInstanceConfig) error {
