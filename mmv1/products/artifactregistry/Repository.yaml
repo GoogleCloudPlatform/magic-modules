@@ -839,7 +839,6 @@ properties:
     # Request-time validation flag; not persisted by the API or returned on GET.
     is_missing_in_cai: true
     ignore_read: true
-    send_empty_value: true
   - name: platformLogsConfig
     type: NestedObject
     description: |-
