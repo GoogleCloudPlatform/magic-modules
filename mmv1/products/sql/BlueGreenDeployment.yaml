@@ -1,0 +1,256 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: BlueGreenDeployment
+description: |
+  A BlueGreenDeployment resource represents a Cloud SQL blue-green deployment setup.
+references:
+  guides:
+    Blue-green deployments overview: https://cloud.google.com/sql/docs/mysql/blue-green-deployments-overview
+  api: https://cloud.google.com/sql/docs/admin-api/rest/v1/projects.locations.blueGreenDeployments
+base_url: projects/{{project}}/locations/{{location}}/blueGreenDeployments
+self_link: projects/{{project}}/locations/{{location}}/blueGreenDeployments/{{blue_green_deployment_id}}
+create_url: projects/{{project}}/locations/{{location}}/blueGreenDeployments?blueGreenDeploymentId={{blue_green_deployment_id}}
+delete_url: projects/{{project}}/locations/{{location}}/blueGreenDeployments/{{blue_green_deployment_id}}
+id_format: projects/{{project}}/locations/{{location}}/blueGreenDeployments/{{blue_green_deployment_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/blueGreenDeployments/{{blue_green_deployment_id}}
+  - '{{project}}/{{location}}/{{blue_green_deployment_id}}'
+  - '{{location}}/{{blue_green_deployment_id}}'
+immutable: true
+timeouts:
+  insert_minutes: 60
+  delete_minutes: 60
+async:
+  type: OpAsync
+  operation:
+    base_url: projects/{{project}}/operations/{{op_id}}
+  result:
+    resource_inside_response: false
+autogen_status: Qmx1ZUdyZWVuRGVwbG95bWVudEF1dG9nZW5WMkFnZW50
+samples:
+  - name: sql_blue_green_deployment_basic
+    primary_resource_id: default
+    steps:
+      - name: sql_blue_green_deployment_basic
+        resource_id_vars:
+          deployment_name: my-deployment
+          instance_name: my-instance
+  - name: sql_blue_green_deployment_requested_config
+    primary_resource_id: default
+    steps:
+      - name: sql_blue_green_deployment_requested_config
+        resource_id_vars:
+          deployment_name: my-deployment
+          instance_name: my-instance
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location in which the blue-green deployment will be created in.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: blueGreenDeploymentId
+    type: String
+    description: |
+      The ID to use for the blue-green deployment, which will become the final component of the deployment's resource name.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    output: true
+    description: |
+      Output only. The full resource name of the deployment.
+      Format: projects/{project}/locations/{location}/blueGreenDeployments/{deployment_id}
+  - name: description
+    type: String
+    description: |
+      User-provided description for the deployment.
+  - name: createTime
+    type: String
+    output: true
+    description: |
+      Output only. The time when the deployment was created.
+  - name: state
+    type: String
+    output: true
+    description: |
+      Output only. The current state of the blue-green deployment.
+  - name: sourceInstance
+    type: String
+    required: true
+    immutable: true
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.tmpl
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    description: |
+      The source Cloud SQL instance (the "blue" instance) for the deployment.
+      Accepts either the instance name or the full resource name (projects/{project}/instances/{instance}).
+  - name: switchoverTargetInstance
+    type: String
+    output: true
+    description: |
+      Output only. The full resource name of the primary target instance (the "green" instance) that will be promoted during switchover.
+  - name: errorDetail
+    type: String
+    output: true
+    description: |
+      Output only. Provides details on why switchover is not possible.
+  - name: deploymentMappings
+    type: Array
+    output: true
+    description: |
+      Output only. A list representing the pairs of source and target instances in the deployment.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: source
+          type: NestedObject
+          output: true
+          description: Output only. Details about the source instance.
+          properties:
+            - name: instance
+              type: String
+              output: true
+              description: The full resource name of the instance.
+            - name: connection
+              type: String
+              output: true
+              description: The instance connection name.
+            - name: dns
+              type: String
+              output: true
+              description: The unique DNS name for this instance.
+            - name: ipMappings
+              type: Array
+              output: true
+              description: The list of IP addresses for this instance.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: ipAddress
+                    type: String
+                    output: true
+                    description: The IP address assigned.
+                  - name: type
+                    type: String
+                    output: true
+                    description: The type of this IP address.
+                  - name: timeToRetire
+                    type: String
+                    output: true
+                    description: The due time for this IP to be retired.
+        - name: target
+          type: NestedObject
+          output: true
+          description: Output only. Details about the target instance.
+          properties:
+            - name: instance
+              type: String
+              output: true
+              description: The full resource name of the instance.
+            - name: connection
+              type: String
+              output: true
+              description: The instance connection name.
+            - name: dns
+              type: String
+              output: true
+              description: The unique DNS name for this instance.
+            - name: ipMappings
+              type: Array
+              output: true
+              description: The list of IP addresses for this instance.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: ipAddress
+                    type: String
+                    output: true
+                    description: The IP address assigned.
+                  - name: type
+                    type: String
+                    output: true
+                    description: The type of this IP address.
+                  - name: timeToRetire
+                    type: String
+                    output: true
+                    description: The due time for this IP to be retired.
+        - name: state
+          type: String
+          output: true
+          description: Output only. The state of this specific source-target pair.
+        - name: diffs
+          type: Array
+          output: true
+          description: Output only. Describes the list of differences for the SourceTargetPairedNode.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: field
+                type: String
+                output: true
+                description: The name of the field that differs in the blue and green instances.
+              - name: sourceValue
+                type: String
+                output: true
+                description: The value on the source instance.
+              - name: targetValue
+                type: String
+                output: true
+                description: The value on the target instance.
+  - name: deploymentTasks
+    type: NestedObject
+    output: true
+    description: Output only. Combined list of tasks for all paired nodes in the deployment.
+    properties:
+      - name: task
+        type: Array
+        output: true
+        description: Tasks performed or being performed on the paired nodes of the deployment.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: type
+              type: String
+              output: true
+              description: The type of the task.
+            - name: state
+              type: String
+              output: true
+              description: The current state of the task.
+            - name: startTime
+              type: String
+              output: true
+              description: Task start time.
+            - name: endTime
+              type: String
+              output: true
+              description: Task end time.
+            - name: errorMessage
+              type: String
+              output: true
+              description: Optional error details if the task state is FAILED.
+  - name: requestedConfig
+    type: NestedObject
+    immutable: true
+    description: |
+      The configuration intended for the target instance(s) when the deployment was created.
+    properties:
+      - name: databaseVersion
+        type: String
+        description: |
+          The target database major version for the upgrade. For example, MYSQL_8_0.
