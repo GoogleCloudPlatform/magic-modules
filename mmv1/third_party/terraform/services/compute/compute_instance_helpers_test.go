@@ -205,7 +205,8 @@ func TestRunComputeInstanceCreateWithStockoutRetry_StockoutRetryTimeout(t *testi
 	t.Parallel()
 	inserts := 0
 	r := newTestComputeInstanceCreateRetry(context.Background())
-	r.stockoutRetryTimeout = time.Millisecond
+	r.stockoutRetryTimeout = 250 * time.Millisecond
+	r.retryDelay = func(int) time.Duration { return 100 * time.Millisecond }
 	r.insert = func() (map[string]interface{}, error) {
 		inserts++
 		return nil, computeInstanceStockoutTestError()
