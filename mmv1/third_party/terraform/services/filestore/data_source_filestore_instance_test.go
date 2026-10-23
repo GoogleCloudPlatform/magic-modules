@@ -35,7 +35,7 @@ resource "google_filestore_instance" "filestore" {
   description = "A basic filestore instance created during testing."
 
   file_shares {
-    capacity_gb = 1536
+    capacity_gb = 1024
     name        = "share"
   }
 
