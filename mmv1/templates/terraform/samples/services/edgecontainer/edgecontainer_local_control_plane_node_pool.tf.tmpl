@@ -34,7 +34,7 @@ resource "google_edgecontainer_node_pool" "{{$.PrimaryResourceId}}" {
   cluster = google_edgecontainer_cluster.cluster.name
   location = "us-central1"
   node_location = "us-central1-edge-example-edgesite"
-  node_count = 3
+  node_count = 1
 }
 
 data "google_project" "project" {}

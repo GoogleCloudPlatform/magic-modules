@@ -23,7 +23,7 @@ resource "google_edgecontainer_node_pool" "node_pool" {
   cluster = google_edgecontainer_cluster.cluster.name
   location = "us-central1"
   node_location = "us-central1-edge-example-edgesite"
-  node_count = 3
+  node_count = 1
 }
 
 resource "google_edgecontainer_vpn_connection" "{{$.PrimaryResourceId}}" {
