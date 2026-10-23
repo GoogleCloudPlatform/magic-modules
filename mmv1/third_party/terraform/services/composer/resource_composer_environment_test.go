@@ -1523,25 +1523,25 @@ resource "google_composer_environment" "test" {
 
     workloads_config {
       scheduler {
-        cpu          = 1.25
-        memory_gb    = 2.5
-        storage_gb   = 5.4
-        count        = 2
+        cpu          = 0.5
+        memory_gb    = 1.875
+        storage_gb   = 1
+        count        = 1
       }
       web_server {
-        cpu          = 1.75
-        memory_gb    = 3.0
-        storage_gb   = 4.4
+        cpu          = 0.5
+        memory_gb    = 1.875
+        storage_gb   = 1
       }
       worker {
         cpu          = 0.5
-        memory_gb    = 2.0
-        storage_gb   = 3.4
-        min_count    = 2
-        max_count    = 5
+        memory_gb    = 1.875
+        storage_gb   = 1
+        min_count    = 1
+        max_count    = 2
       }
     }
-    environment_size = "ENVIRONMENT_SIZE_MEDIUM"
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
     private_environment_config {
       enable_private_endpoint                 = true
       cloud_composer_network_ipv4_cidr_block   = "10.3.192.0/24"
@@ -1606,33 +1606,33 @@ resource "google_composer_environment" "test" {
 
     workloads_config {
       scheduler {
-        cpu         = 1.25
-        memory_gb   = 2.5
-        storage_gb   = 5.4
-        count       = 2
+        cpu         = 0.5
+        memory_gb   = 1.875
+        storage_gb   = 1
+        count       = 1
       }
       web_server {
-        cpu         = 1.75
-        memory_gb   = 3.0
-        storage_gb   = 4.4
+        cpu         = 0.5
+        memory_gb   = 1.875
+        storage_gb   = 1
       }
       worker {
         cpu         = 0.5
-        memory_gb   = 2.0
-        storage_gb   = 3.4
-        min_count   = 2
-        max_count   = 5
+        memory_gb   = 1.875
+        storage_gb   = 1
+        min_count   = 1
+        max_count   = 2
       }
       triggerer {
         cpu         = 0.5
-        memory_gb   = 2.0
+        memory_gb   = 1.0
         count         = 1
       }
     }
     database_config {
       zone = "us-east1-c"
     }
-    environment_size = "ENVIRONMENT_SIZE_MEDIUM"
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
     data_retention_config {
       task_logs_retention_config {
         storage_mode = "CLOUD_LOGGING_ONLY"
@@ -1794,25 +1794,25 @@ resource "google_composer_environment" "test" {
 
     workloads_config {
       scheduler {
-        cpu         = 1.25
-        memory_gb   = 2.5
-        storage_gb  = 5.4
+        cpu         = 0.5
+        memory_gb   = 1.875
+        storage_gb  = 1
         count       = 2
       }
       web_server {
-        cpu         = 1.75
-        memory_gb   = 3.0
-        storage_gb  = 4.4
+        cpu         = 0.5
+        memory_gb   = 1.875
+        storage_gb  = 1
       }
       worker {
         cpu         = 0.5
-        memory_gb   = 2.0
-        storage_gb  = 3.4
+        memory_gb   = 1.875
+        storage_gb  = 1
         min_count   = 2
-        max_count   = 5
+        max_count   = 3
       }
     }
-    environment_size = "ENVIRONMENT_SIZE_MEDIUM"
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
     resilience_mode = "HIGH_RESILIENCE"
     private_environment_config {
       enable_private_endpoint                  = true
@@ -1981,25 +1981,25 @@ resource "google_composer_environment" "test" {
 
     workloads_config {
       scheduler {
-        cpu         = 1.25
-        memory_gb   = 2.5
-        storage_gb  = 5.4
+        cpu         = 0.5
+        memory_gb   = 1.875
+        storage_gb  = 1
         count       = 2
       }
       web_server {
-        cpu         = 1.75
-        memory_gb   = 3.0
-        storage_gb  = 4.4
+        cpu         = 0.5
+        memory_gb   = 1.875
+        storage_gb  = 1
       }
       worker {
         cpu         = 0.5
-        memory_gb   = 2.0
-        storage_gb  = 3.4
+        memory_gb   = 1.875
+        storage_gb  = 1
         min_count   = 2
-        max_count   = 5
+        max_count   = 3
       }
     }
-    environment_size = "ENVIRONMENT_SIZE_MEDIUM"
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
     resilience_mode = "STANDARD_RESILIENCE"
     private_environment_config {
       enable_private_endpoint                  = true
@@ -2120,22 +2120,22 @@ resource "google_composer_environment" "test" {
 
     workloads_config {
       scheduler {
-        cpu         = 2.25
-        memory_gb   = 3.5
-        storage_gb  = 6.4
-        count       = 3
+        cpu         = 1.0
+        memory_gb   = 2.0
+        storage_gb  = 2
+        count       = 2
       }
       web_server {
-        cpu         = 2.75
-        memory_gb   = 4.0
-        storage_gb  = 5.4
+        cpu         = 1.0
+        memory_gb   = 2.0
+        storage_gb  = 2
       }
       worker {
-        cpu         = 1.5
-        memory_gb   = 3.0
-        storage_gb  = 4.4
-        min_count   = 3
-        max_count   = 6
+        cpu         = 1.0
+        memory_gb   = 2.0
+        storage_gb  = 2
+        min_count   = 2
+        max_count   = 3
       }
       triggerer {
         cpu         = 0.75
@@ -2143,7 +2143,7 @@ resource "google_composer_environment" "test" {
         count       = 1
       }
     }
-    environment_size = "ENVIRONMENT_SIZE_LARGE"
+    environment_size = "ENVIRONMENT_SIZE_MEDIUM"
     data_retention_config {
       task_logs_retention_config {
         storage_mode = "CLOUD_LOGGING_AND_CLOUD_STORAGE"
@@ -2379,7 +2379,7 @@ resource "google_composer_environment" "test" {
         memory_gb  = 1.875
         storage_gb = 1
         min_count  = 1
-        max_count  = 3
+        max_count  = 2
       }
     }
 
@@ -2455,7 +2455,7 @@ resource "google_composer_environment" "test" {
         memory_gb  = 1.875
         storage_gb = 1
         min_count  = 1
-        max_count  = 3
+        max_count  = 2
       }
     }
 
