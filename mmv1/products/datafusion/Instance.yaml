@@ -101,6 +101,10 @@ samples:
       - name: data_fusion_instance_cmek
         resource_id_vars:
           instance_name: my-instance
+          prober_test_run: ""
+        test_vars_overrides:
+          # Mark for testing to avoid service networking connection usage that is not cleaned up
+          prober_test_run: '`options = { prober_test_run = "true" }`'
   - name: data_fusion_instance_enterprise
     primary_resource_id: enterprise_instance
     tgc_skip_test: fix it after patch_revision is released in v7.18.0
@@ -119,6 +123,10 @@ samples:
       - name: data_fusion_instance_event
         resource_id_vars:
           instance_name: my-instance
+          prober_test_run: ""
+        test_vars_overrides:
+          # Mark for testing to avoid service networking connection usage that is not cleaned up
+          prober_test_run: '`options = { prober_test_run = "true" }`'
   - name: data_fusion_instance_zone
     primary_resource_id: zone
     tgc_skip_test: fix it after patch_revision is released in v7.18.0
@@ -126,6 +134,10 @@ samples:
       - name: data_fusion_instance_zone
         resource_id_vars:
           instance_name: my-instance
+          prober_test_run: ""
+        test_vars_overrides:
+          # Mark for testing to avoid service networking connection usage that is not cleaned up
+          prober_test_run: '`options = { prober_test_run = "true" }`'
   - name: data_fusion_instance_patch_revision
     primary_resource_id: data_fusion_instance_patch_revision
     tgc_skip_test: fix it after patch_revision is released in v7.18.0
@@ -133,6 +145,10 @@ samples:
       - name: data_fusion_instance_patch_revision
         resource_id_vars:
           instance_name: my-instance
+          prober_test_run: ""
+        test_vars_overrides:
+          # Mark for testing to avoid service networking connection usage that is not cleaned up
+          prober_test_run: '`options = { prober_test_run = "true" }`'
 parameters:
   - name: region
     type: String
