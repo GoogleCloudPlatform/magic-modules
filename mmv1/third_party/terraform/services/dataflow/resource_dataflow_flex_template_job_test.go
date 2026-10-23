@@ -1103,8 +1103,8 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
     schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = google_pubsub_topic.example.id
-  	workerMachineType = "n1-standard-2"
-  	maxNumWorkers = 2
+  	workerMachineType = "n1-standard-1"
+  	maxNumWorkers = 1
   }
   labels = {
    "my_labels" = "value-1"
@@ -1179,7 +1179,7 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
     schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
     topic = google_pubsub_topic.example.id
-  	maxNumWorkers = 3
+  	maxNumWorkers = 2
   }
   labels = {
    "my_labels" = "value-update"
@@ -1766,7 +1766,7 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
     my_labels = "value"
   }
   service_account_email = google_service_account.dataflow-sa[0].email
-  machine_type = "n1-standard-2"
+  machine_type = "n1-standard-1"
 }
 `, topicName, randStr, bucket, job)
 }
@@ -1851,7 +1851,7 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
 	default_key1 = "value1"
   }
   service_account_email = google_service_account.dataflow-sa[0].email
-  machine_type = "n1-standard-2"
+  machine_type = "n1-standard-1"
 }
 `, topicName, randStr, bucket, job)
 }
@@ -1936,7 +1936,7 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
 	default_key1 = "value1"
   }
   service_account_email = google_service_account.dataflow-sa[0].email
-  machine_type = "n1-standard-2"
+  machine_type = "n1-standard-1"
 }
 `, topicName, randStr, bucket, job)
 }
