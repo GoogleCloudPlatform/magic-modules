@@ -5,7 +5,7 @@ resource "google_sql_database_instance" "source_csql" {
   name             = "{{index $.ResourceIdVars "source_csql"}}"
   database_version = "POSTGRES_15"
   settings {
-    tier = "db-custom-2-13312"
+    tier = "db-f1-micro"
     deletion_protection_enabled = false
   }
   deletion_protection = false
