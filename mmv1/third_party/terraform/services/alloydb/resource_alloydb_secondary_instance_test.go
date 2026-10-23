@@ -272,7 +272,7 @@ resource "google_alloydb_instance" "read_pool" {
   instance_id   = "tf-test-alloydb-read-instance%{random_suffix}-read"
   instance_type = "READ_POOL"
   read_pool_config {
-    node_count = 4
+    node_count = 1
   }
   depends_on = [google_alloydb_instance.secondary]
 }
