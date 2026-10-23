@@ -102,8 +102,8 @@ resource "google_vector_search_index" "example-index" {
   dedicated_infrastructure {
     mode = "PERFORMANCE_OPTIMIZED"
     autoscaling_spec {
-      min_replica_count = 2
-      max_replica_count = 4
+      min_replica_count = 1
+      max_replica_count = 2
     }
   }
 }
@@ -163,8 +163,8 @@ resource "google_vector_search_index" "example-index" {
   dedicated_infrastructure {
     mode = "PERFORMANCE_OPTIMIZED"
     autoscaling_spec {
-      min_replica_count = 3
-      max_replica_count = 6
+      min_replica_count = 2
+      max_replica_count = 3
     }
   }
 }
