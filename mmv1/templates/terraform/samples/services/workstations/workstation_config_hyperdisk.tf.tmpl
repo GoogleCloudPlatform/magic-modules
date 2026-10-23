@@ -25,7 +25,7 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   host {
     gce_instance {
       # C3 machine types require Hyperdisk storage
-      machine_type = "c3-standard-22"
+      machine_type = "c3-standard-4"
     }
   }
 
