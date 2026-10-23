@@ -73,6 +73,7 @@ resource "google_storage_bucket" "bucket" {
   name                        = "{{index $.ResourceIdVars "bucket_name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
+  force_destroy               = true
 }
 
 resource "google_storage_bucket_iam_member" "viewer" {
@@ -159,7 +160,7 @@ resource "google_datastream_stream" "{{$.PrimaryResourceId}}" {
                     }
                 }
             }
-            max_concurrent_cdc_tasks = 5
+            max_concurrent_cdc_tasks = 1
         }
     }
     destination_config {
