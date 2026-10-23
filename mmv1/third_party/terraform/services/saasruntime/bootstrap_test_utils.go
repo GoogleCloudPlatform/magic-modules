@@ -1,7 +1,5 @@
 package saasruntime
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 	"log"
@@ -20,16 +18,16 @@ import (
 const (
 	// Prefix of the isolated test project; BootstrapProject appends a suffix
 	// derived from the default test project.
-	bootstrapAdcProjectPrefix  = "tf-boot-saas-"
-	bootstrapAdcLocation       = "us-central1"
-	bootstrapAdcSpace          = "tf-bootstrap-space"
-	bootstrapAdcStandard       = "tf-bootstrap-sa"
-	bootstrapAdcCatalog        = "tf-bootstrap-catalog"
-	bootstrapAdcShare          = "tf-bootstrap-share"
-	bootstrapAdcComposite      = "tf-bootstrap-composite"
-	bootstrapAdcComponent      = "sa-comp-1"
+	bootstrapAdcProjectPrefix   = "tf-boot-saas-"
+	bootstrapAdcLocation        = "us-central1"
+	bootstrapAdcSpace           = "tf-bootstrap-space"
+	bootstrapAdcStandard        = "tf-bootstrap-sa"
+	bootstrapAdcCatalog         = "tf-bootstrap-catalog"
+	bootstrapAdcShare           = "tf-bootstrap-share"
+	bootstrapAdcComposite       = "tf-bootstrap-composite"
+	bootstrapAdcComponent       = "sa-comp-1"
 	bootstrapAdcSharedSATmplRev = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/64f28f7c-92c7-4c8f-aa77-b0cab03fd6a5/revisions/r-10"
-	bootstrapAdcBaseUrl        = "https://designcenter.googleapis.com/v1/"
+	bootstrapAdcBaseUrl         = "https://designcenter.googleapis.com/v1/"
 )
 
 // bootstrapAdcProjectServices are the APIs that the ADC fixture and the
@@ -142,8 +140,8 @@ func BootstrapSaasRuntimeApplicationTemplate(t *testing.T) (project, template st
 	catalogRevision := catalogTemplate + "/revisions/r-1"
 	if !b.exists(catalogRevision) {
 		b.wait(b.create(catalogTemplate+"/revisions?catalog_template_revision_id=r-1", map[string]interface{}{
-			"name":                             catalogRevision,
-			"type":                             "APPLICATION",
+			"name":                              catalogRevision,
+			"type":                              "APPLICATION",
 			"applicationTemplateRevisionSource": standard + "/revisions/r-1",
 		}))
 	}
@@ -352,4 +350,3 @@ func (b *adcBootstrapper) ensureAppHubBoundary() {
 	log.Printf("[DEBUG] Setting App Hub boundary of %s to %s", b.project, crmNode)
 	b.waitAt("https://apphub.googleapis.com/v1/", b.send("PATCH", boundary+"?updateMask=crmNode", map[string]interface{}{"crmNode": crmNode}))
 }
-{{- end }}
