@@ -16,7 +16,7 @@ resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}"
 
 resource "google_compute_instance" "source" {
   name = "{{index $.ResourceIdVars "source_instance"}}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   boot_disk {
     initialize_params {
@@ -33,7 +33,7 @@ resource "google_compute_instance" "source" {
 
 resource "google_compute_instance" "destination" {
   name = "{{index $.ResourceIdVars "dest_instance"}}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   boot_disk {
     initialize_params {
