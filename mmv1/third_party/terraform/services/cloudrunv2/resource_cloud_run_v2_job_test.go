@@ -70,8 +70,8 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
       annotations = {
         temp-annotation-1 = "temp-value-1"
       }
-      parallelism = 4
-      task_count = 4
+      parallelism = 2
+      task_count = 2
       delay_execution = false
       template {
         timeout = "300s"
@@ -96,8 +96,8 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
           }
           resources {
             limits = {
-              cpu = "4"
-              memory = "2Gi"
+              cpu = "1"
+              memory = "512Mi"
             }
           }
         }
@@ -145,8 +145,8 @@ resource "google_cloud_run_v2_job" "default" {
     annotations = {
       temp-annotation-1 = "temp-value-update"
     }
-    parallelism = 2
-    task_count = 8
+    parallelism = 1
+    task_count = 3
     delay_execution = true
     template {
       timeout = "500s"
@@ -172,7 +172,7 @@ resource "google_cloud_run_v2_job" "default" {
         resources {
           limits = {
             cpu = "2"
-            memory = "8Gi"
+            memory = "1Gi"
           }
         }
       }
@@ -193,7 +193,7 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
+  machine_type = "e2-micro"
   min_instances = 2
   max_instances = 3
   region        = "us-central1"
