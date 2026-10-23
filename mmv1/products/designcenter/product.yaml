@@ -1,0 +1,21 @@
+---
+name: DesignCenter
+display_name: Application Design Center
+versions:
+  - name: ga
+    base_url: "https://designcenter.googleapis.com/v1/"
+  - name: beta
+    base_url: "https://designcenter.googleapis.com/v1/"
+scopes:
+  - "https://www.googleapis.com/auth/cloud-platform"
+async:
+  actions: ['create', 'delete', 'update']
+  type: "OpAsync"
+  operation:
+    base_url: "{{op_id}}"
+  result:
+    path: "response"
+    resource_inside_response: true
+  error:
+    path: "error"
+    message: "message"

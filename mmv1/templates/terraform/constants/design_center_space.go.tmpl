@@ -1,0 +1,15 @@
+// IsDesignCenterServiceAgentNotFoundError retries Space requests that fail with
+// 404 when the Design Center service agent (service-{project_number}@gcp-sa-designcenter.iam.gserviceaccount.com)
+// has just been provisioned on first use and has not yet replicated to Spanner
+// when the Space's GCS bucket is created.
+func IsDesignCenterServiceAgentNotFoundError(err error) (bool, string) {
+	if err == nil {
+		return false, ""
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "gcp-sa-designcenter.iam.gserviceaccount.com") &&
+		strings.Contains(msg, "ServiceAccountInfoDataType") {
+		return true, "Waiting for Design Center service agent to propagate"
+	}
+	return false, ""
+}

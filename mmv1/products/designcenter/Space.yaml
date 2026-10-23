@@ -1,0 +1,86 @@
+---
+name: Space
+description: A Space in the Application Design Center.
+base_url: projects/{{project}}/locations/{{location}}/spaces
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces?spaceId={{space_id}}
+update_verb: PATCH
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+async:
+  actions: []
+error_retry_predicates:
+  - 'IsDesignCenterServiceAgentNotFoundError'
+custom_code:
+  constants: 'templates/terraform/constants/design_center_space.go.tmpl'
+iam_policy:
+  method_name_separator: ':'
+  parent: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+  parent_resource_attribute: space_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+    - '{{space_id}}'
+  fetch_iam_policy_verb: GET
+properties:
+  - name: location
+    type: String
+    description: The location of the space.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: space_id
+    type: String
+    description: The ID of the space.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: displayName
+    type: String
+    description: The display name of the space.
+  - name: description
+    type: String
+    description: The description of the space.
+  - name: enableGcpSharedTemplates
+    type: Boolean
+    description: Whether to enable GCP shared templates.
+    send_empty_value: true
+  - name: gcsBucket
+    type: String
+    description: The GCS bucket for the space.
+    default_from_api: true
+  - name: tags
+    type: KeyValuePairs
+    description: Tags for the space.
+    immutable: true
+    ignore_read: true
+  - name: name
+    type: String
+    description: The resource name of the space.
+    output: true
+  - name: createTime
+    type: Time
+    description: The time when the space was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: The time when the space was last updated.
+    output: true
+samples:
+  - name: designcenter_space_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_space_basic
+        resource_id_vars:
+          space_id: example-space
+        vars:
+          project: my-project-name
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+      - name: designcenter_space_update
+        resource_id_vars:
+          space_id: example-space
+        vars:
+          project: my-project-name
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)

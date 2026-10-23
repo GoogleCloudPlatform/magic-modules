@@ -1,0 +1,49 @@
+resource "google_design_center_space" "example" {
+  project                     = "{{index $.Vars "project"}}"
+  location                    = "us-central1"
+  space_id                    = "{{index $.ResourceIdVars "space_id"}}"
+  display_name                = "Example Design Center Space"
+  description                 = "Managed by Terraform"
+  enable_gcp_shared_templates = true
+}
+
+resource "google_design_center_catalog" "example" {
+  project      = google_design_center_space.example.project
+  location     = google_design_center_space.example.location
+  space        = google_design_center_space.example.space_id
+  catalog_id   = "example-catalog"
+  display_name = "Example Catalog"
+  description  = "Catalog of approved architectural templates"
+}
+
+resource "google_design_center_catalog_template" "example" {
+  project             = google_design_center_space.example.project
+  location            = google_design_center_space.example.location
+  space               = google_design_center_space.example.space_id
+  catalog             = google_design_center_catalog.example.catalog_id
+  catalog_template_id = "example-template"
+  display_name        = "Example Component Template"
+  description         = "Example Catalog Template Description"
+  template_category   = "COMPONENT_TEMPLATE"
+}
+
+resource "google_design_center_application_template" "example" {
+  project                 = google_design_center_space.example.project
+  location                = google_design_center_space.example.location
+  space                   = google_design_center_space.example.space_id
+  application_template_id = "example-app-template"
+  display_name            = "Example Application Template"
+  description             = "Application template with compliance policy"
+}
+
+resource "google_design_center_policy" "example" {
+  project              = google_design_center_space.example.project
+  location             = google_design_center_space.example.location
+  space                = google_design_center_space.example.space_id
+  application_template = google_design_center_application_template.example.application_template_id
+  policy_id            = "example-policy"
+  display_name         = "Example Compliance Policy"
+  description          = "Example Policy Description"
+  policy_type          = "COMPLIANCE_FRAMEWORK"
+  policy_uri           = "organizations/123456789/locations/global/frameworks/cis-gcp-v2"
+}
