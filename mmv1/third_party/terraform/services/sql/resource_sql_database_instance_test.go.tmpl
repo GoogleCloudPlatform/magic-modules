@@ -11324,3 +11324,93 @@ resource "google_sql_database_instance" "instance" {
 `, instanceName, dbVersion)
 }
 {{- end }}
+
+
+func TestAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-sqlserver-pvp-%s", acctest.RandString(10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.enable_password_policy", "true"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_length", "10"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_history_length", "5"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_age", "86400s"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_maximum_age", "2592000s"),
+				),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// root_password is not returned by the API; deletion_protection is a Terraform-only field
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(instanceName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.enable_password_policy", "false"),
+				),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// root_password is not returned by the API; deletion_protection is a Terraform-only field
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(instanceName string, enabled bool) string {
+	if enabled {
+		return fmt.Sprintf(`
+resource "google_sql_database_instance" "default" {
+  name                = "%s"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
+
+  settings {
+    tier = "db-custom-1-3840"
+
+    sql_server_password_validation_policy {
+      enable_password_policy  = true
+      password_minimum_length = 10
+      password_history_length = 5
+      password_minimum_age    = "86400s"
+      password_maximum_age    = "2592000s"
+    }
+  }
+}
+`, instanceName)
+	}
+
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "default" {
+  name                = "%s"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
+
+  settings {
+    tier = "db-custom-1-3840"
+
+    sql_server_password_validation_policy {
+      enable_password_policy = false
+    }
+  }
+}
+`, instanceName)
+}
+
