@@ -104,6 +104,14 @@ properties:
       Format: projects/{{project}}/locations/{{location}}/buckets/{{bucket}}/datasets/{{dataset}}.
     required: true
     immutable: true
+  - name: 'autoEnroll'
+    type: Boolean
+    description: |-
+      When true, agents created in Agent Engine that share log and observability
+      buckets with this scope are automatically enrolled as MonitoredAgents.
+      When false, agents must be enrolled explicitly via MonitoredAgent
+      operations.
+    immutable: true
   - name: 'state'
     type: Enum
     description: |-
