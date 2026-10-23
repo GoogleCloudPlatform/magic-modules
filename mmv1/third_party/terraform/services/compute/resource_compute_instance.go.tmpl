@@ -349,6 +349,7 @@ func runComputeInstanceCreateWithStockoutRetry(r computeInstanceCreateRetry) err
 		if delay > remaining {
 			delay = remaining
 		}
+		log.Printf("[INFO] Compute instance stockout on create attempt %d; backoff %s (retry window remaining %s): %s", retryNumber+1, delay, remaining, err)
 		timer := time.NewTimer(delay)
 		select {
 		case <-r.ctx.Done():

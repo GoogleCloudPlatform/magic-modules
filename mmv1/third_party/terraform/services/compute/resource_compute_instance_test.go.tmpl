@@ -255,7 +255,6 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 
 	var instance map[string]interface{}
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	const retryTimeoutSeconds = 600
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -263,7 +262,7 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_basicWithStockoutRetry(instanceName, retryTimeoutSeconds),
+				Config: testAccComputeInstance_basic(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -275,8 +274,6 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 					testAccCheckComputeInstanceDisk(&instance, instanceName, true, true),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "current_status", "RUNNING"),
 					resource.TestCheckResourceAttrSet("google_compute_instance.foobar", "creation_timestamp"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "retry_on_stockout", "true"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "stockout_retry_timeout_seconds", fmt.Sprint(retryTimeoutSeconds)),
 
 					// by default, DeletionProtection is implicitly false. This should be false on any
 					// instance resource without an explicit deletion_protection = true declaration.
@@ -284,11 +281,32 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 					testAccCheckComputeInstanceHasConfiguredDeletionProtection(&instance, false),
 				),
 			},
-			// Retry settings are client-side create options and cannot be recovered from the Compute API on import.
-			computeInstanceImportStep("us-central1-a", instanceName, []string{
-				"metadata.baz", "metadata.foo", "desired_status", "current_status", "labels", "terraform_labels",
-				"retry_on_stockout", "stockout_retry_timeout_seconds",
-			}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"metadata.baz", "metadata.foo", "desired_status", "current_status", "labels", "terraform_labels"}),
+		},
+	})
+}
+
+func TestAccComputeInstance_stockoutRetry(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	const retryTimeoutSeconds = 60
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_basicWithStockoutRetry(instanceName, retryTimeoutSeconds),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "current_status", "RUNNING"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "retry_on_stockout", "true"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "stockout_retry_timeout_seconds", fmt.Sprint(retryTimeoutSeconds)),
+				),
+			},
 		},
 	})
 }
@@ -7159,7 +7177,7 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_basicWithStockoutRetry(instance string, retryTimeoutSeconds int) string {
-	return testAccComputeInstance_basicWithMachineType(instance, "n4d-standard-2", fmt.Sprintf(`
+	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium", fmt.Sprintf(`
   retry_on_stockout = true
   stockout_retry_timeout_seconds = %d`, retryTimeoutSeconds))
 }
