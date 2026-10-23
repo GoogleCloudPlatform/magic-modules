@@ -510,9 +510,11 @@ properties:
     properties:
       - name: instanceUri
         type: String
+        required: true
         description: The URL to the user's Salesforce Data Cloud instance.
       - name: tenantId
         type: String
+        required: true
         description: The ID of the user's Salesforce tenant.
       - name: identity
         type: String
