@@ -279,6 +279,86 @@ func computeInstanceStockoutRetryDelay(retryNumber int) time.Duration {
 	return delay
 }
 
+// computeInstanceCreateRetry holds the inputs for creating an instance with stockout retries.
+type computeInstanceCreateRetry struct {
+	ctx                  context.Context
+	createDeadline       time.Time
+	retryOnStockout      bool
+	stockoutRetryTimeout time.Duration
+	retryDelay           func(retryNumber int) time.Duration
+	insert               func() (map[string]interface{}, error)
+	waitForOperation     func(res map[string]interface{}, timeout time.Duration) error
+}
+
+// runComputeInstanceCreateWithStockoutRetry returns nil once an insert's operation succeeds.
+func runComputeInstanceCreateWithStockoutRetry(r computeInstanceCreateRetry) error {
+	var stockoutRetryDeadline time.Time
+	var lastStockoutError error
+	for retryNumber := 0; ; retryNumber++ {
+		if err := r.ctx.Err(); err != nil {
+			return err
+		}
+		if !time.Now().Before(r.createDeadline) {
+			if lastStockoutError != nil {
+				return lastStockoutError
+			}
+			return fmt.Errorf("timed out creating instance")
+		}
+		if !stockoutRetryDeadline.IsZero() && !time.Now().Before(stockoutRetryDeadline) {
+			return lastStockoutError
+		}
+
+		res, err := r.insert()
+		if err != nil {
+			if !isComputeInstanceStockoutError(err) {
+				return fmt.Errorf("Error creating instance: %s", err)
+			}
+			err = fmt.Errorf("Error creating instance: %s", err)
+		} else {
+			remaining := time.Until(r.createDeadline)
+			if remaining <= 0 {
+				return fmt.Errorf("timed out creating instance")
+			}
+			waitErr := r.waitForOperation(res, remaining)
+			if waitErr == nil {
+				return nil
+			}
+			// A failed stockout operation did not create the instance; allow another insert attempt.
+			if !isComputeInstanceStockoutError(waitErr) {
+				return waitErr
+			}
+			err = waitErr
+		}
+
+		if !r.retryOnStockout {
+			return err
+		}
+		if stockoutRetryDeadline.IsZero() {
+			stockoutRetryDeadline = time.Now().Add(r.stockoutRetryTimeout)
+			if stockoutRetryDeadline.After(r.createDeadline) {
+				stockoutRetryDeadline = r.createDeadline
+			}
+		}
+		lastStockoutError = err
+		remaining := time.Until(stockoutRetryDeadline)
+		if remaining <= 0 {
+			return lastStockoutError
+		}
+
+		delay := r.retryDelay(retryNumber)
+		if delay > remaining {
+			delay = remaining
+		}
+		timer := time.NewTimer(delay)
+		select {
+		case <-r.ctx.Done():
+			timer.Stop()
+			return r.ctx.Err()
+		case <-timer.C:
+		}
+	}
+}
+
 func ResourceComputeInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceCreate,
@@ -2249,93 +2329,31 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error generating URL: %s", err)
 	}
 	createTimeout := d.Timeout(schema.TimeoutCreate)
-	startTime := time.Now()
-	createDeadline := startTime.Add(createTimeout)
-	retryOnStockout := d.Get("retry_on_stockout").(bool)
-	stockoutRetryTimeout := time.Duration(d.Get("stockout_retry_timeout_seconds").(int)) * time.Second
-	var stockoutRetryDeadline time.Time
-	var lastStockoutError error
-	var res interface{}
-	retryNumber := 0
-	for {
-		if err := config.Context.Err(); err != nil {
-			d.SetId("")
-			return err
-		}
-		if !time.Now().Before(createDeadline) {
-			d.SetId("")
-			if lastStockoutError != nil {
-				return lastStockoutError
-			}
-			return fmt.Errorf("timed out creating instance")
-		}
-		if !stockoutRetryDeadline.IsZero() && !time.Now().Before(stockoutRetryDeadline) {
-			d.SetId("")
-			return lastStockoutError
-		}
-
-		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   project,
-			RawURL:    insertUrl,
-			UserAgent: userAgent,
-			Body:      instanceBody,
-		})
-		if err != nil {
-			if !isComputeInstanceStockoutError(err) {
-				return fmt.Errorf("Error creating instance: %s", err)
-			}
-		} else {
+	err = runComputeInstanceCreateWithStockoutRetry(computeInstanceCreateRetry{
+		ctx:                  config.Context,
+		createDeadline:       time.Now().Add(createTimeout),
+		retryOnStockout:      d.Get("retry_on_stockout").(bool),
+		stockoutRetryTimeout: time.Duration(d.Get("stockout_retry_timeout_seconds").(int)) * time.Second,
+		retryDelay:           computeInstanceStockoutRetryDelay,
+		insert: func() (map[string]interface{}, error) {
+			return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   project,
+				RawURL:    insertUrl,
+				UserAgent: userAgent,
+				Body:      instanceBody,
+			})
+		},
+		waitForOperation: func(res map[string]interface{}, timeout time.Duration) error {
 			// Store the ID while waiting for the operation to complete.
 			d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, d.Get("name").(string)))
-
-			remaining := time.Until(createDeadline)
-			if remaining <= 0 {
-				d.SetId("")
-				return fmt.Errorf("timed out creating instance")
-			}
-			waitErr := ComputeOperationWaitTime(config, res, project, "instance to create", userAgent, remaining)
-			if waitErr == nil {
-				break
-			}
-			// A failed stockout operation did not create the instance; allow another insert attempt.
-			d.SetId("")
-			if !isComputeInstanceStockoutError(waitErr) {
-				return waitErr
-			}
-			err = waitErr
-		}
-
-		if !retryOnStockout {
-			d.SetId("")
-			return err
-		}
-		if stockoutRetryDeadline.IsZero() {
-			stockoutRetryDeadline = time.Now().Add(stockoutRetryTimeout)
-			if stockoutRetryDeadline.After(createDeadline) {
-				stockoutRetryDeadline = createDeadline
-			}
-		}
-		lastStockoutError = err
-		remaining := time.Until(stockoutRetryDeadline)
-		if remaining <= 0 {
-			return lastStockoutError
-		}
-
-		delay := computeInstanceStockoutRetryDelay(retryNumber)
-		if delay > remaining {
-			delay = remaining
-		}
-		timer := time.NewTimer(delay)
-		select {
-		case <-config.Context.Done():
-			timer.Stop()
-			d.SetId("")
-			return config.Context.Err()
-		case <-timer.C:
-		}
-		retryNumber++
+			return ComputeOperationWaitTime(config, res, project, "instance to create", userAgent, timeout)
+		},
+	})
+	if err != nil {
+		d.SetId("")
+		return err
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}

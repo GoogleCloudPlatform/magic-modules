@@ -7114,10 +7114,11 @@ func testAccCheckComputeInstanceNicAccessConfigHasNoSecurityPolicy(instance *map
 {{- end }}
 
 func testAccComputeInstance_basic(instance string) string {
-	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium")
+	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium", "")
 }
 
-func testAccComputeInstance_basicWithMachineType(instance, machineType string) string {
+// extraArgs is inserted verbatim after desired_status; pass "" for none.
+func testAccComputeInstance_basicWithMachineType(instance, machineType, extraArgs string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-13"
@@ -7129,7 +7130,7 @@ resource "google_compute_instance" "foobar" {
 	machine_type   = "%s"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
-  desired_status  = "RUNNING"
+  desired_status  = "RUNNING"%s
 
   //deletion_protection = false is implicit in this config due to default value
 
@@ -7154,18 +7155,13 @@ resource "google_compute_instance" "foobar" {
     my_other_key = "my_other_value"
   }
 }
-`, instance, machineType)
+`, instance, machineType, extraArgs)
 }
 
 func testAccComputeInstance_basicWithStockoutRetry(instance string, retryTimeoutSeconds int) string {
-	config := testAccComputeInstance_basicWithMachineType(instance, "n4d-standard-2")
-	return strings.Replace(config,
-		`  desired_status  = "RUNNING"`,
-		fmt.Sprintf(`  desired_status  = "RUNNING"
+	return testAccComputeInstance_basicWithMachineType(instance, "n4d-standard-2", fmt.Sprintf(`
   retry_on_stockout = true
-  stockout_retry_timeout_seconds = %d`, retryTimeoutSeconds),
-		1,
-	)
+  stockout_retry_timeout_seconds = %d`, retryTimeoutSeconds))
 }
 
 func testAccComputeInstance_basic2(instance string) string {

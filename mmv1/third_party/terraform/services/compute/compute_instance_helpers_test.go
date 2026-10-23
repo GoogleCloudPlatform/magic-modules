@@ -1,7 +1,9 @@
 package compute
 
 import (
+	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -103,6 +105,167 @@ func TestComputeInstanceStockoutRetryDelay(t *testing.T) {
 				t.Errorf("retry %d delay %s outside expected range [%s, %s]", retryNumber, delay, minDelay, 30*time.Second)
 			}
 		}
+	}
+}
+
+func newTestComputeInstanceCreateRetry(ctx context.Context) computeInstanceCreateRetry {
+	return computeInstanceCreateRetry{
+		ctx:                  ctx,
+		createDeadline:       time.Now().Add(time.Minute),
+		retryOnStockout:      true,
+		stockoutRetryTimeout: time.Minute,
+		retryDelay:           func(int) time.Duration { return 0 },
+		insert:               func() (map[string]interface{}, error) { return map[string]interface{}{}, nil },
+		waitForOperation:     func(map[string]interface{}, time.Duration) error { return nil },
+	}
+}
+
+func computeInstanceStockoutTestError() error {
+	return &googleapi.Error{Errors: []googleapi.ErrorItem{{Reason: "zoneResourcePoolExhausted"}}}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_RetriesInsertStockout(t *testing.T) {
+	t.Parallel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		if inserts < 3 {
+			return nil, computeInstanceStockoutTestError()
+		}
+		return map[string]interface{}{}, nil
+	}
+	if err := runComputeInstanceCreateWithStockoutRetry(r); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if inserts != 3 {
+		t.Errorf("insert attempts = %d, want 3", inserts)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_RetriesOperationStockout(t *testing.T) {
+	t.Parallel()
+	inserts, waits := 0, 0
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		return map[string]interface{}{}, nil
+	}
+	r.waitForOperation = func(map[string]interface{}, time.Duration) error {
+		waits++
+		if waits == 1 {
+			return computeInstanceStockoutTestError()
+		}
+		return nil
+	}
+	if err := runComputeInstanceCreateWithStockoutRetry(r); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if inserts != 2 {
+		t.Errorf("insert attempts = %d, want 2", inserts)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_NonStockoutNotRetried(t *testing.T) {
+	t.Parallel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		return nil, errors.New("permission denied")
+	}
+	err := runComputeInstanceCreateWithStockoutRetry(r)
+	if err == nil || err.Error() != "Error creating instance: permission denied" {
+		t.Errorf("error = %v, want Error creating instance: permission denied", err)
+	}
+	if inserts != 1 {
+		t.Errorf("insert attempts = %d, want 1", inserts)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_DisabledNotRetried(t *testing.T) {
+	t.Parallel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.retryOnStockout = false
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		return nil, computeInstanceStockoutTestError()
+	}
+	err := runComputeInstanceCreateWithStockoutRetry(r)
+	if err == nil || !strings.HasPrefix(err.Error(), "Error creating instance: ") {
+		t.Errorf("error = %v, want Error creating instance prefix", err)
+	}
+	if inserts != 1 {
+		t.Errorf("insert attempts = %d, want 1", inserts)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_StockoutRetryTimeout(t *testing.T) {
+	t.Parallel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.stockoutRetryTimeout = time.Millisecond
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		return nil, computeInstanceStockoutTestError()
+	}
+	err := runComputeInstanceCreateWithStockoutRetry(r)
+	if err == nil || !strings.HasPrefix(err.Error(), "Error creating instance: ") {
+		t.Errorf("error = %v, want stockout error", err)
+	}
+	if inserts < 2 {
+		t.Errorf("insert attempts = %d, want at least 2 before timeout", inserts)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_CreateDeadlineBounds(t *testing.T) {
+	t.Parallel()
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.createDeadline = time.Now().Add(time.Millisecond)
+	r.insert = func() (map[string]interface{}, error) {
+		return nil, computeInstanceStockoutTestError()
+	}
+	if err := runComputeInstanceCreateWithStockoutRetry(r); err == nil {
+		t.Error("expected an error once the create deadline passes")
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_CanceledBeforeInsert(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(ctx)
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		return map[string]interface{}{}, nil
+	}
+	if err := runComputeInstanceCreateWithStockoutRetry(r); !errors.Is(err, context.Canceled) {
+		t.Errorf("error = %v, want context.Canceled", err)
+	}
+	if inserts != 0 {
+		t.Errorf("insert attempts = %d, want 0", inserts)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_CanceledDuringDelay(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(ctx)
+	r.retryDelay = func(int) time.Duration { return time.Hour }
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		cancel()
+		return nil, computeInstanceStockoutTestError()
+	}
+	if err := runComputeInstanceCreateWithStockoutRetry(r); !errors.Is(err, context.Canceled) {
+		t.Errorf("error = %v, want context.Canceled", err)
+	}
+	if inserts != 1 {
+		t.Errorf("insert attempts = %d, want 1", inserts)
 	}
 }
 
