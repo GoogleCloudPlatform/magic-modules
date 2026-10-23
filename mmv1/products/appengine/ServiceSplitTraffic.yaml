@@ -55,6 +55,7 @@ samples:
           service_id: default
           split.allocations.v1: '1'
           bucket_name: appengine-static-content
+          service_name: liveapp
         test_vars_overrides:
           # for backward compatible
           service_id: '"default" + randomSuffix'

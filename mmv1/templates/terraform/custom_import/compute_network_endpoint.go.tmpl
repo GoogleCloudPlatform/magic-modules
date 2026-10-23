@@ -9,11 +9,32 @@ if err := tpgresource.ParseImportId([]string{
 	return nil, err
 }
 
+if ipAddress, ok := d.GetOk("ip_address"); ok && strings.Contains(ipAddress.(string), ":") {
+	canonicalIpv6 := tpgresource.CanonicalizeIp(ipAddress)
+	if err := d.Set("ipv6_address", canonicalIpv6); err != nil {
+		return nil, fmt.Errorf("Error setting ipv6_address: %s", err)
+	}
+	if err := d.Set("ip_address", canonicalIpv6); err != nil {
+		return nil, fmt.Errorf("Error setting ip_address for id: %s", err)
+	}
+}
+
 // Replace import id for the resource id
 id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}project{{"}}"}}/{{"{{"}}zone{{"}}"}}/{{"{{"}}network_endpoint_group{{"}}"}}/{{"{{"}}instance{{"}}"}}/{{"{{"}}ip_address{{"}}"}}/{{"{{"}}port{{"}}"}}")
 if err != nil {
   return nil, fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id)
+
+if _, ok := d.GetOk("ipv6_address"); ok {
+	if err := d.Set("ip_address", nil); err != nil {
+		return nil, fmt.Errorf("Error clearing ip_address: %s", err)
+	}
+	if identity, err := d.Identity(); err == nil && identity != nil {
+		if err := identity.Set("ip_address", ""); err != nil {
+			return nil, fmt.Errorf("Error clearing identity ip_address: %s", err)
+		}
+	}
+}
 
 return []*schema.ResourceData{d}, nil
