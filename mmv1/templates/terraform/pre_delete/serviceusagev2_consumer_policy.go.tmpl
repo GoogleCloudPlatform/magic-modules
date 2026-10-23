@@ -24,7 +24,7 @@ validateDependenciesEnabled := d.Get("validate_dependencies").(bool)
 
 if validateDependenciesEnabled {
     name := fmt.Sprintf("%s/consumerPolicies/%s", d.Get("parent"), d.Get("name"))
-    analysisRequest := NewAnalysisRequest(name, []string{}, []string{})
+    analysisRequest := NewAnalysisRequestWithRules(name, []map[string][]string{})
     req := transport_tpg.SendRequestOptions{
         Config:    config,
         Method:    "POST",

@@ -33,6 +33,16 @@ type ProposedPolicy struct {
 	EnableRules []map[string][]string `json:"enableRules"`
 }
 
+func NewAnalysisRequestWithRules(name string, enableRules []map[string][]string) map[string]any {
+	if enableRules == nil {
+		enableRules = []map[string][]string{}
+	}
+	return map[string]any{
+		"proposedPolicy": ProposedPolicy{Name: name, EnableRules: enableRules},
+		"analysisTypes":  AnalysisTypeDependency,
+	}
+}
+
 func NewAnalysisRequest(name string, services []string, catalogs []string) map[string]any {
 	rule := map[string][]string{
 		"services": services,
@@ -43,9 +53,7 @@ func NewAnalysisRequest(name string, services []string, catalogs []string) map[s
 	enableRules := []map[string][]string{
 		rule,
 	}
-	return map[string]any{
-		"proposedPolicy": ProposedPolicy{Name: name, EnableRules: enableRules},
-		"analysisTypes":  AnalysisTypeDependency}
+	return NewAnalysisRequestWithRules(name, enableRules)
 }
 
 type AnalysisWarning struct {
