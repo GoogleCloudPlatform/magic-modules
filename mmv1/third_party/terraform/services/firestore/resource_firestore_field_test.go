@@ -15,11 +15,11 @@ func TestAccFirestoreField_firestoreFieldUpdateAddIndexExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 		"resource_name": "add_index",
 	}
-	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context), true, t, context)
+	testAccFirestoreField_runUpdateTest(testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context), false, t, context)
 }
 
 func TestAccFirestoreField_firestoreFieldUpdateAddTTLExample(t *testing.T) {
@@ -171,7 +171,7 @@ resource "google_firestore_field" "%{resource_name}" {
 }
 
 func testAccFirestoreField_firestoreFieldUpdateAddIndexExample(context map[string]interface{}) string {
-	return testAccFirestoreField_update_basicDeps(context, true) + acctest.Nprintf(`
+	return testAccFirestoreField_update_basicDeps(context, false) + acctest.Nprintf(`
 resource "google_firestore_field" "%{resource_name}" {
 	project = google_firestore_database.database.project
 	database = google_firestore_database.database.name
