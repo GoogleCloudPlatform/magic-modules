@@ -10,6 +10,10 @@ import_format:
   - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
 async:
   actions: []
+error_retry_predicates:
+  - 'IsDesignCenterServiceAgentNotFoundError'
+custom_code:
+  constants: 'templates/terraform/constants/design_center_space.go.tmpl'
 iam_policy:
   method_name_separator: ':'
   parent: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}

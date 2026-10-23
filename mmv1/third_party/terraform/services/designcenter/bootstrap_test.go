@@ -86,6 +86,7 @@ func BootstrapDesignCenterProject(t *testing.T) string {
 	ensureDesignCenterAppHubBoundary(t, config, project, number)
 
 	if os.Getenv("VCR_MODE") != "REPLAYING" {
+		ensureDesignCenterServiceIdentity(t, config, project, number)
 		cleanupDesignCenterSpaces(t, config, project, "us-central1")
 	}
 
@@ -98,6 +99,56 @@ func isDesignCenterBootstrapRetryableError(err error) (bool, string) {
 		return true, "Waiting for project IAM permissions and service activation to propagate"
 	}
 	return false, ""
+}
+
+func ensureDesignCenterServiceIdentity(t *testing.T, config *transport_tpg.Config, project, number string) {
+	t.Helper()
+
+	retryPredicates := []transport_tpg.RetryErrorPredicateFunc{isDesignCenterBootstrapRetryableError}
+	genURL := fmt.Sprintf("https://serviceusage.googleapis.com/v1beta1/projects/%s/services/designcenter.googleapis.com:generateServiceIdentity", number)
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "POST",
+		Project:              project,
+		RawURL:               genURL,
+		UserAgent:            config.UserAgent,
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
+	})
+	if err != nil {
+		t.Fatalf("Bootstrapping failed. Error generating Design Center service identity for %s: %s", project, err)
+	}
+
+	name, _ := op["name"].(string)
+	if !strings.Contains(name, "/operations/") || name == "operations/noop.DONE_OPERATION" {
+		return
+	}
+
+	deadline := time.Now().Add(5 * time.Minute)
+	for {
+		opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:               config,
+			Method:               "GET",
+			Project:              project,
+			RawURL:               "https://serviceusage.googleapis.com/v1beta1/" + name,
+			UserAgent:            config.UserAgent,
+			Timeout:              5 * time.Minute,
+			ErrorRetryPredicates: retryPredicates,
+		})
+		if err != nil {
+			t.Fatalf("Bootstrapping failed. Error waiting for operation %s: %s", name, err)
+		}
+		if done, _ := opRes["done"].(bool); done {
+			if e, ok := opRes["error"]; ok {
+				t.Fatalf("Bootstrapping failed. Operation %s failed: %v", name, e)
+			}
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("Bootstrapping failed. Timed out waiting for operation %s", name)
+		}
+		time.Sleep(5 * time.Second)
+	}
 }
 
 func ensureDesignCenterAppHubBoundary(t *testing.T, config *transport_tpg.Config, project, number string) {
