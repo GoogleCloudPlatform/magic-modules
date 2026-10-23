@@ -112,6 +112,24 @@ func TestAccIntegrationsAuthConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"client_certificate", "location"},
 			},
 			{
+				Config: testAccIntegrationsAuthConfig_oauth2ResourceOwnerCredentials(context),
+			},
+			{
+				ResourceName:            "google_integrations_auth_config.update_example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"client_certificate", "location"},
+			},
+			{
+				Config: testAccIntegrationsAuthConfig_oauth2ResourceOwnerCredentialsUpdate(context),
+			},
+			{
+				ResourceName:            "google_integrations_auth_config.update_example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"client_certificate", "location"},
+			},
+			{
 				Config: testAccIntegrationsAuthConfig_update(context),
 			},
 			{
@@ -143,6 +161,112 @@ resource "google_integrations_auth_config" "update_example" {
         username_and_password {
             username = "test-username"
             password = "test-password"
+        }
+    }
+    depends_on = [google_integrations_client.client]
+}
+`, context)
+}
+
+// The API fetches an access token via the resource owner password grant when an
+// OAUTH2_RESOURCE_OWNER_CREDENTIALS auth config is created or updated, so these configs
+// point at WireMock's public mock OAuth server, which issues a token whenever the
+// request body contains a base64 "code" parameter (supplied here via token_params).
+func testAccIntegrationsAuthConfig_oauth2ResourceOwnerCredentials(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_integrations_client" "client" {
+	location = "southamerica-west1"
+	create_sample_integrations = true
+}
+
+resource "google_integrations_auth_config" "update_example" {
+    location = "southamerica-west1"
+    display_name = "tf-test-test-authconfig%{random_suffix}"
+    description = "Test auth config created via terraform"
+    visibility = "CLIENT_VISIBLE"
+    expiry_notification_duration = ["3.500s"]
+    override_valid_time = "2014-10-02T15:01:23Z"
+    decrypted_credential {
+        credential_type = "OAUTH2_RESOURCE_OWNER_CREDENTIALS"
+        oauth2_resource_owner_credentials {
+            client_id = "demo-backend-client"
+            client_secret = "MJlO3binatD9jk1"
+            username = "test-username"
+            password = "test-password"
+            scope = "read"
+            token_endpoint = "https://oauth.wiremockapi.cloud/oauth/token"
+            request_type = "ENCODED_HEADER"
+            token_params {
+                entries {
+                    key {
+                        literal_value {
+                            string_value = "code"
+                        }
+                    }
+                    value {
+                        literal_value {
+                            string_value = "YS4uYi4uYy4uZGVm"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    depends_on = [google_integrations_client.client]
+}
+`, context)
+}
+
+func testAccIntegrationsAuthConfig_oauth2ResourceOwnerCredentialsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_integrations_client" "client" {
+	location = "southamerica-west1"
+	create_sample_integrations = true
+}
+
+resource "google_integrations_auth_config" "update_example" {
+    location = "southamerica-west1"
+    display_name = "tf-test-test-authconfig-ro-update%{random_suffix}"
+    description = "Test auth config ro updated via terraform"
+    visibility = "CLIENT_VISIBLE"
+    expiry_notification_duration = ["3.500s"]
+    override_valid_time = "2014-10-02T15:01:23Z"
+    decrypted_credential {
+        credential_type = "OAUTH2_RESOURCE_OWNER_CREDENTIALS"
+        oauth2_resource_owner_credentials {
+            client_id = "demo-backend-client-updated"
+            client_secret = "MJlO3binatD9jk1-updated"
+            username = "test-username-updated"
+            password = "test-password-updated"
+            scope = "read write"
+            token_endpoint = "https://oauth.wiremockapi.cloud/oauth/token?tenant=updated"
+            request_type = "REQUEST_BODY"
+            token_params {
+                entries {
+                    key {
+                        literal_value {
+                            string_value = "audience"
+                        }
+                    }
+                    value {
+                        literal_value {
+                            string_value = "test-audience"
+                        }
+                    }
+                }
+                entries {
+                    key {
+                        literal_value {
+                            string_value = "code"
+                        }
+                    }
+                    value {
+                        literal_value {
+                            string_value = "dS4udi4udy4ueHl6"
+                        }
+                    }
+                }
+            }
         }
     }
     depends_on = [google_integrations_client.client]

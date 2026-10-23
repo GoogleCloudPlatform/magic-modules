@@ -87,6 +87,15 @@ samples:
           auth_config_name: test-authconfig-oauth2-client-credentials
         test_vars_overrides:
           client: BootstrapIntegrationsClient(t, "us-east4")
+  - name: integrations_auth_config_oauth2_resource_owner_credentials
+    primary_resource_id: oauth2_resource_owner_credentials_example
+    exclude_basic_doc: true
+    steps:
+      - name: integrations_auth_config_oauth2_resource_owner_credentials
+        resource_id_vars:
+          auth_config_name: test-authconfig-oauth2-resource-owner-credentials
+        test_vars_overrides:
+          client: BootstrapIntegrationsClient(t, "us-east4")
   - name: integrations_auth_config_jwt
     primary_resource_id: jwt_example
     exclude_basic_doc: true
@@ -176,7 +185,7 @@ properties:
       - OAUTH2_AUTHORIZATION_CODE
       - OAUTH2_IMPLICIT
       - OAUTH2_CLIENT_CREDENTIALS
-      - OAUTH2_RESORUCE_OWNER_CREDENTIALS
+      - OAUTH2_RESOURCE_OWNER_CREDENTIALS
       - JWT
       - AUTH_TOKEN
       - SERVICE_ACCOUNT
@@ -277,6 +286,7 @@ properties:
         conflicts:
           - decryptedCredential.0.oauth2_authorization_code
           - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.jwt
           - decryptedCredential.0.auth_token
           - decryptedCredential.0.service_account_credentials
@@ -297,6 +307,7 @@ properties:
         conflicts:
           - decryptedCredential.0.username_and_password
           - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.jwt
           - decryptedCredential.0.auth_token
           - decryptedCredential.0.service_account_credentials
@@ -329,6 +340,7 @@ properties:
         conflicts:
           - decryptedCredential.0.username_and_password
           - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.jwt
           - decryptedCredential.0.auth_token
           - decryptedCredential.0.service_account_credentials
@@ -405,6 +417,97 @@ properties:
               - REQUEST_BODY
               - QUERY_PARAMETERS
               - ENCODED_HEADER
+      - name: oauth2ResourceOwnerCredentials
+        type: NestedObject
+        description: |
+          OAuth2 resource owner credentials.
+        conflicts:
+          - decryptedCredential.0.username_and_password
+          - decryptedCredential.0.oauth2_authorization_code
+          - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.jwt
+          - decryptedCredential.0.auth_token
+          - decryptedCredential.0.service_account_credentials
+          - decryptedCredential.0.oidc_token
+        properties:
+          - name: clientId
+            type: String
+            description: |
+              The client's ID.
+          - name: clientSecret
+            type: String
+            description: |
+              The client's secret.
+          - name: username
+            type: String
+            description: |
+              The user's username.
+          - name: password
+            type: String
+            description: |
+              The user's password.
+          - name: tokenEndpoint
+            type: String
+            description: |
+              The token endpoint is used by the client to obtain an access token by presenting its authorization grant or refresh token.
+          - name: scope
+            type: String
+            description: |
+              A space-delimited list of requested scope permissions.
+          - name: tokenParams
+            type: NestedObject
+            description: |
+              Token parameters for the auth request.
+            # ParameterMap
+            properties:
+              - name: entries
+                type: Array
+                description: |
+                  A list of parameter map entries.
+                item_type:
+                  type: NestedObject
+                  # ParameterMapEntry
+                  properties:
+                    - name: key
+                      type: NestedObject
+                      description: |
+                        Key of the map entry.
+                      # ParameterMapField
+                      properties:
+                        - name: literalValue
+                          type: NestedObject
+                          description: |
+                            Passing a literal value
+                          # ValueType
+                          properties:
+                            - name: stringValue
+                              type: String
+                              description: |
+                                String.
+                    - name: value
+                      type: NestedObject
+                      description: |
+                        Value of the map entry.
+                      # ParameterMapField
+                      properties:
+                        - name: literalValue
+                          type: NestedObject
+                          description: |
+                            Passing a literal value
+                          # ValueType
+                          properties:
+                            - name: stringValue
+                              type: String
+                              description: |
+                                String.
+          - name: requestType
+            type: Enum
+            description: |
+              Represent how to pass parameters to fetch access token
+            enum_values:
+              - REQUEST_BODY
+              - QUERY_PARAMETERS
+              - ENCODED_HEADER
       - name: jwt
         type: NestedObject
         description: |
@@ -413,6 +516,7 @@ properties:
           - decryptedCredential.0.username_and_password
           - decryptedCredential.0.oauth2_authorization_code
           - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.auth_token
           - decryptedCredential.0.service_account_credentials
           - decryptedCredential.0.oidc_token
@@ -442,6 +546,7 @@ properties:
           - decryptedCredential.0.username_and_password
           - decryptedCredential.0.oauth2_authorization_code
           - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.jwt
           - decryptedCredential.0.service_account_credentials
           - decryptedCredential.0.oidc_token
@@ -462,6 +567,7 @@ properties:
           - decryptedCredential.0.username_and_password
           - decryptedCredential.0.oauth2_authorization_code
           - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.jwt
           - decryptedCredential.0.auth_token
           - decryptedCredential.0.oidc_token
@@ -482,6 +588,7 @@ properties:
           - decryptedCredential.0.username_and_password
           - decryptedCredential.0.oauth2_authorization_code
           - decryptedCredential.0.oauth2_client_credentials
+          - decryptedCredential.0.oauth2_resource_owner_credentials
           - decryptedCredential.0.jwt
           - decryptedCredential.0.auth_token
           - decryptedCredential.0.service_account_credentials
