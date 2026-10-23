@@ -182,7 +182,7 @@ resource "google_spanner_instance" "instance" {
   name         = "tf-test-instance-%{random_suffix}"
   config       = "regional-us-central1"
   display_name = "My Instance"
-  num_nodes    = 1
+  processing_units = 100
   edition      = "ENTERPRISE"
 }
 
@@ -219,7 +219,7 @@ resource "google_spanner_instance" "instance" {
   name         = "tf-test-instance-%{random_suffix}"
   config       = "regional-us-central1"
   display_name = "My Instance"
-  num_nodes    = 1
+  processing_units = 100
   edition      = "ENTERPRISE"
 }
 
@@ -256,7 +256,7 @@ resource "google_spanner_instance" "instance" {
   name         = "tf-test-instance-%{random_suffix}"
   config       = "regional-us-central1"
   display_name = "My Instance"
-  num_nodes    = 1
+  processing_units = 100
   edition      = "ENTERPRISE"
 }
 
@@ -301,7 +301,7 @@ resource "google_spanner_instance" "instance" {
   name         = "tf-test-instance-%{random_suffix}"
   config       = "regional-us-central1"
   display_name = "My Instance"
-  num_nodes    = 1
+  processing_units = 100
   edition      = "ENTERPRISE"
 }
 
@@ -343,7 +343,7 @@ resource "google_spanner_instance" "instance" {
   name         = "tf-test-instance-%{random_suffix}"
   config       = "nam3"
   display_name = "My Instance"
-  num_nodes    = 1
+  processing_units = 100
   edition      = "ENTERPRISE_PLUS"
 }
 
@@ -392,7 +392,7 @@ resource "google_spanner_instance" "instance" {
   name         = "tf-test-instance-%{random_suffix}"
   config       = "nam3"
   display_name = "My Instance"
-  num_nodes    = 1
+  processing_units = 100
   edition      = "ENTERPRISE_PLUS"
 }
 
