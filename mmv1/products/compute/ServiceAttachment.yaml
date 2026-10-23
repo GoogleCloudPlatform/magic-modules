@@ -164,7 +164,7 @@ properties:
     type: String
     description: |
       An optional description of this resource.
-  - name: 'serviceattachmentId'
+  - name: 'serviceAttachmentId'
     type: Integer
     description: |
       The unique identifier number for the resource. This identifier is defined by the server.
