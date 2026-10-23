@@ -391,7 +391,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "ig_instance" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
 
@@ -446,7 +446,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "ig_instance" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
   boot_disk {
@@ -509,7 +509,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "ig_instance" {
   name           = "%s-${count.index}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
   count          = 2
@@ -552,7 +552,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "ig_instance" {
   name           = "%s-${count.index}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
   count          = 1
@@ -595,7 +595,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "ig_instance" {
   name           = "%s-1"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
 
@@ -612,7 +612,7 @@ resource "google_compute_instance" "ig_instance" {
 
 resource "google_compute_instance" "ig_instance_2" {
   name           = "%s-2"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
 
@@ -658,7 +658,7 @@ resource "google_compute_network" "ig_network" {
 
 resource "google_compute_instance" "ig_instance" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = false
   zone           = "us-central1-c"
 
