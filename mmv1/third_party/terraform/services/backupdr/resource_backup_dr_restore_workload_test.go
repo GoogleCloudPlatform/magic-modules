@@ -214,7 +214,7 @@ resource "google_backup_dr_restore_workload" "restore" {
 
   compute_instance_restore_properties {
     name         = "tf-test-restored-instance-%{random_suffix}"
-    machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/e2-medium"
+    machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/e2-micro"
   }
 }
 `, context)
@@ -396,7 +396,7 @@ resource "google_backup_dr_restore_workload" "restore" {
 
   compute_instance_restore_properties {
     name         = "tf-test-persist-instance-%{random_suffix}"
-    machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/e2-medium"
+    machine_type = "projects/%{project}/zones/us-central1-a/machineTypes/e2-micro"
   }
 }
 `, context)
