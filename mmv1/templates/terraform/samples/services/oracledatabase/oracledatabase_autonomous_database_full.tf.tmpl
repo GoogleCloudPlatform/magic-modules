@@ -12,7 +12,7 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
   }
   properties {
     compute_count         = "2"
-    data_storage_size_gb   = "48"
+    data_storage_size_gb   = "20"
     db_version = "19c"
     db_edition = "STANDARD_EDITION"
     db_workload = "OLTP"
