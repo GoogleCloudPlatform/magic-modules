@@ -31,8 +31,8 @@ resource "google_managed_kafka_connect_cluster" "{{$.PrimaryResourceId}}" {
   location           = "us-central1"
 
   capacity_config {
-    vcpu_count   = 12
-    memory_bytes = 21474836480
+    vcpu_count   = 3
+    memory_bytes = 3221225472
   }
   gcp_config {
     access_config {
