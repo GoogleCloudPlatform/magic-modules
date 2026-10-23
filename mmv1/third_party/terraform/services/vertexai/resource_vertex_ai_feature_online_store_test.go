@@ -122,7 +122,7 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
     bigtable {
         auto_scaling {
             min_node_count = 1
-            max_node_count = 2
+            max_node_count = 1
         }
         enable_direct_bigtable_access = true
         zone = "us-central1-a"
@@ -169,7 +169,7 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
     bigtable {
         auto_scaling {
             min_node_count = 1
-            max_node_count = 2
+            max_node_count = 1
             cpu_utilization_target = 60
         }
         zone = "us-central1-a"

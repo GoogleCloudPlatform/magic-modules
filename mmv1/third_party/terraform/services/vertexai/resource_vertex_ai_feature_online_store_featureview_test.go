@@ -56,7 +56,7 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
     bigtable {
       auto_scaling {
         min_node_count         = 1
-        max_node_count         = 2
+        max_node_count         = 1
         cpu_utilization_target = 80
       }
     }
@@ -133,7 +133,7 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
     bigtable {
       auto_scaling {
         min_node_count         = 1
-        max_node_count         = 2
+        max_node_count         = 1
         cpu_utilization_target = 80
       }
     }
@@ -244,7 +244,7 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
     bigtable {
       auto_scaling {
         min_node_count         = 1
-        max_node_count         = 2
+        max_node_count         = 1
         cpu_utilization_target = 80
       }
     }
@@ -371,7 +371,7 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
     bigtable {
       auto_scaling {
         min_node_count         = 1
-        max_node_count         = 2
+        max_node_count         = 1
         cpu_utilization_target = 80
       }
     }
