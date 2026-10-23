@@ -66,7 +66,7 @@ resource "google_oracle_database_exascale_db_storage_vault" "vault" {
 
   properties {
     exascale_db_storage_details {
-      total_size_gbs = 2048
+      total_size_gbs = 300
     }
   }
 

@@ -29,7 +29,7 @@ func TestAccOracleDatabaseExascaleDbStorageVaultDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_exascale_db_storage_vault.ds_vault", "name"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_exascale_db_storage_vault.ds_vault", "display_name"),
 					resource.TestCheckResourceAttr("data.google_oracle_database_exascale_db_storage_vault.ds_vault", "display_name", fmt.Sprintf("%s displayname", vaultId)),
-					resource.TestCheckResourceAttr("data.google_oracle_database_exascale_db_storage_vault.ds_vault", "properties.0.exascale_db_storage_details.0.total_size_gbs", "512"),
+					resource.TestCheckResourceAttr("data.google_oracle_database_exascale_db_storage_vault.ds_vault", "properties.0.exascale_db_storage_details.0.total_size_gbs", "300"),
 				),
 			},
 		},
@@ -45,7 +45,7 @@ resource "google_oracle_database_exascale_db_storage_vault" "vault" {
   project                      = "%{project}"
   properties {
     exascale_db_storage_details {
-      total_size_gbs = 512
+      total_size_gbs = 300
     }
   }
   deletion_protection = false

@@ -45,7 +45,7 @@ resource "google_oracle_database_exascale_db_storage_vault" "vault" {
   project                      = "%{project}"
   properties {
     exascale_db_storage_details {
-      total_size_gbs = 512
+      total_size_gbs = 300
     }
   }
   deletion_protection = false
