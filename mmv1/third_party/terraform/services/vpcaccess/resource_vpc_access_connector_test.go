@@ -106,7 +106,7 @@ func TestAccVPCAccessConnector_vpcAccessConnectorUpdateOnlyMinInstancesCauseUpda
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "machine_type", "e2-standard-4"),
+					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "machine_type", "e2-micro"),
 					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "min_instances", "3"),
 					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "max_instances", "4"),
 				),
@@ -204,15 +204,15 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrIns
 				Check: resource.ComposeTestCheckFunc(
 					// These fields are set by the config in this test step
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "min_throughput", "400"),
+						"google_vpc_access_connector.connector", "min_throughput", "200"),
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "max_throughput", "800"),
+						"google_vpc_access_connector.connector", "max_throughput", "300"),
 					// These fields aren't set in the config; the API sets and returns values
 					// based on the thoughput values provided
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "min_instances", "4"),
+						"google_vpc_access_connector.connector", "min_instances", "2"),
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "max_instances", "8"),
+						"google_vpc_access_connector.connector", "max_instances", "3"),
 				),
 			},
 			{
@@ -220,15 +220,15 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrIns
 				Check: resource.ComposeTestCheckFunc(
 					// These fields are set by the config in this test step
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "min_instances", "5"),
+						"google_vpc_access_connector.connector", "min_instances", "3"),
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "max_instances", "7"),
+						"google_vpc_access_connector.connector", "max_instances", "4"),
 					// These fields aren't set in the config; the API sets and returns values
 					// based on the instance limit values provided
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "min_throughput", "500"),
+						"google_vpc_access_connector.connector", "min_throughput", "300"),
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "max_throughput", "700"),
+						"google_vpc_access_connector.connector", "max_throughput", "400"),
 				),
 			},
 		},
@@ -242,7 +242,7 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
+  machine_type = "e2-micro"
   min_instances = 2
   max_instances = 4
   region        = "us-central1"
@@ -269,7 +269,7 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
+  machine_type = "e2-micro"
   min_instances = 3
   max_instances = 4
   region        = "us-central1"
@@ -323,7 +323,7 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
+  machine_type = "e2-micro"
   min_instances = 2
   max_instances = 3
   region        = "us-central1"
@@ -350,11 +350,11 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
+  machine_type = "e2-micro"
   min_instances = 2
   max_instances = 3
-  min_throughput = 400
-  max_throughput = 1000
+  min_throughput = 200
+  max_throughput = 300
   region        = "us-central1"
 }
 
@@ -379,9 +379,9 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
-  min_instances = 5
-  max_instances = 7
+  machine_type = "e2-micro"
+  min_instances = 3
+  max_instances = 4
   region        = "us-central1"
 }
 
@@ -406,9 +406,9 @@ resource "google_vpc_access_connector" "connector" {
   subnet {
     name = google_compute_subnetwork.custom_test.name
   }
-  machine_type = "e2-standard-4"
-  min_throughput = 400
-  max_throughput = 800
+  machine_type = "e2-micro"
+  min_throughput = 200
+  max_throughput = 300
   region        = "us-central1"
 }
 
