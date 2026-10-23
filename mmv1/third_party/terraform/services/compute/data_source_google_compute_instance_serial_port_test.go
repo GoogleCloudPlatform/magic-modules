@@ -33,7 +33,7 @@ func testAccComputeInstanceSerialPort(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "default" {
 	name         = "%s"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {

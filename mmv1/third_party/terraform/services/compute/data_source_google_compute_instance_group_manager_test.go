@@ -72,7 +72,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context map[strin
         }
 
         target_pools = [google_compute_target_pool.igm-basic.id]
-        target_size  = 2
+        target_size  = 1
 
         named_port {
           name = "customhttp"
@@ -102,7 +102,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context map[strin
 
     resource "google_compute_instance_template" "igm-basic" {
         name           = "%{templateName}"
-        machine_type   = "e2-medium"
+        machine_type   = "e2-micro"
         can_ip_forward = false
         tags           = ["foo", "bar"]
 
@@ -148,7 +148,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context map[strin
         }
 
         target_pools = [google_compute_target_pool.igm-basic.id]
-        target_size  = 2
+        target_size  = 1
 
         named_port {
           name = "customhttp"
@@ -179,7 +179,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context map[strin
 
     resource "google_compute_instance_template" "igm-basic" {
         name           = "%{templateName}"
-        machine_type   = "e2-medium"
+        machine_type   = "e2-micro"
         can_ip_forward = false
         tags           = ["foo", "bar"]
 

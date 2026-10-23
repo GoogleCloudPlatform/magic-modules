@@ -122,7 +122,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foo" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "%s"
 
   boot_disk {

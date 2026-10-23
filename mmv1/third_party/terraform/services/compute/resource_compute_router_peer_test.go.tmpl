@@ -78,7 +78,7 @@ resource "google_compute_address" "addr_peer" {
 resource "google_compute_instance" "instance" {
   name           = "tf-test-router-appliance%{random_suffix}"
   zone           = "us-central1-a"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   can_ip_forward = true
 
   boot_disk {
