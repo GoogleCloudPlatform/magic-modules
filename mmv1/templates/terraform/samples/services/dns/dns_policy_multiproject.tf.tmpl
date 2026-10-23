@@ -82,33 +82,37 @@ resource "google_compute_network" "network_2_project_2" {
 }
 
 resource "google_project_service" "compute_project_1" {
-  project    = google_project.project_1.project_id
-  service    = "compute.googleapis.com"
+  project            = google_project.project_1.project_id
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
   depends_on = [
     google_project.project_1,
   ]
 }
 
 resource "google_project_service" "compute_project_2" {
-  project    = google_project.project_2.project_id
-  service    = "compute.googleapis.com"
+  project            = google_project.project_2.project_id
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
   depends_on = [
-    google_project_service.dns_project_1
+    google_project.project_2,
   ]
 }
 
 resource "google_project_service" "dns_project_1" {
-  project    = google_project.project_1.project_id
-  service    = "dns.googleapis.com"
+  project            = google_project.project_1.project_id
+  service            = "dns.googleapis.com"
+  disable_on_destroy = false
   depends_on = [
-    google_project_service.compute_project_1
+    google_project.project_1,
   ]
 }
 
 resource "google_project_service" "dns_project_2" {
-  project    = google_project.project_2.project_id
-  service    = "dns.googleapis.com"
+  project            = google_project.project_2.project_id
+  service            = "dns.googleapis.com"
+  disable_on_destroy = false
   depends_on = [
-    google_project_service.compute_project_2,
+    google_project.project_2,
   ]
 }
