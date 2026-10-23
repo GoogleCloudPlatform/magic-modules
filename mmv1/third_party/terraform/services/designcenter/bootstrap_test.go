@@ -93,16 +93,26 @@ func BootstrapDesignCenterProject(t *testing.T) string {
 	return project
 }
 
+func isDesignCenterBootstrapRetryableError(err error) (bool, string) {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+		return true, "Waiting for project IAM permissions and service activation to propagate"
+	}
+	return false, ""
+}
+
 func ensureDesignCenterAppHubBoundary(t *testing.T, config *transport_tpg.Config, project, number string) {
 	t.Helper()
 
+	retryPredicates := []transport_tpg.RetryErrorPredicateFunc{isDesignCenterBootstrapRetryableError}
 	boundaryURL := fmt.Sprintf("https://apphub.googleapis.com/v1/projects/%s/locations/global/boundary", project)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   project,
-		RawURL:    boundaryURL,
-		UserAgent: config.UserAgent,
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               boundaryURL,
+		UserAgent:            config.UserAgent,
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
 	})
 	if err != nil {
 		t.Fatalf("Bootstrapping failed. Error getting App Hub boundary %s: %s", boundaryURL, err)
@@ -115,12 +125,14 @@ func ensureDesignCenterAppHubBoundary(t *testing.T, config *transport_tpg.Config
 
 	log.Printf("[DEBUG] Setting App Hub boundary of %s to %s", project, crmNode)
 	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "PATCH",
-		Project:   project,
-		RawURL:    boundaryURL + "?updateMask=crmNode",
-		UserAgent: config.UserAgent,
-		Body:      map[string]interface{}{"crmNode": crmNode},
+		Config:               config,
+		Method:               "PATCH",
+		Project:              project,
+		RawURL:               boundaryURL + "?updateMask=crmNode",
+		UserAgent:            config.UserAgent,
+		Body:                 map[string]interface{}{"crmNode": crmNode},
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
 	})
 	if err != nil {
 		t.Fatalf("Bootstrapping failed. Error patching App Hub boundary %s: %s", boundaryURL, err)
@@ -134,11 +146,13 @@ func ensureDesignCenterAppHubBoundary(t *testing.T, config *transport_tpg.Config
 	deadline := time.Now().Add(5 * time.Minute)
 	for {
 		opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   project,
-			RawURL:    "https://apphub.googleapis.com/v1/" + name,
-			UserAgent: config.UserAgent,
+			Config:               config,
+			Method:               "GET",
+			Project:              project,
+			RawURL:               "https://apphub.googleapis.com/v1/" + name,
+			UserAgent:            config.UserAgent,
+			Timeout:              5 * time.Minute,
+			ErrorRetryPredicates: retryPredicates,
 		})
 		if err != nil {
 			t.Fatalf("Bootstrapping failed. Error waiting for operation %s: %s", name, err)
@@ -163,13 +177,16 @@ func ensureDesignCenterAppHubBoundary(t *testing.T, config *transport_tpg.Config
 func cleanupDesignCenterSpaces(t *testing.T, config *transport_tpg.Config, project, location string) {
 	t.Helper()
 
+	retryPredicates := []transport_tpg.RetryErrorPredicateFunc{isDesignCenterBootstrapRetryableError}
 	listURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/projects/%s/locations/%s/spaces", project, location)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   project,
-		RawURL:    listURL,
-		UserAgent: config.UserAgent,
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               listURL,
+		UserAgent:            config.UserAgent,
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
 	})
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
@@ -188,11 +205,13 @@ func cleanupDesignCenterSpaces(t *testing.T, config *transport_tpg.Config, proje
 		log.Printf("[DEBUG] Deleting leftover Design Center space %s before test", name)
 		deleteURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/%s?force=true", name)
 		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "DELETE",
-			Project:   project,
-			RawURL:    deleteURL,
-			UserAgent: config.UserAgent,
+			Config:               config,
+			Method:               "DELETE",
+			Project:              project,
+			RawURL:               deleteURL,
+			UserAgent:            config.UserAgent,
+			Timeout:              5 * time.Minute,
+			ErrorRetryPredicates: retryPredicates,
 		})
 		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			t.Fatalf("Bootstrapping failed. Error deleting leftover Design Center space %s: %s", name, err)
