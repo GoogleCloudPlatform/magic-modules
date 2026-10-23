@@ -82,7 +82,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-central1"
   service_level = "PREMIUM"
-  capacity_gib = "4096"
+  capacity_gib = "2148"
   network = data.google_compute_network.default.id
   active_directory      = ""
   description           = "this is test"
@@ -370,7 +370,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east1"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   zone = "us-east1-c"
   replica_zone = "us-east1-b"
@@ -393,7 +393,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east1"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   zone = "us-east1-b"
   replica_zone = "us-east1-c"
@@ -421,7 +421,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east1"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   zone = "us-east1-c"
   replica_zone = "us-east1-b"
@@ -471,7 +471,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "europe-west3-a"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
 }
 
@@ -525,7 +525,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   description = "this is a test description"
   custom_performance_enabled = true
@@ -545,7 +545,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   description = "this is updated test description"
   custom_performance_enabled = true
@@ -598,7 +598,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   description = "this is a test description"
   custom_performance_enabled = true
@@ -617,7 +617,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
-  capacity_gib = "2048"
+  capacity_gib = "1024"
   network = data.google_compute_network.default.id
   description = "this is updated test description"
   custom_performance_enabled = true
@@ -716,7 +716,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4"
   service_level = "EXTREME"
-  capacity_gib = "3046"
+  capacity_gib = "2148"
   network = data.google_compute_network.default.id
   qos_type = "MANUAL"
 }
@@ -773,7 +773,7 @@ resource "google_netapp_storage_pool" "test_pool" {
     location = "us-central1-a"
     service_level = "FLEX"
     type = "UNIFIED"
-    capacity_gib = "2048"
+    capacity_gib = "1024"
     network = data.google_compute_network.default.id
     description           = "this is a test description"
     labels                = {
@@ -796,7 +796,7 @@ resource "google_netapp_storage_pool" "test_pool" {
     location = "us-central1-a"
     service_level = "FLEX"
     type = "UNIFIED"
-    capacity_gib = "2048"
+    capacity_gib = "1024"
     network = data.google_compute_network.default.id
     description           = "this is a test description"
     labels                = {
@@ -855,7 +855,7 @@ resource "google_netapp_storage_pool" "test_pool" {
 	service_level  = "FLEX"
 	type           = "UNIFIED"
 	mode           = "ONTAP"
-	capacity_gib   = "2048"
+	capacity_gib   = "1024"
 	network        = data.google_compute_network.default.id
 	description    = "testing ontap mode"
 	labels         = {
@@ -879,7 +879,7 @@ resource "google_netapp_storage_pool" "test_pool" {
 	service_level  = "FLEX"
 	type           = "UNIFIED"
 	mode           = "ONTAP"
-	capacity_gib   = "2048"
+	capacity_gib   = "1024"
 	network        = data.google_compute_network.default.id
 	description    = "updated description"
 	labels                = {
@@ -934,7 +934,7 @@ resource "google_netapp_storage_pool" "test_pool" {
     location = "us-central1-c"
     service_level = "FLEX"
     type = "UNIFIED"
-    capacity_gib = "12288"
+    capacity_gib = "6144"
     network = data.google_compute_network.default.id
     description           = "this is a ScaleType test description"
     labels                = {
@@ -957,7 +957,7 @@ resource "google_netapp_storage_pool" "test_pool" {
     location = "us-central1-c"
     service_level = "FLEX"
     type = "UNIFIED"
-    capacity_gib = "13312"
+    capacity_gib = "7168"
     network = data.google_compute_network.default.id
     description           = "this is a ScaleType test description"
     labels                = {
