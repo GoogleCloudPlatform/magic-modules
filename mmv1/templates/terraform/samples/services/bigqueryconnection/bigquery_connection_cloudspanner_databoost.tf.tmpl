@@ -7,6 +7,6 @@ resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
       database        = "{{index $.ResourceIdVars "database"}}"
       use_parallelism = true
       use_data_boost  = true
-      max_parallelism = 100
+      max_parallelism = 10
    }
 }
