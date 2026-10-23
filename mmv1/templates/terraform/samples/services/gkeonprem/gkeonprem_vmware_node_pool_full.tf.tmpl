@@ -45,7 +45,7 @@ resource "google_gkeonprem_vmware_node_pool" "{{$.PrimaryResourceId}}" {
   config {
     cpus = 4
     memory_mb = 8196
-    replicas = 3
+    replicas = 1
     image_type = "ubuntu_containerd"
     image = "image"
     boot_disk_size_gb = 10
@@ -75,6 +75,6 @@ resource "google_gkeonprem_vmware_node_pool" "{{$.PrimaryResourceId}}" {
   }
   node_pool_autoscaling {
     min_replicas = 1
-    max_replicas = 5
+    max_replicas = 2
   }
 }
