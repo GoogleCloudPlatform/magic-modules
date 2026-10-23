@@ -47,6 +47,13 @@ samples:
       - name: agent_registry_service_mcp_server
         resource_id_vars:
           service: service
+  - name: agent_registry_service_endpoint
+    primary_resource_id: default
+    skip_func: acctest.SkipTestUntil(t, "2026-09-30") # OPENAPI_SPEC is not supported by the production GA API yet
+    steps:
+      - name: agent_registry_service_endpoint
+        resource_id_vars:
+          service: service
 parameters:
   - name: location
     type: String
@@ -161,8 +168,18 @@ properties:
         required: true
         enum_values:
           - NO_SPEC
+          - OPENAPI_SPEC
         description: |
           The type of the Endpoint spec content.
+      - name: content
+        type: String
+        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+        validation:
+          function: validation.StringIsJSON
+        description: |
+          The content of the Endpoint spec.
   - name: registryResource
     type: String
     description: |
