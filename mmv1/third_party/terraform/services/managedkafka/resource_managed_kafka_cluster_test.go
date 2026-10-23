@@ -92,7 +92,7 @@ resource "google_managed_kafka_cluster" "example" {
     memory_bytes = 4512135122
   }
   broker_capacity_config {
-    disk_size_gib = 1500
+    disk_size_gib = 200
   }
   gcp_config {
     access_config {
@@ -142,7 +142,7 @@ resource "google_managed_kafka_cluster" "example" {
     memory_bytes = 4512135122
   }
   broker_capacity_config {
-    disk_size_gib = 1500
+    disk_size_gib = 200
   }
   gcp_config {
     access_config {
