@@ -1,0 +1,219 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CompanionAgent
+description: |
+  A Companion Agent in Dialogflow.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/agent-assist/docs
+  api: https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.companionAgents
+base_url: projects/{{project}}/locations/{{location}}/companionAgents
+self_link: '{{name}}'
+create_url: projects/{{project}}/locations/{{location}}/companionAgents?companionAgentId={{companion_agent_id}}
+update_mask: true
+update_verb: PATCH
+autogen_status: Q29tcGFuaW9uQWdlbnRBdXRvZ2VuVjJBZ2VudA==
+custom_code:
+  pre_create: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  post_create: templates/terraform/post_create/set_computed_name.tmpl
+  pre_read: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_update: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  pre_delete: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
+  custom_import: templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl
+samples:
+  - name: dialogflow_companion_agent_basic
+    primary_resource_id: default
+    steps:
+      - name: dialogflow_companion_agent_basic
+        resource_id_vars:
+          companion_agent_id: "companion_agent"
+        vars:
+          display_name: "companion-agent-basic"
+          description: "Basic Companion Agent Description"
+      - name: dialogflow_companion_agent_update
+        resource_id_vars:
+          companion_agent_id: "companion_agent"
+        vars:
+          display_name: "companion-agent-updated"
+          description: "Updated Companion Agent Description"
+parameters:
+  - name: location
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location of the companion agent.
+  - name: companionAgentId
+    type: String
+    default_from_api: true
+    immutable: true
+    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+    description: |
+      Optional. The ID to use for the companion agent, which will become the final component of the companion agent's resource name.
+      If the field is not provided, an Id will be auto-generated.
+properties:
+  - name: name
+    type: String
+    description: |
+      The unique identifier of the companion agent.
+      Format: `projects/{project}/locations/{location}/companionAgents/{companion_agent}`.
+    output: true
+  - name: displayName
+    type: String
+    description: |
+      Optional. Display name for the companion agent.
+  - name: description
+    type: String
+    description: |
+      Optional. Description for the companion agent.
+  - name: createTime
+    type: String
+    description: |
+      Output only. Creation time of this companion agent.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      Output only. Update time of this companion agent.
+    output: true
+  - name: skillConfigs
+    type: Array
+    description: |
+      Optional. List of skill configs for the companion agent.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: skillTriggeringEvent
+          type: Enum
+          description: |
+            Optional. The event that should trigger the skill.
+          enum_values:
+            - SKILL_TRIGGER_EVENT_UNSPECIFIED
+            - END_OF_UTTERANCE
+            - CUSTOMER_MESSAGE
+            - AGENT_MESSAGE
+        - name: translationSkillConfig
+          type: NestedObject
+          description: |
+            Optional. Translation skill configuration for the companion agent.
+          properties:
+            - name: agentLanguageCode
+              type: String
+              description: |
+                Optional. Target language code for the agent, in IETF BCP-47 format (e.g., "en-US").
+            - name: customerLanguageCode
+              type: String
+              description: |
+                Optional. Target language code for the customer, in IETF BCP-47 format (e.g., "es").
+        - name: guidanceSkillConfig
+          type: NestedObject
+          description: |
+            Optional. Guidance skill configuration.
+          properties:
+            - name: overarchingGuidance
+              type: String
+              description: |
+                Optional. This is specific additional guidance that can configured by the user.
+            - name: guidanceInstructions
+              type: Array
+              description: |
+                Optional. Customized instructions for guidance.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: displayName
+                    type: String
+                    description: |
+                      Optional. Display name for the instruction.
+                  - name: displayDetails
+                    type: String
+                    description: |
+                      Optional. The detailed description of this instruction.
+                  - name: condition
+                    type: String
+                    description: |
+                      Optional. The condition of the instruction.
+                  - name: disableSuggestedReply
+                    type: Boolean
+                    send_empty_value: true
+                    description: |
+                      Optional. Whether to disable suggested reply generation for this instruction.
+                  - name: triggerEvent
+                    type: Enum
+                    description: |
+                      Optional. Event that triggers the guidance instruction.
+                    enum_values:
+                      - TRIGGER_EVENT_UNSPECIFIED
+                      - END_OF_UTTERANCE
+                      - CUSTOMER_MESSAGE
+                      - AGENT_MESSAGE
+                  - name: actions
+                    type: Array
+                    description: |
+                      Optional. The action items that can be processed.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: description
+                          type: String
+                          required: true
+                          description: |
+                            Required. Description of action item.
+  # Note: cesToolSpecs and toolsetTools reference live external CES tools and toolsets
+  # which cannot be provisioned hermetically in acceptance tests, so they are omitted from sample test configs.
+  - name: cesToolSpecs
+    type: Array
+    description: |
+      Optional. List of CES tool specs that the companion agent can choose from.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: cesTool
+          type: String
+          description: |
+            Optional. The resource name of the CES tool.
+        - name: confirmationRequirement
+          type: Enum
+          description: |
+            Optional. Confirmation requirement for the CES tool.
+          enum_values:
+            - CONFIRMATION_REQUIREMENT_UNSPECIFIED
+            - REQUIRED
+            - NOT_REQUIRED
+  # Note: toolsetTools reference live external CES toolsets which cannot be provisioned hermetically in acceptance tests.
+  - name: toolsetTools
+    type: Array
+    description: |
+      Optional. List of CES toolset specs that the companion agent can choose from.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: toolset
+          type: String
+          description: |
+            Optional. The resource name of the toolset.
+        - name: operationId
+          type: String
+          description: |
+            Optional. The operation ID in the toolset.
+        - name: confirmationRequirement
+          type: Enum
+          description: |
+            Optional. Confirmation requirement for the toolset tool.
+          enum_values:
+            - CONFIRMATION_REQUIREMENT_UNSPECIFIED
+            - REQUIRED
+            - NOT_REQUIRED
