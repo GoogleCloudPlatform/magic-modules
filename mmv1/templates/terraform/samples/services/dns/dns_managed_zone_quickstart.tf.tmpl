@@ -1,7 +1,7 @@
 # to setup a web-server
 resource "google_compute_instance" "default" {
   name         = "{{index $.ResourceIdVars "dns_compute_instance"}}"
-  machine_type = "g1-small"
+  machine_type = "e2-micro"
   zone         = "us-central1-b"
 
   boot_disk {
