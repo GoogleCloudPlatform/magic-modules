@@ -1,0 +1,53 @@
+resource "google_ces_app" "ces_app_for_agent" {
+  provider     = google-beta
+  app_id       = "{{index $.ResourceIdVars "app_id"}}"
+  location     = "us"
+  display_name = "{{index $.ResourceIdVars "app_display_name"}}"
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_dialogflow_conversation_profile" "profile" {
+  provider           = google-beta
+  location           = "us-central1"
+  display_name       = "{{index $.ResourceIdVars "profile_name"}}"
+  language_code      = "en-US"
+  use_bidi_streaming = true
+
+  automated_agent_config {
+    agent = google_ces_app.ces_app_for_agent.id
+  }
+
+  sip_config {
+    allow_virtual_agent_interaction = true
+    create_conversation_on_the_fly  = true
+  }
+}
+
+resource "google_dialogflow_sip_trunk" "trunk" {
+  provider     = google-beta
+  location     = "us-central1"
+  display_name = "{{index $.ResourceIdVars "trunk_name"}}"
+  expected_hostname = [
+    "{{index $.ResourceIdVars "trunk_name"}}.example.com"
+  ]
+}
+
+resource "google_dialogflow_phone_number" "basic_phone_number" {
+  provider             = google-beta
+  location             = "us-central1"
+  description          = "Basic Dialogflow phone number order"
+  conversation_profile = google_dialogflow_conversation_profile.profile.name
+
+  allowed_sip_trunks {
+    sip_trunks = [google_dialogflow_sip_trunk.trunk.name]
+  }
+
+  phone_number_spec {
+    country_code         = 1
+    preferred_area_codes = ["256"]
+  }
+
+  deletion_policy = "DELETE"
+}
