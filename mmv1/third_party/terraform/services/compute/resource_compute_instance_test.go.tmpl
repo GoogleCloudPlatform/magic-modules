@@ -5398,7 +5398,7 @@ data "google_compute_image" "my_image" {
 }
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 	%{allow_stopping_for_update}
 
@@ -5435,7 +5435,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -5464,7 +5464,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -5494,7 +5494,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -5972,7 +5972,7 @@ resource "google_compute_subnetwork" "subnetwork2" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "%{zone}"
 
 	boot_disk {
@@ -7141,7 +7141,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
@@ -7181,7 +7181,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
 
@@ -7211,7 +7211,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   can_ip_forward = false
   tags           = ["foo", "bar"]
@@ -7242,7 +7242,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
 
@@ -7272,7 +7272,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
 
@@ -7302,7 +7302,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
@@ -7360,7 +7360,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
   description  = "old_desc"
 
@@ -7386,7 +7386,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
   description  = "new_desc"
 
@@ -7424,7 +7424,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -7482,7 +7482,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -7541,7 +7541,7 @@ resource "google_compute_resource_policy" "test-snapshot-policy2" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -7591,7 +7591,7 @@ resource "google_compute_resource_policy" "test-snapshot-policy2" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -7641,7 +7641,7 @@ resource "google_compute_resource_policy" "test-snapshot-policy2" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -7691,7 +7691,7 @@ resource "google_compute_resource_policy" "test-snapshot-policy2" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -7722,7 +7722,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name                = "%s"
-  machine_type        = "e2-medium"
+  machine_type        = "e2-micro"
   zone                = "us-central1-a"
   tags                = ["foo", "bar"]
   deletion_protection = false
@@ -7749,7 +7749,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name                = "%s"
-  machine_type        = "e2-medium"
+  machine_type        = "e2-micro"
   zone                = "us-central1-a"
   tags                = ["foo", "bar"]
   deletion_protection = true
@@ -7778,7 +7778,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-b"
   tags         = ["baz"]
 
@@ -7811,7 +7811,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   can_ip_forward = true
   tags           = ["baz"]
@@ -7853,7 +7853,7 @@ resource "google_compute_address" "foo" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
   tags         = ["foo", "bar"]
 
@@ -7907,7 +7907,7 @@ resource "google_compute_address" "foo" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-west2-a"
   tags         = ["foo", "bar"]
 
@@ -8008,7 +8008,7 @@ func testAccComputeInstance_internalIpv6(ip, instance string) string {
 
   resource "google_compute_instance" "foobar" {
     name         = "%s"
-    machine_type = "e2-medium"
+    machine_type = "e2-micro"
     zone         = "us-west2-a"
     tags         = ["foo", "bar"]
 
@@ -8107,7 +8107,7 @@ resource "google_compute_network" "custom-test" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-west2-a"
 
   boot_disk {
@@ -8139,7 +8139,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
   tags         = ["foo", "bar"]
 
@@ -8172,7 +8172,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8245,7 +8245,7 @@ resource "google_compute_disk" "foobar4" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8316,7 +8316,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8370,7 +8370,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-standard-2"
+  machine_type = "e2-small"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8454,7 +8454,7 @@ resource "google_compute_disk" "foobar4" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8507,7 +8507,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8546,7 +8546,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8587,7 +8587,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8642,7 +8642,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8697,7 +8697,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%{instance_name}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8733,7 +8733,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8769,7 +8769,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8805,7 +8805,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8849,7 +8849,7 @@ resource "google_compute_disk" "foobar2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8896,7 +8896,7 @@ resource "google_compute_disk" "foobar2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8935,7 +8935,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -8981,7 +8981,7 @@ resource "google_compute_region_disk" "regionaldisk2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9030,7 +9030,7 @@ resource "google_compute_disk" "foobar2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9071,7 +9071,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9100,7 +9100,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9123,7 +9123,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9149,7 +9149,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9183,7 +9183,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9207,7 +9207,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9330,7 +9330,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9363,7 +9363,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9394,7 +9394,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9427,7 +9427,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9453,7 +9453,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9486,7 +9486,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9520,7 +9520,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9554,7 +9554,7 @@ data "google_compute_image" "my_image" {
 }
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
   boot_disk {
     initialize_params {
@@ -9839,7 +9839,7 @@ resource "google_compute_network" "inst-test-network" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9879,7 +9879,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -9962,7 +9962,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
   project      = google_compute_shared_vpc_service_project.service_project.service_project
 
@@ -10002,7 +10002,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -10040,7 +10040,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -10080,7 +10080,7 @@ resource "google_compute_image" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -10173,7 +10173,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -10215,7 +10215,7 @@ data "google_compute_image" "example" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
 
@@ -10346,7 +10346,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-east1-d"
 
   boot_disk {
@@ -10394,7 +10394,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-east1-d"
 
   boot_disk {
@@ -10449,7 +10449,7 @@ resource "google_compute_subnetwork" "test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -10494,7 +10494,7 @@ resource "google_compute_subnetwork" "test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -10545,7 +10545,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-east1-d"
 
   boot_disk {
@@ -10592,7 +10592,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-east1-d"
 
   boot_disk {
@@ -10644,7 +10644,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-east1-d"
 
   boot_disk {
@@ -10696,7 +10696,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-east1-d"
 
   boot_disk {
@@ -10729,7 +10729,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
 
   boot_disk {
@@ -10857,7 +10857,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  machine_type = "n1-standard-6"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
   allow_stopping_for_update = true
 
@@ -10904,7 +10904,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  machine_type = "n1-standard-6"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
   allow_stopping_for_update = true
 
@@ -10973,7 +10973,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  machine_type = "n1-standard-6"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
   allow_stopping_for_update = true
 
@@ -11042,7 +11042,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
+  machine_type = "n1-standard-6"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
   allow_stopping_for_update = true
 
@@ -11209,7 +11209,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -11459,7 +11459,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
@@ -11495,7 +11495,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
@@ -11592,7 +11592,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -11621,7 +11621,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -11695,7 +11695,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name           = "%{instance_name}"
-	machine_type   = "e2-medium"
+	machine_type   = "e2-micro"
 	zone           = "us-central1-a"
 
 	boot_disk {
@@ -11722,7 +11722,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name           = "%s"
-	machine_type   = "e2-medium"
+	machine_type   = "e2-micro"
 	zone           = "us-central1-a"
 	tags           = ["baz"]
 
@@ -11758,7 +11758,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name           = "%{instance_name}"
-	machine_type   = "e2-medium"
+	machine_type   = "e2-micro"
 	zone           = "%{zone}"
 
 	boot_disk {
@@ -11857,7 +11857,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-standard-4"
+  machine_type   = "e2-micro"
   zone           = "us-east4-b"
   tags           = ["foo", "bar"]
 
@@ -11940,7 +11940,7 @@ func testAccComputeInstance_subnetworkUpdate(suffix, instance string) string {
 
 	resource "google_compute_instance" "foobar" {
 		name         = "%s"
-		machine_type = "e2-medium"
+		machine_type = "e2-micro"
 		zone         = "us-east1-d"
 		allow_stopping_for_update = true
 
@@ -12018,7 +12018,7 @@ func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string 
 
 	resource "google_compute_instance" "foobar" {
 		name         = "%s"
-		machine_type = "e2-medium"
+		machine_type = "e2-micro"
 		zone         = "us-east1-d"
 		allow_stopping_for_update = true
 
@@ -12064,7 +12064,7 @@ func testAccComputeInstance_subnetworkProjectExpectError(suffix, instance string
 
 	resource "google_compute_instance" "foobar" {
 		name         = "%s"
-		machine_type = "e2-medium"
+		machine_type = "e2-micro"
 		zone         = "us-east1-d"
 		allow_stopping_for_update = true
 
@@ -12111,7 +12111,7 @@ func testAccComputeInstance_networkIpUpdate(suffix, instance string) string {
 
 	resource "google_compute_instance" "foobar" {
 		name         = "%s"
-		machine_type = "e2-medium"
+		machine_type = "e2-micro"
 		zone         = "us-east1-d"
 
 		boot_disk {
@@ -12157,7 +12157,7 @@ func testAccComputeInstance_networkIpUpdateByHand(suffix, instance string) strin
 
 	resource "google_compute_instance" "foobar" {
 		name         = "%s"
-		machine_type = "e2-medium"
+		machine_type = "e2-micro"
 		zone         = "us-east1-d"
 
 		boot_disk {
@@ -12203,7 +12203,7 @@ func testAccComputeInstance_networkIpUpdateWithComputeAddress(suffix, instance s
 
 	resource "google_compute_instance" "foobar" {
 		name         = "%s"
-		machine_type = "e2-medium"
+		machine_type = "e2-micro"
 		zone         = "us-east1-d"
 
 		boot_disk {
@@ -12341,7 +12341,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12371,7 +12371,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12403,7 +12403,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12438,7 +12438,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12469,7 +12469,7 @@ func testAccComputeInstance_localSsdVM_maxRunDuration(instance string, instanceT
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "n2-standard-8"
+  machine_type = "n2-standard-2"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12514,7 +12514,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12550,7 +12550,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12584,7 +12584,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12609,7 +12609,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -12707,7 +12707,7 @@ func testAccComputeInstance_regionBootDisk(instance, diskName, suffix string) st
 	return fmt.Sprintf(`
 resource "google_compute_instance" "regional_vm_instance" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone = "us-central1-c"
 
   boot_disk {
@@ -12822,7 +12822,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -12904,7 +12904,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -13053,7 +13053,7 @@ resource "google_compute_region_security_policy" "policyforinstance2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -13225,7 +13225,7 @@ resource "google_compute_region_security_policy" "policyforinstance2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -13307,7 +13307,7 @@ resource "google_compute_subnetwork" "subnet2" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -13416,7 +13416,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -13524,7 +13524,7 @@ resource "google_compute_region_security_policy" "policyforinstance" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "europe-west1-b"
   tags         = ["foo", "bar"]
 
@@ -13583,7 +13583,7 @@ resource "google_compute_network_attachment" "test_network_attachment" {
 
 resource "google_compute_instance" "foobar" {
   name         = "tf-test-instance-%{suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "%{region}-a"
 
 	boot_disk {
@@ -13644,7 +13644,7 @@ resource "google_compute_network_attachment" "test_network_attachment" {
 
 resource "google_compute_instance" "foobar" {
   name         = "tf-test-instance-%{suffix}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "%{region}-a"
 
   boot_disk {
@@ -13720,7 +13720,7 @@ resource "google_compute_network_attachment" "test_network_attachment_2" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "tf-test-compute-instance-%s"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "%s-a"
 	allow_stopping_for_update = true
 
@@ -13770,7 +13770,7 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "%s-a"
   tags         = ["foo", "bar"]
 
@@ -13952,7 +13952,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name = "%{instance_name}"
-	machine_type = "n1-standard-1"
+	machine_type = "e2-micro"
 	zone = "us-central1-a"
 
 	boot_disk {
@@ -13978,7 +13978,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14005,7 +14005,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14044,7 +14044,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "%{env_region}-a"
 
 	boot_disk {
@@ -14084,7 +14084,7 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "%{env_region}-a"
 
 	boot_disk {
@@ -14117,7 +14117,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14147,7 +14147,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14178,7 +14178,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14200,7 +14200,7 @@ resource "google_compute_snapshot" "foobar" {
 
 resource "google_compute_instance" "foobar2" {
 	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14246,7 +14246,7 @@ resource "google_compute_snapshot" "snapshot" {
 
 resource "google_compute_instance" "instance" {
   name         = "%{instance_name}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -14274,7 +14274,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14298,7 +14298,7 @@ resource "google_compute_snapshot" "foobar" {
 
 resource "google_compute_instance" "foobar2" {
 	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14330,7 +14330,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14358,7 +14358,7 @@ resource "google_compute_snapshot" "foobar" {
 
 resource "google_compute_instance" "foobar2" {
 	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14386,7 +14386,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14414,7 +14414,7 @@ resource "google_compute_snapshot" "foobar" {
 
 resource "google_compute_instance" "foobar2" {
 	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14458,7 +14458,7 @@ resource "google_compute_image" "foobar" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14505,7 +14505,7 @@ resource "google_compute_image" "foobar" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14548,7 +14548,7 @@ resource "google_compute_image" "foobar" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14576,7 +14576,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone = "us-central1-a"
 
 	boot_disk {
@@ -14618,7 +14618,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14668,7 +14668,7 @@ resource "google_iam_workload_identity_pool_managed_identity" "id" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
@@ -14698,7 +14698,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
 	name         = "%{instance_name}"
-	machine_type = "e2-medium"
+	machine_type = "e2-micro"
 	zone         = "us-central1-a"
 
 	boot_disk {
