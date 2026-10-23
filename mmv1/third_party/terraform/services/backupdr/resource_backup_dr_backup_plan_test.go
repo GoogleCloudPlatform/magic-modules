@@ -30,7 +30,7 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 				ResourceName:            "google_backup_dr_backup_plan.bp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"resource"},
+				ImportStateVerifyIgnore: []string{"labels", "resource", "terraform_labels"},
 			},
 			{
 				Config: testAccBackupDRBackupPlan_fullUpdate(context),
@@ -39,7 +39,25 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 				ResourceName:            "google_backup_dr_backup_plan.bp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"resource"},
+				ImportStateVerifyIgnore: []string{"labels", "resource", "terraform_labels"},
+			},
+			{
+				Config: testAccBackupDRBackupPlan_fullUpdateDiskExclusionLabels(context),
+			},
+			{
+				ResourceName:            "google_backup_dr_backup_plan.bp",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "resource", "terraform_labels"},
+			},
+			{
+				Config: testAccBackupDRBackupPlan_fullUpdateBootDiskOnlyFalse(context),
+			},
+			{
+				ResourceName:            "google_backup_dr_backup_plan.bp",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "resource", "terraform_labels"},
 			},
 		},
 	})
@@ -47,40 +65,6 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 
 func testAccBackupDRBackupPlan_fullCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_account" "default" {
-  account_id   = "tf-test-my-custom-%{random_suffix}"
-  display_name = "Custom SA for VM Instance"
-}
-
-resource "google_compute_instance" "default" {
-  name         = "tf-test-compute-instance-%{random_suffix}"
-  machine_type = "n2-standard-2"
-  zone         = "us-central1-a"
-  tags = ["foo", "bar"]
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-13"
-      labels = {
-        my_label = "value"
-      }
-    }
-  }
-  // Local SSD disk
-  scratch_disk {
-    interface = "NVME"
-  }
-  network_interface {
-    network = "default"
-    access_config {
-      // Ephemeral public IP
-    }
-  }
-  service_account {
-    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    email  = google_service_account.default.email
-    scopes = ["cloud-platform"]
-  }
-}
 resource "google_backup_dr_backup_vault" "my-backup-vault" {
     location ="us-central1"
     backup_vault_id    = "tf-test-bv-%{random_suffix}"
@@ -96,7 +80,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
     }
     force_update = "true"
     force_delete = "true"
-    allow_missing = "true" 
+    allow_missing = "true"
 }
 
 resource "google_backup_dr_backup_plan" "bp" {
@@ -105,6 +89,13 @@ resource "google_backup_dr_backup_plan" "bp" {
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
   max_custom_on_demand_retention_days = 30
+  labels = {
+    foo = "bar"
+  }
+  compute_instance_backup_plan_properties {
+    guest_flush    = false
+    boot_disk_only = true
+  }
 
   backup_rules {
     rule_id                = "rule-1"
@@ -129,41 +120,6 @@ resource "google_backup_dr_backup_plan" "bp" {
 
 func testAccBackupDRBackupPlan_fullUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_service_account" "default" {
-  account_id   = "tf-test-my-custom-%{random_suffix}"
-  display_name = "Custom SA for VM Instance"
-}
-
-resource "google_compute_instance" "default" {
-  name         = "tf-test-compute-instance-%{random_suffix}"
-  machine_type = "n2-standard-2"
-  zone         = "us-central1-a"
-  tags = ["foo", "bar"]
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-13"
-      labels = {
-        my_label = "value"
-      }
-    }
-  }
-  // Local SSD disk
-  scratch_disk {
-    interface = "NVME"
-  }
-  network_interface {
-    network = "default"
-    access_config {
-      // Ephemeral public IP
-    }
-  }
-  service_account {
-    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    email  = google_service_account.default.email
-    scopes = ["cloud-platform"]
-  }
-}
-
 resource "google_backup_dr_backup_vault" "my-backup-vault" {
     location ="us-central1"
     backup_vault_id    = "tf-test-bv-%{random_suffix}"
@@ -179,7 +135,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
     }
     force_update = "true"
     force_delete = "true"
-    allow_missing = "true" 
+    allow_missing = "true"
 }
 
 resource "google_backup_dr_backup_plan" "bp" {
@@ -188,8 +144,89 @@ resource "google_backup_dr_backup_plan" "bp" {
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
   max_custom_on_demand_retention_days = 45
+  labels = {
+    foo = "bar"
+  }
   compute_instance_backup_plan_properties {
     guest_flush = true
+    disk_exclusion_labels {
+      labels {
+        key   = "key1"
+        value = "value1"
+      }
+    }
+  }
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 366
+    standard_schedule {
+      recurrence_type = "MONTHLY" # Updated recurrence_type from YEARLY
+      days_of_month   = [1, 15]   # Updated days_of_month
+      time_zone       = "America/New_York" # Updated time_zone
+
+      backup_window {
+        start_hour_of_day = 1  # Updated start hour
+        end_hour_of_day   = 7 # Updated end hour
+      }
+    }
+  }
+  backup_rules {
+   # Adding a second rule to test weekly schedule
+    rule_id                = "rule-2"
+    backup_retention_days  = 60 # Different retention for rule-2
+
+    standard_schedule {
+      recurrence_type = "WEEKLY"
+      days_of_week    = ["MONDAY", "FRIDAY"] # Added days_of_week
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 1  # Different backup window for rule-2
+        end_hour_of_day   = 7
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccBackupDRBackupPlan_fullUpdateDiskExclusionLabels(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_backup_dr_backup_vault" "my-backup-vault" {
+    location ="us-central1"
+    backup_vault_id    = "tf-test-bv-%{random_suffix}"
+    description = "This is a second backup vault built by Terraform."
+    backup_minimum_enforced_retention_duration = "100000s"
+    labels = {
+      foo = "bar1"
+      bar = "baz1"
+    }
+    annotations = {
+      annotations1 = "bar1"
+      annotations2 = "baz1"
+    }
+    force_update = "true"
+    force_delete = "true"
+    allow_missing = "true"
+}
+
+resource "google_backup_dr_backup_plan" "bp" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "compute.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
+  max_custom_on_demand_retention_days = 45
+  labels = {
+    foo = "bar"
+  }
+  compute_instance_backup_plan_properties {
+    guest_flush = true
+    disk_exclusion_labels {
+      labels {
+        key   = "key2"
+        value = "value2"
+      }
+    }
   }
   backup_rules {
     rule_id                = "rule-1"
@@ -309,6 +346,73 @@ resource "google_backup_dr_backup_plan" "bp" {
 
   disk_backup_plan_properties {
     guest_flush = true
+  }
+}
+`, context)
+}
+
+func testAccBackupDRBackupPlan_fullUpdateBootDiskOnlyFalse(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_backup_dr_backup_vault" "my-backup-vault" {
+    location ="us-central1"
+    backup_vault_id    = "tf-test-bv-%{random_suffix}"
+    description = "This is a second backup vault built by Terraform."
+    backup_minimum_enforced_retention_duration = "100000s"
+    labels = {
+      foo = "bar1"
+      bar = "baz1"
+    }
+    annotations = {
+      annotations1 = "bar1"
+      annotations2 = "baz1"
+    }
+    force_update = "true"
+    force_delete = "true"
+    allow_missing = "true"
+}
+
+resource "google_backup_dr_backup_plan" "bp" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "compute.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
+  max_custom_on_demand_retention_days = 45
+  labels = {
+    foo = "bar"
+  }
+  compute_instance_backup_plan_properties {
+    guest_flush    = true
+    boot_disk_only = false
+  }
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 366
+    standard_schedule {
+      recurrence_type = "MONTHLY" # Updated recurrence_type from YEARLY
+      days_of_month   = [1, 15]   # Updated days_of_month
+      time_zone       = "America/New_York" # Updated time_zone
+
+      backup_window {
+        start_hour_of_day = 1  # Updated start hour
+        end_hour_of_day   = 7 # Updated end hour
+      }
+    }
+  }
+  backup_rules {
+   # Adding a second rule to test weekly schedule
+    rule_id                = "rule-2"
+    backup_retention_days  = 60 # Different retention for rule-2
+
+    standard_schedule {
+      recurrence_type = "WEEKLY"
+      days_of_week    = ["MONDAY", "FRIDAY"] # Added days_of_week
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 1  # Different backup window for rule-2
+        end_hour_of_day   = 7
+      }
+    }
   }
 }
 `, context)

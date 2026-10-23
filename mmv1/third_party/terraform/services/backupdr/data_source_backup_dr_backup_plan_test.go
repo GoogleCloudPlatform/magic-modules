@@ -79,6 +79,13 @@ resource "google_backup_dr_backup_plan" "test" {
     ignore_changes = [backup_vault]
   }
   max_custom_on_demand_retention_days = 30
+  labels = {
+    foo = "bar"
+  }
+  compute_instance_backup_plan_properties {
+    guest_flush    = true
+    boot_disk_only = true
+  }
   backup_rules {
 	rule_id = "rule-1"
 	backup_retention_days = 5
