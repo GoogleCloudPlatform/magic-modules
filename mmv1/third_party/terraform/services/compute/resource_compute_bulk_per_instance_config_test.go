@@ -190,7 +190,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "tf-test-igm-%{random_suffix}"
-  machine_type   = "e2-medium"
+  machine_type   = "e2-micro"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
