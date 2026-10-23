@@ -8244,13 +8244,9 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 				}
 			}
 
-			allowedConsumerProjectsStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects.#"]
-			if !ok && len(expectedAllowedConsumerProjects) == 0 {
-				allowedConsumerProjectsStr = "0"
-				ok = true
-			}
-			allowedConsumerProjects, err := strconv.Atoi(allowedConsumerProjectsStr)
-			if !ok || err != nil || allowedConsumerProjects != len(expectedAllowedConsumerProjects) {
+			allowedConsumerProjectsStr := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects.#"]
+			allowedConsumerProjects, _ := strconv.Atoi(allowedConsumerProjectsStr)
+			if allowedConsumerProjects != len(expectedAllowedConsumerProjects) {
 				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.allowed_consumer_projects property is not present or set as expected in state of %s", resourceName)
 			}
 
