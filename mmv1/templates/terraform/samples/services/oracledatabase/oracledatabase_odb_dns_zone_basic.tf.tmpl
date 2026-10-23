@@ -1,0 +1,27 @@
+resource "google_oracle_database_odb_dns_zone" "{{$.PrimaryResourceId}}"{
+  odb_dns_zone_id = "{{index $.ResourceIdVars "odb_dns_zone_id"}}"
+  location = "us-east4"
+  project = "{{index $.ResourceIdVars "project"}}"
+  odbnetwork = google_oracle_database_odb_network.my-odbnetwork.odb_network_id
+  domain = "{{index $.ResourceIdVars "domain"}}"
+  labels = {
+    terraform_created = "true"
+  }
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}
+
+resource "google_oracle_database_odb_network" "my-odbnetwork"{
+  odb_network_id = "{{index $.ResourceIdVars "odb_network_id"}}"
+  location = "us-east4"
+  project = "{{index $.ResourceIdVars "project"}}"
+  network = data.google_compute_network.default.id
+  labels = {
+    terraform_created = "true"
+  }
+  deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
+}
+
+data "google_compute_network" "default" {
+  name     = "default"
+  project = "{{index $.ResourceIdVars "project"}}"
+}
