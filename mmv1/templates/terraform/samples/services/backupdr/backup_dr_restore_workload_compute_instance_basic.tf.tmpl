@@ -11,6 +11,6 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
 
   compute_instance_restore_properties {
     name         = "{{index $.ResourceIdVars "instance_name"}}"
-    machine_type = "zones/us-central1-a/machineTypes/e2-medium"
+    machine_type = "zones/us-central1-a/machineTypes/e2-micro"
   }
 }
