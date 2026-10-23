@@ -81,7 +81,7 @@ func resourceComputeNetworkEndpointsEndpointHash(v interface{}) int {
 			buf.WriteString(fmt.Sprintf("%s-", ipv6))
 		}
 	}
-	if port, ok := m["port"].(int); ok {
+	if port, ok := m["port"].(int); ok && port != 0 {
 		buf.WriteString(fmt.Sprintf("%d-", port))
 	}
 	return tpgresource.Hashcode(buf.String())
