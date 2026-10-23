@@ -1,0 +1,30 @@
+resource "google_sql_database_instance" "source" {
+  provider         = google-beta
+  name             = "{{index $.ResourceIdVars "instance_name"}}"
+  region           = "us-central1"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier = "db-n1-standard-1"
+    backup_configuration {
+      enabled            = true
+      binary_log_enabled = true
+    }
+  }
+  deletion_protection = false
+
+  # The blue-green deployment is managed by google_sql_blue_green_deployment instead.
+  lifecycle {
+    ignore_changes = [blue_green_deployment]
+  }
+}
+
+resource "google_sql_blue_green_deployment" "{{.PrimaryResourceId}}" {
+  provider                 = google-beta
+  blue_green_deployment_id = "{{index $.ResourceIdVars "deployment_name"}}"
+  location                 = "us-central1"
+  source_instance          = google_sql_database_instance.source.name
+  description              = "Terraform blue green deployment with requested config"
+  requested_config {
+    database_version = "MYSQL_8_4"
+  }
+}

@@ -811,6 +811,7 @@ service/speech:
   - google_speech_to_text_.*
 service/sqladmin-cp:
   resources:
+  - google_sql_blue_green_deployment
   - google_sql_database_instance
   - google_sql_database_instances
   - google_sql_provision_script
