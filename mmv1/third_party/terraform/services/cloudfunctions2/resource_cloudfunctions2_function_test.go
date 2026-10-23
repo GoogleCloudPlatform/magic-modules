@@ -92,7 +92,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 
   service_config {
     max_instance_count  = 1
-    available_memory    = "1536Mi"
+    available_memory    = "128Mi"
     timeout_seconds     = 30
   }
 }
@@ -174,7 +174,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   service_config {
-    max_instance_count  = 5
+    max_instance_count  = 2
     min_instance_count = 1
     available_memory    = "256M"
     timeout_seconds     = 60
@@ -303,7 +303,7 @@ resource "google_cloudfunctions2_function" "function" {
   }
 
   service_config {
-    max_instance_count  = 3
+    max_instance_count  = 2
     min_instance_count = 1
     available_memory    = "256M"
     timeout_seconds     = 60
@@ -416,7 +416,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 
   service_config {
     max_instance_count  = 1
-    available_memory    = "1536Mi"
+    available_memory    = "256M"
     timeout_seconds     = 30
   }
 }
@@ -563,7 +563,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 
   service_config {
     max_instance_count  = 1
-    available_memory    = "1536Mi"
+    available_memory    = "256M"
     timeout_seconds     = 30
   }
 }
@@ -643,7 +643,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
 
   service_config {
     max_instance_count  = 1
-    available_memory    = "1536Mi"
+    available_memory    = "256M"
     timeout_seconds     = 30
     binary_authorization_policy = "default"
   }
