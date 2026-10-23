@@ -1,0 +1,168 @@
+// Why this decoder exists:
+// Reading a `google_dialogflow_phone_number` combines data from two Dialogflow Telephony
+// collections (`PhoneNumbers` and `PhoneNumberOrders`):
+//   1. `PhoneNumbers` does not have a single-resource `GetPhoneNumber` RPC. Instead, `Read`
+//      queries `PhoneNumbers.ListPhoneNumbers` (`GET /v2beta1/projects/{project}/locations/{location}/phoneNumbers`)
+//      and uses MMv1's `nested_query` to locate the entry matching `name`. Note that
+//      `ListPhoneNumbers` only returns active numbers (omitting soft-deleted `DELETE_REQUESTED`
+//      numbers), so a deleted phone number naturally disappears from the list and triggers
+//      Terraform drift removal (`d.SetId("")`).
+//   2. A `PhoneNumber` object returned by `ListPhoneNumbers` only contains runtime telephony
+//      fields (`name`, `phoneNumber`, `conversationProfile`, `allowedSipTrunks`, `lifecycleState`,
+//      `purgeTime`). It does NOT return the ordering fields (`order_name`, `description`, and
+//      `phone_number_spec` such as `country_code` and `preferred_area_codes`), which live on the
+//      originating `PhoneNumberOrder` resource.
+//
+// What we expect and how it works for the user:
+//   - During normal `Read` refreshes (when `order_name` is already known in Terraform state),
+//     this decoder fetches the `PhoneNumberOrder` directly via `GET /v2beta1/{order_name}` and
+//     copies `orderName`, `description`, and `phoneNumberSpec` onto `res`.
+//   - During `terraform import` (when a user imports an existing phone number by its `PhoneNumber`
+//     resource name `projects/{project}/locations/{location}/phoneNumbers/{id}` and `order_name`
+//     is not yet in state), this decoder falls back to listing `PhoneNumberOrders` in the same
+//     project/location and matching the order whose `phoneNumbers` map contains either the
+//     `PhoneNumber` resource name (key) or E.164 `phoneNumber` string (value).
+//   - This allows users to import existing Dialogflow phone numbers with full fidelity and
+//     avoids `ignore_read` workarounds.
+
+if res == nil {
+	return nil, nil
+}
+
+expectedName := d.Get("name").(string)
+itemName, _ := res["name"].(string)
+location := d.Get("location").(string)
+if location != "" && strings.Contains(itemName, "/locations/") {
+	re := regexp.MustCompile(`^projects/([^/]+)/locations/[^/]+/phoneNumbers/([^/]+)$`)
+	if m := re.FindStringSubmatch(itemName); m != nil {
+		itemName = fmt.Sprintf("projects/%s/locations/%s/phoneNumbers/%s", m[1], location, m[2])
+		res["name"] = itemName
+	}
+}
+
+// MMv1's nested_query invokes the decoder on each candidate item while scanning the
+// `phoneNumbers` list and then once more on the matched item. Skip order lookup for
+// non-matching list items or if the matched item has already been enriched.
+if itemName != expectedName || res["orderName"] != nil {
+	return res, nil
+}
+
+config := meta.(*transport_tpg.Config)
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return nil, err
+}
+
+billingProject := ""
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return nil, err
+}
+billingProject = project
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+universeDomain := config.UniverseDomain
+qualifyDialogflowUrl := func(rawUrl string) string {
+	if universeDomain != "" && universeDomain != "googleapis.com" {
+		rawUrl = strings.Replace(rawUrl, "googleapis.com", universeDomain, 1)
+	}
+	if strings.HasPrefix(rawUrl, "https://dialogflow") {
+		if location != "" && location != "global" {
+			rawUrl = strings.Replace(rawUrl, "https://dialogflow", fmt.Sprintf("https://%s-dialogflow", location), 1)
+		}
+	}
+	return rawUrl
+}
+
+// Fast path: when `order_name` is already recorded in state, fetch that specific
+// PhoneNumberOrder directly via GET /v2beta1/{order_name}.
+var matchedOrder map[string]interface{}
+orderName := d.Get("order_name").(string)
+if orderName != "" {
+	orderUrl := qualifyDialogflowUrl(transport_tpg.BaseUrl(Product, config) + orderName)
+	orderRes, orderErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    orderUrl,
+		UserAgent: userAgent,
+	})
+	if orderErr == nil {
+		matchedOrder = orderRes
+	}
+}
+
+// Import / recovery path: if `order_name` is not in state (for example, during `terraform import`),
+// paginate through `PhoneNumberOrders.ListPhoneNumberOrders` to find the order that provisioned
+// this phone number by matching either the PhoneNumber resource name key or the E.164 number value.
+if matchedOrder == nil {
+	baseListOrdersUrl, replaceErr := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/phoneNumberOrders?pageSize=1000")
+	if replaceErr == nil {
+		baseListOrdersUrl = qualifyDialogflowUrl(baseListOrdersUrl)
+		e164, _ := res["phoneNumber"].(string)
+		pageToken := ""
+		for matchedOrder == nil {
+			listOrdersUrl := baseListOrdersUrl
+			if pageToken != "" {
+				var paramErr error
+				listOrdersUrl, paramErr = transport_tpg.AddQueryParams(baseListOrdersUrl, map[string]string{"pageToken": pageToken})
+				if paramErr != nil {
+					break
+				}
+			}
+			listRes, listErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    listOrdersUrl,
+				UserAgent: userAgent,
+			})
+			if listErr != nil {
+				break
+			}
+			if orders, ok := listRes["phoneNumberOrders"].([]interface{}); ok {
+				for _, rawOrder := range orders {
+					orderMap, ok := rawOrder.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					pns, ok := orderMap["phoneNumbers"].(map[string]interface{})
+					if !ok {
+						continue
+					}
+					for k, v := range pns {
+						valStr, _ := v.(string)
+						if k == expectedName || (e164 != "" && valStr == e164) {
+							matchedOrder = orderMap
+							break
+						}
+					}
+					if matchedOrder != nil {
+						break
+					}
+				}
+			}
+			nextToken, _ := listRes["nextPageToken"].(string)
+			if nextToken == "" {
+				break
+			}
+			pageToken = nextToken
+		}
+	}
+}
+
+if matchedOrder != nil {
+	if v, ok := matchedOrder["name"]; ok {
+		res["orderName"] = v
+	}
+	if v, ok := matchedOrder["description"]; ok {
+		res["description"] = v
+	}
+	if v, ok := matchedOrder["phoneNumberSpec"]; ok {
+		res["phoneNumberSpec"] = v
+	}
+}
+
+return res, nil
