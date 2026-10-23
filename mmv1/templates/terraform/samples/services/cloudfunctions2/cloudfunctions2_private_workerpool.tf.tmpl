@@ -19,7 +19,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
   location = "us-central1"
   worker_config {
     disk_size_gb = 100
-    machine_type = "e2-standard-8"
+    machine_type = "e2-medium"
     no_external_ip = false
   }
 }
