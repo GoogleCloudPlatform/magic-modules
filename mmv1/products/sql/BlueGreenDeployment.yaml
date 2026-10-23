@@ -19,6 +19,12 @@ references:
   guides:
     Blue-green deployments overview: https://cloud.google.com/sql/docs/mysql/blue-green-deployments-overview
   api: https://cloud.google.com/sql/docs/admin-api/rest/v1/projects.locations.blueGreenDeployments
+docs:
+  note: |
+    In the `google-beta` provider, `google_sql_database_instance` authoritatively manages
+    the instance's blue-green deployment through its `blue_green_deployment` block. If the
+    source instance is managed by Terraform, add `lifecycle { ignore_changes = [blue_green_deployment] }`
+    to it; otherwise Terraform will plan to remove the block and delete this deployment.
 base_url: projects/{{project}}/locations/{{location}}/blueGreenDeployments
 self_link: projects/{{project}}/locations/{{location}}/blueGreenDeployments/{{blue_green_deployment_id}}
 create_url: projects/{{project}}/locations/{{location}}/blueGreenDeployments?blueGreenDeploymentId={{blue_green_deployment_id}}
@@ -42,6 +48,8 @@ autogen_status: Qmx1ZUdyZWVuRGVwbG95bWVudEF1dG9nZW5WMkFnZW50
 samples:
   - name: sql_blue_green_deployment_basic
     primary_resource_id: default
+    # The source instance's `blue_green_deployment` field (needed for ignore_changes) is beta-only.
+    min_version: beta
     steps:
       - name: sql_blue_green_deployment_basic
         resource_id_vars:
@@ -49,6 +57,8 @@ samples:
           instance_name: my-instance
   - name: sql_blue_green_deployment_requested_config
     primary_resource_id: default
+    # The source instance's `blue_green_deployment` field (needed for ignore_changes) is beta-only.
+    min_version: beta
     steps:
       - name: sql_blue_green_deployment_requested_config
         resource_id_vars:
