@@ -283,7 +283,7 @@ resource "google_sql_database_instance" "main2" {
 	settings {
 	  # Second-generation instance tiers are based on the machine
 	  # type. See argument reference below.
-	  tier = "db-custom-2-13312"
+	  tier = "db-g1-small"
 	}
   
 	deletion_protection = false
@@ -292,7 +292,7 @@ resource "google_sql_database_instance" "main2" {
 
 data "google_sql_database_instances" "qa" {
 	region = "us-central1"
-	tier = "db-custom-2-13312"
+	tier = "db-g1-small"
 	depends_on = [
 		google_sql_database_instance.main2,
 		google_sql_database_instance.main
