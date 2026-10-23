@@ -1,7 +1,7 @@
 resource "google_compute_instance" "vm" {
   provider     = google-beta
   name         = "{{index $.ResourceIdVars "vm_name"}}"
-  machine_type = "e2-medium"
+  machine_type = "e2-micro"
 
   boot_disk {
     initialize_params {

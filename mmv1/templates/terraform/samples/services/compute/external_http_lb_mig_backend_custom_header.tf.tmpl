@@ -71,7 +71,7 @@ resource "google_compute_backend_service" "default" {
 resource "google_compute_instance_template" "default" {
   name         = "{{index $.ResourceIdVars "mig_template_name"}}"
   provider     = google-beta
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
   tags         = ["allow-health-check"]
 
   network_interface {
@@ -138,7 +138,7 @@ resource "google_compute_instance_group_manager" "default" {
     name              = "primary"
   }
   base_instance_name = "vm"
-  target_size        = 2
+  target_size        = 1
 }
 
 # allow access from health check ranges

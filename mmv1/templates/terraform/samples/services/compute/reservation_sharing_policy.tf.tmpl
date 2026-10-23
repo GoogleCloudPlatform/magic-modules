@@ -40,7 +40,7 @@ resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
   zone = "us-central1-b"
 
   specific_reservation {
-    count = 2
+    count = 1
     source_instance_template = google_compute_instance_template.foobar.self_link
   }
 

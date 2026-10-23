@@ -109,7 +109,7 @@ resource "google_compute_health_check" "default" {
 resource "google_compute_instance_template" "default" {
   name         = "{{index $.ResourceIdVars "ssl_proxy_xlb_mig_template"}}"
   provider     = google
-  machine_type = "e2-small"
+  machine_type = "e2-micro"
   tags         = ["allow-health-check"]
 
   network_interface {
@@ -168,7 +168,7 @@ resource "google_compute_instance_group_manager" "default" {
     name              = "primary"
   }
   base_instance_name = "vm"
-  target_size        = 2
+  target_size        = 1
 }
 
 # allow access from health check ranges
