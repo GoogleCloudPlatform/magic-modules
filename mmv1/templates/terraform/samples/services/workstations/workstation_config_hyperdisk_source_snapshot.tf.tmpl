@@ -47,7 +47,7 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
 
   host {
       gce_instance {
-        machine_type                = "c3-standard-22"
+        machine_type                = "c3-standard-4"
         boot_disk_size_gb           = 35
         disable_public_ip_addresses = true
         vm_tags = {
