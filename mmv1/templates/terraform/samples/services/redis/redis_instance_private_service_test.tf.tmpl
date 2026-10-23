@@ -12,12 +12,11 @@ data "google_compute_network" "redis-network" {
 
 resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
   name           = "{{index $.ResourceIdVars "instance_name"}}"
-  tier           = "STANDARD_HA"
+  tier           = "BASIC"
   memory_size_gb = 1
 
-  region                  = "us-east1"
-  location_id             = "us-east1-b"
-  alternative_location_id = "us-east1-c"
+  region      = "us-east1"
+  location_id = "us-east1-b"
 
   authorized_network = data.google_compute_network.redis-network.id
   connect_mode       = "PRIVATE_SERVICE_ACCESS"
