@@ -294,19 +294,19 @@ resource "google_bigtable_instance" "instance" {
   cluster {
     cluster_id   = "%s1"
     zone         = "us-central1-b"
-    num_nodes    = 3
+    num_nodes    = 1
   }
 
   cluster {
     cluster_id   = "%s2"
     zone         = "us-west1-a"
-    num_nodes    = 3
+    num_nodes    = 1
   }
 
   cluster {
     cluster_id   = "%s3"
     zone         = "us-west1-b"
-    num_nodes    = 3
+    num_nodes    = 1
   }
 
   deletion_protection = false
