@@ -1,0 +1,58 @@
+resource "google_project" "spoke" {
+  project_id      = "{{index $.ResourceIdVars "spoke_project_id"}}"
+  name            = "NCC spoke project"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "spoke_compute" {
+  project = google_project.spoke.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "spoke_ncc" {
+  project = google_project.spoke.project_id
+  service = "networkconnectivity.googleapis.com"
+}
+
+resource "time_sleep" "wait_for_spoke_apis" {
+  create_duration = "60s"
+  depends_on = [
+    google_project_service.spoke_compute,
+    google_project_service.spoke_ncc,
+  ]
+}
+
+resource "google_compute_network" "spoke_network" {
+  project                 = google_project.spoke.project_id
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+  depends_on              = [time_sleep.wait_for_spoke_apis]
+}
+
+resource "google_network_connectivity_hub" "hub" {
+  name        = "{{index $.ResourceIdVars "hub_name"}}"
+  description = "Hub that accepts cross-project spokes"
+}
+
+resource "google_network_connectivity_spoke" "spoke" {
+  project     = google_project.spoke.project_id
+  name        = "{{index $.ResourceIdVars "spoke_name"}}"
+  location    = "global"
+  description = "Spoke proposed from a workload project"
+  hub         = google_network_connectivity_hub.hub.id
+
+  linked_vpc_network {
+    uri                   = google_compute_network.spoke_network.self_link
+    include_export_ranges = ["{{index $.Vars "include_export_range"}}"]
+  }
+
+  depends_on = [time_sleep.wait_for_spoke_apis]
+}
+
+resource "google_network_connectivity_hub_spoke_acceptance" "{{$.PrimaryResourceId}}" {
+  hub        = google_network_connectivity_hub.hub.id
+  spoke      = google_network_connectivity_spoke.spoke.id
+  spoke_etag = google_network_connectivity_spoke.spoke.etag
+}
