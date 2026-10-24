@@ -1631,3 +1631,17 @@ func TestIamPolicyReadModifyWrite_conflictRetry(t *testing.T) {
 		t.Fatalf("expected 1 setIamPolicy call before stopping on second modify, got %d", got)
 	}
 }
+
+func TestIamPolicyReadModifyWrite_maxBackoffTimeout(t *testing.T) {
+	t.Parallel()
+
+	// iamPolicyReadModifyWrite runs GetResourceIamPolicy (DefaultRequestTimeout = 5m)
+	// and SetResourceIamPolicy (schema.TimeoutCreate = 20m) sequentially inside a single
+	// retry.Retry(maxBackoffTimeout, ...) window, and may also retry on 409 conflicts.
+	// maxBackoffTimeout must not be shorter than the underlying SendRequest / synchronous
+	// HTTP client timeout (2m), or WaitForState will abort and unlock the IAM mutex while
+	// an in-flight SetResourceIamPolicy call is still retrying rate-limit (429) responses.
+	if maxBackoffTimeout < 20*time.Minute {
+		t.Fatalf("expected maxBackoffTimeout >= 20m to cover SendRequest retry windows, got %v", maxBackoffTimeout)
+	}
+}

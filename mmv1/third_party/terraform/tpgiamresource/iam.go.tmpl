@@ -18,7 +18,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-const maxBackoffTimeout = 90 * time.Second
+const maxBackoffTimeout = 20 * time.Minute
 const IamPolicyVersion = 3
 
 // These types are implemented per GCP resource type and specify how to do per-resource IAM operations.
