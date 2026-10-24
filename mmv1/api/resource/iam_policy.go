@@ -174,6 +174,10 @@ type IamPolicy struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 
+	// [Optional] Timeout in seconds for retrying IAM policy read-modify-write operations.
+	// If unset, defaults to maxBackoffTimeout (90 seconds).
+	MaxBackoffTimeoutSeconds int `yaml:"max_backoff_timeout_seconds,omitempty"`
+
 	// [Optional] IAM list resources (terrafrom query) to generate for this resource.
 	//
 	// list_resource:
