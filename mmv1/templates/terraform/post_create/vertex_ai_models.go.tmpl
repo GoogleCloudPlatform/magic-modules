@@ -1,0 +1,14 @@
+// If the modelId is not provided by the user then it will be set by the API
+// Store that value in state
+if _, ok := d.GetOk("model_id"); !ok {
+	modelId := tpgresource.GetResourceNameFromSelfLink(opRes["name"].(string))
+	if err := d.Set("model_id", modelId); err != nil {
+		return fmt.Errorf("Error setting model_id: %w", err)
+	}
+}
+
+if _, ok := d.GetOk("version_aliases"); ok {
+	if err := vertexAiModelMergeVersionAliases(d, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+		return err
+	}
+}
