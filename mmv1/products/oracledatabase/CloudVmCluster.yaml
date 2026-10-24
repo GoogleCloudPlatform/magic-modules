@@ -112,6 +112,36 @@ samples:
           odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
           odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
           backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+  - name: oracledatabase_cloud_vmcluster_odbdnszone
+    primary_resource_id: my_vmcluster
+    steps:
+      - name: oracledatabase_cloud_vmcluster_odbdnszone
+        resource_id_vars:
+          project: my-project
+          cloud_vm_cluster_id: my-instance
+          cloud_exadata_infrastructure_id: my-exadata
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          odb_dns_zone: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbDnsZones/my-odbdnszone
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          # ofake- prefix is needed to create a dummy resource for testing purposes only
+          # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+          # As a result these resources are not sweepable
+          # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-odbdnszone-%s", acctest.RandString(t, 10))
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-odbdnszone-%s", acctest.RandString(t, 10))
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+          # OdbDnsZone has no Terraform resource, so the test uses a pre-provisioned
+          # zone in the permanent OdbNetwork instead of creating one.
+          odb_dns_zone: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbDnsZones/tf-test-permanent-odbdnszone"'
   - name: oracledatabase_cloud_vmcluster_full
     primary_resource_id: my_vmcluster
     steps:
