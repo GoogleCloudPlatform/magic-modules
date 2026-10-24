@@ -1,19 +1,33 @@
 func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	// If the resource has no id then it hasn't been created yet
-	// Check to see if any fields are set in the config at create time that shouldn't be there
+	// Check that the request only contains fields supported by the selected
+	// create operation.
 	if diff.Id() == "" {
-		fieldNames := []string{
-			"description",
-			"display_name",
-		}
-		found := []string{}
-		for _, field := range fieldNames {
-			if _, ok := diff.GetOk(field); ok {
-				found = append(found, field)
+		if _, ok := diff.GetOk("source_model"); ok {
+			fieldNames := []string{
+				"description",
+				"display_name",
+				"artifact_uri",
+				"container_spec",
+				"service_account",
+				"parent_model",
 			}
-		}
-		if len(found) > 0 {
-			return fmt.Errorf("these fields cannot be set at create time: %s", strings.Join(found, ","))
+			found := []string{}
+			for _, field := range fieldNames {
+				if _, ok := diff.GetOk(field); ok {
+					found = append(found, field)
+				}
+			}
+			if len(found) > 0 {
+				return fmt.Errorf("these fields cannot be set at copy time: %s", strings.Join(found, ","))
+			}
+		} else {
+			if _, ok := diff.GetOk("display_name"); !ok {
+				return fmt.Errorf("display_name must be set when uploading a model")
+			}
+			if _, ok := diff.GetOk("custom_service_account"); ok {
+				return fmt.Errorf("custom_service_account is only supported when copying a model")
+			}
 		}
 	}
 	// Either we are not creating a resource, or no disallowed fields are present
