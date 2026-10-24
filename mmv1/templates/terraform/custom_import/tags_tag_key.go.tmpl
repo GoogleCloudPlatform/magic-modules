@@ -1,0 +1,29 @@
+	importPattern := regexp.MustCompile(`^(tagKeys\/)?(?P<name>[0-9]+)(\s+(?P<key>[^=]+)=(?P<value>.*))?$`)
+	fieldValues := importPattern.FindStringSubmatch(d.Id())
+
+	if fieldValues == nil {
+		return nil, fmt.Errorf("invalid import TagKey id `%s`, expected '%s'", d.Id(), importPattern.String())
+	}
+	name := ""
+	purposeDataKey := ""
+	purposeDataValue := ""
+	for i := 1; i < len(fieldValues); i++ {
+		switch importPattern.SubexpNames()[i] {
+		case "name":
+			name = fieldValues[i]
+		case "key":
+			purposeDataKey = fieldValues[i]
+		case "value":
+			purposeDataValue = fieldValues[i]
+		default:
+			/** anonymous group **/
+		}
+	}
+	d.SetId("tagKeys/" + name)
+	d.Set("name", name)
+	if purposeDataKey != "" {
+		if err := d.Set("purpose_data", map[string]string{purposeDataKey: purposeDataValue}); err != nil {
+			return nil, fmt.Errorf("[ERROR] failed to import TagKeys purpose_data '%s': %s", d.Id(), err)
+		}
+	}
+	return []*schema.ResourceData{d}, nil
