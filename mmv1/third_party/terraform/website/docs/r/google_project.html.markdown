@@ -115,6 +115,8 @@ The following arguments are supported:
 
 * `tags` - (Optional) A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty. The field is immutable and causes resource replacement when mutated. This field is only set at create time and modifying this field after creation will trigger recreation. To apply tags to an existing resource, see the `google_tags_tag_value` resource.
 
+* `recover_soft_deleted` - (Optional) If true, Terraform will retain projects in `DELETE_REQUESTED` state during refresh and undelete and reconcile soft-deleted projects on create or update instead of removing them from state or failing with HTTP 409 `alreadyExists`. Recovering a soft-deleted project requires `resourcemanager.projects.get` and `resourcemanager.projects.undelete` permissions (e.g. `roles/resourcemanager.projectDeleter` or `roles/owner` on the project or parent organization/folder). Note that create-only `tags` cannot be reconciled during undelete recovery. Defaults to `false`.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -123,6 +125,8 @@ exported:
 * `id` - an identifier for the resource with format `projects/{{project}}`
 
 * `number` - The numeric identifier of the project.
+
+* `lifecycle_state` - The Project lifecycle state.
 
 ## Timeouts
 

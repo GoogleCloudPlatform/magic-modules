@@ -43,6 +43,10 @@ func datasourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
+	if err := d.Set("recover_soft_deleted", nil); err != nil {
+		return fmt.Errorf("Error setting recover_soft_deleted: %s", err)
+	}
+
 	if err := tpgresource.SetDataSourceLabels(d); err != nil {
 		return err
 	}

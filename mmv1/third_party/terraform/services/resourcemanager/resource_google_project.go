@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -48,6 +49,7 @@ func ResourceGoogleProject() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderDeletionPolicy("PREVENT"),
 			tpgresource.SetLabelsDiff,
+			resourceGoogleProjectSoftDeleteCustomDiff,
 		),
 
 		Importer: &schema.ResourceImporter{
@@ -82,6 +84,17 @@ func ResourceGoogleProject() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID. Changing this forces a new project to be created.`,
+			},
+			"recover_soft_deleted": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `If true, Terraform will retain projects in DELETE_REQUESTED state during refresh and undelete and reconcile soft-deleted projects on create or update instead of removing them from state or failing with HTTP 409 alreadyExists.`,
+			},
+			"lifecycle_state": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The Project lifecycle state.`,
 			},
 			"deletion_policy": {
 				Type:     schema.TypeString,
@@ -162,6 +175,125 @@ func ResourceGoogleProject() *schema.Resource {
 	}
 }
 
+func remainingTimeout(deadline time.Time) (time.Duration, error) {
+	rem := time.Until(deadline)
+	if rem <= 0 {
+		return 0, fmt.Errorf("operation timed out")
+	}
+	return rem, nil
+}
+
+func sleepWithDeadline(deadline time.Time, d time.Duration) error {
+	rem, err := remainingTimeout(deadline)
+	if err != nil {
+		return err
+	}
+	if d > rem {
+		time.Sleep(rem)
+		return fmt.Errorf("operation timed out while waiting %v for propagation", d)
+	}
+	time.Sleep(d)
+	return nil
+}
+
+func validateSoftDeletedProjectPreflight(pid string, recoverSoftDeleted bool, configuredOrgId string, existing *cloudresourcemanager.Project) error {
+	if existing == nil {
+		return nil
+	}
+	if existing.LifecycleState == "DELETE_IN_PROGRESS" {
+		return fmt.Errorf("project %q is in %s state and cannot be created or recovered", pid, existing.LifecycleState)
+	}
+	if existing.LifecycleState != "DELETE_REQUESTED" {
+		return nil
+	}
+	if !recoverSoftDeleted {
+		return fmt.Errorf("project %q already exists in DELETE_REQUESTED (soft-deleted) state; set recover_soft_deleted = true on google_project to undelete and reconcile it via Terraform, or run 'gcloud projects undelete %s' and import it into Terraform state", pid, pid)
+	}
+	if existing.Parent != nil && existing.Parent.Type == "organization" && configuredOrgId != "" && existing.Parent.Id != "" && existing.Parent.Id != configuredOrgId {
+		return fmt.Errorf("project %q exists in DELETE_REQUESTED state under organization %q, which conflicts with configured org_id %q", pid, existing.Parent.Id, configuredOrgId)
+	}
+	return nil
+}
+
+func resourceGoogleProjectSoftDeleteCustomDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	recoverSoftDeleted, _ := d.Get("recover_soft_deleted").(bool)
+	if d.Id() != "" && !d.HasChange("project_id") {
+		if state, _ := d.Get("lifecycle_state").(string); state == "DELETE_REQUESTED" {
+			// If user toggles recover_soft_deleted from true to false on an in-state project,
+			// allow the update so resourceGoogleProjectUpdate can remove it from state.
+			if !recoverSoftDeleted && d.HasChange("recover_soft_deleted") {
+				return nil
+			}
+			pid, _ := d.Get("project_id").(string)
+			oldOrg, newOrg := d.GetChange("org_id")
+			existing := &cloudresourcemanager.Project{
+				ProjectId:      pid,
+				LifecycleState: state,
+			}
+			if oldOrgStr, _ := oldOrg.(string); oldOrgStr != "" {
+				existing.Parent = &cloudresourcemanager.ResourceId{
+					Type: "organization",
+					Id:   oldOrgStr,
+				}
+			}
+			configuredOrgId, _ := newOrg.(string)
+			if err := validateSoftDeletedProjectPreflight(pid, recoverSoftDeleted, configuredOrgId, existing); err != nil {
+				return err
+			}
+			if err := d.SetNew("lifecycle_state", "ACTIVE"); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// For new resources (d.Id() == "") or project_id changes:
+	// Short-circuit when recover_soft_deleted is false so default configurations
+	// and existing VCR replay cassettes never issue pre-create Projects.Get RPCs.
+	if !recoverSoftDeleted {
+		return nil
+	}
+	if !d.NewValueKnown("project_id") {
+		return nil
+	}
+	pid, ok := d.Get("project_id").(string)
+	if !ok || pid == "" {
+		return nil
+	}
+	if meta == nil {
+		return nil
+	}
+	config, ok := meta.(*transport_tpg.Config)
+	if !ok || config == nil || config.Client == nil {
+		return nil
+	}
+	client := rmClient.NewClient(config, config.UserAgent)
+	if client == nil {
+		return nil
+	}
+	p, err := client.Projects.Get(pid).Do()
+	if err != nil {
+		log.Printf("[DEBUG] Preflight Projects.Get(%q) during CustomizeDiff returned error (proceeding with create plan): %v", pid, err)
+		return nil
+	}
+	orgId, _ := d.Get("org_id").(string)
+	if err := validateSoftDeletedProjectPreflight(pid, true, orgId, p); err != nil {
+		return err
+	}
+	if p != nil && p.LifecycleState == "DELETE_REQUESTED" {
+		log.Printf("[INFO] Project %q detected in DELETE_REQUESTED state during plan; will undelete and reconcile on apply.", pid)
+		if err := d.SetNew("lifecycle_state", "ACTIVE"); err != nil {
+			return err
+		}
+		if p.ProjectNumber > 0 {
+			if err := d.SetNew("number", strconv.FormatInt(p.ProjectNumber, 10)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -175,6 +307,30 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	var pid string
 	pid = d.Get("project_id").(string)
+	deadline := time.Now().Add(d.Timeout(schema.TimeoutCreate))
+
+	if d.Get("recover_soft_deleted").(bool) {
+		var p *cloudresourcemanager.Project
+		rem, remErr := remainingTimeout(deadline)
+		if remErr != nil {
+			return remErr
+		}
+		getErr := transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (reqErr error) {
+				p, reqErr = rmClient.NewClient(config, userAgent).Projects.Get(pid).Do()
+				return reqErr
+			},
+			Timeout: rem,
+		})
+		if getErr == nil && p != nil {
+			if err := validateSoftDeletedProjectPreflight(pid, true, d.Get("org_id").(string), p); err != nil {
+				return err
+			}
+			if p.LifecycleState == "DELETE_REQUESTED" {
+				return recoverSoftDeletedProject(d, meta, config, userAgent, pid, p, deadline)
+			}
+		}
+	}
 
 	log.Printf("[DEBUG]: Creating new project %q", pid)
 	project := &cloudresourcemanager.Project{
@@ -203,6 +359,25 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		Timeout: d.Timeout(schema.TimeoutCreate),
 	})
 	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			var p *cloudresourcemanager.Project
+			rem, remErr := remainingTimeout(deadline)
+			if remErr == nil {
+				getErr := transport_tpg.Retry(transport_tpg.RetryOptions{
+					RetryFunc: func() (reqErr error) {
+						p, reqErr = rmClient.NewClient(config, userAgent).Projects.Get(pid).Do()
+						return reqErr
+					},
+					Timeout: rem,
+				})
+				if getErr == nil && p != nil && (p.LifecycleState == "DELETE_REQUESTED" || p.LifecycleState == "DELETE_IN_PROGRESS") {
+					if p.LifecycleState == "DELETE_REQUESTED" && d.Get("recover_soft_deleted").(bool) {
+						return recoverSoftDeletedProject(d, meta, config, userAgent, pid, p, deadline)
+					}
+					return fmt.Errorf("error creating project %s (%s): %w", project.ProjectId, project.Name, validateSoftDeletedProjectPreflight(pid, d.Get("recover_soft_deleted").(bool), d.Get("org_id").(string), p))
+				}
+			}
+		}
 		return fmt.Errorf("error creating project %s (%s): %s. "+
 			"If you received a 403 error, make sure you have the"+
 			" `roles/resourcemanager.projectCreator` permission",
@@ -281,6 +456,192 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
+func undeleteGoogleProject(config *transport_tpg.Config, userAgent, pid string, deadline time.Time) (*cloudresourcemanager.Project, error) {
+	rem, err := remainingTimeout(deadline)
+	if err != nil {
+		return nil, fmt.Errorf("error undeleting project %s: %w", pid, err)
+	}
+
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			_, reqErr := rmClient.NewClient(config, userAgent).Projects.Undelete(pid, &cloudresourcemanager.UndeleteProjectRequest{}).Do()
+			return reqErr
+		},
+		Timeout:      rem,
+		PollInterval: config.PollInterval,
+	})
+	if err != nil {
+		// If Undelete returned 400 (FAILED_PRECONDITION) or 409, check if another actor already undeleted it
+		// or if a previous retry attempt succeeded on the server side.
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 400) || transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			p, getErr := rmClient.NewClient(config, userAgent).Projects.Get(pid).Do()
+			if getErr == nil && p != nil {
+				if p.LifecycleState == "ACTIVE" {
+					log.Printf("[DEBUG] Project %q is already ACTIVE after Undelete returned %v; proceeding", pid, err)
+					return p, nil
+				}
+				if p.LifecycleState == "DELETE_IN_PROGRESS" {
+					return nil, fmt.Errorf("error undeleting project %s: project is in DELETE_IN_PROGRESS state and cannot be recovered: %w", pid, err)
+				}
+			}
+		}
+		return nil, fmt.Errorf("error undeleting project %s: %w", pid, err)
+	}
+
+	pollTimeout, err := remainingTimeout(deadline)
+	if err != nil {
+		return nil, fmt.Errorf("error waiting for undeleted project %s to become ACTIVE: %w", pid, err)
+	}
+	// Bound the post-undelete ACTIVE state check to at most 1 minute to avoid spinning for 10 minutes
+	// if another actor immediately re-deleted the project.
+	if pollTimeout > time.Minute {
+		pollTimeout = time.Minute
+	}
+
+	var recovered *cloudresourcemanager.Project
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			var reqErr error
+			recovered, reqErr = rmClient.NewClient(config, userAgent).Projects.Get(pid).Do()
+			if reqErr != nil {
+				return reqErr
+			}
+			if recovered == nil {
+				return fmt.Errorf("project %q returned nil response after undelete", pid)
+			}
+			if recovered.LifecycleState == "ACTIVE" {
+				return nil
+			}
+			if recovered.LifecycleState == "DELETE_REQUESTED" {
+				return &googleapi.Error{
+					Code:    503,
+					Message: fmt.Sprintf("project %q lifecycleState is %q, waiting for ACTIVE", pid, recovered.LifecycleState),
+				}
+			}
+			return fmt.Errorf("project %q is in unexpected lifecycleState %q while waiting for ACTIVE", pid, recovered.LifecycleState)
+		},
+		Timeout:      pollTimeout,
+		PollInterval: config.PollInterval,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error waiting for undeleted project %s to become ACTIVE: %w", pid, err)
+	}
+	return recovered, nil
+}
+
+func recoverSoftDeletedProject(d *schema.ResourceData, meta interface{}, config *transport_tpg.Config, userAgent, pid string, existing *cloudresourcemanager.Project, deadline time.Time) error {
+	log.Printf("[DEBUG] Recovering soft-deleted project %q", pid)
+	if err := validateSoftDeletedProjectPreflight(pid, true, d.Get("org_id").(string), existing); err != nil {
+		return err
+	}
+
+	if _, ok := d.GetOk("tags"); ok {
+		log.Printf("[WARN] Project %q is being recovered from DELETE_REQUESTED state; create-only 'tags' cannot be reconciled via Projects.Undelete or Projects.Update. Use google_tags_tag_binding to manage tags on existing projects.", pid)
+	}
+
+	recovered, err := undeleteGoogleProject(config, userAgent, pid, deadline)
+	if err != nil {
+		return err
+	}
+
+	d.SetId(fmt.Sprintf("projects/%s", pid))
+	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
+		"project_id": pid,
+	}); err != nil {
+		return err
+	}
+
+	desiredName := d.Get("name").(string)
+	needsUpdate := false
+	if recovered.Name != desiredName {
+		recovered.Name = desiredName
+		needsUpdate = true
+	}
+
+	desiredParent := &cloudresourcemanager.Project{}
+	if err := getParentResourceId(d, desiredParent); err != nil {
+		return err
+	}
+	if desiredParent.Parent != nil {
+		if recovered.Parent == nil || recovered.Parent.Type != desiredParent.Parent.Type || recovered.Parent.Id != desiredParent.Parent.Id {
+			recovered.Parent = desiredParent.Parent
+			needsUpdate = true
+		}
+	}
+
+	desiredLabels := tpgresource.ExpandEffectiveLabels(d)
+	if !reflect.DeepEqual(recovered.Labels, desiredLabels) && (len(recovered.Labels) > 0 || len(desiredLabels) > 0) {
+		recovered.Labels = desiredLabels
+		needsUpdate = true
+	}
+
+	if needsUpdate {
+		if _, err := updateProject(config, d, desiredName, userAgent, recovered); err != nil {
+			return err
+		}
+	}
+
+	_, hasConfiguredBilling := d.GetOk("billing_account")
+	if hasConfiguredBilling {
+		if err := updateProjectBillingAccount(d, config, userAgent); err != nil {
+			return err
+		}
+		// Sleep 15s to let billing account propagation settle across downstream services (#3388, #12779).
+		if err := sleepWithDeadline(deadline, 15*time.Second); err != nil {
+			return err
+		}
+	}
+
+	if err := resourceGoogleProjectRead(d, meta); err != nil {
+		return err
+	}
+
+	// Invariant: project must remain ACTIVE after recovery; if another actor concurrently re-deleted it, abort.
+	if d.Id() == "" || d.Get("lifecycle_state").(string) != "ACTIVE" {
+		return fmt.Errorf("project %q was undeleted but is no longer ACTIVE (lifecycle_state=%q); it may have been concurrently deleted by another actor", pid, d.Get("lifecycle_state").(string))
+	}
+
+	if !hasConfiguredBilling && d.Get("billing_account").(string) != "" {
+		if err := d.Set("billing_account", ""); err != nil {
+			return fmt.Errorf("Error setting billing_account: %w", err)
+		}
+		if err := updateProjectBillingAccount(d, config, userAgent); err != nil {
+			return err
+		}
+	}
+
+	if !d.Get("auto_create_network").(bool) {
+		billingProject := pid
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+		rem, err := remainingTimeout(deadline)
+		if err != nil {
+			return err
+		}
+		if err := EnableServiceUsageProjectServices([]string{"compute.googleapis.com"}, pid, billingProject, userAgent, config, rem); err != nil {
+			return fmt.Errorf("Error enabling the Compute Engine API required to delete the default network: %w", err)
+		}
+		err = forceDeleteComputeNetwork(d, config, pid, "default")
+		// Retry if API is not yet enabled (#10046, #12779).
+		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+			if sleepErr := sleepWithDeadline(deadline, 15*time.Second); sleepErr != nil {
+				return sleepErr
+			}
+			err = forceDeleteComputeNetwork(d, config, pid, "default")
+		}
+		if err != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", pid)
+			} else {
+				return fmt.Errorf("Error deleting default network in project %s: %w", pid, err)
+			}
+		}
+	}
+
+	return nil
+}
+
 func resourceGoogleProjectCheckPreRequisites(config *transport_tpg.Config, d *schema.ResourceData, userAgent string) error {
 	ib, ok := d.GetOk("billing_account")
 	if !ok {
@@ -335,9 +696,21 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project %q", pid))
 	}
 
-	// If the project has been deleted from outside Terraform, remove it from state file.
+	// If the project has been deleted from outside Terraform, remove it from state file
+	// unless it is in DELETE_REQUESTED state and recover_soft_deleted is enabled.
 	if p.LifecycleState != "ACTIVE" {
-		log.Printf("[WARN] Removing project '%s' because its state is '%s' (requires 'ACTIVE').", pid, p.LifecycleState)
+		recoverSoftDeleted, _ := d.Get("recover_soft_deleted").(bool)
+		if p.LifecycleState == "DELETE_REQUESTED" && recoverSoftDeleted {
+			log.Printf("[INFO] Project '%s' is in 'DELETE_REQUESTED' state and recover_soft_deleted is true; retaining in state.", pid)
+			if err := populateGoogleProjectResourceData(d, p, pid, config); err != nil {
+				return err
+			}
+			if err := d.Set("billing_account", ""); err != nil {
+				return fmt.Errorf("Error setting billing_account: %s", err)
+			}
+			return nil
+		}
+		log.Printf("[WARN] Removing project '%s' from state because its lifecycle_state is '%s' (requires 'ACTIVE'). To recover a DELETE_REQUESTED project via Terraform, set recover_soft_deleted = true on the google_project resource and run terraform apply.", pid, p.LifecycleState)
 		d.SetId("")
 		return nil
 	}
@@ -382,6 +755,16 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 func populateGoogleProjectResourceData(d *schema.ResourceData, p *cloudresourcemanager.Project, pid string, config *transport_tpg.Config) error {
 	if err := tpgresource.DeletionPolicyReadDefault(d, config, "PREVENT"); err != nil {
 		return err
+	}
+
+	if _, ok := d.GetOkExists("recover_soft_deleted"); !ok {
+		if err := d.Set("recover_soft_deleted", false); err != nil {
+			return fmt.Errorf("Error setting recover_soft_deleted: %s", err)
+		}
+	}
+
+	if err := d.Set("lifecycle_state", p.LifecycleState); err != nil {
+		return fmt.Errorf("Error setting lifecycle_state: %s", err)
 	}
 
 	if err := d.Set("project_id", pid); err != nil {
@@ -456,7 +839,10 @@ func getParentResourceId(d *schema.ResourceData, p *cloudresourcemanager.Project
 }
 
 func ParseFolderId(v interface{}) string {
-	folderId := v.(string)
+	folderId, ok := v.(string)
+	if !ok {
+		return ""
+	}
 	if strings.HasPrefix(folderId, "folders/") {
 		return folderId[8:]
 	}
@@ -486,6 +872,22 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 
 	d.Partial(true)
 
+	undeleted := false
+	if p.LifecycleState == "DELETE_REQUESTED" {
+		if !d.Get("recover_soft_deleted").(bool) {
+			d.Partial(false)
+			return resourceGoogleProjectRead(d, meta)
+		}
+		if err := validateSoftDeletedProjectPreflight(pid, true, d.Get("org_id").(string), p); err != nil {
+			return err
+		}
+		deadline := time.Now().Add(d.Timeout(schema.TimeoutUpdate))
+		if p, err = undeleteGoogleProject(config, userAgent, pid, deadline); err != nil {
+			return err
+		}
+		undeleted = true
+	}
+
 	// Project display name has changed
 	if ok := d.HasChange("name"); ok {
 		p.Name = project_name
@@ -507,8 +909,8 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// Billing account has changed
-	if ok := d.HasChange("billing_account"); ok {
+	// Billing account has changed (or needs re-attachment after undelete)
+	if d.HasChange("billing_account") || (undeleted && d.Get("billing_account").(string) != "") {
 		err = updateProjectBillingAccount(d, config, userAgent)
 		if err != nil {
 			return err
@@ -531,7 +933,25 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	}); err != nil {
 		return err
 	}
-	return resourceGoogleProjectRead(d, meta)
+	if err := resourceGoogleProjectRead(d, meta); err != nil {
+		return err
+	}
+	if undeleted {
+		// Invariant: project must remain ACTIVE after recovery; if another actor concurrently re-deleted it, abort.
+		if d.Id() == "" || d.Get("lifecycle_state").(string) != "ACTIVE" {
+			return fmt.Errorf("project %q was undeleted but is no longer ACTIVE (lifecycle_state=%q); it may have been concurrently deleted by another actor", pid, d.Get("lifecycle_state").(string))
+		}
+		_, hasConfiguredBilling := d.GetOk("billing_account")
+		if !hasConfiguredBilling && d.Get("billing_account").(string) != "" {
+			if err := d.Set("billing_account", ""); err != nil {
+				return fmt.Errorf("Error setting billing_account: %w", err)
+			}
+			if err := updateProjectBillingAccount(d, config, userAgent); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func updateProject(config *transport_tpg.Config, d *schema.ResourceData, projectName, userAgent string, desiredProject *cloudresourcemanager.Project) (*cloudresourcemanager.Project, error) {

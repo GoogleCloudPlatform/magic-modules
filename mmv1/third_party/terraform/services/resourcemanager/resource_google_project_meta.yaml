@@ -11,10 +11,13 @@ fields:
     provider_only: true
   - field: 'folder_id'
   - api_field: 'labels'
+  - api_field: 'lifecycleState'
   - api_field: 'name'
   - field: 'number'
   - field: 'org_id'
   - api_field: 'projectId'
+  - field: 'recover_soft_deleted'
+    provider_only: true
   - api_field: 'tags'
   - field: 'terraform_labels'
     provider_only: true

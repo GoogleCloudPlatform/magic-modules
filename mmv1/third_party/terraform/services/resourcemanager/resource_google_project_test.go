@@ -677,3 +677,89 @@ resource "google_project" "acceptance" {
 }
 `, context)
 }
+
+func TestAccProject_recoverSoftDeleted(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create the project with recover_soft_deleted = false
+			{
+				Config: testAccProject_recoverSoftDeleted(pid, org, "initial", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"stage": "initial"}),
+					resource.TestCheckResourceAttr("google_project.acceptance", "lifecycle_state", "ACTIVE"),
+					resource.TestCheckResourceAttr("google_project.acceptance", "recover_soft_deleted", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "labels", "terraform_labels"},
+			},
+			// Step 2: Destroy the project, placing it into DELETE_REQUESTED in GCP and removing it from Terraform state
+			{
+				Config:  testAccProject_recoverSoftDeleted(pid, org, "initial", false),
+				Destroy: true,
+			},
+			// Step 3: Re-create the project with the same project_id and recover_soft_deleted = true.
+			// Terraform plans a Create because state is empty, and Create recovers the soft-deleted project via Projects.Undelete.
+			{
+				Config: testAccProject_recoverSoftDeleted(pid, org, "recovered", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"stage": "recovered"}),
+					resource.TestCheckResourceAttr("google_project.acceptance", "lifecycle_state", "ACTIVE"),
+					resource.TestCheckResourceAttr("google_project.acceptance", "recover_soft_deleted", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_project.acceptance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// recover_soft_deleted is a client-side provider flag not returned by the API.
+				ImportStateVerifyIgnore: []string{"deletion_policy", "labels", "terraform_labels", "recover_soft_deleted"},
+			},
+			// Step 4: Toggle recover_soft_deleted back to false in-place to verify mutable field update
+			{
+				Config: testAccProject_recoverSoftDeleted(pid, org, "recovered", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+					resource.TestCheckResourceAttr("google_project.acceptance", "recover_soft_deleted", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_policy", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccProject_recoverSoftDeleted(pid, org, labelVal string, recoverSoftDeleted bool) string {
+	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
+resource "google_project" "acceptance" {
+  project_id           = "%s"
+  name                 = "%s"
+  org_id               = "%s"
+  deletion_policy      = "DELETE"
+  recover_soft_deleted = %t
+  labels = {
+    stage = "%s"
+  }
+}
+`, pid, pid, org, recoverSoftDeleted, labelVal)
+}

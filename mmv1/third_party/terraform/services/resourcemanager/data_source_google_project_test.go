@@ -30,6 +30,7 @@ func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 							"auto_create_network",
 							"skip_delete",
 							"deletion_policy",
+							"recover_soft_deleted",
 						}),
 				),
 			},
