@@ -408,6 +408,14 @@ properties:
       Format:
       projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
     default_from_api: true
+  - name: odbDnsZone
+    type: String
+    description: |-
+      The name of the OdbDnsZone for using custom domain name for the VM Cluster.
+      Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbDnsZones/{odb_dns_zone}
+    immutable: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
   - name: identityConnector
     type: NestedObject
     output: true
