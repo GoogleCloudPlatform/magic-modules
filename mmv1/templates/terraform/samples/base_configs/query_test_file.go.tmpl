@@ -123,7 +123,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 					),
 					listScope.Capture(map[string]string{
 					{{- range $scope := $.ListScopeProperties }}
-						{{- if $scope.Required }}
+						{{- if or $scope.Required $scope.DefaultValue }}
 							{{- $n := underscore $scope.Name }}
 						"{{ $n }}": "{{ $sample.ResourceType $.TerraformName }}.{{ $sample.PrimaryResourceId }}",
 						{{- end }}
@@ -151,7 +151,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 func testAcc{{ $step.TestStepSlug $.ProductMetadata.Name $.Name }}ListQuery(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 {{- range $scope := $.ListScopeProperties }}
-	{{- if $scope.Required }}
+	{{- if or $scope.Required $scope.DefaultValue }}
 		{{- $n := underscore $scope.Name }}
 variable "{{ $n }}" { type = string }
 	{{- end }}
@@ -161,7 +161,7 @@ list "{{ $sample.ResourceType $.TerraformName }}" "list_query" {
 	limit = 10000
     config {
 {{- range $scope := $.ListScopeProperties }}
-        {{- if $scope.Required }}
+        {{- if or $scope.Required $scope.DefaultValue }}
             {{- $n := underscore $scope.Name }}
         {{ $n }} = var.{{ $n }}
         {{- end }}
