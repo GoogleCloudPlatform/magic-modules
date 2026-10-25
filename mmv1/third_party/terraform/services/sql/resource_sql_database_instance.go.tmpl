@@ -1116,6 +1116,40 @@ API (for read pools, effective_availability_type may differ from availability_ty
 								},
 							},
 						},
+						"sql_server_password_validation_policy": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enable_password_policy": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the password policy is enabled or not.`,
+									},
+									"password_minimum_length": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Description:  `Minimum number of characters allowed.`,
+									},
+									"password_history_length": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Description:  `Number of previous passwords that cannot be reused.`,
+									},
+									"password_minimum_age": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Minimum interval after which the password can be changed. This flag is only supported for SQLServer.`,
+									},
+									"password_maximum_age": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Maximum interval after which the password can be changed. This flag is only supported for SQLServer.`,
+									},
+								},
+							},
+						},
 						"connector_enforcement": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -2212,6 +2246,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		MaintenanceWindow:             expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
+		SqlServerPasswordValidationPolicy:      expandSqlServerPasswordValidationPolicy(_settings["sql_server_password_validation_policy"].([]interface{})),
 		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
 {{- if ne $.TargetVersionName "ga" }}
 		PerformanceCaptureConfig:      expandPerformanceCaptureConfig(_settings["performance_capture_config"].([]interface{})),
@@ -3590,6 +3625,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"pricing_plan":                     settings.PricingPlan,
 		"user_labels":                      settings.UserLabels,
 		"password_validation_policy":       settings.PasswordValidationPolicy,
+		"sql_server_password_validation_policy":       settings.SqlServerPasswordValidationPolicy,
 		"time_zone":                        settings.TimeZone,
 		"deletion_protection_enabled":      settings.DeletionProtectionEnabled,
 		"retain_backups_on_delete":         settings.RetainBackupsOnDelete,
@@ -3691,6 +3727,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 
 	if settings.PasswordValidationPolicy != nil {
 		data["password_validation_policy"] = flattenPasswordValidationPolicy(settings.PasswordValidationPolicy)
+	}
+
+	if settings.SqlServerPasswordValidationPolicy != nil {
+		data["sql_server_password_validation_policy"] = flattenSqlServerPasswordValidationPolicy(settings.SqlServerPasswordValidationPolicy)
 	}
 
 	if settings.DataCacheConfig != nil {
@@ -4149,6 +4189,59 @@ func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.Password
 		"enable_password_policy":      passwordValidationPolicy.EnablePasswordPolicy,
 	}
 	return []map[string]interface{}{data}
+}
+
+func flattenSqlServerPasswordValidationPolicy(sqlServerPasswordValidationPolicy *sqladmin.SqlServerPasswordValidationPolicy) interface{} {
+	data := map[string]interface{}{
+		"enable_password_policy":  sqlServerPasswordValidationPolicy.EnablePasswordPolicy,
+		"password_minimum_length": sqlServerPasswordValidationPolicy.PasswordMinimumLength,
+		"password_history_length": sqlServerPasswordValidationPolicy.PasswordHistoryLength,
+		"password_minimum_age":    sqlServerPasswordValidationPolicy.PasswordMinimumAge,
+		"password_maximum_age":    sqlServerPasswordValidationPolicy.PasswordMaximumAge,
+	}
+	return []map[string]interface{}{data}
+}
+
+func expandSqlServerPasswordValidationPolicy(configured []interface{}) *sqladmin.SqlServerPasswordValidationPolicy {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_policy := configured[0].(map[string]interface{})
+	policy := &sqladmin.SqlServerPasswordValidationPolicy{
+		EnablePasswordPolicy: _policy["enable_password_policy"].(bool),
+	}
+	policy.ForceSendFields = append(policy.ForceSendFields, "EnablePasswordPolicy")
+
+	if v, ok := _policy["password_minimum_length"].(int); ok && v != 0 {
+		policy.PasswordMinimumLength = int64(v)
+		policy.ForceSendFields = append(policy.ForceSendFields, "PasswordMinimumLength")
+	} else if ok && v == 0 {
+		policy.NullFields = append(policy.NullFields, "PasswordMinimumLength")
+	}
+
+	if v, ok := _policy["password_history_length"].(int); ok && v != 0 {
+		policy.PasswordHistoryLength = int64(v)
+		policy.ForceSendFields = append(policy.ForceSendFields, "PasswordHistoryLength")
+	} else if ok && v == 0 {
+		policy.NullFields = append(policy.NullFields, "PasswordHistoryLength")
+	}
+
+	if v, ok := _policy["password_minimum_age"].(string); ok && v != "" {
+		policy.PasswordMinimumAge = v
+		policy.ForceSendFields = append(policy.ForceSendFields, "PasswordMinimumAge")
+	} else if ok && v == "" {
+		policy.NullFields = append(policy.NullFields, "PasswordMinimumAge")
+	}
+
+	if v, ok := _policy["password_maximum_age"].(string); ok && v != "" {
+		policy.PasswordMaximumAge = v
+		policy.ForceSendFields = append(policy.ForceSendFields, "PasswordMaximumAge")
+	} else if ok && v == "" {
+		policy.NullFields = append(policy.NullFields, "PasswordMaximumAge")
+	}
+
+	return policy
 }
 
 func flattenEdition(v interface{}) string {
