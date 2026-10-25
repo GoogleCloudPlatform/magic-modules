@@ -1,0 +1,8 @@
+// If a `context` URL parameter is present, insert the segment
+// /context/{context} before the final /config path piece.
+// Use d.GetOkExists because `context` is a url_param_only parameter.
+if v, ok := d.GetOkExists("context"); ok {
+	if ctxStr, ok := v.(string); ok && ctxStr != "" {
+		url = strings.Replace(url, "/config", fmt.Sprintf("/contexts/%s/config", ctxStr), 1)
+	}
+}
