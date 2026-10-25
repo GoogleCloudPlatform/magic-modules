@@ -95,7 +95,7 @@ func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
 			},
 			{
 				ResourceName:       "google_storage_bucket.bucket",
-				RefreshState:       true,
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
