@@ -42,6 +42,13 @@ async:
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: name
+  base_url: projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}
+  import_format:
+    - projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}
+    - '{{name}}'
 samples:
   - name: clouddeploy_deploy_policy_basic
     primary_resource_id: b-deploy-policy
