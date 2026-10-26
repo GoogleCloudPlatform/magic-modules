@@ -460,8 +460,6 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 }
 
 func TestAccBackupDRBackupPlanAssociation_mvbp(t *testing.T) {
-	acctest.SkipIfVcr(t)
-
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -471,7 +469,7 @@ func TestAccBackupDRBackupPlanAssociation_mvbp(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBackupDRBackupPlanAssociation_mvbp(context),
@@ -493,11 +491,13 @@ func TestAccBackupDRBackupPlanAssociation_mvbp(t *testing.T) {
 func testAccBackupDRBackupPlanAssociation_mvbp(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "default" {
+  provider     = google-beta
   account_id   = "tf-test-sa-%{random_suffix}"
   display_name = "Custom SA for VM Instance"
 }
 
 resource "google_compute_instance" "default" {
+  provider     = google-beta
   name         = "tf-test-vm-%{random_suffix}"
   machine_type = "n2-standard-2"
   zone         = "us-central1-a"
@@ -525,6 +525,7 @@ resource "google_compute_instance" "default" {
 }
 
 resource "google_backup_dr_backup_vault" "primary_vault" {
+  provider                                   = google-beta
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-p-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
@@ -532,6 +533,7 @@ resource "google_backup_dr_backup_vault" "primary_vault" {
 }
 
 resource "google_backup_dr_backup_vault" "secondary_vault" {
+  provider                                   = google-beta
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-s-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
@@ -539,6 +541,7 @@ resource "google_backup_dr_backup_vault" "secondary_vault" {
 }
 
 resource "google_backup_dr_backup_plan" "plan" {
+  provider       = google-beta
   location       = "us-central1"
   backup_plan_id = "tf-test-bp-%{random_suffix}"
   resource_type  = "compute.googleapis.com/Instance"
@@ -578,6 +581,7 @@ resource "google_backup_dr_backup_plan" "plan" {
 }
 
 resource "google_backup_dr_backup_plan_association" "bpa" {
+  provider                   = google-beta
   location                   = "us-central1"
   backup_plan_association_id = "tf-test-bpa-%{random_suffix}"
   resource                   = google_compute_instance.default.id

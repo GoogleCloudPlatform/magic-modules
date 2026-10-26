@@ -330,7 +330,7 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBackupDRBackupPlan_mvbp(context),
@@ -353,18 +353,21 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 func testAccBackupDRBackupPlan_mvbp(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_backup_dr_backup_vault" "primary_vault" {
+  provider                                   = google-beta
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-pri-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
 }
 
 resource "google_backup_dr_backup_vault" "secondary_vault" {
+  provider                                   = google-beta
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-sec-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
 }
 
 resource "google_backup_dr_backup_plan" "bp" {
+  provider       = google-beta
   location       = "us-central1"
   backup_plan_id = "tf-test-bp-mvbp-%{random_suffix}"
   resource_type  = "compute.googleapis.com/Instance"
