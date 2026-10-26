@@ -1,3 +1,5 @@
 resource "google_integrations_client" "{{$.PrimaryResourceId}}" {
-  location = "us-central1"
+  location                   = "us-central1"
+  enable_http_call           = true
+  enable_managed_ai_features = true
 }

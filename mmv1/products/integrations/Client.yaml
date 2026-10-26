@@ -113,3 +113,18 @@ properties:
       Indicates if sample integrations should be created along with provisioning.
     immutable: true
     ignore_read: true
+  - name: enableHttpCall
+    type: Boolean
+    description: |
+      Indicates if the client should be allowed to make HTTP calls.
+    immutable: true
+    # enableHttpCall is a provisioning request parameter on ProvisionClientRequest and is not returned at the top level of GetClientResponse.
+    ignore_read: true
+  - name: enableManagedAiFeatures
+    type: Boolean
+    description: |
+      Indicates if the client should be allowed to use managed AI features, i.e. using Cloud Companion APIs of the tenant project.
+      This will allow the customers to use features like Troubleshooting, OpenAPI spec enrichment, etc. for free.
+    immutable: true
+    # enableManagedAiFeatures is a provisioning request parameter on ProvisionClientRequest and is not returned at the top level of GetClientResponse.
+    ignore_read: true
