@@ -324,4 +324,3 @@ properties:
             type: Integer
             description: |
               Defines the number of days for session TTL.
-
