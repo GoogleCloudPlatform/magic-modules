@@ -1,0 +1,63 @@
+---
+name: "CatalogTemplateRevision"
+description: "A revision of a CatalogTemplate."
+base_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions"
+has_self_link: true
+immutable: true
+import_format:
+  - "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+parameters:
+  - name: "location"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The location of the resource."
+  - name: "space"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The space of the resource."
+  - name: "catalog"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The catalog of the resource."
+  - name: "catalog_template"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The catalog template of the resource."
+  - name: "revision_id"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The ID of the revision."
+properties:
+  - name: "name"
+    type: "String"
+    output: true
+    description: "The resource name of the revision."
+  - name: "displayName"
+    type: "String"
+    description: "The display name of the revision."
+  - name: "description"
+    type: "String"
+    description: "The description of the revision."
+  - name: "createTime"
+    type: "Time"
+    output: true
+    description: "The creation time of the revision."
+  - name: "updateTime"
+    type: "Time"
+    output: true
+    description: "The last update time of the revision."
