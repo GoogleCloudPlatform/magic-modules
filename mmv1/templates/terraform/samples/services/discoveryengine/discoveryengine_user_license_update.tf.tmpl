@@ -1,0 +1,43 @@
+resource "google_discovery_engine_license_config" "test_config" {
+  location          = "global"
+  license_config_id = "{{index $.ResourceIdVars "license_config_id"}}"
+  license_count     = 50
+  subscription_tier = "SUBSCRIPTION_TIER_NOTEBOOK_LM"
+  start_date {
+    year  = 2099
+    month = 1
+    day   = 1
+  }
+  end_date {
+    year  = 2100
+    month = 1
+    day   = 1
+  }
+  subscription_term = "SUBSCRIPTION_TERM_ONE_YEAR"
+}
+
+resource "google_discovery_engine_license_config" "test_config2" {
+  location          = "global"
+  license_config_id = "{{index $.ResourceIdVars "license_config_id2"}}"
+  license_count     = 50
+  subscription_tier = "SUBSCRIPTION_TIER_NOTEBOOK_LM"
+  start_date {
+    year  = 2099
+    month = 1
+    day   = 1
+  }
+  end_date {
+    year  = 2100
+    month = 1
+    day   = 1
+  }
+  subscription_term = "SUBSCRIPTION_TERM_ONE_YEAR"
+}
+
+resource "google_discovery_engine_user_license" "{{.PrimaryResourceId}}" {
+  location                        = "global"
+  user_store_id                   = "default_user_store"
+  user_principal                  = "tf-test-{{index $.ResourceIdVars "user_principal_id"}}@example.com"
+  license_config                  = google_discovery_engine_license_config.test_config2.name
+  delete_unassigned_user_licenses = false
+}

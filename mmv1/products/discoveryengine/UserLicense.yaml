@@ -1,0 +1,126 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'UserLicense'
+description: |
+  Manages user license assignments and unassignments on a Discovery Engine UserStore.
+references:
+  guides:
+    'Manage User Licenses': 'https://cloud.google.com/gemini/enterprise/docs/admin/manage-user-licenses'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.userStores.userLicenses'
+base_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}/userLicenses'
+self_link: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}/userLicenses'
+create_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}:batchUpdateUserLicenses'
+create_verb: 'POST'
+update_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}:batchUpdateUserLicenses'
+update_verb: 'POST'
+delete_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}:batchUpdateUserLicenses'
+delete_verb: 'POST'
+read_query_params: '?filter=user_principal={{user_principal}}'
+id_format: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}/userLicenses/{{user_principal}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}/userLicenses/{{user_principal}}'
+  - '{{project}}/{{location}}/{{user_store_id}}/{{user_principal}}'
+  - '{{location}}/{{user_store_id}}/{{user_principal}}'
+mutex: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+identity:
+  - userPrincipal
+nested_query:
+  keys:
+    - userLicenses
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  encoder: 'templates/terraform/encoders/discoveryengine_user_license.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/discoveryengine_user_license.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/discoveryengine_user_license.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/discoveryengine_user_license.go.tmpl'
+samples:
+  - name: 'discoveryengine_user_license_basic'
+    primary_resource_id: 'basic'
+    steps:
+      - name: 'discoveryengine_user_license_basic'
+        resource_id_vars:
+          user_principal_id: 'usr'
+          license_config_id: 'lc-id'
+  - name: 'discoveryengine_user_license_update'
+    primary_resource_id: 'basic'
+    steps:
+      - name: 'discoveryengine_user_license_basic'
+        resource_id_vars:
+          user_principal_id: 'usr'
+          license_config_id: 'lc-id'
+      - name: 'discoveryengine_user_license_update'
+        resource_id_vars:
+          user_principal_id: 'usr'
+          license_config_id: 'lc-id'
+          license_config_id2: 'lc-id2'
+parameters:
+  - name: location
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: userStoreId
+    type: String
+    description: |
+      Target UserStore ID. Currently only accepts "default_user_store".
+    url_param_only: true
+    immutable: true
+    default_value: default_user_store
+properties:
+  - name: userPrincipal
+    type: String
+    description: |
+      The user principal of the User, could be email address or other principal identifier.
+      This field is immutable.
+    required: true
+    immutable: true
+  - name: licenseConfig
+    type: String
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    description: |
+      The full resource name of the LicenseConfig assigned to the user. Format:
+      `projects/{project}/locations/{location}/licenseConfigs/{license_config}`.
+  - name: deleteUnassignedUserLicenses
+    type: Boolean
+    default_value: true
+    ignore_read: true
+    description: |
+      Whether unassigning a user license deletes the unassigned record during
+      batchUpdateUserLicenses.
+  - name: licenseAssignmentState
+    type: String
+    output: true
+    description: |
+      Read-only assignment state of the user. Values can be:
+      * `ASSIGNED`: License assigned to the user.
+      * `UNASSIGNED`: No license assigned to the user.
+      * `NO_LICENSE`: No license assigned to the user.
+      * `NO_LICENSE_ATTEMPTED_LOGIN`: User attempted to login but no license assigned.

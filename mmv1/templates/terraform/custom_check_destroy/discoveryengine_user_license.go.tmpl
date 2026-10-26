@@ -1,0 +1,34 @@
+			config := acctest.GoogleProviderConfig(t)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}DiscoveryEngineBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/userStores/{{"{{"}}user_store_id{{"}}"}}/userLicenses?filter=user_principal={{"{{"}}user_principal{{"}}"}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				continue
+			}
+
+			if userLicenses, ok := res["userLicenses"].([]interface{}); ok && len(userLicenses) > 0 {
+				for _, ul := range userLicenses {
+					if ulMap, ok := ul.(map[string]interface{}); ok {
+						if state, ok := ulMap["licenseAssignmentState"].(string); ok && state == "ASSIGNED" {
+							return fmt.Errorf("DiscoveryEngineUserLicense still exists and is ASSIGNED at %s", url)
+						}
+						if lc, ok := ulMap["licenseConfig"].(string); ok && lc != "" {
+							return fmt.Errorf("DiscoveryEngineUserLicense still has licenseConfig at %s", url)
+						}
+					}
+				}
+			}
