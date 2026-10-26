@@ -275,6 +275,11 @@ properties:
     type: String
     description: |
       An optional description of this resource.
+  - name: snapReserve
+    type: Double
+    description: |
+      Optional. Snap_reserve specifies percentage of volume storage reserved for
+      snapshot storage. Default is 0 percent.
   - name: snapshotDirectory
     type: Boolean
     description: |
