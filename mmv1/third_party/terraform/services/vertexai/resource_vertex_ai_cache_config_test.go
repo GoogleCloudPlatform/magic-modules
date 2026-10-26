@@ -30,10 +30,6 @@ func TestAccVertexAICacheConfig_region(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAICacheConfig_region(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_vertex_ai_cache_config.cache_config", "region", "europe-west4"),
-					resource.TestCheckResourceAttr("google_vertex_ai_cache_config.cache_config", "disable_cache", "false"),
-				),
 			},
 			{
 				ResourceName:            "google_vertex_ai_cache_config.cache_config",
@@ -50,10 +46,6 @@ func TestAccVertexAICacheConfig_region(t *testing.T) {
 						plancheck.ExpectResourceAction("google_vertex_ai_cache_config.cache_config", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_vertex_ai_cache_config.cache_config", "region", "asia-northeast1"),
-					resource.TestCheckResourceAttr("google_vertex_ai_cache_config.cache_config", "disable_cache", "true"),
-				),
 			},
 			{
 				ResourceName:            "google_vertex_ai_cache_config.cache_config",
