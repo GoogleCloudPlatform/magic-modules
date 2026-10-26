@@ -400,7 +400,6 @@ properties:
           type: String
           required: true
           description: The unique ID referring to this node pool.
-          immutable: true
         - name: labels
           type: KeyValuePairs
           description: |-
@@ -426,7 +425,6 @@ properties:
           type: NestedObject
           required: true
           description: Specification of a single machine.
-          immutable: true
           properties:
             - name: machineType
               type: String
@@ -443,14 +441,12 @@ properties:
                 For DeployedModel this field is optional, and the default
                 value is `n1-standard-2`. For BatchPredictionJob or as part of
                 WorkerPoolSpec this field is required.
-              immutable: true
             - name: reservationAffinity
               type: NestedObject
               description: |-
                 A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
                 DeployedModel) to draw its Compute Engine resources from a Shared
                 Reservation, or exclusively from on-demand capacity.
-              immutable: true
               properties:
                 - name: reservationAffinityType
                   type: String
@@ -461,14 +457,12 @@ properties:
                     NO_RESERVATION
                     ANY_RESERVATION
                     SPECIFIC_RESERVATION
-                  immutable: true
                 - name: values
                   type: Array
                   description: |-
                     Corresponds to the label values of a reservation resource. This must be the
                     resource name of the reservation, reservation block, or reservation sub-
                     block.
-                  immutable: true
                   item_type:
                     type: String
         - name: nodeImage
@@ -508,7 +502,6 @@ properties:
             SPOT
             FLEX_START
           default_from_api: true
-          immutable: true
         - name: scalingSpec
           type: NestedObject
           description: The scaling spec of the node pool.
