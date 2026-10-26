@@ -11375,9 +11375,6 @@ func TestAccSqlDatabaseInstance_databaseCenterIntegration(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_databaseCenterIntegrationDisabled(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.primary", "database_center_integration", "DISABLED"),
-				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.primary",
@@ -11387,22 +11384,45 @@ func TestAccSqlDatabaseInstance_databaseCenterIntegration(t *testing.T) {
 			},
 			{
 				Config: testAccSqlDatabaseInstance_databaseCenterIntegrationEnabled(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.primary", "database_center_integration", "ENABLED"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.edition"},
 			},
 			{
 				Config: testAccSqlDatabaseInstance_databaseCenterIntegrationDisabledUnrelated(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.primary", "database_center_integration", "DISABLED"),
-					resource.TestCheckResourceAttr("google_sql_database_instance.primary", "settings.0.user_labels.foo", "bar"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.edition"},
 			},
 			{
 				Config: testAccSqlDatabaseInstance_databaseCenterIntegrationRemoved(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.primary", "database_center_integration", ""),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.edition"},
 			},
 		},
 	})
@@ -11423,9 +11443,34 @@ func TestAccSqlDatabaseInstance_databaseCenterIntegration_replica(t *testing.T) 
 			{
 				Config: testAccSqlDatabaseInstance_databaseCenterIntegrationReplica(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.primary", "database_center_integration", "DISABLED"),
 					resource.TestCheckResourceAttr("google_sql_database_instance.replica", "database_center_integration", "DISABLED"),
 				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.edition"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.replica",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				Config: testAccSqlDatabaseInstance_databaseCenterIntegrationReplicaUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.replica", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.replica",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
 		},
 	})
@@ -11474,6 +11519,41 @@ resource "google_sql_database_instance" "replica" {
 
   settings {
     tier = "db-custom-2-7680"
+  }
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_databaseCenterIntegrationReplicaUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "primary" {
+  name             = "tf-test-inst-%{random_suffix}"
+  database_version = "POSTGRES_15"
+  region           = "us-central1"
+  database_center_integration = "DISABLED"
+  deletion_protection = false
+
+  settings {
+    tier = "db-custom-2-7680"
+  }
+}
+
+resource "google_sql_database_instance" "replica" {
+  name                 = "tf-test-replica-%{random_suffix}"
+  master_instance_name = google_sql_database_instance.primary.name
+  database_version     = "POSTGRES_15"
+  region               = "us-central1"
+  deletion_protection  = false
+
+  replica_configuration {
+    failover_target = false
+  }
+
+  settings {
+    tier = "db-custom-2-7680"
+    user_labels = {
+      foo = "bar"
+    }
   }
 }
 `, context)
