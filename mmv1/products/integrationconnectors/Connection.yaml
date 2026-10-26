@@ -893,6 +893,42 @@ properties:
         type: Boolean
         description: |
           Enrichment Enabled.
+      - name: allowedEventTypes
+        type: Array
+        description: |
+          List of allowed event types for the connection.
+        item_type:
+          type: String
+      - name: globalEventFilter
+        type: String
+        description: |
+          Filter to be applied on the events to be received by the connection.
+      - name: deadLetterConfig
+        type: NestedObject
+        description: |
+          Dead letter configuration for eventing of a connection.
+        properties:
+          - name: projectId
+            type: String
+            required: true
+            description: |
+              Project which has the topic given.
+          - name: topic
+            type: String
+            required: true
+            description: |
+              Topic to push events which couldn't be processed.
+      - name: enrichmentConfig
+        type: NestedObject
+        description: |
+          Data enrichment configuration.
+        allow_empty_object: true
+        properties:
+          - name: appendAcl
+            type: Boolean
+            send_empty_value: true
+            description: |
+              Append ACL to the event.
   - name: connectorVersionLaunchStage
     type: String
     description: |
