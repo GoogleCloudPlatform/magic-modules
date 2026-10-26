@@ -1,0 +1,37 @@
+resource "google_discovery_engine_data_store" "basic" {
+  location                     = "global"
+  data_store_id                = "{{index $.ResourceIdVars "data_store_id"}}"
+  display_name                 = "tf-test-datastore-import-bq"
+  industry_vertical            = "GENERIC"
+  content_config               = "CONTENT_REQUIRED"
+  solution_types               = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search  = false
+  skip_default_schema_creation = false
+  document_processing_config {
+    default_parsing_config {
+      digital_parsing_config {}
+    }
+  }
+}
+
+resource "google_discovery_engine_document_import" "{{.PrimaryResourceId}}" {
+  location            = "global"
+  collection_id       = "default_collection"
+  data_store_id       = google_discovery_engine_data_store.basic.data_store_id
+  branch_id           = "default_branch"
+  reconciliation_mode = "INCREMENTAL"
+  auto_generate_ids   = false
+  id_field            = "_id"
+
+  bigquery_source {
+    project_id   = "{{index $.ResourceIdVars "project"}}"
+    dataset_id   = "{{index $.ResourceIdVars "dataset_id"}}"
+    table_id     = "{{index $.ResourceIdVars "table_id"}}"
+    data_schema  = "custom"
+    partition_date {
+      year  = 2026
+      month = 10
+      day   = 26
+    }
+  }
+}

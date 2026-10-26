@@ -1,0 +1,202 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DocumentImport'
+description: |-
+  Imports documents from Cloud Storage or BigQuery into a Discovery Engine DataStore branch.
+references:
+  guides:
+    'Import documents': 'https://cloud.google.com/generative-ai-app-builder/docs/import-documents'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.branches.documents/import'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents:import'
+id_format: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}'
+immutable: true
+exclude_read: true
+exclude_import: true
+exclude_sweeper: true
+timeouts:
+  insert_minutes: 30
+  delete_minutes: 30
+async:
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['create']
+  result:
+    resource_inside_response: false
+autogen_async: true
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/discovery_engine_document_import.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+samples:
+  - name: 'discoveryengine_document_import_basic'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'discoveryengine_document_import_basic'
+        exclude_import_test: true
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+  - name: 'discoveryengine_document_import_no_purge'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'discoveryengine_document_import_no_purge'
+        exclude_import_test: true
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+  - name: 'discoveryengine_document_import_full'
+    primary_resource_id: 'default'
+    # Test is excluded from automated test runs because error_config.gcs_prefix points to an external sample bucket/path that is not writable in CI.
+    exclude_test: true
+    steps:
+      - name: 'discoveryengine_document_import_full'
+        exclude_import_test: true
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+  - name: 'discoveryengine_document_import_bigquery'
+    primary_resource_id: 'default'
+    # Test is excluded from automated test runs because it requires pre-existing BigQuery dataset and table assets.
+    exclude_test: true
+    steps:
+      - name: 'discoveryengine_document_import_bigquery'
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+          project: 'my-project'
+          dataset_id: 'dataset-id'
+          table_id: 'table-id'
+parameters:
+  - name: 'location'
+    type: String
+    description: The geographic location where the data store resides.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'collectionId'
+    type: String
+    description: The collection ID. Currently only accepts "default_collection".
+    url_param_only: true
+    immutable: true
+    default_value: default_collection
+  - name: 'dataStoreId'
+    type: String
+    description: The unique id of the data store.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'branchId'
+    type: String
+    description: The target branch ID. Defaults to "default_branch".
+    url_param_only: true
+    immutable: true
+    default_value: default_branch
+  - name: 'purgeOnDestroy'
+    type: Boolean
+    description: |-
+      Whether to invoke documents:purge with filter: "*" when the Terraform resource is destroyed.
+    url_param_only: true
+    default_value: false
+properties:
+  - name: 'gcsSource'
+    type: NestedObject
+    description: Cloud Storage input configuration.
+    exactly_one_of:
+      - gcs_source
+      - bigquery_source
+    properties:
+      - name: 'inputUris'
+        type: Array
+        required: true
+        description: |-
+          Cloud Storage URIs to input files. Each URI can be up to
+          2000 characters long. URIs can match the full object path or a pattern
+          matching one or more files, such as `gs://bucket/directory/*.json`.
+        item_type:
+          type: String
+      - name: 'dataSchema'
+        type: String
+        description: |-
+          The schema to use when parsing the data from the source.
+          Supported values: 'document', 'custom', 'csv', 'content', 'user_event'.
+  - name: 'bigquerySource'
+    type: NestedObject
+    description: BigQuery input configuration.
+    exactly_one_of:
+      - gcs_source
+      - bigquery_source
+    properties:
+      - name: 'projectId'
+        type: String
+        description: |-
+          The project ID or the project number that contains the BigQuery source.
+          If not specified, inherits the project ID from the parent request.
+      - name: 'datasetId'
+        type: String
+        required: true
+        description: The BigQuery data set to copy the data from.
+      - name: 'tableId'
+        type: String
+        required: true
+        description: The BigQuery table to copy the data from.
+      - name: 'gcsStagingDir'
+        type: String
+        description: Intermediate Cloud Storage directory used for the import.
+      - name: 'dataSchema'
+        type: String
+        description: |-
+          The schema to use when parsing the data from the source.
+          Supported values: 'custom', 'csv'.
+      - name: 'partitionDate'
+        type: NestedObject
+        description: BigQuery time partitioned table's _PARTITIONDATE in YYYY-MM-DD format.
+        properties:
+          - name: 'year'
+            type: Integer
+            required: true
+            description: Year of date. Must be from 1 to 9999.
+          - name: 'month'
+            type: Integer
+            required: true
+            description: Month of year. Must be from 1 to 12.
+          - name: 'day'
+            type: Integer
+            required: true
+            description: Day of month. Must be from 1 to 31 and valid for the year and month.
+  - name: 'reconciliationMode'
+    type: Enum
+    description: The mode of reconciliation between existing documents and the documents to be imported.
+    default_value: 'INCREMENTAL'
+    enum_values:
+      - 'RECONCILIATION_MODE_UNSPECIFIED'
+      - 'INCREMENTAL'
+      - 'FULL'
+  - name: 'autoGenerateIds'
+    type: Boolean
+    description: |-
+      Whether to automatically generate IDs for the documents if absent.
+      Only set this field when dataSchema is 'custom' or 'csv'.
+  - name: 'idField'
+    type: String
+    description: |-
+      The field indicates the ID field or column to be used as unique IDs of the documents.
+      Only set this field when autoGenerateIds is unset or set to false.
+  - name: 'errorConfig'
+    type: NestedObject
+    description: Configuration of destination for Import related errors.
+    properties:
+      - name: 'gcsPrefix'
+        type: String
+        description: |-
+          Cloud Storage prefix for import errors. This must be an empty,
+          existing Cloud Storage directory.

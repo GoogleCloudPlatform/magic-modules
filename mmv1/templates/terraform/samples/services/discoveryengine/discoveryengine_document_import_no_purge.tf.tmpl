@@ -1,0 +1,30 @@
+resource "google_discovery_engine_data_store" "basic" {
+  location                     = "global"
+  data_store_id                = "{{index $.ResourceIdVars "data_store_id"}}"
+  display_name                 = "tf-test-datastore-import-no-purge"
+  industry_vertical            = "GENERIC"
+  content_config               = "CONTENT_REQUIRED"
+  solution_types               = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search  = false
+  skip_default_schema_creation = false
+  document_processing_config {
+    default_parsing_config {
+      digital_parsing_config {}
+    }
+  }
+}
+
+resource "google_discovery_engine_document_import" "{{.PrimaryResourceId}}" {
+  location            = "global"
+  data_store_id       = google_discovery_engine_data_store.basic.data_store_id
+  branch_id           = "default_branch"
+  reconciliation_mode = "INCREMENTAL"
+  auto_generate_ids   = false
+  id_field            = "_id"
+  purge_on_destroy    = false
+
+  gcs_source {
+    input_uris  = ["gs://cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs/*"]
+    data_schema = "custom"
+  }
+}
