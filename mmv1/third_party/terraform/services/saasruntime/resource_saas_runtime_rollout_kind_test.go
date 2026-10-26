@@ -1,7 +1,5 @@
 package saasruntime_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"testing"
 
@@ -9,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
-  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 )
 
 func TestAccSaasRuntimeRolloutKind_update(t *testing.T) {
@@ -28,7 +26,7 @@ func TestAccSaasRuntimeRolloutKind_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeRolloutKind_basic(context),
@@ -60,7 +58,6 @@ func TestAccSaasRuntimeRolloutKind_update(t *testing.T) {
 func testAccSaasRuntimeRolloutKind_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "global"
 
@@ -70,14 +67,12 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_unit_kind" "example_unitkind" {
-  provider     = google-beta
   location     = "global"
   unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
   saas         = google_saas_runtime_saas.example_saas.id
 }
 
 resource "google_saas_runtime_rollout_kind" "example" {
-  provider          = google-beta
   location          = "global"
   rollout_kind_id   = "tf-test-example-rolloutkind%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
@@ -95,7 +90,6 @@ resource "google_saas_runtime_rollout_kind" "example" {
 func testAccSaasRuntimeRolloutKind_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "global"
 
@@ -105,14 +99,12 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_unit_kind" "example_unitkind" {
-  provider     = google-beta
   location     = "global"
   unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
   saas         = google_saas_runtime_saas.example_saas.id
 }
 
 resource "google_saas_runtime_rollout_kind" "example" {
-  provider          = google-beta
   location          = "global"
   rollout_kind_id   = "tf-test-example-rolloutkind%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
@@ -132,5 +124,3 @@ resource "google_saas_runtime_rollout_kind" "example" {
 }
 `, context)
 }
-
-{{- end }}

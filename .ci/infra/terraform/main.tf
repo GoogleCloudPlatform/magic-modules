@@ -261,6 +261,7 @@ module "project-services" {
     "cloudtrace.googleapis.com",
     "composer.googleapis.com",
     "compute.googleapis.com",
+    "config.googleapis.com",
     "connectors.googleapis.com",
     "container.googleapis.com",
     "containeranalysis.googleapis.com",
@@ -450,6 +451,35 @@ resource "google_project_service_identity" "dlp_sa" {
 
   project = google_project.proj.project_id
   service = "dlp.googleapis.com"
+}
+
+resource "google_project_service_identity" "saasservicemgmt_sa" {
+  provider   = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "saasservicemgmt.googleapis.com"
+}
+
+resource "google_project_service_identity" "infra_manager_sa" {
+  provider   = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "config.googleapis.com"
+}
+
+# TestAccSaasRuntime*
+resource "google_project_iam_member" "saasservicemgmt_service_agent" {
+  project = google_project.proj.project_id
+  role    = "roles/saasservicemgmt.serviceAgent"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "infra_manager_service_agent" {
+  project = google_project.proj.project_id
+  role    = "roles/config.serviceAgent"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-config.iam.gserviceaccount.com"
 }
 
 # TestAccComposerEnvironment_fixPyPiPackages
