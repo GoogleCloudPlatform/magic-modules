@@ -1,0 +1,170 @@
+---
+name: 'Application'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications/{{application_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications?applicationId={{application_id}}'
+update_verb: 'PATCH'
+update_mask: true
+description: |
+  Application Design Center Application.
+autogen_async: true
+async:
+  operation:
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result:
+    path: 'response'
+  status:
+    path: 'done'
+    complete: true
+    allowed_value:
+      - true
+  error:
+    path: 'error'
+    message: 'message'
+  actions:
+    - 'delete'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications/{{application_id}}'
+properties:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The location of the space.
+  - name: 'space'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The space for the application.
+  - name: 'application_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The ID of the application.
+  - name: 'source'
+    type: NestedObject
+    required: true
+    description: |
+      DeploymentSource for the application.
+    properties:
+      - name: 'applicationTemplateRevisionUri'
+        type: String
+        description: |
+          Application template revision URI.
+  - name: 'scope'
+    type: NestedObject
+    required: true
+    description: |
+      AppHub Scope for the application.
+    properties:
+      - name: 'type'
+        type: String
+        description: |
+          Scope type.
+  - name: 'displayName'
+    type: String
+    description: |
+      Display name.
+  - name: 'description'
+    type: String
+    description: |
+      Description of the application.
+  - name: 'appParameters'
+    type: KeyValuePairs
+    description: |
+      Application parameters.
+  - name: 'componentParameters'
+    type: KeyValuePairs
+    description: |
+      Component parameters.
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      Service account for deployment.
+  - name: 'attributes'
+    type: KeyValuePairs
+    description: |
+      Attributes of the application.
+  - name: 'deploymentRegion'
+    type: String
+    description: |
+      Deployment region.
+  - name: 'deploymentProject'
+    type: String
+    description: |
+      Deployment project.
+  - name: 'connectionConfigs'
+    type: Array
+    description: |
+      Connection configurations.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'connectionId'
+          type: String
+          description: |
+            Connection ID.
+        - name: 'destinationUri'
+          type: String
+          description: |
+            Destination URI.
+  - name: 'deploymentTarget'
+    type: String
+    description: |
+      Deployment target.
+  - name: 'compositeApplicationParameters'
+    type: KeyValuePairs
+    description: |
+      Composite application parameters.
+  - name: 'rolesApisConfig'
+    type: NestedObject
+    description: |
+      Roles and APIs configuration.
+    properties:
+      - name: 'roles'
+        type: Array
+        description: |
+          List of roles.
+        item_type:
+          type: String
+      - name: 'apis'
+        type: Array
+        description: |
+          List of APIs.
+        item_type:
+          type: String
+  - name: 'name'
+    type: String
+    output: true
+    description: |
+      Name of the application.
+  - name: 'state'
+    type: String
+    output: true
+    description: |
+      State of the application.
+  - name: 'deploymentMetadata'
+    type: KeyValuePairs
+    output: true
+    description: |
+      Deployment metadata.
+  - name: 'apphubApplication'
+    type: String
+    output: true
+    description: |
+      AppHub application URI.
+  - name: 'createTime'
+    type: Time
+    output: true
+    description: |
+      Create time.
+  - name: 'updateTime'
+    type: Time
+    output: true
+    description: |
+      Update time.
