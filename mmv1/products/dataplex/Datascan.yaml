@@ -30,6 +30,7 @@ read_query_params: ?view=FULL
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: data_scan_id
+  max_backoff_timeout_seconds: 1200
   import_format:
     - projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}
     - '{{data_scan_id}}'
