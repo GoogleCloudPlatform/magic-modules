@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"testing"
 
@@ -474,6 +475,92 @@ func TestAccComputeRouterPeer_UpdateMd5AuthenticationKey(t *testing.T) {
 	})
 }
 
+// Updates to google_compute_router must not drop MD5 keys that belong to
+// google_compute_router_peer resources on the same router.
+func TestAccComputeRouterPeer_md5AuthenticationKeysKeptOnRouterUpdate(t *testing.T) {
+	t.Parallel()
+
+	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
+	peerKey := fmt.Sprintf("%s-peer-key", routerName)
+	peer1Key := fmt.Sprintf("%s-peer1-key", routerName)
+	routerKey := fmt.Sprintf(`
+    md5_authentication_keys {
+      name = "%s"
+      key  = "%s-value"
+    }`, peerKey, peerKey)
+	customBgp := `
+    advertise_mode    = "CUSTOM"
+    advertised_groups = ["ALL_SUBNETS"]`
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, "", "", "value", true),
+				Check: testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
+					fmt.Sprintf("%s-peer", routerName):  peerKey,
+					fmt.Sprintf("%s-peer1", routerName): peer1Key,
+				}),
+			},
+			{
+				// The router takes over the key of one peer. Before the fix, this
+				// replaced the router's key list and dropped the other peer's key.
+				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, "", routerKey, "value", true),
+				Check: testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
+					fmt.Sprintf("%s-peer", routerName):  peerKey,
+					fmt.Sprintf("%s-peer1", routerName): peer1Key,
+				}),
+			},
+			{
+				// A router change unrelated to MD5 must not resend the router's key.
+				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, customBgp, routerKey, "value", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_router.foobar", "bgp.0.advertise_mode", "CUSTOM"),
+					testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
+						fmt.Sprintf("%s-peer", routerName):  peerKey,
+						fmt.Sprintf("%s-peer1", routerName): peer1Key,
+					}),
+				),
+			},
+			{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The API never returns key values, and md5_authentication_keys is not read.
+				ImportStateVerifyIgnore: []string{"md5_authentication_keys"},
+			},
+			{
+				ResourceName:      "google_compute_router_peer.foobar1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The API never returns key values, only the key name. The other two
+				// fields are client-side flags, ignored like in the other peer tests.
+				ImportStateVerifyIgnore: []string{"md5_authentication_key.0.key", "is_advertised_route_priority_set", "zero_custom_learned_route_priority"},
+			},
+			{
+				// Rotating a peer's key still works after router updates.
+				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, customBgp, routerKey, "rotated", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_router_peer.foobar1", "md5_authentication_key.0.key", fmt.Sprintf("%s-rotated", peer1Key)),
+					testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
+						fmt.Sprintf("%s-peer", routerName):  peerKey,
+						fmt.Sprintf("%s-peer1", routerName): peer1Key,
+					}),
+				),
+			},
+			{
+				// Removing a peer removes its key and keeps the others.
+				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, customBgp, routerKey, "rotated", false),
+				Check: testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
+					fmt.Sprintf("%s-peer", routerName): peerKey,
+				}),
+			},
+		},
+	})
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRouterPeer_addImportAndExportPolicy(t *testing.T) {
   t.Parallel()
@@ -648,6 +735,202 @@ func testAccCheckComputeRouterPeerExists(t *testing.T, n string) resource.TestCh
 
 		return fmt.Errorf("Peer %s not found for router %s", name, routerResName)
 	}
+}
+
+// testAccCheckComputeRouterMd5AuthenticationKeys checks that the router has exactly
+// the expected BGP peers, each referencing its expected MD5 key, and that every
+// key is defined on the router.
+func testAccCheckComputeRouterMd5AuthenticationKeys(t *testing.T, n string, expectedPeerKeys map[string]string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		project, err := acctest.GetTestProject(rs.Primary, config)
+		if err != nil {
+			return err
+		}
+
+		region, err := acctest.GetTestRegion(rs.Primary, config)
+		if err != nil {
+			return err
+		}
+
+		routerName := rs.Primary.Attributes["name"]
+		url := fmt.Sprintf("%sprojects/%s/regions/%s/routers/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, region, routerName)
+		router, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
+		}
+
+		keys := map[string]bool{}
+		if rawKeys, ok := router["md5AuthenticationKeys"].([]interface{}); ok {
+			for _, rawKey := range rawKeys {
+				key, _ := rawKey.(map[string]interface{})
+				name, _ := key["name"].(string)
+				keys[name] = true
+			}
+		}
+
+		peerKeys := map[string]string{}
+		if rawPeers, ok := router["bgpPeers"].([]interface{}); ok {
+			for _, rawPeer := range rawPeers {
+				peer, _ := rawPeer.(map[string]interface{})
+				peerName, _ := peer["name"].(string)
+				keyName, _ := peer["md5AuthenticationKeyName"].(string)
+				peerKeys[peerName] = keyName
+			}
+		}
+
+		if !reflect.DeepEqual(peerKeys, expectedPeerKeys) {
+			return fmt.Errorf("Router %s: expected BGP peer keys %v, got %v", routerName, expectedPeerKeys, peerKeys)
+		}
+		for peerName, keyName := range peerKeys {
+			if !keys[keyName] {
+				return fmt.Errorf("Router %s: BGP peer %s uses MD5 key %s, which is not in md5AuthenticationKeys %v", routerName, peerName, keyName, keys)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, routerBgp, routerMd5Key, peer1KeySuffix string, withPeer1 bool) string {
+	context := map[string]interface{}{
+		"router_name":      routerName,
+		"router_bgp":       routerBgp,
+		"router_md5_key":   routerMd5Key,
+		"peer1_key_suffix": peer1KeySuffix,
+		"peer1":            "",
+	}
+	if withPeer1 {
+		context["peer1"] = acctest.Nprintf(`
+  resource "google_compute_router_peer" "foobar1" {
+    name                      = "%{router_name}-peer1"
+    router                    = google_compute_router.foobar.name
+    region                    = google_compute_router.foobar.region
+    peer_asn                  = 65516
+    advertised_route_priority = 100
+    interface                 = google_compute_router_interface.foobar1.name
+    peer_ip_address           = "169.254.4.2"
+    md5_authentication_key {
+      name = "%{router_name}-peer1-key"
+      key  = "%{router_name}-peer1-key-%{peer1_key_suffix}"
+    }
+    depends_on = [
+      google_compute_router_peer.foobar
+    ]
+  }
+`, context)
+	}
+
+	return acctest.Nprintf(`
+  resource "google_compute_network" "foobar" {
+    name                    = "%{router_name}-net"
+    auto_create_subnetworks = false
+  }
+
+  resource "google_compute_subnetwork" "foobar" {
+    name          = "%{router_name}-subnet"
+    network       = google_compute_network.foobar.self_link
+    ip_cidr_range = "10.0.0.0/16"
+    region        = "us-central1"
+  }
+
+  resource "google_compute_ha_vpn_gateway" "foobar" {
+    name    = "%{router_name}-gateway"
+    network = google_compute_network.foobar.self_link
+    region  = google_compute_subnetwork.foobar.region
+  }
+
+  resource "google_compute_external_vpn_gateway" "external_gateway" {
+    name            = "%{router_name}-external-gateway"
+    redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+    description     = "An externally managed VPN gateway"
+    interface {
+      id         = 0
+      ip_address = "8.8.8.8"
+    }
+  }
+
+  resource "google_compute_router" "foobar" {
+    name    = "%{router_name}"
+    region  = google_compute_subnetwork.foobar.region
+    network = google_compute_network.foobar.self_link
+    bgp {
+      asn = 64514
+      %{router_bgp}
+    }
+    %{router_md5_key}
+  }
+
+  resource "google_compute_vpn_tunnel" "foobar" {
+    name                            = "%{router_name}"
+    region                          = google_compute_subnetwork.foobar.region
+    vpn_gateway                     = google_compute_ha_vpn_gateway.foobar.id
+    peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+    peer_external_gateway_interface = 0
+    shared_secret                   = "unguessable"
+    router                          = google_compute_router.foobar.name
+    vpn_gateway_interface           = 0
+  }
+
+  resource "google_compute_vpn_tunnel" "foobar1" {
+    name                            = "%{router_name}1"
+    region                          = google_compute_subnetwork.foobar.region
+    vpn_gateway                     = google_compute_ha_vpn_gateway.foobar.id
+    peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+    peer_external_gateway_interface = 0
+    shared_secret                   = "unguessable"
+    router                          = google_compute_router.foobar.name
+    vpn_gateway_interface           = 1
+  }
+
+  resource "google_compute_router_interface" "foobar" {
+    name       = "%{router_name}"
+    router     = google_compute_router.foobar.name
+    region     = google_compute_router.foobar.region
+    vpn_tunnel = google_compute_vpn_tunnel.foobar.name
+    ip_range   = "169.254.3.1/30"
+  }
+
+  resource "google_compute_router_interface" "foobar1" {
+    name       = "%{router_name}1"
+    router     = google_compute_router.foobar.name
+    region     = google_compute_router.foobar.region
+    vpn_tunnel = google_compute_vpn_tunnel.foobar1.name
+    ip_range   = "169.254.4.1/30"
+    depends_on = [
+      google_compute_router_interface.foobar
+    ]
+  }
+
+  resource "google_compute_router_peer" "foobar" {
+    name                      = "%{router_name}-peer"
+    router                    = google_compute_router.foobar.name
+    region                    = google_compute_router.foobar.region
+    peer_asn                  = 65515
+    advertised_route_priority = 100
+    interface                 = google_compute_router_interface.foobar.name
+    peer_ip_address           = "169.254.3.2"
+    md5_authentication_key {
+      name = "%{router_name}-peer-key"
+      key  = "%{router_name}-peer-key-value"
+    }
+    depends_on = [
+      google_compute_router_interface.foobar1
+    ]
+  }
+%{peer1}`, context)
 }
 
 func testAccComputeRouterPeerBasic(routerName string) string {

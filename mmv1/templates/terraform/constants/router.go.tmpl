@@ -27,3 +27,19 @@ func resourceComputeRouterCustomDiff(_ context.Context, diff *schema.ResourceDif
 
 	return nil
 }
+
+// mergeComputeRouterMd5AuthenticationKeys returns the router's md5AuthenticationKeys
+// with newKey in place of the key previously managed by google_compute_router (oldName).
+// All other keys belong to google_compute_router_peer and are sent with only their
+// name, which tells the API to keep their current value.
+func mergeComputeRouterMd5AuthenticationKeys(current []interface{}, oldName interface{}, newKey map[string]interface{}) []interface{} {
+	merged := make([]interface{}, 0, len(current)+1)
+	for _, raw := range current {
+		key, ok := raw.(map[string]interface{})
+		if !ok || key["name"] == oldName || key["name"] == newKey["name"] {
+			continue
+		}
+		merged = append(merged, map[string]interface{}{"name": key["name"]})
+	}
+	return append(merged, newKey)
+}
