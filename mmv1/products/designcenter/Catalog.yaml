@@ -18,8 +18,11 @@ create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalo
 self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog_id}}'
 update_verb: 'PATCH'
 update_mask: true
+autogen_async: true
 async:
   actions: ["delete"]
+  operation:
+    base_url: "{{op_id}}"
 description: |
   A Design Center Catalog.
 import_format:
