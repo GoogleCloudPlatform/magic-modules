@@ -817,7 +817,7 @@ properties:
                               This translates to the Access-Control-Allow-Origin response header.
                             item_type:
                               type: String
-                            max_size: 25
+                            max_size: 100
                           - name: allowMethods
                             type: Array
                             description: |
