@@ -1,4 +1,5 @@
 package vertexai
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -40,3 +41,4 @@ func TestUnitModelDevelopmentCluster_NodePools_NotForceNew(t *testing.T) {
 		assertNoForceNew(fmt.Sprintf("node_pools.%s", name), childSchema)
 	}
 }
+{{- end }}
