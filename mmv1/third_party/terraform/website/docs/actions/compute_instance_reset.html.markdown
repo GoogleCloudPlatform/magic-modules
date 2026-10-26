@@ -15,7 +15,7 @@ first, and any data that has not been written to disk is lost. If your workload 
 
 Actions require Terraform 1.14 or later. For an overview of how actions work in the Terraform 
 Provider for Google Cloud, see
-[Use actions with Terraform Provider for Google Cloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/using_actions).
+[Use actions with Terraform Provider for Google Cloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/using_actions).
 
 To get more information about resetting instances, see:
 
@@ -25,7 +25,6 @@ To get more information about resetting instances, see:
 
 ## Example Usage - Invoke from CLI
 
-
 ```hcl
 resource "google_compute_instance" "example" {
   name         = "example-instance"
@@ -34,7 +33,7 @@ resource "google_compute_instance" "example" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-13"
     }
   }
 
@@ -45,7 +44,7 @@ resource "google_compute_instance" "example" {
 
 action "google_compute_instance_reset" "example" {
   config {
-    instance  = google_compute_instance.example.self_link
+    instance = google_compute_instance.example.self_link
   }
 }
 ```
@@ -63,27 +62,27 @@ the instance boots with the new script. It uses the instance and the action from
 
 ```hcl
 resource "google_storage_bucket_object" "startup_script" {
-    name   = "startup.sh"
-    bucket = "my-config-bucket"
-    source = "${path.module}/startup.sh"
+  name   = "startup.sh"
+  bucket = "my-config-bucket"
+  source = "${path.module}/startup.sh"
 }
 
 resource "terraform_data" "startup_script_version" {
-    input = google_storage_bucket_object.startup_script.md5hash
+  input = google_storage_bucket_object.startup_script.md5hash
 
-    lifecycle {
-        action_trigger {
-            events = [after_update]
-            actions = [action.google_compute_instance_reset.example]
-        }
+  lifecycle {
+    action_trigger {
+      events  = [after_update]
+      actions = [action.google_compute_instance_reset.example]
     }
+  }
 }
 ```
 
 ## Example Usage - Reference the instance by name
 
 ```hcl
-action "google_compute_instance_reset" "example" {
+action "google_compute_instance_reset" "by_name" {
   config {
     instance  = "example-instance"
     project   = "my-project"
@@ -97,7 +96,7 @@ action "google_compute_instance_reset" "example" {
 
 The following arguments are supported in the `config` block:
 
-* `instance` - (Required) The instance to reset. Accepts any off the following formats:
+* `instance` - (Required) The instance to reset. Accepts any of the following formats:
     * The instance name, for example `example-instance`.
     * A partial URI: `zones/{zone}/instances/{name}` or `projects/{project}/zones/{zone}/instances/{name}`.
     * A self link, such as the value of `google_compute_instance.example.self_link`.
@@ -106,11 +105,11 @@ The following arguments are supported in the `config` block:
  the project in `instance` is used, and then the provider project. If you set both `project` and a 
  project in `instance`, they must match.
 
-* `zone` -  (Optional) The zone of the instance. If it is not provided, the zone in `instance` is
+* `zone` - (Optional) The zone of the instance. If it is not provided, the zone in `instance` is
 used, and then the provider zone. If you set both `zone` and a zone in `instance`, they must match.
 
 * `timeout` - (Optional) The maximum time to wait for the instance to be ready for a reset and for 
-the reset operation to complete, as a duration string such as "10m" or "1h". The value must be
+the reset operation to complete, as a duration string such as `"10m"` or `"1h"`. The value must be
 greater than zero. Defaults to `"20m"`.
 
 ## Behavior

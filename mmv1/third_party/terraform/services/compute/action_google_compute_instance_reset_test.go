@@ -157,6 +157,7 @@ resource "google_compute_instance" "test" {
 action "google_compute_instance_reset" "test" {
 	config {
 		instance = google_compute_instance.test.self_link
+		timeout = "10m"
 		}
 }
 

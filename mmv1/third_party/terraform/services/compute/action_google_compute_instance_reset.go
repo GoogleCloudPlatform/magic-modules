@@ -35,7 +35,7 @@ var (
 	computeInstancePartialRefRegexp = regexp.MustCompile(fmt.Sprintf(tpgresource.ZonalPartialLinkBasePattern, "instances"))
 
 	// Instance states that will settle into RUNNING on their own. The action waits these out
-	// so that the triggering on the instance's own creation is not racy.
+	// so that triggering on the instance's own creation is not racy.
 	computeInstanceTransitionalStates = []string{"PROVISIONING", "STAGING", "REPAIRING"}
 )
 
@@ -51,7 +51,7 @@ func NewComputeInstanceResetAction() action.Action {
 	return &computeInstanceResetAction{}
 }
 
-// computeInstanceResetAction performs a hard reset (instance.reset) on a running ComputeEngine
+// computeInstanceResetAction performs a hard reset (instance.reset) on a running Compute Engine
 // instance. Reset leaves the instance RUNNING, so it does not drift any attribute that
 // google_compute_instance tracks (desired_status/ current_status).
 type computeInstanceResetAction struct {
@@ -72,26 +72,26 @@ func (a *computeInstanceResetAction) Metadata(_ context.Context, req action.Meta
 func (a *computeInstanceResetAction) Schema(_ context.Context, _ action.SchemaRequest, resp *action.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Performs a hard reset of a running Compute Engine instance. The guest OS is not shut down gracefully.",
-		MarkdownDescription: "Performs a hard reset ([`instance.reset`](https://docs.cloud.google.com/compute/docs/reference/rest/v1/instances/reset)) " +
+		MarkdownDescription: "Performs a hard reset ([`instance.reset`](https://cloud.google.com/compute/docs/reference/rest/v1/instances/reset)) " +
 			"of a running Compute Engine instance. The guest OS is not shut down gracefully.",
 		Attributes: map[string]schema.Attribute{
 			"instance": schema.StringAttribute{
-				Description: "The Compute instance to reset. Accepts the instance name, a partial URI" +
-					"(projects/{project}/zones/{zone}/instances/{name} or /zones/{zone}/instances/{name}), or a self-link.",
-				MarkdownDescription: "The Compute instance to reset. Accepts the instance name, a partial URI" +
-					"(projects/{project}/zones/{zone}/instances/{name} or /zones/{zone}/instances/{name}), or a self-link.",
+				Description: "The instance to reset. Accepts the instance name, a partial URI" +
+					"(projects/{project}/zones/{zone}/instances/{name} or zones/{zone}/instances/{name}), or a self link.",
+				MarkdownDescription: "The instance to reset. Accepts the instance name, a partial URI" +
+					"(projects/{project}/zones/{zone}/instances/{name} or zones/{zone}/instances/{name}), or a self link.",
 				Required: true,
 				Validators: []validator.String{
 					fwvalidators.NonEmptyStringValidator(),
 				},
 			},
 			"project": schema.StringAttribute{
-				Description: "The project of the instance. If it is not provided, the project in `instance is used, " +
+				Description: "The project of the instance. If it is not provided, the project in `instance` is used, " +
 					"and then the provider project.",
 				Optional: true,
 			},
 			"zone": schema.StringAttribute{
-				Description: "The zone of the instance. If it is not provided, the zone in `instance is used, " +
+				Description: "The zone of the instance. If it is not provided, the zone in `instance` is used, " +
 					"and then the provider zone.",
 				Optional: true,
 			},
@@ -131,7 +131,7 @@ func (a *computeInstanceResetAction) ValidateConfig(ctx context.Context, req act
 	}
 	if !data.Timeout.IsNull() && !data.Timeout.IsUnknown() {
 		// format is already checked by the attribute validator; only zero needs rejecting here.
-		if d, err := time.ParseDuration(data.Timeout.ValueString()); err == nil || d == 0 {
+		if d, err := time.ParseDuration(data.Timeout.ValueString()); err == nil && d == 0 {
 			resp.Diagnostics.AddAttributeError(path.Root("timeout"), "Invalid timeout", "Timeout must be a positive duration")
 		}
 	}
@@ -158,7 +158,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 
 	ref, err := parseComputeInstanceRef(data.Instance.ValueString(), data.Project.ValueString(), data.Zone.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddAttributeError(path.Root("instance"), "Invalid instance ", err.Error())
+		resp.Diagnostics.AddAttributeError(path.Root("instance"), "Invalid instance", err.Error())
 		return
 	}
 
@@ -171,7 +171,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 	}
 
 	if ref.Project == "" || ref.Zone == "" {
-		resp.Diagnostics.AddError("Missing project or zone", "Project and Zone must be specified either in the instance reference or in the provider configuration.")
+		resp.Diagnostics.AddError("Missing project or zone", "Project and Zone must be specified either in the instance reference, the action configuration or the provider configuration")
 		return
 	}
 
@@ -214,7 +214,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 	status, err := getStatus()
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			resp.Diagnostics.AddError("Instance not found", fmt.Sprintf("instance %s does not exist.", instanceID))
+			resp.Diagnostics.AddError("Instance not found", fmt.Sprintf("Instance %s does not exist.", instanceID))
 			return
 		}
 		resp.Diagnostics.AddError("Error reading instance", fmt.Sprintf("Error reading instance %s: %v", instanceID, err))
@@ -284,7 +284,7 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 // -projects/{project}/zones/{zone}/instances/{name}
 // -https://{endpoint}/compute/{version}/projects/{project}/zones/{zone}/instances/{name}
 //
-// Project and zone in the returned value are empty when neither the reference not the attributes
+// Project and zone in the returned value are empty when neither the reference nor the attributes
 // set them; the caller fills them from the provider configuration.
 func parseComputeInstanceRef(instance, project, zone string) (*tpgresource.ZonalFieldValue, error) {
 	ref := &tpgresource.ZonalFieldValue{ResourceType: "instances"}

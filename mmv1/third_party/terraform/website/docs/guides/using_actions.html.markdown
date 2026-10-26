@@ -1,7 +1,7 @@
 ---
 page_title: "Use actions with the Terraform Provider for Google Cloud"
 description: |-
-  Learn how to declare, trigger and invoke actions in the Terraform Provider for Google Cloud.
+  Learn how to declare, trigger, and invoke actions in the Terraform Provider for Google Cloud.
 ---
 
 # Use actions with the Terraform Provider for Google Cloud
@@ -11,9 +11,7 @@ on your infrastructure. Actions do not affect resource state. The Terraform Prov
 implements actions for operations that do not fit the resource lifecycle, such as resetting
 a Compute Engine instance.
 
-Terraform actions are available in Terraform v1.14 and later. For more information, see [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
-
----
+Actions are available in Terraform v1.14 and later. For more information, see [Invoke an action](https://developer.hashicorp.com/terraform/language/invoke-actions) in the Terraform documentation.
 
 ## Declare an action
 
@@ -21,7 +19,7 @@ Declare an `action` block with the action type and a label. Put the action's arg
 `config` block:
 
 ```hcl
-action "google_compute_instance_reset" "web"{
+action "google_compute_instance_reset" "web" {
   config {
      instance = google_compute_instance.web.self_link
   }
@@ -35,11 +33,12 @@ syntax, see the [`action` block reference](https://developer.hashicorp.com/terra
 
 To run an action when a resource changes, add an `action_trigger` block to the `lifecycle` block of
 that resource:
+
 ```hcl
 resource "terraform_data" "config_version" {
-    input = var.config_version
+  input = var.config_version
 
-    lifecycle {
+  lifecycle {
     action_trigger {
       events  = [after_update]
       actions = [action.google_compute_instance_reset.web]
@@ -74,5 +73,3 @@ provider describes how the action interacts with the related resource and whethe
 ## Available actions
 
 * [`google_compute_instance_reset`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/actions/compute_instance_reset) - Performs a hard reset of a running Compute Engine instance.
-
----
