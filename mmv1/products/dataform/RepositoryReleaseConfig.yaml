@@ -23,6 +23,7 @@ base_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/
 min_version: beta
 create_url: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs?releaseConfigId={{name}}
 update_verb: PATCH
+update_mask: true
 id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
 import_format:
   - projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
