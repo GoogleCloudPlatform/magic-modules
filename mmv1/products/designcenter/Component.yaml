@@ -1,0 +1,143 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Component'
+description: |
+  A Design Center Component.
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components?componentId={{component_id}}'
+update_verb: 'PATCH'
+update_mask: true
+async:
+  actions: []
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component_id}}'
+
+parameters:
+  - name: 'location'
+    type: 'String'
+    description: |
+      The location of the component.
+    url_param_only: true
+    required: true
+    immutable: true
+
+  - name: 'space'
+    type: 'String'
+    description: |
+      The space of the component.
+    url_param_only: true
+    required: true
+    immutable: true
+
+  - name: 'application_template'
+    type: 'String'
+    description: |
+      The application_template of the component.
+    url_param_only: true
+    required: true
+    immutable: true
+
+  - name: 'component_id'
+    type: 'String'
+    description: |
+      The ID of the component.
+    url_param_only: true
+    required: true
+    immutable: true
+
+properties:
+  - name: 'name'
+    type: 'String'
+    description: |
+      Identifier. The resource name of the component.
+    output: true
+
+  - name: 'sharedTemplateRevisionUri'
+    type: 'String'
+    description: |
+      The URI of the shared template revision.
+    required: true
+    immutable: true
+
+  - name: 'displayName'
+    type: 'String'
+    description: |
+      The display name of the component.
+
+  - name: 'parameters'
+    type: 'KeyValuePairs'
+    description: |
+      The parameters of the component.
+
+  - name: 'applicationInfo'
+    type: 'KeyValuePairs'
+    description: |
+      The application info of the component.
+
+  - name: 'useAsRootModule'
+    type: 'Boolean'
+    description: |
+      Whether to use as root module.
+
+  - name: 'inputVariableAliases'
+    type: 'KeyValuePairs'
+    description: |
+      The input variable aliases.
+
+  - name: 'applicationTemplateRevisionUri'
+    type: 'String'
+    description: |
+      The application template revision URI.
+
+  - name: 'roles'
+    type: 'Array'
+    item_type:
+      type: 'String'
+    description: |
+      The roles of the component.
+    output: true
+
+  - name: 'apis'
+    type: 'Array'
+    item_type:
+      type: 'String'
+    description: |
+      The APIs of the component.
+    output: true
+
+  - name: 'connectionsParameters'
+    type: 'KeyValuePairs'
+    description: |
+      The connections parameters of the component.
+    output: true
+
+  - name: 'componentParameterSchema'
+    type: 'String'
+    description: |
+      The component parameter schema.
+    output: true
+
+  - name: 'createTime'
+    type: 'Time'
+    description: |
+      [Output only] Create time stamp.
+    output: true
+
+  - name: 'updateTime'
+    type: 'Time'
+    description: |
+      [Output only] Update time stamp.
+    output: true
