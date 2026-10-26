@@ -20,8 +20,11 @@ update_verb: 'PATCH'
 update_mask: true
 description: |
   A Design Center Catalog Template.
+autogen_async: true
 async:
   actions: ["delete"]
+  operation:
+    base_url: "{{op_id}}"
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}'
 properties:
