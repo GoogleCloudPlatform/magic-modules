@@ -1,5 +1,4 @@
 package networkservices_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -16,26 +15,26 @@ func TestAccNetworkServicesGrpcRoute_update(t *testing.T) {
 	grpcRouteName := fmt.Sprintf("tf-test-grpc-route-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkServicesGrpcRouteDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkServicesGrpcRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-        Config: testAccNetworkServicesGrpcRoute_basic(grpcRouteName),
+				Config: testAccNetworkServicesGrpcRoute_basic(grpcRouteName),
 			},
 			{
-				ResourceName:      "google_network_services_grpc_route.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_network_services_grpc_route.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkServicesGrpcRoute_update(grpcRouteName),
 			},
 			{
-				ResourceName:      "google_network_services_grpc_route.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_network_services_grpc_route.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -57,8 +56,15 @@ func testAccNetworkServicesGrpcRoute_basic(grpcRouteName string) string {
           key = "key"
           value = "value"
         }
+        method {
+          grpc_service   = "foo"
+          grpc_method    = "bar"
+          case_sensitive = true
+          type           = "EXACT"
+        }
       }
       action {
+        idle_timeout = "30s"
         retry_policy {
             retry_conditions = ["cancelled"]
             num_retries = 1
@@ -104,8 +110,15 @@ func testAccNetworkServicesGrpcRoute_update(grpcRouteName string) string {
           key = "key"
           value = "value"
         }
+        method {
+          grpc_service   = "foo.*"
+          grpc_method    = "bar.*"
+          case_sensitive = true
+          type           = "REGULAR_EXPRESSION"
+        }
       }
       action {
+        idle_timeout = "60s"
         retry_policy {
             retry_conditions = ["cancelled"]
             num_retries = 2
@@ -118,6 +131,10 @@ func testAccNetworkServicesGrpcRoute_update(grpcRouteName string) string {
           key = "key1"
           value = "value1"
         }
+        method {
+          grpc_service = "baz"
+          grpc_method  = "qux"
+        }
       }
       action {
         retry_policy {
@@ -129,6 +146,3 @@ func testAccNetworkServicesGrpcRoute_update(grpcRouteName string) string {
   }
 `, grpcRouteName)
 }
-
-{{ end }}
-
