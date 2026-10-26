@@ -1,17 +1,13 @@
 package sql
 
 import (
-{{- if ne $.TargetVersionName "ga" }}
 	"context"
 	"strings"
-{{- end }}
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-{{- end }}
 )
 
 func TestMaintenanceVersionDiffSuppress(t *testing.T) {
@@ -299,7 +295,6 @@ func TestDenyMaintenancePeriodDateDiffSuppress(t *testing.T) {
 		})
 	}
 }
-{{- if ne $.TargetVersionName "ga" }}
 
 func TestBlueGreenDeployment_SkipGreenComparisonFields(t *testing.T) {
 	requiredSkipFields := []string{
@@ -453,4 +448,3 @@ func TestBlueGreenDeployment_CompareConfiguredField_SensitiveRedaction(t *testin
 		}
 	}
 }
-{{- end }}

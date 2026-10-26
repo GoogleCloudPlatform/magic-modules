@@ -5286,7 +5286,6 @@ func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *te
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_blueGreenDeployment_mvuSwitchover(t *testing.T) {
 	t.Parallel()
 
@@ -5589,7 +5588,6 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_outOfBandDelete(t *testing.T
 		},
 	})
 }
-{{- end }}
 
 func testGoogleSqlDatabaseInstance_attachGCBDR(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -11084,7 +11082,6 @@ resource "google_sql_database_instance" "instance" {
 `, instanceName, enforce)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccSqlDatabaseInstanceCaptureAttr(resourceName, attrName string, target *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
@@ -11359,4 +11356,3 @@ resource "google_sql_database_instance" "instance" {
 }
 `, instanceName, dbVersion)
 }
-{{- end }}
