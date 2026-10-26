@@ -8,8 +8,11 @@ update_verb: PATCH
 update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+autogen_async: true
 async:
   actions: []
+  operation:
+    base_url: "{{op_id}}"
 error_retry_predicates:
   - 'IsDesignCenterServiceAgentNotFoundError'
 custom_code:
