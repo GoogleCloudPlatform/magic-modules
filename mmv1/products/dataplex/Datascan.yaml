@@ -179,11 +179,8 @@ samples:
           location: REGION
         vars:
           sql_dialect: GOOGLE_SQL
-<<<<<<< HEAD
           catalog_publishing_enabled: "true"
-=======
           custom_instructions: "example custom instructions"
->>>>>>> 26cb64616 (dataplex: add character limit doc and update test step for custom_instructions)
       - name: dataplex_datascan_documentation
         resource_id_vars:
           datascan_name: datadocumentation
@@ -191,15 +188,11 @@ samples:
           project_name: PROJECT_NAME
           location: REGION
         vars:
-<<<<<<< HEAD
           # SPARK_SQL is only accepted by the API for BLMS IRC table resources,
           # so the update step mutates catalog_publishing_enabled instead.
           sql_dialect: GOOGLE_SQL
           catalog_publishing_enabled: "false"
-=======
-          sql_dialect: SPARK_SQL
           custom_instructions: "updated custom instructions"
->>>>>>> 26cb64616 (dataplex: add character limit doc and update test step for custom_instructions)
   - name: dataplex_datascan_onetime_documentation
     primary_resource_id: onetime_documentation
     steps:
