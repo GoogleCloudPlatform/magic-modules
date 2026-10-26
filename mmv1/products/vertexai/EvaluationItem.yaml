@@ -1,0 +1,437 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationItem
+description: |
+  An evaluation item represents a single prompt and optional model/candidate responses,
+  ground truth, and rubrics for evaluation in Vertex AI.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/evaluation/overview'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.evaluationItems'
+base_url: projects/{{project}}/locations/{{region}}/evaluationItems
+self_link: projects/{{project}}/locations/{{region}}/evaluationItems/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/evaluationItems
+immutable: true
+generate_list_resource: true
+id_format: projects/{{project}}/locations/{{region}}/evaluationItems/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/evaluationItems/{{name}}
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+sweeper:
+  identifier_field: displayName
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['delete']
+samples:
+  - name: vertex_ai_evaluation_item
+    primary_resource_id: tf_test_evaluation_item
+    steps:
+      - name: vertex_ai_evaluation_item
+        resource_id_vars:
+          display_name: 'eval-item'
+  - name: vertex_ai_evaluation_item_gcs
+    primary_resource_id: tf_test_evaluation_item_gcs
+    steps:
+      - name: vertex_ai_evaluation_item_gcs
+        resource_id_vars:
+          display_name: 'eval-item'
+          bucket_name: 'eval-item-bucket'
+  - name: vertex_ai_evaluation_item_variants
+    exclude_basic_doc: true
+    primary_resource_id: tf_test_evaluation_item_variants
+    steps:
+      - name: vertex_ai_evaluation_item_variants
+        resource_id_vars:
+          display_name: 'eval-item'
+parameters:
+  - name: region
+    type: String
+    description: The region of the EvaluationItem. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The short name of the EvaluationItem (the final component of the resource name).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      The user-friendly display name for the EvaluationItem.
+    required: true
+  - name: evaluationItemType
+    type: Enum
+    description: |
+      The type of the EvaluationItem.
+    required: true
+    enum_values:
+      - REQUEST
+      - RESULT
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels for the EvaluationItem.
+  - name: metadata
+    type: String
+    description: |
+      User-defined metadata for this evaluation item as a JSON string.
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+    custom_expand: templates/terraform/custom_expand/json_value.tmpl
+    validation:
+      function: validation.StringIsJSON
+  - name: gcsUri
+    type: String
+    description: |
+      The Cloud Storage object where the request or response is stored.
+      Exactly one of evaluationRequest or gcsUri can be set.
+    exactly_one_of:
+      - evaluation_request
+      - gcs_uri
+  - name: evaluationRequest
+    type: NestedObject
+    description: |
+      The request to evaluate.
+      Exactly one of evaluationRequest or gcsUri can be set.
+    exactly_one_of:
+      - evaluation_request
+      - gcs_uri
+    properties:
+      - name: prompt
+        type: NestedObject
+        description: |
+          The request/prompt to evaluate.
+        properties:
+          - name: text
+            type: String
+            description: |
+              Text prompt.
+          - name: value
+            type: String
+            description: |
+              Fields and values that can be used to populate the prompt template, as a JSON string.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
+            validation:
+              function: validation.StringIsJSON
+          - name: promptTemplateData
+            type: NestedObject
+            description: |
+              Prompt template data.
+            properties:
+              - name: values
+                type: String
+                description: |
+                  The values for fields in the prompt template, as a JSON string mapping
+                  field names to Content objects.
+                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+                validation:
+                  function: validation.StringIsJSON
+          - name: agentData
+            type: String
+            description: |
+              Represents the complete execution trace of a multi-turn conversation,
+              which can involve single or multiple agents, as a JSON string. This
+              serves as the input context for agent scraping.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+            validation:
+              function: validation.StringIsJSON
+          - name: userScenario
+            type: NestedObject
+            description: |
+              The generated user scenario used to drive multi-turn agent running results.
+            properties:
+              - name: startingPrompt
+                type: String
+                required: true
+                description: |
+                  The prompt that starts the conversation between the simulated user and
+                  the agent under test.
+              - name: conversationPlan
+                type: String
+                required: true
+                description: |
+                  The plan for the conversation, used to drive the multi-turn agent run and
+                  generate the simulated agent evaluation dataset.
+      - name: goldenResponse
+        type: NestedObject
+        description: |
+          The ideal response or ground truth.
+        properties:
+          - name: candidate
+            type: String
+            required: true
+            description: |
+              The name of the candidate that produced the response.
+          - name: text
+            type: String
+            description: |
+              Text response.
+          - name: value
+            type: String
+            description: |
+              Fields and values that can be used to populate the response template, as a JSON string.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
+            validation:
+              function: validation.StringIsJSON
+          - name: agentData
+            type: String
+            description: |
+              Represents the complete execution trace of a multi-turn conversation,
+              which can involve single or multiple agents, as a JSON string. This
+              field is used to provide the full output of an agent's run, including
+              all turns and events, for direct evaluation.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+            validation:
+              function: validation.StringIsJSON
+          - name: error
+            type: NestedObject
+            description: |
+              Error while scraping model or agent.
+            output: true
+            properties:
+              - name: code
+                type: Integer
+                output: true
+                description: The status code, which should be an enum value of google.rpc.Code.
+              - name: message
+                type: String
+                output: true
+                description: A developer-facing error message.
+      - name: candidateResponses
+        type: Array
+        description: |
+          Responses from model under test and other baseline models for comparison.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: candidate
+              type: String
+              required: true
+              description: |
+                The name of the candidate that produced the response.
+            - name: text
+              type: String
+              description: |
+                Text response.
+            - name: value
+              type: String
+              description: |
+                Fields and values that can be used to populate the response template, as a JSON string.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+              custom_expand: templates/terraform/custom_expand/json_value.tmpl
+              validation:
+                function: validation.StringIsJSON
+            - name: agentData
+              type: String
+              description: |
+                Represents the complete execution trace of a multi-turn conversation,
+                which can involve single or multiple agents, as a JSON string. This
+                field is used to provide the full output of an agent's run, including
+                all turns and events, for direct evaluation.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+              validation:
+                function: validation.StringIsJSON
+            - name: error
+              type: NestedObject
+              description: |
+                Error while scraping model or agent.
+              output: true
+              properties:
+                - name: code
+                  type: Integer
+                  output: true
+                  description: The status code, which should be an enum value of google.rpc.Code.
+                - name: message
+                  type: String
+                  output: true
+                  description: A developer-facing error message.
+      - name: rubrics
+        type: Map
+        description: |
+          Named groups of rubrics associated with this prompt.
+          The key is a user-defined name for the rubric group.
+        key_name: name
+        value_type:
+          type: NestedObject
+          properties:
+            - name: groupId
+              type: String
+              description: Unique identifier for the group.
+            - name: displayName
+              type: String
+              description: Human-readable name for the group.
+            - name: rubrics
+              type: Array
+              description: Rubrics that are part of this group.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: rubricId
+                    type: String
+                    description: Unique identifier for the rubric.
+                  - name: type
+                    type: String
+                    description: A type designator for the rubric, e.g. `SUMMARIZATION_QUALITY`.
+                  - name: importance
+                    type: Enum
+                    description: The relative importance of this rubric.
+                    enum_values:
+                      - HIGH
+                      - MEDIUM
+                      - LOW
+                  - name: content
+                    type: NestedObject
+                    required: true
+                    description: The actual testable criteria for the rubric.
+                    properties:
+                      - name: property
+                        type: NestedObject
+                        description: Evaluation criteria based on a specific property.
+                        properties:
+                          - name: description
+                            type: String
+                            description: Description of the property being evaluated.
+  - name: evaluationResponse
+    type: NestedObject
+    description: |
+      The response from evaluation.
+    output: true
+    properties:
+      - name: evaluationRequest
+        type: String
+        output: true
+        description: |
+          The request item that was evaluated. Format:
+          `projects/{project}/locations/{location}/evaluationItems/{evaluation_item}`
+      - name: evaluationRun
+        type: String
+        output: true
+        description: |
+          The evaluation run that was used to generate the result. Format:
+          `projects/{project}/locations/{location}/evaluationRuns/{evaluation_run}`
+      - name: metric
+        type: String
+        output: true
+        description: The metric that was evaluated.
+      - name: metadata
+        type: String
+        output: true
+        description: Metadata about the evaluation result, as a JSON string.
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+      - name: request
+        type: String
+        output: true
+        description: The request that was evaluated, as a JSON string.
+        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+      - name: candidateResults
+        type: Array
+        output: true
+        description: The results for the metric.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: candidate
+              type: String
+              output: true
+              description: The candidate that is being evaluated.
+            - name: metric
+              type: String
+              output: true
+              description: The metric that was evaluated.
+            - name: score
+              type: Double
+              output: true
+              description: The score for the metric.
+            - name: explanation
+              type: String
+              output: true
+              description: The explanation for the metric.
+            - name: additionalResults
+              type: String
+              output: true
+              description: Additional results for the metric, as a JSON string.
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            - name: error
+              type: NestedObject
+              output: true
+              description: Error while evaluating the candidate for the metric.
+              properties:
+                - name: code
+                  type: Integer
+                  output: true
+                  description: The status code, which should be an enum value of google.rpc.Code.
+                - name: message
+                  type: String
+                  output: true
+                  description: A developer-facing error message.
+            - name: rubricVerdicts
+              type: Array
+              output: true
+              description: The rubric verdicts for the metric.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: verdict
+                    type: Boolean
+                    output: true
+                    description: Outcome of the evaluation against the rubric.
+                  - name: reasoning
+                    type: String
+                    output: true
+                    description: Human-readable reasoning for the verdict.
+                  - name: evaluatedRubric
+                    type: String
+                    output: true
+                    description: The full rubric definition that was evaluated, as a JSON string.
+                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+  - name: error
+    type: NestedObject
+    description: |
+      The error that occurred during the evaluation item processing.
+    output: true
+    properties:
+      - name: code
+        type: Integer
+        output: true
+        description: The status code, which should be an enum value of google.rpc.Code.
+      - name: message
+        type: String
+        output: true
+        description: A developer-facing error message.
+  - name: createTime
+    type: String
+    description: |
+      Timestamp when this EvaluationItem was created.
+    output: true
