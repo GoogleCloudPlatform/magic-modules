@@ -84,7 +84,7 @@ properties:
     type: String
     output: true
     description: |
-      Output only. The full resource name of the deployment.
+      The full resource name of the deployment.
       Format: projects/{project}/locations/{location}/blueGreenDeployments/{deployment_id}
   - name: description
     type: String
@@ -94,12 +94,12 @@ properties:
     type: String
     output: true
     description: |
-      Output only. The time when the deployment was created.
+      The time when the deployment was created.
   - name: state
     type: String
     output: true
     description: |
-      Output only. The current state of the blue-green deployment.
+      The current state of the blue-green deployment.
   - name: sourceInstance
     type: String
     required: true
@@ -113,24 +113,24 @@ properties:
     type: String
     output: true
     description: |
-      Output only. The full resource name of the primary target instance (the "green" instance) that will be promoted during switchover.
+      The full resource name of the primary target instance (the "green" instance) that will be promoted during switchover.
   - name: errorDetail
     type: String
     output: true
     description: |
-      Output only. Provides details on why switchover is not possible.
+      Provides details on why switchover is not possible.
   - name: deploymentMappings
     type: Array
     output: true
     description: |
-      Output only. A list representing the pairs of source and target instances in the deployment.
+      A list representing the pairs of source and target instances in the deployment.
     item_type:
       type: NestedObject
       properties:
         - name: source
           type: NestedObject
           output: true
-          description: Output only. Details about the source instance.
+          description: Details about the source instance.
           properties:
             - name: instance
               type: String
@@ -166,7 +166,7 @@ properties:
         - name: target
           type: NestedObject
           output: true
-          description: Output only. Details about the target instance.
+          description: Details about the target instance.
           properties:
             - name: instance
               type: String
@@ -202,11 +202,11 @@ properties:
         - name: state
           type: String
           output: true
-          description: Output only. The state of this specific source-target pair.
+          description: The state of this specific source-target pair.
         - name: diffs
           type: Array
           output: true
-          description: Output only. Describes the list of differences for the SourceTargetPairedNode.
+          description: Describes the list of differences for the SourceTargetPairedNode.
           item_type:
             type: NestedObject
             properties:
@@ -225,7 +225,7 @@ properties:
   - name: deploymentTasks
     type: NestedObject
     output: true
-    description: Output only. Combined list of tasks for all paired nodes in the deployment.
+    description: Combined list of tasks for all paired nodes in the deployment.
     properties:
       - name: task
         type: Array
