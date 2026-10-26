@@ -554,7 +554,7 @@ properties:
                 - name: bytesBody
                   type: String
                   description: |
-                    Response body as bytes. Maximum body size is 4096B.
+                    Response body as base64 encoded bytes. Maximum body size is 4096B.
             - name: idleTimeout
               type: String
               description: |
