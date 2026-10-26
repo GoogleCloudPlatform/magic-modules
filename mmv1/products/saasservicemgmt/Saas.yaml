@@ -25,6 +25,7 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
+min_version: beta
 timeouts:
   # The application template import takes up to 20 minutes.
   insert_minutes: 30
@@ -44,11 +45,13 @@ custom_code:
 samples:
   - name: saas_runtime_saas_basic
     primary_resource_id: "example"
+    min_version: 'beta'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
         role: "roles/saasservicemgmt.serviceAgent"
     steps:
       - name: saas_runtime_saas_basic
+        min_version: 'beta'
         # The service reconciles a new Saas asynchronously after Create returns
         # (provisions its blueprint repository and sets status), which refreshes
         # the output-only etag and update_time fields.
@@ -65,9 +68,11 @@ samples:
           saas_name: test-saas
   - name: saas_runtime_saas_application_template
     primary_resource_id: "example"
+    min_version: 'beta'
     exclude_test: true
     steps:
       - name: saas_runtime_saas_application_template
+        min_version: 'beta'
         resource_id_vars:
           saas_name: example-saas
           space_name: my-space
