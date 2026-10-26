@@ -163,6 +163,19 @@ properties:
           - CLIENT_VALIDATION_MODE_UNSPECIFIED
           - ALLOW_INVALID_OR_MISSING_CLIENT_CERT
           - REJECT_INVALID
+          - ALLOW_VALIDATION_RELAXATIONS
+      - name: clientValidationRelaxations
+        type: Array
+        description: |
+          A list of validation relaxations to apply when clientValidationMode is set to ALLOW_VALIDATION_RELAXATIONS.
+        item_type:
+          type: Enum
+          description: |
+            Client certificate validation relaxations available when using the ALLOW_VALIDATION_RELAXATIONS validation mode.
+          enum_values:
+            - ALLOW_MISSING_EKU
+            - ALLOW_SHA1_HASHING
+            - ALLOW_EXPIRED_LEAF_CERTIFICATE
       - name: clientValidationTrustConfig
         type: String
         description: |
