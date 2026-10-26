@@ -14,7 +14,14 @@ func TestAccVertexAICacheConfig_region(t *testing.T) {
 	// The cache config is a project-level singleton, so tests that modify it
 	// must not run in parallel with each other.
 	context := map[string]interface{}{
-		"project": envvar.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"region":        "europe-west4",
+		"disable_cache": false,
+	}
+	contextUpdated := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"region":        "asia-northeast1",
+		"disable_cache": true,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -22,7 +29,7 @@ func TestAccVertexAICacheConfig_region(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAICacheConfig_region(context, "europe-west4", false),
+				Config: testAccVertexAICacheConfig_region(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_cache_config.cache_config", "region", "europe-west4"),
 					resource.TestCheckResourceAttr("google_vertex_ai_cache_config.cache_config", "disable_cache", "false"),
@@ -37,7 +44,7 @@ func TestAccVertexAICacheConfig_region(t *testing.T) {
 			{
 				// Changing the region only changes the API endpoint, so it is an
 				// in-place update rather than a replacement.
-				Config: testAccVertexAICacheConfig_region(context, "asia-northeast1", true),
+				Config: testAccVertexAICacheConfig_region(contextUpdated),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_vertex_ai_cache_config.cache_config", plancheck.ResourceActionUpdate),
@@ -58,9 +65,7 @@ func TestAccVertexAICacheConfig_region(t *testing.T) {
 	})
 }
 
-func testAccVertexAICacheConfig_region(context map[string]interface{}, region string, disableCache bool) string {
-	context["region"] = region
-	context["disable_cache"] = disableCache
+func testAccVertexAICacheConfig_region(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_cache_config" "cache_config" {
   project       = "%{project}"
