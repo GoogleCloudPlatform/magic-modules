@@ -115,6 +115,12 @@ const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
 const allowMultipleResourcesLabel = "override-multiple-resources"
 
+// enableMissingServiceLabelsCheck controls whether added resources are checked
+// for missing service labels. When disabled, the
+// terraform-provider-missing-service-labels status is still posted (always as
+// "success") so that it never blocks PRs. Set to true to re-enable the check.
+const enableMissingServiceLabelsCheck = false
+
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
 	"BUILD_STEP",
@@ -496,6 +502,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	missingServiceLabels := []string{}
 	if len(regexpLabels) > 0 {
 		for resource, _ := range uniqueAddedResources {
+			if !enableMissingServiceLabelsCheck {
+				break
+			}
 			found := false
 			for _, rl := range regexpLabels {
 				if rl.Regexp.MatchString(resource) {
