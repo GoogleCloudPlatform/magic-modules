@@ -491,6 +491,10 @@ func TestAccComputeRouterPeer_md5AuthenticationKeysKeptOnRouterUpdate(t *testing
 	customBgp := `
     advertise_mode    = "CUSTOM"
     advertised_groups = ["ALL_SUBNETS"]`
+	ignoreRouterKey := `
+    lifecycle {
+      ignore_changes = [md5_authentication_keys]
+    }`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -518,6 +522,18 @@ func TestAccComputeRouterPeer_md5AuthenticationKeysKeptOnRouterUpdate(t *testing
 				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, customBgp, routerKey, "value", true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_router.foobar", "bgp.0.advertise_mode", "CUSTOM"),
+					testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
+						fmt.Sprintf("%s-peer", routerName):  peerKey,
+						fmt.Sprintf("%s-peer1", routerName): peer1Key,
+					}),
+				),
+			},
+			{
+				// The router's key block is removed but ignored, so its old value stays
+				// planned. A router change must still not resend it.
+				Config: testAccComputeRouterPeerMd5AuthKeysRouterUpdate(routerName, "", ignoreRouterKey, "value", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_router.foobar", "bgp.0.advertise_mode", "DEFAULT"),
 					testAccCheckComputeRouterMd5AuthenticationKeys(t, "google_compute_router.foobar", map[string]string{
 						fmt.Sprintf("%s-peer", routerName):  peerKey,
 						fmt.Sprintf("%s-peer1", routerName): peer1Key,
