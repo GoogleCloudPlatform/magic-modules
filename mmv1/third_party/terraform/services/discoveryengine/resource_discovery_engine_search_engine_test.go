@@ -178,6 +178,16 @@ resource "google_discovery_engine_search_engine" "basic" {
     "gemini-3.1-pro-preview" = "MODEL_DISABLED"
     "gemini-2.5-pro"         = "MODEL_ENABLED"
   }
+  observability_config {
+    observability_enabled     = true
+    sensitive_logging_enabled = true
+  }
+  session_config {
+    session_management_policy = "VERTEX_AI_MANAGED"
+    session_ttl {
+      days = 30
+    }
+  }
   knowledge_graph_config {
     enable_cloud_knowledge_graph = false
     cloud_knowledge_graph_types = ["foobar"]
@@ -242,6 +252,16 @@ resource "google_discovery_engine_search_engine" "basic" {
     "gemini-3.5-flash" = "MODEL_DISABLED"
     "gemini-2.5-pro"   = "MODEL_ENABLED"
   }
+  observability_config {
+    observability_enabled     = true
+    sensitive_logging_enabled = false
+  }
+  session_config {
+    session_management_policy = "VERTEX_AI_MANAGED"
+    session_ttl {
+      days = 60
+    }
+  }
   knowledge_graph_config {
     enable_cloud_knowledge_graph = false
     cloud_knowledge_graph_types = ["foobar"]
@@ -303,6 +323,16 @@ resource "google_discovery_engine_search_engine" "basic" {
     "workflow-agents" = "FEATURE_STATE_ON"
   }
   model_configs = {}
+  observability_config {
+    observability_enabled     = true
+    sensitive_logging_enabled = false
+  }
+  session_config {
+    session_management_policy = "VERTEX_AI_MANAGED"
+    session_ttl {
+      days = 60
+    }
+  }
   knowledge_graph_config {
     enable_cloud_knowledge_graph = false
     cloud_knowledge_graph_types = ["foobar"]

@@ -281,3 +281,47 @@ properties:
       chosen to enable it. Each value is one of `MODEL_STATE_UNSPECIFIED`,
       `MODEL_ENABLED`, or `MODEL_DISABLED`; see the [ModelState API reference](https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines#modelstate)
       for details.
+  - name: observabilityConfig
+    type: NestedObject
+    default_from_api: true
+    description: |
+      Observability config for the engine.
+    properties:
+      - name: observabilityEnabled
+        type: Boolean
+        description: |
+          Enables observability. If `false`, all other flags are ignored.
+        send_empty_value: true
+      - name: sensitiveLoggingEnabled
+        type: Boolean
+        description: |
+          Enables sensitive logging. Sensitive logging includes customer core content
+          (e.g. prompts, responses). If `false`, will sanitize all sensitive fields.
+        send_empty_value: true
+  - name: sessionConfig
+    type: NestedObject
+    default_from_api: true
+    description: |
+      Configurations for the session.
+    update_mask_fields:
+      - sessionConfig.sessionTtl
+    properties:
+      - name: sessionManagementPolicy
+        type: Enum
+        immutable: true
+        description: |
+          Session management policy that defines who will manage the session.
+        enum_values:
+          - SESSION_MANAGEMENT_POLICY_UNSPECIFIED
+          - NOT_MANAGED
+          - VERTEX_AI_MANAGED
+      - name: sessionTtl
+        type: NestedObject
+        description: |
+          The TTL for the session. If unset, the default value is 60 days.
+        properties:
+          - name: days
+            type: Integer
+            description: |
+              Defines the number of days for session TTL.
+
