@@ -1156,7 +1156,6 @@ properties:
         item_type:
           type: Enum
           enum_values:
-            - NOTIFICATION_PROMPT_UNSPECIFIED
             - OPENED
             - CLOSED
       - name: notificationChannelStrategy
