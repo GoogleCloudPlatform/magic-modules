@@ -1,0 +1,21 @@
+resource "google_vertex_ai_evaluation_item" "{{index $.ResourceIdVars "item_display_name"}}" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "item_display_name"}}"
+  evaluation_item_type = "REQUEST"
+  evaluation_request {
+    prompt {
+      text = "hello"
+    }
+  }
+}
+
+resource "google_vertex_ai_evaluation_set" "{{$.PrimaryResourceId}}" {
+  region           = "us-central1"
+  display_name     = "{{index $.ResourceIdVars "display_name"}}"
+  evaluation_items = [
+    google_vertex_ai_evaluation_item.{{index $.ResourceIdVars "item_display_name"}}.id
+  ]
+  metadata = jsonencode({
+    "env" = "test"
+  })
+}
