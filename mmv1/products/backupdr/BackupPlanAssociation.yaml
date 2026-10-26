@@ -156,3 +156,10 @@ properties:
           type: String
           description: The point in time when the last successful backup was captured from the source
           output: true
+        - name: dataSource
+          type: String
+          min_version: beta
+          description: |
+            The DataSource in the vault targeted by this rule.
+            Format: `projects/{project}/locations/{location}/backupVaults/{backup_vault}/dataSources/{data_source}`
+          output: true
