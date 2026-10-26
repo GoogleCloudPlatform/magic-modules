@@ -23,16 +23,22 @@ func BootstrapOdbDnsZone(t *testing.T, project, location, odbNetworkId, odbDnsZo
 	parent := fmt.Sprintf("projects/%s/locations/%s/odbNetworks/%s", project, location, odbNetworkId)
 	name := fmt.Sprintf("%s/odbDnsZones/%s", parent, odbDnsZoneId)
 	baseUrl := transport_tpg.BaseUrl(Product, config)
+	getZone := func() (map[string]interface{}, error) {
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    baseUrl + name,
+			UserAgent: config.UserAgent,
+		})
+	}
 
 	log.Printf("[DEBUG] Getting OdbDnsZone %q", name)
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   project,
-		RawURL:    baseUrl + name,
-		UserAgent: config.UserAgent,
-	})
+	existing, err := getZone()
 	if err == nil {
+		if got, _ := existing["domain"].(string); got != domain {
+			t.Fatalf("OdbDnsZone %q already exists with domain %q, want %q. Use a different zone ID or delete the existing zone.", name, got, domain)
+		}
 		return name
 	}
 	if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
@@ -56,6 +62,27 @@ func BootstrapOdbDnsZone(t *testing.T, project, location, odbNetworkId, odbDnsZo
 	}
 	if err := OracleDatabaseOperationWaitTime(config, res, project, "Creating OdbDnsZone", config.UserAgent, 20*time.Minute); err != nil {
 		t.Fatalf("Error waiting to create OdbDnsZone %q: %s", name, err)
+	}
+
+	// The create operation can finish while the zone is still PROVISIONING, so
+	// wait for provisioning to complete before tests use the zone.
+	for deadline := time.Now().Add(10 * time.Minute); ; {
+		zone, err := getZone()
+		if err != nil {
+			t.Fatalf("Error getting OdbDnsZone %q: %s", name, err)
+		}
+		state, _ := zone["state"].(string)
+		if state == "FAILED" {
+			t.Fatalf("OdbDnsZone %q failed to provision", name)
+		}
+		if state != "PROVISIONING" {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("Timed out waiting for OdbDnsZone %q to finish provisioning", name)
+		}
+		log.Printf("[DEBUG] Waiting for OdbDnsZone %q to finish provisioning", name)
+		time.Sleep(10 * time.Second)
 	}
 	log.Printf("[DEBUG] Finished creating OdbDnsZone %q", name)
 
