@@ -161,7 +161,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedUpd
 			{
 				// Template is locked; updating its content should fail.
 				Config:      testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V2", false),
-				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*Precondition check failed"),
+				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*is locked and cannot be updated"),
 			},
 		},
 	})
