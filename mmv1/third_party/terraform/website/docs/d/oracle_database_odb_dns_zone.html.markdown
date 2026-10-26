@@ -16,8 +16,8 @@ For more information see the
 
 ```hcl
 data "google_oracle_database_odb_dns_zone" "my-zone" {
-  location = "us-east4"
-  odbnetwork = "my-network-id"
+  location        = "europe-west2"
+  odbnetwork      = "my-network-id"
   odb_dns_zone_id = "my-dns-zone-id"
 }
 ```
@@ -30,11 +30,11 @@ The following arguments are supported:
 
 * `odbnetwork` - (Required) The ID of the parent ODB Network.
 
-* `location` - (Required) The location of the resource.
+* `location` - (Optional) The location of the resource. If it is not provided, the provider default is used.
 
 * `project` - (Optional) The project to which the resource belongs. If it
     is not provided, the provider project is used.
 
-## Attributes reference
+## Attributes Reference
 
 See [google_oracle_database_odb_dns_zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/oracle_database_odb_dns_zone#argument-reference) resource for details of the available attributes.

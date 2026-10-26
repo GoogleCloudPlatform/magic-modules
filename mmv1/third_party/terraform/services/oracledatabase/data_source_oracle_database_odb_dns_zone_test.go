@@ -1,7 +1,6 @@
 package oracledatabase_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,33 +10,42 @@ import (
 
 func TestAccDataSourceOracleDatabaseOdbDnsZone_basic(t *testing.T) {
 	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckOracleDatabaseOdbDnsZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceOracleDatabaseOdbDnsZone_basic(t),
+				Config: testAccDataSourceOracleDatabaseOdbDnsZone_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_odb_dns_zone.my-zone", "name"),
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_odb_dns_zone.my-zone", "domain"),
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_odb_dns_zone.my-zone", "create_time"),
-					resource.TestCheckResourceAttrSet("data.google_oracle_database_odb_dns_zone.my-zone", "state"),
+					// Ignore deletion_protection because it is a client-side virtual field with default_value: true not returned by the API
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_oracle_database_odb_dns_zone.my-zone",
+						"google_oracle_database_odb_dns_zone.default",
+						[]string{"deletion_protection"},
+					),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceOracleDatabaseOdbDnsZone_basic(t *testing.T) string {
-	suffix := acctest.RandString(t, 10)
-	return fmt.Sprintf(`
+func testAccDataSourceOracleDatabaseOdbDnsZone_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_oracle_database_odb_dns_zone" "default" {
-  odb_dns_zone_id     = "tf-test-odbdnszone-%s"
+  odb_dns_zone_id     = "tf-test-odbdnszone-%{random_suffix}"
   odbnetwork          = "tf-test-permanent-odbnetwork"
   location            = "europe-west2"
   project             = "oasis-terraform-testing-prod"
-  domain              = "tftest%s.example.com"
+  domain              = "tftest%{random_suffix}.example.com"
+  labels = {
+    terraform_created = "true"
+  }
   deletion_protection = false
 }
 
@@ -47,5 +55,5 @@ data "google_oracle_database_odb_dns_zone" "my-zone" {
   location        = "europe-west2"
   project         = "oasis-terraform-testing-prod"
 }
-`, suffix, suffix)
+`, context)
 }
