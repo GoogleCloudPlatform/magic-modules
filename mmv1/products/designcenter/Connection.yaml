@@ -1,0 +1,83 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Connection'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections?connectionId={{connection_id}}'
+update_verb: 'PATCH'
+update_mask: true
+async:
+  actions: []
+description: |
+  A connection between two components in an Application Design Center Application Template.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
+parameters:
+  - type: String
+    name: 'location'
+    description: 'The location of the space.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - type: String
+    name: 'space'
+    description: 'The ID of the space.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - type: String
+    name: 'application_template'
+    description: 'The ID of the application template.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - type: String
+    name: 'component'
+    description: 'The ID of the component.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - type: String
+    name: 'connection_id'
+    description: 'The ID of the connection.'
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - type: String
+    name: 'name'
+    description: 'Identifier. The resource name of the Connection. Format: projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}/connections/{connection_id}'
+    output: true
+  - type: Time
+    name: 'createTime'
+    description: 'Output only. [Output only] Create time stamp.'
+    output: true
+  - type: Time
+    name: 'updateTime'
+    description: 'Output only. [Output only] Update time stamp.'
+    output: true
+  - type: String
+    name: 'destinationComponentUri'
+    description: 'Required. The component URI that the connection points to.'
+    required: true
+  - type: KeyValuePairs
+    name: 'sourceComponentParameters'
+    description: 'Optional. Parameters associated with the source component.'
+  - type: KeyValuePairs
+    name: 'destinationComponentParameters'
+    description: 'Optional. Parameters associated with the destination component.'
+  - type: String
+    name: 'dependencyType'
+    description: 'Output only. The dependency type of the connection.'
+    output: true
