@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	bootstrapDesignCenterLocation             = "us-central1"
-	bootstrapDesignCenterSpaceID              = "tf-bootstrap-space"
-	bootstrapDesignCenterAppTemplateID        = "tf-bootstrap-app-template"
-	bootstrapDesignCenterComponentID          = "tf-bootstrap-src-component"
-	bootstrapDesignCenterDestComponentID      = "tf-bootstrap-dest-component"
-	bootstrapDesignCenterCloudRunTemplateURI  = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/1b5e09c8-780f-484e-b8ed-c7178f4e4342/revisions/r-24"
-	bootstrapDesignCenterCloudSQLTemplateURI  = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/45be1bc2-89bc-477b-9b5d-64c41ff3b146/revisions/r-12"
+	bootstrapDesignCenterLocation            = "us-central1"
+	bootstrapDesignCenterSpaceID             = "tf-bootstrap-space"
+	bootstrapDesignCenterAppTemplateID       = "tf-bootstrap-app-template"
+	bootstrapDesignCenterComponentID         = "tf-bootstrap-src-component"
+	bootstrapDesignCenterDestComponentID     = "tf-bootstrap-dest-component"
+	bootstrapDesignCenterCloudRunTemplateURI = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/1b5e09c8-780f-484e-b8ed-c7178f4e4342/revisions/r-24"
+	bootstrapDesignCenterCloudSQLTemplateURI = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/45be1bc2-89bc-477b-9b5d-64c41ff3b146/revisions/r-12"
 )
 
 var (

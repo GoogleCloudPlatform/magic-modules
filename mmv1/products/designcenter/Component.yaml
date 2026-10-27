@@ -170,4 +170,3 @@ samples:
           project: BootstrapDesignCenterProject(t)
           space: BootstrapDesignCenterSpace(t)
           application_template: BootstrapDesignCenterApplicationTemplate(t)
-
