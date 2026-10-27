@@ -168,3 +168,30 @@ properties:
     output: true
     description: |
       Update time.
+samples:
+  - name: 'designcenter_application_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_application_basic'
+        resource_id_vars:
+          application_id: 'example-application'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template_revision_uri: 'BootstrapDesignCenterApplicationTemplateRevisionURI(t)'
+      - name: 'designcenter_application_update'
+        resource_id_vars:
+          application_id: 'example-application'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template_revision_uri: 'BootstrapDesignCenterApplicationTemplateRevisionURI(t)'
+
