@@ -119,4 +119,3 @@ samples:
           application_template: BootstrapDesignCenterApplicationTemplate(t)
           component: BootstrapDesignCenterComponent(t)
           destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
-
