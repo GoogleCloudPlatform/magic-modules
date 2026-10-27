@@ -200,6 +200,9 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 		if strings.HasPrefix(val, "servicenetworking.") {
 			deps["services/servicenetworking"] = ""
 		}
+		if strings.HasPrefix(val, "tags.") {
+			deps["services/tags"] = ""
+		}
 	}
 	matches := hclResourceRegexp.FindAllStringSubmatch(s.TestHCLText, -1)
 	resources := map[string]struct{}{}
