@@ -147,7 +147,7 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
 
       partitions {
         id            = "main"
-        node_pool_ids = ["compute", "respool"]
+        node_pool_ids = ["compute", "compute2", "respool"]
         config = {
           PriorityTier = "20"
         }
@@ -169,7 +169,7 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     provisioning_model = "ON_DEMAND"
     node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
     startup_script     = "#!/bin/bash\necho hello-updated"
-    enable_public_ips  = true
+    enable_public_ips  = false
     filestores         = [google_filestore_instance.data.id]
 
     labels = {
@@ -187,8 +187,37 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     }
 
     scaling_spec {
-      min_node_count = 1
+      min_node_count = 0
       max_node_count = 3
+    }
+  }
+
+  node_pools {
+    id                 = "compute2"
+    zone               = "us-central1-b"
+    provisioning_model = "ON_DEMAND"
+    node_image         = "projects/clusterdirector-public-images/global/images/family/common-ubuntu-2204-amd64-nvidia-580-slurm-2505-v20251113"
+    startup_script     = "#!/bin/bash\necho hello-updated"
+    enable_public_ips  = false
+    filestores         = [google_filestore_instance.data.id]
+
+    labels = {
+      pool = "compute2"
+      tier = "updated"
+    }
+
+    boot_disk {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-ssd"
+    }
+
+    machine_spec {
+      machine_type = "n2-standard-4"
+    }
+
+    scaling_spec {
+      min_node_count = 0
+      max_node_count = 1
     }
   }
 
