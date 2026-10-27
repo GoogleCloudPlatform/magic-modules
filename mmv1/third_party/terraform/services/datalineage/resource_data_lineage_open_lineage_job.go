@@ -26,8 +26,25 @@ func init() {
 	}.Register()
 }
 
-// This resource is intentionally non-declarative: Create and Update emit OpenLineage COMPLETE
-// events to processOpenLineageRunEvent, and state tracks the resulting process/run identifiers.
+// google_data_lineage_open_lineage_job is intentionally non-declarative.
+//
+// The Data Lineage API has no CRUD endpoint for static lineage. This resource wraps
+// processOpenLineageRunEvent: it builds an OpenLineage RunEvent from the config and
+// emits it, and the API turns that event into a Data Lineage process, run and lineage
+// events. Because of that, the CRUD methods don't map onto the API the usual way:
+//
+//   - Create emits a single COMPLETE event (no START; see the resource docs) and stores
+//     the returned process as the resource ID and the returned run as `run`.
+//   - Read does not read back the OpenLineage config. The API never returns it, and
+//     there is no 1:1 mapping from process/run back to it, which is also why the resource
+//     is not importable. Read only checks that the process still exists (removing the
+//     resource from state if it doesn't) and refreshes `run` to the process's latest
+//     run, which can change if other systems emit to the same process.
+//   - Update does not patch anything. It emits a new COMPLETE event from the current
+//     config, which adds a new run to the same process. Changes to client-side-only
+//     fields (description, deletion_policy) skip the API call.
+//   - Delete deletes the whole process, and with it all of its runs, including runs
+//     emitted by other systems, unless deletion_policy is ABANDON or PREVENT.
 func ResourceDataLineageOpenLineageJob() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDataLineageOpenLineageJobCreate,

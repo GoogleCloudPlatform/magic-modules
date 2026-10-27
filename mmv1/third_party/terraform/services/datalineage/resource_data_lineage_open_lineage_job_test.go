@@ -40,6 +40,9 @@ var (
 )
 
 func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobSimpleExample(t *testing.T) {
+	// Each emitted OpenLineage event carries a freshly generated runId and eventTime,
+	// so request bodies never match recorded cassettes.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -88,6 +91,9 @@ resource "google_data_lineage_open_lineage_job" "simple" {
 }
 
 func TestAccDataLineageOpenLineageJob_dataLineageOpenLineageJobWithFacetsExample(t *testing.T) {
+	// Each emitted OpenLineage event carries a freshly generated runId and eventTime,
+	// so request bodies never match recorded cassettes.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -276,6 +282,9 @@ resource "google_data_lineage_open_lineage_job" "full_job" {
 // - No new OpenLineage event is emitted when only description changes
 // - State refresh correctly preserves the description value
 func TestAccDataLineageOpenLineageJob_UpdateDescription(t *testing.T) {
+	// Each emitted OpenLineage event carries a freshly generated runId and eventTime,
+	// so request bodies never match recorded cassettes.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -361,6 +370,9 @@ resource "google_data_lineage_open_lineage_job" "update_test" {
 // - Resource is properly destroyed when Terraform state is cleaned up
 // - Deletion via REST DELETE endpoint removes the remote process
 func TestAccDataLineageOpenLineageJob_CreateAndDelete(t *testing.T) {
+	// Each emitted OpenLineage event carries a freshly generated runId and eventTime,
+	// so request bodies never match recorded cassettes.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -415,6 +427,9 @@ resource "google_data_lineage_open_lineage_job" "delete_test" {
 // TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon validates that ABANDON leaves the
 // remote process intact after Terraform removes it from state, and that the test cleanup removes it.
 func TestAccDataLineageOpenLineageJob_WithDeletionPolicyAbandon(t *testing.T) {
+	// Each emitted OpenLineage event carries a freshly generated runId and eventTime,
+	// so request bodies never match recorded cassettes.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
@@ -535,6 +550,9 @@ func testAccCheckDataLineageOpenLineageJobDestroyProducer(t *testing.T) func(s *
 // - Refresh updates run ID in state from the latest run returned by the API
 // - Plan phase remains empty after refresh because computed state is current
 func TestAccDataLineageOpenLineageJob_DriftDetection(t *testing.T) {
+	// Each emitted OpenLineage event carries a freshly generated runId and eventTime,
+	// so request bodies never match recorded cassettes.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)

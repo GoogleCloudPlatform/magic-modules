@@ -14,6 +14,7 @@ This resource is a stop-gap until static lineage endpoints are available in Know
 
 This resource emits OpenLineage `RunEvent` payloads directly to the Data Lineage API. It does not rely on OpenLineage client libraries.
 Each create/update emits a `COMPLETE` event and does not emit a preceding `START` event.
+A standalone `COMPLETE` event is a valid, complete lineage record: `START` events are only needed to track run duration for runtime lineage, while this resource records static lineage that the Data Lineage API requires to be wrapped in a run.
 
 This resource is **not importable** because there is no 1:1 mapping between the OpenLineage representation and the Knowledge Catalog process and run resources created by the API.
 
