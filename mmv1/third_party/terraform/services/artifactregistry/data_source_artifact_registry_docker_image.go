@@ -111,7 +111,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		imageUrlSafe := url.QueryEscape(imageName)
 		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages/%s@%s", imageUrlSafe, digest))
 		if err != nil {
-			return fmt.Errorf("Error setting api endpoint")
+			return fmt.Errorf("Error setting api endpoint: %s", err)
 		}
 
 		resGet, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -130,7 +130,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/list
 		urlRequest, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages")
 		if err != nil {
-			return fmt.Errorf("Error setting api endpoint")
+			return fmt.Errorf("Error setting api endpoint: %s", err)
 		}
 
 		// to reduce the number of pages we need to fetch, we set the pageSize to 1000(max)
