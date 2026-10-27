@@ -172,3 +172,14 @@ properties:
             - name: serviceAccount
               type: String
               description: Specifies the email of the producer service account.
+        - name: defaultIamRoleConfig
+          type: NestedObject
+          description: |
+            Configuration for the default IAM role associated with the access group.
+          properties:
+            - name: role
+              type: String
+              required: true
+              description: |
+                Default IAM role associated with the access group, such as
+                `roles/bigquery.dataViewer`.
