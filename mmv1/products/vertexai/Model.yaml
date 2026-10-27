@@ -134,9 +134,11 @@ properties:
       properties:
         - type: String
           name: id
+          description: The ID of the export format, such as `tflite`, `tf-saved-model`, or `custom-trained`.
           output: true
         - type: Enum
           name: exportableContent
+          description: The content of this Model that may be exported.
           output: true
           enum_values:
             - :ARTIFACT
@@ -189,6 +191,10 @@ properties:
     properties:
       - type: String
         name: kmsKeyName
+        description: |
+          Resource name of the Cloud KMS key used to protect the Model. The key must be in the
+          same region as the Model, in the format
+          `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
         immutable: true
   - type: String
     name: customServiceAccount
