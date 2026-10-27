@@ -121,3 +121,14 @@ properties:
       - TRANSFER_STATUS_UNSPECIFIED
       - TRANSFER_STATUS_MIGRATED
       - TRANSFER_STATUS_TRANSFERRED
+  - name: changeRequestConfig
+    type: NestedObject
+    description: |
+      Specifies the configuration for requesting changes in the metadata belonging to the Entry Group.
+    properties:
+      - name: approverEmails
+        type: Array
+        description: |
+          Specifies the email addresses of users who are potential approvers and are notified when a change request is created for the metadata belonging to the Entry Group. The maximum number of emails allowed is 10.
+        item_type:
+          type: String

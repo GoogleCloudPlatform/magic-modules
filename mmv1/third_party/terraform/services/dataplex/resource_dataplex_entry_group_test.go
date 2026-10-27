@@ -41,6 +41,24 @@ func TestAccDataplexEntryGroup_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "entry_group_id", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccDataplexEntryGroup_updateChangeRequestConfig(context),
+			},
+			{
+				ResourceName:            "google_dataplex_entry_group.test_entry_group",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "entry_group_id", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataplexEntryGroup_full(context),
+			},
+			{
+				ResourceName:            "google_dataplex_entry_group.test_entry_group",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "entry_group_id", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -65,6 +83,28 @@ resource "google_dataplex_entry_group" "test_entry_group" {
   labels = { "tag": "test-tf" }
   display_name = "terraform entry group"
   description = "entry group created by Terraform"
+
+  change_request_config {
+    approver_emails = ["test-user@example.com"]
+  }
+}
+`, context)
+}
+
+func testAccDataplexEntryGroup_updateChangeRequestConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_entry_group" "test_entry_group" {
+  entry_group_id = "tf-test-entry-group%{random_suffix}"
+  project = "%{project_name}"
+  location = "us-central1"
+	
+  labels = { "tag": "test-tf" }
+  display_name = "terraform entry group"
+  description = "entry group created by Terraform"
+
+  change_request_config {
+    approver_emails = ["test-user-1@example.com", "test-user-2@example.com"]
+  }
 }
 `, context)
 }
