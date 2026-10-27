@@ -151,4 +151,3 @@ samples:
         test_vars_overrides:
           project: 'BootstrapDesignCenterProject(t)'
           space: 'BootstrapDesignCenterSpace(t)'
-
