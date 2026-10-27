@@ -74,6 +74,18 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+      - name: vertex_ai_model_development_cluster_basic
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
+          filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
 parameters:
   - name: region
     type: String
@@ -346,7 +358,11 @@ properties:
   - name: nodePools
     type: Array
     required: true
-    description: The spec of the pools of different resources.
+    description: |-
+      The spec of the pools of different resources. Node pools can be added,
+      removed, or reordered in place; changing some fields on an existing node
+      pool may require replacing the node pool (validated server-side by the
+      API).
     item_type:
       type: NestedObject
       properties:
@@ -399,7 +415,10 @@ properties:
         - name: id
           type: String
           required: true
-          description: The unique ID referring to this node pool.
+          description: |-
+            The unique ID referring to this node pool. Cannot be modified in
+            place on an existing node pool; changing `id` updates the list of
+            node pools by adding/removing pools (validated server-side).
         - name: labels
           type: KeyValuePairs
           description: |-
