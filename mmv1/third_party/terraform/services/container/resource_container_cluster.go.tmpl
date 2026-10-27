@@ -2966,6 +2966,24 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			"node_pool_upgrade_concurrency_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `The node pool upgrade concurrency config of the cluster. Used for auto upgrade.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_count": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: `If set, no more than max_count node pools can be upgraded concurrently.`,
+						},
+					},
+				},
+			},
+			{{- end }}
 			"enterprise_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -3515,6 +3533,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	if v, ok := d.GetOk("schedule_upgrade_config"); ok {
 		cluster.ScheduleUpgradeConfig = expandScheduleUpgradeConfig(v)
 	}
+	{{- if ne $.TargetVersionName `ga` }}
+	if v, ok := d.GetOk("node_pool_upgrade_concurrency_config"); ok {
+		cluster.NodePoolUpgradeConcurrencyConfig = expandNodePoolUpgradeConcurrencyConfig(v)
+	}
+	{{- end }}
 
 	req := &container.CreateClusterRequest{
 		Cluster: cluster,
@@ -4110,6 +4133,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("schedule_upgrade_config", flattenScheduleUpgradeConfig(cluster.ScheduleUpgradeConfig)); err != nil {
 		return err
 	}
+
+{{- if ne $.TargetVersionName `ga` }}
+	if err := d.Set("node_pool_upgrade_concurrency_config", flattenNodePoolUpgradeConcurrencyConfig(cluster.NodePoolUpgradeConcurrencyConfig)); err != nil {
+		return err
+	}
+{{- end }}
 
 	if err := d.Set("enterprise_config", flattenEnterpriseConfig(cluster.EnterpriseConfig)); err != nil {
 		return err
@@ -5705,6 +5734,23 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's ScheduleUpgradeConfig has been updated", d.Id())
+	}
+
+	if d.HasChange("node_pool_upgrade_concurrency_config") {
+		if npucc := expandNodePoolUpgradeConcurrencyConfig(d.Get("node_pool_upgrade_concurrency_config")); npucc != nil {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNodePoolUpgradeConcurrencyConfig: npucc,
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster NodePoolUpgradeConcurrencyConfig")
+			if err := updateF(); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s's NodePoolUpgradeConcurrencyConfig has been updated", d.Id())
+		}
 	}
 {{- end }}
 
@@ -7621,6 +7667,21 @@ func expandScheduleUpgradeConfig(configured interface{}) *container.ScheduleUpgr
 	}
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func expandNodePoolUpgradeConcurrencyConfig(configured interface{}) *container.NodePoolUpgradeConcurrencyConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.NodePoolUpgradeConcurrencyConfig{
+		MaxCount:        int64(config["max_count"].(int)),
+		ForceSendFields: []string{"MaxCount"},
+	}
+}
+{{- end }}
+
 func expandRBACBindingConfig(configured interface{}) *container.RBACBindingConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -8858,6 +8919,19 @@ func flattenScheduleUpgradeConfig(c *container.ScheduleUpgradeConfig) []map[stri
 		},
 	}
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenNodePoolUpgradeConcurrencyConfig(c *container.NodePoolUpgradeConcurrencyConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"max_count": int(c.MaxCount),
+		},
+	}
+}
+{{- end }}
 
 func flattenRBACBindingConfig(c *container.RBACBindingConfig) []map[string]interface{} {
 	if c == nil {

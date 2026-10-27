@@ -497,6 +497,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `schedule_upgrade_config` - (Optional)
   Configuration for [scheduled upgrades](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions#scheduled_upgrades). Structure is [documented below](#nested_schedule_upgrade_config).
 
+* `node_pool_upgrade_concurrency_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Configuration for how many node pools can be auto-upgraded concurrently. Removing this block leaves the existing server-side value unchanged. Structure is [documented below](#nested_node_pool_upgrade_concurrency_config).
+
 * `enterprise_config` - (Optional)
   (DEPRECATED) Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config). Deprecated as GKE Enterprise features are now available without an Enterprise tier. See https://cloud.google.com/blog/products/containers-kubernetes/gke-gets-new-pricing-and-capabilities-on-10th-birthday for the announcement of this change.
 
@@ -2118,6 +2121,10 @@ registry_hosts {
 <a name="nested_schedule_upgrade_config"></a>The `schedule_upgrade_config` block supports:
 
 * `enabled` - (Required) Whether scheduled upgrades are enabled on the cluster.
+
+<a name="nested_node_pool_upgrade_concurrency_config"></a>The `node_pool_upgrade_concurrency_config` block supports:
+
+* `max_count` - (Required) The maximum number of node pools that can be upgraded concurrently.
 
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
