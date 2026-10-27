@@ -278,7 +278,7 @@ func TestDatabaseCenterIntegrationDiffSuppress(t *testing.T) {
 					Optional: true,
 				},
 			}, tc.AppData)
-			if databaseCenterIntegrationDiffSuppress("settings.0.database_center_integration", tc.Old, tc.New, rd) != tc.ShouldSuppress {
+			if databaseCenterIntegrationDiffSuppress("database_center_integration", tc.Old, tc.New, rd) != tc.ShouldSuppress {
 				t.Fatalf("%q => %q (AppData=%v) expect DiffSuppress to return %t", tc.Old, tc.New, tc.AppData, tc.ShouldSuppress)
 			}
 		})

@@ -2737,6 +2737,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error setting database_version: %s", err)
 	}
 	dci := instance.DatabaseCenterIntegration
+	// The Cloud SQL API omits databaseCenterIntegration from responses when unset,
+	// so clearing DATABASE_CENTER_INTEGRATION_UNSPECIFIED to "" is defensive handling
+	// in case the API ever returns the default enum value explicitly.
 	if dci == "DATABASE_CENTER_INTEGRATION_UNSPECIFIED" {
 		dci = ""
 	}
