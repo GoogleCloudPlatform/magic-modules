@@ -2,7 +2,9 @@ package pubsub_test
 
 import (
 	"fmt"
+	"net/url"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -767,6 +769,86 @@ func TestAccPubsubSubscription_tags(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscription_pubsubSubscriptionTagsExample(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"subscription_name": "tf-test-example-subscription" + randomSuffix,
+		"tag_key":           "tf_test_tag_key" + randomSuffix,
+		"tag_value":         "tf_test_tag_value" + randomSuffix,
+		"topic_name":        "tf-test-example-topic" + randomSuffix,
+		"random_suffix":     randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_pubsubSubscriptionTagsExample(context),
+				Check:  testAccCheckPubsubSubscriptionDetachTagBinding(t),
+			},
+			{
+				ResourceName:            "google_pubsub_subscription.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "tags", "terraform_labels", "topic"},
+			},
+			{
+				ResourceName:       "google_pubsub_subscription.example",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
+func testAccCheckPubsubSubscriptionDetachTagBinding(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		projectRs, ok := s.RootModule().Resources["data.google_project.project"]
+		if !ok {
+			return fmt.Errorf("data.google_project.project not found in state")
+		}
+		subRs, ok := s.RootModule().Resources["google_pubsub_subscription.example"]
+		if !ok {
+			return fmt.Errorf("google_pubsub_subscription.example not found in state")
+		}
+		tagValueRs, ok := s.RootModule().Resources["google_tags_tag_value.tag_value"]
+		if !ok {
+			return fmt.Errorf("google_tags_tag_value.tag_value not found in state")
+		}
+
+		projectNumber := projectRs.Primary.Attributes["number"]
+		subName := subRs.Primary.Attributes["name"]
+		tagValueID := tagValueRs.Primary.ID
+
+		config := acctest.GoogleProviderConfig(t)
+		parent := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/subscriptions/%s", projectNumber, subName)
+		deleteBindingURL := fmt.Sprintf("%stagBindings/%s/%s", transport_tpg.BaseUrl(tags.Product, config), url.PathEscape(parent), tagValueID)
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "DELETE",
+			RawURL:    deleteBindingURL,
+			UserAgent: config.UserAgent,
+			Timeout:   4 * time.Minute,
+		})
+		if err != nil {
+			return fmt.Errorf("error deleting TagBinding %s: %v", deleteBindingURL, err)
+		}
+
+		if err := tags.TagsOperationWaitTime(config, res, "Deleting TagBinding", config.UserAgent, 4*time.Minute); err != nil {
+			return fmt.Errorf("error waiting to delete TagBinding %s: %v", deleteBindingURL, err)
+		}
+
+		return nil
+	}
+}
+
 func TestAccPubsubSubscription_bigquery_config_update(t *testing.T) {
 	// test that reproduces https://github.com/hashicorp/terraform-provider-google/issues/24891
 	t.Parallel()
@@ -1272,6 +1354,35 @@ resource "google_pubsub_subscription" "foo" {
   tags = {
     "%{org}/%{tagKey}" = "%{tagValue}"
   }
+}
+`, context)
+}
+
+func testAccPubsubSubscription_pubsubSubscriptionTagsExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "example" {
+  name = "%{topic_name}"
+}
+
+resource "google_pubsub_subscription" "example" {
+  name  = "%{subscription_name}"
+  topic = google_pubsub_topic.example.id
+  tags = {
+    (google_tags_tag_key.tag_key.namespaced_name) = google_tags_tag_value.tag_value.short_name
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_tags_tag_key" "tag_key" {
+  parent     = data.google_project.project.id
+  short_name = "%{tag_key}"
+  depends_on = [google_pubsub_topic.example]
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = google_tags_tag_key.tag_key.id
+  short_name = "%{tag_value}"
 }
 `, context)
 }

@@ -178,6 +178,8 @@ samples:
           topic_name: example-topic
   - name: pubsub_subscription_tags
     primary_resource_id: example
+    # Tested in resource_pubsub_subscription_test.go so a TestCheck can detach the tag binding before TagValue destroy
+    exclude_test: true
     steps:
       - name: pubsub_subscription_tags
         resource_id_vars:
