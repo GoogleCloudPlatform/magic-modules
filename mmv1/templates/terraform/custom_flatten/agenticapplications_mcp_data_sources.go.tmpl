@@ -23,15 +23,17 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 			continue
 		}
 		item := map[string]interface{}{
-			"api_key_header":  original["apiKeyHeader"],
-			"api_key_name":    original["apiKeyName"],
-			"client_id":       original["clientId"],
-			"description":     original["description"],
-			"display_name":    original["displayName"],
-			"enabled":         original["enabled"],
-			"oauth_token_url": original["oauthTokenUrl"],
-			"prompt":          original["prompt"],
-			"server_url":      original["serverUrl"],
+			"api_key_header":    original["apiKeyHeader"],
+			"api_key_name":      original["apiKeyName"],
+			"client_id":         original["clientId"],
+			"description":       original["description"],
+			"display_name":      original["displayName"],
+			"enabled":           original["enabled"],
+			"oauth_token_url":   original["oauthTokenUrl"],
+			"prompt":            original["prompt"],
+			"server_url":        original["serverUrl"],
+			"session_id_header": original["sessionIdHeader"],
+			"task_id_header":    original["taskIdHeader"],
 		}
 		if apiKey, ok := d.GetOk(fmt.Sprintf("mcp_data_sources.%d.api_key", i)); ok {
 			item["api_key"] = apiKey
