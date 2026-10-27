@@ -185,7 +185,6 @@ resource "google_netapp_volume_replication" "test_replication" {
     tiering_policy {
       cooling_threshold_days       = 20
       tier_action                  = "ENABLED"
-      hot_tier_bypass_mode_enabled = false
     }
   }
   replication_enabled = true
