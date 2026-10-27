@@ -72,13 +72,11 @@ parameters:
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-    immutable: true
     url_param_only: true
     required: true
   - name: odbnetwork
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-    immutable: true
     url_param_only: true
     required: true
   - name: odbDnsZoneId
@@ -88,7 +86,6 @@ parameters:
       to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of 63
       characters in length. The value must start with a letter and end with
       a letter or a number.
-    immutable: true
     url_param_only: true
     required: true
 properties:
@@ -104,7 +101,6 @@ properties:
     required: true
   - name: labels
     type: KeyValueLabels
-    immutable: true
     description: Labels or tags associated with the resource.
   - name: name
     type: String

@@ -11,8 +11,8 @@ import (
 
 func DataSourceOracleDatabaseOdbDnsZone() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceOracleDatabaseOdbDnsZone().Schema)
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "odb_dns_zone_id", "odbnetwork")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "location", "project")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "odb_dns_zone_id", "odbnetwork")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	return &schema.Resource{
 		Read:   dataSourceOracleDatabaseOdbDnsZoneRead,
 		Schema: dsSchema,
@@ -21,14 +21,6 @@ func DataSourceOracleDatabaseOdbDnsZone() *schema.Resource {
 
 func dataSourceOracleDatabaseOdbDnsZoneRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-
-	location, err := tpgresource.GetLocation(d, config)
-	if err != nil {
-		return err
-	}
-	if err := d.Set("location", location); err != nil {
-		return fmt.Errorf("Error setting location: %s", err)
-	}
 
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones/{{odb_dns_zone_id}}")
 	if err != nil {
@@ -42,12 +34,12 @@ func dataSourceOracleDatabaseOdbDnsZoneRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	if err := tpgresource.SetDataSourceLabels(d); err != nil {
-		return err
-	}
-
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
+	}
+
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
 	}
 
 	// Reset deletion_protection as it is a client-side virtual field not returned by the API
