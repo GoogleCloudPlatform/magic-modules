@@ -165,8 +165,12 @@ EOT
   oidc {
     allowed_audiences = ["https://example.com/gcp-oidc-federation", "example.com/gcp-oidc-federation"]
     issuer_uri        = "https://sts.windows.net/azure-tenant-id-full"
+    discovery_uri     = "https://sts.windows.net/azure-tenant-id-full/.well-known/openid-configuration"
     jwks_json         = "{\"keys\":[{\"kty\":\"RSA\",\"alg\":\"RS256\",\"kid\":\"sif0AR-F6MuvksAyAOv-Pds08Bcf2eUMlxE30NofddA\",\"use\":\"sig\",\"e\":\"AQAB\",\"n\":\"ylH1Chl1tpfti3lh51E1g5dPogzXDaQseqjsefGLknaNl5W6Wd4frBhHyE2t41Q5zgz_Ll0-NvWm0FlaG6brhrN9QZu6sJP1bM8WPfJVPgXOanxi7d7TXCkeNubGeiLTf5R3UXtS9Lm_guemU7MxDjDTelxnlgGCihOVTcL526suNJUdfXtpwUsvdU6_ZnAp9IpsuYjCtwPm9hPumlcZGMbxstdh07O4y4O90cVQClJOKSGQjAUCKJWXIQ0cqffGS_HuS_725CPzQ85SzYZzaNpgfhAER7kx_9P16ARM3BJz0PI5fe2hECE61J4GYU_BY43sxDfs7HyJpEXKLU9eWw\"}]}"
   }
+  actor_providers = [
+    "projects/${google_iam_workload_identity_pool.my_pool.project}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.my_pool.workload_identity_pool_id}/providers/tf-test-actor-1-%{random_suffix}",
+  ]
 }
 `, context)
 }
@@ -197,9 +201,14 @@ EOT
   oidc {
     allowed_audiences = ["https://example.com/gcp-oidc-federation-update", "example.com/gcp-oidc-federation-update"]
     issuer_uri        = "https://sts.windows.net/azure-tenant-id-update"
+    discovery_uri     = "https://sts.windows.net/azure-tenant-id-update/.well-known/openid-configuration"
     jwks_json         = "{\"keys\":[{\"kty\":\"RSA\",\"alg\":\"RS256\",\"kid\":\"F6MuvksAyAOv-Pds08Bcf2eUMlxE30NofddA\",\"use\":\"sig\",\"e\":\"AQAB\",\"n\":\"ylH1Chl1tpfti3lh51E1g5dPogzXDaQseqjsefGLknaNl5W6Wd4frBhHyE2t41Q5zgz_Ll0-NvWm0FlaG6brhrN9QZu6sJP1bM8WPfJVPgXOanxi7d7TXCkeNubGeiLTf5R3UXtS9Lm_guemU7MxDjDTelxnlgGCihOVTcL526suNJUdfXtpwUsvdU6_ZnAp9IpsuYjCtwPm9hPumlcZGMbxstdh07O4y4O90cVQClJOKSGQjAUCKJWXIQ0cqffGS_HuS_725CPzQ85SzYZzaNpgfhAER7kx_9P16ARM3BJz0PI5fe2hECE61J4GYU_BY43sxDfs7HyJpEXKLU9eWw\"}]}"
 
   }
+  actor_providers = [
+    "projects/${google_iam_workload_identity_pool.my_pool.project}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.my_pool.workload_identity_pool_id}/providers/tf-test-actor-1-%{random_suffix}",
+    "projects/${google_iam_workload_identity_pool.my_pool.project}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.my_pool.workload_identity_pool_id}/providers/tf-test-actor-2-%{random_suffix}",
+  ]
 }
 `, context)
 }

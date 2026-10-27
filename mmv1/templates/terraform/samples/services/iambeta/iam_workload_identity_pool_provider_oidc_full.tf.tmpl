@@ -22,5 +22,9 @@ EOT
   oidc {
     allowed_audiences = ["https://example.com/gcp-oidc-federation", "example.com/gcp-oidc-federation"]
     issuer_uri        = "https://sts.windows.net/azure-tenant-id"
+    discovery_uri     = "https://sts.windows.net/azure-tenant-id/.well-known/openid-configuration"
   }
+  actor_providers = [
+    "projects/${google_iam_workload_identity_pool.pool.project}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.pool.workload_identity_pool_id}/providers/example-actor-prvdr"
+  ]
 }
