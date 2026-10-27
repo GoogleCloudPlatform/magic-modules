@@ -90,7 +90,6 @@ samples:
       - name: 'workbench_instance_basic_gpu'
         resource_id_vars:
           instance_name: 'workbench-instance'
-          reservation_name: 'wbi-reservation'
         ignore_read_extra:
           - 'gce_setup.0.vm_image'
           - 'gce_setup.0.boot_disk.0.disk_type'
