@@ -1,0 +1,66 @@
+if networkConfig, ok := d.GetOk("network_config"); ok {
+	if ncList, ok := networkConfig.([]interface{}); ok && len(ncList) > 0 && ncList[0] != nil {
+		ncMap := ncList[0].(map[string]interface{})
+		if consumers, ok := ncMap["consumers"].([]interface{}); ok && len(consumers) > 0 {
+			subnetworkRe := regexp.MustCompile(`projects/([^/]+)/regions/([^/]+)/subnetworks/([^/]+)$`)
+			for _, c := range consumers {
+				if c == nil {
+					continue
+				}
+				cMap := c.(map[string]interface{})
+				subnetwork, _ := cMap["subnetwork"].(string)
+				matches := subnetworkRe.FindStringSubmatch(subnetwork)
+				if len(matches) != 4 {
+					continue
+				}
+				subnetworkProject, subnetworkRegion, subnetworkName := matches[1], matches[2], matches[3]
+				subnetworkSuffix := fmt.Sprintf("/regions/%s/subnetworks/%s", subnetworkRegion, subnetworkName)
+				addrListUrl, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}ComputeBasePath{{"}}"}}projects/%s/regions/%s/addresses", subnetworkProject, subnetworkRegion))
+				if err != nil {
+					return err
+				}
+
+				deadline := time.Now().Add(d.Timeout(schema.TimeoutDelete))
+				for {
+					addrRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "GET",
+						Project:   billingProject,
+						RawURL:    addrListUrl,
+						UserAgent: userAgent,
+					})
+					if err != nil {
+						if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+							break
+						}
+						return fmt.Errorf("Error listing addresses in subnetwork %q while waiting for Dataproc Metastore PSC cleanup: %s", subnetwork, err)
+					}
+
+					inUse := false
+					if items, ok := addrRes["items"].([]interface{}); ok {
+						for _, item := range items {
+							addrMap, ok := item.(map[string]interface{})
+							if !ok {
+								continue
+							}
+							addrName, _ := addrMap["name"].(string)
+							addrSubnetwork, _ := addrMap["subnetwork"].(string)
+							if strings.HasPrefix(addrName, "metastore-addr-") && strings.HasSuffix(addrSubnetwork, subnetworkSuffix) {
+								inUse = true
+								break
+							}
+						}
+					}
+					if !inUse {
+						break
+					}
+					if time.Now().After(deadline) {
+						return fmt.Errorf("timeout waiting for Dataproc Metastore PSC address in subnetwork %q to be deleted", subnetwork)
+					}
+					log.Printf("[DEBUG] Dataproc Metastore PSC address in subnetwork %q is still present, waiting...", subnetwork)
+					time.Sleep(10 * config.SleepUnit)
+				}
+			}
+		}
+	}
+}
