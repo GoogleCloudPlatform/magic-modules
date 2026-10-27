@@ -18,8 +18,11 @@ create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applic
 self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
 update_verb: 'PATCH'
 update_mask: true
+autogen_async: true
 async:
   actions: []
+  operation:
+    base_url: "{{op_id}}"
 description: |
   Application template in Application Design Center.
 import_format:
@@ -126,3 +129,26 @@ properties:
     output: true
     description: |
       Output only. The time the resource was last updated.
+samples:
+  - name: 'designcenter_application_template_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_application_template_basic'
+        resource_id_vars:
+          application_template_id: 'example-template'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+      - name: 'designcenter_application_template_update'
+        resource_id_vars:
+          application_template_id: 'example-template'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+
