@@ -1,0 +1,258 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationRun
+description: |
+  An evaluation run is an execution of an evaluation pipeline on a dataset using
+  specified metrics in Vertex AI.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/evaluation/overview'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.evaluationRuns'
+docs:
+base_url: projects/{{project}}/locations/{{region}}/evaluationRuns
+self_link: projects/{{project}}/locations/{{region}}/evaluationRuns/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/evaluationRuns
+immutable: true
+generate_list_resource: true
+exclude_sweeper: true
+id_format: projects/{{project}}/locations/{{region}}/evaluationRuns/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/evaluationRuns/{{name}}
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+error_retry_predicates:
+  - transport_tpg.IsEvaluationRunOperationInProgressError
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['delete']
+samples:
+  - name: vertex_ai_evaluation_run
+    primary_resource_id: tf_test_evaluation_run
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    steps:
+      - name: vertex_ai_evaluation_run
+        resource_id_vars:
+          name: 'eval_run'
+          kms_key_name: 'kms-key'
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        test_env_vars:
+          project: PROJECT_NAME
+        ignore_read_extra:
+          - completion_time
+          - state
+          - evaluation_set_snapshot
+parameters:
+  - name: region
+    type: String
+    description: The region of the EvaluationRun. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The short name of the EvaluationRun (the final component of the resource name).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      The user-friendly display name for the EvaluationRun.
+    required: true
+    immutable: true
+  - name: dataSource
+    type: NestedObject
+    description: |
+      The source of data to evaluate.
+    required: true
+    immutable: true
+    properties:
+      - name: evaluationSet
+        type: String
+        description: |
+          The resource name of the EvaluationSet to evaluate.
+          Format: `projects/{project}/locations/{location}/evaluationSets/{evaluation_set}`
+        immutable: true
+        exactly_one_of:
+          - data_source.0.evaluation_set
+          - data_source.0.bigquery_request_set
+      - name: bigqueryRequestSet
+        type: NestedObject
+        description: |
+          The BigQuery request set for the evaluation run.
+        immutable: true
+        exactly_one_of:
+          - data_source.0.evaluation_set
+          - data_source.0.bigquery_request_set
+        properties:
+          - name: uri
+            type: String
+            required: true
+            description: |
+              The URI of a BigQuery table. e.g. bq://projectId.bqDatasetId.bqTableId
+            immutable: true
+          - name: promptColumn
+            type: String
+            description: |
+              The name of the column that contains the requests to evaluate.
+            immutable: true
+          - name: rubricsColumn
+            type: String
+            description: |
+              The name of the column that contains the rubrics.
+            immutable: true
+          - name: candidateResponseColumns
+            type: KeyValuePairs
+            description: |
+              Map of candidate name to candidate response column name.
+            immutable: true
+  - name: evaluationConfig
+    type: NestedObject
+    description: |
+      Configurations for the evaluation run, including metric definitions and output configs.
+    immutable: true
+    properties:
+      - name: metrics
+        type: Array
+        description: |
+          The list of metrics to evaluate.
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: metric
+              type: String
+              required: true
+              description: |
+                The name of the metric.
+              immutable: true
+            - name: metricConfig
+              type: String
+              description: |
+                The metric configuration as a JSON string.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
+              validation:
+                function: validation.StringIsJSON
+              immutable: true
+            - name: metricResourceName
+              type: String
+              description: |
+                Resource name of the metric definition.
+              immutable: true
+            - name: predefinedMetricSpec
+              type: NestedObject
+              description: |
+                Spec for a pre-defined metric.
+              immutable: true
+              properties:
+                - name: metricSpecName
+                  type: String
+                  required: true
+                  description: |
+                    The name of the predefined metric spec.
+                  immutable: true
+      - name: outputConfig
+        type: NestedObject
+        description: |
+          The configuration for where the evaluation results will be output.
+        immutable: true
+        properties:
+          - name: gcsDestination
+            type: NestedObject
+            description: |
+              Cloud Storage destination for evaluation results.
+            immutable: true
+            properties:
+              - name: outputUriPrefix
+                type: String
+                required: true
+                description: |
+                  The Google Cloud Storage prefix where results will be written.
+                immutable: true
+          - name: bigqueryDestination
+            type: NestedObject
+            description: |
+              BigQuery destination for evaluation results.
+            immutable: true
+            properties:
+              - name: outputUri
+                type: String
+                required: true
+                description: |
+                  The BigQuery table URI where results will be written.
+                immutable: true
+      - name: autoraterConfig
+        type: NestedObject
+        description: |
+          Configuration for the autorater.
+        immutable: true
+        properties:
+          - name: sampleCount
+            type: Integer
+            description: |
+              The number of samples to generate per evaluation item.
+            immutable: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels for the EvaluationRun.
+    immutable: true
+  - name: evaluationExperiment
+    type: String
+    description: |
+      The resource name of the EvaluationExperiment this EvaluationRun belongs to.
+    immutable: true
+  - name: evaluationSetSnapshot
+    type: String
+    description: |
+      The resource name of the EvaluationSetSnapshot associated with this EvaluationRun.
+    output: true
+  - name: state
+    type: String
+    description: |
+      The state of the EvaluationRun.
+    output: true
+  - name: createTime
+    type: String
+    description: |
+      Timestamp when this EvaluationRun was created.
+    output: true
+  - name: completionTime
+    type: String
+    description: |
+      Timestamp when this EvaluationRun was completed.
+    output: true
+  - name: encryptionSpec
+    type: NestedObject
+    description: |
+      Customer-managed encryption key options for the EvaluationRun.
+    immutable: true
+    properties:
+      - name: kmsKeyName
+        type: String
+        description: |
+          The Cloud KMS resource identifier of the customer managed encryption key
+          used to protect a resource.
+        required: true
+        immutable: true

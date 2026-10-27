@@ -757,3 +757,17 @@ func IsResourceManagerBoundaryRetryableError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry if Vertex AI EvaluationRun returns a 400 error because operations are still running on the resource.
+func IsEvaluationRunOperationInProgressError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && (strings.Contains(gerr.Body, "There are other operations running") || strings.Contains(gerr.Message, "There are other operations running")) {
+			return true, "Waiting for operations on EvaluationRun to finish"
+		}
+	}
+	if err != nil && strings.Contains(err.Error(), "There are other operations running") {
+		return true, "Waiting for operations on EvaluationRun to finish"
+	}
+	return false, ""
+}
+
