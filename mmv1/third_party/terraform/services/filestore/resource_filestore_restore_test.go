@@ -160,7 +160,7 @@ resource "google_backup_dr_backup_plan" "backup_plan" {
 
      backup_window {
        start_hour_of_day = 0
-       end_hour_of_day   = 23
+       end_hour_of_day   = 24
      }
     }
  }
