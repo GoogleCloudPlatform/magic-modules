@@ -178,8 +178,6 @@ samples:
           topic_name: example-topic
   - name: pubsub_subscription_tags
     primary_resource_id: example
-    # Tested in resource_pubsub_subscription_test.go so a TestCheck can detach the tag binding before TagValue destroy
-    exclude_test: true
     steps:
       - name: pubsub_subscription_tags
         resource_id_vars:
@@ -187,6 +185,9 @@ samples:
           tag_key: tag_key
           tag_value: tag_value
           topic_name: example-topic
+        test_vars_overrides:
+          tag_key: tags.BootstrapSharedTestProjectTagKey(t, "pubsub-subscription-tagkey", nil)
+          tag_value: tags.BootstrapSharedTestProjectTagValue(t, "pubsub-subscription-tagvalue", tags.BootstrapSharedTestProjectTagKey(t, "pubsub-subscription-tagkey", nil))
   - name: pubsub_subscription_ai_inference
     primary_resource_id: example
     external_providers: [time]
