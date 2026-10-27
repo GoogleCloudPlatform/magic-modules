@@ -30,7 +30,7 @@ The following arguments are supported:
 
 * `odbnetwork` - (Required) The ID of the parent ODB Network.
 
-* `location` - (Required) The location of the resource.
+* `location` - (Optional) The location of the resource. If it is not provided, the provider default is used.
 
 * `project` - (Optional) The project to which the resource belongs. If it
     is not provided, the provider project is used.
