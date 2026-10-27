@@ -71,15 +71,16 @@ func vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(k, old, new string, d
 			if old == "" || d == nil {
 				return false
 			}
-			cpVer, _ := d.Get("orchestrator_spec.0.kubernetes_spec.0.control_plane_version").(string)
-			if cpVer == "" || cpVer == "-" {
-				oldCp, _ := d.GetChange("orchestrator_spec.0.kubernetes_spec.0.control_plane_version")
-				cpVer, _ = oldCp.(string)
-			}
-			if cpVer == "" || cpVer == "-" {
+			oldCp, newCp := d.GetChange("orchestrator_spec.0.kubernetes_spec.0.control_plane_version")
+			oldCpStr, _ := oldCp.(string)
+			newCpStr, _ := newCp.(string)
+			if oldCpStr == "" {
 				return false
 			}
-			return vertexAiModelDevelopmentClusterGkeVersionMatches(old, cpVer)
+			if newCpStr == "" || newCpStr == "-" || vertexAiModelDevelopmentClusterGkeVersionMatches(oldCpStr, newCpStr) {
+				return old == oldCpStr
+			}
+			return false
 		}
 		return old != ""
 	}
@@ -101,11 +102,24 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 	}
 
 	poolIDSet := make(map[string]struct{})
-	if rawPoolIDs, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids"); ok {
-		if poolIDList, ok := rawPoolIDs.([]interface{}); ok {
-			for _, item := range poolIDList {
-				if id, ok := item.(string); ok && id != "" {
-					poolIDSet[id] = struct{}{}
+	if rawNodePools, ok := d.GetOk("node_pools"); ok {
+		if npList, ok := rawNodePools.([]interface{}); ok && len(npList) > 0 {
+			for _, item := range npList {
+				if npMap, ok := item.(map[string]interface{}); ok {
+					if id, ok := npMap["id"].(string); ok && id != "" {
+						poolIDSet[id] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+	if len(poolIDSet) == 0 {
+		if rawPoolIDs, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids"); ok {
+			if poolIDList, ok := rawPoolIDs.([]interface{}); ok {
+				for _, item := range poolIDList {
+					if id, ok := item.(string); ok && id != "" {
+						poolIDSet[id] = struct{}{}
+					}
 				}
 			}
 		}
@@ -119,7 +133,7 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 	}
 	if len(unknownPools) > 0 {
 		sort.Strings(unknownPools)
-		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions contains unknown node pool ID(s) not present in node_pool_ids: %s", strings.Join(unknownPools, ", "))
+		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions contains unknown node pool ID(s) not present in the cluster's node pools: %s", strings.Join(unknownPools, ", "))
 	}
 
 	var missingPools []string
@@ -130,12 +144,35 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 	}
 	if len(missingPools) > 0 {
 		sort.Strings(missingPools)
-		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions must include all node pool IDs from node_pool_ids; missing: %s", strings.Join(missingPools, ", "))
+		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions must include all node pool IDs in the cluster; missing: %s", strings.Join(missingPools, ", "))
 	}
 
 	return nil
 }
 
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if !diff.NewValueKnown("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions") ||
+		!diff.NewValueKnown("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids") ||
+		!diff.NewValueKnown("node_pools") {
+		return nil
+	}
+	if rawNodePools, ok := diff.GetOk("node_pools"); ok {
+		if npList, ok := rawNodePools.([]interface{}); ok {
+			for i := range npList {
+				if !diff.NewValueKnown(fmt.Sprintf("node_pools.%d.id", i)) {
+					return nil
+				}
+			}
+		}
+	}
+	if rawPoolIDs, ok := diff.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids"); ok {
+		if poolIDList, ok := rawPoolIDs.([]interface{}); ok {
+			for i := range poolIDList {
+				if !diff.NewValueKnown(fmt.Sprintf("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids.%d", i)) {
+					return nil
+				}
+			}
+		}
+	}
 	return validateVertexAIModelDevelopmentClusterNodePoolVersions(diff)
 }

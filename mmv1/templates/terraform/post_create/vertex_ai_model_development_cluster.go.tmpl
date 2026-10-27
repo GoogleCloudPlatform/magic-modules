@@ -33,6 +33,7 @@ if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions");
 		if needsNodePoolPatch {
 			expanded, err := expandVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(m, d, config)
 			if err != nil {
+				_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
 				return err
 			}
 			if expanded != nil {
@@ -51,10 +52,12 @@ if len(postCreateMask) > 0 {
 	}
 	patchUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
 	if err != nil {
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
 		return err
 	}
 	patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": strings.Join(postCreateMask, ",")})
 	if err != nil {
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
 		return err
 	}
 	log.Printf("[DEBUG] Patching ModelDevelopmentCluster %q versions after creation: %#v", d.Id(), patchObj)
@@ -65,16 +68,18 @@ if len(postCreateMask) > 0 {
 		RawURL:    patchUrl,
 		UserAgent: userAgent,
 		Body:      patchObj,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Timeout:   d.Timeout(schema.TimeoutCreate),
 		Headers:   headers,
 	})
 	if err != nil {
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
 		return fmt.Errorf("Error patching ModelDevelopmentCluster %q versions after creation: %s", d.Id(), err)
 	}
 	err = VertexAIOperationWaitTime(
 		config, patchRes, project, tpgresource.LocationFromId(d.Id()), "Updating ModelDevelopmentCluster", userAgent,
-		d.Timeout(schema.TimeoutUpdate))
+		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
 		return err
 	}
 }

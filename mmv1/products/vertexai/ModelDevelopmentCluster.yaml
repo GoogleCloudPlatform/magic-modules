@@ -753,7 +753,7 @@ properties:
             type: KeyValuePairs
             description: |-
               The Kubernetes versions for specific node pools, keyed by node pool ID.
-              When specified, all node pool IDs from `node_pool_ids` must be included.
+              When specified, all node pool IDs in the cluster must be included.
               Accepted formats are minor version (for example, `"1.30"`), patch version
               (for example, `"1.30.5"`), full GKE release version (for example,
               `"1.30.5-gke.1014001"`), or `"-"` to align with the control plane version.
