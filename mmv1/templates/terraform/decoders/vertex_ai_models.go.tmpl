@@ -1,5 +1,6 @@
 if modelName, ok := res["model"].(string); ok && modelName != "" {
 	res["name"] = modelName
+	res["modelId"] = tpgresource.GetResourceNameFromSelfLink(modelName)
 }
 
 return res, nil

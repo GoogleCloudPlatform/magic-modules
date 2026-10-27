@@ -24,7 +24,7 @@ references:
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
 description: |-
   A trained machine learning Model copied from an existing Model.
-id_format: '{{name}}'
+id_format: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
