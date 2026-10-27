@@ -322,6 +322,98 @@ properties:
             type: String
             description: |
               The token url endpoint to send the token request to.
+          - name: applyReauthPolicy
+            type: Boolean
+            description: |
+              Indicates if the user has opted in Google Reauth Policy. If opted in, the refresh token will be valid for 20 hours, after which time users must re-authenticate in order to obtain a new one.
+          - name: requestType
+            type: Enum
+            description: |
+              Represent how to pass parameters to fetch access token
+            enum_values:
+              - REQUEST_BODY
+              - QUERY_PARAMETERS
+              - ENCODED_HEADER
+          - name: authParams
+            type: NestedObject
+            description: |
+              The auth parameters sent along with the auth code request.
+            properties:
+              - name: entries
+                type: Array
+                description: |
+                  A list of parameter map entries.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: NestedObject
+                      description: |
+                        Key of the map entry.
+                      properties:
+                        - name: literalValue
+                          type: NestedObject
+                          description: |
+                            Literal value of the parameter key.
+                          properties:
+                            - name: stringValue
+                              type: String
+                              description: |
+                                The string value of the parameter key.
+                    - name: value
+                      type: NestedObject
+                      description: |
+                        Value of the map entry.
+                      properties:
+                        - name: literalValue
+                          type: NestedObject
+                          description: |
+                            Literal value of the parameter.
+                          properties:
+                            - name: stringValue
+                              type: String
+                              description: |
+                                The string value of the parameter.
+          - name: tokenParams
+            type: NestedObject
+            description: |
+              The token parameters sent along with the token request.
+            properties:
+              - name: entries
+                type: Array
+                description: |
+                  A list of parameter map entries.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: key
+                      type: NestedObject
+                      description: |
+                        Key of the map entry.
+                      properties:
+                        - name: literalValue
+                          type: NestedObject
+                          description: |
+                            Literal value of the parameter key.
+                          properties:
+                            - name: stringValue
+                              type: String
+                              description: |
+                                The string value of the parameter key.
+                    - name: value
+                      type: NestedObject
+                      description: |
+                        Value of the map entry.
+                      properties:
+                        - name: literalValue
+                          type: NestedObject
+                          description: |
+                            Literal value of the parameter.
+                          properties:
+                            - name: stringValue
+                              type: String
+                              description: |
+                                The string value of the parameter.
       - name: oauth2ClientCredentials
         type: NestedObject
         description: |
