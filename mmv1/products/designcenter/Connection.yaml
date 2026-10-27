@@ -14,11 +14,15 @@
 ---
 name: 'Connection'
 base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections?connectionId={{connection_id}}'
 update_verb: 'PATCH'
 update_mask: true
+autogen_async: true
 async:
   actions: []
+  operation:
+    base_url: "{{op_id}}"
 description: |
   A connection between two components in an Application Design Center Application Template.
 import_format:
@@ -81,3 +85,38 @@ properties:
     name: 'dependencyType'
     description: 'Output only. The dependency type of the connection.'
     output: true
+samples:
+  - name: designcenter_connection_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_connection_basic
+        resource_id_vars:
+          connection_id: example-connection
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+          component: my-source-component
+          destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+          component: BootstrapDesignCenterComponent(t)
+          destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
+      - name: designcenter_connection_update
+        resource_id_vars:
+          connection_id: example-connection
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+          component: my-source-component
+          destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+          component: BootstrapDesignCenterComponent(t)
+          destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
+
