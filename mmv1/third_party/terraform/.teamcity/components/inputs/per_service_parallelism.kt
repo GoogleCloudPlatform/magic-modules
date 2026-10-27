@@ -21,5 +21,7 @@ var ServiceParallelism = mapOf(
 
     "looker" to 1,
     // dataprocmetastore: ;Create Bucket quota limit limit exceeded on the Google Cloud project. Please slow down execution and try again.
-    "dataprocmetastore" to 6
+    "dataprocmetastore" to 6,
+    // workstations: Error code 8, Not enough resources available in us-central1 when creating WorkstationClusters
+    "workstations" to 12
 )
