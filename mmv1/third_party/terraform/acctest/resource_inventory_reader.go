@@ -72,6 +72,13 @@ func (mc *MetadataCache) Populate() error {
 
 	mc.cache = make(map[string]Metadata)
 
+	type apiResourceKey struct {
+		serviceName      string
+		version          string
+		resourceTypeKind string
+	}
+	seenApiResources := make(map[string]map[apiResourceKey]string)
+
 	var malformed_yaml_errs []string
 
 	// Walk through all service directories once
@@ -108,6 +115,20 @@ func (mc *MetadataCache) Populate() error {
 		}
 		metadata.ServicePackage = pathParts[servicesIndex+1]
 
+		apiKey := apiResourceKey{
+			serviceName:      metadata.ApiServiceName,
+			version:          metadata.ApiVersion,
+			resourceTypeKind: metadata.ApiResourceTypeKind,
+		}
+		if seenForResource, ok := seenApiResources[metadata.Resource]; ok {
+			if prevPath, duplicate := seenForResource[apiKey]; duplicate {
+				return fmt.Errorf("duplicate API resource (%s, %s, %s) for %s in %s and %s", metadata.ApiServiceName, metadata.ApiVersion, metadata.ApiResourceTypeKind, metadata.Resource, prevPath, path)
+			}
+		} else {
+			seenApiResources[metadata.Resource] = make(map[apiResourceKey]string)
+		}
+		seenApiResources[metadata.Resource][apiKey] = path
+
 		if existing, ok := mc.cache[metadata.Resource]; ok {
 			if isPrimaryMetadataFile(existing) && isPrimaryMetadataFile(metadata) {
 				return fmt.Errorf("duplicate resource: %s in %s", metadata.Resource, path)
@@ -117,8 +138,6 @@ func (mc *MetadataCache) Populate() error {
 				primary, secondary = metadata, existing
 			}
 			primary.Fields = append(primary.Fields, secondary.Fields...)
-			primary.CaiAssetNameFormats = append(primary.CaiAssetNameFormats, secondary.CaiAssetNameFormats...)
-			primary.ApiVariantPatterns = append(primary.ApiVariantPatterns, secondary.ApiVariantPatterns...)
 			mc.cache[metadata.Resource] = primary
 			return nil
 		}
