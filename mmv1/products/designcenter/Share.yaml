@@ -90,3 +90,21 @@ properties:
     description: |
       Output only. [Output only] Update time stamp.
     output: true
+samples:
+  - name: designcenter_share_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_share_basic
+        resource_id_vars:
+          share_id: example-share
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          destination_space: destination-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          destination_space: BootstrapDesignCenterDestinationSpace(t)
+
