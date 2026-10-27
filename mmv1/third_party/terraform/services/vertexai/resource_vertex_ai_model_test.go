@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 )
 
 func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
@@ -19,6 +20,7 @@ func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project_name": envvar.GetTestProjectFromEnv(),
+		"source_model": vertexai.BootstrapVertexAIModel(t, "us-central1"),
 		"model_id":     fmt.Sprintf("tf-test-test-model%s", randomString),
 	}
 
@@ -58,6 +60,7 @@ func TestAccVertexAIModel_modelIdNotProvidedAtCreateTime(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_name":  envvar.GetTestProjectFromEnv(),
+		"source_model":  vertexai.BootstrapVertexAIModel(t, "us-central1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -80,7 +83,7 @@ func testAccVertexAIModel_modelIdNotProvided_create(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = "%{source_model}"
 
   region = "us-central1"
 }
@@ -93,6 +96,7 @@ func TestAccVertexAIModel_modelIdProvidedAtCreateTime(t *testing.T) {
 	randomString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"project_name": envvar.GetTestProjectFromEnv(),
+		"source_model": vertexai.BootstrapVertexAIModel(t, "us-central1"),
 		"model_id":     fmt.Sprintf("tf-test-test-model%s", randomString),
 	}
 
@@ -116,6 +120,7 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_name":          envvar.GetTestProjectFromEnv(),
+		"source_model":          vertexai.BootstrapVertexAIModel(t, "us-central1"),
 		"service_account":       envvar.GetTestServiceAccountFromEnv(t),
 		"kms_key_name":          kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-vertex-ai-model-key").CryptoKey.Name,
 		"model_id":              fmt.Sprintf("tf-test-test-model%s", acctest.RandString(t, 10)),
@@ -188,7 +193,7 @@ func testAccVertexAIModel_copyWithOptionalFields(context map[string]interface{})
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = "%{source_model}"
 
   region = "us-central1"
   custom_service_account = "%{service_account}"
@@ -205,7 +210,7 @@ func testAccVertexAIModel_copyWithOptionalFieldsUpdate(context map[string]interf
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = "%{source_model}"
 
   region = "us-central1"
   custom_service_account = "%{service_account}"
@@ -224,7 +229,7 @@ func testAccVertexAIModel_modelIdProvided_create(context map[string]interface{})
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = "%{source_model}"
 
   region = "us-central1"
 }
@@ -236,7 +241,7 @@ func testAccVertexAIModel_modelIdProvided_update(context map[string]interface{})
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = "%{source_model}"
 
   region = "us-central1"
 

@@ -58,8 +58,12 @@ samples:
     primary_resource_id: 'model'
     steps:
       - name: 'vertex_ai_model_source_basic_1'
+        vars:
+          source_model: 'projects/my-project-name/locations/us-central1/models/my-source-model'
         test_env_vars:
           project_name: 'PROJECT_NAME'
+        test_vars_overrides:
+          source_model: 'vertexai.BootstrapVertexAIModel(t, "us-central1")'
         ignore_read_extra:
           - project
   - name: 'vertex_ai_model_source_basic_2'
@@ -68,8 +72,11 @@ samples:
       - name: 'vertex_ai_model_source_basic_2'
         vars:
           model_id: 'test-model'
+          source_model: 'projects/my-project-name/locations/us-central1/models/my-source-model'
         test_env_vars:
           project_name: 'PROJECT_NAME'
+        test_vars_overrides:
+          source_model: 'vertexai.BootstrapVertexAIModel(t, "us-central1")'
         ignore_read_extra:
           - project
 parameters:
