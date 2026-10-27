@@ -15,4 +15,14 @@ resource "google_dialogflow_conversation_profile" "{{$.PrimaryResourceId}}" {
       enable_sentiment_analysis = true
     }
   }
+  stt_config {
+    use_gemini_asr = {{index $.Vars "use_gemini_asr"}}
+    gemini_asr_config {
+      model_id                    = "{{index $.Vars "model_id"}}"
+      silence_duration_ms         = {{index $.Vars "silence_duration_ms"}}
+      prefix_padding_ms           = {{index $.Vars "prefix_padding_ms"}}
+      start_of_speech_sensitivity = "{{index $.Vars "start_of_speech_sensitivity"}}"
+      end_of_speech_sensitivity   = "{{index $.Vars "end_of_speech_sensitivity"}}"
+    }
+  }
 }

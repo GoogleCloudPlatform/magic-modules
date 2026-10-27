@@ -15,9 +15,13 @@
 name: RegionalParameter
 api_resource_type_kind: Parameter
 description: |
-  A Regional Parameter is a logical regional parameter.
+  A Regional Parameter is a configuration value stored in a specific region
+  through Parameter Manager. Regional parameters support labels, encryption
+  via Cloud KMS, and resource manager tags for fine-grained access control,
+  organization, and regional compliance.
 references:
   guides:
+    Work with parameter tags: https://docs.cloud.google.com/secret-manager/parameter-manager/docs/create-and-manage-tags
   api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters
 docs:
 base_url: projects/{{project}}/locations/{{location}}/parameters
@@ -63,6 +67,19 @@ samples:
           kms_key: kms-key
         test_vars_overrides:
           kms_key: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+  - name: regional_parameter_with_tags
+    primary_resource_id: regional-parameter-with-tags
+    # Docs example only. The tag key/value IDs here are illustrative
+    # placeholders, not real resources, so this sample is excluded from
+    # generating a live acceptance test (which would fail against real GCP).
+    # Real coverage lives in TestAccParameterManagerRegionalRegionalParameter_tags
+    # in resource_parameter_manager_regional_parameter_test.go, which
+    # bootstraps an actual org tag key/value.
+    exclude_test: true
+    steps:
+      - name: regional_parameter_with_tags
+        resource_id_vars:
+          parameter_id: regional_parameter
 parameters:
   - name: location
     type: String
@@ -146,3 +163,11 @@ properties:
     description: |
       The resource name of the Cloud KMS CryptoKey used to encrypt regional parameter version payload. Format
       `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}`
+  - name: tags
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true

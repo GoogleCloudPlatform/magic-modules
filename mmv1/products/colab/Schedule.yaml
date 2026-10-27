@@ -25,8 +25,12 @@ create_url: 'projects/{{project}}/locations/{{location}}/schedules'
 update_url: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
 update_mask: true
 update_verb: 'PATCH'
+generate_list_resource: true
+autogen_async: true
 async:
   type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
   actions: ['delete']
 custom_code:
   encoder: 'templates/terraform/encoders/colab_schedule.go.tmpl'
@@ -400,6 +404,7 @@ properties:
           - name: 'workbenchRuntime'
             type: NestedObject
             description: 'Configuration for a Workbench Instances-based environment.'
+            allow_empty_object: true
             properties: []
       - name: 'notebookExecutionJobId'
         type: String

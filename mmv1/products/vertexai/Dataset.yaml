@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_import: true
+generate_list_resource: true
 async:
   type: OpAsync
   operation:
@@ -46,9 +47,6 @@ samples:
       - name: vertex_ai_dataset
         resource_id_vars:
           display_name: terraform
-        test_vars_overrides:
-          # for backward compatible
-          display_name: '"terraform" + randomSuffix'
         exclude_import_test: true
 parameters:
   - name: region

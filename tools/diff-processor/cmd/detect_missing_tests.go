@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"encoding/json"
-	"io"
-
 	"fmt"
+	"io"
+	"log"
 	"os"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +38,7 @@ func newDetectMissingTestsCmd(rootOptions *rootOptions) *cobra.Command {
 func (o *detectMissingTestsOptions) run(args []string) error {
 	allTests, errs := reader.ReadAllTests(args[0])
 	for path, err := range errs {
-		glog.Infof("error reading path: %s, err: %v", path, err)
+		log.Printf("error reading path: %s, err: %v", path, err)
 	}
 
 	missingTests, err := detector.DetectMissingTests(schemaDiff, allTests)

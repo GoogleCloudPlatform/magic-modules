@@ -1,5 +1,5 @@
 resource "google_identity_platform_tenant" "tenant" {
-  display_name  = "tenant"
+  display_name  = "{{index $.Vars "display_name"}}"
 }
 
 resource "google_identity_platform_tenant_inbound_saml_config" "{{$.PrimaryResourceId}}" {

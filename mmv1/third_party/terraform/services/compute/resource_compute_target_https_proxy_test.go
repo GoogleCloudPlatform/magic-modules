@@ -250,8 +250,9 @@ resource "google_compute_target_https_proxy" "foobar" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name          = "tf-test-httpsproxy-backend-%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "tf-test-httpsproxy-backend-%s"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
@@ -341,8 +342,9 @@ resource "google_compute_target_https_proxy" "foobar" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name          = "tf-test-httpsproxy-backend-%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "tf-test-httpsproxy-backend-%s"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
@@ -408,8 +410,9 @@ resource "google_compute_target_https_proxy" "foobar" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name          = "tf-test-httpsproxy-backend-%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "tf-test-httpsproxy-backend-%s"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
@@ -467,8 +470,9 @@ resource "google_compute_target_https_proxy" "foobar" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name          = "tf-test-httpsproxy-backend-%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "tf-test-httpsproxy-backend-%s"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
@@ -505,8 +509,9 @@ resource "google_compute_target_https_proxy" "foobar" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name          = "tf-test-httpsproxy-backend-%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "tf-test-httpsproxy-backend-%s"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {

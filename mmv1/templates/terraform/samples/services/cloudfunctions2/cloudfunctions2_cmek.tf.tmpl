@@ -9,7 +9,7 @@ data "google_project" "project" {
 resource "google_storage_bucket" "bucket" {
   provider = google-beta
 
-  name     = "${local.project}-{{index $.ResourceIdVars "bucket_name"}}"  # Every bucket name must be globally unique
+  name     = "{{index $.ResourceIdVars "bucket_name"}}-${local.project}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }

@@ -75,13 +75,17 @@ var (
 					startDate: newDate(2026, 7, 10),
 					endDate:   newDate(2026, 7, 17),
 				},
+				{
+					startDate: newDate(2026, 9, 17),
+					endDate:   newDate(2026, 9, 23),
+				},
 			},
 		},
 		"melinath": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 6, 26),
-					endDate:   newDate(2026, 7, 6),
+					startDate: newDate(2026, 9, 18),
+					endDate:   newDate(2026, 9, 22),
 				},
 			},
 		},
@@ -123,13 +127,17 @@ var (
 					startDate: newDate(2026, 7, 5),
 					endDate:   newDate(2026, 8, 17),
 				},
+				{
+					startDate: newDate(2026, 10, 8),
+					endDate:   newDate(2026, 11, 8),
+				},
 			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 4, 4),
-					endDate:   newDate(2026, 7, 5),
+					startDate: newDate(2026, 9, 14),
+					endDate:   newDate(2026, 11, 18),
 				},
 			},
 		},

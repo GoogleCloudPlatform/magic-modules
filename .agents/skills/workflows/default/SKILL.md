@@ -1,6 +1,6 @@
 ---
 name: default-workflow
-description: "Fallback workflow for general implementation and debugging tasks that do not involve creating a new resource."
+description: "Fallback workflow for general implementation and debugging tasks without a more specific workflow"
 ---
 
 # `default-workflow`

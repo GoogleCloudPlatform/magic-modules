@@ -27,7 +27,7 @@ func TestAccLoggingBillingAccountExclusion(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}
@@ -149,16 +149,36 @@ resource "google_logging_billing_account_exclusion" "basic" {
 }
 
 func testAccLoggingBillingAccountExclusion_multipleCfg(exclusionName, billingAccount string) string {
-	s := ""
-	for i := 0; i < 3; i++ {
-		s += fmt.Sprintf(`
-resource "google_logging_billing_account_exclusion" "basic%d" {
-	name             = "%s%d"
+	return fmt.Sprintf(`
+resource "google_logging_billing_account_exclusion" "basic0" {
+	name             = "%s0"
 	billing_account  = "%s"
 	description      = "Basic BillingAccount Logging Exclusion"
 	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, billingAccount, envvar.GetTestProjectFromEnv())
-	}
-	return s
+
+resource "google_logging_billing_account_exclusion" "basic1" {
+	name             = "%s1"
+	billing_account  = "%s"
+	description      = "Basic BillingAccount Logging Exclusion"
+	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+}
+
+resource "google_logging_billing_account_exclusion" "basic2" {
+	name             = "%s2"
+	billing_account  = "%s"
+	description      = "Basic BillingAccount Logging Exclusion"
+	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+}
+`,
+		exclusionName,
+		billingAccount,
+		envvar.GetTestProjectFromEnv(),
+		exclusionName,
+		billingAccount,
+		envvar.GetTestProjectFromEnv(),
+		exclusionName,
+		billingAccount,
+		envvar.GetTestProjectFromEnv(),
+	)
 }

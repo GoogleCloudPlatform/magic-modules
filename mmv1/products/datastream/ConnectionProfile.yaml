@@ -112,11 +112,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           # for backward compatible
-          database_name: '"db" + randomSuffix'
-          # for backward compatible
           database_password: '"password" + randomSuffix'
-          # for backward compatible
-          database_user: '"user" + randomSuffix'
   - name: datastream_stream_postgresql_sslconfig_server_and_client_verification
     primary_resource_id: default
     external_providers: [random]
@@ -676,11 +672,16 @@ properties:
           secretManagerStoredPassword.
         sensitive: true
         is_missing_in_cai: true
+        # The Datastream API does not return password on read.
+        ignore_read: true
       - name: secretManagerStoredPassword
         type: String
         description: |
           A reference to a Secret Manager resource name storing the MongoDB
           connection password. Mutually exclusive with password.
+        sensitive: true
+        # The Datastream API does not return secretManagerStoredPassword on read.
+        ignore_read: true
       - name: sslConfig
         type: NestedObject
         description: |

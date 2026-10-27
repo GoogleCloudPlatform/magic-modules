@@ -96,7 +96,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic1(context map[strin
     }
 
     data "google_compute_image" "my_image" {
-        family  = "debian-11"
+        family  = "debian-13"
         project = "debian-cloud"
     }
 
@@ -173,7 +173,7 @@ func testAccDataSourceGoogleComputeInstanceGroupManager_basic2(context map[strin
     }
 
     data "google_compute_image" "my_image" {
-        family  = "debian-11"
+        family  = "debian-13"
         project = "debian-cloud"
     }
 

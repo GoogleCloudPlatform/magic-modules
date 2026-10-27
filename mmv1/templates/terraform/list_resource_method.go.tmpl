@@ -51,6 +51,15 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		return err
 	}
 
+{{- if $.ListResponseIsArray }}
+	return transport_tpg.ListArrayPages(transport_tpg.ListArrayPagesOptions{
+		Config:         config,
+		TempData:       resourceData,
+		Resource:       Resource{{ $.ResourceName -}}(),
+		ListURL:        url,
+		BillingProject: billingProject,
+		UserAgent:      userAgent,
+{{- else }}
 	return transport_tpg.ListPages(transport_tpg.ListPagesOptions{
 		Config:         config,
 		TempData:       resourceData,
@@ -62,6 +71,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 		{{- if $.ListFilter }}
 		Filter:         "{{ $.ListFilter }}",
 		{{- end }}
+{{- end }}
 		Flattener: func(res map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
 			headers := make(http.Header)
 			var err error
@@ -86,7 +96,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 				return fmt.Errorf("error decoding {{ $.ResourceName }} from list response")
 			}
 {{- end }}
-{{- /* url_param_only identity fields (e.g. name) are not GettableProperties, so the flattener does not Set them. Copy from res → d here so SetId/ListResultDisplayName can find them. Integer ids sometimes arrive as strings and need coercion. */ -}}
+{{- /* url_param_only identity fields (e.g. name) are not GettableProperties, so the flattener does not Set them. Copy from res → d here so SetId/ListResultDisplayName can find them. Integer ids sometimes arrive as strings and need coercion. API list payloads often return name as a full self-link; strip to the resource id so DisplayName matches create-state Capture. */ -}}
 {{- range $id := $.IdentityProperties }}
 {{- if $id.ApiName }}
 			if v, ok := res["{{ $id.ApiName }}"]; ok && v != nil {
@@ -98,6 +108,10 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 					}
 					v = i
 				}
+	{{- else if $id.UrlParamOnly }}
+				if s, ok := v.(string); ok {
+					v = tpgresource.GetResourceNameFromSelfLink(s)
+				}
 	{{- end }}
 				if err := d.Set("{{ underscore $id.Name }}", v); err != nil {
 					return fmt.Errorf("error setting {{ underscore $id.Name }}: %w", err)
@@ -108,6 +122,14 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
+{{- /* Copy list scope values onto each item so URL-scope identity fields are preserved. */ -}}
+{{- range $scope := $.ListScopeProperties }}
+			if {{ $scope.CamelizeProperty }} != "" {
+				if err := d.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
+					return fmt.Errorf("error setting {{ underscore $scope.Name }}: %w", err)
+				}
+			}
+{{- end }}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 			if err != nil {
 				return fmt.Errorf("error constructing id: %w", err)

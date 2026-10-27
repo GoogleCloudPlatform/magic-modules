@@ -44,6 +44,8 @@ samples:
     primary_resource_id: version
     steps:
       - name: iap_app_engine_version
+        resource_id_vars:
+          bucket_name: 'appengine-static-content'
 parameters:
 properties:
   - name: appId

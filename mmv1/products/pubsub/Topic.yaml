@@ -31,6 +31,9 @@ update_verb: PATCH
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: topic
+  list_resource:
+    member_iam_resource:
+      generate: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -254,12 +257,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Kinesis Data Streams.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: streamArn
             type: String
@@ -291,12 +288,6 @@ properties:
       - name: cloudStorage
         type: NestedObject
         description: Settings for ingestion from Cloud Storage.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: bucket
             type: String
@@ -390,12 +381,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Azure Event Hubs.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: resourceGroup
             type: String
@@ -431,12 +416,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Amazon Managed Streaming for Apache Kafka.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: clusterArn
             type: String
@@ -467,12 +446,6 @@ properties:
         type: NestedObject
         description: |
           Settings for ingestion from Confluent Cloud.
-        conflicts:
-          - aws_kinesis
-          - cloud_storage
-          - azure_event_hubs
-          - aws_msk
-          - confluent_cloud
         properties:
           - name: bootstrapServer
             type: String
@@ -506,9 +479,6 @@ properties:
       order specified.
     item_type:
       type: NestedObject
-      exactly_one_of:
-        - javascript_udf
-        - ai_inference
       properties:
         - name: aiInference
           type: NestedObject
@@ -541,6 +511,27 @@ properties:
               description: |
                 The service account to use to make prediction requests against
                 endpoints.
+        - name: compression
+          type: NestedObject
+          description: |
+            Configuration for compressing/decompressing message data using a
+            user-specified compression algorithm.
+          properties:
+            - name: compressionAlgorithm
+              type: String
+              required: true
+              description: |
+                Specifies the compression algorithm to use.
+                Possible values include `ZLIB`.
+                See [CompressionAlgorithm](https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics#CompressionAlgorithm) for allowed values.
+            - name: compressionMode
+              type: Enum
+              required: true
+              description: |
+                Specifies whether to compress or decompress the message.
+              enum_values:
+                - COMPRESS
+                - DECOMPRESS
         - name: javascriptUdf
           type: NestedObject
           description: |

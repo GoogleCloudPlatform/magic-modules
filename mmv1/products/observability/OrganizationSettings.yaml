@@ -15,7 +15,6 @@
 name: OrganizationSettings
 description: Manages Cloud Observability settings for an organization.
 base_url: organizations/{{organization}}/locations/{{location}}/settings
-min_version: beta
 self_link: organizations/{{organization}}/locations/{{location}}/settings
 create_url: organizations/{{organization}}/locations/{{location}}/settings
 update_url: organizations/{{organization}}/locations/{{location}}/settings

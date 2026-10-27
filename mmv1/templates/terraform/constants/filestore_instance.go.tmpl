@@ -16,9 +16,8 @@ func ModifyFilestoreInstanceReplica(config *transport_tpg.Config, d *schema.Reso
 		return fmt.Errorf("Unable to %q google_filestore_instance %q: %s", method, d.Id(), err)
 	}
 
-	location := tpgresource.LocationFromId(d.Id())
 	err = FilestoreOperationWaitTime(
-		config, res, project, location, "Modifying Filestore Instance Replica", userAgent,
+		config, res, project, "Modifying Filestore Instance Replica", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {

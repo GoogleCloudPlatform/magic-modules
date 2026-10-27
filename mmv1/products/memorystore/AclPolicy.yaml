@@ -22,6 +22,11 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/aclPolicies/{{acl_policy_id}}
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
+    - region: us-east4
 parameters:
   - name: location
     type: String

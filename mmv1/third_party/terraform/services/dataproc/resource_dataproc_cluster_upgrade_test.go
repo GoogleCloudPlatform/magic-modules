@@ -20,7 +20,7 @@ func TestAccDataprocClusterLabelsMigration_withoutLabels_withoutChanges(t *testi
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	subnetworkName := BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	oldVersion := map[string]resource.ExternalProvider{
@@ -69,7 +69,7 @@ func TestAccDataprocClusterLabelsMigration_withLabels_withoutChanges(t *testing.
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	subnetworkName := BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	oldVersion := map[string]resource.ExternalProvider{
@@ -121,7 +121,7 @@ func TestAccDataprocClusterLabelsMigration_withUpdate(t *testing.T) {
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := tpgcompute.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	subnetworkName := BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	oldVersion := map[string]resource.ExternalProvider{

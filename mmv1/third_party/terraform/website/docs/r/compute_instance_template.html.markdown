@@ -346,7 +346,7 @@ The following arguments are supported:
   Resulting name for a `name_prefix` <= 37 characters:
   `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
   Resulting name for a `name_prefix` 38 - 54 characters:
-  `name_prefix` + YYmmdd + 3 digit incremental counter
+  `name_prefix` + 9 random lowercase alphanumeric characters
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.
@@ -585,6 +585,10 @@ The following arguments are supported:
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
 
+* `enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
+
+* `service_class_id` - (Optional) Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
+
 * `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
 
 * `subnetwork_project` - (Optional) The ID of the project in which the subnetwork belongs.
@@ -709,7 +713,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
-* `preemption_notice_duration` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
+* `preemption_notice_duration` - (Optional) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
@@ -821,6 +825,8 @@ The `specific_reservation` block supports:
 * `visible_core_count` - (Optional) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
+
+    ~> **Note:** Early 8.X.0 provider versions dropped an explicitly configured `STANDARD` value when creating the resource. On affected resources the diff stays suppressed, so Terraform reports no changes. For `google_compute_instance`, apply once with another level (`ENHANCED` or `ARCHITECTURAL`) and then again with `STANDARD`; this requires `allow_stopping_for_update`. For instance templates the field is `ForceNew`, so use `terraform apply -replace=...` instead.
 
 * `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 

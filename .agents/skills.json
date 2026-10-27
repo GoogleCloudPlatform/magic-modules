@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "path": ".agents/skills/workflows"
+    },
+    {
+      "path": ".agents/skills/utils"
+    },
+    {
+      "path": ".agents/skills/operations"
+    }
+  ]
+}

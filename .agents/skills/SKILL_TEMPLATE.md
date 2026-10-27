@@ -27,7 +27,7 @@ Provide the precise, bulletproof bash commands, python script, or instruction se
 #### Example: Compile Downstream Provider
 ```bash
 # Make terraform provider for Beta
-make terraform VERSION=beta OUTPUT_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta PRODUCT=compute
+make terraform VERSION=beta OUTPUT_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 ```
 
 ### 3. Verification & Handoff

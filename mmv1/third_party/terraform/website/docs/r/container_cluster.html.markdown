@@ -35,11 +35,9 @@ resource "google_container_cluster" "primary" {
   name     = "my-gke-cluster"
   location = "us-central1"
 
-  # We can't create a cluster with no node pool defined, but we want to only use
-  # separately managed node pools. So we create the smallest possible default
-  # node pool and immediately delete it.
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  # Required prior to GKE 1.36.4-gke.1469000 to use separately managed node pools
+  # remove_default_node_pool = true
+  # initial_node_count       = 1
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
@@ -222,6 +220,9 @@ for more information.
 * `enable_tpu` - (Optional) Whether to enable Cloud TPU resources in this cluster.
     See the [official documentation](https://cloud.google.com/tpu/docs/kubernetes-engine-setup).
 
+* `tpu_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for Cloud TPU in this cluster.
+    Structure is [documented below](#nested_tpu_config).
+
 * `enable_legacy_abac` - (Optional) Whether the ABAC authorizer is enabled for this cluster.
     When enabled, identities in the system, including service accounts, nodes, and controllers,
     will have statically granted permissions beyond those provided by the RBAC configuration or IAM.
@@ -238,7 +239,10 @@ for more information.
 
 * `initial_node_count` - (Optional) The number of nodes to create in this
 cluster's default node pool. In regional or multi-zonal clusters, this is the
-number of nodes per zone. Must be set if `node_pool` is not set. If you're using
+number of nodes per zone. When omitted (or set to `0`) with no `node_config` or
+`node_pool` blocks defined, the cluster is created without a default node pool.
+This requires a GKE version that supports clusters without a default node pool
+(`1.36.4-gke.1469000+`). For older GKE versions, if you're using
 `google_container_node_pool` objects with no default node pool, you'll need to
 set this to a value of at least `1`, alongside setting
 `remove_default_node_pool` to `true`.
@@ -260,7 +264,7 @@ Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https:/
 * `maintenance_policy` - (Optional) The maintenance policy to use for the cluster. Structure is
     [documented below](#nested_maintenance_policy).
 
-* `managed_opentelemetry_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the [GKE Managed OpenTelemetry](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/managed-otel-gke) feature. Structure is [documented below](#nested_managed_opentelemetry_config).
+* `managed_opentelemetry_config` - (Optional) Configuration for the [GKE Managed OpenTelemetry](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/managed-otel-gke) feature. Structure is [documented below](#nested_managed_opentelemetry_config).
 
 * `managed_machine_learning_diagnostics_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the [GKE Managed ML Diagnostics](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/TODO) feature. Structure is [documented below](#nested_managed_ml_diagnostics_config).
 
@@ -368,7 +372,7 @@ region are guaranteed to support the same version.
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
 
-* `user_managed_keys_config` - (Optional) The custom keys configuration of the cluster Structure is [documented below](#nested_control_plane_endpoints_config).
+* `user_managed_keys_config` - (Optional) The custom keys configuration of the cluster. Structure is [documented below](#nested_user_managed_keys_config).
 
 * `control_plane_endpoints_config` - (Optional) Configuration for all of the cluster's control plane endpoints.
     Structure is [documented below](#nested_control_plane_endpoints_config).
@@ -398,10 +402,14 @@ channel. Structure is [documented below](#nested_release_channel).
 Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.
 Structure is [documented below](#nested_gke_auto_upgrade_config).
 
-* `remove_default_node_pool` - (Optional) If `true`, deletes the default node
-    pool upon cluster creation. If you're using `google_container_node_pool`
-    resources with no default node pool, this should be set to `true`, alongside
-    setting `initial_node_count` to at least `1`.
+* `remove_default_node_pool` - (Optional, Deprecated) If `true`, deletes the default node
+    pool upon cluster creation. On GKE versions that support clusters without a
+    default node pool, you can instead omit `initial_node_count` and
+    `node_config` (or set `initial_node_count` to `0`) to skip creating the
+    default node pool without setting this field. For older GKE versions, if
+    you're using `google_container_node_pool` resources with no default node
+    pool, this should be set to `true`, alongside setting `initial_node_count`
+    to at least `1`.
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
@@ -485,6 +493,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
 * `workload_alts_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
   Configuration for [direct-path (via ALTS) with workload identity.](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#workloadaltsconfig). Structure is [documented below](#nested_workload_alts_config).
+
+* `schedule_upgrade_config` - (Optional)
+  Configuration for [scheduled upgrades](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions#scheduled_upgrades). Structure is [documented below](#nested_schedule_upgrade_config).
 
 * `enterprise_config` - (Optional)
   (DEPRECATED) Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config). Deprecated as GKE Enterprise features are now available without an Enterprise tier. See https://cloud.google.com/blog/products/containers-kubernetes/gke-gets-new-pricing-and-capabilities-on-10th-birthday for the announcement of this change.
@@ -576,28 +587,21 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
     The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications.
     It is disabled by default for Standard clusters. Set `enabled = true` to enable.
 
-*  `ray_operator_config` - (Optional). The status of the [Ray Operator
+*  `ray_operator_config` - (Optional) The status of the [Ray Operator
    addon](https://cloud.google.com/kubernetes-engine/docs/add-on/ray-on-gke/concepts/overview).
    It is disabled by default. Set `enabled = true` to enable. The minimum
-   cluster version to enable Ray is 1.30.0-gke.1747000.
-
-   Ray Operator config has optional subfields
-   `ray_cluster_logging_config.enabled` and
-   `ray_cluster_monitoring_config.enabled` which control Ray Cluster logging
-   and monitoring respectively. See [Collect and view logs and metrics for Ray
-   clusters on
-   GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/ray-on-gke/how-to/collect-view-logs-metrics)
-   for more information.
+   cluster version to enable Ray is 1.30.0-gke.1747000. Structure is [documented below](#nested_ray_operator_config).
 
 *  `slice_controller_config` - (Optional). 
    The status of the slice controller addon.
    It is disabled by default. Set `enabled = true` to enable.
 
-*  `parallelstore_csi_driver_config` - (Optional) The status of the Parallelstore CSI driver addon,
+*  `parallelstore_csi_driver_config` - (Optional, Deprecated) The status of the Parallelstore CSI driver addon,
    which allows the usage of a Parallelstore instances as volumes.
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
    It is enabled by default for Autopilot clusters with version 1.29 or later; set `enabled = true` to enable it explicitly.
    See [Enable the Parallelstore CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/parallelstore-csi-new-volume#enable) for more information.
+   `addons_config.parallelstore_csi_driver_config` is deprecated and will be removed in a future major release. Use `addons_config.lustre_csi_driver_config` instead.
 
 *  `high_scale_checkpointing_config` - (Optional) The status of the High Scale Checkpointing addon, which enables Multi-Tier Checkpointing for Machine Learning workloads. Structure is [documented below](#nested_high_scale_checkpointing_config).
 
@@ -638,6 +642,20 @@ addons_config {
 
 * `enabled` - (Required) Enable the Node Readiness Controller addon for your cluster.
 
+<a name="nested_ray_operator_config"></a>The `ray_operator_config` block supports:
+
+* `enabled` - (Required) Whether the Ray Operator addon is enabled.
+* `ray_cluster_logging_config` - (Optional) The status of Ray Logging, which scrapes Ray cluster logs to Cloud Logging. Structure is [documented below](#nested_ray_cluster_logging_config).
+* `ray_cluster_monitoring_config` - (Optional) The status of Ray Cluster monitoring, which shows Ray cluster metrics in Cloud Console. Structure is [documented below](#nested_ray_cluster_monitoring_config).
+
+<a name="nested_ray_cluster_logging_config"></a>The `ray_cluster_logging_config` block supports:
+
+* `enabled` - (Required) Whether Ray Cluster logging is enabled.
+
+<a name="nested_ray_cluster_monitoring_config"></a>The `ray_cluster_monitoring_config` block supports:
+
+* `enabled` - (Required) Whether Ray Cluster monitoring is enabled.
+
 <a name="nested_binary_authorization"></a>The `binary_authorization` block supports:
 
 * `enabled` - (DEPRECATED) Enable Binary Authorization for this cluster. Deprecated in favor of `evaluation_mode`.
@@ -662,6 +680,11 @@ addons_config {
 <a name="nested_enable_k8s_beta_apis"></a>The `enable_k8s_beta_apis` block supports:
 
 * `enabled_apis` - (Required) Enabled Kubernetes Beta APIs. To list a Beta API resource, use the representation {group}/{version}/{resource}. The version must be a Beta version. Note that you cannot disable beta APIs that are already enabled on a cluster without recreating it. See the [Configure beta APIs](https://cloud.google.com/kubernetes-engine/docs/how-to/use-beta-apis#configure-beta-apis) for more information.
+
+<a name="nested_tpu_config"></a>The `tpu_config` block supports:
+
+* `enabled` - (Required) Whether Cloud TPU integration is enabled or not.
+* `use_service_networking` - (Optional) Whether to use service networking for Cloud TPU or not.
 
 <a name="nested_high_scale_checkpointing_config"></a>The `high_scale_checkpointing_config` block supports:
 
@@ -722,7 +745,7 @@ for a list of types.
 
 <a name="nested_auto_provisioning_defaults"></a>The `auto_provisioning_defaults` block supports:
 
-* `min_cpu_platform` - (Optional, [Beta](../guides/provider_versions.html.markdown))
+* `min_cpu_platform` - (Optional)
 Minimum CPU platform to be used for NAP created node pools. The instance may be scheduled on the
 specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
 as "Intel Haswell" or "Intel Sandy Bridge".
@@ -757,7 +780,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
-* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN or SURGE. The default is value is SURGE.
+* `strategy` - (Optional) Strategy used for node pool update. Strategy can only be one of BLUE_GREEN, SURGE, or SHORT_LIVED. The default is value is SURGE.
 
 * `max_surge` - (Optional) The maximum number of nodes that can be created beyond the current size of the node pool during the upgrade process. To be used when strategy is set to SURGE. Default is 0.
 
@@ -798,7 +821,13 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_managed_opentelemetry_config"></a>The `managed_opentelemetry_config` block supports:
 
-*  `scope` - (Required) The scope of the Managed OpenTelemetry pipeline. Supported values include: `SCOPE_UNSPECIFIED`, `NONE`, `COLLECTION_AND_INSTRUMENTATION_COMPONENTS`.
+* `scope` - (Optional) The scope of the Managed OpenTelemetry pipeline. Available options include:
+    * `COLLECTION_AND_INSTRUMENTATION_COMPONENTS`: Enables the Managed OpenTelemetry pipeline for collection and instrumentation components.
+    * `NONE`: Disables the Managed OpenTelemetry pipeline.
+
+    See the [GKE Managed OpenTelemetry documentation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/managed-otel-gke) and [ManagedOpenTelemetryConfig REST API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#managedopentelemetryconfig) for additional details.
+
+~> **Note:** Removing the `managed_opentelemetry_config` block or omitting `scope` from your configuration stops Terraform from managing this setting, but does **not** disable the pipeline on the cluster. To disable the feature, keep the block and explicitly set `scope = "NONE"`.
 
 <a name="nested_managed_ml_diagnostics_config"></a>The `managed_machine_learning_diagnostics_config` block supports:
 
@@ -925,7 +954,11 @@ maintenance_policy {
 * `maintenance_exclusion` - Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to 20 maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
 
 <a name="nested_maintenance_exclusion"></a>The `maintenance_exclusion` block supports:
-* `exclusion_options` - (Optional) MaintenanceExclusionOptions provides maintenance exclusion related options.
+
+* `exclusion_name` - (Required) The name of the maintenance exclusion.
+* `start_time` - (Required) The start time of the exclusion window, in RFC3339 format.
+* `end_time` - (Optional) The end time of the exclusion window, in RFC3339 format. Exactly one of `end_time` and `exclusion_options.end_time_behavior` should be specified.
+* `exclusion_options` - (Optional) MaintenanceExclusionOptions provides maintenance exclusion related options. Structure is [documented below](#nested_exclusion_options).
 
 
 <a name="nested_exclusion_options"></a>The `exclusion_options` block supports:
@@ -1020,6 +1053,12 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 * `auto_ipam_config` - (Optional) All the information related to Auto IPAM. Structure is [documented below](#nested_auto_ipam_config)
 
 * `network_tier_config` - (Optional) Contains network tier information. Structure is [documented below](#nested_network_tier_config)
+
+* `pod_cidr_overprovision_config` - (Optional) Configuration for cluster level pod cidr overprovision. Default is `disabled = false`. Structure is [documented below](#nested_pod_cidr_overprovision_config).
+
+<a name="nested_pod_cidr_overprovision_config"></a>The `pod_cidr_overprovision_config` block supports:
+
+* `disabled` - (Required) Whether Pod CIDR overprovisioning is disabled.
 
 <a name="nested_auto_ipam_config"></a>The auto ipam config supports:
 
@@ -1186,7 +1225,7 @@ gvnic {
 
 * `flex_start` - (Optional) Enables Flex Start provisioning model for the node pool.
 
-* `host_maintenance_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The maintenance policy for the hosts on which the GKE VMs run on. Structure is [documented below](#nested_host_maintenance_policy).
+* `host_maintenance_policy` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The maintenance policy for the hosts on which the GKE VMs run on. Structure is [documented below](#nested_host_maintenance_policy).
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
@@ -1270,14 +1309,7 @@ kubelet_config {
 
 * `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
 
-* `windows_node_config` - (Optional)
-Windows node configuration, currently supporting OSVersion [attribute](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/NodeConfig#osversion). The value must be one of [OS_VERSION_UNSPECIFIED, OS_VERSION_LTSC2019, OS_VERSION_LTSC2022]. For example:
-
-```hcl
-windows_node_config {
-  osversion = "OS_VERSION_LTSC2019"
-}
-```
+* `windows_node_config` - (Optional) Windows node configuration. Structure is [documented below](#nested_windows_node_config).
 
 * `containerd_config` - (Optional) Parameters to customize containerd runtime. Structure is [documented below](#nested_containerd_config).
 
@@ -1347,6 +1379,8 @@ sole_tenant_config {
 * `enable_nested_virtualization`- (Optional) Defines whether the instance should have nested virtualization enabled. Defaults to false.
 
 * `performance_monitoring_unit` - (Optional) Defines the performance monitoring unit [PMU](https://cloud.google.com/compute/docs/pmu-overview) level. Valid values are `ARCHITECTURAL`, `STANDARD`, or `ENHANCED`. Defaults to off.
+
+~> **Note:** Early 8.x provider versions dropped an explicitly configured `STANDARD` value when creating the resource. On affected node pools the diff stays suppressed and this field cannot be updated in place, so enabling `STANDARD` requires recreating the node pool.
 
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
@@ -1442,6 +1476,14 @@ workload_identity_config {
 <a name="nested_node_pool"></a>The `node_pool` block supports:
 
 * `node_config` - (Optional) The node configuration of the pool. Structure is [documented below](#nested_node_pool_node_config).
+
+* `best_effort_provisioning` - (Optional) Best-effort provisioning allows node pool creations to automatically ignore stockout errors once the minimum number of nodes have been provisioned. Structure is [documented below](#nested_node_pool_best_effort_provisioning).
+
+<a name="nested_node_pool_best_effort_provisioning"></a>The `best_effort_provisioning` block supports:
+
+* `enabled` - (Required) When enabled, node pool creation ignores non-fatal errors like stockout to provision as many nodes as possible right away, and eventually brings up the target number of nodes. Set to `false` or remove the block to disable best-effort provisioning; either change recreates the cluster.
+
+* `min_provision_nodes` - (Optional) Minimum number of nodes that must be provisioned for the creation to be considered successful. The remaining nodes are provisioned gradually once the stockout issue has been resolved. Can only be set when `enabled` is `true`.
 
 <a name="nested_node_pool_node_config"></a>The `node_config` block supports:
 
@@ -1605,7 +1647,9 @@ addresses to the cluster master(s) and the ILB VIP. This range must not overlap
 with any other ranges in use within the cluster's network, and it must be a /28
 subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters#req_res_lim)
 for more details. This field only applies to private clusters, when
-`enable_private_nodes` is `true`.
+`enable_private_nodes` is `true`. On GKE versions 1.29 and later, this field is
+optional when `private_endpoint_subnetwork` is specified. It is also optional for
+Autopilot clusters.
 
 * `private_endpoint_subnetwork` - (Optional) Subnetwork in cluster's network where master's endpoint will be provisioned.
 
@@ -1650,6 +1694,7 @@ not.
     Accepted values are:
 
     * `"GVISOR"`: Pods run within a gVisor sandbox.
+    * `"MICROVM"`: Pods run within a microVM sandbox.
 
 * `sandbox_type` (Beta, Deprecated) Which sandbox to use for pods in the node pool. `sandbox_config.sandbox_type` is deprecated and will be removed in a future major release. Use `sandbox_config.type` instead.
     Accepted values are:
@@ -1944,13 +1989,22 @@ linux_node_config {
 
 * `gcp_secret_manager_secret_uri` - (Optional) The Google Cloud Secret Manager secret version URI for storing the init script. Format: `projects/PROJECT_ID/secrets/SECRET_NAME/versions/VERSION`. The service account on the nodepool must have access to the secret version. Conflicts with `gcs_uri`.
 
+<a name="nested_windows_node_config"></a>The `windows_node_config` block supports:
+
+* `osversion` - (Optional) OSVersion [attribute](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/NodeConfig#osversion). The value must be one of `OS_VERSION_UNSPECIFIED`, `OS_VERSION_LTSC2019`, or `OS_VERSION_LTSC2022`.
+
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 
 * `private_registry_access_config` (Optional) - Configuration for private container registries. There are two fields in this config:
 
   * `enabled` (Required) - Enables private registry config. If set to false, all other fields in this object must not be set.
 
-  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example:
+  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail.
+    * `fqdns` - (Required) List of fully-qualified-domain-names. IPv4s and port specification are supported.
+    * `gcp_secret_manager_certificate_config` - (Required) Parameters for configuring a certificate hosted in GCP SecretManager:
+      * `secret_uri` - (Required) URI for the secret that hosts a certificate. Must be in the format `projects/PROJECT_NUM/secrets/SECRET_NAME/versions/VERSION_OR_LATEST`.
+
+  Example:
   ```hcl
   certificate_authority_domain_config {
     fqdns = [
@@ -1968,7 +2022,18 @@ linux_node_config {
 
   * `enabled` (Required) - Whether writable cgroups are enabled.
 
-* `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail. Example:
+* `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail.
+  * `server` - (Required) Defines the host name of the registry server.
+  * `hosts` - (Optional) Configures a list of host-specific configurations for the server:
+    * `host` - (Required) Configures the registry host/mirror.
+    * `capabilities` - (Optional) Represent the capabilities of the registry host, specifying what operations a host is capable of performing. Valid values include `HOST_CAPABILITY_PULL`, `HOST_CAPABILITY_RESOLVE`, `HOST_CAPABILITY_PUSH`.
+    * `override_path` - (Optional) Indicates the host's API root endpoint is defined in the URL path rather than by the API specification.
+    * `dial_timeout` - (Optional) Specifies the maximum duration allowed for a connection attempt to complete.
+    * `header` - (Optional) Configures the registry host headers. Each header contains `key` (Required, string) and `value` (Required, list of strings).
+    * `ca` - (Optional) Configures the registry host certificate. Contains `gcp_secret_manager_secret_uri` (Optional).
+    * `client` - (Optional) Configures the registry host client certificate and key. Contains `cert` (Required) with `gcp_secret_manager_secret_uri` (Optional) and `key` (Optional) with `gcp_secret_manager_secret_uri` (Optional).
+
+  Example:
 ```hcl
 registry_hosts {
   server = "REGISTRY_SERVER_FQDN"
@@ -2049,6 +2114,10 @@ registry_hosts {
 <a name="nested_workload_alts_config"></a>The `workload_alts_config` block supports:
 
 * `enable_alts` - (Required) Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity ([workloadPool]((#nested_workload_identity_config)) must be non-empty).
+
+<a name="nested_schedule_upgrade_config"></a>The `schedule_upgrade_config` block supports:
+
+* `enabled` - (Required) Whether scheduled upgrades are enabled on the cluster.
 
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
@@ -2131,9 +2200,15 @@ exported:
 
 * `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
+* `fleet.0.pre_registered` - Whether the cluster has been registered via the fleet API.
+
 * `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
 
 * `emulated_version` - The current emulated Kubernetes version running on the GKE cluster control plane.
+
+* `user_managed_keys_config.0.control_plane_disk_encryption_key_versions` - The Cloud KMS cryptoKey versions to use for Confidential Hyperdisk on the control plane nodes.
+
+* `tpu_config.0.ipv4_cidr_block` - The IPv4 CIDR block reserved for Cloud TPU in the VPC.
 
 ## Timeouts
 

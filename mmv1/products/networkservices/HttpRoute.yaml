@@ -486,6 +486,10 @@ properties:
                         If only one serviceName is specified and it has a weight greater than 0, 100% of the traffic is forwarded to that backend.
                         If weights are specified for any one service name, they need to be specified for all of them.
                         If weights are unspecified for all services, then, traffic is distributed in equal proportions to all of them.
+                - name: mirrorPercent
+                  type: Double
+                  description: |
+                    The percentage of requests to get mirrored to the desired destination.
             - name: corsPolicy
               type: NestedObject
               description: |
@@ -533,3 +537,27 @@ properties:
                   type: Boolean
                   description: |
                     If true, the CORS policy is disabled. The default value is false, which indicates that the CORS policy is in effect.
+            - name: directResponse
+              type: NestedObject
+              description: |
+                Static HTTP Response object to be returned regardless of the request.
+              properties:
+                - name: status
+                  type: Integer
+                  description: |
+                    Status to return as part of HTTP Response. Must be a positive integer.
+                  required: true
+                - name: stringBody
+                  type: String
+                  description: |
+                    Response body as a string. Maximum body length is 1024 characters.
+                - name: bytesBody
+                  type: String
+                  description: |
+                    Response body as base64 encoded bytes. Maximum body size is 4096B.
+            - name: idleTimeout
+              type: String
+              description: |
+                Specifies the idle timeout for the selected route. The idle timeout is defined as the period in which there are no bytes sent or received on either the upstream or downstream connection. If not set, the default idle timeout is 1 hour. If set to 0s, the timeout will be disabled.
+
+                A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".

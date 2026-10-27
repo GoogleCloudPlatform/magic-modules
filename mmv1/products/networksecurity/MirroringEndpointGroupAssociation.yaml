@@ -37,6 +37,8 @@ import_format:
 sweeper:
   url_substitutions:
     - region: global
+generate_list_resource: true
+
 async:
   type: OpAsync
   operation:

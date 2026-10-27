@@ -158,7 +158,7 @@ func TestAccComputeBackendService_withBackendAndIAP(t *testing.T) {
 func TestAccComputeBackendService_withBackendAndPreferenceInternalManaged(t *testing.T) {
 	t.Parallel()
 
-	im_suffix := fmt.Sprintf("im-%s", acctest.RandString(t, 10))
+	im_suffix := fmt.Sprintf("tf-test-im-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -188,7 +188,7 @@ func TestAccComputeBackendService_withBackendAndPreferenceInternalManaged(t *tes
 func TestAccComputeBackendService_withBackendAndPreferenceInternalSelfManaged(t *testing.T) {
 	t.Parallel()
 
-	ism_suffix := fmt.Sprintf("ism-%s", acctest.RandString(t, 10))
+	ism_suffix := fmt.Sprintf("tf-test-ism-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -217,7 +217,7 @@ func TestAccComputeBackendService_withBackendAndPreferenceInternalSelfManaged(t 
 
 func TestAccComputeBackendService_withBackendAndPreferenceExternalManaged(t *testing.T) {
 	t.Parallel()
-	em_suffix := fmt.Sprintf("em-%s", acctest.RandString(t, 10))
+	em_suffix := fmt.Sprintf("tf-test-em-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -740,15 +740,15 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 }
 
 func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
-	// Instance template uses UniqueId in some cases
+	// name_prefix appends a random suffix to the generated name, which VCR cannot replay.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
+	fr := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	proxy := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	urlmap := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -895,8 +895,8 @@ func TestAccComputeBackendService_withLogConfigRequestResponseHeaders(t *testing
 func TestAccComputeBackendService_trafficDirectorUpdateBasic(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("foo-%s", acctest.RandString(t, 10))
-	checkName := fmt.Sprintf("bar-%s", acctest.RandString(t, 10))
+	backendName := fmt.Sprintf("tf-test-foo-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-bar-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -926,8 +926,8 @@ func TestAccComputeBackendService_trafficDirectorUpdateBasic(t *testing.T) {
 func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("foo-%s", acctest.RandString(t, 10))
-	checkName := fmt.Sprintf("bar-%s", acctest.RandString(t, 10))
+	backendName := fmt.Sprintf("tf-test-foo-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-bar-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -935,7 +935,7 @@ func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, "DISABLED"),
+				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, true, "DISABLED"),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -943,7 +943,15 @@ func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, "AUTOMATIC"),
+				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, true, "AUTOMATIC"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, false, "AUTOMATIC"),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -965,8 +973,8 @@ func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 func TestAccComputeBackendService_trafficDirectorUpdateLbPolicies(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("foo-%s", acctest.RandString(t, 10))
-	checkName := fmt.Sprintf("bar-%s", acctest.RandString(t, 10))
+	backendName := fmt.Sprintf("tf-test-foo-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-bar-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -997,8 +1005,8 @@ func TestAccComputeBackendService_trafficDirectorUpdateLbPolicies(t *testing.T) 
 func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("foo-%s", acctest.RandString(t, 10))
-	checkName := fmt.Sprintf("bar-%s", acctest.RandString(t, 10))
+	backendName := fmt.Sprintf("tf-test-foo-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-bar-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1654,7 +1662,7 @@ func testAccComputeBackendService_withBackend(
 	serviceName, igName, itName, checkName string, timeout int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1711,7 +1719,7 @@ func testAccComputeBackendService_withBackendAndMaxUtilization(
 	serviceName, igName, itName, checkName string, timeout int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1769,7 +1777,7 @@ func testAccComputeBackendService_withBackendAndIAP(
 	serviceName, igName, itName, checkName string, timeout int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1938,9 +1946,18 @@ func testAccComputeBackendService_withCdnPolicy(serviceName, checkName string) s
 resource "google_compute_backend_service" "foobar" {
   name          = "%s"
   health_checks = [google_compute_http_health_check.zero.self_link]
+  enable_cdn    = true
 
   cdn_policy {
-    negative_caching = false
+    // client_ttl and default_ttl are explicitly 0 here. They are Optional + Computed, so an
+    // explicit 0 has to be told apart from an unset field: dropping it makes the API apply its own
+    // default and produces a permadiff, while sending it unconditionally breaks cache modes that
+    // forbid TTLs. testAccComputeBackendService_withCdnPolicyUseOriginHeaders covers the unset side.
+    cache_mode        = "CACHE_ALL_STATIC"
+    client_ttl        = 0
+    default_ttl       = 0
+    max_ttl       = 0
+    negative_caching  = false
     serve_while_stale = 0
     cache_key_policy {
       include_protocol       = true
@@ -2099,7 +2116,7 @@ func testAccComputeBackendService_withMaxConnections(
 	serviceName, igName, itName, checkName string, maxConnections int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2156,7 +2173,7 @@ func testAccComputeBackendService_withMaxConnectionsPerInstance(
 	serviceName, igName, itName, checkName string, maxConnectionsPerInstance int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2229,7 +2246,7 @@ resource "google_compute_backend_service" "lipsum" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2388,7 +2405,7 @@ resource "google_compute_backend_service" "lipsum" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2537,7 +2554,7 @@ resource "google_compute_url_map" "default" {
 }
 
 data "google_compute_image" "debian_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -2668,12 +2685,12 @@ resource "google_compute_health_check" "zero" {
 `, serviceName, reqHeader, respHeader, checkName)
 }
 
-func testAccComputeBackendService_withCompressionMode(serviceName, checkName, compressionMode string) string {
+func testAccComputeBackendService_withCompressionMode(serviceName, checkName string, enableCdn bool, compressionMode string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name             = "%s"
   health_checks    = [google_compute_http_health_check.zero.self_link]
-  enable_cdn       = true
+  enable_cdn       = %t
   compression_mode = "%s"
 }
 
@@ -2683,7 +2700,7 @@ resource "google_compute_http_health_check" "zero" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-`, serviceName, compressionMode, checkName)
+`, serviceName, enableCdn, compressionMode, checkName)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -2910,7 +2927,7 @@ func TestAccComputeBackendService_backendServiceCustomMetrics_update(t *testing.
 func testAccComputeBackendService_backendServiceCustomMetrics_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
 }
 
 // Zonal NEG with GCE_VM_IP_PORT
@@ -2966,7 +2983,7 @@ resource "google_compute_health_check" "default" {
 func testAccComputeBackendService_backendServiceCustomMetrics_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
 }
 
 // Zonal NEG with GCE_VM_IP_PORT
@@ -3043,7 +3060,7 @@ resource "google_compute_health_check" "health_check" {
 func testAccComputeBackendService_withBackendAndPreference(suffix, loadBalancingScheme, preference string, timeout int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -3112,7 +3129,7 @@ func TestAccComputeBackendService_updateCanaryMigration(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_basic(serviceName, checkName),
+				Config: testAccComputeBackendService_withCanaryMigrationInitial(serviceName, checkName),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -3165,12 +3182,30 @@ func TestAccComputeBackendService_updateCanaryMigration(t *testing.T) {
 	})
 }
 
+func testAccComputeBackendService_withCanaryMigrationInitial(serviceName, checkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name                  = "%s"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.zero.self_link]
+}
+
+resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+`, serviceName, checkName)
+}
+
 func testAccComputeBackendService_withCanaryMigration(serviceName, checkName, description, migrationState string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
-  name             = "%s"
-  description      = "%s"
-  health_checks    = [google_compute_http_health_check.zero.self_link]
+  name                             = "%s"
+  description                      = "%s"
+  load_balancing_scheme            = "EXTERNAL"
+  health_checks                    = [google_compute_http_health_check.zero.self_link]
   external_managed_migration_state = "%s"
 }
 
@@ -3190,9 +3225,10 @@ resource "time_sleep" "six_minutes_delay" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name             = "%s"
-  description      = "%s"
-  health_checks    = [google_compute_http_health_check.zero.self_link]
+  name                             = "%s"
+  description                      = "%s"
+  load_balancing_scheme            = "EXTERNAL"
+  health_checks                    = [google_compute_http_health_check.zero.self_link]
   external_managed_migration_state = "%s"
 	depends_on = [
 		time_sleep.six_minutes_delay
@@ -3215,9 +3251,10 @@ resource "time_sleep" "six_minutes_delay" {
 }
 
 resource "google_compute_backend_service" "foobar" {
-  name             = "%s"
-  description      = "%s"
-  health_checks    = [google_compute_http_health_check.zero.self_link]
+  name                             = "%s"
+  description                      = "%s"
+  load_balancing_scheme            = "EXTERNAL"
+  health_checks                    = [google_compute_http_health_check.zero.self_link]
   external_managed_migration_state = "TEST_BY_PERCENTAGE"
 	external_managed_migration_testing_percentage = %d
 	depends_on = [
@@ -3295,7 +3332,7 @@ func testAccComputeBackendService_withMaxInFlightRequests(
 	serviceName, igName, itName, checkName string, maxInFlightRequests int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -3355,7 +3392,7 @@ func testAccComputeBackendService_withMaxInFlightRequestsPerInstance(
 	serviceName, igName, itName, checkName string, maxInFlightRequestsPerInstance int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -3447,7 +3484,7 @@ resource "google_compute_backend_service" "lipsum" {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -3509,7 +3546,7 @@ resource "google_compute_health_check" "default" {
 func testAccComputeBackendService_withTrafficDuration(serviceName, igName, itName, checkName, duration string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 

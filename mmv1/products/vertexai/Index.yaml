@@ -20,6 +20,8 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{region}}/indexes
 self_link: projects/{{project}}/locations/{{region}}/indexes/{{name}}
+# Vertex AI list responses use "indexes", not the English plural "indices".
+collection_url_key: indexes
 create_url: projects/{{project}}/locations/{{region}}/indexes
 update_mask: true
 update_verb: PATCH
@@ -29,6 +31,12 @@ timeouts:
   delete_minutes: 180
 sweeper:
   identifier_field: displayName
+  dependencies:
+    - google_vertex_ai_index_endpoint
+  url_substitutions:
+    - region: us-central1
+    - region: europe-west4
+generate_list_resource: true
 async:
   type: OpAsync
   operation:
@@ -49,6 +57,8 @@ samples:
           display_name: test-index
           bucket_name: vertex-ai-index-test
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
@@ -64,6 +74,8 @@ samples:
           display_name: test-index
           bucket_name: vertex-ai-index-test
           kms_key_name: kms-name
+        vars:
+          region: 'us-central1'
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
@@ -185,6 +197,15 @@ properties:
                       The default percentage of leaf nodes that any query may be searched. Must be in
                       range 1-100, inclusive. The default value is 10 (means 10%) if not set.
                     default_value: 10
+                    deprecation_message: '`leaf_nodes_to_search_percent` is deprecated and will be removed in a future major release. Use `fraction_leaf_nodes_to_search` instead.'
+                  - name: fractionLeafNodesToSearch
+                    type: Double
+                    description: |-
+                      The default fraction of leaf nodes that any query may be searched. Must be in
+                      range 0.0-1.0, exclusive. The default value is 0.05 if not set.
+                      This value can only be set when creating the index.
+                    immutable: true
+                    default_from_api: true
               - name: bruteForceConfig
                 type: NestedObject
                 description: |-

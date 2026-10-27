@@ -1,0 +1,18 @@
+// API omits networkConfig when public IP flags are false. Backfill so
+// generated flatten does not drop the block (permadiff).
+networkConfig, _ := res["networkConfig"].(map[string]interface{})
+if networkConfig == nil {
+	networkConfig = make(map[string]interface{})
+}
+
+for apiName, tfName := range map[string]string{
+	"enablePublicIp":         "network_config.0.enable_public_ip",
+	"enableOutboundPublicIp": "network_config.0.enable_outbound_public_ip",
+} {
+	if v, exists := networkConfig[apiName]; !exists || v == nil {
+		networkConfig[apiName] = d.Get(tfName)
+	}
+}
+
+res["networkConfig"] = networkConfig
+return res, nil

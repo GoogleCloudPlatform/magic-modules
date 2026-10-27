@@ -1,0 +1,110 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ConsumerPolicy
+min_version: beta
+base_url: '{{parent}}/consumerPolicies/{{name}}'
+self_link: '{{parent}}/consumerPolicies/{{name}}'
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
+description: |
+  Consumer Policy is a set of rules that define what services or service groups can be used for a cloud resource hierarchy.
+references:
+  guides:
+    'Enabling and Disabling Services': 'https://cloud.google.com/service-usage/docs/enable-disable'
+  api: 'https://docs.cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
+import_format: ['{{%parent}}/consumerPolicies/{{name}}']
+id_format: '{{parent}}/consumerPolicies/{{name}}'
+autogen_async: true
+async:
+  type: 'OpAsync'
+  actions: ['create', 'update', 'delete']
+  include_project: true
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+read_error_transform: transformServiceUsageV2ConsumerPolicyReadError
+custom_code:
+  constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
+  pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+  pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+  pre_delete: templates/terraform/pre_delete/serviceusagev2_consumer_policy.go.tmpl
+  post_create_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+  post_update_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+  post_delete_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
+
+
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+     The name of the parent. It can be a project, folder or organization in the format of  projects/<project_id or project_number>, folders/<folder_number> or organizations/<org_number> .
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: 'name'
+    type: String
+    description: |
+     The name of the policy. Currently only the “default” policy name is supported.
+    required: true
+    immutable: true
+    url_param_only: true
+    validation:
+      function: 'validation.StringInSlice([]string{"default"}, false)'
+properties:
+  - name: 'enableRules'
+    type: Array
+    required: true
+    max_size: 1
+    description: |
+      The consumer policy rule that defines enabled services. The structure is documented below.
+    custom_flatten: templates/terraform/custom_flatten/serviceusagev2_consumer_policy_enable_rules.go.tmpl
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'services'
+          type: Array
+          send_empty_value: true
+          is_set: true
+          description: |
+            List of service names to be enabled in the format of services/<service_name>
+          item_type:
+            type: String
+        - name: 'catalogs'
+          type: Array
+          send_empty_value: true
+          is_set: true
+          description: |
+            List of service catalog names to be enabled in the format of catalogs/<catalog_name>, for example catalogs/default-cloud-services.
+          item_type:
+            type: String
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      Entity tag (ETag) used for optimistic concurrency control as a way to help prevent simultaneous updates from overwriting each other.
+      Used internally during updates.
+virtual_fields:
+  - name: 'validate_dependencies'
+    type: Boolean
+    description: |
+      Default value is true. If true, this flag enforces dependency management within the consumer policy. When adding a new service, it verifies that all its dependencies are already present/added in the policy. Conversely, when removing a service, it ensures that no other services within the policy depend on the service to be removed. If the validation fails, a comprehensive message will be presented, outlining the missing dependencies and providing instructions on how to address the issue.
+    default_value: true
+  - name: 'check_usage_on_remove'
+    type: Boolean
+    description: |
+      Default value is false. This field is deprecated and has no effect.
+    default_value: false
+    deprecation_message: '`check_usage_on_remove` is deprecated and will be removed in a future major release.'

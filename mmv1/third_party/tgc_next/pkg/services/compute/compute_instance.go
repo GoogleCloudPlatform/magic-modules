@@ -75,7 +75,9 @@ var (
 		"scheduling.0.availability_domain",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
+		"scheduling.0.host_error_timeout_seconds",
 		"scheduling.0.maintenance_interval",
+		"scheduling.0.preemption_notice_duration",
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
 
@@ -473,6 +475,20 @@ func ResourceComputeInstance() *schema.Resource {
 							ForceNew:         true,
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
+						},
+
+						"enable_vpc_scoped_dns": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `If true, DNS resolution will be enabled over this interface. Only valid with network_attachment.`,
+						},
+
+						"service_class_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Producer Service's Service class Id for the region of this network interface. Can only be used with network_attachment. It is not possible to use on its own; however, network_attachment can be used without service_class_id.`,
 						},
 
 						"parent_nic_name": {
@@ -1002,6 +1018,11 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+						"host_error_timeout_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
+						},
 
 						"maintenance_interval": {
 							Type:         schema.TypeString,
@@ -1076,6 +1097,27 @@ be from 0 to 999,999,999 inclusive.`,
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"preemption_notice_duration": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							MaxItems:     1,
+							AtLeastOneOf: schedulingKeys,
+							Description:  `The duration of the notice that the instance will receive before it is preempted.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"seconds": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: `Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.`,
+									},
+									"nanos": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.`,
 									},
 								},
 							},
@@ -1429,6 +1471,28 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: `The SHA256 hash of the customer's encryption key.`,
+						},
+					},
+				},
+			},
+			"workload_identity_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: `Workload identity config.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"identity": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Identity SPIFFE id.`,
+						},
+						"identity_certificate_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Specifies whether identity certificates are enabled.`,
 						},
 					},
 				},

@@ -37,6 +37,13 @@ async:
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'pipeline_id'
+  allowed_iam_role: 'roles/eventarc.admin'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/pipelines/{{pipeline_id}}'
+    - '{{pipeline_id}}'
 samples:
   - name: eventarc_pipeline_with_topic_destination
     primary_resource_id: primary

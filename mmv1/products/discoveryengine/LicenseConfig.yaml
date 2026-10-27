@@ -132,3 +132,7 @@ properties:
     type: Boolean
     description: |
       Whether the license config is for free trial.
+  - name: lastUserUpdateTime
+    type: Time
+    description: |
+      Timestamp of the most recent user-initiated update.

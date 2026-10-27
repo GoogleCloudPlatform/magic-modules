@@ -16,7 +16,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -49,7 +49,7 @@ func TestAccCloudRunService_cloudRunServiceCreateHasStatus(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,7 +74,7 @@ func TestAccCloudRunService_foregroundDeletion(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -154,14 +154,14 @@ func TestAccCloudRunService_secretVolume(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+acctest.RandString(t, 5), "secret-"+acctest.RandString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "tf-test-secret-"+acctest.RandString(t, 5), "tf-test-secret-"+acctest.RandString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -170,7 +170,7 @@ func TestAccCloudRunService_secretVolume(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "secret-"+acctest.RandString(t, 10), "secret-"+acctest.RandString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretVolume(name, project, "tf-test-secret-"+acctest.RandString(t, 10), "tf-test-secret-"+acctest.RandString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -278,14 +278,14 @@ func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+acctest.RandString(t, 5), "secret-"+acctest.RandString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "tf-test-secret-"+acctest.RandString(t, 5), "tf-test-secret-"+acctest.RandString(t, 6), "google_secret_manager_secret.secret1.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -294,7 +294,7 @@ func TestAccCloudRunService_secretEnvironmentVariable(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
 			{
-				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "secret-"+acctest.RandString(t, 10), "secret-"+acctest.RandString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
+				Config: testAccCloudRunService_cloudRunServiceUpdateWithSecretEnvVar(name, project, "tf-test-secret-"+acctest.RandString(t, 10), "tf-test-secret-"+acctest.RandString(t, 11), "google_secret_manager_secret.secret2.secret_id"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -523,7 +523,7 @@ func TestAccCloudRunServiceMigration_withLabels(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-  name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+  name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
   project := envvar.GetTestProjectFromEnv()
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {
@@ -562,7 +562,7 @@ func TestAccCloudRunService_withComputedLabels(t *testing.T) {
   acctest.SkipIfVcr(t)
   t.Parallel()
 
-  name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+  name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
   project := envvar.GetTestProjectFromEnv()
 
   acctest.VcrTest(t, resource.TestCase{
@@ -573,7 +573,39 @@ func TestAccCloudRunService_withComputedLabels(t *testing.T) {
     ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     Steps: []resource.TestStep{
       {
-        Config:            testAccCloudRunService_withComputedLabels(name, project, "10", "600"),
+        Config: testAccCloudRunService_withComputedLabelsCreate(name, project, "10", "600"),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "2"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.deployed_by", "terraform"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.labels.key1"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.terraform_labels.deployed_by", "terraform"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.terraform_labels.key1"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.deployed_by", "terraform"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.effective_labels.key1"),
+        ),
+      },
+      {
+        ResourceName:            "google_cloud_run_service.default",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+      },
+      {
+        Config: testAccCloudRunService_withComputedLabels(name, project, "10", "600"),
+        Check: resource.ComposeTestCheckFunc(
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.%", "3"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.client-name", "cloudrun-service-v1-module"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.labels.deployed_by", "terraform"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.labels.key1"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.terraform_labels.client-name", "cloudrun-service-v1-module"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.terraform_labels.deployed_by", "terraform"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.terraform_labels.key1"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.client-name", "cloudrun-service-v1-module"),
+          resource.TestCheckResourceAttr("google_cloud_run_service.default", "metadata.0.effective_labels.deployed_by", "terraform"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.effective_labels.key1"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.annotations.env"),
+          resource.TestCheckResourceAttrSet("google_cloud_run_service.default", "metadata.0.effective_annotations.env"),
+        ),
       },
       {
         ResourceName:            "google_cloud_run_service.default",
@@ -585,7 +617,7 @@ func TestAccCloudRunService_withComputedLabels(t *testing.T) {
   })
 }
 
-func testAccCloudRunService_withComputedLabels(name, project, concurrency, timeoutSeconds string) string {
+func testAccCloudRunService_withComputedLabelsCreate(name, project, concurrency, timeoutSeconds string) string {
   return fmt.Sprintf(`
 resource "random_uuid" "test" {
 }
@@ -596,11 +628,55 @@ resource "google_cloud_run_service" "default" {
 
   metadata {
     namespace = "%s"
+    labels = {
+      deployed_by = "terraform"
+      key1        = "${random_uuid.test.result}"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = %s
+      timeout_seconds = %s
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+    tag             = "magic-module"
+  }
+}
+`, name, project, concurrency, timeoutSeconds)
+}
+
+func testAccCloudRunService_withComputedLabels(name, project, concurrency, timeoutSeconds string) string {
+  return fmt.Sprintf(`
+resource "random_uuid" "test" {
+}
+
+resource "random_uuid" "test2" {
+}
+
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
     annotations = {
-      env = "${random_uuid.test.result}"
+      env = "${random_uuid.test2.result}"
     }
     labels = {
-      key1 = "${random_uuid.test.result}"
+      client-name = "cloudrun-service-v1-module"
+      deployed_by = "terraform"
+      key1        = "${random_uuid.test2.result}"
     }
   }
 
@@ -780,7 +856,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1093,7 +1169,7 @@ func TestAccCloudRunService_readinessProbe(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1140,8 +1216,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage": "BETA"
-
     }
   }
 
@@ -1178,7 +1252,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage": "BETA"
     }
   }
 
@@ -1222,7 +1295,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage": "BETA"
     }
   }
 
@@ -1486,7 +1558,7 @@ func TestAccCloudRunService_csiVolume(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1595,7 +1667,7 @@ func TestAccCloudRunService_emptyDirVolume(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1652,7 +1724,7 @@ func TestAccCloudRunService_resourcesRequirements(t *testing.T) {
        t.Parallel()
 
        project := envvar.GetTestProjectFromEnv()
-       name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+       name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
        acctest.VcrTest(t, resource.TestCase{
                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1765,7 +1837,7 @@ func TestAccCloudRunService_cloudRunServiceWithMinInstance(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1848,7 +1920,7 @@ func TestAccCloudRunService_cloudRunServiceWithManualScaling(t *testing.T) {
 	t.Parallel()
 
 	project := envvar.GetTestProjectFromEnv()
-	name := "tftest-cloudrun-" + acctest.RandString(t, 6)
+	name := "tf-test-cloudrun-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

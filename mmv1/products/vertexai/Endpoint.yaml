@@ -72,10 +72,13 @@ samples:
       - name: vertex_ai_endpoint_private_service_connect
         resource_id_vars:
           network_name: psc-network
+          endpoint_name: endpoint-name
   - name: vertex_ai_endpoint_dedicated_endpoint
     primary_resource_id: endpoint
     steps:
       - name: vertex_ai_endpoint_dedicated_endpoint
+        resource_id_vars:
+          endpoint_name: endpoint-name
 parameters:
   - name: location
     type: String

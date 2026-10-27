@@ -17,7 +17,7 @@ api_resource_type_kind: ServicePerimeter
 description: |
   Allows configuring a single GCP resource that should be inside the `status` block of a service perimeter.
   This resource is intended to be used in cases where it is not possible to compile a full list
-  of projects to include in a `google_access_context_manager_service_perimeter` resource,
+  of resources (projects, folders, or VPC networks) to include in a `google_access_context_manager_service_perimeter` resource,
   to enable them to be added separately.
   If your perimeter is in dry-run mode use `google_access_context_manager_service_perimeter_dry_run_resource` instead.
 
@@ -93,13 +93,17 @@ parameters:
     immutable: true
     resource: ServicePerimeter
     imports: name
+    validation:
+      regex: '^accessPolicies/[^/]+/servicePerimeters/[^/]+$'
 properties:
   - name: resource
     type: String
     description: |
       A GCP resource that is inside of the service perimeter.
-      Currently only projects are allowed.
-      Format: projects/{project_number}
+      Projects, folders, and VPC networks are allowed.
+      Project format: `projects/{project_number}`
+      Folder format: `folders/{folder_number}`
+      VPC network format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`
     required: true
     immutable: true
   - name: accessPolicyId

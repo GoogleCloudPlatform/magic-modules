@@ -138,8 +138,6 @@ properties:
         - name: dense
           type: NestedObject
           description: A dense vector.
-          conflicts:
-            - sparse
           properties:
             - name: values
               type: Array
@@ -150,8 +148,6 @@ properties:
         - name: sparse
           type: NestedObject
           description: A sparse vector.
-          conflicts:
-            - dense
           properties:
             - name: values
               type: Array

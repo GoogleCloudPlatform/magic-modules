@@ -481,6 +481,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Gemini",
         "path" to "./google/services/gemini"
     ),
+    "geminidataanalytics" to mapOf(
+        "name" to "geminidataanalytics",
+        "displayName" to "Gemini Data Analytics",
+        "path" to "./google/services/geminidataanalytics"
+    ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
         "displayName" to "Gkebackup",
@@ -601,11 +606,6 @@ var ServicesListGa = mapOf(
         "displayName" to "Migrationcenter",
         "path" to "./google/services/migrationcenter"
     ),
-    "mlengine" to mapOf(
-        "name" to "mlengine",
-        "displayName" to "Mlengine",
-        "path" to "./google/services/mlengine"
-    ),
     "modelarmor" to mapOf(
         "name" to "modelarmor",
         "displayName" to "ModelArmor",
@@ -641,6 +641,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Networkmanagement",
         "path" to "./google/services/networkmanagement"
     ),
+    "networkmanagementv1" to mapOf(
+        "name" to "networkmanagementv1",
+        "displayName" to "Networkmanagementv1",
+        "path" to "./google/services/networkmanagementv1"
+    ),
     "networksecurity" to mapOf(
         "name" to "networksecurity",
         "displayName" to "Networksecurity",
@@ -650,11 +655,6 @@ var ServicesListGa = mapOf(
         "name" to "networkservices",
         "displayName" to "Networkservices",
         "path" to "./google/services/networkservices"
-    ),
-    "notebooks" to mapOf(
-        "name" to "notebooks",
-        "displayName" to "Notebooks",
-        "path" to "./google/services/notebooks"
     ),
     "observability" to mapOf(
         "name" to "observability",
@@ -840,6 +840,11 @@ var ServicesListGa = mapOf(
         "name" to "storagecontrol",
         "displayName" to "Storagecontrol",
         "path" to "./google/services/storagecontrol"
+    ),
+    "storageftp" to mapOf(
+        "name" to "storageftp",
+        "displayName" to "Storageftp",
+        "path" to "./google/services/storageftp"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

@@ -1,12 +1,10 @@
 resource "google_compute_region_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
-  provider              = google-beta
   name                  = "{{index $.ResourceIdVars "region_target_tcp_proxy_name"}}"
   region                = "europe-west4"
   load_balancing_scheme = "EXTERNAL_MANAGED"
 }
 
 resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   name        = "{{index $.ResourceIdVars "region_backend_service_name"}}"
   protocol    = "TCP"
   timeout_sec = 10
@@ -17,7 +15,6 @@ resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_region_health_check" "{{$.PrimaryResourceId}}" {
-  provider           = google-beta
   name               = "{{index $.ResourceIdVars "health_check_name"}}"
   region             = "europe-west4"
   timeout_sec        = 1
@@ -28,7 +25,6 @@ resource "google_compute_region_health_check" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_network_services_tls_route" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name     = "{{index $.ResourceIdVars "tls_route_name"}}"
   location = "europe-west4"
 

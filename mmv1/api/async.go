@@ -15,10 +15,10 @@ package api
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 

@@ -47,7 +47,12 @@ samples:
           cluster_id: mycluster1
           network_id: cluster-net1
         test_vars_overrides:
-          cluster_id: fmt.Sprintf("tf%s", acctest.RandString(t, 8))
+          # cluster_id must be at most 10 characters and may only contain
+          # lowercase letters and numbers, so the automatic "tf-test-" prefix
+          # cannot be used here. "tfgen" is also recognized by the sweeper and
+          # fits the charset/length limits.
+          cluster_id: fmt.Sprintf("tfgen%s", acctest.RandString(t, 5))
+          # "cluster-" is already a sweeper-recognized prefix.
           network_id: fmt.Sprintf("cluster-net1-%s", acctest.RandString(t,10))
 parameters:
   - name: location
@@ -101,6 +106,14 @@ properties:
                   description: |-
                     Specifies the time limit for created instances. Instances will be
                     terminated at the end of this duration.
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: zone
                   type: String
                   required: true
@@ -121,6 +134,14 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: zone
                   type: String
                   required: true
@@ -135,6 +156,14 @@ properties:
                 be created from a
                 [reservation](https://cloud.google.com/compute/docs/instances/reservations-overview).
               properties:
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: reservation
                   type: String
                   description: |-
@@ -154,6 +183,14 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
+                - name: networkTags
+                  type: Array
+                  min_version: beta
+                  description: |-
+                    A list of network tags to attach to the VM instances.
+                    A maximum of 64 network tags are allowed.
+                  item_type:
+                    type: String
                 - name: terminationAction
                   type: String
                   description: |-
@@ -358,6 +395,14 @@ properties:
                   Name of the Compute Engine [machine
                   type](https://cloud.google.com/compute/docs/machine-resource) to use for
                   login nodes, e.g. `n2-standard-2`.
+              - name: networkTags
+                type: Array
+                min_version: beta
+                description: |-
+                  A list of network tags to attach to the VM instances.
+                  A maximum of 64 network tags are allowed.
+                item_type:
+                  type: String
               - name: startupScript
                 type: String
                 description: |-
@@ -594,6 +639,26 @@ properties:
                   description: |-
                     Name of the Managed Lustre instance to import, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
+            - name: existingNfs
+              type: NestedObject
+              min_version: beta
+              description: |-
+                When set in a StorageResourceConfig, indicates that an existing NFS
+                share should be imported.
+              properties:
+                - name: mountOptions
+                  type: String
+                  description: |-
+                    Options to mount the NFS share, as expected by fs_mntops field in fstab(5),
+                    for example: "rw,vers=4.1,nconnect=2,noatime".
+                - name: remoteMount
+                  type: String
+                  required: true
+                  description: Remote mount path of the NFS share.
+                - name: serverIpAddress
+                  type: String
+                  required: true
+                  description: Server IP address of the NFS share.
             - name: newBucket
               type: NestedObject
               description: |-

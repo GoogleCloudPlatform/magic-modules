@@ -240,7 +240,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Sleep to let the billing account settle before other resources
 	// try to use this project.
-	time.Sleep(15 * time.Second)
+	time.Sleep(15 * config.SleepUnit)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -648,23 +648,60 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
-	net, err := tpgcompute.NewClient(config, userAgent).Networks.Get(projectId, networkName).Do()
+	networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), projectId, networkName)
+	net, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   projectId,
+		RawURL:    networkUrl,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return err
 	}
+	netSelfLink, _ := net["selfLink"].(string)
 
 	token := ""
 	for paginate := true; paginate; {
-		filter := fmt.Sprintf("network eq %s", net.SelfLink)
-		resp, err := tpgcompute.NewClient(config, userAgent).Firewalls.List(projectId).Filter(filter).Do()
+		params := map[string]string{
+			"filter": fmt.Sprintf("network eq %s", netSelfLink),
+		}
+		if token != "" {
+			params["pageToken"] = token
+		}
+		firewallsUrl, err := transport_tpg.AddQueryParams(
+			fmt.Sprintf("%sprojects/%s/global/firewalls", transport_tpg.BaseUrl(tpgcompute.Product, config), projectId),
+			params)
+		if err != nil {
+			return err
+		}
+
+		resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   projectId,
+			RawURL:    firewallsUrl,
+			UserAgent: userAgent,
+		})
 		if err != nil {
 			return errwrap.Wrapf("Error listing firewall rules in proj: {{err}}", err)
 		}
 
-		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(resp.Items), networkName)
+		items, _ := resp["items"].([]interface{})
+		log.Printf("[DEBUG] Found %d firewall rules in %q network", len(items), networkName)
 
-		for _, firewall := range resp.Items {
-			op, err := tpgcompute.NewClient(config, userAgent).Firewalls.Delete(projectId, firewall.Name).Do()
+		for _, item := range items {
+			firewall, _ := item.(map[string]interface{})
+			firewallName, _ := firewall["name"].(string)
+
+			deleteUrl := fmt.Sprintf("%sprojects/%s/global/firewalls/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), projectId, firewallName)
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "DELETE",
+				Project:   projectId,
+				RawURL:    deleteUrl,
+				UserAgent: userAgent,
+			})
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
@@ -674,7 +711,11 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 			}
 		}
 
-		token = resp.NextPageToken
+		if pToken, ok := resp["nextPageToken"]; ok && pToken != nil && pToken.(string) != "" {
+			token = pToken.(string)
+		} else {
+			token = ""
+		}
 		paginate = token != ""
 	}
 
@@ -723,15 +764,21 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		if baName == name {
 			return nil
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(3 * config.SleepUnit)
 	}
 	return fmt.Errorf("Timed out waiting for billing account to return correct value.  Waiting for %s, got %s.",
 		name, strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/"))
 }
 
 func deleteComputeNetwork(project, network, userAgent string, config *transport_tpg.Config) error {
-	op, err := tpgcompute.NewClient(config, userAgent).Networks.Delete(
-		project, network).Do()
+	url := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, network)
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
@@ -907,7 +954,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 func waitForServiceUsageEnabledServices(services []string, project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) error {
 	missing := make([]string, 0, len(services))
 	delay := time.Duration(0)
-	interval := time.Second
+	interval := config.SleepUnit
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			// Get the list of services that are enabled on the project

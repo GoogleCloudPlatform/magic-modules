@@ -62,9 +62,6 @@ samples:
           network: 'network'
           tag_key: 'tag-key'
           tag_value: 'tag-value'
-        test_vars_overrides:
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
           project_name: 'PROJECT_NAME'
@@ -90,9 +87,6 @@ samples:
         resource_id_vars:
           fw_policy: 'fw-policy'
           network: 'network'
-        test_vars_overrides:
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
           project_name: 'PROJECT_NAME'
@@ -115,9 +109,6 @@ samples:
         resource_id_vars:
           fw_policy: 'fw-policy'
           network: 'network'
-        test_vars_overrides:
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
           project_name: 'PROJECT_NAME'
@@ -130,7 +121,9 @@ samples:
         min_version: "beta"
         resource_id_vars:
           folder: 'folder'
-          fw_policy: 'fw-policy'
+          network_name: 'fw-policy-net'
+          fw_policy_name: 'simple-fw-policy'
+          fw_policy_association_name: 'fw-policy-assoc'
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
@@ -244,8 +237,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_context
       - name: 'destNetworkContext'
         type: Enum
         default_from_api: true
@@ -257,8 +248,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_scope
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

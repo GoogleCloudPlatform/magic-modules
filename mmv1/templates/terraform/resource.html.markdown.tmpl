@@ -67,12 +67,13 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 		{{- range $index, $step := $sample.Steps }}
 			{{- if $step.ShouldGenerateDoc $index $sample }}
 				{{- if not (or $sample.ExcludeTest $step.TestEnvVars) }}
-<div class = "oics-button" style="float: right; margin: 0 0 -15px">
-  <a href="{{ $step.OiCSLink }}" target="_blank">
-    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+<div class="oics-button" style="padding-top: 1px; margin-top: -1px;">
+  <a href="{{ $step.OiCSLink }}" target="_blank" style="float: right; margin: 32px 0 12px 16px;">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; max-width: 100%;">
   </a>
 </div>
 				{{- end }}
+
 ## Example Usage - {{ title (camelize $step.Name "upper" )}}
 
 
@@ -166,7 +167,7 @@ This resource provides the following
 - `update` - Default is {{$.GetTimeouts.UpdateMinutes}} minutes.
 {{- end }}
 - `delete` - Default is {{$.GetTimeouts.DeleteMinutes}} minutes.
-{{ if $.ProductMetadata.Version.RepEnabled }}
+{{ if $.ProductMetadata.Version.RepUrl }}
 ## Regional Endpoint Policies
 
 This resource supports Regional Endpoint Policies (REP). See the [provider reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#prefer_regional_endpoints) for more details on configuration.

@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "bucket" {
-  name     = "{{index $.TestEnvVars "project_id"}}-{{index $.ResourceIdVars "bucket_name"}}"  # Every bucket name must be globally unique
+  name     = "{{index $.ResourceIdVars "bucket_name"}}-{{index $.TestEnvVars "project_id"}}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }

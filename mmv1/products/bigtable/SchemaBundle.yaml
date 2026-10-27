@@ -35,6 +35,8 @@ timeouts:
   update_minutes: 10
   delete_minutes: 10
 exclude_sweeper: true
+error_retry_predicates:
+  - transport_tpg.IsBigtableTableCreatingOrDeletingError
 samples:
   - name: bigtable_schema_bundle
     primary_resource_id: schema_bundle

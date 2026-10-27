@@ -1,5 +1,6 @@
 {
   "name": "removal-auditor",
+  "description": "Performs pre-flight deprecation audits, branch sync checks, and repository blast-radius scans for major release removals.",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }

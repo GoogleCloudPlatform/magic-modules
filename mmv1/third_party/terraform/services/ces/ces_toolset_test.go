@@ -24,6 +24,10 @@ func TestAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_update(t
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_full(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_openapi_service_account_auth_config", "open_api_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.#", "1"),
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_openapi_service_account_auth_config", "open_api_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.0", "https://www.googleapis.com/auth/cloud-platform"),
+				),
 			},
 			{
 				ResourceName:            "google_ces_toolset.ces_toolset_openapi_service_account_auth_config",
@@ -38,6 +42,11 @@ func TestAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_update(t
 						plancheck.ExpectResourceAction("google_ces_toolset.ces_toolset_openapi_service_account_auth_config", plancheck.ResourceActionUpdate),
 					},
 				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_openapi_service_account_auth_config", "open_api_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.#", "2"),
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_openapi_service_account_auth_config", "open_api_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.0", "https://www.googleapis.com/auth/cloud-platform"),
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_openapi_service_account_auth_config", "open_api_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.1", "https://www.googleapis.com/auth/userinfo.email"),
+				),
 			},
 			{
 				ResourceName:            "google_ces_toolset.ces_toolset_openapi_service_account_auth_config",
@@ -73,7 +82,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -135,7 +144,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Updated toolset display name"
@@ -165,7 +174,7 @@ resource "google_ces_toolset" "ces_toolset_openapi_service_account_auth_config" 
     api_authentication {
         service_account_auth_config {
             service_account = "${google_service_account.ces_test_service_account.email}"
-            scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+            scopes = ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/userinfo.email"]
         }
     }
   }
@@ -232,7 +241,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_oauth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -292,7 +301,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_oauth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -391,7 +400,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_service_agent_id_token_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -446,7 +455,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_service_agent_id_token_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Updated toolset display name"
@@ -540,7 +549,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_api_key_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -598,7 +607,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_openapi_api_key_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -695,7 +704,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_bearer_token_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -758,7 +767,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
 }
 
 resource "google_ces_toolset" "ces_toolset_bearer_token_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -815,6 +824,10 @@ func TestAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_update(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_full(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_mcp_service_account_auth_config", "mcp_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.#", "1"),
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_mcp_service_account_auth_config", "mcp_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.0", "https://www.googleapis.com/auth/cloud-platform"),
+				),
 			},
 			{
 				ResourceName:            "google_ces_toolset.ces_toolset_mcp_service_account_auth_config",
@@ -829,6 +842,11 @@ func TestAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_update(t *te
 						plancheck.ExpectResourceAction("google_ces_toolset.ces_toolset_mcp_service_account_auth_config", plancheck.ResourceActionUpdate),
 					},
 				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_mcp_service_account_auth_config", "mcp_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.#", "2"),
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_mcp_service_account_auth_config", "mcp_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.0", "https://www.googleapis.com/auth/cloud-platform"),
+					resource.TestCheckResourceAttr("google_ces_toolset.ces_toolset_mcp_service_account_auth_config", "mcp_toolset.0.api_authentication.0.service_account_auth_config.0.scopes.1", "https://www.googleapis.com/auth/userinfo.email"),
+				),
 			},
 			{
 				ResourceName:            "google_ces_toolset.ces_toolset_mcp_service_account_auth_config",
@@ -862,7 +880,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -910,7 +928,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -928,7 +946,7 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_account_auth_config" {
     api_authentication {
         service_account_auth_config {
             service_account = "${google_service_account.ces_test_service_account.email}"
-            scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+            scopes = ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/userinfo.email"]
         }
     }
   }
@@ -993,7 +1011,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_oauth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1040,7 +1058,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_oauth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1126,7 +1144,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_bearer_token_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1169,7 +1187,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_bearer_token_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1251,7 +1269,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_api_key_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1298,7 +1316,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_api_key_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1384,7 +1402,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1404,6 +1422,11 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
     }
     api_authentication {
         service_agent_id_token_auth_config {}
+    }
+    tool_overrides {
+      tool = "my-tool"
+      name_override = "my_tool_override"
+      description_override = "A tool description override"
     }
   }
 }
@@ -1428,7 +1451,7 @@ resource "google_ces_app" "ces_app_for_toolset" {
   }
 }
 resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_config" {
-  toolset_id = "toolset1%{random_suffix}"
+  toolset_id = "tf-test-toolset1%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_toolset.app_id
   display_name = "Basic toolset display name"
@@ -1448,6 +1471,11 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
     }
     api_authentication {
         service_agent_id_token_auth_config {}
+    }
+    tool_overrides {
+      tool = "my-tool"
+      name_override = "my_tool_override_updated"
+      description_override = "A tool description override updated"
     }
   }
 }

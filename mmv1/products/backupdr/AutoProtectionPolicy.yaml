@@ -1,0 +1,199 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AutoProtectionPolicy
+description: |
+  An AutoProtectionPolicy automates backup management by applying a backup plan to all
+  eligible resources that match the policy's criteria, instead of protecting each resource
+  individually. A policy takes effect only after it is attached to a scope, such as a
+  project, with a `google_backup_dr_auto_protection_policy_binding`.
+min_version: beta
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/backup-disaster-recovery/docs
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1beta/projects.locations.autoProtectionPolicies
+base_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies
+self_link: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}
+create_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies?autoProtectionPolicyId={{auto_protection_policy_id}}
+update_verb: PATCH
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+samples:
+  - name: backup_dr_auto_protection_policy_basic
+    primary_resource_id: my-auto-protection-policy
+    min_version: beta
+    steps:
+      - name: backup_dr_auto_protection_policy_basic
+        resource_id_vars:
+          backup_vault_id: bv-app
+          backup_plan_id: bp-app
+          auto_protection_policy_id: app
+  - name: backup_dr_auto_protection_policy_update
+    primary_resource_id: my-auto-protection-policy
+    min_version: beta
+    steps:
+      - name: backup_dr_auto_protection_policy_full
+        resource_id_vars:
+          backup_vault_id: bv-app-update
+          instance_backup_plan_id: bp-app-update-vm
+          disk_backup_plan_id: bp-app-update-disk
+          auto_protection_policy_id: app-update
+      - name: backup_dr_auto_protection_policy_full_update
+        resource_id_vars:
+          backup_vault_id: bv-app-update
+          instance_backup_plan_id: bp-app-update-vm
+          disk_backup_plan_id: bp-app-update-disk
+          auto_protection_policy_id: app-update
+parameters:
+  - name: location
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location of the auto protection policy.
+  - name: autoProtectionPolicyId
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the auto protection policy. This becomes the final component of the policy's resource name.
+properties:
+  - name: name
+    type: String
+    output: true
+    description: |
+      The resource name of the auto protection policy, in the format
+      `projects/{project}/locations/{location}/autoProtectionPolicies/{auto_protection_policy_id}`.
+  - name: description
+    type: String
+    description: |
+      A description of the auto protection policy.
+  - name: criteria
+    type: NestedObject
+    required: true
+    description: |
+      The criteria that a resource must meet to be protected by the policy.
+    properties:
+      - name: matchingConditions
+        type: Array
+        required: true
+        description: |
+          A list of matching conditions that a resource must meet to be protected by the policy.
+          Currently, only one condition is supported.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: labelCondition
+              type: NestedObject
+              description: |
+                A condition that matches resources based on their labels.
+              properties:
+                - name: key
+                  type: String
+                  required: true
+                  description: |
+                    The key of the label to match.
+                - name: values
+                  type: Array
+                  required: true
+                  description: |
+                    The values of the label to match. A resource matches the condition if its label
+                    value is equal to any of the listed values. Currently, only one value is supported.
+                  item_type:
+                    type: String
+  - name: backupPlanDetails
+    type: Array
+    required: true
+    description: |
+      The backup plans to apply to the resources that match the policy's criteria. Each entry
+      specifies a resource type and the backup plan that protects resources of that type.
+      Currently, only one entry is supported.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: resourceType
+          type: String
+          required: true
+          description: |
+            The type of resource that this policy automatically protects, for example
+            `compute.googleapis.com/Instance` or `compute.googleapis.com/Disk`.
+        - name: backupPlan
+          type: String
+          required: true
+          diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+          description: |
+            The resource name of the backup plan to apply to the matching resources, in the format
+            `projects/{project}/locations/{location}/backupPlans/{backup_plan_id}`. The backup plan
+            must be in the same location as the auto protection policy.
+  - name: state
+    type: String
+    output: true
+    description: |
+      The current state of the auto protection policy.
+      Possible values are `CREATING`, `ACTIVE`, `UPDATING`, and `DELETING`.
+  - name: etag
+    type: String
+    output: true
+    description: |
+      The etag of the auto protection policy, used for optimistic concurrency control.
+  - name: createTime
+    type: String
+    output: true
+    description: |
+      The time when the auto protection policy was created.
+  - name: updateTime
+    type: String
+    output: true
+    description: |
+      The time when the auto protection policy was last updated.
+  - name: policyEvaluationSummary
+    type: NestedObject
+    output: true
+    description: |
+      A summary of the last run of the job that applies the policy to matching resources.
+    properties:
+      - name: matchingResourceCount
+        type: String
+        output: true
+        description: |
+          The number of resources that currently match the policy's criteria.
+      - name: protectedResourceCount
+        type: String
+        output: true
+        description: |
+          The number of matching resources that are successfully protected.
+      - name: failedResourceCount
+        type: String
+        output: true
+        description: |
+          The number of matching resources whose protection failed during the last job run.
+  - name: bindingSummary
+    type: NestedObject
+    output: true
+    description: |
+      A summary of the scopes that the policy is applied to through bindings.
+    properties:
+      - name: projectCount
+        type: String
+        output: true
+        description: |
+          The total number of projects protected by the policy.

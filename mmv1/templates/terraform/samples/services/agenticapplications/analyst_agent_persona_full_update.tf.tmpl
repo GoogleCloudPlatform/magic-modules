@@ -23,6 +23,7 @@ resource "google_storage_bucket_object" "object" {
 }
 
 resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
+  project                  = "{{index $.TestEnvVars "project_number"}}"
   location                 = "us"
   analyst_agent_persona_id = "{{index $.ResourceIdVars "persona_id"}}"
   display_name             = "Full Test Analyst Persona Updated"
@@ -109,6 +110,7 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       }
     }
     visualization_options {
+      visualization_mode = "VISUALIZATION_MODE_ALWAYS"
       visualization_examples {
         visualization_type = "VISUALIZATION_TYPE_UNSPECIFIED"
         resource {
@@ -136,7 +138,9 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
     enabled         = true
     prompt          = "Use this server for updated queries"
     api_key_name    = "x-api-key"
+    api_key_header  = "x-api-key-header-updated"
     client_id       = "sample-client-id"
+    client_secret   = "sample-client-secret"
     oauth_token_url = "https://example.com/oauth/token"
   }
 
@@ -188,5 +192,12 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
       description = "First column description updated"
       data_type   = "STRING"
     }
+  }
+
+  math_rendering_mode = "MATH_RENDERING_MODE_PLAIN_TEXT"
+
+  web_search_config {
+    disabled         = true
+    excluded_domains = ["updated-example.com"]
   }
 }

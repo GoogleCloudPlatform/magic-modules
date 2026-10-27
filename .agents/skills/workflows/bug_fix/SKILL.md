@@ -5,63 +5,60 @@ description: "Workflow for triaging, planning, fixing, and verifying reported pr
 
 # `bug-fix-workflow`
 
-This document outlines the structured 6-step lifecycle for investigating, planning, fixing, and verifying reported provider bugs in Magic Modules.
-
-## Prerequisites
-*   You must be in the `magic-modules` root directory.
-*   You must have access to the relevant downstream provider workspace(s) (GA and/or Beta) required by the bug. When in doubt, ask the user.
-
+This document outlines the structured lifecycle for investigating, reproducing, fixing, and verifying reported provider bugs in Magic Modules.
 
 ## Execution Steps
 
-### 1. Repo Sync & Baseline Setup
-*   Execute the `repo-sync` skill (located in `.agents/skills/operations/repo-sync/`). This skill handles checking the sync status and prompting for action if needed to establish a clean sync baseline.
+### 1. Triage & Context Gathering
+* **External context:** Read the target issue description, related bug reports, and external API documentation (e.g., REST API references).
+* **Internal context:** Consult the Knowledge Index (`.agents/knowledge/index.md`) for relevant topics/patterns and search the codebase for affected schemas, fields, expanders, or flatteners.
+* **Historical context:** Trace Git history (`git log`, PRs, blame) in the repository and downstream providers to identify how the defect was introduced or how similar resources behave.
 
-### 2. Triage & Context Gathering
-*   **External context:** Read the target issue description, related bug reports, and external API documentation (e.g., REST API references) to understand service behavior and parameters.
-*   **Internal context:** Consult the Knowledge Index (`.agents/knowledge/index.md`) for any relevant topics, patterns, or repository-specific instructions. Then search the codebase to locate where the affected fields, schemas, expanders, or flatteners are defined.
-*   **Historical context:** Trace Git logs, tags, and past PRs in the repository and downstream provider repositories to identify the lifecycle of the affected code, related fixes, or similar resource implementations (`Modeled after:` / `Based on:`).
+### 2. Empirical Issue Reproduction & Remediation Plan
+* **Empirical Reproduction (RED Check):** Formulate a minimal reproduction (acceptance test, CLI plan with dev overrides, or targeted schema test) and run it against the *unfixed baseline*.
+  * ❌ **If reproduction FAILS to recreate the bug** (or unexpectedly passes): STOP. The static analysis is incomplete. Re-investigate, update findings, and present a revised plan at the HITL Checkpoint.
+  * ✅ **If reproduction SUCCEEDS in recreating the bug**: Document the failure signature.
+* **Remediation Plan:**
+  * Identify root cause and propose the exact MMv1 changes.
+  * **Unit Test Scope:** Consult [`.agents/knowledge/test/unit-test-scope.md`](../../../knowledge/test/unit-test-scope.md).
+  * **Backwards Compatibility:** Check `docs/content/breaking-changes/` for schema or validation changes.
+  * **Version Upgrade Safety (`RELEASE_DIFF=true`):** Recommend running acceptance tests with `RELEASE_DIFF=true make testacc ...` to verify zero plan diffs against the released provider baseline.
+  * Create an Investigation & Remediation Report artifact.
 
-### 3. Remediation Planning (Proposal)
-*   Analyze the triage findings and identify the root cause.
-*   **Backwards Compatibility Check:** When proposing code changes that alter schema validation (e.g., adding `ValidateFunc`), default values, or resource naming/ID formulas, check `docs/content/breaking-changes/` and explicitly note in the investigation report whether existing deployed resources or valid configurations are affected.
-*   Create a final investigation report (an artifact) detailing the root cause, affected version matrix, and analysis.
-*   Propose a resolution path to the user:
-    *   If the bug can be resolved or closed without code changes, propose closing the issue (e.g. if the bug is already fixed in a released version, is a duplicate, is not a bug, or is otherwise closeable).
-    *   If the bug requires code changes, propose the code modification plan (dipping into the `fix` planning skill located in `.agents/skills/operations/fix/`).
-*   **Verification Proposal:** If running an acceptance test (live or VCR) is necessary to verify either the code change or the initial analysis (e.g., to prove it's already resolved in the latest version), explicitly include the test execution in the proposed plan. Do not run tests unilaterally unless approved.
-    *   **Version Upgrade Safety (`RELEASE_DIFF=true`):** When testing bug fixes that modify schema validation, defaults, or ID/name formatting, recommend running the acceptance test with `RELEASE_DIFF=true make testacc ...` to verify zero plan diffs against the released provider baseline.
-*   **HIL steering checkpoint:** Present the analysis, proposal, and testing plan to the user. **Do not proceed to implementation or testing until the user confirms the plan.**
+---
 
+### 🛑 CRITICAL: MANDATORY HUMAN-IN-THE-LOOP CHECKPOINT
+* **STOP ALL TOOL CALLS AND YIELD EXECUTION TO THE USER.**
+* Present the investigation report, empirical reproduction results, and remediation plan.
+* **DO NOT** write fix code, generate downstream providers, or edit files until the user explicitly approves the plan.
+* *Re-steering triggers:* If reproduction failed, verification failed, or fix scope expands, you MUST return here and pause.
 
-### 4. Implementation & Code Generation (Only if code changes are required)
-*   Apply the approved schema or logic changes in Magic Modules (`mmv1/`).
-*   **Template Modifications:** If the fix requires modifying engine templates (`mmv1/templates/terraform/`), consult the Knowledge Index entry on [Template Modifications & Blast Radius](../../../knowledge/template/template-modifications.md). Obtain explicit user approval before modifying engine templates.
-*   Execute code generation to compile the downstream provider (using the `generate-provider` skill located in `.agents/skills/operations/generate-provider/`).
+---
 
+### 3. Implementation & Code Generation (Only after user approval)
+* Apply approved changes in Magic Modules (`mmv1/`).
+* **Template Modifications:** If modifying engine templates (`mmv1/templates/terraform/`), consult [Template Modifications & Blast Radius](../../../knowledge/template/template-modifications.md) and obtain explicit user approval before proceeding.
+* Execute code generation via `generate-provider` (`.agents/skills/operations/generate-provider/`) to compile downstream providers.
 
-### 5. Verification Testing (Only if approved in the plan)
-*   Execute the `qa-test-runner` skill (located in `.agents/skills/operations/qa-test-runner/`) to trigger test runs and parse logs.
-*   **Verification:** Verify the test finishes successfully (`PASS`). Inspect the API request/response payloads in the test logs or report to confirm the correct payload structure (e.g., verifying fields are correctly set or sent as `null`/omitted).
+### 4. Post-Fix Verification (GREEN Check)
+* **Verify Reproduction:** Run the **exact same reproduction** from Step 2 against the patched build to confirm it now passes (RED $\rightarrow$ GREEN).
+* **Cleanup Ephemeral Tests:** Remove any ad-hoc reproduction tests before proceeding.
+* **Acceptance Tests:** Execute `qa-test-runner` (`.agents/skills/operations/qa-test-runner/`) for target acceptance tests. Verify payloads and `PASS` status.
 
-
-### 6. Resolution & Issue Reporting
-*   **Plan Completeness:** Verify that every file listed in the remediation plan (including any necessary documentation) has been generated and staged.
-*   **Pre-PR Quality & Verification Gate:** Before opening a PR or finalizing the branch, run the following verification pipeline:
-    1. **Build Verification:** Run `make build` in downstream provider repository to ensure full compilation passes without syntax errors.
-    2. **Acceptance Test Verification:** Confirm target acceptance tests pass (`PASS`).
-    3. **Pre-Gen Static Checks:** Execute the `run-pre-gen-checks` skill (`.agents/skills/utils/run-pre-gen-checks/`) to run fast static checks directly against Magic Modules (Go formatting, YAML linting, template validation, and MMv1 unit tests).
-    4. **Breaking Change Validation:** Execute the `validate-provider-changes` skill (`.agents/skills/utils/validate-provider-changes/`) if schemas or properties were modified.
-*   **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts across both repositories before reporting resolution or creating a PR.
-*   **Artifact Report:** If code changes or verification tests were performed, compile these results into a separate verification/test report artifact.
-*   **GitHub Response Draft:** Draft a final, succinct public response containing verified PR/commit links.
-    *   **Succinct Public Communication:** Responses should be concise (2–3 sentences preferred): state what changed, why, and refer readers to the PR or documentation for technical deep-dives.
-*   **HIL steering checkpoint:** Present the final response draft and any new verification reports to the user for sign-off and issue closure.
-
+### 5. Resolution & Issue Reporting
+* **Plan Completeness:** Verify all changed and generated files are staged.
+* **Pre-PR Quality Gate:**
+  1. **Build Verification:** Run `make build` in downstream provider repository to ensure compilation passes without errors.
+  2. **Acceptance Test Verification:** Confirm target acceptance tests pass (`PASS`).
+  3. **Pre-Gen Static Checks:** Run `./.agents/skills/utils/run-pre-gen-checks/scripts/run_pre_gen_checks.sh`.
+  4. **Breaking Change Validation:** Run `validate-provider-changes` if schemas changed.
+* **Prepare PR Link:** Execute `prepare-pr-link` (`.agents/skills/operations/prepare-pr-link/`) to push to fork and generate the comparison link.
+* **Workspace Cleanup:** Run `git status --porcelain` and remove any untracked `.log`, `.test`, or temporary test artifacts.
+* **HIL Final Checkpoint:** Present the final response draft (2–3 sentences) and verification report to the user for sign-off.
 
 ---
 
 ## The Loop
-If verification fails during Step 5, repeat steps 3-5 as needed.
-*   **Scope Expansion Guardrail:** If debugging reveals that resolving the root cause requires expanding scope beyond the approved plan (such as modifying engine templates in `mmv1/templates/` or altering additional fields/resources), do NOT apply changes silently. Loop back to Step 3, update the investigation report artifact, and obtain explicit user approval.
-*   Reset to Step 4 (Implementation & Code Generation) after applying any approved fix changes to compile and re-test.
+If verification fails during Step 4, repeat steps 2-4 as needed.
+* **Scope Expansion Guardrail:** If resolving the root cause requires expanding scope beyond the approved plan (such as modifying engine templates in `mmv1/templates/` or altering additional fields/resources), do NOT apply changes silently. Loop back to Step 2, update the report, and obtain explicit user approval at the HITL Checkpoint.
+* Reset to Step 3 (Implementation & Code Generation) after applying any approved fix changes to compile and re-test.
