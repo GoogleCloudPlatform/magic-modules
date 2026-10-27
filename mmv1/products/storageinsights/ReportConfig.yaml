@@ -185,3 +185,7 @@ properties:
     type: String
     description: |
       The editable display name of the inventory report configuration. Has a limit of 256 characters. Can be empty.
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Have a character limit of 64 per key and value.
