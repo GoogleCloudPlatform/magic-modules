@@ -232,6 +232,7 @@ func suppressDiffForDnsConfig(k, oldValue, newValue string, d *schema.ResourceDa
 	if suppressDiffForAutopilot(k, oldValue, newValue, d) {
 		return true
 	}
+	// If ever set, the API permanently returns an empty block in the response
 	if k == "dns_config.#" && oldValue == "1" && newValue == "0" {
 		clusterDns, _ := d.GetChange("dns_config.0.cluster_dns")
 		clusterDnsScope, _ := d.GetChange("dns_config.0.cluster_dns_scope")
