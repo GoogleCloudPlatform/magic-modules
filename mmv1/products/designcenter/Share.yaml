@@ -107,4 +107,3 @@ samples:
           space: BootstrapDesignCenterSpace(t)
           catalog: BootstrapDesignCenterCatalog(t)
           destination_space: BootstrapDesignCenterDestinationSpace(t)
-
