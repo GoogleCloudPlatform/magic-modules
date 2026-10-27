@@ -1,0 +1,8 @@
+resource "google_design_center_catalog" "example" {
+  project      = "{{index $.Vars "project"}}"
+  location     = "us-central1"
+  space        = "{{index $.Vars "space"}}"
+  catalog_id   = "{{index $.ResourceIdVars "catalog_id"}}"
+  display_name = "Example Design Center Catalog"
+  description  = "Managed by Terraform"
+}
