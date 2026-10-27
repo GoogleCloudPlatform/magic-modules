@@ -38,4 +38,18 @@ if paramMap, ok := res["params"]; ok {
 	res["params"] = params
 }
 
+// The BigQuery Data Transfer API mirrors time-based and manual schedules
+// between v1 (`schedule`, `scheduleOptions`) and v2 (`scheduleOptionsV2`) on
+// read. Filter out the unconfigured representation so the mutually exclusive
+// schema fields do not conflict or cause diffs after read.
+if v, ok := d.Get("schedule_options_v2").([]interface{}); ok && len(v) > 0 && v[0] != nil {
+	delete(res, "schedule")
+	delete(res, "scheduleOptions")
+} else if v2Map, ok := res["scheduleOptionsV2"].(map[string]interface{}); ok && v2Map["eventDrivenSchedule"] != nil {
+	delete(res, "schedule")
+	delete(res, "scheduleOptions")
+} else {
+	delete(res, "scheduleOptionsV2")
+}
+
 return res, nil
