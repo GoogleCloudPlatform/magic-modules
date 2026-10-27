@@ -2,7 +2,8 @@
 name: "CatalogTemplateRevision"
 description: "A revision of a CatalogTemplate."
 base_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions"
-has_self_link: true
+create_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions?catalogTemplateRevisionId={{revision_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
 immutable: true
 import_format:
   - "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
@@ -11,6 +12,17 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: "OpAsync"
+  operation:
+    base_url: "{{op_id}}"
+  result:
+    path: "response"
+    resource_inside_response: true
+  error:
+    path: "error"
+    message: "message"
 parameters:
   - name: "location"
     type: "String"
@@ -47,12 +59,57 @@ properties:
     type: "String"
     output: true
     description: "The resource name of the revision."
-  - name: "displayName"
-    type: "String"
-    description: "The display name of the revision."
   - name: "description"
     type: "String"
+    immutable: true
     description: "The description of the revision."
+  - name: "type"
+    type: "String"
+    immutable: true
+    description: "The type of the component template revision."
+  - name: "gitSource"
+    type: "NestedObject"
+    immutable: true
+    description: "Git repository source for the template revision."
+    properties:
+      - name: "repo"
+        type: "String"
+        required: true
+        immutable: true
+        description: "The Git repository URI."
+      - name: "dir"
+        type: "String"
+        immutable: true
+        description: "The directory path within the Git repository."
+      - name: "refTag"
+        type: "String"
+        required: true
+        immutable: true
+        description: "The Git reference tag or branch."
+      - name: "commitSha"
+        type: "String"
+        output: true
+        description: "The commit SHA resolved from the reference tag."
+  - name: "applicationTemplateRevisionSource"
+    type: "String"
+    immutable: true
+    description: "The application template revision source URI."
+  - name: "annotations"
+    type: "KeyValueAnnotations"
+    immutable: true
+    description: "The annotations of the revision."
+  - name: "state"
+    type: "String"
+    output: true
+    description: "The state of the revision."
+  - name: "uuid"
+    type: "String"
+    output: true
+    description: "The unique identifier of the revision."
+  - name: "templateCategory"
+    type: "String"
+    output: true
+    description: "The category of the parent catalog template."
   - name: "createTime"
     type: "Time"
     output: true
@@ -61,3 +118,20 @@ properties:
     type: "Time"
     output: true
     description: "The last update time of the revision."
+samples:
+  - name: designcenter_catalog_template_revision_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_template_revision_basic
+        resource_id_vars:
+          revision_id: example-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-catalog-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterCatalogTemplate(t)
