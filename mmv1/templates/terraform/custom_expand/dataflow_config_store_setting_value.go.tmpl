@@ -24,6 +24,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	transformed := make(map[string]interface{})
 
 	if d != nil {
+{{- if not (contains $.ResourceMetadata.ProductMetadata.Compiler "terraformgoogleconversion") }}
 		if rd, ok := d.(interface{ GetRawConfig() cty.Value }); ok {
 			rawConfig := rd.GetRawConfig()
 			if rawConfig.IsKnown() && !rawConfig.IsNull() && rawConfig.Type().IsObjectType() && rawConfig.Type().HasAttribute("value") {
@@ -43,6 +44,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 				}
 			}
 		}
+{{- end }}
 
 		if s, ok := d.GetOk("value.0.string_value"); ok && s.(string) != "" {
 			transformed["stringValue"] = s.(string)
