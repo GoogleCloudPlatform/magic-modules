@@ -1308,6 +1308,19 @@ properties:
                                                       description: |-
                                                         Transcript of the word.
                                                       required: true
+                                          - name: 'speechMetadata'
+                                            type: NestedObject
+                                            description: |-
+                                              Turn-level metadata for speech generation. May be set alongside `text` to attach speaker and style information to a text part.
+                                            properties:
+                                              - name: 'speaker'
+                                                type: String
+                                                description: |-
+                                                  Identifies which speaker is speaking this turn.
+                                              - name: 'style'
+                                                type: String
+                                                description: |-
+                                                  Natural language description of the vocal style (e.g., "cheerful").
                       - name: 'generatedMemories'
                         type: Array
                         description: |-
