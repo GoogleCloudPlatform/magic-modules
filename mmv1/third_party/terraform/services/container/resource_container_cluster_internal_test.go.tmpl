@@ -1199,24 +1199,48 @@ func TestSuppressDiffForClusterDns(t *testing.T) {
 func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 	t.Parallel()
 
+	type priorState struct {
+		mode       string
+		clusterDns string
+		scope      string
+		domain     string
+		avpcDomain string
+	}
+
 	const (
-		priorCreate          = "<create>"
-		priorAbsent          = "<absent>"
-		priorFlattenedUnspec = ""
-		unspec               = "PROVIDER_UNSPECIFIED"
-		cloudDns             = "CLOUD_DNS"
+		modeCreate  = "<create>"
+		modeAbsent  = "<absent>"
+		modePresent = "<present>"
+
+		unspec          = "PROVIDER_UNSPECIFIED"
+		platformDefault = "PLATFORM_DEFAULT"
+		kubeDns         = "KUBE_DNS"
+		cloudDns        = "CLOUD_DNS"
 	)
 
+	priorCreate := priorState{mode: modeCreate}
+	priorAbsent := priorState{mode: modeAbsent}
+	priorFlattenedUnspec := priorState{mode: modePresent}
+	priorUnspec := priorState{mode: modePresent, clusterDns: unspec, scope: "DNS_SCOPE_UNSPECIFIED"}
+	priorPlatformDefault := priorState{mode: modePresent, clusterDns: platformDefault}
+	priorKubeDns := priorState{mode: modePresent, clusterDns: kubeDns}
+	priorCloudDns := priorState{mode: modePresent, clusterDns: cloudDns}
+	priorClusterScopeOnly := priorState{mode: modePresent, scope: "CLUSTER_SCOPE"}
+	priorDomainOnly := priorState{mode: modePresent, domain: "cluster.local"}
+	priorAvpcDomainOnly := priorState{mode: modePresent, avpcDomain: "example.com"}
+
 	configs := map[string]map[string]interface{}{
-		"Missing":   {},
-		"Empty":     {"dns_config": []interface{}{map[string]interface{}{}}},
-		"UNSPEC":    {"dns_config": []interface{}{map[string]interface{}{"cluster_dns": unspec}}},
-		"CLOUD_DNS": {"dns_config": []interface{}{map[string]interface{}{"cluster_dns": cloudDns}}},
+		"Missing":          {},
+		"Empty":            {"dns_config": []interface{}{map[string]interface{}{}}},
+		"UNSPEC":           {"dns_config": []interface{}{map[string]interface{}{"cluster_dns": unspec}}},
+		"PLATFORM_DEFAULT": {"dns_config": []interface{}{map[string]interface{}{"cluster_dns": platformDefault}}},
+		"KUBE_DNS":         {"dns_config": []interface{}{map[string]interface{}{"cluster_dns": kubeDns}}},
+		"CLOUD_DNS":        {"dns_config": []interface{}{map[string]interface{}{"cluster_dns": cloudDns}}},
 	}
 
 	cases := []struct {
 		name        string
-		prior       string
+		prior       priorState
 		config      string
 		wantRequest string
 	}{
@@ -1232,19 +1256,33 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 
 		// When the GKE API returns `"dnsConfig": {}` for PROVIDER_UNSPECIFIED,
 		// flattenDnsConfig sets `cluster_dns = ""` in state. Subsequent plans
-		// with `dns_config {}` or `cluster_dns = "PROVIDER_UNSPECIFIED"` must
-		// produce no diff and send no update request.
+		// with `dns_config` omitted, `dns_config {}`, or
+		// `cluster_dns = "PROVIDER_UNSPECIFIED"` must produce no diff and send
+		// no update request.
+		{"flattened_unspec/Missing", priorFlattenedUnspec, "Missing", ""},
 		{"flattened_unspec/Empty", priorFlattenedUnspec, "Empty", ""},
 		{"flattened_unspec/UNSPEC", priorFlattenedUnspec, "UNSPEC", ""},
 		{"flattened_unspec/CLOUD_DNS", priorFlattenedUnspec, "CLOUD_DNS", `{"clusterDns":"CLOUD_DNS"}`},
 
-		{"CLOUD_DNS/Empty", cloudDns, "Empty", `{"clusterDns":"PROVIDER_UNSPECIFIED"}`},
-		{"CLOUD_DNS/UNSPEC", cloudDns, "UNSPEC", `{"clusterDns":"PROVIDER_UNSPECIFIED"}`},
-		{"CLOUD_DNS/CLOUD_DNS", cloudDns, "CLOUD_DNS", ""},
+		{"UNSPEC_and_DNS_SCOPE_UNSPECIFIED/Missing", priorUnspec, "Missing", ""},
+		{"PLATFORM_DEFAULT/Missing", priorPlatformDefault, "Missing", `{}`},
+		{"PLATFORM_DEFAULT/Empty", priorPlatformDefault, "Empty", `{"clusterDns":"PROVIDER_UNSPECIFIED"}`},
+		{"KUBE_DNS/Missing", priorKubeDns, "Missing", `{}`},
+		{"KUBE_DNS/Empty", priorKubeDns, "Empty", `{"clusterDns":"PROVIDER_UNSPECIFIED"}`},
+		{"CLOUD_DNS/Missing", priorCloudDns, "Missing", `{}`},
+		{"CLOUD_DNS/Empty", priorCloudDns, "Empty", `{"clusterDns":"PROVIDER_UNSPECIFIED"}`},
+		{"CLOUD_DNS/UNSPEC", priorCloudDns, "UNSPEC", `{"clusterDns":"PROVIDER_UNSPECIFIED"}`},
+		{"CLOUD_DNS/CLOUD_DNS", priorCloudDns, "CLOUD_DNS", ""},
+
+		// Non-default subfields in prior state must not be suppressed when removing dns_config.
+		{"cluster_scope_only/Missing", priorClusterScopeOnly, "Missing", `{}`},
+		{"domain_only/Missing", priorDomainOnly, "Missing", `{}`},
+		{"avpc_domain_only/Missing", priorAvpcDomainOnly, "Missing", `{}`},
 	}
 
 	r := &schema.Resource{Schema: map[string]*schema.Schema{
-		"dns_config": ResourceContainerCluster().Schema["dns_config"],
+		"enable_autopilot": ResourceContainerCluster().Schema["enable_autopilot"],
+		"dns_config":       ResourceContainerCluster().Schema["dns_config"],
 	}}
 
 	for _, tc := range cases {
@@ -1253,10 +1291,10 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 			t.Parallel()
 
 			var prior *terraform.InstanceState
-			switch tc.prior {
-			case priorCreate:
+			switch tc.prior.mode {
+			case modeCreate:
 				prior = &terraform.InstanceState{}
-			case priorAbsent:
+			case modeAbsent:
 				prior = &terraform.InstanceState{ID: "id", Attributes: map[string]string{
 					"id":           "id",
 					"dns_config.#": "0",
@@ -1265,10 +1303,10 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 				prior = &terraform.InstanceState{ID: "id", Attributes: map[string]string{
 					"id":                                         "id",
 					"dns_config.#":                               "1",
-					"dns_config.0.additive_vpc_scope_dns_domain": "",
-					"dns_config.0.cluster_dns":                   tc.prior,
-					"dns_config.0.cluster_dns_domain":            "",
-					"dns_config.0.cluster_dns_scope":             "",
+					"dns_config.0.additive_vpc_scope_dns_domain": tc.prior.avpcDomain,
+					"dns_config.0.cluster_dns":                   tc.prior.clusterDns,
+					"dns_config.0.cluster_dns_domain":            tc.prior.domain,
+					"dns_config.0.cluster_dns_scope":             tc.prior.scope,
 				}}
 			}
 
@@ -1281,14 +1319,18 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 				t.Fatalf("Data: %v", err)
 			}
 
-			sent := tc.prior == priorCreate || d.HasChange("dns_config")
+			sent := tc.prior.mode == modeCreate || d.HasChange("dns_config")
 			if wantSent := tc.wantRequest != ""; sent != wantSent {
 				t.Fatalf("request sent = %t, want %t (diff: %+v)", sent, wantSent, diff)
 			}
 			if !sent {
 				return
 			}
-			b, err := json.Marshal(expandDnsConfig(d.Get("dns_config")))
+			dnsConfig := expandDnsConfig(d.Get("dns_config"))
+			if tc.prior.mode != modeCreate && dnsConfig == nil {
+				dnsConfig = &container.DNSConfig{}
+			}
+			b, err := json.Marshal(dnsConfig)
 			if err != nil {
 				t.Fatalf("json.Marshal: %v", err)
 			}
