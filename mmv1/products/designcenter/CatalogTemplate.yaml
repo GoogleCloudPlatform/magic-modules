@@ -113,3 +113,30 @@ properties:
     description: |
       The time the catalog template was last updated.
     output: true
+samples:
+  - name: designcenter_catalog_template_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_template_basic
+        resource_id_vars:
+          catalog_template_id: example-catalog-template
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+      - name: designcenter_catalog_template_update
+        resource_id_vars:
+          catalog_template_id: example-catalog-template
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+
