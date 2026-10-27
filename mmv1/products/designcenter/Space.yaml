@@ -1,6 +1,25 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
 name: Space
-description: A Space in the Application Design Center.
+description: |
+  Space is a top level resource for managing teams building applications
+  through Application Design Center.
+references:
+  guides:
+    'Application Design Center Overview': 'https://cloud.google.com/application-design-center/docs/overview'
+  api: 'https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces'
 base_url: projects/{{project}}/locations/{{location}}/spaces
 self_link: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
 create_url: projects/{{project}}/locations/{{location}}/spaces?spaceId={{space_id}}
@@ -8,11 +27,8 @@ update_verb: PATCH
 update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
-autogen_async: true
 async:
   actions: []
-  operation:
-    base_url: "{{op_id}}"
 error_retry_predicates:
   - 'IsDesignCenterServiceAgentNotFoundError'
 custom_code:
@@ -40,34 +56,43 @@ properties:
     url_param_only: true
   - name: displayName
     type: String
-    description: The display name of the space.
+    description: Display name for the space.
   - name: description
     type: String
-    description: The description of the space.
+    description: Description for the space.
   - name: enableGcpSharedTemplates
     type: Boolean
-    description: Whether to enable GCP shared templates.
+    description: Flag to enable Google opinionated shared templates.
     send_empty_value: true
   - name: gcsBucket
     type: String
-    description: The GCS bucket for the space.
+    description: |
+      An existing Google Cloud Storage bucket that you want to use instead of
+      creating a new bucket during Application Design Center setup. If not
+      provided, a default bucket is created during setup. The bucket must exist
+      in the same project as the space. Format: {bucket_name}
+    immutable: true
     default_from_api: true
   - name: tags
     type: KeyValuePairs
-    description: Tags for the space.
+    description: |
+      Tags are key/value pairs bound to the space resource.
+      For example:
+      "123/environment": "production"
+      "123/costCenter": "marketing"
     immutable: true
     ignore_read: true
   - name: name
     type: String
-    description: The resource name of the space.
+    description: Identifier. The space name.
     output: true
   - name: createTime
     type: Time
-    description: The time when the space was created.
+    description: Space creation timestamp.
     output: true
   - name: updateTime
     type: Time
-    description: The time when the space was last updated.
+    description: Space update timestamp.
     output: true
 samples:
   - name: designcenter_space_basic
