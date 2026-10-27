@@ -1599,6 +1599,146 @@ resource "google_compute_network" "default" {
 `, context)
 }
 
+func TestAccAlloydbCluster_withDenyMaintenancePeriods(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withDenyMaintenancePeriods(context),
+			},
+			{
+				ResourceName:      "google_alloydb_cluster.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_protection is a Terraform-only virtual field; initial_user is write-only and not returned by the API.
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user"},
+			},
+			{
+				Config: testAccAlloydbCluster_withDenyMaintenancePeriodsUpdate(context),
+			},
+			{
+				ResourceName:      "google_alloydb_cluster.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_protection is a Terraform-only virtual field; initial_user is write-only and not returned by the API.
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withDenyMaintenancePeriods(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+  maintenance_update_policy {
+    maintenance_windows {
+      day = "WEDNESDAY"
+      start_time {
+        hours   = 12
+        minutes = 0
+        seconds = 0
+        nanos   = 0
+      }
+    }
+    deny_maintenance_periods {
+      start_date {
+        year  = 2027
+        month = 11
+        day   = 20
+      }
+      end_date {
+        year  = 2027
+        month = 12
+        day   = 5
+      }
+      time {
+        hours   = 10
+        minutes = 15
+        seconds = 30
+        nanos   = 100
+      }
+    }
+  }
+
+  deletion_protection = false
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_withDenyMaintenancePeriodsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+  maintenance_update_policy {
+    maintenance_windows {
+      day = "WEDNESDAY"
+      start_time {
+        hours   = 12
+        minutes = 0
+        seconds = 0
+        nanos   = 0
+      }
+    }
+    deny_maintenance_periods {
+      start_date {
+        year  = 2028
+        month = 11
+        day   = 25
+      }
+      end_date {
+        year  = 2028
+        month = 12
+        day   = 10
+      }
+      time {
+        hours   = 14
+        minutes = 45
+        seconds = 20
+        nanos   = 200
+      }
+    }
+  }
+
+  deletion_protection = false
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
 // Ensures cluster creation throws expected errors for incorrect configurations of maintenance update policy.
 func TestAccAlloydbCluster_withMaintenanceWindowsMissingFields(t *testing.T) {
 	t.Parallel()
