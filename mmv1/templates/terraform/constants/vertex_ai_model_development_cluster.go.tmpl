@@ -1,69 +1,141 @@
-func vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if new == "-" {
+func vertexAiModelDevelopmentClusterGkeVersionMatches(actual, target string) bool {
+	if actual == target {
 		return true
 	}
-	if old == new {
-		return true
-	}
-	if old == "" || new == "" {
+	if actual == "" || target == "" {
 		return false
 	}
 
-	newParts := strings.SplitN(new, "-", 2)
-	newVer := newParts[0]
-	hasNewSuffix := len(newParts) > 1
-	newSuffix := ""
-	if hasNewSuffix {
-		newSuffix = newParts[1]
+	targetParts := strings.SplitN(target, "-", 2)
+	targetVer := targetParts[0]
+	hasTargetSuffix := len(targetParts) > 1
+	targetSuffix := ""
+	if hasTargetSuffix {
+		targetSuffix = targetParts[1]
 	}
 
-	newDots := strings.Split(newVer, ".")
-	if len(newDots) < 2 {
-		return old == new
+	targetDots := strings.Split(targetVer, ".")
+	if len(targetDots) < 2 {
+		return actual == target
 	}
-	newMajor := newDots[0]
-	newMinor := newDots[1]
-	hasNewPatch := len(newDots) >= 3
-	newPatch := ""
-	if hasNewPatch {
-		newPatch = newDots[2]
-	}
-
-	oldParts := strings.SplitN(old, "-", 2)
-	oldVer := oldParts[0]
-	hasOldSuffix := len(oldParts) > 1
-	oldSuffix := ""
-	if hasOldSuffix {
-		oldSuffix = oldParts[1]
+	targetMajor := targetDots[0]
+	targetMinor := targetDots[1]
+	hasTargetPatch := len(targetDots) >= 3
+	targetPatch := ""
+	if hasTargetPatch {
+		targetPatch = targetDots[2]
 	}
 
-	oldDots := strings.Split(oldVer, ".")
-	if len(oldDots) < 2 {
-		return old == new
-	}
-	oldMajor := oldDots[0]
-	oldMinor := oldDots[1]
-	hasOldPatch := len(oldDots) >= 3
-	oldPatch := ""
-	if hasOldPatch {
-		oldPatch = oldDots[2]
+	actualParts := strings.SplitN(actual, "-", 2)
+	actualVer := actualParts[0]
+	hasActualSuffix := len(actualParts) > 1
+	actualSuffix := ""
+	if hasActualSuffix {
+		actualSuffix = actualParts[1]
 	}
 
-	if newMajor != oldMajor || newMinor != oldMinor {
+	actualDots := strings.Split(actualVer, ".")
+	if len(actualDots) < 2 {
+		return actual == target
+	}
+	actualMajor := actualDots[0]
+	actualMinor := actualDots[1]
+	hasActualPatch := len(actualDots) >= 3
+	actualPatch := ""
+	if hasActualPatch {
+		actualPatch = actualDots[2]
+	}
+
+	if targetMajor != actualMajor || targetMinor != actualMinor {
 		return false
 	}
 
-	if hasNewPatch {
-		if !hasOldPatch || newPatch != oldPatch {
+	if hasTargetPatch {
+		if !hasActualPatch || targetPatch != actualPatch {
 			return false
 		}
 	}
 
-	if hasNewSuffix {
-		if !hasOldSuffix || newSuffix != oldSuffix {
+	if hasTargetSuffix {
+		if !hasActualSuffix || targetSuffix != actualSuffix {
 			return false
 		}
 	}
 
 	return true
+}
+
+func vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if new == "-" {
+		if strings.Contains(k, "node_pool_versions.") {
+			if old == "" || d == nil {
+				return false
+			}
+			cpVer, _ := d.Get("orchestrator_spec.0.kubernetes_spec.0.control_plane_version").(string)
+			if cpVer == "" || cpVer == "-" {
+				oldCp, _ := d.GetChange("orchestrator_spec.0.kubernetes_spec.0.control_plane_version")
+				cpVer, _ = oldCp.(string)
+			}
+			if cpVer == "" || cpVer == "-" {
+				return false
+			}
+			return vertexAiModelDevelopmentClusterGkeVersionMatches(old, cpVer)
+		}
+		return old != ""
+	}
+	return vertexAiModelDevelopmentClusterGkeVersionMatches(old, new)
+}
+
+type vertexAiModelDevelopmentClusterGetter interface {
+	GetOk(string) (interface{}, bool)
+}
+
+func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDevelopmentClusterGetter) error {
+	rawVersions, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions")
+	if !ok {
+		return nil
+	}
+	versionsMap, ok := rawVersions.(map[string]interface{})
+	if !ok || len(versionsMap) == 0 {
+		return nil
+	}
+
+	poolIDSet := make(map[string]struct{})
+	if rawPoolIDs, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids"); ok {
+		if poolIDList, ok := rawPoolIDs.([]interface{}); ok {
+			for _, item := range poolIDList {
+				if id, ok := item.(string); ok && id != "" {
+					poolIDSet[id] = struct{}{}
+				}
+			}
+		}
+	}
+
+	var unknownPools []string
+	for k := range versionsMap {
+		if _, exists := poolIDSet[k]; !exists {
+			unknownPools = append(unknownPools, k)
+		}
+	}
+	if len(unknownPools) > 0 {
+		sort.Strings(unknownPools)
+		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions contains unknown node pool ID(s) not present in node_pool_ids: %s", strings.Join(unknownPools, ", "))
+	}
+
+	var missingPools []string
+	for id := range poolIDSet {
+		if _, exists := versionsMap[id]; !exists {
+			missingPools = append(missingPools, id)
+		}
+	}
+	if len(missingPools) > 0 {
+		sort.Strings(missingPools)
+		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions must include all node pool IDs from node_pool_ids; missing: %s", strings.Join(missingPools, ", "))
+	}
+
+	return nil
+}
+
+func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return validateVertexAIModelDevelopmentClusterNodePoolVersions(diff)
 }

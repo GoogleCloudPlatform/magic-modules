@@ -42,10 +42,13 @@ async:
     - delete
   result:
     resource_inside_response: true
+custom_diff:
+  - resourceVertexAIModelDevelopmentClusterCustomDiff
 custom_code:
   constants: templates/terraform/constants/vertex_ai_model_development_cluster.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_model_development_cluster.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_model_development_cluster.go.tmpl
+  post_create: templates/terraform/post_create/vertex_ai_model_development_cluster.go.tmpl
   pre_update: templates/terraform/pre_update/vertex_ai_model_development_cluster.go.tmpl
 autogen_status: TW9kZWxEZXZlbG9wbWVudENsdXN0ZXJBdXRvZ2VuVjJBZ2VudA==
 samples:
@@ -739,16 +742,24 @@ properties:
             type: String
             description: |-
               The Kubernetes version of the GKE control plane.
-              Cannot be set on creation. Clusters are created with the service default
-              version; use update to change it.
+              Accepted formats are minor version (for example, `"1.30"`), patch version
+              (for example, `"1.30.5"`), full GKE release version (for example,
+              `"1.30.5-gke.1014001"`), or `"-"` to use the service default version.
+              Upgrades can advance at most one minor version at a time; downgrades are
+              rejected.
             default_from_api: true
             diff_suppress_func: 'vertexAiModelDevelopmentClusterGkeVersionDiffSuppress'
           - name: nodePoolVersions
             type: KeyValuePairs
             description: |-
               The Kubernetes versions for specific node pools, keyed by node pool ID.
-              Cannot be set on creation. Node pools are created with the service default
-              version; use update to change it.
+              When specified, all node pool IDs from `node_pool_ids` must be included.
+              Accepted formats are minor version (for example, `"1.30"`), patch version
+              (for example, `"1.30.5"`), full GKE release version (for example,
+              `"1.30.5-gke.1014001"`), or `"-"` to align with the control plane version.
+              Node pools cannot be newer than the control plane or more than 2 minor
+              versions behind it; upgrades can advance at most one minor version at a
+              time and downgrades are rejected.
             default_from_api: true
             diff_suppress_func: 'vertexAiModelDevelopmentClusterGkeVersionDiffSuppress'
             custom_expand: templates/terraform/custom_expand/vertex_ai_model_development_cluster_node_pool_versions.go.tmpl

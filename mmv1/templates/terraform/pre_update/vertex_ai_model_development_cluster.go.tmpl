@@ -10,17 +10,19 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil {
+	return err
+}
+
 isGke := false
 if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 	isGke = true
 }
 
-newMask := make([]string, 0, len(updateMask))
 if isGke {
+	newMask := make([]string, 0, len(updateMask))
 	for _, mask := range updateMask {
-		if strings.HasPrefix(mask, "orchestrator_spec.slurm_spec") ||
-			strings.HasPrefix(mask, "orchestratorSpec.slurmSpec") ||
-			mask == "orchestrator_spec" || mask == "orchestratorSpec" {
+		if strings.HasPrefix(mask, "orchestrator_spec.slurm_spec.") {
 			continue
 		}
 		newMask = append(newMask, mask)
@@ -37,20 +39,12 @@ if isGke {
 			}
 		}
 	}
-} else {
-	for _, mask := range updateMask {
-		if strings.HasPrefix(mask, "orchestrator_spec.kubernetes_spec") ||
-			strings.HasPrefix(mask, "orchestratorSpec.kubernetesSpec") {
-			continue
-		}
-		newMask = append(newMask, mask)
-	}
+	updateMask = newMask
 }
-updateMask = newMask
 
 hasOrchestratorMask := false
 for _, m := range updateMask {
-	if strings.HasPrefix(m, "orchestrator_spec") {
+	if strings.HasPrefix(m, "orchestrator_spec.") {
 		hasOrchestratorMask = true
 		break
 	}
@@ -59,6 +53,7 @@ if !hasOrchestratorMask {
 	delete(obj, "orchestratorSpec")
 }
 
+// AddQueryParams uses url.Values.Set, replacing the generated updateMask query parameter.
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
 	return err

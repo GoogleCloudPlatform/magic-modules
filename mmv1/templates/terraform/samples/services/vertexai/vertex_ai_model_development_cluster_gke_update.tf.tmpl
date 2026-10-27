@@ -1,5 +1,6 @@
-data "google_project" "project" {
+data "google_container_engine_versions" "default" {
   provider = google-beta
+  location = "us-east4"
 }
 
 resource "google_compute_network" "net" {
@@ -60,7 +61,7 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
       node_pool_ids                  = ["cpu1"]
       enable_ip_alias                = true
       public_access_endpoint_enabled = true
-      control_plane_version          = "-"
+      control_plane_version          = data.google_container_engine_versions.default.default_cluster_version
       node_pool_versions = {
         cpu1 = "-"
       }

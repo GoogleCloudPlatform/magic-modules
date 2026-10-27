@@ -10,11 +10,16 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.control_plane_version"); ok && v.(string) != "" {
-	return fmt.Errorf("control_plane_version cannot be set on creation; clusters are created with the service default version and can be upgraded via update")
+if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil {
+	return err
 }
-if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions"); ok {
-	if m, ok := v.(map[string]interface{}); ok && len(m) > 0 {
-		return fmt.Errorf("node_pool_versions cannot be set on creation; node pools are created with the service default version and can be upgraded via update")
+
+// The Create API rejects controlPlaneVersion and nodePoolVersions on initial
+// cluster creation; strip them from the POST body and apply them via a
+// follow-up PATCH in post_create if configured.
+if orch, ok := obj["orchestratorSpec"].(map[string]interface{}); ok {
+	if k8s, ok := orch["kubernetesSpec"].(map[string]interface{}); ok {
+		delete(k8s, "controlPlaneVersion")
+		delete(k8s, "nodePoolVersions")
 	}
 }
