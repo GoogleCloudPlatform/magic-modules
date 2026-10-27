@@ -139,6 +139,11 @@ fun BuildSteps.saveArtifactsToGCS() {
             #!/bin/bash
             echo "Post-test step - storage artifacts(debug logs) to GCS"
 
+            if ! compgen -G "%teamcity.build.checkoutDir%/debug*" > /dev/null; then
+                echo "No debug artifacts found; skipping GCS upload"
+                exit 0
+            fi
+
             # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS_GCS}" > google-account.json
             chmod 600 google-account.json
@@ -161,13 +166,6 @@ fun BuildSteps.saveArtifactsToGCS() {
 
             echo "Uploading artifacts to GCS folder: ${'$'}{FOLDER}"
             # Copy logs to GCS
-            if ! compgen -G "%teamcity.build.checkoutDir%/debug*" > /dev/null; then
-                echo "No debug artifacts found; skipping GCS upload"
-                rm google-account.json
-                gcloud auth application-default revoke
-                gcloud auth revoke --all
-                exit 0
-            fi
             gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
             # Cleanup
