@@ -25,7 +25,11 @@ resource "google_secret_manager_secret" "password" {
   project   = "{{index $.ResourceIdVars "project"}}"
   secret_id = "{{index $.ResourceIdVars "password_secret"}}"
   replication {
-    auto {}
+    user_managed {
+      replicas {
+        location = "us-east4"
+      }
+    }
   }
 }
 
