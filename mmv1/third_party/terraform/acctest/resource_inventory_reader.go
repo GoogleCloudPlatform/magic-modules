@@ -99,10 +99,6 @@ func (mc *MetadataCache) Populate() error {
 			return nil
 		}
 
-		if _, ok := mc.cache[metadata.Resource]; ok {
-			return fmt.Errorf("duplicate resource: %s in %s", metadata.Resource, path)
-		}
-
 		metadata.Path = path
 		metadata.FileName = filepath.Base(path)
 		pathParts := strings.Split(path, string(os.PathSeparator))
@@ -111,6 +107,22 @@ func (mc *MetadataCache) Populate() error {
 			return fmt.Errorf("no service found for %s (%s)", metadata.Resource, path)
 		}
 		metadata.ServicePackage = pathParts[servicesIndex+1]
+
+		if existing, ok := mc.cache[metadata.Resource]; ok {
+			if isPrimaryMetadataFile(existing) && isPrimaryMetadataFile(metadata) {
+				return fmt.Errorf("duplicate resource: %s in %s", metadata.Resource, path)
+			}
+			primary, secondary := existing, metadata
+			if isPrimaryMetadataFile(metadata) {
+				primary, secondary = metadata, existing
+			}
+			primary.Fields = append(primary.Fields, secondary.Fields...)
+			primary.CaiAssetNameFormats = append(primary.CaiAssetNameFormats, secondary.CaiAssetNameFormats...)
+			primary.ApiVariantPatterns = append(primary.ApiVariantPatterns, secondary.ApiVariantPatterns...)
+			mc.cache[metadata.Resource] = primary
+			return nil
+		}
+
 		mc.cache[metadata.Resource] = metadata
 		return nil
 	})
@@ -146,6 +158,19 @@ func (mc *MetadataCache) Get(key string) (Metadata, bool) {
 
 func (mc *MetadataCache) Cache() map[string]Metadata {
 	return mc.cache
+}
+
+func isPrimaryMetadataFile(metadata Metadata) bool {
+	shortName := strings.TrimPrefix(metadata.Resource, "google_")
+	switch metadata.FileName {
+	case fmt.Sprintf("resource_%s_meta.yaml", shortName),
+		fmt.Sprintf("resource_%s_generated_meta.yaml", shortName),
+		fmt.Sprintf("resource_%s_meta.yaml", metadata.Resource),
+		fmt.Sprintf("resource_%s_generated_meta.yaml", metadata.Resource):
+		return true
+	default:
+		return false
+	}
 }
 
 // getServicesDir returns the path to the services directory
