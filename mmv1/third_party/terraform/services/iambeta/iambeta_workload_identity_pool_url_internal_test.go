@@ -37,6 +37,16 @@ func TestValidateWorkloadIdentityPoolURL(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "missing host is rejected",
+			raw:     "https:///openid/jwks",
+			wantErr: true,
+		},
+		{
+			name:    "empty string is rejected",
+			raw:     "",
+			wantErr: true,
+		},
+		{
 			name:    "control characters make the url unparseable",
 			raw:     "https://sts.googleapis.com/\x7f",
 			wantErr: true,
@@ -52,6 +62,19 @@ func TestValidateWorkloadIdentityPoolURL(t *testing.T) {
 			if !tc.wantErr && err != nil {
 				t.Fatalf("unexpected error for %q: %v", tc.raw, err)
 			}
+
+			// The schema ValidateFunc must reach the same verdict as the Read-time check.
+			_, errs := validateWorkloadIdentityPoolURLSchema(tc.raw, "resource_name")
+			if (len(errs) > 0) != (err != nil) {
+				t.Fatalf("schema validator disagrees with read-time check for %q: schema errs=%v, read err=%v", tc.raw, errs, err)
+			}
 		})
+	}
+}
+
+func TestValidateWorkloadIdentityPoolURLSchema_nonString(t *testing.T) {
+	_, errs := validateWorkloadIdentityPoolURLSchema(42, "resource_name")
+	if len(errs) != 1 {
+		t.Fatalf("expected one error for non-string value, got %v", errs)
 	}
 }

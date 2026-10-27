@@ -5,8 +5,8 @@ import (
 	"net/url"
 )
 
-// validateWorkloadIdentityPoolURL requires raw to be an https URL with no
-// embedded userinfo.
+// validateWorkloadIdentityPoolURL requires raw to be an https URL with a host
+// and no embedded userinfo.
 //
 // The openid_config and jwks data sources fetch the issuer's OIDC discovery
 // document and its public keys, which are Workload Identity Federation trust
@@ -17,6 +17,10 @@ import (
 // time as well. Rejecting userinfo avoids a "https://trusted@attacker/" host
 // confusion where the authority that gets contacted differs from the one an
 // operator reading the config would expect.
+//
+// validateWorkloadIdentityPoolURLSchema wraps this for the schema ValidateFunc
+// so plan-time validation of a literal value and the Read-time check apply the
+// same rules.
 func validateWorkloadIdentityPoolURL(raw string) error {
 	u, err := url.Parse(raw)
 	if err != nil {
@@ -25,8 +29,24 @@ func validateWorkloadIdentityPoolURL(raw string) error {
 	if u.Scheme != "https" {
 		return fmt.Errorf("resource_name must use the https scheme, got %q", u.Scheme)
 	}
+	if u.Host == "" {
+		return fmt.Errorf("resource_name %q must have a host", raw)
+	}
 	if u.User != nil {
 		return fmt.Errorf("resource_name must not embed userinfo credentials")
 	}
 	return nil
+}
+
+// validateWorkloadIdentityPoolURLSchema is the schema.SchemaValidateFunc form of
+// validateWorkloadIdentityPoolURL.
+func validateWorkloadIdentityPoolURLSchema(i interface{}, k string) ([]string, []error) {
+	v, ok := i.(string)
+	if !ok {
+		return nil, []error{fmt.Errorf("expected type of %q to be string", k)}
+	}
+	if err := validateWorkloadIdentityPoolURL(v); err != nil {
+		return nil, []error{err}
+	}
+	return nil, nil
 }
