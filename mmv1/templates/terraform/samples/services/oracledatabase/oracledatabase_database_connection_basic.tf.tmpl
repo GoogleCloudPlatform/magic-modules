@@ -42,14 +42,14 @@ resource "google_secret_manager_secret_iam_member" "password_accessor" {
   project   = google_secret_manager_secret.password.project
   secret_id = google_secret_manager_secret.password.secret_id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-oracledatabase.iam.gserviceaccount.com"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-oci.iam.gserviceaccount.com"
 }
 
 resource "google_oracle_database_database_connection" "{{$.PrimaryResourceId}}" {
   database_connection_id  = "{{index $.ResourceIdVars "database_connection_id"}}"
   location                = "us-east4"
   project                 = "{{index $.ResourceIdVars "project"}}"
-  connection_string       = google_oracle_database_autonomous_database.target.properties[0].connection_strings[0].high
+  connection_string       = "(description=(address=(protocol=tcps)(port=1521)(host=${google_oracle_database_autonomous_database.target.properties[0].private_endpoint_ip}))(connect_data=(service_name=${split("/", google_oracle_database_autonomous_database.target.properties[0].connection_strings[0].high)[1]}))(security=(ssl_server_dn_match=yes)(ssl_server_cert_dn=\"CN=${google_oracle_database_autonomous_database.target.properties[0].private_endpoint}\")))"
   username                = "ADMIN"
   password_secret_version = "projects/{{index $.ResourceIdVars "project"}}/secrets/${google_secret_manager_secret.password.secret_id}/versions/${google_secret_manager_secret_version.password.version}"
   odb_network             = "{{index $.ResourceIdVars "odb_network"}}"
