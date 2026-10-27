@@ -3,6 +3,7 @@ package compute_test
 import (
     "fmt"
     "log"
+    "maps"
     "strconv"
     "strings"
     "testing"
@@ -70,8 +71,17 @@ func TestAccComputeRouterNamedSet_updatePrefix(t *testing.T) {
 }
 
 func testAccComputeRouterNamedSet_routerNamedSetPrefix(context map[string]interface{}, description string, addElement bool) string {
-    var b strings.Builder
-    b.WriteString(acctest.Nprintf(`
+    context = maps.Clone(context)
+    context["description"] = description
+    context["extra_element"] = ""
+    if addElement {
+        context["extra_element"] = `
+  elements {
+    expression  = "'192.168.0.0/16'"
+    title       = "one-nine-two"
+  }`
+    }
+    return acctest.Nprintf(`
 resource "google_compute_network" "net" {
   name                    = "tf-test-my-network%{random_suffix}"
   auto_create_subnetworks = false
@@ -87,7 +97,7 @@ resource "google_compute_router_named_set" "prefix_set" {
   name        = "tf-test-my-prefix-set%{random_suffix}"
   router      = google_compute_router.router.name
   region      = "us-central1"
-  description = "`+description+`"
+  description = "%{description}"
   type        = "NAMED_SET_TYPE_PREFIX"
 
   elements {
@@ -100,20 +110,9 @@ resource "google_compute_router_named_set" "prefix_set" {
     expression  = "'172.16.0.0/12'"
     title       = "seventeen-two-slash-sixteen"
   }
-`, context))
-
-    if addElement {
-        b.WriteString(`
-  elements {
-    expression  = "'192.168.0.0/16'"
-    title       = "one-nine-two"
-  }
-`)
-    }
-    b.WriteString(`
+%{extra_element}
 }
-`)
-    return b.String()
+`, context)
 }
 
 func testAccCheckComputeRouterNamedSetsDestroyProducer(t *testing.T) func(s *terraform.State) error {
