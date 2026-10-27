@@ -15,9 +15,18 @@ import (
 func TestAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
-		"projectNumber": envvar.GetTestProjectNumberFromEnv(),
-		"randomSuffix":  acctest.RandString(t, 10),
+		"projectNumber":             envvar.GetTestProjectNumberFromEnv(),
+		"randomSuffix":              randomSuffix,
+		"certificate_issuance_mode": "LOCAL_INTERMEDIATE_CA_SIGNING",
+	}
+
+	contextUpdated := map[string]interface{}{
+		"projectNumber":             envvar.GetTestProjectNumberFromEnv(),
+		"randomSuffix":              randomSuffix,
+		"certificate_issuance_mode": "DIRECT_LEAF_PROVISIONING",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -26,7 +35,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(t *testin
 		CheckDestroy:             testAccCheckNetworkSecurityTlsInspectionPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(context, "LOCAL_INTERMEDIATE_CA_SIGNING"),
+				Config: testAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(context),
 			},
 			{
 				ResourceName:      "google_network_security_tls_inspection_policy.default",
@@ -34,7 +43,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(t *testin
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(context, "DIRECT_LEAF_PROVISIONING"),
+				Config: testAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(contextUpdated),
 			},
 			{
 				ResourceName:      "google_network_security_tls_inspection_policy.default",
@@ -45,8 +54,7 @@ func TestAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(t *testin
 	})
 }
 
-func testAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(context map[string]interface{}, mode string) string {
-	context["certificate_issuance_mode"] = mode
+func testAccNetworkSecurityTlsInspectionPolicy_certificateIssuanceMode(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_privateca_ca_pool" "default" {
   name     = "tf-test-cap-cim-%{randomSuffix}"
