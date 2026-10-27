@@ -5245,12 +5245,14 @@ func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance
 func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *testing.T) {
 	t.Parallel()
 
-	backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", "us-central1")
+	location := "us-east1"
+	backupVault := backupdr.BootstrapBackupDRVault(t, "bv-test", location)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"project":       envvar.GetTestProjectFromEnv(),
 		"backup_vault":  backupVault,
+		"location":      location,
 		"db_version":    "MYSQL_8_0_41",
 		"edition":       "ENTERPRISE",
 		"tier":          "db-f1-micro",
@@ -5270,7 +5272,7 @@ func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *te
 			},
 			{
 				// Edition upgrade, which should ignore backup_configuration settings
-				Config: testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context, "ENTERPRISE_PLUS", "db-perf-optimized-N-4"),
+				Config: testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context, "ENTERPRISE_PLUS", "db-perf-optimized-N-2"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 				),
@@ -5592,13 +5594,16 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_outOfBandDelete(t *testing.T
 {{- end }}
 
 func testGoogleSqlDatabaseInstance_attachGCBDR(context map[string]interface{}) string {
+	if _, ok := context["location"]; !ok {
+		context["location"] = "us-central1"
+	}
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-instance-%{random_suffix}"
   database_version = "%{db_version}"
-  region           = "us-central1"
+  region           = "%{location}"
 
   settings {
     tier = "db-f1-micro"
@@ -5607,7 +5612,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_backup_dr_backup_plan" "plan" {
-  location       = "us-central1"
+  location       = "%{location}"
   backup_plan_id = "tf-test-bp-test-%{random_suffix}"
   resource_type  = "sqladmin.googleapis.com/Instance"
   backup_vault   = "%{backup_vault}"
@@ -5630,7 +5635,7 @@ resource "google_backup_dr_backup_plan" "plan" {
 }
 
 resource "google_backup_dr_backup_plan_association" "backup_association" {
-  location                      = "us-central1" 
+  location                      = "%{location}" 
   backup_plan_association_id    = "tf-test-bpa-test-%{random_suffix}"
   resource                      = "projects/${data.google_project.project.project_id}/instances/${google_sql_database_instance.instance.name}"
   resource_type                 = "sqladmin.googleapis.com/Instance"
@@ -5763,6 +5768,9 @@ func testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context 
 	for k, v := range context {
 		localContext[k] = v
 	}
+	if _, ok := localContext["location"]; !ok {
+		localContext["location"] = "us-central1"
+	}
 	localContext["edition"] = edition
 	localContext["tier"] = tier
 	return acctest.Nprintf(`
@@ -5771,7 +5779,7 @@ data "google_project" "project" {}
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-instance-%{random_suffix}"
   database_version = "%{db_version}"
-  region           = "us-central1"
+  region           = "%{location}"
 
   settings {
     tier = "%{tier}"
@@ -5792,7 +5800,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_backup_dr_backup_plan" "plan" {
-  location       = "us-central1"
+  location       = "%{location}"
   backup_plan_id = "tf-test-bp-test-%{random_suffix}"
   resource_type  = "sqladmin.googleapis.com/Instance"
   backup_vault   = "%{backup_vault}"
@@ -5815,7 +5823,7 @@ resource "google_backup_dr_backup_plan" "plan" {
 }
 
 resource "google_backup_dr_backup_plan_association" "backup_association" {
-  location                      = "us-central1" 
+  location                      = "%{location}" 
   backup_plan_association_id    = "tf-test-bpa-test-%{random_suffix}"
   resource                      = "projects/${data.google_project.project.project_id}/instances/${google_sql_database_instance.instance.name}"
   resource_type                 = "sqladmin.googleapis.com/Instance"
