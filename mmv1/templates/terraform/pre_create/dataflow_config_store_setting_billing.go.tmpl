@@ -1,0 +1,6 @@
+	if billingProject == "" && config.Project != "" {
+		billingProject = config.Project
+	}
+	if billingProject != "" {
+		headers.Set("X-Goog-User-Project", billingProject)
+	}

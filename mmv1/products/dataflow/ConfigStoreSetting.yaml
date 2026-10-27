@@ -1,0 +1,109 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ConfigStoreSetting
+description: |
+  A regional Dataflow Config Store setting on a project, folder, or organization.
+api_variant_patterns:
+  - projects/{project}/locations/{location}/configStoreSettings/{config_store_setting}
+  - folders/{folder}/locations/{location}/configStoreSettings/{config_store_setting}
+  - organizations/{organization}/locations/{location}/configStoreSettings/{config_store_setting}
+references:
+  guides:
+    Dataflow Config Store Settings: https://cloud.google.com/dataflow/docs/guides/config-store-settings
+  api: https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.configStoreSettings
+docs:
+base_url: '{{parent}}/locations/{{location}}/configStoreSettings'
+self_link: '{{parent}}/locations/{{location}}/configStoreSettings/{{config_store_setting_id}}'
+create_url: '{{parent}}/locations/{{location}}/configStoreSettings?configStoreSettingId={{config_store_setting_id}}'
+update_url: '{{parent}}/locations/{{location}}/configStoreSettings?configStoreSettingId={{config_store_setting_id}}'
+update_verb: POST
+delete_url: '{{parent}}/locations/{{location}}/configStoreSettings/{{config_store_setting_id}}'
+id_format: '{{parent}}/locations/{{location}}/configStoreSettings/{{config_store_setting_id}}'
+import_format:
+  - '{{%parent}}/locations/{{location}}/configStoreSettings/{{config_store_setting_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+supports_indirect_user_project_override: true
+custom_code:
+  pre_create: templates/terraform/pre_create/dataflow_config_store_setting_billing.go.tmpl
+  pre_read: templates/terraform/pre_create/dataflow_config_store_setting_billing.go.tmpl
+  pre_update: templates/terraform/pre_create/dataflow_config_store_setting_billing.go.tmpl
+  pre_delete: templates/terraform/pre_create/dataflow_config_store_setting_billing.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/dataflow_config_store_setting.go.tmpl
+samples:
+  - name: dataflow_config_store_setting_basic
+    primary_resource_id: example
+    steps:
+      - name: dataflow_config_store_setting_basic
+      - name: dataflow_config_store_setting_update
+parameters:
+  - name: parent
+    type: String
+    description: |
+      The parent resource in which to create the config store setting.
+      Must be in one of the following formats:
+      * `projects/{project_number}` (numeric project number is required)
+      * `folders/{folder_id}`
+      * `organizations/{organization_id}`
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: location
+    type: String
+    description: |
+      The Dataflow region for the setting (e.g. `us-central1`).
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: configStoreSettingId
+    type: String
+    description: |
+      The ID of the config store setting (e.g. `default_launcher_machine_type`).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the setting.
+      Format: `projects/{project_number}/locations/{location}/configStoreSettings/{config_store_setting_id}`
+      or `folders/{folder_id}/locations/{location}/configStoreSettings/{config_store_setting_id}`
+      or `organizations/{organization_id}/locations/{location}/configStoreSettings/{config_store_setting_id}`
+    output: true
+  - name: value
+    type: NestedObject
+    description: |
+      The configuration value of the setting.
+    required: true
+    custom_expand: templates/terraform/custom_expand/dataflow_config_store_setting_value.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/dataflow_config_store_setting_value.go.tmpl
+    properties:
+      - name: stringValue
+        type: String
+        description: |
+          Represents a string value.
+        exactly_one_of:
+          - value.0.string_value
+          - value.0.bool_value
+      - name: boolValue
+        type: Boolean
+        description: |
+          Represents a boolean value.
+        exactly_one_of:
+          - value.0.string_value
+          - value.0.bool_value
