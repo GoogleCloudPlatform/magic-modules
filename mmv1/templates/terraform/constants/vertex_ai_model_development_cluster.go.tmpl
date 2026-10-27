@@ -103,21 +103,10 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 
 	poolIDSet := make(map[string]struct{})
 	if rawNodePools, ok := d.GetOk("node_pools"); ok {
-		if npList, ok := rawNodePools.([]interface{}); ok && len(npList) > 0 {
+		if npList, ok := rawNodePools.([]interface{}); ok {
 			for _, item := range npList {
 				if npMap, ok := item.(map[string]interface{}); ok {
 					if id, ok := npMap["id"].(string); ok && id != "" {
-						poolIDSet[id] = struct{}{}
-					}
-				}
-			}
-		}
-	}
-	if len(poolIDSet) == 0 {
-		if rawPoolIDs, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids"); ok {
-			if poolIDList, ok := rawPoolIDs.([]interface{}); ok {
-				for _, item := range poolIDList {
-					if id, ok := item.(string); ok && id != "" {
 						poolIDSet[id] = struct{}{}
 					}
 				}
@@ -152,7 +141,6 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	if !diff.NewValueKnown("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions") ||
-		!diff.NewValueKnown("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids") ||
 		!diff.NewValueKnown("node_pools") {
 		return nil
 	}
@@ -160,15 +148,6 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 		if npList, ok := rawNodePools.([]interface{}); ok {
 			for i := range npList {
 				if !diff.NewValueKnown(fmt.Sprintf("node_pools.%d.id", i)) {
-					return nil
-				}
-			}
-		}
-	}
-	if rawPoolIDs, ok := diff.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids"); ok {
-		if poolIDList, ok := rawPoolIDs.([]interface{}); ok {
-			for i := range poolIDList {
-				if !diff.NewValueKnown(fmt.Sprintf("orchestrator_spec.0.kubernetes_spec.0.node_pool_ids.%d", i)) {
 					return nil
 				}
 			}

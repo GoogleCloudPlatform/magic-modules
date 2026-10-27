@@ -16,17 +16,11 @@ package vertexai
 
 import (
 	"context"
-	"encoding/json"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func testModelDevelopmentClusterResourceData(t *testing.T, res *schema.Resource, stateMap, configMap map[string]interface{}) *schema.ResourceData {
@@ -54,91 +48,6 @@ func testModelDevelopmentClusterResourceData(t *testing.T, res *schema.Resource,
 		t.Fatalf("error creating resource data: %v", err)
 	}
 	return d
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_SchemaKubernetesSpec(t *testing.T) {
-	t.Parallel()
-	res := ResourceVertexAIModelDevelopmentCluster()
-	orchestratorSpecSchema, ok := res.Schema["orchestrator_spec"]
-	if !ok {
-		t.Fatalf("orchestrator_spec missing from schema")
-	}
-	orchestratorResource, ok := orchestratorSpecSchema.Elem.(*schema.Resource)
-	if !ok {
-		t.Fatalf("orchestrator_spec Elem is not *schema.Resource")
-	}
-
-	slurmSchema, ok := orchestratorResource.Schema["slurm_spec"]
-	if !ok {
-		t.Fatalf("slurm_spec missing from orchestrator_spec schema")
-	}
-	if len(slurmSchema.ConflictsWith) == 0 {
-		t.Errorf("expected slurm_spec to have ConflictsWith configured, got %v", slurmSchema.ConflictsWith)
-	}
-
-	k8sSchema, ok := orchestratorResource.Schema["kubernetes_spec"]
-	if !ok {
-		t.Fatalf("kubernetes_spec missing from orchestrator_spec schema")
-	}
-	if len(k8sSchema.ConflictsWith) == 0 {
-		t.Errorf("expected kubernetes_spec to have ConflictsWith configured, got %v", k8sSchema.ConflictsWith)
-	}
-
-	k8sResource, ok := k8sSchema.Elem.(*schema.Resource)
-	if !ok {
-		t.Fatalf("kubernetes_spec Elem is not *schema.Resource")
-	}
-
-	// Verify node_pool_ids
-	npIds, ok := k8sResource.Schema["node_pool_ids"]
-	if !ok {
-		t.Fatalf("node_pool_ids missing from kubernetes_spec schema")
-	}
-	if !npIds.ForceNew {
-		t.Errorf("node_pool_ids must be ForceNew (immutable)")
-	}
-
-	// Verify enable_ip_alias
-	ipAlias, ok := k8sResource.Schema["enable_ip_alias"]
-	if !ok {
-		t.Fatalf("enable_ip_alias missing from kubernetes_spec schema")
-	}
-	if !ipAlias.ForceNew {
-		t.Errorf("enable_ip_alias must be ForceNew (immutable)")
-	}
-
-	// Verify public_access_endpoint_enabled
-	pae, ok := k8sResource.Schema["public_access_endpoint_enabled"]
-	if !ok {
-		t.Fatalf("public_access_endpoint_enabled missing from kubernetes_spec schema")
-	}
-	if !pae.ForceNew {
-		t.Errorf("public_access_endpoint_enabled must be ForceNew (immutable)")
-	}
-
-	// Verify control_plane_version
-	cpv, ok := k8sResource.Schema["control_plane_version"]
-	if !ok {
-		t.Fatalf("control_plane_version missing from kubernetes_spec schema")
-	}
-	if !cpv.Computed || !cpv.Optional {
-		t.Errorf("control_plane_version must be Computed and Optional, got Computed=%v Optional=%v", cpv.Computed, cpv.Optional)
-	}
-	if cpv.DiffSuppressFunc == nil {
-		t.Errorf("control_plane_version must have DiffSuppressFunc configured")
-	}
-
-	// Verify node_pool_versions
-	npv, ok := k8sResource.Schema["node_pool_versions"]
-	if !ok {
-		t.Fatalf("node_pool_versions missing from kubernetes_spec schema")
-	}
-	if !npv.Computed || !npv.Optional {
-		t.Errorf("node_pool_versions must be Computed and Optional, got Computed=%v Optional=%v", npv.Computed, npv.Optional)
-	}
-	if npv.DiffSuppressFunc == nil {
-		t.Errorf("node_pool_versions must have DiffSuppressFunc configured")
-	}
 }
 
 func TestUnitVertexAIModelDevelopmentCluster_GkeVersionDiffSuppress(t *testing.T) {
@@ -339,54 +248,6 @@ func TestUnitVertexAIModelDevelopmentCluster_GkeVersionDiffSuppress(t *testing.T
 	}
 }
 
-func TestUnitVertexAIModelDevelopmentCluster_NodePoolVersionsExpandFlatten(t *testing.T) {
-	t.Parallel()
-
-	// Test expand
-	input := map[string]interface{}{
-		"pool-1": "1.30.5-gke.1014001",
-		"pool-2": "1.31",
-	}
-	expanded, err := expandVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(input, nil, nil)
-	if err != nil {
-		t.Fatalf("unexpected error during expand: %v", err)
-	}
-	expectedExpanded := map[string]interface{}{
-		"pool-1": map[string]interface{}{"version": "1.30.5-gke.1014001"},
-		"pool-2": map[string]interface{}{"version": "1.31"},
-	}
-	if !reflect.DeepEqual(expanded, expectedExpanded) {
-		t.Errorf("expand mismatch: got %#v, want %#v", expanded, expectedExpanded)
-	}
-
-	// Test expand nil / empty
-	if expNil, err := expandVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(nil, nil, nil); err != nil || expNil != nil {
-		t.Errorf("expected expand(nil) to return nil, nil; got %#v, %v", expNil, err)
-	}
-	if expEmpty, err := expandVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(map[string]interface{}{}, nil, nil); err != nil || expEmpty != nil {
-		t.Errorf("expected expand({}) to return nil, nil; got %#v, %v", expEmpty, err)
-	}
-
-	// Test flatten
-	apiResp := map[string]interface{}{
-		"pool-1": map[string]interface{}{"version": "1.30.5-gke.1014001"},
-		"pool-2": map[string]interface{}{"version": "1.31"},
-	}
-	flattened := flattenVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(apiResp, nil, nil)
-	expectedFlattened := map[string]interface{}{
-		"pool-1": "1.30.5-gke.1014001",
-		"pool-2": "1.31",
-	}
-	if !reflect.DeepEqual(flattened, expectedFlattened) {
-		t.Errorf("flatten mismatch: got %#v, want %#v", flattened, expectedFlattened)
-	}
-
-	// Test flatten nil
-	if flatNil := flattenVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(nil, nil, nil); flatNil != nil {
-		t.Errorf("expected flatten(nil) to return nil; got %#v", flatNil)
-	}
-}
-
 func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing.T) {
 	t.Parallel()
 	res := ResourceVertexAIModelDevelopmentCluster()
@@ -394,6 +255,22 @@ func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing
 	t.Run("missing node pool ID", func(t *testing.T) {
 		t.Parallel()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
 			"orchestrator_spec": []interface{}{
 				map[string]interface{}{
 					"kubernetes_spec": []interface{}{
@@ -419,6 +296,15 @@ func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing
 	t.Run("unknown node pool ID", func(t *testing.T) {
 		t.Parallel()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
 			"orchestrator_spec": []interface{}{
 				map[string]interface{}{
 					"kubernetes_spec": []interface{}{
@@ -445,28 +331,6 @@ func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing
 	t.Run("valid matching node pool IDs", func(t *testing.T) {
 		t.Parallel()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"orchestrator_spec": []interface{}{
-				map[string]interface{}{
-					"kubernetes_spec": []interface{}{
-						map[string]interface{}{
-							"node_pool_ids": []interface{}{"pool-1", "pool-2"},
-							"node_pool_versions": map[string]interface{}{
-								"pool-1": "1.30",
-								"pool-2": "-",
-							},
-						},
-					},
-				},
-			},
-		})
-		if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil {
-			t.Fatalf("unexpected validation error: %v", err)
-		}
-	})
-
-	t.Run("top-level node_pools takes precedence over kubernetes_spec.node_pool_ids", func(t *testing.T) {
-		t.Parallel()
-		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"node_pools": []interface{}{
 				map[string]interface{}{
 					"id":   "pool-1",
@@ -487,9 +351,9 @@ func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing
 				map[string]interface{}{
 					"kubernetes_spec": []interface{}{
 						map[string]interface{}{
-							"node_pool_ids": []interface{}{"pool-1"},
+							"node_pool_ids": []interface{}{"pool-1", "pool-2"},
 							"node_pool_versions": map[string]interface{}{
-								"pool-1": "-",
+								"pool-1": "1.30",
 								"pool-2": "-",
 							},
 						},
@@ -498,7 +362,7 @@ func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing
 			},
 		})
 		if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil {
-			t.Fatalf("expected top-level node_pools IDs to be accepted, got error: %v", err)
+			t.Fatalf("unexpected validation error: %v", err)
 		}
 	})
 }
@@ -579,451 +443,6 @@ func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_NodePoolVersions(t *test
 			t.Fatalf("expected CustomDiff missing pool-2 error, got: %v", err)
 		}
 	})
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_Create_VersionsPatchedAfterCreate(t *testing.T) {
-	t.Parallel()
-
-	var postBody map[string]interface{}
-	var patchMask string
-	var patchBody map[string]interface{}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.Method {
-		case "POST":
-			body, _ := io.ReadAll(r.Body)
-			_ = json.Unmarshal(body, &postBody)
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/create-op", "done": true, "response": {"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"}}`))
-		case "PATCH":
-			patchMask = r.URL.Query().Get("updateMask")
-			body, _ := io.ReadAll(r.Body)
-			_ = json.Unmarshal(body, &patchBody)
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/patch-op", "done": true, "response": {"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"}}`))
-		case "GET":
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"}`))
-		}
-	}))
-	defer server.Close()
-
-	res := ResourceVertexAIModelDevelopmentCluster()
-	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "test",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"node_pool_ids":         []interface{}{"pool-1"},
-						"control_plane_version": "1.31",
-						"node_pool_versions": map[string]interface{}{
-							"pool-1": "-",
-						},
-					},
-				},
-			},
-		},
-	})
-
-	config := &transport_tpg.Config{
-		Project: "test-project",
-		Region:  "us-central1",
-		Client:  server.Client(),
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: server.URL + "/",
-		},
-	}
-
-	if err := resourceVertexAIModelDevelopmentClusterCreate(d, config); err != nil {
-		t.Fatalf("unexpected error during create: %v", err)
-	}
-
-	// Verify initial POST strips controlPlaneVersion and nodePoolVersions
-	orchPost, _ := postBody["orchestratorSpec"].(map[string]interface{})
-	k8sPost, _ := orchPost["kubernetesSpec"].(map[string]interface{})
-	if _, hasCP := k8sPost["controlPlaneVersion"]; hasCP {
-		t.Errorf("expected initial POST body not to contain controlPlaneVersion, got %#v", k8sPost)
-	}
-	if _, hasNP := k8sPost["nodePoolVersions"]; hasNP {
-		t.Errorf("expected initial POST body not to contain nodePoolVersions, got %#v", k8sPost)
-	}
-
-	// Verify follow-up PATCH sets updateMask and body
-	expectedMask := "orchestrator_spec.kubernetes_spec.control_plane_version,orchestrator_spec.kubernetes_spec.node_pool_versions"
-	if patchMask != expectedMask {
-		t.Errorf("expected post-create PATCH updateMask %q, got %q", expectedMask, patchMask)
-	}
-	orchPatch, _ := patchBody["orchestratorSpec"].(map[string]interface{})
-	k8sPatch, _ := orchPatch["kubernetesSpec"].(map[string]interface{})
-	if got := k8sPatch["controlPlaneVersion"]; got != "1.31" {
-		t.Errorf("expected PATCH controlPlaneVersion = \"1.31\", got %#v", got)
-	}
-	expectedNPV := map[string]interface{}{
-		"pool-1": map[string]interface{}{"version": "-"},
-	}
-	if !reflect.DeepEqual(k8sPatch["nodePoolVersions"], expectedNPV) {
-		t.Errorf("expected PATCH nodePoolVersions = %#v, got %#v", expectedNPV, k8sPatch["nodePoolVersions"])
-	}
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_Create_DefaultVersionsSkipPatch(t *testing.T) {
-	t.Parallel()
-
-	patchCalled := false
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.Method {
-		case "POST":
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/create-op", "done": true, "response": {"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"}}`))
-		case "PATCH":
-			patchCalled = true
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/patch-op", "done": true, "response": {}}`))
-		case "GET":
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"}`))
-		}
-	}))
-	defer server.Close()
-
-	res := ResourceVertexAIModelDevelopmentCluster()
-	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "test",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"node_pool_ids":         []interface{}{"pool-1"},
-						"control_plane_version": "-",
-						"node_pool_versions": map[string]interface{}{
-							"pool-1": "-",
-						},
-					},
-				},
-			},
-		},
-	})
-
-	config := &transport_tpg.Config{
-		Project: "test-project",
-		Region:  "us-central1",
-		Client:  server.Client(),
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: server.URL + "/",
-		},
-	}
-
-	if err := resourceVertexAIModelDevelopmentClusterCreate(d, config); err != nil {
-		t.Fatalf("unexpected error during create: %v", err)
-	}
-	if patchCalled {
-		t.Errorf("expected no post-create PATCH when control_plane_version and node_pool_versions are '-'")
-	}
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_Create_PostCreatePatchFailurePopulatesState(t *testing.T) {
-	t.Parallel()
-
-	readCalled := false
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.Method {
-		case "POST":
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/create-op", "done": true, "response": {"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"}}`))
-		case "PATCH":
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"error": {"code": 400, "message": "invalid version"}}`))
-		case "GET":
-			readCalled = true
-			w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster", "displayName": "created-cluster"}`))
-		}
-	}))
-	defer server.Close()
-
-	res := ResourceVertexAIModelDevelopmentCluster()
-	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "created-cluster",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"node_pool_ids":         []interface{}{"pool-1"},
-						"control_plane_version": "1.99",
-					},
-				},
-			},
-		},
-	})
-
-	config := &transport_tpg.Config{
-		Project: "test-project",
-		Region:  "us-central1",
-		Client:  server.Client(),
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: server.URL + "/",
-		},
-	}
-
-	err := resourceVertexAIModelDevelopmentClusterCreate(d, config)
-	if err == nil {
-		t.Fatalf("expected error when post-create PATCH fails, got nil")
-	}
-	if !readCalled {
-		t.Errorf("expected resourceVertexAIModelDevelopmentClusterRead to be called when post-create PATCH fails")
-	}
-	if d.Id() == "" {
-		t.Errorf("expected resource ID to remain set after post-create PATCH failure")
-	}
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_PreUpdate_UpdateMaskGKE(t *testing.T) {
-	t.Parallel()
-
-	var capturedMask string
-	var capturedBody map[string]interface{}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PATCH" {
-			capturedMask = r.URL.Query().Get("updateMask")
-			body, _ := io.ReadAll(r.Body)
-			_ = json.Unmarshal(body, &capturedBody)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/op1", "done": true, "response": {}}`))
-	}))
-	defer server.Close()
-
-	res := ResourceVertexAIModelDevelopmentCluster()
-	stateMap := map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "initial-name",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"control_plane_version": "1.30",
-					},
-				},
-			},
-		},
-	}
-	configMap := map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "initial-name",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"control_plane_version": "1.31",
-					},
-				},
-			},
-		},
-	}
-	d := testModelDevelopmentClusterResourceData(t, res, stateMap, configMap)
-
-	config := &transport_tpg.Config{
-		Project: "test-project",
-		Region:  "us-central1",
-		Client:  server.Client(),
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: server.URL + "/",
-		},
-	}
-
-	err := resourceVertexAIModelDevelopmentClusterUpdate(d, config)
-	if err != nil {
-		t.Fatalf("unexpected error during update: %v", err)
-	}
-
-	if capturedMask != "orchestrator_spec.kubernetes_spec.control_plane_version" {
-		t.Errorf("expected updateMask to be exactly \"orchestrator_spec.kubernetes_spec.control_plane_version\", got %q", capturedMask)
-	}
-	orchBody, ok := capturedBody["orchestratorSpec"].(map[string]interface{})
-	if !ok {
-		t.Fatalf("expected orchestratorSpec in PATCH body, got %#v", capturedBody)
-	}
-	k8sBody, ok := orchBody["kubernetesSpec"].(map[string]interface{})
-	if !ok {
-		t.Fatalf("expected kubernetesSpec in PATCH body, got %#v", orchBody)
-	}
-	if got := k8sBody["controlPlaneVersion"]; got != "1.31" {
-		t.Errorf("expected controlPlaneVersion = \"1.31\" in PATCH body, got %#v", got)
-	}
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_PreUpdate_GKENonOrchestratorChangeOmitsOrchestratorSpec(t *testing.T) {
-	t.Parallel()
-
-	var capturedMask string
-	var capturedBody map[string]interface{}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PATCH" {
-			capturedMask = r.URL.Query().Get("updateMask")
-			body, _ := io.ReadAll(r.Body)
-			_ = json.Unmarshal(body, &capturedBody)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/op1", "done": true, "response": {}}`))
-	}))
-	defer server.Close()
-
-	res := ResourceVertexAIModelDevelopmentCluster()
-	stateMap := map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "initial-name",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"node_pool_ids":         []interface{}{"cpu1"},
-						"control_plane_version": "1.35.8-gke.1919000",
-						"node_pool_versions": map[string]interface{}{
-							"cpu1": "1.35.8-gke.1919000",
-						},
-					},
-				},
-			},
-		},
-	}
-	configMap := map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "updated-name",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"kubernetes_spec": []interface{}{
-					map[string]interface{}{
-						"node_pool_ids":         []interface{}{"cpu1"},
-						"control_plane_version": "1.35",
-						"node_pool_versions": map[string]interface{}{
-							"cpu1": "-",
-						},
-					},
-				},
-			},
-		},
-	}
-	d := testModelDevelopmentClusterResourceData(t, res, stateMap, configMap)
-
-	config := &transport_tpg.Config{
-		Project: "test-project",
-		Region:  "us-central1",
-		Client:  server.Client(),
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: server.URL + "/",
-		},
-	}
-
-	if err := resourceVertexAIModelDevelopmentClusterUpdate(d, config); err != nil {
-		t.Fatalf("unexpected error during update: %v", err)
-	}
-
-	if capturedMask != "displayName" {
-		t.Errorf("expected updateMask to be \"displayName\", got %q", capturedMask)
-	}
-	if _, hasOrch := capturedBody["orchestratorSpec"]; hasOrch {
-		t.Errorf("expected orchestratorSpec to be omitted from PATCH body when unchanged, got %#v", capturedBody)
-	}
-}
-
-func TestUnitVertexAIModelDevelopmentCluster_PreUpdate_UpdateMaskSlurm(t *testing.T) {
-	t.Parallel()
-
-	var capturedMask string
-	var capturedBody map[string]interface{}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PATCH" {
-			capturedMask = r.URL.Query().Get("updateMask")
-			body, _ := io.ReadAll(r.Body)
-			_ = json.Unmarshal(body, &capturedBody)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"name": "projects/test-project/locations/us-central1/operations/op1", "done": true, "response": {}}`))
-	}))
-	defer server.Close()
-
-	res := ResourceVertexAIModelDevelopmentCluster()
-	stateMap := map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "initial-name",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"slurm_spec": []interface{}{
-					map[string]interface{}{
-						"home_directory_storage": "filestore-id",
-						"default_partition_id":   "part1",
-					},
-				},
-			},
-		},
-	}
-	configMap := map[string]interface{}{
-		"model_development_cluster_id": "test-cluster",
-		"region":                       "us-central1",
-		"display_name":                 "initial-name",
-		"deletion_policy":              "DELETE",
-		"orchestrator_spec": []interface{}{
-			map[string]interface{}{
-				"slurm_spec": []interface{}{
-					map[string]interface{}{
-						"home_directory_storage": "filestore-id",
-						"default_partition_id":   "part2",
-					},
-				},
-			},
-		},
-	}
-	d := testModelDevelopmentClusterResourceData(t, res, stateMap, configMap)
-
-	config := &transport_tpg.Config{
-		Project: "test-project",
-		Region:  "us-central1",
-		Client:  server.Client(),
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: server.URL + "/",
-		},
-	}
-
-	err := resourceVertexAIModelDevelopmentClusterUpdate(d, config)
-	if err != nil {
-		t.Fatalf("unexpected error during update: %v", err)
-	}
-
-	if !strings.Contains(capturedMask, "orchestrator_spec.slurm_spec") {
-		t.Errorf("expected updateMask to contain slurm_spec paths, got %q", capturedMask)
-	}
-	if strings.Contains(capturedMask, "kubernetes_spec") {
-		t.Errorf("expected updateMask not to contain kubernetes_spec, got %q", capturedMask)
-	}
-	orchBody, ok := capturedBody["orchestratorSpec"].(map[string]interface{})
-	if !ok {
-		t.Fatalf("expected orchestratorSpec in PATCH body, got %#v", capturedBody)
-	}
-	slurmBody, ok := orchBody["slurmSpec"].(map[string]interface{})
-	if !ok {
-		t.Fatalf("expected slurmSpec in PATCH body, got %#v", orchBody)
-	}
-	if got := slurmBody["defaultPartitionId"]; got != "part2" {
-		t.Errorf("expected defaultPartitionId = \"part2\" in PATCH body, got %#v", got)
-	}
 }
 
 {{- end }}

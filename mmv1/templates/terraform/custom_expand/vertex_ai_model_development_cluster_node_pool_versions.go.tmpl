@@ -28,19 +28,5 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 		}
 		return transformed, nil
 	}
-	if m, ok := v.(map[string]string); ok {
-		if len(m) == 0 {
-			return nil, nil
-		}
-		transformed := make(map[string]interface{})
-		for k, val := range m {
-			if val != "" {
-				transformed[k] = map[string]interface{}{
-					"version": val,
-				}
-			}
-		}
-		return transformed, nil
-	}
 	return nil, nil
 }
