@@ -1,6 +1,9 @@
 resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
   region       = "us-central1"
-  display_name = "Test Evaluation Run"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  metadata     = jsonencode({
+    tracker = "eval-tracker"
+  })
 
   labels = {
     env  = "test"
@@ -13,30 +16,26 @@ resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
 
   data_source {
     bigquery_request_set {
-      uri                        = "bq://${google_bigquery_table.eval_table.project}.${google_bigquery_table.eval_table.dataset_id}.${google_bigquery_table.eval_table.table_id}"
-      prompt_column              = "prompt"
-      rubrics_column             = "rubrics"
+      uri            = "bq://${google_bigquery_table.eval_table.project}.${google_bigquery_table.eval_table.dataset_id}.${google_bigquery_table.eval_table.table_id}"
+      prompt_column  = "prompt"
+      rubrics_column = "rubrics"
       candidate_response_columns = {
         candidate = "response"
+      }
+      sampling_config {
+        sampling_count    = 1
+        sampling_method   = "RANDOM"
+        sampling_duration = "1s"
       }
     }
   }
 
   evaluation_config {
     metrics {
-      metric = "general_quality_v1"
-      predefined_metric_spec {
-        metric_spec_name = "general_quality_v1"
+      metric = "exact_match"
+      computation_based_metric_spec {
+        type = "EXACT_MATCH"
       }
-    }
-
-    metrics {
-      metric = "custom_llm_metric"
-      metric_config = jsonencode({
-        llmBasedMetricSpec = {
-          metricPromptTemplate = "Evaluate the quality of the response: {response}"
-        }
-      })
     }
 
     metrics {
@@ -50,8 +49,23 @@ resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
       }
     }
 
+    prompt_template {
+      prompt_template = "Evaluate the following prompt: {prompt}"
+    }
+
     autorater_config {
-      sample_count = 1
+      sample_count    = 1
+      autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+      generation_config {
+        temperature = 0.2
+        top_p       = 0.9
+        top_k       = 20
+        seed        = 42
+        thinking_config {
+          include_thoughts = true
+          thinking_budget  = 128
+        }
+      }
     }
   }
 
@@ -59,9 +73,10 @@ resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_vertex_ai_evaluation_metric" "eval_metric" {
-  region       = "us-central1"
-  display_name = "Test Evaluation Metric"
-  description  = "An evaluation metric for EvaluationRun testing"
+  evaluation_metric_id = "{{index $.ResourceIdVars "display_name"}}"
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "display_name"}}"
+  description          = "An evaluation metric for EvaluationRun testing"
 
   metric = jsonencode({
     llmBasedMetricSpec = {
@@ -74,7 +89,7 @@ resource "google_bigquery_dataset" "eval_dataset" {
   dataset_id                 = "{{index $.ResourceIdVars "name"}}_dataset"
   friendly_name              = "test"
   description                = "Dataset for Vertex AI Evaluation Run test"
-  location                   = "US"
+  location                   = "us-central1"
   delete_contents_on_destroy = true
 }
 
@@ -111,7 +126,7 @@ EOF
 
 resource "google_bigquery_job" "eval_data" {
   job_id   = "{{index $.ResourceIdVars "name"}}_data"
-  location = "US"
+  location = "us-central1"
 
   query {
     query              = "INSERT INTO ${google_bigquery_dataset.eval_dataset.dataset_id}.${google_bigquery_table.eval_table.table_id} (prompt, rubrics, response, reference) VALUES ('{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Why is the sky blue?\"}]}]}', 'accurate and concise', '{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"The sky is blue because of Rayleigh scattering.\"}]}}]}', '{\"contents\":[{\"role\":\"model\",\"parts\":[{\"text\":\"The sky is blue because of Rayleigh scattering.\"}]}]}')"
