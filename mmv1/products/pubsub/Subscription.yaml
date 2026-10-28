@@ -711,10 +711,6 @@ properties:
       order specified.
     item_type:
       type: NestedObject
-      exactly_one_of:
-        - javascript_udf
-        - ai_inference
-        - compression
       properties:
         - name: aiInference
           type: NestedObject
