@@ -3,14 +3,12 @@ resource "google_datastream_connection_profile" "default" {
     location              = "us-central1"
     connection_profile_id = "{{index $.ResourceIdVars "source_connection_profile_id"}}"
     create_without_validation = true
-    provider = google-beta
 
     salesforce_profile {
         domain = "fake-domain.my.salesforce.com"
-        user_credentials {
-          username = "fake-username"
-          secret_manager_stored_password = "fake-password"
-          secret_manager_stored_security_token = "fake-token"
+        oauth2_client_credentials {
+          client_id = "fake-client-id"
+          secret_manager_stored_client_secret = "projects/fake-project/secrets/fake-secret/versions/1"
         }
     }
 }

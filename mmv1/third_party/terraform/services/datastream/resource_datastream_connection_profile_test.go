@@ -751,3 +751,160 @@ resource "google_datastream_connection_profile" "default" {
 }
 `, context)
 }
+
+func TestAccDatastreamConnectionProfile_salesforce(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_salesforceBasicExample(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// client_secret is input-only and omitted by the Datastream API on GET responses.
+				ImportStateVerifyIgnore: []string{"create_without_validation", "location", "connection_profile_id", "salesforce_profile.0.oauth2_client_credentials.0.client_secret"},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_salesforceUpdateExample(context),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_without_validation", "location", "connection_profile_id", "salesforce_profile.0.oauth2_client_credentials.0.client_secret"},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_salesforceBasicExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-salesforce-profile"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-sf-cp-%{random_suffix}"
+  create_without_validation = true
+
+  salesforce_profile {
+    domain = "fake-domain.my.salesforce.com"
+    oauth2_client_credentials {
+      client_id     = "fake-client-id"
+      client_secret = "fake-client-secret"
+    }
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_salesforceUpdateExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "client_secret" {
+  project   = data.google_project.project.project_id
+  secret_id = "tf-test-sf-secret-%{random_suffix}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "client_secret_version" {
+  secret      = google_secret_manager_secret.client_secret.id
+  secret_data = "my-secret-client-secret"
+}
+
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-salesforce-profile-updated"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-sf-cp-%{random_suffix}"
+  create_without_validation = true
+
+  salesforce_profile {
+    domain = "updated-domain.my.salesforce.com"
+    oauth2_client_credentials {
+      client_id                           = "updated-client-id"
+      secret_manager_stored_client_secret = google_secret_manager_secret_version.client_secret_version.id
+    }
+  }
+
+  depends_on = [
+    google_secret_manager_secret_version.client_secret_version,
+  ]
+}
+`, context)
+}
+
+func TestAccDatastreamConnectionProfile_spanner(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_spannerBasicExample(context),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_without_validation", "location", "connection_profile_id"},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_spannerUpdateExample(context),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_without_validation", "location", "connection_profile_id"},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_spannerBasicExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-spanner-profile"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-spanner-cp-%{random_suffix}"
+  create_without_validation = true
+
+  spanner_profile {
+    database = "projects/example-project/instances/example-instance/databases/example-database"
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_spannerUpdateExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-spanner-profile-updated"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-spanner-cp-%{random_suffix}"
+  create_without_validation = true
+
+  spanner_profile {
+    database = "projects/example-project/instances/example-instance/databases/example-database"
+    host     = "https://spanner.us-central1.rep.googleapis.com"
+  }
+}
+`, context)
+}

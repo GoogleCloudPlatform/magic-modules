@@ -484,7 +484,6 @@ properties:
                 sensitive: true
                 ignore_read: true
   - name: salesforceProfile
-    min_version: beta
     type: NestedObject
     description: |
       Salesforce profile.
@@ -505,12 +504,14 @@ properties:
           Domain for the Salesforce Org.
         required: true
       - name: userCredentials
+        min_version: beta
+        deprecation_message: '`user_credentials` is deprecated. Use `oauth2_client_credentials` instead.'
         type: NestedObject
         description: |
           User credentials to use for Salesforce authentication.
         exactly_one_of:
-          - user_credentials
-          - oauth2_client_credentials
+          - salesforce_profile.0.user_credentials
+          - salesforce_profile.0.oauth2_client_credentials
         properties:
           - name: username
             type: String
@@ -537,23 +538,32 @@ properties:
         description: |
           OAuth credentials to use for Salesforce authentication.
         exactly_one_of:
-          - user_credentials
-          - oauth2_client_credentials
+          - salesforce_profile.0.user_credentials
+          - salesforce_profile.0.oauth2_client_credentials
         properties:
           - name: clientId
             type: String
             description: |
               Client ID to use for authentication.
+            required: true
           - name: clientSecret
             type: String
             description: |
               Client secret to use for authentication.
+            sensitive: true
+            # client_secret is input-only and omitted by the Datastream API on GET responses.
+            ignore_read: true
+            exactly_one_of:
+              - salesforce_profile.0.oauth2_client_credentials.0.client_secret
+              - salesforce_profile.0.oauth2_client_credentials.0.secret_manager_stored_client_secret
           - name: secretManagerStoredClientSecret
             type: String
             description: |
               A reference to a Secret Manager resource name storing the client secret.
+            exactly_one_of:
+              - salesforce_profile.0.oauth2_client_credentials.0.client_secret
+              - salesforce_profile.0.oauth2_client_credentials.0.secret_manager_stored_client_secret
   - name: spannerProfile
-    min_version: beta
     type: NestedObject
     description: |
       Spanner profile.
@@ -574,6 +584,7 @@ properties:
           The full project and resource path for Spanner database. Format:
           projects/{project}/instances/{instance}/databases/{database}.
         required: true
+        immutable: true
       - name: host
         type: String
         description: |
