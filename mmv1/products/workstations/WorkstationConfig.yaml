@@ -127,33 +127,6 @@ samples:
           enable_confidential_compute: null
         test_vars_overrides:
           org_id: envvar.GetTestOrgFromEnv(t)
-      - name: workstation_config_idle_action
-        min_version: beta
-        include_step_doc: true
-        resource_id_vars:
-          account_id: my-account
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-          key_short_name: keyname
-          value_short_name: valuename
-          org_id: '123456789'
-        vars:
-          idle_action: 'SUSPEND'
-        test_vars_overrides:
-          org_id: envvar.GetTestOrgFromEnv(t)
-      - name: workstation_config_idle_action
-        min_version: beta
-        resource_id_vars:
-          account_id: my-account
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-          key_short_name: keyname
-          value_short_name: valuename
-          org_id: '123456789'
-        vars:
-          idle_action: 'STOP'
-        test_vars_overrides:
-          org_id: envvar.GetTestOrgFromEnv(t)
   - name: workstation_config_boost
     primary_resource_id: default
     steps:
@@ -163,7 +136,6 @@ samples:
           workstation_config_name: workstation-config
       - name: workstation_config_boost_update
         min_version: beta
-        include_step_doc: true
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
@@ -213,6 +185,22 @@ samples:
           account_id: my-account
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
+  - name: workstation_config_idle_action
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: workstation_config_idle_action
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          idle_action: 'SUSPEND'
+      - name: workstation_config_idle_action
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          idle_action: 'STOP'
 parameters:
   - name: workstationConfigId
     type: String
