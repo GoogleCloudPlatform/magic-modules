@@ -1,0 +1,229 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Addon
+api_resource_type_kind: Addon
+description: |-
+  Addons are used to configure value-added services inside the API Hub.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/api-hub/docs/overview
+  api: https://cloud.google.com/api-hub/docs/reference/rest/v1/projects.locations.addons
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}:manageConfig'
+update_url: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}:manageConfig'
+update_verb: POST
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}'
+  - '{{project}}/{{location}}/{{addon_id}}'
+  - '{{location}}/{{addon_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 20
+exclude_delete: true
+mutex: 'addons/{{project}}/{{location}}/{{addon_id}}'
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 0
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: QWRkb24=
+autogen_async: true
+custom_diff:
+  - apihubAddonCustomizeDiff
+custom_code:
+  constants: templates/terraform/constants/apihub_addon.go.tmpl
+  pre_create: templates/terraform/pre_create/apihub_addon.go.tmpl
+  pre_update: templates/terraform/pre_update/apihub_addon.go.tmpl
+samples:
+  - name: apihub_addon_basic
+    primary_resource_id: apihub_addon_basic
+    steps:
+      - name: apihub_addon_basic
+        resource_id_vars:
+          addon_id: system-specboost
+        test_vars_overrides:
+          addon_id: '"system-specboost"'
+      - name: apihub_addon_update
+        resource_id_vars:
+          addon_id: system-specboost
+        test_vars_overrides:
+          addon_id: '"system-specboost"'
+  - name: apihub_addon_gateway_plugin
+    primary_resource_id: apihub_addon_gateway_plugin
+    steps:
+      - name: apihub_addon_gateway_plugin
+        resource_id_vars:
+          addon_id: system-advanced-api-security
+          plugin_instance_id: edge-plugin-instance
+          source_project_id: edge-org
+        test_vars_overrides:
+          addon_id: '"system-advanced-api-security"'
+      - name: apihub_addon_gateway_plugin_update
+        resource_id_vars:
+          addon_id: system-advanced-api-security
+          plugin_instance_id: edge-plugin-instance
+          source_project_id: edge-org
+        test_vars_overrides:
+          addon_id: '"system-advanced-api-security"'
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: addonId
+    type: String
+    description: The ID of the addon.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the addon. Format: `projects/{project}/locations/{location}/addons/{addon}`.
+    output: true
+  - name: displayName
+    type: String
+    description: The display name of the addon.
+    output: true
+  - name: description
+    type: String
+    description: The description of the addon.
+    output: true
+  - name: dataSource
+    type: String
+    description: The data source on which the addon operates.
+    output: true
+  - name: createTime
+    type: String
+    description: The time at which the addon was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time at which the addon was last updated.
+    output: true
+  - name: state
+    type: String
+    description: The state of the addon.
+    output: true
+  - name: boostSpecGeminiRegionId
+    type: String
+    description: The Vertex AI region where the BoostSpec Gemini model calls run for this API Hub instance.
+    output: true
+  - name: config
+    type: NestedObject
+    description: The configuration of the addon.
+    required: true
+    properties:
+      - name: gatewayPluginAddonConfig
+        type: NestedObject
+        description: Configuration for gateway plugin addons.
+        exactly_one_of:
+          - config.0.gateway_plugin_addon_config
+          - config.0.all_data_addon_config
+        properties:
+          - name: gatewayPluginConfigs
+            type: Array
+            description: The list of gateway plugin configs for which the addon is enabled.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: pluginInstance
+                  type: String
+                  description: |-
+                    The name of the gateway plugin instance for which the config is to be specified.
+                    Format: projects/{project}/locations/{location}/plugins/{plugin}/instances/{instance}
+                  required: true
+                - name: apigeeXHybridConfig
+                  type: NestedObject
+                  description: Configuration for Apigee X and Apigee Hybrid gateways.
+                  properties:
+                    - name: environmentFilter
+                      type: NestedObject
+                      description: The filter to apply on the resources managed by the gateway plugin instance.
+                      properties:
+                        - name: allEnvironments
+                          type: Boolean
+                          send_empty_value: true
+                          description: Indicates if this filter should match all environments or only a subset of environments.
+                        - name: environments
+                          type: Array
+                          description: If provided, only environments in this list are matched.
+                          item_type:
+                            type: String
+                - name: apigeeEdgeConfig
+                  type: NestedObject
+                  description: Configuration for Apigee Edge gateways.
+                  properties:
+                    - name: environmentFilter
+                      type: NestedObject
+                      description: The filter to apply on the resources managed by the gateway plugin instance.
+                      properties:
+                        - name: allEnvironments
+                          type: Boolean
+                          send_empty_value: true
+                          description: Indicates if this filter should match all environments or only a subset of environments.
+                        - name: environments
+                          type: Array
+                          description: If provided, only environments in this list are matched.
+                          item_type:
+                            type: String
+                - name: apigeeOpdkConfig
+                  type: NestedObject
+                  description: Configuration for Apigee OPDK gateways.
+                  properties:
+                    - name: environmentFilter
+                      type: NestedObject
+                      description: The filter to apply on the resources managed by the gateway plugin instance.
+                      properties:
+                        - name: allEnvironments
+                          type: Boolean
+                          send_empty_value: true
+                          description: Indicates if this filter should match all environments or only a subset of environments.
+                        - name: environments
+                          type: Array
+                          description: If provided, only environments in this list are matched.
+                          item_type:
+                            type: String
+      - name: allDataAddonConfig
+        type: NestedObject
+        description: Configuration for addons which act on all data in the API hub.
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - config.0.gateway_plugin_addon_config
+          - config.0.all_data_addon_config
+        properties:
+          - name: enabled
+            type: Boolean
+            send_empty_value: true
+            description: If true, the addon is enabled for all data in the API hub.
+            required: true

@@ -1,0 +1,10 @@
+resource "google_apihub_addon" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  addon_id = "{{index $.ResourceIdVars "addon_id"}}"
+
+  config {
+    all_data_addon_config {
+      enabled = false
+    }
+  }
+}
