@@ -98,6 +98,35 @@ func TestExecVCRMerge(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("resolves PR by commit message when outside GetPullRequests page", func(t *testing.T) {
+		gh := &mockGithub{
+			commitMessage: "some pr title (#456)",
+			pullRequests: []github.PullRequest{
+				{
+					Number:         456,
+					MergeCommitSha: "older-sha",
+				},
+			},
+			pullRequest: github.PullRequest{
+				Number:         123,
+				MergeCommitSha: "newer-sha",
+			},
+			calledMethods: make(map[string][][]any),
+		}
+		runner := &mockRunner{
+			cwd:           "cwd",
+			calledMethods: make(map[string][]ParameterList),
+			cmdResults:    make(map[string]string),
+		}
+		if err := execVCRMerge(gh, "older-sha", "main", runner); err != nil {
+			t.Fatalf("execVCRMerge() unexpected error: %v", err)
+		}
+		got, ok := runner.Calls("Run")
+		if !ok || len(got) != 6 {
+			t.Fatalf("execVCRMerge() expected 6 gcloud calls for auto-pr-456, got %v", got)
+		}
+	})
 }
 
 func TestVCRMergeRunE(t *testing.T) {

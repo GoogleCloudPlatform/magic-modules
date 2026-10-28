@@ -35,11 +35,9 @@ resource "google_container_cluster" "primary" {
   name     = "my-gke-cluster"
   location = "us-central1"
 
-  # We can't create a cluster with no node pool defined, but we want to only use
-  # separately managed node pools. So we create the smallest possible default
-  # node pool and immediately delete it.
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  # Required prior to GKE 1.36.4-gke.1469000 to use separately managed node pools
+  # remove_default_node_pool = true
+  # initial_node_count       = 1
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
@@ -241,7 +239,10 @@ for more information.
 
 * `initial_node_count` - (Optional) The number of nodes to create in this
 cluster's default node pool. In regional or multi-zonal clusters, this is the
-number of nodes per zone. Must be set if `node_pool` is not set. If you're using
+number of nodes per zone. When omitted (or set to `0`) with no `node_config` or
+`node_pool` blocks defined, the cluster is created without a default node pool.
+This requires a GKE version that supports clusters without a default node pool
+(`1.36.4-gke.1469000+`). For older GKE versions, if you're using
 `google_container_node_pool` objects with no default node pool, you'll need to
 set this to a value of at least `1`, alongside setting
 `remove_default_node_pool` to `true`.
@@ -401,10 +402,14 @@ channel. Structure is [documented below](#nested_release_channel).
 Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.
 Structure is [documented below](#nested_gke_auto_upgrade_config).
 
-* `remove_default_node_pool` - (Optional) If `true`, deletes the default node
-    pool upon cluster creation. If you're using `google_container_node_pool`
-    resources with no default node pool, this should be set to `true`, alongside
-    setting `initial_node_count` to at least `1`.
+* `remove_default_node_pool` - (Optional, Deprecated) If `true`, deletes the default node
+    pool upon cluster creation. On GKE versions that support clusters without a
+    default node pool, you can instead omit `initial_node_count` and
+    `node_config` (or set `initial_node_count` to `0`) to skip creating the
+    default node pool without setting this field. For older GKE versions, if
+    you're using `google_container_node_pool` resources with no default node
+    pool, this should be set to `true`, alongside setting `initial_node_count`
+    to at least `1`.
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
@@ -1425,6 +1430,10 @@ sole_tenant_config {
 * `min_nodes_per_pool` (Required) - The minimum nodes required to be available in a pool. Blocks maintenance if it would cause the number of running nodes to dip below this value.
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
+
+~> **Note:** `gpu_driver_installation_config` and `gpu_sharing_config` are updated in place. Changing
+`type`, `count` or `gpu_partition_size` recreates the node pool, because the GKE API does not support
+updating them on an existing node pool.
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
 
