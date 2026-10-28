@@ -567,7 +567,9 @@ properties:
       https://cloud.google.com/billing/docs/how-to/budgets-spend-caps.
 
       While `output_state` is `ENFORCED`, only `input_state` can be changed.
-      The API rejects a spend cap budget whose project and service match an
+      A budget whose spend cap is `ENFORCED` cannot be deleted until the cap
+      is lifted (`input_state = AWAITING_NEXT_PERIOD`) or the next period
+      starts. The API rejects a spend cap budget whose project and service match an
       existing spend cap budget. Removing the `spend_cap` block converts the
       budget back to an alerts-only budget. A spend cap cannot be added to an
       existing budget. Adding the block replaces the budget.
@@ -580,18 +582,18 @@ properties:
         description: |
           The desired state of the spend cap. Must be `CONFIGURED` on create.
           Set to `AWAITING_NEXT_PERIOD` to lift an enforced cap until the next
-          period starts. Set `AWAITING_NEXT_PERIOD` only while
-          `output_state` is `ENFORCED`; in any other state the API returns a
-          generic 400 `INVALID_ARGUMENT`. After the next period starts the API
-          resets `output_state` to `CONFIGURED`; set `input_state` back to
-          `CONFIGURED` then, because every later update of any field of a
-          capped budget re-sends `input_state`, and `AWAITING_NEXT_PERIOD` is
-          rejected once the cap is no longer enforced.
+          period starts; the API accepts it only while `output_state` is
+          `ENFORCED` and otherwise returns `INVALID_ARGUMENT`. Set it back to
+          `CONFIGURED` before changing any other field of the budget, because
+          every update of a capped budget re-sends this field and
+          `AWAITING_NEXT_PERIOD` is rejected once the cap is no longer
+          enforced.
 
           The API does not return this field. A cap lifted outside Terraform
           is visible in `output_state` (`AWAITING_NEXT_PERIOD`) and does not
-          produce a diff on this field. On import, Terraform sets it to
-          `CONFIGURED`.
+          produce a diff on this field. Re-applying `CONFIGURED` after a cap
+          was lifted outside Terraform may re-activate the cap. On import,
+          Terraform sets it to `CONFIGURED`.
         required: true
         enum_values:
           - CONFIGURED
