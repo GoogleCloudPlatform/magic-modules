@@ -1,0 +1,277 @@
+package datastream_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/datastream"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+)
+
+func TestAccDatastreamStream_oracleCdcMethods(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDatastreamStreamDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamStream_oracleLogMiner(context),
+			},
+			{
+				ResourceName:      "google_datastream_stream.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"stream_id",
+				},
+			},
+			{
+				Config: testAccDatastreamStream_oracleBinaryLogParserAsm(context),
+			},
+			{
+				ResourceName:      "google_datastream_stream.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"stream_id",
+				},
+			},
+			{
+				Config: testAccDatastreamStream_oracleBinaryLogParserDirectories(context),
+			},
+			{
+				ResourceName:      "google_datastream_stream.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"stream_id",
+				},
+			},
+		},
+	})
+}
+
+func testAccDatastreamStream_oracleLogMiner(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "oracle_source" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-source"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-ora-src-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 1521
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  provider                    = google-beta
+  name                        = "tf-test-ora-gcs-bucket-%{random_suffix}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_datastream_connection_profile" "gcs_destination" {
+  provider                  = google-beta
+  display_name              = "tf-gcs-dest"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-ora-dst-%{random_suffix}"
+  create_without_validation = true
+
+  gcs_profile {
+    bucket    = google_storage_bucket.bucket.name
+    root_path = "/path"
+  }
+}
+
+resource "google_datastream_stream" "default" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-logminer-stream"
+  location                  = "us-central1"
+  stream_id                 = "tf-test-ora-stream-%{random_suffix}"
+  create_without_validation = true
+
+  source_config {
+    source_connection_profile = google_datastream_connection_profile.oracle_source.id
+    oracle_source_config {
+      log_miner {}
+    }
+  }
+
+  destination_config {
+    destination_connection_profile = google_datastream_connection_profile.gcs_destination.id
+    gcs_destination_config {
+      path = "/mydata"
+      avro_file_format {}
+    }
+  }
+
+  backfill_none {}
+}
+`, context)
+}
+
+func testAccDatastreamStream_oracleBinaryLogParserAsm(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "oracle_source" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-source"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-ora-src-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 1521
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+
+    oracle_asm_config {
+      hostname    = "1.1.1.2"
+      port        = 1521
+      username    = "asm_user"
+      password    = "asm_password"
+      asm_service = "+ASM"
+    }
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  provider                    = google-beta
+  name                        = "tf-test-ora-gcs-bucket-%{random_suffix}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_datastream_connection_profile" "gcs_destination" {
+  provider                  = google-beta
+  display_name              = "tf-gcs-dest"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-ora-dst-%{random_suffix}"
+  create_without_validation = true
+
+  gcs_profile {
+    bucket    = google_storage_bucket.bucket.name
+    root_path = "/path"
+  }
+}
+
+resource "google_datastream_stream" "default" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-blr-asm-stream"
+  location                  = "us-central1"
+  stream_id                 = "tf-test-ora-stream-%{random_suffix}"
+  create_without_validation = true
+
+  source_config {
+    source_connection_profile = google_datastream_connection_profile.oracle_source.id
+    oracle_source_config {
+      binary_log_parser {
+        oracle_asm_log_file_access {}
+      }
+    }
+  }
+
+  destination_config {
+    destination_connection_profile = google_datastream_connection_profile.gcs_destination.id
+    gcs_destination_config {
+      path = "/mydata"
+      avro_file_format {}
+    }
+  }
+
+  backfill_none {}
+}
+`, context)
+}
+
+func testAccDatastreamStream_oracleBinaryLogParserDirectories(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "oracle_source" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-source"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-ora-src-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 1521
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  provider                    = google-beta
+  name                        = "tf-test-ora-gcs-bucket-%{random_suffix}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_datastream_connection_profile" "gcs_destination" {
+  provider                  = google-beta
+  display_name              = "tf-gcs-dest"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-ora-dst-%{random_suffix}"
+  create_without_validation = true
+
+  gcs_profile {
+    bucket    = google_storage_bucket.bucket.name
+    root_path = "/path"
+  }
+}
+
+resource "google_datastream_stream" "default" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-blr-dirs-stream"
+  location                  = "us-central1"
+  stream_id                 = "tf-test-ora-stream-%{random_suffix}"
+  create_without_validation = true
+
+  source_config {
+    source_connection_profile = google_datastream_connection_profile.oracle_source.id
+    oracle_source_config {
+      binary_log_parser {
+        log_file_directories {
+          online_log_directory   = "ONLINE_LOG_DIR"
+          archived_log_directory = "ARCHIVED_LOG_DIR"
+        }
+      }
+    }
+  }
+
+  destination_config {
+    destination_connection_profile = google_datastream_connection_profile.gcs_destination.id
+    gcs_destination_config {
+      path = "/mydata"
+      avro_file_format {}
+    }
+  }
+
+  backfill_none {}
+}
+`, context)
+}
+{{- end }}

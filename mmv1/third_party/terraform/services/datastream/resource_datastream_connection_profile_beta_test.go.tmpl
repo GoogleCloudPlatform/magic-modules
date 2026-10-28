@@ -1,0 +1,158 @@
+package datastream_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/datastream"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+)
+
+func TestAccDatastreamConnectionProfile_oracleAsmConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_oracleAsmConfigBasic(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					// password and ca_certificate are input-only and omitted by the Datastream API on GET responses.
+					"oracle_profile.0.password",
+					"oracle_profile.0.oracle_asm_config.0.password",
+					"oracle_profile.0.oracle_asm_config.0.oracle_ssl_config.0.ca_certificate",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_oracleAsmConfigUpdate(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					"oracle_profile.0.password",
+					"oracle_profile.0.oracle_asm_config.0.oracle_ssl_config.0.ca_certificate",
+				},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_oracleAsmConfigBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-asm-profile"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-oracle-asm-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 1521
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+
+    oracle_asm_config {
+      hostname    = "1.1.1.2"
+      port        = 1521
+      username    = "asm_user"
+      password    = "asm_password"
+      asm_service = "+ASM"
+
+      connection_attributes = {
+        "internal_logon" = "sysasm"
+      }
+
+      oracle_ssl_config {
+        ca_certificate                        = file("text-fixtures/ca-cert.pem")
+        server_certificate_distinguished_name = "CN=asm.example.com"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_oracleAsmConfigUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_secret_manager_secret" "asm_password" {
+  provider  = google-beta
+  project   = data.google_project.project.project_id
+  secret_id = "tf-test-asm-pw-%{random_suffix}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "asm_password_version" {
+  provider    = google-beta
+  secret      = google_secret_manager_secret.asm_password.id
+  secret_data = "my-asm-secret-password"
+}
+
+resource "google_datastream_connection_profile" "default" {
+  provider                  = google-beta
+  display_name              = "tf-oracle-asm-profile-updated"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-oracle-asm-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 1521
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+
+    oracle_asm_config {
+      hostname                       = "1.1.1.3"
+      port                           = 2484
+      username                       = "asm_user_updated"
+      secret_manager_stored_password = google_secret_manager_secret_version.asm_password_version.id
+      asm_service                    = "+ASM2"
+
+      connection_attributes = {
+        "internal_logon" = "sysdba"
+      }
+
+      oracle_ssl_config {
+        ca_certificate                        = file("text-fixtures/ca-cert.pem")
+        server_certificate_distinguished_name = "CN=updated-asm.example.com"
+      }
+    }
+  }
+
+  depends_on = [
+    google_secret_manager_secret_version.asm_password_version,
+  ]
+}
+`, context)
+}
+{{- end }}

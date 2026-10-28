@@ -800,6 +800,58 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             properties: []
+          - name: logMiner
+            min_version: beta
+            type: NestedObject
+            description: |
+              Configuration to use LogMiner for CDC replication.
+            immutable: true
+            send_empty_value: true
+            allow_empty_object: true
+            conflicts:
+              - source_config.0.oracle_source_config.0.binary_log_parser
+            properties: []
+          - name: binaryLogParser
+            min_version: beta
+            type: NestedObject
+            description: |
+              Configuration to use Binary Log Parser CDC replication method.
+            immutable: true
+            conflicts:
+              - source_config.0.oracle_source_config.0.log_miner
+            properties:
+              - name: oracleAsmLogFileAccess
+                type: NestedObject
+                description: |
+                  Configuration to use Oracle ASM to access the log files.
+                immutable: true
+                send_empty_value: true
+                allow_empty_object: true
+                exactly_one_of:
+                  - source_config.0.oracle_source_config.0.binary_log_parser.0.oracle_asm_log_file_access
+                  - source_config.0.oracle_source_config.0.binary_log_parser.0.log_file_directories
+                properties: []
+              - name: logFileDirectories
+                type: NestedObject
+                description: |
+                  Configuration to specify the directories to access the log files.
+                immutable: true
+                exactly_one_of:
+                  - source_config.0.oracle_source_config.0.binary_log_parser.0.oracle_asm_log_file_access
+                  - source_config.0.oracle_source_config.0.binary_log_parser.0.log_file_directories
+                properties:
+                  - name: onlineLogDirectory
+                    type: String
+                    description: |
+                      Oracle directory for online logs.
+                    required: true
+                    immutable: true
+                  - name: archivedLogDirectory
+                    type: String
+                    description: |
+                      Oracle directory for archived logs.
+                    required: true
+                    immutable: true
       - name: postgresqlSourceConfig
         type: NestedObject
         description: |

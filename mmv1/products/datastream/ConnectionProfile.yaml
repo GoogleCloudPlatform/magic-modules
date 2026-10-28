@@ -241,6 +241,82 @@ properties:
       - name: connectionAttributes
         type: KeyValuePairs
         description: Connection string attributes
+      - name: oracleAsmConfig
+        min_version: beta
+        type: NestedObject
+        description: |
+          Optional. Configuration for Oracle ASM connection.
+        properties:
+          - name: hostname
+            type: String
+            description: |
+              Hostname for the Oracle ASM connection.
+            required: true
+          - name: port
+            type: Integer
+            description: |
+              Port for the Oracle ASM connection.
+            required: true
+          - name: username
+            type: String
+            description: |
+              Username for the Oracle ASM connection.
+            required: true
+          - name: password
+            type: String
+            description: |
+              Password for the Oracle ASM connection.
+            sensitive: true
+            # password is input-only and omitted by the Datastream API on GET responses.
+            ignore_read: true
+            exactly_one_of:
+              - oracle_profile.0.oracle_asm_config.0.password
+              - oracle_profile.0.oracle_asm_config.0.secret_manager_stored_password
+          - name: secretManagerStoredPassword
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the Oracle ASM
+              connection password.
+            exactly_one_of:
+              - oracle_profile.0.oracle_asm_config.0.password
+              - oracle_profile.0.oracle_asm_config.0.secret_manager_stored_password
+          - name: asmService
+            type: String
+            description: |
+              ASM service name for the Oracle ASM connection.
+            required: true
+          - name: connectionAttributes
+            type: KeyValuePairs
+            description: |
+              Custom connection string attributes.
+          - name: oracleSslConfig
+            type: NestedObject
+            description: |
+              Optional. SSL configuration for the Oracle connection.
+            properties:
+              - name: caCertificate
+                type: String
+                description: |
+                  PEM-encoded certificate of the CA that signed the source database
+                  server's certificate.
+                immutable: true
+                sensitive: true
+                # ca_certificate is input-only and omitted by the Datastream API on GET responses.
+                ignore_read: true
+              - name: caCertificateSet
+                type: Boolean
+                description: |
+                  Indicates whether the caCertificate field has been set for this
+                  Connection-Profile.
+                output: true
+              - name: serverCertificateDistinguishedName
+                type: String
+                description: |
+                  The distinguished name (DN) mentioned in the server
+                  certificate. This corresponds to SSL_SERVER_CERT_DN sqlnet parameter.
+                  Refer
+                  https://docs.oracle.com/en/database/oracle/oracle-database/19/netrf/local-naming-parameters-in-the-tnsnames-ora-file.html#GUID-70AB0695-A9AA-4A94-B141-4C605236EEB7
+                  If this field is not provided, the DN matching is not enforced.
   - name: gcsProfile
     type: NestedObject
     description: |
