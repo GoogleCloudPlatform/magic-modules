@@ -1,4 +1,3 @@
-{{ if ne $.TargetVersionName "ga" -}}
 resource: 'google_sql_database_instance'
 generation_type: 'handwritten'
 api_service_name: 'sqladmin.googleapis.com'
@@ -31,4 +30,3 @@ fields:
     field: 'blue_green_deployment.old_source_instance_name'
   - api_field: 'deploymentMappings.source.connection'
     field: 'blue_green_deployment.old_source_instance_connection_name'
-{{- end }}

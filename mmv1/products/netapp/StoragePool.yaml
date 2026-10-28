@@ -80,6 +80,8 @@ sweeper:
     - location: us-central1-a
     - location: us-central1-c
     - location: us-east4-a
+    - location: us-east4-b
+    - location: us-east4-c
     - location: us-south1-a
     - location: europe-west3-a
 custom_code:
