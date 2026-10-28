@@ -15,7 +15,7 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
+  location               = "us-west4"
   
   tags = {
     "${data.google_project.project.project_id}/${google_tags_tag_key.tag_key.short_name}" = "${google_tags_tag_value.tag_value.short_name}"
@@ -30,6 +30,6 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-west4"
   network       = google_compute_network.default.name
 }
