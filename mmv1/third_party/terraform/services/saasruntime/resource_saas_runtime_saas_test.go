@@ -1,7 +1,5 @@
 package saasruntime_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 	"net/url"
@@ -14,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
-  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -34,7 +32,7 @@ func TestAccSaasRuntimeSaas_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeSaas_basic(context),
@@ -88,7 +86,6 @@ func TestAccSaasRuntimeSaas_update(t *testing.T) {
 func testAccSaasRuntimeSaas_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
-  provider = google-beta
   saas_id  = "tf-test-test-saas%{random_suffix}"
   location = "global"
 
@@ -105,7 +102,6 @@ resource "google_saas_runtime_saas" "example" {
 func testAccSaasRuntimeSaas_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
-  provider = google-beta
   saas_id  = "tf-test-test-saas%{random_suffix}"
   location = "global"
   locations {
@@ -163,7 +159,7 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSaasRuntimeSaasDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -225,7 +221,7 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 						return fmt.Errorf("expected 1 imported Release, got %d", len(states))
 					}
 					want := map[string]string{
-						"application_template_component.0.component":                         "sa-comp-1",
+						"application_template_component.0.component":                            "sa-comp-1",
 						"application_template_component.0.composite_ref.0.application_template": template,
 					}
 					for k, v := range want {
@@ -262,7 +258,6 @@ func TestAccSaasRuntimeSaas_applicationTemplateUpdate(t *testing.T) {
 func testAccSaasRuntimeSaas_applicationTemplate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
-  provider = google-beta
   project  = "%{project}"
   saas_id  = "tf-test-app-saas%{random_suffix}"
   location = "us-central1"
@@ -282,7 +277,6 @@ resource "google_saas_runtime_saas" "example" {
 func testAccSaasRuntimeSaas_applicationTemplateLabels(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
-  provider = google-beta
   project  = "%{project}"
   saas_id  = "tf-test-app-saas%{random_suffix}"
   location = "us-central1"
@@ -306,7 +300,6 @@ resource "google_saas_runtime_saas" "example" {
 func testAccSaasRuntimeSaas_noApplicationTemplate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
-  provider = google-beta
   project  = "%{project}"
   saas_id  = "tf-test-app-saas%{random_suffix}"
   location = "us-central1"
@@ -321,7 +314,6 @@ resource "google_saas_runtime_saas" "example" {
 func testAccSaasRuntimeSaas_applicationTemplateImportedRelease(context map[string]interface{}) string {
 	return testAccSaasRuntimeSaas_applicationTemplate(context) + acctest.Nprintf(`
 resource "google_saas_runtime_release" "imported" {
-  provider   = google-beta
   project    = "%{project}"
   location   = "us-central1"
   release_id = "imported"
@@ -492,4 +484,3 @@ func testAccSaasRuntimeSaasDeleteImportedResources(t *testing.T, saasName string
 		t.Fatalf("Error deleting Saas %s: %s", globalSaas, err)
 	}
 }
-{{- end }}

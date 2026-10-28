@@ -1,7 +1,5 @@
 package saasruntime_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"testing"
 
@@ -9,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
 )
 
 func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
@@ -30,7 +28,7 @@ func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeUnitKind_basic(context),
@@ -62,7 +60,6 @@ func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
 func testAccSaasRuntimeUnitKind_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-east1"
 
@@ -72,7 +69,6 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
-  provider = google-beta
   location = "us-east1"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
@@ -80,7 +76,6 @@ resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
-  provider = google-beta
   location = "us-east1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
@@ -96,7 +91,6 @@ resource "google_saas_runtime_unit_kind" "example" {
 func testAccSaasRuntimeUnitKind_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-east1"
 
@@ -106,7 +100,6 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
-  provider = google-beta
   location = "us-east1"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
@@ -114,7 +107,6 @@ resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
-  provider = google-beta
   location = "us-east1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
@@ -204,7 +196,7 @@ func TestAccSaasRuntimeUnitKind_appCentricUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeUnitKind_appCentric(context),
@@ -255,7 +247,6 @@ func TestAccSaasRuntimeUnitKind_appCentricUpdate(t *testing.T) {
 func testAccSaasRuntimeUnitKind_appCentricRemoved(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-central1"
 
@@ -265,7 +256,6 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
-  provider     = google-beta
   location     = "us-central1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas         = google_saas_runtime_saas.example_saas.id
@@ -276,7 +266,6 @@ resource "google_saas_runtime_unit_kind" "example" {
 func testAccSaasRuntimeUnitKind_appCentric(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "us-central1"
 
@@ -286,7 +275,6 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
-  provider     = google-beta
   location     = "us-central1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas         = google_saas_runtime_saas.example_saas.id
@@ -309,4 +297,3 @@ resource "google_saas_runtime_unit_kind" "example" {
 }
 `, context)
 }
-{{- end }}
