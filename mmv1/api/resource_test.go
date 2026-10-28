@@ -1351,3 +1351,49 @@ func TestResourceShouldGenerateSweepers(t *testing.T) {
 		})
 	}
 }
+
+func TestResource_UseLegacyIdentityImportTest(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		want        bool
+	}{
+		{
+			description: "default is false",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{Name: "Compute"},
+			},
+			want: false,
+		},
+		{
+			description: "resource level opt-out is true",
+			resource: api.Resource{
+				LegacyIdentityImportTest: true,
+				ProductMetadata:          &api.Product{Name: "Compute"},
+			},
+			want: true,
+		},
+		{
+			description: "product level opt-out is true",
+			resource: api.Resource{
+				ProductMetadata: &api.Product{
+					Name:                     "Compute",
+					LegacyIdentityImportTest: true,
+				},
+			},
+			want: true,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.UseLegacyIdentityImportTest(); got != tc.want {
+				t.Errorf("UseLegacyIdentityImportTest() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}

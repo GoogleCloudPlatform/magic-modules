@@ -27,3 +27,4 @@ versions:
     base_url: https://notebooks.googleapis.com/v2/
   - name: ga
     base_url: https://notebooks.googleapis.com/v2/
+legacy_identity_import_test: true

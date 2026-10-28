@@ -27,3 +27,4 @@ versions:
     base_url: https://privilegedaccessmanager.googleapis.com/v1/
   - name: beta
     base_url: https://privilegedaccessmanager.googleapis.com/v1beta/
+legacy_identity_import_test: true

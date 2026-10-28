@@ -77,6 +77,11 @@ type Product struct {
 	// Setting this is currently disallowed.
 	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 
+	// If true, generated acceptance tests for resources in this product use the
+	// legacy RefreshState: true step for ImportBlockWithResourceIdentity instead
+	// of ImportState: true.
+	LegacyIdentityImportTest bool `yaml:"legacy_identity_import_test,omitempty"`
+
 	// The version of the product which is currently being generated.
 	Version *product.Version `yaml:"-"`
 
