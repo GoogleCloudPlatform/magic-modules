@@ -1015,6 +1015,18 @@ properties:
       - name: 'identity'
         type: String
         description: 'Identity SPIFFE id.'
+        default_from_api: true
       - name: 'identityCertificateEnabled'
         type: Boolean
         description: 'Specifies whether identity certificates are enabled.'
+        default_from_api: true
+      - name: 'identityType'
+        type: Enum
+        description: 'The type of identity to use.'
+        min_version: beta
+        default_from_api: true
+        enum_values:
+          - IDENTITY_TYPE_UNSPECIFIED
+          - SERVICE_ACCOUNT
+          - WORKLOAD_IDENTITY
+          - AGENT_IDENTITY
