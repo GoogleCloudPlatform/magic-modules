@@ -1,5 +1,7 @@
 {{- if not $.ProductMetadata.IsTgcCompiler }}
 if d.Get("deletion_policy").(string) == "FORCE" {
-	deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent)
+	if err := deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent); err != nil {
+		return fmt.Errorf("Error cleaning up Dataproc Metastore PSC endpoints in consumer subnetworks (deletion_policy = \"FORCE\"): %w", err)
+	}
 }
 {{- end }}

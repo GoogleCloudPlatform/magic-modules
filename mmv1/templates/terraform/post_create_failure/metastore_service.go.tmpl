@@ -1,16 +1,18 @@
 {{- if not $.ProductMetadata.IsTgcCompiler }}
-if d.Get("deletion_policy").(string) == "FORCE" {
-	config := meta.(*transport_tpg.Config)
-	if userAgent, uaErr := tpgresource.GenerateUserAgentString(d, config.UserAgent); uaErr == nil {
-		billingProject := ""
-		if project, projErr := tpgresource.GetProject(d, config); projErr == nil {
-			billingProject = project
-		}
-		if bp, bpErr := tpgresource.GetBillingProject(d, config); bpErr == nil {
-			billingProject = bp
-		}
-		deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent)
-	}
+config := meta.(*transport_tpg.Config)
+userAgent, uaErr := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if uaErr != nil {
+	return fmt.Errorf("%w; additionally failed to generate user agent while cleaning up Dataproc Metastore PSC endpoints in consumer subnetworks after failed service creation: %v", err, uaErr)
+}
+billingProject := ""
+if project, projErr := tpgresource.GetProject(d, config); projErr == nil {
+	billingProject = project
+}
+if bp, bpErr := tpgresource.GetBillingProject(d, config); bpErr == nil {
+	billingProject = bp
+}
+if cleanupErr := deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent); cleanupErr != nil {
+	return fmt.Errorf("%w; additionally failed to clean up Dataproc Metastore PSC endpoints in consumer subnetworks after failed service creation: %v", err, cleanupErr)
 }
 {{- end }}
 return err

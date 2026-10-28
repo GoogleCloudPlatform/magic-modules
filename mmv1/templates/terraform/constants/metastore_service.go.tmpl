@@ -19,21 +19,21 @@ import (
 )
 
 // Clean up PSC forwarding rules and reserved internal addresses created by the Dataproc Metastore
-// service agent in consumer subnetworks so that the subnetworks are not left in use after deletion.
-func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) {
+// service agent in consumer subnetworks so that the subnetworks are not left in use after deletion
+// or failed creation.
+func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
 	v, ok := d.GetOk("network_config.0.consumers")
 	if !ok {
-		return
+		return nil
 	}
 	consumers, ok := v.([]interface{})
 	if !ok {
-		return
+		return nil
 	}
 
 	computeBasePath, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}")
 	if err != nil {
-		log.Printf("[DEBUG] Unable to resolve ComputeBasePath for Dataproc Metastore PSC cleanup: %s", err)
-		return
+		return fmt.Errorf("resolving ComputeBasePath: %w", err)
 	}
 
 	for _, itemRaw := range consumers {
@@ -54,8 +54,7 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 
 		fv, err := tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
 		if err != nil {
-			log.Printf("[DEBUG] Unable to parse Dataproc Metastore consumer subnetwork %q for PSC cleanup: %s", subnetwork, err)
-			continue
+			return fmt.Errorf("parsing consumer subnetwork %q: %w", subnetwork, err)
 		}
 
 		addressesUrl := fmt.Sprintf("%sprojects/%s/regions/%s/addresses?filter=name%%3Dmetastore-addr-*", computeBasePath, fv.Project, fv.Region)
@@ -67,8 +66,7 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 			UserAgent: userAgent,
 		})
 		if err != nil {
-			log.Printf("[DEBUG] Unable to list addresses for Dataproc Metastore PSC cleanup in %s/%s: %s", fv.Project, fv.Region, err)
-			continue
+			return fmt.Errorf("listing PSC addresses in %s/%s for subnetwork %q: %w", fv.Project, fv.Region, subnetwork, err)
 		}
 
 		items, ok := res["items"].([]interface{})
@@ -117,13 +115,15 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 						Timeout:   d.Timeout(schema.TimeoutDelete),
 					})
 					if err != nil {
-						log.Printf("[DEBUG] Unable to delete Dataproc Metastore PSC forwarding rule %q: %s", fwRuleURL, err)
-						continue
+						if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+							continue
+						}
+						return fmt.Errorf("deleting PSC forwarding rule %q for subnetwork %q: %w", fwRuleURL, subnetwork, err)
 					}
 					if err := tpgcompute.ComputeOperationWaitTime(
 						config, opRes, fv.Project, "Deleting Dataproc Metastore PSC forwarding rule", userAgent,
 						d.Timeout(schema.TimeoutDelete)); err != nil {
-						log.Printf("[DEBUG] Error waiting for Dataproc Metastore PSC forwarding rule %q deletion: %s", fwRuleURL, err)
+						return fmt.Errorf("waiting for PSC forwarding rule %q deletion for subnetwork %q: %w", fwRuleURL, subnetwork, err)
 					}
 				}
 			}
@@ -139,15 +139,19 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 				Timeout:   d.Timeout(schema.TimeoutDelete),
 			})
 			if err != nil {
-				log.Printf("[DEBUG] Unable to delete Dataproc Metastore PSC address %q: %s", addrURL, err)
-				continue
+				if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+					continue
+				}
+				return fmt.Errorf("deleting PSC address %q for subnetwork %q: %w", addrURL, subnetwork, err)
 			}
 			if err := tpgcompute.ComputeOperationWaitTime(
 				config, opRes, fv.Project, "Deleting Dataproc Metastore PSC address", userAgent,
 				d.Timeout(schema.TimeoutDelete)); err != nil {
-				log.Printf("[DEBUG] Error waiting for Dataproc Metastore PSC address %q deletion: %s", addrURL, err)
+				return fmt.Errorf("waiting for PSC address %q deletion for subnetwork %q: %w", addrURL, subnetwork, err)
 			}
 		}
 	}
+
+	return nil
 }
 {{- end }}
