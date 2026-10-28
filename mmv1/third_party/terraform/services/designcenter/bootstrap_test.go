@@ -131,9 +131,9 @@ func BootstrapDesignCenterProject(t *testing.T) string {
 
 	project := p.ProjectId
 	number := strconv.FormatInt(p.ProjectNumber, 10)
-	ensureDesignCenterAppHubBoundary(t, config, project, number)
 
 	if os.Getenv("VCR_MODE") != "REPLAYING" {
+		ensureDesignCenterAppHubBoundary(t, config, project, number)
 		ensureDesignCenterServiceIdentity(t, config, project, number)
 		if strings.HasPrefix(t.Name(), "TestAccDesignCenterSpace") {
 			cleanupDesignCenterSpaces(t, config, project, bootstrapDesignCenterLocation)

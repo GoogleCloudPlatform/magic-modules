@@ -321,11 +321,6 @@ var ServicesListGa = mapOf(
         "displayName" to "Databasemigrationservice",
         "path" to "./google/services/databasemigrationservice"
     ),
-    "designcenter" to mapOf(
-        "name" to "designcenter",
-        "displayName" to "Designcenter",
-        "path" to "./google/services/designcenter"
-    ),
     "datacatalog" to mapOf(
         "name" to "datacatalog",
         "displayName" to "Datacatalog",
@@ -390,6 +385,11 @@ var ServicesListGa = mapOf(
         "name" to "deploymentmanager",
         "displayName" to "Deploymentmanager",
         "path" to "./google/services/deploymentmanager"
+    ),
+    "designcenter" to mapOf(
+        "name" to "designcenter",
+        "displayName" to "Designcenter",
+        "path" to "./google/services/designcenter"
     ),
     "developerconnect" to mapOf(
         "name" to "developerconnect",

@@ -39,7 +39,7 @@ iam_policy:
   parent_resource_attribute: space_id
   import_format:
     - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
-    - '{{project}}/{{location}}/{{space_id}}'
+    - '{{space_id}}'
   fetch_iam_policy_verb: GET
 parameters:
   - name: location
@@ -73,7 +73,6 @@ properties:
       provided, a default bucket is created during setup. The bucket must exist
       in the same project as the space. Format: {bucket_name}
     immutable: true
-    default_from_api: true
   - name: tags
     type: KeyValuePairs
     description: |
