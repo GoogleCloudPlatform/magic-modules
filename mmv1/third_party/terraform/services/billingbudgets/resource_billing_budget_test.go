@@ -677,27 +677,35 @@ resource "google_billing_budget" "budget" {
 // never returns it. This changes only the amount, then removes the cap while
 // changing the amount again, and checks import after each step.
 //
-// The API allows one spend cap per project and service, and the tests run in
-// parallel, so each spend cap test uses its own service. The sample uses
-// C7E2-9256-1C43 (Gemini Enterprise Agent Platform), this test
-// AEFD-7695-64FA (Gemini API) and TestAccBillingBudget_spendCapAdd
-// 152E-C115-5142 (Cloud Run).
+// The API allows one spend cap per project and service. Each spend cap test
+// creates its own project and also uses its own service, as a second
+// safeguard against overlapping caps. The sample uses C7E2-9256-1C43 (Gemini
+// Enterprise Agent Platform), this test AEFD-7695-64FA (Gemini API) and
+// TestAccBillingBudget_spendCapAdd 152E-C115-5142 (Cloud Run).
 func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		// The budget's account must bill the filtered project. For regular budgets,
+		// a parent of the project's billing account also seems to work
+		// (TestAccBillingBudget_budgetFilterProjectsOrdering), but that is not
+		// documented. So the budget and the project share BILLING_ACCT, and these
+		// tests do not rely on a parent account.
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"billing_acct":  envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"service":       "AEFD-7695-64FA",
 		"units":         "100",
 	}
 	contextUpdate := map[string]interface{}{
+		"org":           context["org"],
 		"billing_acct":  context["billing_acct"],
 		"random_suffix": context["random_suffix"],
 		"service":       context["service"],
 		"units":         "200",
 	}
 	contextRemoved := map[string]interface{}{
+		"org":           context["org"],
 		"billing_acct":  context["billing_acct"],
 		"random_suffix": context["random_suffix"],
 		"service":       context["service"],
@@ -757,7 +765,9 @@ func TestAccBillingBudget_spendCapAdd(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		// See TestAccBillingBudget_spendCapUpdate.
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"billing_acct":  envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"service":       "152E-C115-5142",
 		"units":         "100",
@@ -796,7 +806,12 @@ data "google_billing_account" "account" {
   billing_account = "%{billing_acct}"
 }
 
-data "google_project" "project" {
+resource "google_project" "project" {
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  org_id          = "%{org}"
+  billing_account = "%{billing_acct}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_billing_budget" "budget" {
@@ -804,7 +819,7 @@ resource "google_billing_budget" "budget" {
   display_name    = "Example Spend Cap Budget%{random_suffix}"
 
   budget_filter {
-    projects               = ["projects/${data.google_project.project.number}"]
+    projects               = ["projects/${google_project.project.number}"]
     services               = ["services/%{service}"]
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
@@ -812,8 +827,8 @@ resource "google_billing_budget" "budget" {
 
   amount {
     specified_amount {
-      currency_code = "USD"
-      units         = "%{units}"
+      # No currency_code, so the budget uses the billing account's currency.
+      units = "%{units}"
     }
   }
 
@@ -848,7 +863,12 @@ data "google_billing_account" "account" {
   billing_account = "%{billing_acct}"
 }
 
-data "google_project" "project" {
+resource "google_project" "project" {
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  org_id          = "%{org}"
+  billing_account = "%{billing_acct}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_billing_budget" "budget" {
@@ -856,7 +876,7 @@ resource "google_billing_budget" "budget" {
   display_name    = "Example Spend Cap Budget%{random_suffix}"
 
   budget_filter {
-    projects               = ["projects/${data.google_project.project.number}"]
+    projects               = ["projects/${google_project.project.number}"]
     services               = ["services/%{service}"]
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
@@ -864,8 +884,8 @@ resource "google_billing_budget" "budget" {
 
   amount {
     specified_amount {
-      currency_code = "USD"
-      units         = "%{units}"
+      # No currency_code, so the budget uses the billing account's currency.
+      units = "%{units}"
     }
   }
 
