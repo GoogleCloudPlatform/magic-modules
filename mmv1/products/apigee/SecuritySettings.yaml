@@ -1,0 +1,89 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SecuritySettings
+description: |
+  Represents the Advanced API Security settings of an Apigee organization.
+  Manages whether the organization consents to the use of machine learning (ML)
+  models for abuse detection.
+references:
+  guides:
+    Opt in for machine learning models for Abuse Detection: https://docs.cloud.google.com/apigee/docs/api-security/abuse-detection#opt-in-for-machine-learning-models-for-abuse-detection
+    Manage the Advanced API Security add-on: https://docs.cloud.google.com/apigee/docs/api-platform/reference/manage-security-add-on
+  api: https://docs.cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/SecuritySettings
+docs:
+  note: |
+    Security settings exist only for Apigee organizations that have the Advanced API Security
+    add-on enabled. For Subscription and Evaluation organizations, enable it with
+    `google_apigee_addons_config`; for Pay-as-you-go organizations, enable it in at least one
+    environment. Creating a resource of this type will acquire and update the existing security
+    settings of the organization. Deleting this resource will remove it from your Terraform
+    state but leave the security settings as is.
+base_url: '{{org_id}}/securitySettings'
+self_link: '{{org_id}}/securitySettings'
+create_url: '{{org_id}}/securitySettings?updateMask=mlRetrainingFeedbackEnabled'
+update_mask: true
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed. We also
+# hardcode the update mask, since the API requires one.
+create_verb: PATCH
+update_verb: PATCH
+import_format:
+  - '{{%org_id}}/securitySettings'
+# This is a singleton resource that cannot be deleted, so skip delete.
+exclude_delete: true
+deletion_policy_exclude: true
+samples:
+  - name: apigee_security_settings_basic
+    exclude_test: true
+    steps:
+      - name: apigee_security_settings_basic
+  - name: apigee_security_settings_basic_test
+    primary_resource_id: security_settings
+    exclude_basic_doc: true
+    external_providers: [time]
+    steps:
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
+          ml_retraining_feedback_enabled: true
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
+          ml_retraining_feedback_enabled: false
+parameters:
+  - name: orgId
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee Security Settings,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      Name of the security settings resource,
+      in the format `organizations/{{org_name}}/securitySettings`.
+    output: true
+  - name: mlRetrainingFeedbackEnabled
+    type: Boolean
+    description: |
+      If true, the user consents to the use of ML models for abuse detection.
+    send_empty_value: true
