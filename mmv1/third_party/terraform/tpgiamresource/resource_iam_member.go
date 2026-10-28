@@ -24,6 +24,22 @@ func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool 
 	return tpgresource.CaseDiffSuppress(k, old, new, d)
 }
 
+func iamMemberMatches(memberFromPolicy, targetMember string) bool {
+	if tpgresource.IamPrincipalIsCaseSensitive(memberFromPolicy) || tpgresource.IamPrincipalIsCaseSensitive(targetMember) {
+		return memberFromPolicy == targetMember
+	}
+	return strings.ToLower(memberFromPolicy) == strings.ToLower(targetMember)
+}
+
+func policyHasConditions(bindings []*cloudresourcemanager.Binding) bool {
+	for _, b := range bindings {
+		if b != nil && !conditionKeyFromCondition(b.Condition).Empty() {
+			return true
+		}
+	}
+	return false
+}
+
 func validateIAMMember(i interface{}, k string) ([]string, []error) {
 	v, ok := i.(string)
 	if !ok {
@@ -157,12 +173,13 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 			return nil, err
 		}
 		var binding *cloudresourcemanager.Binding
-		for _, b := range p.Bindings {
+		for _, b := range MergeBindings(p.Bindings) {
 			if b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle {
 				containsMember := false
 				for _, m := range b.Members {
-					if strings.ToLower(m) == strings.ToLower(member) {
+					if iamMemberMatches(m, member) {
 						containsMember = true
+						break
 					}
 				}
 				if !containsMember {
@@ -345,7 +362,17 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 			setIamMemberResourceIdentity(identity, d, parentSpecificSchema, memberBind.Role, memberBind.Members[0], conditionTitle)
 		}
 
-		return resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, parentResourceIdentityParser)(d, meta)
+		err = resourceIamMemberRead(newUpdaterFunc, parentSpecificSchema, parentResourceIdentityParser)(d, meta)
+		if err != nil {
+			return err
+		}
+		if d.Id() == "" {
+			if !conditionKeyFromCondition(memberBind.Condition).Empty() {
+				return fmt.Errorf("Error applying IAM policy for %s: member %q for role %q with condition title %q was not found in policy after apply", updater.DescribeResource(), memberBind.Members[0], memberBind.Role, memberBind.Condition.Title)
+			}
+			return fmt.Errorf("Error applying IAM policy for %s: member %q for role %q was not found in policy after apply", updater.DescribeResource(), memberBind.Members[0], memberBind.Role)
+		}
+		return nil
 	}
 }
 
@@ -368,7 +395,7 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 		log.Printf("[DEBUG]: Looking for binding with role %q and condition %#v", eMember.Role, eCondition)
 
 		var binding *cloudresourcemanager.Binding
-		for _, b := range p.Bindings {
+		for _, b := range MergeBindings(p.Bindings) {
 			if b.Role == eMember.Role && conditionKeyFromCondition(b.Condition) == eCondition {
 				binding = b
 				break
@@ -384,8 +411,9 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpeci
 		log.Printf("[DEBUG]: Looking for member %q in found binding", eMember.Members[0])
 		var member string
 		for _, m := range binding.Members {
-			if strings.ToLower(m) == strings.ToLower(eMember.Members[0]) {
+			if iamMemberMatches(m, eMember.Members[0]) {
 				member = m
+				break
 			}
 		}
 
@@ -434,8 +462,12 @@ func resourceIamMemberDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 
 		memberBind := getResourceIamMember(d)
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
+			hasConditions := !conditionKeyFromCondition(memberBind.Condition).Empty() || policyHasConditions(ep.Bindings)
 			// Merge the bindings together
 			ep.Bindings = subtractFromBindings(ep.Bindings, memberBind)
+			if hasConditions {
+				ep.Version = IamPolicyVersion
+			}
 			return nil
 		}
 		if enableBatching {
