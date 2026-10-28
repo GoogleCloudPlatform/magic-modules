@@ -565,6 +565,8 @@ properties:
       https://cloud.google.com/billing/docs/how-to/budgets-spend-caps.
 
       While `output_state` is `ENFORCED`, only `input_state` can be changed.
+      Only one spend cap budget may exist per project and service; the API
+      rejects a spend cap that overlaps an existing one.
     update_mask_fields:
       - spendCap.inputState
     custom_flatten: templates/terraform/custom_flatten/billing_budget_spend_cap.go.tmpl
@@ -575,10 +577,14 @@ properties:
           The desired state of the spend cap. Must be `CONFIGURED` on create.
           Set to `AWAITING_NEXT_PERIOD` to lift an enforced cap until the next
           period starts. `AWAITING_NEXT_PERIOD` is only accepted while
-          `output_state` is `ENFORCED`.
+          `output_state` is `ENFORCED`; otherwise the API rejects the update
+          with a generic "invalid argument" error.
 
-          The API does not return this field. Terraform keeps the configured
-          value in state, and on import derives it from `output_state`.
+          The API does not return this field. When `output_state` is
+          `AWAITING_NEXT_PERIOD`, Terraform reads `input_state` as
+          `AWAITING_NEXT_PERIOD`, so a cap lifted outside Terraform shows as
+          a diff. Otherwise Terraform keeps the configured value in state,
+          and on import uses `CONFIGURED`.
         required: true
         enum_values:
           - CONFIGURED

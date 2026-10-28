@@ -10,9 +10,9 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-// The API rejects any update of a capped budget whose mask lacks
-// spendCap.inputState, even when only other fields change.
 if _, ok := d.GetOk("spend_cap"); ok && len(updateMask) > 0 {
+	// The API rejects any update of a capped budget whose mask lacks
+	// spendCap.inputState, even when only other fields change.
 	hasInputState := false
 	for _, m := range updateMask {
 		if m == "spendCap.inputState" {
@@ -26,5 +26,17 @@ if _, ok := d.GetOk("spend_cap"); ok && len(updateMask) > 0 {
 		if err != nil {
 			return err
 		}
+	}
+} else if !ok && d.HasChange("spend_cap") {
+	// spend_cap was removed. The API clears the cap only when the mask names
+	// spendCap itself.
+	for i, m := range updateMask {
+		if m == "spendCap.inputState" {
+			updateMask[i] = "spendCap"
+		}
+	}
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
 	}
 }

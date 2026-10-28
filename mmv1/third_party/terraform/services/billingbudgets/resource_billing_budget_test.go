@@ -674,7 +674,9 @@ resource "google_billing_budget" "budget" {
 }
 
 // A capped budget needs spendCap.inputState in every update mask, and the API
-// never returns it. This changes only the amount and checks import.
+// never returns it. This changes only the amount, then removes the cap, and
+// checks import after each step. It uses its own service because the API
+// allows one spend cap per project and service and the tests run in parallel.
 func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -715,6 +717,20 @@ func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccBillingBudget_spendCapRemoved(contextUpdate),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -734,7 +750,7 @@ resource "google_billing_budget" "budget" {
 
   budget_filter {
     projects               = ["projects/${data.google_project.project.number}"]
-    services               = ["services/C7E2-9256-1C43"] # Gemini Enterprise Agent Platform
+    services               = ["services/AEFD-7695-64FA"] # Gemini API
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
   }
@@ -766,6 +782,54 @@ resource "google_billing_budget" "budget" {
 
   spend_cap {
     input_state = "CONFIGURED"
+  }
+}
+`, context)
+}
+
+func testAccBillingBudget_spendCapRemoved(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{billing_acct}"
+}
+
+data "google_project" "project" {
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "Example Spend Cap Budget%{random_suffix}"
+
+  budget_filter {
+    projects               = ["projects/${data.google_project.project.number}"]
+    services               = ["services/AEFD-7695-64FA"] # Gemini API
+    credit_types_treatment = "EXCLUDE_ALL_CREDITS"
+    calendar_period        = "MONTH"
+  }
+
+  amount {
+    specified_amount {
+      currency_code = "USD"
+      units         = "%{units}"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
+  }
+
+  all_updates_rule {
+    monitoring_notification_channels = []
+    enable_project_level_recipients  = true
   }
 }
 `, context)
