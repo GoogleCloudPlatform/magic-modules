@@ -1,15 +1,12 @@
 package reader
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -56,18 +53,8 @@ const (
 type Step map[BlockType]TypeLabels
 
 type Test struct {
-	Name          string
-	Steps         []Step
-	resolvedSteps []Step
-}
-
-// EffectiveSteps returns per-step HCL blocks with Nprintf and Sprintf argument
-// bindings resolved across multi-step tests when available, falling back to Steps.
-func (t *Test) EffectiveSteps() []Step {
-	if len(t.resolvedSteps) == len(t.Steps) && len(t.resolvedSteps) > 0 {
-		return t.resolvedSteps
-	}
-	return t.Steps
+	Name  string
+	Steps []Step
 }
 
 func (t *Test) String() string {
@@ -157,7 +144,6 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 	var tests []*Test
 	var errs []error
 	vars := make(map[string]*ast.CompositeLit, len(testFunc.Body.List)) // map of variable names to composite literal values in function body
-	scope := newEvalScope(varDecls)
 	for _, stmt := range testFunc.Body.List {
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
@@ -165,18 +151,15 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				ident, isIdent := callExpr.Fun.(*ast.Ident)
 				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
 				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
-					test, err := readVcrTestCallWithScope(callExpr, funcDecls, varDecls, scope)
+					test, err := readVcrTestCall(callExpr, funcDecls, varDecls)
 					if err != nil {
 						errs = append(errs, err)
 					}
-					if test != nil {
-						test.Name = testFunc.Name.Name
-						tests = append(tests, test)
-					}
+					test.Name = testFunc.Name.Name
+					tests = append(tests, test)
 				}
 			}
 		} else if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
-			recordAssignInScope(assignStmt, scope)
 			if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
 				// For now, only allow single assignment variables for serial test maps.
 				// e.g. testCases := map[string]func(t *testing.T) {...
@@ -242,15 +225,11 @@ func readSerialTestEltKeyValueExpr(eltKeyValueExpr *ast.KeyValueExpr, funcDecls 
 }
 
 func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
-	return readVcrTestCallWithScope(vcrTestCall, funcDecls, varDecls, nil)
-}
-
-func readVcrTestCallWithScope(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, scope *evalScope) (*Test, error) {
 	for _, arg := range vcrTestCall.Args {
 		if vcrTestArgCompLit, ok := arg.(*ast.CompositeLit); ok {
 			if selExpr, ok := vcrTestArgCompLit.Type.(*ast.SelectorExpr); ok {
 				if ident, ok := selExpr.X.(*ast.Ident); ok && ident.Name == "resource" && selExpr.Sel.Name == "TestCase" {
-					return readTestCaseCompLitWithScope(vcrTestArgCompLit, funcDecls, varDecls, scope)
+					return readTestCaseCompLit(vcrTestArgCompLit, funcDecls, varDecls)
 				}
 			}
 		}
@@ -259,15 +238,11 @@ func readVcrTestCallWithScope(vcrTestCall *ast.CallExpr, funcDecls map[string]*a
 }
 
 func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
-	return readTestCaseCompLitWithScope(testCaseCompLit, funcDecls, varDecls, nil)
-}
-
-func readTestCaseCompLitWithScope(testCaseCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, scope *evalScope) (*Test, error) {
 	for _, elt := range testCaseCompLit.Elts {
 		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
 			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Steps" {
 				if stepsCompLit, ok := keyValueExpr.Value.(*ast.CompositeLit); ok {
-					return readStepsCompLitWithScope(stepsCompLit, funcDecls, varDecls, scope)
+					return readStepsCompLit(stepsCompLit, funcDecls, varDecls)
 				}
 			}
 		}
@@ -288,55 +263,35 @@ func unwrapStepCompLit(elt ast.Expr) *ast.CompositeLit {
 }
 
 func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
-	return readStepsCompLitWithScope(stepsCompLit, funcDecls, varDecls, nil)
-}
-
-func readStepsCompLitWithScope(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, scope *evalScope) (*Test, error) {
 	test := &Test{}
 	errs := make([]error, 0)
-	var configExprs []ast.Expr
 	for _, elt := range stepsCompLit.Elts {
-		eltCompLit := unwrapStepCompLit(elt)
-		if eltCompLit == nil || shouldSkipStep(eltCompLit) {
-			continue
-		}
-		for _, eltCompLitElt := range eltCompLit.Elts {
-			if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
-				if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
-					// A config is any expression that evaluates to a config
-					// string, and reads the same way here as it does in a
-					// config func's return statement.
-					configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls)
-					if err != nil {
-						errs = append(errs, err)
+		if eltCompLit := unwrapStepCompLit(elt); eltCompLit != nil {
+			if shouldSkipStep(eltCompLit) {
+				continue
+			}
+			for _, eltCompLitElt := range eltCompLit.Elts {
+				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
+					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
+						// A config is any expression that evaluates to a config
+						// string, and reads the same way here as it does in a
+						// config func's return statement.
+						configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls)
+						if err != nil {
+							errs = append(errs, err)
+						}
+						step, err := readConfigStr(configStr)
+						if err != nil {
+							errs = append(errs, err)
+						}
+						test.Steps = append(test.Steps, step)
 					}
-					step, err := readConfigStr(configStr)
-					if err != nil {
-						errs = append(errs, err)
-					}
-					test.Steps = append(test.Steps, step)
-					configExprs = append(configExprs, keyValueExpr.Value)
 				}
 			}
 		}
 	}
 	if len(errs) > 0 {
 		return test, fmt.Errorf("errors reading test steps: %v", errs)
-	}
-	if len(test.Steps) > 1 && scope != nil {
-		resolved := make([]Step, 0, len(configExprs))
-		for idx, cfgExpr := range configExprs {
-			if resStr, ok := readResolvedConfigExpr(cfgExpr, funcDecls, varDecls, scope); ok {
-				if resStep, resErr := readConfigStr(resStr); resErr == nil {
-					resolved = append(resolved, resStep)
-					continue
-				}
-			}
-			resolved = append(resolved, test.Steps[idx])
-		}
-		if !reflect.DeepEqual(resolved, test.Steps) {
-			test.resolvedSteps = resolved
-		}
 	}
 	return test, nil
 }
@@ -617,304 +572,4 @@ func flattenBlock(b Block, parent string) Block {
 	}
 
 	return flattened
-}
-
-type evalScope struct {
-	vars    map[string]string
-	maps    map[string]map[string]string
-	pkgVars map[string]*ast.BasicLit
-}
-
-func newEvalScope(pkgVars map[string]*ast.BasicLit) *evalScope {
-	return &evalScope{
-		vars:    make(map[string]string),
-		maps:    make(map[string]map[string]string),
-		pkgVars: pkgVars,
-	}
-}
-
-func cloneStringMap(src map[string]string) map[string]string {
-	dst := make(map[string]string, len(src))
-	for k, v := range src {
-		dst[k] = v
-	}
-	return dst
-}
-
-func stringLitValue(expr ast.Expr) (string, bool) {
-	if lit, ok := expr.(*ast.BasicLit); ok && lit.Kind == token.STRING {
-		s, err := strconv.Unquote(lit.Value)
-		return s, err == nil
-	}
-	return "", false
-}
-
-func isStringKeyMapLit(compLit *ast.CompositeLit) bool {
-	mapType, ok := compLit.Type.(*ast.MapType)
-	if !ok {
-		return false
-	}
-	keyIdent, ok := mapType.Key.(*ast.Ident)
-	return ok && keyIdent.Name == "string" && !isSerialTestMap(compLit)
-}
-
-func evalMapExpr(expr ast.Expr, scope *evalScope) map[string]string {
-	if scope == nil || expr == nil {
-		return nil
-	}
-	if ident, ok := expr.(*ast.Ident); ok {
-		if m, exists := scope.maps[ident.Name]; exists {
-			return m
-		}
-		return nil
-	}
-	if compLit, ok := expr.(*ast.CompositeLit); ok && isStringKeyMapLit(compLit) {
-		out := make(map[string]string, len(compLit.Elts))
-		for _, elt := range compLit.Elts {
-			if kv, ok := elt.(*ast.KeyValueExpr); ok {
-				if key, ok := stringLitValue(kv.Key); ok {
-					out[key] = evalSymbolicValue(kv.Value, scope)
-				}
-			}
-		}
-		return out
-	}
-	return nil
-}
-
-func evalSymbolicValue(expr ast.Expr, scope *evalScope) string {
-	if expr == nil {
-		return ""
-	}
-	switch e := expr.(type) {
-	case *ast.BasicLit:
-		if e.Kind == token.STRING {
-			if s, err := strconv.Unquote(e.Value); err == nil {
-				return "str:" + s
-			}
-		}
-		return "lit:" + e.Value
-	case *ast.Ident:
-		if e.Name == "true" || e.Name == "false" || e.Name == "nil" {
-			return "kw:" + e.Name
-		}
-		if scope != nil {
-			if v, ok := scope.vars[e.Name]; ok {
-				return v
-			}
-			if pkgLit, ok := scope.pkgVars[e.Name]; ok {
-				return evalSymbolicValue(pkgLit, scope)
-			}
-		}
-		return "ident:" + e.Name
-	case *ast.IndexExpr:
-		if m := evalMapExpr(e.X, scope); m != nil {
-			if key, ok := stringLitValue(e.Index); ok {
-				if v, exists := m[key]; exists {
-					return v
-				}
-			}
-		}
-		return fmt.Sprintf("index@%d", int(e.Pos()))
-	case *ast.UnaryExpr:
-		return e.Op.String() + evalSymbolicValue(e.X, scope)
-	case *ast.BinaryExpr:
-		return evalSymbolicValue(e.X, scope) + e.Op.String() + evalSymbolicValue(e.Y, scope)
-	default:
-		return fmt.Sprintf("dynamic@%d", int(expr.Pos()))
-	}
-}
-
-func recordAssignInScope(assignStmt *ast.AssignStmt, scope *evalScope) {
-	if scope == nil || len(assignStmt.Lhs) != len(assignStmt.Rhs) {
-		return
-	}
-	for i, lhs := range assignStmt.Lhs {
-		rhs := assignStmt.Rhs[i]
-		if ident, ok := lhs.(*ast.Ident); ok {
-			if m := evalMapExpr(rhs, scope); m != nil {
-				scope.maps[ident.Name] = cloneStringMap(m)
-			}
-			scope.vars[ident.Name] = evalSymbolicValue(rhs, scope)
-		} else if idxExpr, ok := lhs.(*ast.IndexExpr); ok {
-			if mapIdent, ok := idxExpr.X.(*ast.Ident); ok {
-				if key, ok := stringLitValue(idxExpr.Index); ok {
-					if existing, exists := scope.maps[mapIdent.Name]; exists {
-						cloned := cloneStringMap(existing)
-						cloned[key] = evalSymbolicValue(rhs, scope)
-						scope.maps[mapIdent.Name] = cloned
-					}
-				}
-			}
-		}
-	}
-}
-
-func hclSubToken(symbolicVal string) string {
-	sum := sha256.Sum256([]byte(symbolicVal))
-	return "__mm_sub_" + hex.EncodeToString(sum[:6]) + "__"
-}
-
-func isWholeLineMatch(s string, start, end int) bool {
-	lineStart := strings.LastIndexByte(s[:start], '\n') + 1
-	lineEndOffset := strings.IndexByte(s[end:], '\n')
-	lineEnd := len(s)
-	if lineEndOffset != -1 {
-		lineEnd = end + lineEndOffset
-	}
-	return strings.TrimLeft(s[lineStart:start], " \t") == "" &&
-		strings.TrimRight(s[end:lineEnd], " \t\r") == ""
-}
-
-var (
-	nprintfKeyPattern  = regexp.MustCompile("(?:%|" + escapedPercent + `)\{([^{}]+)\}`)
-	sprintfVerbPattern = regexp.MustCompile("%[vTtbcspqxXUeEfFgGdo]")
-)
-
-func readResolvedConfigExpr(expr ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, scope *evalScope) (string, bool) {
-	switch e := expr.(type) {
-	case *ast.BasicLit:
-		if e.Kind == token.STRING {
-			s, err := strconv.Unquote(e.Value)
-			return s, err == nil
-		}
-	case *ast.Ident:
-		if scope != nil {
-			if v, ok := scope.vars[e.Name]; ok && strings.HasPrefix(v, "str:") {
-				return strings.TrimPrefix(v, "str:"), true
-			}
-		}
-		if configVar, ok := varDecls[e.Name]; ok {
-			s, err := strconv.Unquote(configVar.Value)
-			return s, err == nil
-		}
-	case *ast.BinaryExpr:
-		if e.Op == token.ADD {
-			left, okL := readResolvedConfigExpr(e.X, funcDecls, varDecls, scope)
-			right, okR := readResolvedConfigExpr(e.Y, funcDecls, varDecls, scope)
-			if okL && okR {
-				return left + right, true
-			}
-		}
-	case *ast.CallExpr:
-		return readResolvedConfigCallExpr(e, funcDecls, varDecls, scope)
-	}
-	return "", false
-}
-
-func readResolvedConfigCallExpr(callExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, scope *evalScope) (string, bool) {
-	if ident, ok := callExpr.Fun.(*ast.Ident); ok {
-		configFunc, exists := funcDecls[ident.Name]
-		if !exists || configFunc.Body == nil {
-			return "", false
-		}
-		childScope := newEvalScope(varDecls)
-		if configFunc.Type != nil && configFunc.Type.Params != nil {
-			argIdx := 0
-			for _, field := range configFunc.Type.Params.List {
-				for _, paramIdent := range field.Names {
-					if argIdx < len(callExpr.Args) {
-						arg := callExpr.Args[argIdx]
-						if m := evalMapExpr(arg, scope); m != nil {
-							childScope.maps[paramIdent.Name] = cloneStringMap(m)
-						}
-						childScope.vars[paramIdent.Name] = evalSymbolicValue(arg, scope)
-					}
-					argIdx++
-				}
-			}
-		}
-		for _, stmt := range configFunc.Body.List {
-			if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
-				recordAssignInScope(assignStmt, childScope)
-			} else if returnStmt, ok := stmt.(*ast.ReturnStmt); ok && len(returnStmt.Results) > 0 {
-				return readResolvedConfigExpr(returnStmt.Results[0], funcDecls, varDecls, childScope)
-			}
-		}
-		return "", false
-	}
-
-	selExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
-	if !ok {
-		return "", false
-	}
-	switch selExpr.Sel.Name {
-	case "Nprintf":
-		if len(callExpr.Args) == 0 {
-			return "", false
-		}
-		tmplStr, ok := readResolvedConfigExpr(callExpr.Args[0], funcDecls, varDecls, scope)
-		if !ok {
-			return "", false
-		}
-		mergedMap := make(map[string]string)
-		for _, arg := range callExpr.Args[1:] {
-			for k, v := range evalMapExpr(arg, scope) {
-				mergedMap[k] = v
-			}
-		}
-		if len(mergedMap) == 0 {
-			return tmplStr, true
-		}
-		matches := nprintfKeyPattern.FindAllStringSubmatchIndex(tmplStr, -1)
-		if len(matches) == 0 {
-			return tmplStr, true
-		}
-		var out strings.Builder
-		last := 0
-		for _, loc := range matches {
-			start, end := loc[0], loc[1]
-			key := tmplStr[loc[2]:loc[3]]
-			out.WriteString(tmplStr[last:start])
-			if val, exists := mergedMap[key]; exists && !isWholeLineMatch(tmplStr, start, end) {
-				out.WriteString(hclSubToken(val))
-			} else {
-				out.WriteString(tmplStr[start:end])
-			}
-			last = end
-		}
-		out.WriteString(tmplStr[last:])
-		return out.String(), true
-
-	case "Sprintf":
-		if len(callExpr.Args) == 0 {
-			return "", false
-		}
-		tmplStr, ok := readResolvedConfigExpr(callExpr.Args[0], funcDecls, varDecls, scope)
-		if !ok {
-			return "", false
-		}
-		tmplStr = markEscapedPercents(tmplStr)
-		matches := sprintfVerbPattern.FindAllStringIndex(tmplStr, -1)
-		if len(matches) == 0 {
-			return tmplStr, true
-		}
-		var out strings.Builder
-		last := 0
-		for argOffset, loc := range matches {
-			start, end := loc[0], loc[1]
-			out.WriteString(tmplStr[last:start])
-			if argOffset+1 < len(callExpr.Args) && !isWholeLineMatch(tmplStr, start, end) {
-				sym := evalSymbolicValue(callExpr.Args[argOffset+1], scope)
-				out.WriteString(hclSubToken(sym))
-			} else {
-				out.WriteString(tmplStr[start:end])
-			}
-			last = end
-		}
-		out.WriteString(tmplStr[last:])
-		return out.String(), true
-
-	case "Sprint":
-		var out strings.Builder
-		for _, arg := range callExpr.Args {
-			part, ok := readResolvedConfigExpr(arg, funcDecls, varDecls, scope)
-			if !ok {
-				return "", false
-			}
-			out.WriteString(part)
-		}
-		return out.String(), true
-	}
-	return "", false
 }

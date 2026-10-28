@@ -88,6 +88,12 @@ func FieldBecomingForceNewMessages(resource, field string, fieldDiff diff.FieldD
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
 	}
+	// Promoting an output-only (Computed-only) field to create-time configurable
+	// (Optional + ForceNew) does not break existing configs because users could
+	// not configure the field previously.
+	if !fieldDiff.Old.Optional && !fieldDiff.Old.Required {
+		return nil
+	}
 	tmpl := "Field `%s` became ForceNew on `%s`"
 	if !fieldDiff.Old.ForceNew && fieldDiff.New.ForceNew {
 		return []string{fmt.Sprintf(tmpl, field, resource)}
