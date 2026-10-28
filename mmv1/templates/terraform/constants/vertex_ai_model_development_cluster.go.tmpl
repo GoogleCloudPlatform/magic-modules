@@ -87,11 +87,36 @@ func vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(k, old, new string, d
 	return vertexAiModelDevelopmentClusterGkeVersionMatches(old, new)
 }
 
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 type vertexAiModelDevelopmentClusterGetter interface {
 	GetOk(string) (interface{}, bool)
+	GetRawConfig() cty.Value
+}
+
+func vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(d vertexAiModelDevelopmentClusterGetter) bool {
+	if d == nil {
+		return false
+	}
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() {
+		rawVersions, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions")
+		if !ok {
+			return false
+		}
+		versionsMap, ok := rawVersions.(map[string]interface{})
+		return ok && len(versionsMap) > 0
+	}
+	npv, err := cty.GetAttrPath("orchestrator_spec").IndexInt(0).GetAttr("kubernetes_spec").IndexInt(0).GetAttr("node_pool_versions").Apply(rawConfig)
+	if err != nil || npv.IsNull() || !npv.IsKnown() {
+		return false
+	}
+	return npv.CanIterateElements() && npv.LengthInt() > 0
 }
 
 func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDevelopmentClusterGetter) error {
+	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(d) {
+		return nil
+	}
 	rawVersions, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions")
 	if !ok {
 		return nil
@@ -140,6 +165,9 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 }
 
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(diff) {
+		return nil
+	}
 	if !diff.NewValueKnown("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions") ||
 		!diff.NewValueKnown("node_pools") {
 		return nil
@@ -155,3 +183,4 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 	}
 	return validateVertexAIModelDevelopmentClusterNodePoolVersions(diff)
 }
+{{- end }}

@@ -11,6 +11,11 @@
 	limitations under the License.
 */ -}}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+{{- if not (contains $.ResourceMetadata.ProductMetadata.Compiler "terraformgoogleconversion") }}
+	if getter, ok := d.(vertexAiModelDevelopmentClusterGetter); ok && !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(getter) {
+		return nil, nil
+	}
+{{- end }}
 	if v == nil {
 		return nil, nil
 	}

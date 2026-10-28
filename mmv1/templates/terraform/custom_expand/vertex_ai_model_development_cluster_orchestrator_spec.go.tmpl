@@ -1,0 +1,51 @@
+{{/*
+	The license inside this block applies to this file.
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedSlurmSpec, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}SlurmSpec(original["slurm_spec"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedSlurmSpec); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["slurmSpec"] = transformedSlurmSpec
+	}
+
+	transformedKubernetesSpec, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}KubernetesSpec(original["kubernetes_spec"], d, config)
+	if err != nil {
+		return nil, err
+	} else if transformedKubernetesSpec != nil {
+		transformed["kubernetesSpec"] = transformedKubernetesSpec
+	}
+
+	return transformed, nil
+}
+{{- if $.NestedProperties }}
+  {{- range $prop := $.NestedProperties }}
+    {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
+      {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
+      {{- template "expandTgcPropertyMethod" $prop -}}
+      {{- else }}
+      {{- template "expandPropertyMethod" $prop -}}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

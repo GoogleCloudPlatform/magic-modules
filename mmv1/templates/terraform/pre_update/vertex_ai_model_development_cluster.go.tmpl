@@ -15,7 +15,7 @@ if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil
 }
 
 isGke := false
-if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+if v, ok := d.Get("orchestrator_spec.0.kubernetes_spec").([]interface{}); ok && len(v) > 0 {
 	isGke = true
 }
 
@@ -32,7 +32,7 @@ if isGke {
 			newMask = append(newMask, "orchestrator_spec.kubernetes_spec.control_plane_version")
 		}
 	}
-	if d.HasChange("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions") {
+	if vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(d) && d.HasChange("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions") {
 		if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions"); ok {
 			if m, ok := v.(map[string]interface{}); ok && len(m) > 0 {
 				newMask = append(newMask, "orchestrator_spec.kubernetes_spec.node_pool_versions")

@@ -574,6 +574,7 @@ properties:
     type: NestedObject
     required: true
     description: The spec of the orchestrator. Only one orchestrator may be specified.
+    custom_expand: templates/terraform/custom_expand/vertex_ai_model_development_cluster_orchestrator_spec.go.tmpl
     update_mask_fields:
       - orchestrator_spec.slurm_spec.accounting
       - orchestrator_spec.slurm_spec.config
@@ -715,6 +716,7 @@ properties:
       - name: kubernetesSpec
         type: NestedObject
         description: The GKE orchestrator related spec of the cluster.
+        allow_empty_object: true
         conflicts:
           - orchestrator_spec.0.slurm_spec
         properties:
