@@ -1,0 +1,247 @@
+{{- if ne $.TargetVersionName "ga" }}
+package vertexai
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestUnitVertexAIModelDevelopmentCluster_UpdateMode(t *testing.T) {
+	t.Parallel()
+
+	project := "test-project"
+	region := "us-central1"
+	clusterID := "test-cluster"
+	clusterPath := "/projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster"
+
+	t.Run("changing only update_mode sends no PATCH", func(t *testing.T) {
+		var patchCount int32
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			if r.Method == http.MethodPatch {
+				atomic.AddInt32(&patchCount, 1)
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{})
+				return
+			}
+			if r.Method == http.MethodGet && r.URL.Path == clusterPath {
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"name":        "projects/" + project + "/locations/" + region + "/modelDevelopmentClusters/" + clusterID,
+					"displayName": "test-cluster-name",
+				})
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+
+		cfg := &transport_tpg.Config{
+			Context:      context.Background(),
+			Client:       server.Client(),
+			Project:      project,
+			PollInterval: time.Millisecond,
+			CustomEndpoints: map[string]string{
+				"vertex_ai_custom_endpoint": server.URL + "/",
+			},
+		}
+
+		res := ResourceVertexAIModelDevelopmentCluster()
+		if res.Schema["update_mode"] == nil {
+			t.Fatal("Expected update_mode in schema, got nil")
+		}
+		if res.Schema["update_mode"].Default != "USER_AND_SERVICE" {
+			t.Fatalf("Expected update_mode schema Default 'USER_AND_SERVICE', got %v", res.Schema["update_mode"].Default)
+		}
+		d, err := schema.InternalMap(res.Schema).Data(&terraform.InstanceState{
+			ID: "projects/" + project + "/locations/" + region + "/modelDevelopmentClusters/" + clusterID,
+			Attributes: map[string]string{
+				"project":                      project,
+				"region":                       region,
+				"model_development_cluster_id": clusterID,
+				"display_name":                 "test-cluster-name",
+				"update_mode":                  res.Schema["update_mode"].Default.(string),
+			},
+		}, &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"update_mode": {Old: "USER_AND_SERVICE", New: "USER_ONLY"},
+			},
+		})
+		if err != nil {
+			t.Fatalf("Failed to initialize ResourceData: %v", err)
+		}
+
+		if err := res.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		if count := atomic.LoadInt32(&patchCount); count != 0 {
+			t.Fatalf("Expected 0 PATCH requests when only update_mode changes, got %d", count)
+		}
+	})
+
+	t.Run("changing display_name with explicit update_mode sends PATCH with explicit updateMode query param", func(t *testing.T) {
+		var patchCount int32
+		var receivedUpdateMode string
+		var receivedUpdateMask string
+
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			if r.Method == http.MethodPatch && r.URL.Path == clusterPath {
+				atomic.AddInt32(&patchCount, 1)
+				receivedUpdateMode = r.URL.Query().Get("updateMode")
+				receivedUpdateMask = r.URL.Query().Get("updateMask")
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{})
+				return
+			}
+			if r.Method == http.MethodGet && r.URL.Path == clusterPath {
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"name":        "projects/" + project + "/locations/" + region + "/modelDevelopmentClusters/" + clusterID,
+					"displayName": "new-cluster-name",
+				})
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+
+		cfg := &transport_tpg.Config{
+			Context:      context.Background(),
+			Client:       server.Client(),
+			Project:      project,
+			PollInterval: time.Millisecond,
+			CustomEndpoints: map[string]string{
+				"vertex_ai_custom_endpoint": server.URL + "/",
+			},
+		}
+
+		res := ResourceVertexAIModelDevelopmentCluster()
+		if res.Schema["update_mode"] == nil {
+			t.Fatal("Expected update_mode in schema, got nil")
+		}
+		if res.Schema["update_mode"].Default != "USER_AND_SERVICE" {
+			t.Fatalf("Expected update_mode schema Default 'USER_AND_SERVICE', got %v", res.Schema["update_mode"].Default)
+		}
+		d, err := schema.InternalMap(res.Schema).Data(&terraform.InstanceState{
+			ID: "projects/" + project + "/locations/" + region + "/modelDevelopmentClusters/" + clusterID,
+			Attributes: map[string]string{
+				"project":                      project,
+				"region":                       region,
+				"model_development_cluster_id": clusterID,
+				"display_name":                 "old-cluster-name",
+				"update_mode":                  res.Schema["update_mode"].Default.(string),
+			},
+		}, &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"display_name": {Old: "old-cluster-name", New: "new-cluster-name"},
+				"update_mode":  {Old: "USER_AND_SERVICE", New: "USER_ONLY"},
+			},
+		})
+		if err != nil {
+			t.Fatalf("Failed to initialize ResourceData: %v", err)
+		}
+
+		if err := res.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		if count := atomic.LoadInt32(&patchCount); count != 1 {
+			t.Fatalf("Expected 1 PATCH request, got %d", count)
+		}
+		if receivedUpdateMode != "USER_ONLY" {
+			t.Errorf("Expected updateMode query param 'USER_ONLY', got %q", receivedUpdateMode)
+		}
+		if receivedUpdateMask != "displayName" {
+			t.Errorf("Expected updateMask query param 'displayName', got %q", receivedUpdateMask)
+		}
+	})
+
+	t.Run("changing display_name without specifying update_mode sends PATCH with default USER_AND_SERVICE updateMode", func(t *testing.T) {
+		var patchCount int32
+		var receivedUpdateMode string
+		var receivedUpdateMask string
+
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			if r.Method == http.MethodPatch && r.URL.Path == clusterPath {
+				atomic.AddInt32(&patchCount, 1)
+				receivedUpdateMode = r.URL.Query().Get("updateMode")
+				receivedUpdateMask = r.URL.Query().Get("updateMask")
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{})
+				return
+			}
+			if r.Method == http.MethodGet && r.URL.Path == clusterPath {
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"name":        "projects/" + project + "/locations/" + region + "/modelDevelopmentClusters/" + clusterID,
+					"displayName": "new-cluster-name",
+				})
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+
+		cfg := &transport_tpg.Config{
+			Context:      context.Background(),
+			Client:       server.Client(),
+			Project:      project,
+			PollInterval: time.Millisecond,
+			CustomEndpoints: map[string]string{
+				"vertex_ai_custom_endpoint": server.URL + "/",
+			},
+		}
+
+		res := ResourceVertexAIModelDevelopmentCluster()
+		if res.Schema["update_mode"] == nil {
+			t.Fatal("Expected update_mode in schema, got nil")
+		}
+		if res.Schema["update_mode"].Default != "USER_AND_SERVICE" {
+			t.Fatalf("Expected update_mode schema Default 'USER_AND_SERVICE', got %v", res.Schema["update_mode"].Default)
+		}
+		d, err := schema.InternalMap(res.Schema).Data(&terraform.InstanceState{
+			ID: "projects/" + project + "/locations/" + region + "/modelDevelopmentClusters/" + clusterID,
+			Attributes: map[string]string{
+				"project":                      project,
+				"region":                       region,
+				"model_development_cluster_id": clusterID,
+				"display_name":                 "old-cluster-name",
+				"update_mode":                  res.Schema["update_mode"].Default.(string),
+			},
+		}, &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"display_name": {Old: "old-cluster-name", New: "new-cluster-name"},
+			},
+		})
+		if err != nil {
+			t.Fatalf("Failed to initialize ResourceData: %v", err)
+		}
+
+		if err := res.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		if count := atomic.LoadInt32(&patchCount); count != 1 {
+			t.Fatalf("Expected 1 PATCH request, got %d", count)
+		}
+		if receivedUpdateMode != "USER_AND_SERVICE" {
+			t.Errorf("Expected updateMode query param default 'USER_AND_SERVICE', got %q", receivedUpdateMode)
+		}
+		if receivedUpdateMask != "displayName" {
+			t.Errorf("Expected updateMask query param 'displayName', got %q", receivedUpdateMask)
+		}
+	})
+}
+{{- end }}

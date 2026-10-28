@@ -25,6 +25,7 @@ references:
 base_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters
 self_link: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}
 create_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters?modelDevelopmentClusterId={{model_development_cluster_id}}
+update_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}?updateMode={{update_mode}}
 update_mask: true
 update_verb: PATCH
 import_format:
@@ -44,6 +45,7 @@ async:
     resource_inside_response: true
 custom_code:
   decoder: templates/terraform/decoders/vertex_ai_model_development_cluster.go.tmpl
+  pre_update: templates/terraform/pre_update/vertex_ai_model_development_cluster.go.tmpl
 autogen_status: TW9kZWxEZXZlbG9wbWVudENsdXN0ZXJBdXRvZ2VuVjJBZ2VudA==
 samples:
   - name: vertex_ai_model_development_cluster_basic
@@ -92,6 +94,20 @@ parameters:
       hyphens are not allowed (`/^[a-z][a-z0-9]{0,9}$/`).
     immutable: true
     url_param_only: true
+  - name: updateMode
+    type: Enum
+    enum_values:
+      - USER_ONLY
+      - USER_AND_SERVICE
+    url_param_only: true
+    default_value: USER_AND_SERVICE
+    min_version: beta
+    description: |-
+      Whether the service also refreshes service-managed fields (startup and
+      prolog/epilog scripts, default node images) on update. USER_ONLY applies
+      only your changes; adding a node pool requires USER_AND_SERVICE.
+      Only applies to Slurm clusters (`orchestrator_spec.slurm_spec`); ignored
+      for GKE clusters (`kubernetes_spec`).
 properties:
   - name: clusterEvents
     type: Array
