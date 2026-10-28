@@ -520,6 +520,26 @@ properties:
       Optional. If disabled is set to true, functionality is disabled for this connection.
       Repository based API methods and webhooks processing for repositories in
       this connection will be disabled.
+  - name: gitProxyConfig
+    type: NestedObject
+    description: |-
+      Optional. Configuration for the git proxy feature. Enabling the git proxy
+      allows clients to perform git operations on the repositories linked in the
+      connection.
+    properties:
+      - name: enabled
+        type: Boolean
+        description: |-
+          Optional. Setting this to true allows the git proxy to be used for
+          performing git operations on the repositories linked in the connection.
+      - name: httpProxyBaseUri
+        type: String
+        description: |-
+          Output only. The base URI for the HTTP proxy endpoint. Has the format
+          `https://{generatedID}-c-h-{shortRegion}.developerconnect.dev` Populated
+          only when enabled is set to true. This endpoint is used by other Google
+          services that integrate with Developer Connect.
+        output: true
   - name: annotations
     type: KeyValueAnnotations
     description: Optional. Allows clients to store small amounts of arbitrary data.
