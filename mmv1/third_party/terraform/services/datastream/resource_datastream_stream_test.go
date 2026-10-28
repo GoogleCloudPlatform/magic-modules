@@ -533,6 +533,7 @@ resource "google_datastream_stream" "default" {
         source_connection_profile = google_datastream_connection_profile.mongo_source.id
         mongodb_source_config {
             max_concurrent_backfill_tasks = 25
+            json_mode = "STRICT"
             include_objects {
                 databases {
                     database = "test"

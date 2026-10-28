@@ -439,6 +439,16 @@ properties:
                                   description: |
                                     Column length.
                                   output: true
+                                - name: precision
+                                  type: Integer
+                                  description: |
+                                    Column precision.
+                                  output: true
+                                - name: scale
+                                  type: Integer
+                                  description: |
+                                    Column scale.
+                                  output: true
                                 - name: collation
                                   type: String
                                   description: |
@@ -517,6 +527,16 @@ properties:
                                   type: Integer
                                   description: |
                                     Column length.
+                                  output: true
+                                - name: precision
+                                  type: Integer
+                                  description: |
+                                    Column precision.
+                                  output: true
+                                - name: scale
+                                  type: Integer
+                                  description: |
+                                    Column scale.
                                   output: true
                                 - name: collation
                                   type: String
@@ -1264,6 +1284,16 @@ properties:
                             type: String
                             description: |
                               Field name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The data type of the field.
+                            output: true
+                          - name: nillable
+                            type: Boolean
+                            description: |
+                              Indicates whether the field can accept nil values.
+                            output: true
           - name: excludeObjects
             type: NestedObject
             description: |
@@ -1298,6 +1328,16 @@ properties:
                             type: String
                             description: |
                               Field name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The data type of the field.
+                            output: true
+                          - name: nillable
+                            type: Boolean
+                            description: |
+                              Indicates whether the field can accept nil values.
+                            output: true
           - name: pollingInterval
             type: String
             description: |
@@ -1583,6 +1623,15 @@ properties:
               Optional. Maximum number of concurrent backfill tasks. The number
               should be non-negative and less than or equal to 50. If not set
               (or set to 0), the system''s default value is used
+          - name: jsonMode
+            type: Enum
+            description: |
+              Optional. JSON mode for the stream.
+            immutable: true
+            default_from_api: true
+            enum_values:
+              - STRICT
+              - CANONICAL
   - name: destinationConfig
     type: NestedObject
     description: |
@@ -1848,6 +1897,16 @@ properties:
                               type: Integer
                               description: |
                                 Column length.
+                              output: true
+                            - name: precision
+                              type: Integer
+                              description: |
+                                Column precision.
+                              output: true
+                            - name: scale
+                              type: Integer
+                              description: |
+                                Column scale.
                               output: true
                             - name: collation
                               type: String
@@ -2162,6 +2221,16 @@ properties:
                         type: String
                         description: |
                           Field name.
+                      - name: dataType
+                        type: String
+                        description: |
+                          The data type of the field.
+                        output: true
+                      - name: nillable
+                        type: Boolean
+                        description: |
+                          Indicates whether the field can accept nil values.
+                        output: true
       - name: spannerExcludedObjects
         type: NestedObject
         description: |
