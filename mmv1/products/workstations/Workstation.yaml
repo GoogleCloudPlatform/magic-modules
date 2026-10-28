@@ -58,6 +58,11 @@ samples:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
           workstation_name: work-station
+      - name: workstation_basic_update
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          workstation_name: work-station
 parameters:
   - name: workstationId
     type: String
