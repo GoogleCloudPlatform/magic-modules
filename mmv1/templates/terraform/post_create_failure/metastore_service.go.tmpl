@@ -1,4 +1,3 @@
-{{- if not $.ProductMetadata.IsTgcCompiler }}
 config := meta.(*transport_tpg.Config)
 userAgent, uaErr := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if uaErr != nil {
@@ -14,5 +13,4 @@ if bp, bpErr := tpgresource.GetBillingProject(d, config); bpErr == nil {
 if cleanupErr := deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent); cleanupErr != nil {
 	return fmt.Errorf("%w; additionally failed to clean up Dataproc Metastore PSC endpoints in consumer subnetworks after failed service creation: %v", err, cleanupErr)
 }
-{{- end }}
 return err

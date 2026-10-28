@@ -11,7 +11,7 @@
 	limitations under the License.
 */ -}}
 
-{{- if not $.ProductMetadata.IsTgcCompiler }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 import (
 	neturl "net/url"
 
@@ -31,10 +31,7 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 		return nil
 	}
 
-	computeBasePath, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}")
-	if err != nil {
-		return fmt.Errorf("resolving ComputeBasePath: %w", err)
-	}
+	computeBasePath := transport_tpg.BaseUrl(tpgcompute.Product, config)
 
 	for _, itemRaw := range consumers {
 		consumer, ok := itemRaw.(map[string]interface{})
