@@ -204,8 +204,8 @@ virtual_fields:
       the command will fail if this field is set to "PREVENT" in Terraform state.
       When set to "ABANDON", the command will remove the resource from Terraform
       management without updating or deleting the resource in the API.
-      When set to "DELETE", deleting the resource is allowed without cleaning up
-      PSC endpoints in consumer subnetworks.
+      When set to "DELETE", the resource is deleted directly. PSC endpoints in consumer
+      subnetworks will be deleted asynchronously by the API.
 
       Possible values: `DELETE`, `FORCE`, `PREVENT`, `ABANDON`.
     # excluded from generation due to Universal Deletion Policy
