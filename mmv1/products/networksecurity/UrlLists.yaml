@@ -44,6 +44,7 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
+generate_list_resource: true
 include_in_tgc_next: true
 custom_code:
 samples:
@@ -51,6 +52,8 @@ samples:
     primary_resource_id: default
     steps:
       - name: network_security_url_lists_basic
+        vars:
+          location: us-central1
         resource_id_vars:
           resource_name: my-url-lists
   - name: network_security_url_lists_advanced
