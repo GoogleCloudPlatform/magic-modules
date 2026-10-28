@@ -1,0 +1,46 @@
+if d.HasChange("name") {
+	oldName, newName := d.GetChange("name")
+	obj := map[string]interface{}{
+		"name":        newName,
+		"currentName": oldName,
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/global/interconnects/"+oldName.(string)+"/setName{{- if eq $.TargetVersionName "ga" -}}?$apiVersion=2026-09-01{{- end -}}")
+	if err != nil {
+		d.Partial(true)
+		return err
+	}
+
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+	})
+	if err != nil {
+		d.Partial(true)
+		return fmt.Errorf("Error updating Interconnect %q name: %s", d.Id(), err)
+	}
+
+	err = ComputeOperationWaitTime(
+		config, res, project, "Updating Interconnect Name", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		d.Partial(true)
+		return err
+	}
+
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/global/interconnects/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		d.Partial(true)
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+}
