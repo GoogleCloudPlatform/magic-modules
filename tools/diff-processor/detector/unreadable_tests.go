@@ -17,7 +17,6 @@ var KnownUnreadableTests = []string{
 	"TestAccComputeInstance_diskResourcePolicies_attachmentDiff",
 	"TestAccComputeNetwork_bgpModeAndMedInteractions",
 	"TestAccComputeNetwork_networkBgpStandardModeDeleteMed",
-	"TestAccComputeRouterNamedSet_updatePrefix",
 	"TestAccDNSManagedZone_update",
 	"TestAccEphemeralServiceAccountJwt_basic",
 	"TestAccEphemeralServiceAccountJwt_withDelegates",
