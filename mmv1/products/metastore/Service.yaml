@@ -51,6 +51,7 @@ async:
   actions: [create, delete, update]
   result:
     resource_inside_response: false
+deletion_policy_custom_docs: true
 autogen_async: true
 custom_code:
   constants: templates/terraform/constants/metastore_service.go.tmpl
@@ -122,6 +123,8 @@ samples:
           metastore_service_name: metastore-srv
           network_name: my-network
           subnet_name: my-subnetwork
+        ignore_read_extra:
+          - deletion_policy
   - name: dataproc_metastore_service_private_service_connect_custom_routes
     primary_resource_id: default
     min_version: beta
@@ -189,6 +192,24 @@ samples:
       - name: dataproc_metastore_service_autoscaling_no_limit_config
         resource_id_vars:
           metastore_service_name: test-service
+virtual_fields:
+  - name: deletion_policy
+    type: String
+    description: |
+      The deletion policy for the Dataproc Metastore service. Setting `FORCE` will also delete
+      the PSC forwarding rules and reserved internal addresses created by the Dataproc Metastore
+      service agent in consumer subnetworks when the service is deleted. Defaults to `DELETE`.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", deleting the resource is allowed without cleaning up
+      PSC endpoints in consumer subnetworks.
+
+      Possible values: `DELETE`, `FORCE`, `PREVENT`, `ABANDON`.
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
 parameters:
   - name: serviceId
     type: String

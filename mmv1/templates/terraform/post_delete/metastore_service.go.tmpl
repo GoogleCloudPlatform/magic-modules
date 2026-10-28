@@ -1,3 +1,5 @@
 {{- if not $.ProductMetadata.IsTgcCompiler }}
-deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent)
+if d.Get("deletion_policy").(string) == "FORCE" {
+	deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent)
+}
 {{- end }}
