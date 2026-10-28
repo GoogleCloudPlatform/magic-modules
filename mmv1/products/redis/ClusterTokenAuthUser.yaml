@@ -1,0 +1,73 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+name: "ClusterTokenAuthUser"
+description: "Represents a Token Auth User for a Google Cloud Redis Cluster."
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/memorystore/docs/cluster/
+  api: https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters
+docs:
+  note: |
+    Removing a `google_redis_cluster_token_auth_user` resource from the Terraform configuration deletes the user and revokes all of its tokens.
+
+    The `default` user is automatically created when token-based authentication (`AUTH_MODE_TOKEN_AUTH`) is enabled on a cluster and is lifecycle-bound to the cluster; it cannot be created or deleted via `google_redis_cluster_token_auth_user`. To view the `default` user's metadata or active tokens, use the `google_redis_cluster_token_auth_user` and `google_redis_cluster_auth_token` data sources; to rotate its tokens, use the `google_redis_cluster_auth_token` resource.
+supports_indirect_user_project_override: true
+immutable: true
+base_url: "{{cluster}}/tokenAuthUsers"
+self_link: "{{cluster}}/tokenAuthUsers/{{user_id}}"
+create_url: "{{cluster}}:addTokenAuthUser"
+id_format: "{{cluster}}/tokenAuthUsers/{{user_id}}"
+import_format:
+  - "{{cluster}}/tokenAuthUsers/{{user_id}}"
+async:
+  type: OpAsync
+  include_project: true
+  operation:
+    base_url: '{{op_id}}'
+custom_code:
+  custom_import: templates/terraform/custom_import/redis_token_auth_user.go.tmpl
+  encoder: templates/terraform/encoders/redis_token_auth_user.go.tmpl
+samples:
+  - name: redis_cluster_token_auth_user_basic
+    primary_resource_id: user-basic
+    steps:
+      - name: redis_cluster_token_auth_user_basic
+        resource_id_vars:
+          cluster_name: user-basic-cluster
+          user_id: user-basic-user
+properties:
+  - name: "cluster"
+    type: "ResourceRef"
+    resource: "Cluster"
+    imports: "id"
+    description: "The full name of the Redis cluster."
+    required: true
+    url_param_only: true
+  - name: "user_id"
+    type: "String"
+    description: |
+      The unique ID (username) of the Token Auth User.
+      The `default` user and internal engine service users cannot be managed with this resource.
+    required: true
+    url_param_only: true
+    validation:
+      function: 'verify.StringNotInSlice([]string{"default", "service-01c76d35-b998-4714-b86e-a81502b72b17"}, false)'
+  - name: "name"
+    type: "String"
+    description: "The full resource name of the Token Auth User."
+    output: true
+  - name: "state"
+    type: "String"
+    description: "The current state of the Token Auth User."
+    output: true
