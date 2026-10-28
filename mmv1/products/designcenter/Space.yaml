@@ -39,9 +39,9 @@ iam_policy:
   parent_resource_attribute: space_id
   import_format:
     - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
-    - '{{space_id}}'
+    - '{{project}}/{{location}}/{{space_id}}'
   fetch_iam_policy_verb: GET
-properties:
+parameters:
   - name: location
     type: String
     description: The location of the space.
@@ -54,6 +54,7 @@ properties:
     required: true
     immutable: true
     url_param_only: true
+properties:
   - name: displayName
     type: String
     description: Display name for the space.
