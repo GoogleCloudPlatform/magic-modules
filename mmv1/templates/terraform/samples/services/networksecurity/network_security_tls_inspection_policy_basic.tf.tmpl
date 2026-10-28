@@ -1,6 +1,6 @@
 resource "google_privateca_ca_pool" "default" {
   name      = "{{index $.ResourceIdVars "privateca_ca_pool_name"}}"
-  location  = "us-central1"
+  location  = "{{index $.Vars "location"}}"
   tier     = "DEVOPS"
   publishing_options {
     publish_ca_cert = false
@@ -25,7 +25,7 @@ resource "google_privateca_ca_pool" "default" {
 resource "google_privateca_certificate_authority" "default" {
   pool                                   = google_privateca_ca_pool.default.name
   certificate_authority_id               = "{{index $.ResourceIdVars "privateca_certificate_authority_id"}}"
-  location                               = "us-central1"
+  location                               = "{{index $.Vars "location"}}"
   lifetime                               = "86400s"
   type                                   = "SELF_SIGNED"
   deletion_protection                    = false
@@ -69,7 +69,7 @@ resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
 
 resource "google_network_security_tls_inspection_policy" "{{$.PrimaryResourceId}}" {
   name                  = "{{index $.ResourceIdVars "resource_name"}}"
-  location              = "us-central1"
+  location              = "{{index $.Vars "location"}}"
   ca_pool               = google_privateca_ca_pool.default.id
   exclude_public_ca_set = false
   depends_on            = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default, google_privateca_ca_pool_iam_member.tls_inspection_permission]
