@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -19,6 +20,11 @@ type MissingTestInfo struct {
 	UntestedFields []string
 	SuggestedTest  string
 	Tests          []string
+}
+
+type MissingUpdateTestInfo struct {
+	UntestedUpdateFields []string
+	Tests                []string
 }
 
 type FieldSet map[string]struct{}
@@ -182,6 +188,142 @@ func suggestedTest(resourceName string, untested []string) string {
 		}
 	}
 	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
+}
+
+// DetectMissingUpdateTests identifies newly added (or newly updatable) configurable
+// fields without ForceNew that are never mutated across at least two applied steps
+// of the same resource block in any acceptance test.
+func DetectMissingUpdateTests(schemaDiff diff.SchemaDiff, allTests []*reader.Test) (map[string]*MissingUpdateTestInfo, error) {
+	updatableFields := getUpdatableFieldsFromSchemaDiff(schemaDiff)
+	return getMissingUpdateTestsForChanges(updatableFields, allTests)
+}
+
+func getUpdatableFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]ResourceChanges {
+	updatableFields := make(map[string]ResourceChanges)
+	for resource, resourceDiff := range schemaDiff {
+		if rc := resourceDiff.ResourceConfig.New; rc != nil &&
+			(rc.Create != nil || rc.CreateContext != nil) &&
+			rc.Update == nil && rc.UpdateContext == nil {
+			continue
+		}
+		resourceChanges := make(ResourceChanges)
+		for field, fieldDiff := range resourceDiff.Fields {
+			if field == "project" || field == "deletion_policy" {
+				continue
+			}
+			if strings.HasPrefix(field, "condition.") {
+				switch {
+				case strings.HasSuffix(resource, "_iam_member"),
+					strings.HasSuffix(resource, "_iam_policy"),
+					strings.HasSuffix(resource, "_iam_binding"):
+					continue
+				}
+			}
+			if fieldDiff.New == nil {
+				continue
+			}
+			if fieldDiff.New.Computed && !fieldDiff.New.Optional {
+				continue
+			}
+			if fieldDiff.New.ForceNew || hasForceNewAncestor(field, resourceDiff) {
+				continue
+			}
+			if _, ok := fieldDiff.New.Elem.(*schema.Resource); ok {
+				continue
+			}
+			if fieldDiff.Old == nil {
+				resourceChanges[field] = &Field{Added: true}
+			} else if fieldDiff.Old.ForceNew && !fieldDiff.New.ForceNew {
+				resourceChanges[field] = &Field{Changed: true}
+			}
+		}
+		if len(resourceChanges) > 0 {
+			updatableFields[resource] = resourceChanges
+		}
+	}
+	return updatableFields
+}
+
+func hasForceNewAncestor(fieldPath string, resourceDiff diff.ResourceDiff) bool {
+	parts := strings.Split(fieldPath, ".")
+	for i := 1; i < len(parts); i++ {
+		prefix := strings.Join(parts[:i], ".")
+		if s, ok := resourceDiff.FlattenedSchema.New[prefix]; ok && s != nil && s.ForceNew {
+			return true
+		}
+		if fd, ok := resourceDiff.Fields[prefix]; ok && fd.New != nil && fd.New.ForceNew {
+			return true
+		}
+	}
+	return false
+}
+
+func getMissingUpdateTestsForChanges(updatableFields map[string]ResourceChanges, allTests []*reader.Test) (map[string]*MissingUpdateTestInfo, error) {
+	resourceNamesToTests := make(map[string][]string)
+	seenTests := make(map[string]map[string]bool)
+	recordTest := func(resourceName, testName string) {
+		if seenTests[resourceName] == nil {
+			seenTests[resourceName] = make(map[string]bool)
+		}
+		if !seenTests[resourceName][testName] {
+			seenTests[resourceName][testName] = true
+			resourceNamesToTests[resourceName] = append(resourceNamesToTests[resourceName], testName)
+		}
+	}
+
+	for _, test := range allTests {
+		steps := test.EffectiveSteps()
+		instanceSteps := make(map[string]map[string][]reader.Block)
+		for _, step := range steps {
+			for resourceName, resourceMap := range step[reader.ResourceBlock] {
+				if _, tracked := updatableFields[resourceName]; !tracked {
+					continue
+				}
+				recordTest(resourceName, test.Name)
+				if instanceSteps[resourceName] == nil {
+					instanceSteps[resourceName] = make(map[string][]reader.Block)
+				}
+				for instanceLabel, resourceConfig := range resourceMap {
+					instanceSteps[resourceName][instanceLabel] = append(instanceSteps[resourceName][instanceLabel], resourceConfig)
+				}
+			}
+		}
+
+		for resourceName, instances := range instanceSteps {
+			fieldCoverage := updatableFields[resourceName]
+			for _, blocks := range instances {
+				if len(blocks) < 2 {
+					continue
+				}
+				for i := 1; i < len(blocks); i++ {
+					prev, curr := blocks[i-1], blocks[i]
+					for fieldName, fieldState := range fieldCoverage {
+						if fieldState.Tested {
+							continue
+						}
+						prevVal, prevHas := prev[fieldName]
+						currVal, currHas := curr[fieldName]
+						if prevHas != currHas || (prevHas && !reflect.DeepEqual(prevVal, currVal)) {
+							fieldState.Tested = true
+						}
+					}
+				}
+			}
+		}
+	}
+
+	missingUpdateTests := make(map[string]*MissingUpdateTestInfo)
+	for resourceName, fieldCoverage := range updatableFields {
+		untested := untestedFields(fieldCoverage)
+		sort.Strings(untested)
+		if len(untested) > 0 {
+			missingUpdateTests[resourceName] = &MissingUpdateTestInfo{
+				UntestedUpdateFields: untested,
+				Tests:                resourceNamesToTests[resourceName],
+			}
+		}
+	}
+	return missingUpdateTests, nil
 }
 
 // DetectMissingDocs detect new fields that are missing docs given the schema diffs.

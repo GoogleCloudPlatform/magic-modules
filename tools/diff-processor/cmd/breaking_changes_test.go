@@ -71,6 +71,23 @@ func TestBreakingChangesCmd(t *testing.T) {
 			},
 			expectedViolations: 3,
 		},
+		"field becoming force new": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"field-a": {Description: "beep", Optional: true, ForceNew: false},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"field-a": {Description: "beep", Optional: true, ForceNew: true},
+					},
+				},
+			},
+			expectedViolations: 1,
+		},
 	}
 
 	for tn, tc := range cases {

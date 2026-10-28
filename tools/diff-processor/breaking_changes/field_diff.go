@@ -23,6 +23,7 @@ var FieldDiffRules = []FieldDiffRule{
 	FieldNewRequired,
 	FieldNewOptionalFieldWithDefault,
 	FieldBecomingRequired,
+	FieldBecomingForceNew,
 	FieldBecomingComputedOnly,
 	FieldOptionalComputedToOptional,
 	FieldDefaultModification,
@@ -71,6 +72,24 @@ func FieldBecomingRequiredMessages(resource, field string, fieldDiff diff.FieldD
 	}
 	tmpl := "Field `%s` changed from optional to required on `%s`"
 	if !fieldDiff.Old.Required && fieldDiff.New.Required {
+		return []string{fmt.Sprintf(tmpl, field, resource)}
+	}
+
+	return nil
+}
+
+var FieldBecomingForceNew = FieldDiffRule{
+	Identifier: "field-becoming-force-new",
+	Messages:   FieldBecomingForceNewMessages,
+}
+
+func FieldBecomingForceNewMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+	// Ignore for added / removed fields
+	if fieldDiff.Old == nil || fieldDiff.New == nil {
+		return nil
+	}
+	tmpl := "Field `%s` became ForceNew on `%s`"
+	if !fieldDiff.Old.ForceNew && fieldDiff.New.ForceNew {
 		return []string{fmt.Sprintf(tmpl, field, resource)}
 	}
 

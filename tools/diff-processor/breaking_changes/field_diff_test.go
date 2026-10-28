@@ -95,6 +95,82 @@ var FieldBecomingRequiredTestCases = []fieldTestCase{
 	},
 }
 
+func TestFieldBecomingForceNew(t *testing.T) {
+	for _, tc := range FieldBecomingForceNewTestCases {
+		tc.check(FieldBecomingForceNew, t)
+	}
+}
+
+var FieldBecomingForceNewTestCases = []fieldTestCase{
+	{
+		name: "control - remains updatable",
+		oldField: &schema.Schema{
+			Optional: true,
+			ForceNew: false,
+		},
+		newField: &schema.Schema{
+			Optional: true,
+			ForceNew: false,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "remains ForceNew",
+		oldField: &schema.Schema{
+			Optional: true,
+			ForceNew: true,
+		},
+		newField: &schema.Schema{
+			Optional: true,
+			ForceNew: true,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "ForceNew to updatable is backwards-compatible",
+		oldField: &schema.Schema{
+			Optional: true,
+			ForceNew: true,
+		},
+		newField: &schema.Schema{
+			Optional: true,
+			ForceNew: false,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "updatable to ForceNew is breaking",
+		oldField: &schema.Schema{
+			Optional: true,
+			ForceNew: false,
+		},
+		newField: &schema.Schema{
+			Optional: true,
+			ForceNew: true,
+		},
+		expectedViolation: true,
+		messageRegex:      "Field `field` became ForceNew on `resource`",
+	},
+	{
+		name:     "new field added as ForceNew",
+		oldField: nil,
+		newField: &schema.Schema{
+			Optional: true,
+			ForceNew: true,
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "field removed",
+		oldField: &schema.Schema{
+			Optional: true,
+			ForceNew: false,
+		},
+		newField:          nil,
+		expectedViolation: false,
+	},
+}
+
 func TestFieldNewRequired(t *testing.T) {
 	for _, tc := range FieldNewRequiredTestCases {
 		tc.check(FieldNewRequired, t)

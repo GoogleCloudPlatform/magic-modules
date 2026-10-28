@@ -1,6 +1,8 @@
 package detector
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"testing"
@@ -292,6 +294,26 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "expect-error-and-non-applying-steps-are-not-coverage",
+			changedFields: map[string]ResourceChanges{
+				"expect_error_resource": {
+					"field_one":   &Field{Added: true},
+					"field_two":   &Field{Added: true},
+					"field_three": &Field{Added: true},
+				},
+			},
+			expectedMissingTests: map[string]MissingTestInfo{
+				"expect_error_resource": {
+					UntestedFields: []string{"field_three", "field_two"},
+					SuggestedTest: `resource "expect_error_resource" "primary" {
+  field_three = # value needed
+  field_two   = # value needed
+}
+`,
+				},
+			},
+		},
 	} {
 		missingTests, err := getMissingTestsForChanges(test.changedFields, allTests)
 		if err != nil {
@@ -564,5 +586,161 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
 			}
 		})
+	}
+}
+
+func TestDetectMissingUpdateTests(t *testing.T) {
+	testFile := filepath.Join(t.TempDir(), "resource_update_coverage_test.go")
+	src := `package service_test
+
+import (
+	"regexp"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccOneStepOnly(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: ` + "`" + `
+resource "google_one_step" "primary" {
+  mutable_field   = "only-create"
+  immutable_field = "create-only"
+}
+` + "`" + `,
+			},
+			&resource.TestStep{
+				Config: ` + "`" + `
+resource "google_one_step" "primary" {
+  mutable_field   = "rejected-update"
+  immutable_field = "create-only"
+  error_only      = "invalid"
+}
+` + "`" + `,
+				ExpectError: regexp.MustCompile("invalid"),
+			},
+		},
+	})
+}
+
+func TestAccTwoStepMutations(t *testing.T) {
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"static_ctx":    "unchanged",
+		"mutated_ctx":   "before",
+		"flag_ctx":      true,
+	}
+	context_1 := map[string]interface{}{
+		"random_suffix": context["random_suffix"],
+		"static_ctx":    "unchanged",
+		"mutated_ctx":   "after",
+		"flag_ctx":      false,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTwoStepConfigStep1(context),
+			},
+			{
+				Config: testAccTwoStepConfigStep2(context_1),
+			},
+		},
+	})
+}
+
+func testAccTwoStepConfigStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(` + "`" + `
+resource "google_two_step" "primary" {
+  name             = "tf-test-%{random_suffix}"
+  identical_lit    = "same"
+  static_ctx_field = "%{static_ctx}"
+  mutated_ctx      = "%{mutated_ctx}"
+  mutated_bool     = %{flag_ctx}
+  cleared_in_step2 = "present"
+}
+` + "`" + `, context)
+}
+
+func testAccTwoStepConfigStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(` + "`" + `
+resource "google_two_step" "primary" {
+  name             = "tf-test-%{random_suffix}"
+  identical_lit    = "same"
+  static_ctx_field = "%{static_ctx}"
+  mutated_ctx      = "%{mutated_ctx}"
+  mutated_bool     = %{flag_ctx}
+  added_in_step2   = "added"
+}
+` + "`" + `, context)
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("failed writing temp test file: %v", err)
+	}
+	parsedTests, errs := reader.ReadTestFiles([]string{testFile})
+	if len(errs) > 0 {
+		t.Fatalf("unexpected reader errors: %v", errs)
+	}
+
+	// Verify ExpectError pointer step does not satisfy positive coverage in DetectMissingTests.
+	missingPositive, err := DetectMissingTests(diff.SchemaDiff{
+		"google_one_step": {
+			Fields: map[string]diff.FieldDiff{
+				"mutable_field": {New: &schema.Schema{Optional: true}},
+				"error_only":    {New: &schema.Schema{Optional: true}},
+			},
+		},
+	}, parsedTests)
+	if err != nil {
+		t.Fatalf("DetectMissingTests returned error: %v", err)
+	}
+	if got := missingPositive["google_one_step"]; got == nil || !reflect.DeepEqual(got.UntestedFields, []string{"error_only"}) {
+		t.Fatalf("expected error_only to be flagged by DetectMissingTests, got %+v", got)
+	}
+
+	schemaDiff := diff.SchemaDiff{
+		"google_one_step": {
+			Fields: map[string]diff.FieldDiff{
+				"mutable_field":     {New: &schema.Schema{Optional: true}},
+				"immutable_field":   {New: &schema.Schema{Optional: true, ForceNew: true}},
+				"computed_only":     {New: &schema.Schema{Computed: true}},
+				"newly_updatable":   {Old: &schema.Schema{Optional: true, ForceNew: true}, New: &schema.Schema{Optional: true, ForceNew: false}},
+				"existing_modified": {Old: &schema.Schema{Optional: true}, New: &schema.Schema{Optional: true, Description: "updated docs"}},
+			},
+		},
+		"google_two_step": {
+			Fields: map[string]diff.FieldDiff{
+				"name":             {New: &schema.Schema{Required: true, ForceNew: true}},
+				"identical_lit":    {New: &schema.Schema{Optional: true}},
+				"static_ctx_field": {New: &schema.Schema{Optional: true}},
+				"mutated_ctx":      {New: &schema.Schema{Optional: true}},
+				"mutated_bool":     {New: &schema.Schema{Optional: true}},
+				"cleared_in_step2": {New: &schema.Schema{Optional: true}},
+				"added_in_step2":   {New: &schema.Schema{Optional: true}},
+			},
+		},
+	}
+
+	gotUpdateMissing, err := DetectMissingUpdateTests(schemaDiff, parsedTests)
+	if err != nil {
+		t.Fatalf("DetectMissingUpdateTests returned error: %v", err)
+	}
+
+	wantUpdateMissing := map[string]*MissingUpdateTestInfo{
+		"google_one_step": {
+			UntestedUpdateFields: []string{"mutable_field", "newly_updatable"},
+			Tests:                []string{"TestAccOneStepOnly"},
+		},
+		"google_two_step": {
+			UntestedUpdateFields: []string{"identical_lit", "static_ctx_field"},
+			Tests:                []string{"TestAccTwoStepMutations"},
+		},
+	}
+	if d := cmp.Diff(wantUpdateMissing, gotUpdateMissing); d != "" {
+		t.Errorf("DetectMissingUpdateTests mismatch (-want +got):\n%s", d)
 	}
 }

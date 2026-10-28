@@ -599,3 +599,147 @@ func TestFlattenBlock(t *testing.T) {
 		}
 	}
 }
+
+func TestEffectiveStepsResolvesNprintfAndSprintfMutations(t *testing.T) {
+	testFile := filepath.Join(t.TempDir(), "update_resolution_test.go")
+	src := `package service_test
+
+import (
+	"fmt"
+	"regexp"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccUpdateContextResolution(t *testing.T) {
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"unchanged":     "same-value",
+		"display_name":  "initial-name",
+		"enabled":       true,
+	}
+	context_1 := map[string]interface{}{
+		"random_suffix": context["random_suffix"],
+		"unchanged":     "same-value",
+		"display_name":  "updated-name",
+		"enabled":       false,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: testAccUpdateContextConfig(context),
+			},
+			{
+				Config: testAccUpdateContextConfig(context_1),
+			},
+			&resource.TestStep{
+				Config:      testAccUpdateErrorConfig(),
+				ExpectError: regexp.MustCompile("invalid"),
+			},
+		},
+	})
+}
+
+func testAccUpdateContextConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(` + "`" + `
+resource "google_example_resource" "primary" {
+  name         = "tf-test-%{random_suffix}"
+  unchanged    = "%{unchanged}"
+  display_name = "%{display_name}"
+  enabled      = %{enabled}
+}
+` + "`" + `, context)
+}
+
+func testAccUpdateErrorConfig() string {
+	return ` + "`" + `
+resource "google_example_resource" "primary" {
+  error_only_field = "bad"
+}
+` + "`" + `
+}
+
+func TestAccUpdateSprintfResolution(t *testing.T) {
+	suffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSprintfConfig(suffix, "v1"),
+			},
+			{
+				Config: testAccSprintfConfig(suffix, "v2"),
+			},
+		},
+	})
+}
+
+func testAccSprintfConfig(suffix, label string) string {
+	return fmt.Sprintf(` + "`" + `
+resource "google_example_resource" "primary" {
+  name  = "tf-test-%s"
+  label = %q
+}
+` + "`" + `, suffix, label)
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+
+	tests, errs := ReadTestFiles([]string{testFile})
+	if len(errs) > 0 {
+		t.Fatalf("unexpected errors reading temp test file: %v", errs)
+	}
+	if len(tests) != 2 {
+		t.Fatalf("expected 2 tests, got %d", len(tests))
+	}
+
+	byName := make(map[string]*Test, len(tests))
+	for _, tc := range tests {
+		byName[tc.Name] = tc
+	}
+
+	ctxTest := byName["TestAccUpdateContextResolution"]
+	if ctxTest == nil {
+		t.Fatalf("missing TestAccUpdateContextResolution")
+	}
+	// Pointer-literal ExpectError step must be skipped.
+	if len(ctxTest.Steps) != 2 {
+		t.Fatalf("expected 2 applied steps (skipping &resource.TestStep ExpectError), got %d", len(ctxTest.Steps))
+	}
+	eff := ctxTest.EffectiveSteps()
+	step1 := eff[0][ResourceBlock]["google_example_resource"]["primary"]
+	step2 := eff[1][ResourceBlock]["google_example_resource"]["primary"]
+	if _, hasErrField := step1["error_only_field"]; hasErrField {
+		t.Errorf("unexpected error_only_field in step 1")
+	}
+	if step1["name"] != step2["name"] {
+		t.Errorf("expected reused random_suffix to produce equal expressions across steps, got %v vs %v", step1["name"], step2["name"])
+	}
+	if step1["unchanged"] != step2["unchanged"] {
+		t.Errorf("expected unchanged field to match across steps, got %v vs %v", step1["unchanged"], step2["unchanged"])
+	}
+	if step1["display_name"] == step2["display_name"] {
+		t.Errorf("expected mutated display_name to differ across steps, got %v", step1["display_name"])
+	}
+	if step1["enabled"] == step2["enabled"] {
+		t.Errorf("expected mutated enabled boolean to differ across steps, got %v", step1["enabled"])
+	}
+
+	sprintfTest := byName["TestAccUpdateSprintfResolution"]
+	if sprintfTest == nil {
+		t.Fatalf("missing TestAccUpdateSprintfResolution")
+	}
+	spEff := sprintfTest.EffectiveSteps()
+	sp1 := spEff[0][ResourceBlock]["google_example_resource"]["primary"]
+	sp2 := spEff[1][ResourceBlock]["google_example_resource"]["primary"]
+	if sp1["name"] != sp2["name"] {
+		t.Errorf("expected shared suffix arg to match across steps, got %v vs %v", sp1["name"], sp2["name"])
+	}
+	if sp1["label"] == sp2["label"] {
+		t.Errorf("expected mutated label arg to differ across steps, got %v", sp1["label"])
+	}
+}
