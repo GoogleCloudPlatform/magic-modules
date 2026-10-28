@@ -13,6 +13,7 @@
 if _, ok := d.GetOk("spend_cap"); ok && len(updateMask) > 0 {
 	// The API rejects any update of a capped budget whose mask lacks
 	// spendCap.inputState, even when only other fields change.
+	// An empty mask means no PATCH is sent, so do not add to it.
 	hasInputState := false
 	for _, m := range updateMask {
 		if m == "spendCap.inputState" {

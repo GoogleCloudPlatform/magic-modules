@@ -674,21 +674,34 @@ resource "google_billing_budget" "budget" {
 }
 
 // A capped budget needs spendCap.inputState in every update mask, and the API
-// never returns it. This changes only the amount, then removes the cap, and
-// checks import after each step. It uses its own service because the API
-// allows one spend cap per project and service and the tests run in parallel.
+// never returns it. This changes only the amount, then removes the cap while
+// changing the amount again, and checks import after each step.
+//
+// The API allows one spend cap per project and service, and the tests run in
+// parallel, so each spend cap test uses its own service. The sample uses
+// C7E2-9256-1C43 (Gemini Enterprise Agent Platform), this test
+// AEFD-7695-64FA (Gemini API) and TestAccBillingBudget_spendCapAdd
+// 152E-C115-5142 (Cloud Run).
 func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
+		"service":       "AEFD-7695-64FA",
 		"units":         "100",
 	}
 	contextUpdate := map[string]interface{}{
 		"billing_acct":  context["billing_acct"],
 		"random_suffix": context["random_suffix"],
+		"service":       context["service"],
 		"units":         "200",
+	}
+	contextRemoved := map[string]interface{}{
+		"billing_acct":  context["billing_acct"],
+		"random_suffix": context["random_suffix"],
+		"service":       context["service"],
+		"units":         "300",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -718,13 +731,55 @@ func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBillingBudget_spendCapRemoved(contextUpdate),
+				Config: testAccBillingBudget_spendCapRemoved(contextRemoved),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+					resource.TestCheckResourceAttr("google_billing_budget.budget", "amount.0.specified_amount.0.units", "300"),
+				),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// The API refuses to turn a regular budget into a spend cap budget, so adding
+// a spend_cap block must replace the budget.
+func TestAccBillingBudget_spendCapAdd(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"service":       "152E-C115-5142",
+		"units":         "100",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetsBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_spendCapRemoved(context),
+				Check:  resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+			},
+			{
+				Config: testAccBillingBudget_spendCap(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.0.input_state", "CONFIGURED"),
 			},
 			{
 				ResourceName:      "google_billing_budget.budget",
@@ -750,7 +805,7 @@ resource "google_billing_budget" "budget" {
 
   budget_filter {
     projects               = ["projects/${data.google_project.project.number}"]
-    services               = ["services/AEFD-7695-64FA"] # Gemini API
+    services               = ["services/%{service}"]
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
   }
@@ -802,7 +857,7 @@ resource "google_billing_budget" "budget" {
 
   budget_filter {
     projects               = ["projects/${data.google_project.project.number}"]
-    services               = ["services/AEFD-7695-64FA"] # Gemini API
+    services               = ["services/%{service}"]
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
   }

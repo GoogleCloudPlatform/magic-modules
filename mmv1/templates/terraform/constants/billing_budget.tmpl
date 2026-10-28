@@ -21,3 +21,15 @@ func checkValAndDefaultStringSuppress(defaultVal string, checkVal string) schema
 		return (old == "" && new == defaultVal) || (new == "" && old == defaultVal)
 	}
 }
+// The API refuses to turn a regular budget into a spend cap budget, so adding
+// a spend_cap block replaces the budget. Removing it is an in-place update.
+func billingBudgetSpendCapAddedCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() == "" {
+		return nil
+	}
+	o, n := d.GetChange("spend_cap")
+	if len(o.([]interface{})) == 0 && len(n.([]interface{})) > 0 {
+		return d.ForceNew("spend_cap")
+	}
+	return nil
+}

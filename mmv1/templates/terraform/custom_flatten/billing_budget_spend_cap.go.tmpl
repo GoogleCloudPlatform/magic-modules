@@ -20,14 +20,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	}
 	transformed := make(map[string]interface{})
 
-	// The API does not return spendCap.inputState. Report a lifted cap as
-	// AWAITING_NEXT_PERIOD so a lift outside Terraform shows as drift.
-	// Otherwise use spendCap.inputState if the API ever returns it, else the
-	// value from state, else CONFIGURED on import.
+	// The API does not return spendCap.inputState today. Use it if it ever
+	// does, else the value from state, else CONFIGURED on import. A cap
+	// lifted outside Terraform shows in output_state.
 	var inputState interface{}
-	if original["outputState"] == "AWAITING_NEXT_PERIOD" {
-		inputState = "AWAITING_NEXT_PERIOD"
-	} else if apiInputState, ok := original["inputState"]; ok && apiInputState != nil {
+	if apiInputState, ok := original["inputState"]; ok && apiInputState != nil {
 		inputState = apiInputState
 	} else if s, ok := d.GetOk("{{ join $.Lineage ".0." }}.0.input_state"); ok {
 		inputState = s
