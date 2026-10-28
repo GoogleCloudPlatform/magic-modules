@@ -1,0 +1,154 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+lockName, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}token_auth_user{{"}}"}}")
+if err != nil {
+	return err
+}
+transport_tpg.MutexStore.Lock(lockName)
+defer transport_tpg.MutexStore.Unlock(lockName)
+
+requestedTokenId := ""
+if v, ok := d.GetOk("token_id"); ok && v.(string) != "" {
+	requestedTokenId = tpgresource.GetResourceNameFromSelfLink(v.(string))
+}
+
+listUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}RedisBasePath{{"}}"}}{{"{{"}}token_auth_user{{"}}"}}/authTokens")
+if err != nil {
+	return err
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}RedisBasePath{{"}}"}}{{"{{"}}token_auth_user{{"}}"}}:addAuthToken")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(listUrl); parts != nil {
+	billingProject = parts[1]
+}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+_ = project
+project = billingProject
+
+if requestedTokenId != "" {
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    listUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error listing authTokens for %s: %s", listUrl, err)
+	}
+	if tokens, ok := res["authTokens"].([]interface{}); ok {
+		for _, t := range tokens {
+			tokenMap, ok := t.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			name, _ := tokenMap["name"].(string)
+			if tpgresource.GetResourceNameFromSelfLink(name) == requestedTokenId {
+				d.SetId(name)
+				if err := d.Set("name", name); err != nil {
+					return fmt.Errorf("Error setting name: %s", err)
+				}
+				if err := d.Set("token_id", requestedTokenId); err != nil {
+					return fmt.Errorf("Error setting token_id: %s", err)
+				}
+				log.Printf("[DEBUG] Acquired existing AuthToken %q", d.Id())
+				return resourceRedisClusterAuthTokenRead(d, meta)
+			}
+		}
+	}
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "POST",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent,
+	Timeout:   d.Timeout(schema.TimeoutCreate),
+})
+if err != nil {
+	return fmt.Errorf("Error creating AuthToken: %s", err)
+}
+
+err = RedisOperationWaitTime(
+	config, res, project, "Creating AuthToken", userAgent,
+	d.Timeout(schema.TimeoutCreate))
+if err != nil {
+	return fmt.Errorf("Error waiting to create AuthToken: %s", err)
+}
+
+listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    listUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return fmt.Errorf("Error listing authTokens for %s: %s", listUrl, err)
+}
+
+var matchedToken map[string]interface{}
+if tokens, ok := listRes["authTokens"].([]interface{}); ok && len(tokens) > 0 {
+	if requestedTokenId != "" {
+		for _, t := range tokens {
+			if tm, ok := t.(map[string]interface{}); ok {
+				if name, ok := tm["name"].(string); ok && tpgresource.GetResourceNameFromSelfLink(name) == requestedTokenId {
+					matchedToken = tm
+					break
+				}
+			}
+		}
+		if matchedToken == nil {
+			return fmt.Errorf("Created token %q not found in authTokens list", requestedTokenId)
+		}
+	} else {
+		maxVersion := -1
+		for _, t := range tokens {
+			if tm, ok := t.(map[string]interface{}); ok {
+				if name, ok := tm["name"].(string); ok {
+					tokenId := tpgresource.GetResourceNameFromSelfLink(name)
+					var vNum int
+					if _, err := fmt.Sscanf(tokenId, "version-%d", &vNum); err == nil {
+						if vNum > maxVersion {
+							maxVersion = vNum
+							matchedToken = tm
+						}
+					} else if matchedToken == nil {
+						matchedToken = tm
+					}
+				}
+			}
+		}
+		if matchedToken == nil {
+			matchedToken = tokens[len(tokens)-1].(map[string]interface{})
+		}
+	}
+} else {
+	return fmt.Errorf("No authTokens returned after create for %s", listUrl)
+}
+
+tokenName, ok := matchedToken["name"].(string)
+if !ok {
+	return fmt.Errorf("AuthToken response missing name attribute")
+}
+tokenId := tpgresource.GetResourceNameFromSelfLink(tokenName)
+d.SetId(tokenName)
+if err := d.Set("name", tokenName); err != nil {
+	return fmt.Errorf("Error setting name: %s", err)
+}
+if err := d.Set("token_id", tokenId); err != nil {
+	return fmt.Errorf("Error setting token_id: %s", err)
+}
+
+return resourceRedisClusterAuthTokenRead(d, meta)
