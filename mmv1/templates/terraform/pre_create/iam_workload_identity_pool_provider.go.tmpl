@@ -1,0 +1,14 @@
+	var wasUndeleted bool
+	deleted, err := isWorkloadIdentityPoolProviderInDeletedState(config, d, billingProject, userAgent)
+	if err != nil {
+		return fmt.Errorf("checking if WorkloadIdentityPoolProvider %q is in deleted state: %w", d.Id(), err)
+	}
+	if deleted {
+		log.Printf("[DEBUG] WorkloadIdentityPoolProvider exists in deleted state - undeleting instead of creating")
+		url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}IAMBetaBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/global/workloadIdentityPools/{{"{{"}}workload_identity_pool_id{{"}}"}}/providers/{{"{{"}}workload_identity_pool_provider_id{{"}}"}}:undelete")
+		if err != nil {
+			return err
+		}
+		obj = make(map[string]interface{})
+		wasUndeleted = true
+	}

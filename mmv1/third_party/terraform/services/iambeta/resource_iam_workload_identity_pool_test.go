@@ -1,11 +1,20 @@
 package iambeta_test
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -269,4 +278,189 @@ resource "google_iam_workload_identity_pool" "my_pool" {
   mode                      = "TRUST_DOMAIN"
 }
 `, context)
+}
+
+func TestAccIAMBetaWorkloadIdentityPool_undeleteOnCreate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]any{
+		"project":       envvar.GetTestProjectNumberFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIAMBetaWorkloadIdentityPoolUndeleteInitial(context),
+			},
+			{
+				ResourceName:      "google_iam_workload_identity_pool.my_pool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:  testAccIAMBetaWorkloadIdentityPoolUndeleteInitial(context),
+				Destroy: true,
+			},
+			{
+				Config: testAccIAMBetaWorkloadIdentityPoolUndeleteRecreated(context),
+			},
+			{
+				ResourceName:      "google_iam_workload_identity_pool.my_pool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccIAMBetaWorkloadIdentityPoolUndeleteInitial(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my_pool" {
+  workload_identity_pool_id = "tf-test-my-pool-%{random_suffix}"
+  display_name              = "Initial pool name"
+  description               = "Initial pool description"
+  disabled                  = true
+}
+`, context)
+}
+
+func testAccIAMBetaWorkloadIdentityPoolUndeleteRecreated(context map[string]any) string {
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my_pool" {
+  workload_identity_pool_id = "tf-test-my-pool-%{random_suffix}"
+  display_name              = "Recreated pool name"
+  description               = "Recreated pool description"
+  disabled                  = false
+}
+`, context)
+}
+
+type recordedRequest struct {
+	Method     string
+	Path       string
+	UpdateMask string
+	Body       map[string]any
+}
+
+func TestResourceIAMBetaWorkloadIdentityPoolCreate_undeleteWhenDeleted(t *testing.T) {
+	_ = t.Context()
+
+	var requests []recordedRequest
+	undeleted := false
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		var body map[string]any
+		if r.Body != nil {
+			raw, _ := io.ReadAll(r.Body)
+			if len(raw) > 0 {
+				_ = json.Unmarshal(raw, &body)
+			}
+		}
+
+		if strings.HasPrefix(r.URL.Path, "/v1/operations/") {
+			_, _ = w.Write([]byte(`{"name": "` + strings.TrimPrefix(r.URL.Path, "/v1/") + `", "done": true}`))
+			return
+		}
+
+		if strings.HasSuffix(r.URL.Path, ":listAttestationRules") {
+			_, _ = w.Write([]byte(`{}`))
+			return
+		}
+
+		requests = append(requests, recordedRequest{
+			Method:     r.Method,
+			Path:       r.URL.Path,
+			UpdateMask: r.URL.Query().Get("updateMask"),
+			Body:       body,
+		})
+
+		switch {
+		case r.Method == "GET" && !undeleted:
+			_, _ = w.Write([]byte(`{
+				"name": "projects/test-project/locations/global/workloadIdentityPools/my-pool",
+				"state": "DELETED",
+				"displayName": "Old Name",
+				"description": "Old Description",
+				"disabled": true,
+				"mode": "FEDERATION_ONLY"
+			}`))
+		case r.Method == "POST" && strings.HasSuffix(r.URL.Path, ":undelete"):
+			undeleted = true
+			_, _ = w.Write([]byte(`{"name": "operations/undelete-pool-op", "done": true}`))
+		case r.Method == "PATCH":
+			_, _ = w.Write([]byte(`{"name": "operations/patch-pool-op", "done": true}`))
+		case r.Method == "GET" && undeleted:
+			_, _ = w.Write([]byte(`{
+				"name": "projects/test-project/locations/global/workloadIdentityPools/my-pool",
+				"state": "ACTIVE",
+				"displayName": "Recreated Name",
+				"description": "Recreated Description",
+				"disabled": false,
+				"mode": "FEDERATION_ONLY"
+			}`))
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"error": "unexpected request"}`))
+		}
+	}))
+	defer ts.Close()
+
+	res := iambeta.ResourceIAMBetaWorkloadIdentityPool()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]any{
+		"project":                   "test-project",
+		"workload_identity_pool_id": "my-pool",
+		"display_name":              "Recreated Name",
+		"description":               "Recreated Description",
+		"disabled":                  false,
+		"mode":                      "FEDERATION_ONLY",
+	})
+
+	config := &transport_tpg.Config{
+		Client:       ts.Client(),
+		Project:      "test-project",
+		UserAgent:    "test-agent",
+		PollInterval: 1 * time.Millisecond,
+		CustomEndpoints: map[string]string{
+			"iam_beta_custom_endpoint": ts.URL + "/v1/",
+		},
+	}
+
+	if err := res.Create(d, config); err != nil {
+		t.Fatalf("ResourceIAMBetaWorkloadIdentityPool().Create(%q) returned unexpected error: %v", "my-pool", err)
+	}
+
+	wantRequests := []recordedRequest{
+		{
+			Method: "GET",
+			Path:   "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool",
+		},
+		{
+			Method: "POST",
+			Path:   "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool:undelete",
+			Body:   map[string]any{},
+		},
+		{
+			Method:     "PATCH",
+			Path:       "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool",
+			UpdateMask: "displayName,description,disabled",
+			Body: map[string]any{
+				"displayName": "Recreated Name",
+				"description": "Recreated Description",
+				"disabled":    false,
+			},
+		},
+		{
+			Method: "GET",
+			Path:   "/v1/projects/test-project/locations/global/workloadIdentityPools/my-pool",
+		},
+	}
+
+	if diff := cmp.Diff(wantRequests, requests); diff != "" {
+		t.Errorf("ResourceIAMBetaWorkloadIdentityPool().Create(%q) HTTP requests mismatch (-want +got):\n%s", "my-pool", diff)
+	}
 }
