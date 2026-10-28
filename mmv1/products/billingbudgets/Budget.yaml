@@ -43,6 +43,7 @@ schema_version: 1
 state_upgraders: true
 custom_code:
   constants: templates/terraform/constants/billing_budget.tmpl
+  pre_update: templates/terraform/pre_update/billing_budget.go.tmpl
 samples:
   - name: billing_budget_basic
     primary_resource_id: budget
@@ -566,13 +567,18 @@ properties:
       While `output_state` is `ENFORCED`, only `input_state` can be changed.
     update_mask_fields:
       - spendCap.inputState
+    custom_flatten: templates/terraform/custom_flatten/billing_budget_spend_cap.go.tmpl
     properties:
       - name: inputState
         type: Enum
         description: |
           The desired state of the spend cap. Must be `CONFIGURED` on create.
           Set to `AWAITING_NEXT_PERIOD` to lift an enforced cap until the next
-          period starts.
+          period starts. `AWAITING_NEXT_PERIOD` is only accepted while
+          `output_state` is `ENFORCED`.
+
+          The API does not return this field. Terraform keeps the configured
+          value in state, and on import derives it from `output_state`.
         required: true
         enum_values:
           - CONFIGURED

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/billingbudgets"
@@ -669,5 +670,103 @@ resource "google_billing_budget" "budget" {
   }
 }
 
+`, context)
+}
+
+// A capped budget needs spendCap.inputState in every update mask, and the API
+// never returns it. This changes only the amount and checks import.
+func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"units":         "100",
+	}
+	contextUpdate := map[string]interface{}{
+		"billing_acct":  context["billing_acct"],
+		"random_suffix": context["random_suffix"],
+		"units":         "200",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetsBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_spendCap(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_spendCap(contextUpdate),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccBillingBudget_spendCap(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{billing_acct}"
+}
+
+data "google_project" "project" {
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "Example Spend Cap Budget%{random_suffix}"
+
+  budget_filter {
+    projects               = ["projects/${data.google_project.project.number}"]
+    services               = ["services/C7E2-9256-1C43"] # Gemini Enterprise Agent Platform
+    credit_types_treatment = "EXCLUDE_ALL_CREDITS"
+    calendar_period        = "MONTH"
+  }
+
+  amount {
+    specified_amount {
+      currency_code = "USD"
+      units         = "%{units}"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
+  }
+
+  all_updates_rule {
+    monitoring_notification_channels = []
+    enable_project_level_recipients  = true
+  }
+
+  spend_cap {
+    input_state = "CONFIGURED"
+  }
+}
 `, context)
 }
