@@ -152,7 +152,7 @@ func (s *Step) UnmarshalYAML(value *yaml.Node) error {
 	type stepAlias Step
 	aliasObj := (*stepAlias)(s)
 
-	if err := value.Decode(aliasObj); err != nil {
+	if err := google.DecodeYAMLStrict(value, aliasObj); err != nil {
 		return err
 	}
 

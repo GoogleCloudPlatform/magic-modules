@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"gopkg.in/yaml.v3"
 )
 
@@ -123,7 +124,7 @@ func (a *Async) UnmarshalYAML(value *yaml.Node) error {
 	type asyncAlias Async
 	aliasObj := (*asyncAlias)(a)
 
-	if err := value.Decode(aliasObj); err != nil {
+	if err := google.DecodeYAMLStrict(value, aliasObj); err != nil {
 		return err
 	}
 

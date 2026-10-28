@@ -94,7 +94,7 @@ func (p *Product) UnmarshalYAML(value *yaml.Node) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
-	if err := value.Decode(aliasObj); err != nil {
+	if err := google.DecodeYAMLStrict(value, aliasObj); err != nil {
 		return err
 	}
 

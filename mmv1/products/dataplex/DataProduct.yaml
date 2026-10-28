@@ -33,7 +33,6 @@ iam_policy:
   import_format:
     - projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
     - '{{data_product_id}}'
-  method_name_suffix: DataProduct
 id_format: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}

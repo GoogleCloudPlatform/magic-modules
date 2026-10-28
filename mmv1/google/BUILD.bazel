@@ -23,6 +23,8 @@ go_test(
         "slice_utils_test.go",
         "string_utils_test.go",
         "template_cache_test.go",
+        "yaml_validator_test.go",
     ],
     embed = [":google"],
+    deps = ["@in_gopkg_yaml_v3//:yaml_v3"],
 )

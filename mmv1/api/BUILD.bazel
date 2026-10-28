@@ -34,5 +34,6 @@ go_test(
         "//mmv1/api/product",
         "//mmv1/api/resource",
         "@com_github_google_go_cmp//cmp",
+        "@in_gopkg_yaml_v3//:yaml_v3",
     ],
 )

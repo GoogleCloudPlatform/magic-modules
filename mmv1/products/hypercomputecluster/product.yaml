@@ -14,7 +14,6 @@
 ---
 name: Hypercomputecluster
 display_name: Cluster Director
-packagepath: ""
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:

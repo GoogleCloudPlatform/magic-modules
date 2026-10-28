@@ -227,9 +227,6 @@ properties:
         type: NestedObject
         description: |
           Configuration options for the tree-AH algorithm (Shallow tree + Asymmetric Hashing). Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
-        exactly_one_of:
-          - treeAhConfig
-          - bruteForceConfig
         properties:
           - name: leafNodeEmbeddingCount
             type: String
@@ -242,9 +239,6 @@ properties:
           Configuration options for using brute force search, which simply implements the standard linear search in the database for each query. It is primarily meant for benchmarking and to generate the ground truth for approximate search.
         send_empty_value: true
         allow_empty_object: true
-        exactly_one_of:
-          - treeAhConfig
-          - bruteForceConfig
         properties: []
       - name: embeddingDimension
         type: Integer

@@ -187,7 +187,7 @@ func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
 	type exampleAlias Examples
 	aliasObj := (*exampleAlias)(e)
 
-	err := value.Decode(aliasObj)
+	err := google.DecodeYAMLStrict(value, aliasObj)
 	if err != nil {
 		return err
 	}

@@ -18,6 +18,7 @@ import (
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"gopkg.in/yaml.v3"
 )
 
@@ -215,7 +216,7 @@ func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
 	aliasObj := (*iamPolicyAlias)(p)
 
 	// Decode the provided YAML, which will overwrite any default values that are specified.
-	return value.Decode(aliasObj)
+	return google.DecodeYAMLStrict(value, aliasObj)
 }
 
 // MarshalYAML implements a custom marshaller for the IamPolicy struct.
