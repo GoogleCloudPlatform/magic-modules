@@ -25,40 +25,19 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   }
 }
 
-resource "google_service_account" "default" {
-  account_id   = "{{index $.ResourceIdVars "account_id"}}"
-  display_name = "Service Account"
-}
-
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
   location               = "europe-west4"
 
-  enable_audit_agent = true
-
   host {
     gce_instance {
       machine_type                = "n1-standard-2"
       boot_disk_size_gb           = 35
-      pool_size                   = 0
-      service_account             = google_service_account.default.email
-      service_account_scopes      = ["https://www.googleapis.com/auth/cloud-platform"]
-      disable_public_ip_addresses = false
-
+      disable_public_ip_addresses = true
       accelerators {
         type  = "nvidia-tesla-t4"
-        count = 1
-      }
-
-      shielded_instance_config {
-        enable_secure_boot          = false
-        enable_vtpm                 = false
-        enable_integrity_monitoring = false
-      }
-
-      confidential_instance_config {
-        enable_confidential_compute = false
+        count = "1"
       }
     }
   }

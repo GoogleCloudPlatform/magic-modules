@@ -35,6 +35,11 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   }
 }
 
+resource "google_service_account" "default" {
+  account_id   = "{{index $.ResourceIdVars "account_id"}}"
+  display_name = "Service Account"
+}
+
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id   = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id  = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id

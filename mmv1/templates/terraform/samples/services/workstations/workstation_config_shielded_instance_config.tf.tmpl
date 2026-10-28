@@ -1,3 +1,13 @@
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = "organizations/{{index $.ResourceIdVars "org_id"}}"
+  short_name = "{{index $.ResourceIdVars "key_short_name"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.ResourceIdVars "value_short_name"}}"
+}
+
 resource "google_compute_network" "default" {
   name                    = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   auto_create_subnetworks = false
@@ -6,7 +16,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "europe-west4"
+  region        = "us-west4"
   network       = google_compute_network.default.name
 }
 
@@ -14,7 +24,7 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "europe-west4"
+  location               = "us-west4"
 
   labels = {
     "label" = "key"
@@ -33,7 +43,7 @@ resource "google_service_account" "default" {
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location               = "europe-west4"
+  location               = "us-west4"
 
   enable_audit_agent = {{index $.Vars "enable_audit_agent"}}
 
@@ -44,7 +54,7 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
       pool_size                   = 1
       service_account             = google_service_account.default.email
       service_account_scopes      = ["https://www.googleapis.com/auth/cloud-platform"]
-      disable_public_ip_addresses = true
+      disable_public_ip_addresses = false
       tags                        = ["foo", "bar"]
 
       shielded_instance_config {
@@ -55,11 +65,6 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
 
       confidential_instance_config {
         enable_confidential_compute = {{index $.Vars "enable_confidential_compute"}}
-      }
-
-      boost_configs {
-        id           = "boost-1"
-        machine_type = "n2d-standard-2"
       }
     }
   }
