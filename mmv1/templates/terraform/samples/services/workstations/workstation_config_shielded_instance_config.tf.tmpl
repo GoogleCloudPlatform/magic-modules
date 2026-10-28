@@ -15,7 +15,7 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
   location               = "europe-west4"
-  
+
   labels = {
     "label" = "key"
   }
@@ -25,19 +25,41 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   }
 }
 
+resource "google_service_account" "default" {
+  account_id   = "{{index $.ResourceIdVars "account_id"}}"
+  display_name = "Service Account"
+}
+
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location   		         = "europe-west4"
+  location               = "europe-west4"
+
+  enable_audit_agent = {{index $.Vars "enable_audit_agent"}}
 
   host {
     gce_instance {
-      machine_type                = "e2-standard-4"
+      machine_type                = "n2d-standard-2"
       boot_disk_size_gb           = 35
+      pool_size                   = 1
+      service_account             = google_service_account.default.email
+      service_account_scopes      = ["https://www.googleapis.com/auth/cloud-platform"]
       disable_public_ip_addresses = true
+      tags                        = ["foo", "bar"]
+
       shielded_instance_config {
-        enable_secure_boot = true
-        enable_vtpm        = true
+        enable_secure_boot          = {{index $.Vars "enable_secure_boot"}}
+        enable_vtpm                 = {{index $.Vars "enable_vtpm"}}
+        enable_integrity_monitoring = {{index $.Vars "enable_integrity_monitoring"}}
+      }
+
+      confidential_instance_config {
+        enable_confidential_compute = {{index $.Vars "enable_confidential_compute"}}
+      }
+
+      boost_configs {
+        id           = "boost-1"
+        machine_type = "n2d-standard-2"
       }
     }
   }

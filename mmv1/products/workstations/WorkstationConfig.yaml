@@ -68,72 +68,29 @@ samples:
           value_short_name: valuename
           org_id: '123456789'
         test_vars_overrides:
-          key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-          value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
           org_id: envvar.GetTestOrgFromEnv(t)
-  - name: workstation_config_container
-    primary_resource_id: default
-    exclude_test: true
-    steps:
       - name: workstation_config_container
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_hyperdisk
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_hyperdisk
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_hyperdisk_source_snapshot
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_hyperdisk_source_snapshot
+        include_step_doc: true
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
           key_short_name: keyname
           value_short_name: valuename
-          org_id: '0123456789'
+          org_id: '123456789'
         test_vars_overrides:
-          key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-          value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
           org_id: envvar.GetTestOrgFromEnv(t)
-  - name: workstation_config_persistent_directories
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_persistent_directories
+      - name: workstation_config_allowed_ports
+        include_step_doc: true
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
-  - name: workstation_config_source_snapshot
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_source_snapshot
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_shielded_instance_config
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_shielded_instance_config
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_accelerators
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_accelerators
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
+          key_short_name: keyname
+          value_short_name: valuename
+          org_id: '123456789'
+        vars:
+          working_dir: null
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
   - name: workstation_config_boost
     primary_resource_id: default
     steps:
@@ -143,6 +100,7 @@ samples:
           workstation_config_name: workstation-config
       - name: workstation_config_boost_update
         min_version: beta
+        include_step_doc: true
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
@@ -157,29 +115,67 @@ samples:
         vars:
           enable_automatic_failover: 'false'
           idle_action: 'STOP'
+  - name: workstation_config_accelerators
+    primary_resource_id: default
+    steps:
+      - name: workstation_config_accelerators
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+      - name: workstation_config_shielded_instance_config
+        include_step_doc: true
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          enable_audit_agent: 'true'
+          enable_secure_boot: 'true'
+          enable_vtpm: 'true'
+          enable_integrity_monitoring: 'true'
+          enable_confidential_compute: 'true'
+      - name: workstation_config_shielded_instance_config
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          enable_audit_agent: 'false'
+          enable_secure_boot: null
+          enable_vtpm: null
+          enable_integrity_monitoring: null
+          enable_confidential_compute: null
+  - name: workstation_config_persistent_directories
+    primary_resource_id: default
+    steps:
+      - name: workstation_config_persistent_directories
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+      - name: workstation_config_source_snapshot
+        include_step_doc: true
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+  - name: workstation_config_hyperdisk
+    primary_resource_id: default
+    steps:
+      - name: workstation_config_hyperdisk
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          key_short_name: keyname
+          value_short_name: valuename
+          org_id: '0123456789'
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
   - name: workstation_config_encryption_key
     primary_resource_id: default
     steps:
       - name: workstation_config_encryption_key
         resource_id_vars:
           account_id: my-account
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_allowed_ports
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: workstation_config_allowed_ports
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_idle_action
-    primary_resource_id: default
-    min_version: beta
-    exclude_test: true
-    steps:
-      - name: workstation_config_idle_action
-        resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
 parameters:
