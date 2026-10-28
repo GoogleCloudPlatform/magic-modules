@@ -29,6 +29,7 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: data_product_id
+  max_backoff_timeout_seconds: 1200
   import_format:
     - projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
     - '{{data_product_id}}'
@@ -171,3 +172,14 @@ properties:
             - name: serviceAccount
               type: String
               description: Specifies the email of the producer service account.
+        - name: defaultIamRoleConfig
+          type: NestedObject
+          description: |
+            Configuration for the default IAM role associated with the access group.
+          properties:
+            - name: role
+              type: String
+              required: true
+              description: |
+                Default IAM role associated with the access group, such as
+                `roles/bigquery.dataViewer`.

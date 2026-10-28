@@ -57,10 +57,10 @@ resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
   provider     = google-beta
   version_id   = "v1"
   service      = "{{index $.ResourceIdVars "service_id"}}"
-  runtime      = "python310"
+  runtime      = "python312"
 
   vpc_access {
-    egress_setting = "ALL_TRAFFIC"
+    vpc_egress = "{{index $.Vars "vpc_egress"}}"
     network_interfaces {
       network    = google_compute_network.custom.name
       subnetwork = google_compute_subnetwork.custom.name

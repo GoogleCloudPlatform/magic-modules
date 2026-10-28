@@ -25,7 +25,7 @@ resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
 
   message_transforms {
     ai_inference {
-      endpoint = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      endpoint = "projects/{{index $.TestEnvVars "project_name"}}/locations/global/publishers/google/models/gemini-3.5-flash"
       unstructured_inference {
         parameters = {
           "max_tokens" = 25000

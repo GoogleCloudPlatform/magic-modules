@@ -46,6 +46,7 @@ func BootstrapConfig(t *testing.T) *Config {
 	bootstrapConfigOnce.Do(func() {
 		config := &Config{
 			Credentials:               envvar.GetTestCredsFromEnv(),
+			AccessToken:               envvar.GetTestAccessTokenFromEnv(),
 			ImpersonateServiceAccount: envvar.GetTestImpersonateServiceAccountFromEnv(),
 			Project:                   envvar.GetTestProjectFromEnv(),
 			Region:                    envvar.GetTestRegionFromEnv(),

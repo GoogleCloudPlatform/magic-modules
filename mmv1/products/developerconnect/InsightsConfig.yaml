@@ -95,7 +95,7 @@ properties:
       - name: projectIds
         type: Array
         description: The project IDs. Format {project}.
-        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+        diff_suppress_func: tpgresource.CompareProjectNames
         item_type:
           type: String
         immutable: true

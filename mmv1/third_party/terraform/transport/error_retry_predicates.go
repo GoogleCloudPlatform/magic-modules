@@ -38,11 +38,12 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// GCE Error codes- we don't have a way to add these to all GCE resources
 	// easily, so add them globally.
 
-	// GCE Subnetworks are considered unready for a brief period when certain
-	// operations are performed on them, and the scope is likely too broad to
-	// apply a mutex. If we attempt an operation w/ an unready subnetwork, retry
-	// it.
-	isSubnetworkUnreadyError,
+	// GCE resources (such as subnetworks, networks, routers, serviceAttachments,
+	// backendServices, securityPolicies, etc.) are considered unready for a brief
+	// period when certain operations are performed on them, and the scope is
+	// likely too broad to apply a mutex. If we attempt an operation w/ an unready
+	// resource, retry it.
+	isResourceNotReadyError,
 
 	// As of February 2022 GCE seems to have added extra quota enforcement on
 	// reads, causing significant failure for our CI and for large customers.
@@ -54,12 +55,6 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// when too many operations are in flight. This is transient and clears
 	// once in-flight operations complete.
 	is403ConcurrentOperationsQuotaError,
-
-	// GCE Networks are considered unready for a brief period when certain
-	// operations are performed on them, and the scope is likely too broad to
-	// apply a mutex. If we attempt an operation w/ an unready network, retry
-	// it.
-	isNetworkUnreadyError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -141,28 +136,15 @@ func IsCodeRepositoryIndexUnreadyError(err error) (bool, string) {
 	return false, ""
 }
 
-func isSubnetworkUnreadyError(err error) (bool, string) {
+func isResourceNotReadyError(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)
 	if !ok {
 		return false, ""
 	}
 
-	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "subnetworks") {
-		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ `subnetwork`: %s", err)
-		return true, "Subnetwork not ready"
-	}
-	return false, ""
-}
-
-func isNetworkUnreadyError(err error) (bool, string) {
-	gerr, ok := err.(*googleapi.Error)
-	if !ok {
-		return false, ""
-	}
-
-	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "networks") {
-		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ 'networks': %s", err)
-		return true, "Network not ready"
+	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady': %s", err)
+		return true, "Resource not ready"
 	}
 	return false, ""
 }
@@ -736,6 +718,42 @@ func IsNetworkAttachmentConnectedEndpointsError(err error) (bool, string) {
 func IsAgentConnectivityTemplateInUse(err error) (bool, string) {
 	if err != nil && strings.Contains(err.Error(), "is already being used by resource(s)") {
 		return true, "waiting for AgentConnectivityTemplate to no longer be referenced"
+	}
+	return false, ""
+}
+
+// Retry when a referenced subnetwork is not ready yet during an async LRO.
+// This is a post-operation error so it uses tpgresource.CommonOpError instead of googleapi.Error.
+func IsSubnetworkNotReadyLROError(err error) (bool, string) {
+	if err != nil && strings.Contains(err.Error(), "subnetworks") && strings.Contains(err.Error(), "is not ready") {
+		return true, "Subnetwork is not ready"
+	}
+	return false, ""
+}
+
+// Dataproc returns a 400 error with reason "badRequest" (instead of GCE's "resourceNotReady")
+// when a referenced GCE resource such as a subnetwork or network is not yet ready.
+func DataprocResourceNotReady(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "The resource") && strings.Contains(gerr.Body, "is not ready") {
+			log.Printf("[DEBUG] Dismissed error as a retryable operation: %s", err)
+			return true, "Waiting for Dataproc resource dependency to be ready"
+		}
+	}
+	return false, ""
+}
+
+// Retry if Resource Manager Boundary or BoundaryConfig operation on a folder
+// returns a 403 while folder creation or folder IAM bindings are still propagating.
+func IsResourceManagerBoundaryRetryableError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code != 403 {
+			return false, ""
+		}
+		pattern := regexp.MustCompile(`Permission 'resourcemanager\.(boundaries|boundaryConfigs)\.[a-zA-Z]*' denied on resource '//cloudresourcemanager\.googleapis\.com/folders/[a-z0-9-]+(/boundaryConfig|/boundaries(/[^']*)?)?' \(or it may not exist\)\.`)
+		if pattern.MatchString(gerr.Body) || pattern.MatchString(gerr.Message) {
+			return true, "Waiting for folder and IAM policy propagation for Resource Manager Boundary"
+		}
 	}
 	return false, ""
 }

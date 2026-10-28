@@ -1,0 +1,406 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CustomJob
+description: |-
+  Represents a job that runs custom workloads such as a Docker container or a
+  Python package. A CustomJob can have multiple worker pools and each worker
+  pool can have its own machine and input spec. A CustomJob will be cleaned up
+  once the job enters terminal state (failed or succeeded).
+references:
+  guides:
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.customJobs
+docs:
+base_url: projects/{{project}}/locations/{{region}}/customJobs
+self_link: projects/{{project}}/locations/{{region}}/customJobs/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/customJobs
+immutable: true
+import_format:
+  - projects/{{project}}/locations/{{region}}/customJobs/{{name}}
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_delete: templates/terraform/custom_delete/vertex_ai_custom_job.go.tmpl
+autogen_status: Q3VzdG9tSm9iQXV0b2dlblYyQWdlbnQ=
+samples:
+  - name: vertex_ai_custom_job_basic
+    primary_resource_id: custom_job
+    steps:
+      - name: vertex_ai_custom_job_basic
+        ignore_read_extra:
+          - state
+          - update_time
+          - start_time
+          - end_time
+          - error
+        resource_id_vars:
+          display_name: example-custom-job
+          bucket_name: example-custom-job-bucket
+  - name: vertex_ai_custom_job_python_package
+    primary_resource_id: custom_job
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    steps:
+      - name: vertex_ai_custom_job_python_package
+        ignore_read_extra:
+          - state
+          - update_time
+          - start_time
+          - end_time
+          - error
+          - web_access_uris
+          - effective_labels
+        resource_id_vars:
+          display_name: example-custom-job-python
+          bucket_name: example-custom-job-python-bucket
+          service_account_id: job-sa
+          tensorboard_name: example-tensorboard
+          kms_key_name: example-key
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+  - name: vertex_ai_custom_job_tpu_network
+    primary_resource_id: custom_job
+    steps:
+      - name: vertex_ai_custom_job_tpu_network
+        ignore_read_extra:
+          - state
+          - update_time
+          - start_time
+          - end_time
+          - error
+          - effective_labels
+        resource_id_vars:
+          display_name: example-custom-job-tpu
+          network_name: custom-job-vpc-net
+          address_name: custom-job-vpc-range
+parameters:
+  - name: region
+    type: String
+    description: The Google Cloud region to run the custom job in.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: The resource name of the CustomJob.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    required: true
+    description: |-
+      The display name of the CustomJob.
+      The name can be up to 128 characters long and can consist of any UTF-8 characters.
+  - name: jobSpec
+    type: NestedObject
+    required: true
+    description: Job spec.
+    properties:
+      - name: workerPoolSpecs
+        type: Array
+        required: true
+        description: |-
+          The spec of the worker pools including machine type and Docker image.
+          All worker pools except the first one are optional and can be skipped by providing an empty value.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: replicaCount
+              type: Integer
+              description: The number of worker replicas to use for this worker pool.
+            - name: machineSpec
+              type: NestedObject
+              description: Specification of a single machine.
+              properties:
+                - name: machineType
+                  type: String
+                  description: The type of the machine.
+                - name: acceleratorType
+                  type: String
+                  description: The type of accelerator(s) that may be attached to the machine.
+                - name: acceleratorCount
+                  type: Integer
+                  description: The number of accelerators to attach to the machine.
+                - name: tpuTopology
+                  type: String
+                  description: The topology of the TPUs.
+                - name: reservationAffinity
+                  type: NestedObject
+                  description: Configuration for using robust to failure reservation.
+                  properties:
+                    - name: reservationAffinityType
+                      type: String
+                      required: true
+                      description: 'Specifies the reservation affinity type. Possible values: "NO_RESERVATION", "ANY_RESERVATION", and "SPECIFIC_RESERVATION"'
+                    - name: key
+                      type: String
+                      description: Corresponds to the label key of a reservation resource.
+                    - name: values
+                      type: Array
+                      description: Corresponds to the label values of a reservation resource.
+                      item_type:
+                        type: String
+            - name: diskSpec
+              type: NestedObject
+              description: Disk spec.
+              properties:
+                - name: bootDiskType
+                  type: String
+                  description: 'Type of the disk. The default value depends on the machine type. Valid values include: "pd-ssd", "pd-standard", "pd-balanced", and "hyperdisk-balanced".'
+                - name: bootDiskSizeGb
+                  type: Integer
+                  description: Size in GB of the boot disk (default is 100GB).
+            - name: containerSpec
+              type: NestedObject
+              description: |-
+                The custom container task. Either `container_spec` or `python_package_spec` can be provided, but not both.
+              properties:
+                - name: imageUri
+                  type: String
+                  required: true
+                  description: The URI of a container image in the Container Registry that is to be run on each worker replica.
+                - name: command
+                  type: Array
+                  description: The command to be invoked when the container is started. It overrides the entrypoint instruction in Dockerfile when provided.
+                  item_type:
+                    type: String
+                - name: args
+                  type: Array
+                  description: The arguments to be passed when starting the container.
+                  item_type:
+                    type: String
+                - name: env
+                  type: Array
+                  description: Environment variables to be passed to the container. Maximum limit is 100.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: name
+                        type: String
+                        required: true
+                        description: Name of the environment variable. Must be a valid C identifier.
+                      - name: value
+                        type: String
+                        required: true
+                        description: Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container.
+            - name: pythonPackageSpec
+              type: NestedObject
+              description: |-
+                The Python packaged task. Either `container_spec` or `python_package_spec` can be provided, but not both.
+              properties:
+                - name: executorImageUri
+                  type: String
+                  required: true
+                  description: The URI of a container image in Artifact Registry that will run the provided Python package.
+                - name: packageUris
+                  type: Array
+                  required: true
+                  description: The Google Cloud Storage location of the Python package files which are the training program and its dependent packages.
+                  item_type:
+                    type: String
+                - name: pythonModule
+                  type: String
+                  required: true
+                  description: The Python module name to run after installing the packages.
+                - name: args
+                  type: Array
+                  description: Command line arguments to be passed to the Python task.
+                  item_type:
+                    type: String
+                - name: env
+                  type: Array
+                  description: Environment variables to be passed to the python module. Maximum limit is 100.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: name
+                        type: String
+                        required: true
+                        description: Name of the environment variable.
+                      - name: value
+                        type: String
+                        required: true
+                        description: Value of the environment variable.
+            - name: nfsMounts
+              type: Array
+              description: List of NFS mount spec.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: server
+                    type: String
+                    required: true
+                    description: IP address of the NFS server.
+                  - name: path
+                    type: String
+                    required: true
+                    description: Source path exported from NFS database.
+                  - name: mountPoint
+                    type: String
+                    required: true
+                    description: Destination mount path. The path must be absolute.
+            - name: lustreMounts
+              type: Array
+              description: List of Lustre mounts.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: instanceIp
+                    type: String
+                    required: true
+                    description: IP address of the Lustre instance.
+                  - name: volumeHandle
+                    type: String
+                    required: true
+                    description: The unique identifier of the Lustre volume.
+                  - name: filesystem
+                    type: String
+                    required: true
+                    description: The name of the Lustre filesystem.
+                  - name: mountPoint
+                    type: String
+                    required: true
+                    description: Destination mount path. The Lustre file system will be mounted for the user under /mnt/lustre/<mount_point>.
+      - name: scheduling
+        type: NestedObject
+        description: Scheduling options for a CustomJob.
+        properties:
+          - name: timeout
+            type: String
+            description: |-
+              The maximum job running time. The default is 7 days. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+          - name: restartJobOnWorkerRestart
+            type: Boolean
+            description: Restarts the entire CustomJob if a worker gets restarted.
+          - name: strategy
+            type: String
+            description: 'This determines which type of scheduling strategy to use. Possible values: ["STANDARD", "SPOT", "FLEX_START"]'
+          - name: disableRetries
+            type: Boolean
+            description: Indicates if the job should retry for internal errors after the job starts running.
+          - name: maxWaitDuration
+            type: String
+            description: The maximum duration that a job will wait for the requested resources to be provisioned if the scheduling strategy is set to FLEX_START.
+      - name: serviceAccount
+        type: String
+        description: Specifies the service account for workload run-as account.
+      - name: network
+        type: String
+        description: The full name of the Compute Engine network to which the Job should be peered.
+      - name: reservedIpRanges
+        type: Array
+        description: A list of names for the reserved ip ranges under the VPC network that can be used for this job.
+        item_type:
+          type: String
+      - name: pscInterfaceConfig
+        type: NestedObject
+        description: Configuration for PSC-I for CustomJob.
+        properties:
+          - name: networkAttachment
+            type: String
+            description: The name of the attachment to connect to.
+          - name: dnsPeeringConfigs
+            type: Array
+            description: DNS peering config for the PSC interface.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: domain
+                  type: String
+                  required: true
+                  description: The DNS name suffix of the zone being peered to, e.g., "my-internal-domain.corp.". Must end with a dot.
+                - name: targetProject
+                  type: String
+                  required: true
+                  description: The project ID hosting the Cloud DNS managed zone that contains the 'domain'. The Vertex AI Service Agent requires the dns.peer role on this project.
+                - name: targetNetwork
+                  type: String
+                  required: true
+                  description: The VPC network name in the target_project where the DNS zone specified by 'domain' is visible.
+      - name: baseOutputDirectory
+        type: NestedObject
+        description: The Cloud Storage location to store the output of this CustomJob or HyperparameterTuningJob.
+        properties:
+          - name: outputUriPrefix
+            type: String
+            required: true
+            description: Cloud Storage folder URL to store the output.
+      - name: tensorboard
+        type: String
+        description: The name of a Vertex AI Tensorboard resource to which this CustomJob will upload Tensorboard logs.
+      - name: enableWebAccess
+        type: Boolean
+        description: Whether you want Vertex AI to enable interactive shell access to training containers.
+      - name: enableDashboardAccess
+        type: Boolean
+        description: Whether you want Vertex AI to enable access to the customized dashboard in training chief container.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      The labels with user-defined metadata to organize CustomJobs.
+      Label keys and values can be no longer than 64 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed.
+      See https://goo.gl/xmQnxf for more information and examples of labels.
+  - name: encryptionSpec
+    type: NestedObject
+    description: Customer-managed encryption key options for a CustomJob.
+    properties:
+      - name: kmsKeyName
+        type: String
+        required: true
+        description: |-
+          Resource name of the Cloud KMS key used to protect the resource.
+          The Cloud KMS key must be in the same region as the resource. It must have the format
+          `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+  - name: state
+    type: String
+    output: true
+    description: The detailed state of the job.
+  - name: createTime
+    type: String
+    output: true
+    description: Time when the CustomJob was created.
+  - name: startTime
+    type: String
+    output: true
+    description: Time when the CustomJob for the first time entered the `JOB_STATE_RUNNING` state.
+  - name: endTime
+    type: String
+    output: true
+    description: |-
+      Time when the CustomJob entered any of the following states: `JOB_STATE_SUCCEEDED`, `JOB_STATE_FAILED`, `JOB_STATE_CANCELLED`.
+  - name: updateTime
+    type: String
+    output: true
+    description: Time when the CustomJob was most recently updated.
+  - name: error
+    type: NestedObject
+    output: true
+    description: Only populated when job's state is `JOB_STATE_FAILED` or `JOB_STATE_CANCELLED`.
+    properties:
+      - name: code
+        type: Integer
+        output: true
+        description: The status code, which should be an enum value of google.rpc.Code.
+      - name: message
+        type: String
+        output: true
+        description: A developer-facing error message, which should be in English.
+  - name: webAccessUris
+    type: KeyValuePairs
+    output: true
+    description: URIs for accessing interactive shells (one URI for each training node).

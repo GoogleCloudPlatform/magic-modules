@@ -185,6 +185,9 @@ samples:
           tag_key: tag_key
           tag_value: tag_value
           topic_name: example-topic
+        test_vars_overrides:
+          tag_key: tags.BootstrapSharedTestProjectTagKey(t, "pubsub-subscription-tagkey", nil)
+          tag_value: tags.BootstrapSharedTestProjectTagValue(t, "pubsub-subscription-tagvalue", tags.BootstrapSharedTestProjectTagKey(t, "pubsub-subscription-tagkey", nil))
   - name: pubsub_subscription_ai_inference
     primary_resource_id: example
     external_providers: [time]
@@ -711,6 +714,7 @@ properties:
       exactly_one_of:
         - javascript_udf
         - ai_inference
+        - compression
       properties:
         - name: aiInference
           type: NestedObject
@@ -743,6 +747,26 @@ properties:
               description: |
                 The service account to use to make prediction requests against
                 endpoints.
+        - name: compression
+          type: NestedObject
+          description: |
+            Compression/Decompression. Configuration for compressing/decompressing
+            message data using a user-specified compression algorithm.
+          properties:
+            - name: compressionAlgorithm
+              type: String
+              required: true
+              description: |
+                Specifies the compression algorithm to use.
+                Possible values include `ZLIB`.
+            - name: compressionMode
+              type: Enum
+              required: true
+              description: |
+                Specifies whether to compress or decompress the message.
+              enum_values:
+                - COMPRESS
+                - DECOMPRESS
         - name: javascriptUdf
           type: NestedObject
           description: |

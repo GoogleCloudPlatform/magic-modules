@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"strings"
 	"text/template"
 	"time"
@@ -28,8 +29,6 @@ import (
 
 	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
-
-	"golang.org/x/exp/slices"
 
 	_ "embed"
 )

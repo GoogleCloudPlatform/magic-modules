@@ -887,6 +887,14 @@ func TestAccComputeInstance_internalIPv6PrefixLength(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccComputeInstance_internalIpv6PrefixLength("", instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			computeInstanceImportStep("us-west2-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
 				Config: testAccComputeInstance_internalIpv6PrefixLength("96", instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
@@ -2128,7 +2136,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_schedulingUpdated(instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -2136,7 +2144,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{}),
 		},
 	})
 }
@@ -2165,7 +2173,7 @@ func TestAccComputeInstance_schedulingTerminationTime(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_TerminationTime(instanceName, terminationTimeUpdated),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -2178,7 +2186,7 @@ func TestAccComputeInstance_schedulingTerminationTime(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_TerminationTimeDeleted(instanceName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -2191,7 +2199,7 @@ func TestAccComputeInstance_schedulingTerminationTime(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-central1-f", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -2371,25 +2379,25 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	context_1 := map[string]interface{}{
 		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"zone":                   "us-central1-a",
-		"host_error_timeout_sec": "host_error_timeout_seconds = 90",
+		"host_error_timeout_sec": 90,
 	}
 
 	context_2 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": "host_error_timeout_seconds = 120",
+		"host_error_timeout_sec": 120,
 	}
 
 	context_3 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": "host_error_timeout_seconds = null",
+		"host_error_timeout_sec": nil,
 	}
 
 	context_4 := map[string]interface{}{
 		"instance_name":          context_1["instance_name"],
 		"zone":                   context_1["zone"],
-		"host_error_timeout_sec": "host_error_timeout_seconds = 0",
+		"host_error_timeout_sec": 0,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3158,8 +3166,17 @@ func TestAccComputeInstance_hyperdiskBootDisk_provisioned_iops_throughput(t *tes
 	context := map[string]interface{}{
 		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"zone":                   "us-central1-a",
+		"size":                   100,
 		"provisioned_iops":       12000,
 		"provisioned_throughput": 200,
+	}
+
+	contextUpdate := map[string]interface{}{
+		"instance_name":          context["instance_name"],
+		"zone":                   context["zone"],
+		"size":                   200,
+		"provisioned_iops":       15000,
+		"provisioned_throughput": 250,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3172,8 +3189,16 @@ func TestAccComputeInstance_hyperdiskBootDisk_provisioned_iops_throughput(t *tes
 			},
 			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstanceHyperDiskBootDiskProvisionedIopsThroughput_update(context),
+				// Also covers increasing the boot disk size alongside iops/throughput
+				Config: testAccComputeInstanceHyperDiskBootDiskProvisionedIopsThroughput_update(contextUpdate),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						// Check that the update is done in-place
+						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -4063,7 +4088,7 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scheduling(instanceName),
+				Config: testAccComputeInstance_schedulingInZone(instanceName, "us-central1-a"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -4256,7 +4281,7 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scheduling(instanceName),
+				Config: testAccComputeInstance_schedulingInZone(instanceName, "us-central1-a"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -4321,7 +4346,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_scheduling(instanceName),
+				Config: testAccComputeInstance_schedulingInZone(instanceName, "us-central1-a"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -5136,25 +5161,51 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 				// before creating a new one. Only one can exist per region.
 				PreConfig: func() {
 					config := acctest.GoogleProviderConfig(t)
-					client := tpgcompute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent)
-					found, err := client.NetworkEdgeSecurityServices.AggregatedList(config.Project).Do()
+					listUrl := fmt.Sprintf("%sprojects/%s/aggregated/networkEdgeSecurityServices", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project)
+					found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+						Config:    config,
+						Method:    "GET",
+						Project:   config.Project,
+						RawURL:    listUrl,
+						UserAgent: config.UserAgent,
+					})
 					if err != nil {
 						return
 					}
-					scopedList, ok := found.Items["regions/europe-west1"]
+					items, ok := found["items"].(map[string]interface{})
 					if !ok {
 						return
 					}
-					for _, nesec := range scopedList.NetworkEdgeSecurityServices {
-						if !strings.HasPrefix(nesec.Name, "tf-test-") {
+					scopedList, ok := items["regions/europe-west1"].(map[string]interface{})
+					if !ok {
+						return
+					}
+					services, ok := scopedList["networkEdgeSecurityServices"].([]interface{})
+					if !ok {
+						return
+					}
+					for _, raw := range services {
+						nesec, ok := raw.(map[string]interface{})
+						if !ok {
 							continue
 						}
-						op, err := client.NetworkEdgeSecurityServices.Delete(config.Project, "europe-west1", nesec.Name).Do()
+						nesecName, _ := nesec["name"].(string)
+						if !strings.HasPrefix(nesecName, "tf-test-") {
+							continue
+						}
+						deleteUrl := fmt.Sprintf("%sprojects/%s/regions/europe-west1/networkEdgeSecurityServices/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project, nesecName)
+						op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+							Config:    config,
+							Method:    "DELETE",
+							Project:   config.Project,
+							RawURL:    deleteUrl,
+							UserAgent: config.UserAgent,
+						})
 						if err != nil {
 							continue
 						}
 						if waitErr := tpgcompute.ComputeOperationWaitTime(config, op, config.Project, "deleting leftover NetworkEdgeSecurityService", config.UserAgent, 10*time.Minute); waitErr != nil {
-							t.Logf("Warning: cleanup of leftover NetworkEdgeSecurityService %q failed: %v", nesec.Name, waitErr)
+							t.Logf("Warning: cleanup of leftover NetworkEdgeSecurityService %q failed: %v", nesecName, waitErr)
 						}
 					}
 				},
@@ -7989,6 +8040,12 @@ func testAccComputeInstance_internalIpv6(ip, instance string) string {
 }
 
 func testAccComputeInstance_internalIpv6PrefixLength(length, instance string) string {
+	stackType := "IPV4_ONLY"
+	prefixLengthConfig := ""
+	if length != "" {
+		stackType = "IPV4_IPV6"
+		prefixLengthConfig = fmt.Sprintf("internal_ipv6_prefix_length = %s", length)
+	}
 	return fmt.Sprintf(`
 resource "google_compute_network" "vpc" {
   name                     = "%s-network"
@@ -8019,14 +8076,14 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network    = google_compute_network.vpc.self_link
     subnetwork = google_compute_subnetwork.subnetwork.self_link
-    stack_type = "IPV4_IPV6"
+    stack_type = "%s"
     access_config {
       network_tier = "STANDARD"
     }
-    internal_ipv6_prefix_length = %s
+    %s
   }
 }
-`, instance, instance, instance, length)
+`, instance, instance, instance, stackType, prefixLengthConfig)
 }
 func testAccComputeInstance_ipv6ExternalReservation(instance string) string {
 	return fmt.Sprintf(`
@@ -9532,6 +9589,10 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_scheduling(instance string) string {
+	return testAccComputeInstance_schedulingInZone(instance, "us-central1-f")
+}
+
+func testAccComputeInstance_schedulingInZone(instance, zone string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-13"
@@ -9540,8 +9601,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "%s"
 
   boot_disk {
     initialize_params {
@@ -9557,7 +9618,7 @@ resource "google_compute_instance" "foobar" {
     automatic_restart = false
   }
 }
-`, instance)
+`, instance, zone)
 }
 
 func testAccComputeInstance_schedulingUpdated(instance string) string {
@@ -9569,8 +9630,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "us-central1-f"
 
   boot_disk {
     initialize_params {
@@ -9599,8 +9660,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "us-central1-f"
 
   boot_disk {
     initialize_params {
@@ -9633,8 +9694,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  machine_type = "e2-micro"
+  zone         = "us-central1-f"
 
   boot_disk {
     initialize_params {
@@ -11098,7 +11159,7 @@ resource "google_compute_reservation" "reservation" {
 }
 
 resource "google_compute_instance" "foobar" {
-  name         = "%[1]s"
+  name         = "%s"
   machine_type = "n1-standard-1"
   zone         = "us-central1-a"
 
@@ -11117,11 +11178,11 @@ resource "google_compute_instance" "foobar" {
 
 	specific_reservation {
 		key    = "compute.googleapis.com/reservation-name"
-		values = ["%[1]s"]
+		values = ["%s"]
 	}
   }
 }
-`, instanceName)
+`, instanceName, instanceName, instanceName)
 }
 
 func testAccComputeInstance_hostErrorTimeoutSeconds(context map[string]interface{}) string {
@@ -11146,8 +11207,8 @@ resource "google_compute_instance" "foobar" {
     network = "default"
   }
   scheduling {
-    %{host_error_timeout_sec}
-	automatic_restart = true
+    host_error_timeout_seconds = %{host_error_timeout_sec}
+    automatic_restart          = true
   }
 }
 `, context)
@@ -11525,7 +11586,7 @@ resource "google_compute_instance" "foobar" {
       provisioned_iops = %{provisioned_iops}
       provisioned_throughput = %{provisioned_throughput}
       type = "hyperdisk-balanced"
-      size = 100
+      size = %{size}
     }
   }
 
@@ -14818,7 +14879,7 @@ resource "google_compute_instance" "foobar" {
       provisioned_iops = %{provisioned_iops}
       provisioned_throughput = %{provisioned_throughput}
       type = "hyperdisk-balanced"
-      size = 100
+      size = %{size}
     }
   }
 

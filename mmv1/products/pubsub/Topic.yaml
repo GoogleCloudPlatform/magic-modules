@@ -479,9 +479,6 @@ properties:
       order specified.
     item_type:
       type: NestedObject
-      exactly_one_of:
-        - javascript_udf
-        - ai_inference
       properties:
         - name: aiInference
           type: NestedObject
@@ -514,6 +511,27 @@ properties:
               description: |
                 The service account to use to make prediction requests against
                 endpoints.
+        - name: compression
+          type: NestedObject
+          description: |
+            Configuration for compressing/decompressing message data using a
+            user-specified compression algorithm.
+          properties:
+            - name: compressionAlgorithm
+              type: String
+              required: true
+              description: |
+                Specifies the compression algorithm to use.
+                Possible values include `ZLIB`.
+                See [CompressionAlgorithm](https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics#CompressionAlgorithm) for allowed values.
+            - name: compressionMode
+              type: Enum
+              required: true
+              description: |
+                Specifies whether to compress or decompress the message.
+              enum_values:
+                - COMPRESS
+                - DECOMPRESS
         - name: javascriptUdf
           type: NestedObject
           description: |

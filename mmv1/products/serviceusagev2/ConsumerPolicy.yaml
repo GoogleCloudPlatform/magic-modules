@@ -31,15 +31,17 @@ autogen_async: true
 async:
   type: 'OpAsync'
   actions: ['create', 'update', 'delete']
+  include_project: true
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+read_error_transform: transformServiceUsageV2ConsumerPolicyReadError
 custom_code:
   constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
   pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
   pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
-  pre_delete: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+  pre_delete: templates/terraform/pre_delete/serviceusagev2_consumer_policy.go.tmpl
   post_create_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
   post_update_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
   post_delete_failure: templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
@@ -51,17 +53,22 @@ parameters:
     description: |
      The name of the parent. It can be a project, folder or organization in the format of  projects/<project_id or project_number>, folders/<folder_number> or organizations/<org_number> .
     required: true
+    immutable: true
     url_param_only: true
   - name: 'name'
     type: String
     description: |
      The name of the policy. Currently only the “default” policy name is supported.
     required: true
+    immutable: true
     url_param_only: true
+    validation:
+      function: 'validation.StringInSlice([]string{"default"}, false)'
 properties:
   - name: 'enableRules'
     type: Array
     required: true
+    max_size: 1
     description: |
       The consumer policy rule that defines enabled services. The structure is documented below.
     custom_flatten: templates/terraform/custom_flatten/serviceusagev2_consumer_policy_enable_rules.go.tmpl
@@ -73,7 +80,7 @@ properties:
           send_empty_value: true
           is_set: true
           description: |
-            (Optional): List of service names to be enabled in the format of services/<service_name>
+            List of service names to be enabled in the format of services/<service_name>
           item_type:
             type: String
         - name: 'catalogs'
@@ -93,11 +100,11 @@ virtual_fields:
   - name: 'validate_dependencies'
     type: Boolean
     description: |
-      (Optional) Default value is true. If true, this flag enforces dependency management within the consumer policy. When adding a new service, it verifies that all its dependencies are already present/added in the policy. Conversely, when removing a service, it ensures that no other services within the policy depend on the service to be removed. If the validation fails, a comprehensive message will be presented, outlining the missing dependencies and providing instructions on how to address the issue.
+      Default value is true. If true, this flag enforces dependency management within the consumer policy. When adding a new service, it verifies that all its dependencies are already present/added in the policy. Conversely, when removing a service, it ensures that no other services within the policy depend on the service to be removed. If the validation fails, a comprehensive message will be presented, outlining the missing dependencies and providing instructions on how to address the issue.
     default_value: true
   - name: 'check_usage_on_remove'
     type: Boolean
     description: |
-      (Optional) Default value is false. This field is deprecated and has no effect.
+      Default value is false. This field is deprecated and has no effect.
     default_value: false
     deprecation_message: '`check_usage_on_remove` is deprecated and will be removed in a future major release.'

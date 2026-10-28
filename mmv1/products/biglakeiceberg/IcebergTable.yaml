@@ -67,6 +67,14 @@ samples:
           bucket_name: my-bucket
           namespace_id: my_namespace
           table_name: my_table
+  - name: biglake_iceberg_table_nested_types
+    primary_resource_id: my_iceberg_table
+    steps:
+      - name: biglake_iceberg_table_nested_types
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          table_name: my_table
   - name: biglake_iceberg_table_update
     primary_resource_id: my_iceberg_table
     skip_test: true
@@ -150,7 +158,13 @@ properties:
               type: String
               required: true
               description: |
-                The type of the field.
+                The type of the field. Primitive types are plain names such as `long`. List, map and
+                struct types are JSON objects as defined by the
+                [Iceberg spec](https://iceberg.apache.org/spec/#appendix-c-json-serialization),
+                typically written with `jsonencode`.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: templates/terraform/custom_flatten/biglake_iceberg_table_field_type.go.tmpl
+              custom_expand: templates/terraform/custom_expand/biglake_iceberg_table_field_type.go.tmpl
             - name: required
               type: Boolean
               required: true

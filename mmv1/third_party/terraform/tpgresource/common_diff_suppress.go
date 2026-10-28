@@ -3,6 +3,7 @@
 package tpgresource
 
 import (
+	"net"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -127,6 +128,22 @@ func ProjectIDDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return a2 == b2
 }
 
+// Suppress diffs when comparing bare project IDs/numbers or "projects/{project}"
+// resource names, including when one value is a project ID and the other is a project number.
+func CompareProjectNames(_, old, new string, _ *schema.ResourceData) bool {
+	oldBare := strings.TrimPrefix(old, "projects/")
+	newBare := strings.TrimPrefix(new, "projects/")
+	if oldBare == newBare {
+		return true
+	}
+	if oldBare == "" || newBare == "" || strings.Contains(oldBare, "/") || strings.Contains(newBare, "/") {
+		return false
+	}
+	_, oldErr := StringToFixed64(oldBare)
+	_, newErr := StringToFixed64(newBare)
+	return (oldErr == nil) != (newErr == nil)
+}
+
 func IsNewResource(diff TerraformResourceDiff) bool {
 	name := diff.Get("name")
 	return name.(string) == ""
@@ -175,4 +192,19 @@ func SuppressMajorRevisionId(_, old, new string, _ *schema.ResourceData) bool {
 		return oldVal >= newVal
 	}
 	return false
+}
+
+// IpAddressDiffSuppress compares two IP addresses for semantic equality,
+// suppressing diffs caused by different IPv6 string representations
+// (e.g. RFC 5952 zero-compression, leading zeros, or hex casing).
+func IpAddressDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+	oldIP := net.ParseIP(old)
+	newIP := net.ParseIP(new)
+	if oldIP != nil && newIP != nil {
+		return oldIP.Equal(newIP)
+	}
+	return old == new
 }

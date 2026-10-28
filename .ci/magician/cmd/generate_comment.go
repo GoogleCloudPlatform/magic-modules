@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -39,7 +40,6 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/parser"
 	"go.abhg.dev/goldmark/frontmatter"
-	"golang.org/x/exp/maps"
 
 	_ "embed"
 )
@@ -65,6 +65,12 @@ type BreakingChange struct {
 type MissingTestInfo struct {
 	SuggestedTest string
 	Tests         []string
+}
+
+// The output of `diff-processor detect-unreadable-tests`.
+type UnreadableTestsReport struct {
+	NewUnreadableTests   map[string]string
+	StaleUnreadableTests []string
 }
 
 type MissingIdentityInfo struct {
@@ -94,6 +100,7 @@ type diffCommentData struct {
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
+	UnreadableTests      *UnreadableTestsReport
 	MissingDocs          *MissingDocsSummary
 	MissingIdentity      map[string]*MissingIdentityInfo
 	MultipleResources    []string
@@ -107,6 +114,12 @@ type simpleSchemaDiff struct {
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
 const allowMultipleResourcesLabel = "override-multiple-resources"
+
+// enableMissingServiceLabelsCheck controls whether added resources are checked
+// for missing service labels. When disabled, the
+// terraform-provider-missing-service-labels status is still posted (always as
+// "success") so that it never blocks PRs. Set to true to re-enable the check.
+const enableMissingServiceLabelsCheck = false
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -352,6 +365,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 			data.MissingTests = missingTests
 
+			unreadableTests, err := detectUnreadableTests(diffProcessorPath, repo.Path, changedServices(repo.ChangedFiles), rnr)
+			if err != nil {
+				fmt.Println("Error running unreadable test detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The unreadable test detector failed to run.")
+			}
+			data.UnreadableTests = unreadableTests
+
 			missingDocs, err := detectMissingDocs(diffProcessorPath, repo.Path, rnr)
 			if err != nil {
 				fmt.Println("Error running missing doc detector: ", err)
@@ -385,7 +405,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
-	breakingChangesSlice := maps.Values(uniqueBreakingChanges)
+	breakingChangesSlice := slices.Collect(maps.Values(uniqueBreakingChanges))
 	sort.Slice(breakingChangesSlice, func(i, j int) bool {
 		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
 	})
@@ -393,7 +413,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Check if multiple resources were added.
 	multipleResourcesState := "success"
-	data.MultipleResources = multipleResources(maps.Keys(uniqueAddedResources))
+	data.MultipleResources = multipleResources(slices.Collect(maps.Keys(uniqueAddedResources)))
 	if len(data.MultipleResources) > 1 {
 		multipleResourcesState = "failure"
 		for _, label := range pullRequest.Labels {
@@ -423,7 +443,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(changedFilesAffectedResources))
+	fmt.Printf("affected resources based on changed files: %v\n", slices.Collect(maps.Keys(changedFilesAffectedResources)))
 
 	// Compute service labels based on affected resources
 	uniqueServiceLabels := map[string]struct{}{}
@@ -433,7 +453,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
 	}
 	if len(regexpLabels) > 0 {
-		for _, label := range labeler.ComputeLabels(maps.Keys(uniqueAffectedResources), regexpLabels) {
+		for _, label := range labeler.ComputeLabels(slices.Collect(maps.Keys(uniqueAffectedResources)), regexpLabels) {
 			uniqueServiceLabels[label] = struct{}{}
 		}
 	}
@@ -448,7 +468,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 		if !hasServiceLabels {
-			serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
+			serviceLabelsSlice := slices.Collect(maps.Keys(uniqueServiceLabels))
 			sort.Strings(serviceLabelsSlice)
 			if len(serviceLabelsSlice) > 3 {
 				// Treat this as a cross-provider change
@@ -482,6 +502,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	missingServiceLabels := []string{}
 	if len(regexpLabels) > 0 {
 		for resource, _ := range uniqueAddedResources {
+			if !enableMissingServiceLabelsCheck {
+				break
+			}
 			found := false
 			for _, rl := range regexpLabels {
 				if rl.Regexp.MatchString(resource) {
@@ -631,6 +654,27 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 	return missingTests, rnr.PopDir()
 }
 
+// Run the unreadable test detector on the given services and return the
+// results: acceptance tests the missing test detector can't read that aren't
+// known to be unreadable, and tests known to be unreadable that it can now read.
+func detectUnreadableTests(diffProcessorPath, tpgbLocalPath string, services []string, rnr ExecRunner) (*UnreadableTestsReport, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	args := append([]string{"detect-unreadable-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, services...)
+	output, err := rnr.Run("bin/diff-processor", args, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var unreadableTests *UnreadableTestsReport
+	if err = json.Unmarshal([]byte(output), &unreadableTests); err != nil {
+		return nil, err
+	}
+	return unreadableTests, rnr.PopDir()
+}
+
 // Run the missing doc detector and return the results.
 func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (*MissingDocsSummary, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
@@ -707,8 +751,7 @@ func multipleResources(resources []string) []string {
 		}
 	}
 
-	ret := maps.Keys(final)
-	slices.Sort(ret)
+	ret := slices.Sorted(maps.Keys(final))
 	return ret
 }
 
@@ -735,6 +778,19 @@ func fileToResource(path string) string {
 		resource = "google_" + resource
 	}
 	return resource
+}
+
+// Return the sorted names of the beta provider services containing changed files.
+func changedServices(changedFiles []string) []string {
+	services := map[string]struct{}{}
+	for _, path := range changedFiles {
+		if rest, ok := strings.CutPrefix(path, "google-beta/services/"); ok {
+			if service, _, ok := strings.Cut(rest, "/"); ok {
+				services[service] = struct{}{}
+			}
+		}
+	}
+	return slices.Sorted(maps.Keys(services))
 }
 
 func pathChanged(path string, changedFiles []string) bool {

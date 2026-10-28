@@ -3119,3 +3119,28 @@ properties:
                                           - FRIDAY
                                           - SATURDAY
                                           - SUNDAY
+      - name: transformationErrorHandling
+        type: NestedObject
+        description: |
+          Mode for handling transformation errors. If left unspecified, the default mode is TransformationErrorHandling.ThrowError.
+        properties:
+          - name: throwError
+            type: NestedObject
+            description: |
+              Throw an error
+            exactly_one_of:
+              - deidentify_config.0.transformation_error_handling.0.throw_error
+              - deidentify_config.0.transformation_error_handling.0.leave_untransformed
+            send_empty_value: true
+            allow_empty_object: true
+            properties: []
+          - name: leaveUntransformed
+            type: NestedObject
+            description: |
+              Ignore errors
+            exactly_one_of:
+              - deidentify_config.0.transformation_error_handling.0.throw_error
+              - deidentify_config.0.transformation_error_handling.0.leave_untransformed
+            send_empty_value: true
+            allow_empty_object: true
+            properties: []

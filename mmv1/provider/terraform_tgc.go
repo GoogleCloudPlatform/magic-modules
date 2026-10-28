@@ -25,10 +25,9 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -193,7 +192,6 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	resourceConverters := map[string]string{
 		"converters/google/resources/resource_converters.go":                            "third_party/tgc/resource_converters.go.tmpl",
 		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":         "third_party/terraform/services/bigquery/iam_bigquery_dataset.go.tmpl",
-		"converters/google/resources/services/compute/client.go":                        "third_party/terraform/services/compute/client.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance.go":              "third_party/tgc/services/compute/compute_instance.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance_helpers.go":      "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance_http_helpers.go": "third_party/terraform/services/compute/compute_instance_http_helpers.go.tmpl",

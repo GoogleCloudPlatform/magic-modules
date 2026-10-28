@@ -29,6 +29,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  query_string: "?force=true&ignoreBackupPlanReferences=true"
 async:
   type: OpAsync
   operation:

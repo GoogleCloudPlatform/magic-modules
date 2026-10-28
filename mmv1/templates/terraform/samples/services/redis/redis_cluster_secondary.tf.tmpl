@@ -11,11 +11,11 @@ resource "google_redis_cluster" "primary_cluster" {
   // Please see https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication#settings_copied_from_the_primary_during_instance_creation for the complete list of such settings.
   authorization_mode = "AUTH_MODE_DISABLED"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
-  shard_count   = 3
+  shard_count   = 1
   redis_configs = {
     maxmemory-policy = "volatile-ttl"
   }
-  node_type = "REDIS_HIGHMEM_MEDIUM"
+  node_type = "REDIS_SHARED_CORE_NANO"
   persistence_config {
     mode = "RDB"
     rdb_config {
@@ -62,11 +62,11 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   // Please see https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication#settings_copied_from_the_primary_during_instance_creation for the complete list of such settings.
   authorization_mode = "AUTH_MODE_DISABLED"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
-  shard_count   = 3
+  shard_count   = 1
   redis_configs = {
     maxmemory-policy = "volatile-ttl"
   }
-  node_type = "REDIS_HIGHMEM_MEDIUM"
+  node_type = "REDIS_SHARED_CORE_NANO"
   persistence_config {
     mode = "RDB"
     rdb_config {
@@ -80,7 +80,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   zone_distribution_config {
     mode = "MULTI_ZONE"
   }
-  replica_count = 2
+  replica_count = 1
   maintenance_policy {
     weekly_maintenance_window {
       day = "WEDNESDAY"

@@ -46,6 +46,12 @@ if err != nil {
 } else if v, ok := d.GetOkExists("unique"); !tpgresource.IsEmptyValue(reflect.ValueOf(uniqueProp)) && (ok || !reflect.DeepEqual(v, uniqueProp)) {
 	obj["unique"] = uniqueProp
 }
+searchIndexOptionsProp, err := expandFirestoreIndexSearchIndexOptions(d.Get("search_index_options"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("search_index_options"); !tpgresource.IsEmptyValue(reflect.ValueOf(searchIndexOptionsProp)) && (ok || !reflect.DeepEqual(v, searchIndexOptionsProp)) {
+	obj["searchIndexOptions"] = searchIndexOptionsProp
+}
 fieldsProp, err := expandFirestoreIndexFields(d.Get("fields"), d, config)
 if err != nil {
 	return err
