@@ -454,6 +454,10 @@ type Resource struct {
 
 	// Runtime contains information about the currently-running generation process.
 	Runtime Runtime `yaml:"-"`
+
+	// The string representing a MV API version to be attached in all request
+	// headers
+	ApiVersion string `yaml:"api_version,omitempty"`
 }
 
 type TestConfig struct {
