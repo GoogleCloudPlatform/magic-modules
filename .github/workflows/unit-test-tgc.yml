@@ -41,14 +41,9 @@ jobs:
       - name: Get dependencies
         run: |
           cd tgc
-          go mod download
-
-      - name: Build Terraform Google Conversion
-        run: |
-          cd tgc
           go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta=../tpgb
           go mod tidy
-          make build
+          go mod download
 
       - name: Run Unit Tests
         run: |

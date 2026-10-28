@@ -9,7 +9,8 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "autoCreateSubnetworks": false,
-                "name": "neg-network"
+                "name": "neg-network",
+                "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
             }
         },
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"

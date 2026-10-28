@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
 resource "google_vmwareengine_private_cloud" "main" {
   name        = "gg-asset-pc-00563-8560"
   location    = "us-central1-a"
