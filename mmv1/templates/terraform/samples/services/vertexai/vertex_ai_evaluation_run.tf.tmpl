@@ -30,6 +30,26 @@ resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
       }
     }
 
+    metrics {
+      metric = "custom_llm_metric"
+      metric_config = jsonencode({
+        llmBasedMetricSpec = {
+          metricPromptTemplate = "Evaluate the quality of the response: {response}"
+        }
+      })
+    }
+
+    metrics {
+      metric               = "saved_metric"
+      metric_resource_name = google_vertex_ai_evaluation_metric.eval_metric.id
+    }
+
+    output_config {
+      bigquery_destination {
+        output_uri = "bq://${google_bigquery_dataset.eval_dataset.project}.${google_bigquery_dataset.eval_dataset.dataset_id}"
+      }
+    }
+
     autorater_config {
       sample_count = 1
     }
@@ -38,11 +58,24 @@ resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
   depends_on = [google_bigquery_job.eval_data]
 }
 
+resource "google_vertex_ai_evaluation_metric" "eval_metric" {
+  region       = "us-central1"
+  display_name = "Test Evaluation Metric"
+  description  = "An evaluation metric for EvaluationRun testing"
+
+  metric = jsonencode({
+    llmBasedMetricSpec = {
+      metricPromptTemplate = "Rate the quality of the following response on a scale of 1 to 5. Response: {response}"
+    }
+  })
+}
+
 resource "google_bigquery_dataset" "eval_dataset" {
-  dataset_id                  = "{{index $.ResourceIdVars "name"}}_dataset"
-  friendly_name               = "test"
-  description                 = "Dataset for Vertex AI Evaluation Run test"
-  location                    = "US"
+  dataset_id                 = "{{index $.ResourceIdVars "name"}}_dataset"
+  friendly_name              = "test"
+  description                = "Dataset for Vertex AI Evaluation Run test"
+  location                   = "US"
+  delete_contents_on_destroy = true
 }
 
 resource "google_bigquery_table" "eval_table" {
@@ -87,5 +120,3 @@ resource "google_bigquery_job" "eval_data" {
     write_disposition  = ""
   }
 }
-
-

@@ -34,12 +34,14 @@ timeouts:
   insert_minutes: 20
   delete_minutes: 20
 error_retry_predicates:
-  - transport_tpg.IsEvaluationRunOperationInProgressError
+  - IsEvaluationRunOperationInProgressError
 async:
   type: OpAsync
   operation:
     base_url: '{{op_id}}'
   actions: ['delete']
+custom_code:
+  constants: 'templates/terraform/constants/vertex_ai_evaluation_run.go.tmpl'
 samples:
   - name: vertex_ai_evaluation_run
     primary_resource_id: tf_test_evaluation_run
@@ -53,6 +55,21 @@ samples:
           kms_key_name: 'kms-key'
         test_vars_overrides:
           kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        test_env_vars:
+          project: PROJECT_NAME
+        ignore_read_extra:
+          - completion_time
+          - state
+          - evaluation_set_snapshot
+  - name: vertex_ai_evaluation_run_gcs
+    primary_resource_id: tf_test_evaluation_run
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/storage.admin"
+    steps:
+      - name: vertex_ai_evaluation_run_gcs
+        resource_id_vars:
+          bucket_name: 'eval-run-gcs-bucket'
         test_env_vars:
           project: PROJECT_NAME
         ignore_read_extra:
@@ -183,6 +200,9 @@ properties:
             description: |
               Cloud Storage destination for evaluation results.
             immutable: true
+            exactly_one_of:
+              - evaluation_config.0.output_config.0.gcs_destination
+              - evaluation_config.0.output_config.0.bigquery_destination
             properties:
               - name: outputUriPrefix
                 type: String
@@ -195,6 +215,9 @@ properties:
             description: |
               BigQuery destination for evaluation results.
             immutable: true
+            exactly_one_of:
+              - evaluation_config.0.output_config.0.gcs_destination
+              - evaluation_config.0.output_config.0.bigquery_destination
             properties:
               - name: outputUri
                 type: String
@@ -217,11 +240,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels for the EvaluationRun.
-    immutable: true
-  - name: evaluationExperiment
-    type: String
-    description: |
-      The resource name of the EvaluationExperiment this EvaluationRun belongs to.
     immutable: true
   - name: evaluationSetSnapshot
     type: String

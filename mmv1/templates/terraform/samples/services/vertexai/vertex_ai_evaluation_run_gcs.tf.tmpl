@@ -1,0 +1,32 @@
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "eval_bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
+  region       = "us-central1"
+  display_name = "Test Evaluation Run GCS"
+
+  data_source {
+    evaluation_set = "projects/${data.google_project.project.number}/locations/us-central1/evaluationSets/12345"
+  }
+
+  evaluation_config {
+    metrics {
+      metric = "general_quality_v1"
+      predefined_metric_spec {
+        metric_spec_name = "general_quality_v1"
+      }
+    }
+
+    output_config {
+      gcs_destination {
+        output_uri_prefix = "gs://${google_storage_bucket.eval_bucket.name}/output"
+      }
+    }
+  }
+}
