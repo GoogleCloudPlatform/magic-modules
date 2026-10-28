@@ -55,6 +55,7 @@ deletion_policy_custom_docs: true
 autogen_async: true
 custom_code:
   constants: templates/terraform/constants/metastore_service.go.tmpl
+  post_create_failure: templates/terraform/post_create_failure/metastore_service.go.tmpl
   post_delete: templates/terraform/post_delete/metastore_service.go.tmpl
 samples:
   - name: dataproc_metastore_service_basic

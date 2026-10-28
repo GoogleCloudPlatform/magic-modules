@@ -1,0 +1,16 @@
+{{- if not $.ProductMetadata.IsTgcCompiler }}
+if d.Get("deletion_policy").(string) == "FORCE" {
+	config := meta.(*transport_tpg.Config)
+	if userAgent, uaErr := tpgresource.GenerateUserAgentString(d, config.UserAgent); uaErr == nil {
+		billingProject := ""
+		if project, projErr := tpgresource.GetProject(d, config); projErr == nil {
+			billingProject = project
+		}
+		if bp, bpErr := tpgresource.GetBillingProject(d, config); bpErr == nil {
+			billingProject = bp
+		}
+		deleteDataprocMetastoreServicePscEndpoints(d, config, billingProject, userAgent)
+	}
+}
+{{- end }}
+return err
