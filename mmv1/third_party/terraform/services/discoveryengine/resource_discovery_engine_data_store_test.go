@@ -103,8 +103,9 @@ resource "google_discovery_engine_data_store" "layout_eu" {
 `, context)
 }
 
-// The v1 API can't update document_processing_config, so changing a nested field must recreate the data store.
-func TestAccDiscoveryEngineDataStore_documentProcessingConfigChangeRecreates(t *testing.T) {
+// The v1 API can't update document_processing_config, so changing a nested field must plan a replacement.
+// The plan isn't applied: recreating a data store under the same ID fails until its deletion completes, which takes hours.
+func TestAccDiscoveryEngineDataStore_documentProcessingConfigChangeForcesReplacement(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -119,17 +120,20 @@ func TestAccDiscoveryEngineDataStore_documentProcessingConfigChangeRecreates(t *
 				Config: testAccDiscoveryEngineDataStore_documentProcessingConfigDigitalEu(context),
 			},
 			{
-				Config: testAccDiscoveryEngineDataStore_documentProcessingConfigLayoutChangeEu(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_discovery_engine_data_store.dpc_change", plancheck.ResourceActionReplace),
-					},
-				},
+				ResourceName:            "google_discovery_engine_data_store.dpc_change",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "data_store_id", "create_advanced_site_search", "skip_default_schema_creation"},
 			},
 			{
 				Config:             testAccDiscoveryEngineDataStore_documentProcessingConfigLayoutChangeEu(context),
 				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPreRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_data_store.dpc_change", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 		},
 	})
