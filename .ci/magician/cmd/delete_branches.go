@@ -23,6 +23,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -39,9 +40,10 @@ var deleteBranchesCmd = &cobra.Command{
 	It also expects the following environment variables:
 	1. GITHUB_TOKEN_CLASSIC
 	2. GOPATH`,
+	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		baseBranch := args[0]
-		sha := args[1]
+		sha := args[0]
+		baseBranch := args[1]
 
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_CLASSIC")
 		if !ok {
@@ -75,7 +77,7 @@ func execDeleteBranchesCmd(baseBranch, sha, githubToken string, runner ExecRunne
 }
 
 func fetchPRNumber(sha, baseBranch string, runner ExecRunner, gh GithubClient) (string, error) {
-	message, err := gh.GetCommitMessage("hashicorp", "terraform-provider-google-beta", sha)
+	message, err := gh.GetCommitMessage("GoogleCloudPlatform", "magic-modules", sha)
 	if err != nil {
 		return "", fmt.Errorf("error getting commit message: %s", err)
 	}
@@ -103,26 +105,34 @@ var repoList = []string{
 
 func deleteBranches(prNumber, githubToken string, runner source.Runner) error {
 	for _, repo := range repoList {
+		remote := fmt.Sprintf("https://modular-magician:%s@github.com/modular-magician/%s", githubToken, repo)
 		for _, branch := range []string{
 			fmt.Sprintf(":auto-pr-%s", prNumber),
 			fmt.Sprintf(":auto-pr-%s-old", prNumber),
 		} {
-			_, err := runner.Run("git", []string{
-				"push",
-				fmt.Sprintf("https://modular-magician:%s@github.com/modular-magician/%s", githubToken, repo),
-				branch,
-			}, nil)
-
-			if err != nil {
-				if strings.Contains(err.Error(), "does not exist") {
-					continue
-				}
+			if err := deleteBranchWithRetry(runner, remote, branch); err != nil {
 				return err
 			}
 		}
 	}
 
 	return nil
+}
+
+func deleteBranchWithRetry(runner source.Runner, remote, branch string) error {
+	var err error
+	for attempt := 0; ; attempt++ {
+		_, err = runner.Run("git", []string{"push", remote, branch}, nil)
+		if err == nil || strings.Contains(err.Error(), "does not exist") {
+			return nil
+		}
+		if attempt >= len(pushRetryBackoffs) {
+			break
+		}
+		fmt.Printf("Deletion of branch %s failed (attempt %d of %d), retrying in %s: %v\n", branch, attempt+1, len(pushRetryBackoffs)+1, pushRetryBackoffs[attempt], err)
+		time.Sleep(pushRetryBackoffs[attempt])
+	}
+	return fmt.Errorf("deletion of branch %s failed after %d attempts: %w", branch, len(pushRetryBackoffs)+1, err)
 }
 
 func init() {

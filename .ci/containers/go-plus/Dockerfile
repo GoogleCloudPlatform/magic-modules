@@ -1,5 +1,5 @@
 # Stage 1: Download go module cache for builds
-FROM golang:1.26-trixie AS builder
+FROM golang:1.26.10-trixie@sha256:909771fef53e3dcb0950255f0c9a8b4728c3b841e61509c7b29b098de7ee02d4 AS builder
 ENV GOCACHE=/go/cache
 
 RUN apt-get update && apt-get install -y unzip
@@ -11,14 +11,16 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 # Build the binary (we won't use it in the final image, but it's cached)
 RUN go build -o /dev/null .
 
+WORKDIR /app1/magic-modules-main/mmv1/third_party/terraform
+RUN go mod download
+
+WORKDIR /app1/magic-modules-main/tools/diff-processor
+RUN go mod download
+
 # Stage 2: Creating the final image
-FROM golang:1.26-trixie
+FROM golang:1.26.10-trixie@sha256:909771fef53e3dcb0950255f0c9a8b4728c3b841e61509c7b29b098de7ee02d4
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
-
-# Copy Go dependencies and Go build cache
-COPY --from=builder /go/pkg/mod /go/pkg/mod
-COPY --from=builder /go/cache /go/cache
 
 RUN apt-get update && \
     apt-get install -y git jq unzip zip parallel apt-transport-https ca-certificates gnupg curl && \
@@ -30,6 +32,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget https://releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_amd64.zip \
+    && echo "178b2a602251bb68b94732aceca2cc1023d87597cb83dba92cab31b6689edb4d  terraform_1.14.3_linux_amd64.zip" | sha256sum -c - \
     && unzip terraform_1.14.3_linux_amd64.zip \
     && rm terraform_1.14.3_linux_amd64.zip \
     && mv ./terraform /bin/terraform
+
+# Copy Go dependencies and Go build cache
+COPY --from=builder /go/pkg/mod /go/pkg/mod
+COPY --from=builder /go/cache /go/cache

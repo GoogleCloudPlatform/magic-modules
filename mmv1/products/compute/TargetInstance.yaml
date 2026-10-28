@@ -47,6 +47,7 @@ custom_code:
 exclude_identity_generation: true
 sweeper:
   url_substitutions:
+    - zone: "us-central1-a"
     - zone: "southamerica-west1-a"
 include_in_tgc_next: true
 samples:

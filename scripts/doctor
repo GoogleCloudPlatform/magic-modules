@@ -62,10 +62,11 @@ else
     version=($(go version))
     version=${version[2]}
     ok=0
-    if [[ "$version" < "go1.26.0" ]]; then
+    if ! GOTOOLCHAIN=local go -C mmv1 list -m >/dev/null 2>&1; then
         ok=1
         exitcode=1
-        warn "yel" "   $version is installed, but go 1.26 or later is required. See https://golang.org/doc/install for information on installing it."
+        required=$(awk '/^go / {print $2; exit}' mmv1/go.mod)
+        warn "yel" "   $version is installed, but go ${required} or later is required. See https://golang.org/doc/install for information on installing it."
     fi
     if [[ -z "${GOPATH}" ]]; then
         ok=1

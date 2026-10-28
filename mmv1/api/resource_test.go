@@ -680,6 +680,34 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
+	t.Run("KeyValueLabels and KeyValueAnnotations with metadata parent consolidates CustomDiff", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource", "terraform")
+		parent := &api.Type{Name: "metadata"}
+
+		labelsType := &api.Type{
+			Name: "labels",
+			Type: "KeyValueLabels",
+		}
+		annotationsType := &api.Type{
+			Name: "annotations",
+			Type: "KeyValueAnnotations",
+		}
+
+		props := []*api.Type{labelsType, annotationsType}
+		resource.AddExtraFields(props, parent)
+
+		expectedDiff := "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		if !slices.Contains(resource.CustomDiff, expectedDiff) {
+			t.Errorf("Expected CustomDiff to contain %s, got %v", expectedDiff, resource.CustomDiff)
+		}
+		if slices.Contains(resource.CustomDiff, "tpgresource.SetMetadataLabelsDiff") ||
+			slices.Contains(resource.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff") {
+			t.Errorf("Expected individual metadata CustomDiffs to be replaced by consolidated CustomDiff, got %v", resource.CustomDiff)
+		}
+	})
+
 	t.Run("KeyValueAnnotations property adds effective annotations", func(t *testing.T) {
 		t.Parallel()
 
@@ -1251,6 +1279,74 @@ func TestResourceFirstRunnableTestConfig(t *testing.T) {
 			}
 			if got.Sample == nil || got.Sample.Name != tc.wantName {
 				t.Errorf("got %v, want %q", got.Sample, tc.wantName)
+			}
+		})
+	}
+}
+
+func TestResourceShouldGenerateSweepers(t *testing.T) {
+	t.Parallel()
+	p := &api.Product{
+		Name: "test",
+		Version: &product.Version{
+			Name:    "ga",
+			BaseUrl: "https://example.googleapis.com/v1/",
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		want        bool
+	}{
+		{
+			description: "standard resource with DELETE verb generates sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb:      "DELETE",
+				ProductMetadata: p,
+			},
+			want: true,
+		},
+		{
+			description: "resource with pre_delete still generates sweeper",
+			resource: api.Resource{
+				BaseUrl:    "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb: "DELETE",
+				CustomCode: resource.CustomCode{
+					PreDelete: "templates/terraform/pre_delete/some_pre_delete.go.tmpl",
+				},
+				ProductMetadata: p,
+			},
+			want: true,
+		},
+		{
+			description: "resource with non-DELETE delete_verb does not generate sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/policy",
+				DeleteVerb:      "PUT",
+				ProductMetadata: p,
+			},
+			want: false,
+		},
+		{
+			description: "resource with exclude_sweeper does not generate sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb:      "DELETE",
+				ExcludeSweeper:  true,
+				ProductMetadata: p,
+			},
+			want: false,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateSweepers(); got != tc.want {
+				t.Errorf("ShouldGenerateSweepers() = %v, want %v", got, tc.want)
 			}
 		})
 	}

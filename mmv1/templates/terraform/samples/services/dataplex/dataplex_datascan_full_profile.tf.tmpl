@@ -34,6 +34,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       }
     }
     catalog_publishing_enabled = true
+    mode = "STANDARD"
   }
 
   project = "{{index $.TestEnvVars "project_name"}}"

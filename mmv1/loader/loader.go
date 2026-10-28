@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -15,8 +16,6 @@ import (
 	apiresource "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
-	"golang.org/x/exp/slices"
 )
 
 type Loader struct {
@@ -460,7 +459,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 
 	for _, e := range resource.Examples {
 		if err := e.LoadHCLText(l.sysfs); err != nil {
-			glog.Exit(err)
+			log.Fatal(err)
 		}
 	}
 

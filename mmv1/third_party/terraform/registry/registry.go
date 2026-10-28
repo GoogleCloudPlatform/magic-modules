@@ -55,6 +55,8 @@ func GetProduct(name string) Product {
 }
 
 func ListProducts() []Product {
+	products.RLock()
+	defer products.RUnlock()
 	l := slices.Collect(maps.Values(products.m))
 	slices.SortFunc(l, func(a, b Product) int {
 		return strings.Compare(a.Name, b.Name)
@@ -102,8 +104,8 @@ type Schema struct {
 
 // Register adds the schema definition to the internal registry.
 func (s Schema) Register() {
-	products.Lock()
-	defer products.Unlock()
+	schemas.Lock()
+	defer schemas.Unlock()
 	if s.Type.IsDataSource() {
 		if _, ok := schemas.d[s.Name]; ok {
 			log.Fatalf("Duplicate registration attempt for data source %q", s.Name)
@@ -142,6 +144,8 @@ func Resource(name string) *schema.Resource {
 }
 
 func ResourceMap() map[string]*schema.Resource {
+	schemas.RLock()
+	defer schemas.RUnlock()
 	ret := map[string]*schema.Resource{}
 	for k, v := range schemas.r {
 		ret[k] = v.Schema
@@ -163,6 +167,8 @@ func DataSource(name string) *schema.Resource {
 }
 
 func DatasourceMap() map[string]*schema.Resource {
+	schemas.RLock()
+	defer schemas.RUnlock()
 	ret := map[string]*schema.Resource{}
 	for k, v := range schemas.d {
 		ret[k] = v.Schema

@@ -1,5 +1,4 @@
 resource "google_network_security_security_profile_group" "{{$.PrimaryResourceId}}" {
-  provider                  = google-beta
   name                      = "{{index $.ResourceIdVars "security_profile_group_name"}}"
   parent                    = "projects/{{index $.TestEnvVars "project"}}"
   description               = "my updated description"
@@ -11,7 +10,6 @@ resource "google_network_security_security_profile_group" "{{$.PrimaryResourceId
 }
 
 resource "google_network_security_security_profile" "threat_prevention_profile" {
-  provider = google-beta
   name     = "{{index $.ResourceIdVars "threat_prevention_profile_name"}}"
   type     = "THREAT_PREVENTION"
   parent   = "projects/{{index $.TestEnvVars "project"}}"
@@ -19,7 +17,6 @@ resource "google_network_security_security_profile" "threat_prevention_profile" 
 }
 
 resource "google_network_security_security_profile" "wildfire_profile" {
-  provider = google-beta
   name     = "{{index $.ResourceIdVars "wildfire_profile_name"}}"
   type     = "WILDFIRE_ANALYSIS"
   parent   = "projects/{{index $.TestEnvVars "project"}}"
@@ -36,7 +33,6 @@ resource "google_network_security_security_profile" "wildfire_profile" {
 }
 
 resource "google_network_security_security_profile" "wildfire_profile_updated" {
-  provider = google-beta
   name     = "{{index $.ResourceIdVars "wildfire_profile_updated_name"}}"
   type     = "WILDFIRE_ANALYSIS"
   parent   = "projects/{{index $.TestEnvVars "project"}}"

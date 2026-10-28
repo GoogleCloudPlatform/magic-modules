@@ -31,6 +31,11 @@ timeouts:
   delete_minutes: 180
 sweeper:
   identifier_field: displayName
+  dependencies:
+    - google_vertex_ai_index_endpoint
+  url_substitutions:
+    - region: us-central1
+    - region: europe-west4
 generate_list_resource: true
 async:
   type: OpAsync
@@ -192,6 +197,15 @@ properties:
                       The default percentage of leaf nodes that any query may be searched. Must be in
                       range 1-100, inclusive. The default value is 10 (means 10%) if not set.
                     default_value: 10
+                    deprecation_message: '`leaf_nodes_to_search_percent` is deprecated and will be removed in a future major release. Use `fraction_leaf_nodes_to_search` instead.'
+                  - name: fractionLeafNodesToSearch
+                    type: Double
+                    description: |-
+                      The default fraction of leaf nodes that any query may be searched. Must be in
+                      range 0.0-1.0, exclusive. The default value is 0.05 if not set.
+                      This value can only be set when creating the index.
+                    immutable: true
+                    default_from_api: true
               - name: bruteForceConfig
                 type: NestedObject
                 description: |-

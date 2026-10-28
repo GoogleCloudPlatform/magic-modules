@@ -1,0 +1,364 @@
+package compute
+
+import (
+	"context"
+	"reflect"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestUnitComputeNetworkEndpoint_decoder(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		configIpv6 string
+		input      map[string]interface{}
+		expected   map[string]interface{}
+	}{
+		"matching canonical ipv6 returns unwrapped endpoint": {
+			configIpv6: "2600:1900:4000:318:0:0:0:0",
+			input: map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":    "vm1",
+					"ipv6Address": "2600:1900:4000:318::",
+					"port":        float64(90),
+				},
+			},
+			expected: map[string]interface{}{
+				"instance":    "vm1",
+				"ipv6Address": "2600:1900:4000:318::",
+				"port":        float64(90),
+			},
+		},
+		"non-matching ipv6 returns sentinel port -1": {
+			configIpv6: "2600:1900:4000:318::2",
+			input: map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":    "vm1",
+					"ipv6Address": "2600:1900:4000:318::1",
+					"port":        float64(90),
+				},
+			},
+			expected: map[string]interface{}{
+				"port": -1,
+			},
+		},
+		"ipv4 endpoint in list when looking for ipv6 returns sentinel port -1": {
+			configIpv6: "2600:1900:4000:318::1",
+			input: map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":  "vm1",
+					"ipAddress": "10.0.0.2",
+					"port":      float64(90),
+				},
+			},
+			expected: map[string]interface{}{
+				"port": -1,
+			},
+		},
+		"no ipv6_address in state unwraps endpoint without filtering": {
+			configIpv6: "",
+			input: map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":  "vm1",
+					"ipAddress": "10.0.0.2",
+					"port":      float64(90),
+				},
+			},
+			expected: map[string]interface{}{
+				"instance":  "vm1",
+				"ipAddress": "10.0.0.2",
+				"port":      float64(90),
+			},
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			d := ResourceComputeNetworkEndpoint().TestResourceData()
+			if tc.configIpv6 != "" {
+				if err := d.Set("ipv6_address", tc.configIpv6); err != nil {
+					t.Fatalf("failed to set ipv6_address: %v", err)
+				}
+			}
+
+			got, err := resourceComputeNetworkEndpointDecoder(d, &transport_tpg.Config{}, tc.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, tc.expected) {
+				t.Errorf("got %#v, want %#v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestUnitComputeNetworkEndpoint_findNestedObjectInList(t *testing.T) {
+	t.Parallel()
+
+	t.Run("with_instance_and_port", func(t *testing.T) {
+		t.Parallel()
+		items := []interface{}{
+			map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":  "vm1",
+					"ipAddress": "10.0.0.2",
+					"port":      float64(90),
+				},
+			},
+			map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":    "vm1",
+					"ipv6Address": "2600:1900:4000:318::1",
+					"port":        float64(90),
+				},
+			},
+			map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"instance":    "vm1",
+					"ipv6Address": "2600:1900:4000:318::2",
+					"port":        float64(90),
+				},
+			},
+		}
+
+		d := ResourceComputeNetworkEndpoint().TestResourceData()
+		if err := d.Set("instance", "vm1"); err != nil {
+			t.Fatalf("failed to set instance: %v", err)
+		}
+		if err := d.Set("ipv6_address", "2600:1900:4000:318:0:0:0:2"); err != nil {
+			t.Fatalf("failed to set ipv6_address: %v", err)
+		}
+		if err := d.Set("port", 90); err != nil {
+			t.Fatalf("failed to set port: %v", err)
+		}
+
+		idx, item, err := resourceComputeNetworkEndpointFindNestedObjectInList(d, &transport_tpg.Config{}, items)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if idx != 2 {
+			t.Fatalf("expected index 2, got %d (item: %#v)", idx, item)
+		}
+		if item["ipv6Address"] != "2600:1900:4000:318::2" {
+			t.Errorf("expected ipv6Address 2600:1900:4000:318::2, got %v", item["ipv6Address"])
+		}
+	})
+
+	t.Run("without_instance_relies_on_sentinel_port_-1", func(t *testing.T) {
+		t.Parallel()
+		items := []interface{}{
+			map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"ipv6Address": "2600:1900:4000:318::1",
+				},
+			},
+			map[string]interface{}{
+				"networkEndpoint": map[string]interface{}{
+					"ipv6Address": "2600:1900:4000:318::2",
+				},
+			},
+		}
+
+		d := ResourceComputeNetworkEndpoint().TestResourceData()
+		if err := d.Set("ipv6_address", "2600:1900:4000:318::2"); err != nil {
+			t.Fatalf("failed to set ipv6_address: %v", err)
+		}
+
+		idx, item, err := resourceComputeNetworkEndpointFindNestedObjectInList(d, &transport_tpg.Config{}, items)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if idx != 1 {
+			t.Fatalf("expected index 1, got %d (item: %#v)", idx, item)
+		}
+		if item["ipv6Address"] != "2600:1900:4000:318::2" {
+			t.Errorf("expected ipv6Address 2600:1900:4000:318::2, got %v", item["ipv6Address"])
+		}
+	})
+}
+
+func TestUnitComputeNetworkEndpoint_customImport(t *testing.T) {
+	t.Parallel()
+
+	t.Run("ipv6_in_ip_address_slot", func(t *testing.T) {
+		t.Parallel()
+		d := ResourceComputeNetworkEndpoint().TestResourceData()
+		d.SetId("my-proj/us-central1-a/my-neg/vm1/2600:1900:4000:318:0:0:0:1/90")
+
+		if _, err := resourceComputeNetworkEndpointImport(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got := d.Get("ipv6_address"); got != "2600:1900:4000:318::1" {
+			t.Errorf("expected canonical ipv6_address 2600:1900:4000:318::1, got %v", got)
+		}
+		if got := d.Get("ip_address"); got != "" {
+			t.Errorf("expected empty ip_address, got %v", got)
+		}
+		if got := d.Get("port"); got != 90 {
+			t.Errorf("expected port 90, got %v", got)
+		}
+		if got := d.Id(); got != "my-proj/us-central1-a/my-neg/vm1/2600:1900:4000:318::1/90" {
+			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1/2600:1900:4000:318::1/90, got %s", got)
+		}
+	})
+
+	t.Run("ipv4_in_ip_address_slot", func(t *testing.T) {
+		t.Parallel()
+		d := ResourceComputeNetworkEndpoint().TestResourceData()
+		d.SetId("my-proj/us-central1-a/my-neg/vm1/10.0.0.2/90")
+
+		if _, err := resourceComputeNetworkEndpointImport(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got := d.Get("ip_address"); got != "10.0.0.2" {
+			t.Errorf("expected ip_address 10.0.0.2, got %v", got)
+		}
+		if got := d.Get("ipv6_address"); got != "" {
+			t.Errorf("expected empty ipv6_address, got %v", got)
+		}
+		if got := d.Id(); got != "my-proj/us-central1-a/my-neg/vm1/10.0.0.2/90" {
+			t.Errorf("expected ID my-proj/us-central1-a/my-neg/vm1/10.0.0.2/90, got %s", got)
+		}
+	})
+
+	t.Run("empty_ip_address_slot_is_rejected", func(t *testing.T) {
+		t.Parallel()
+		d := ResourceComputeNetworkEndpoint().TestResourceData()
+		d.SetId("my-proj/us-central1-a/my-neg/vm1//90")
+
+		if _, err := resourceComputeNetworkEndpointImport(d, &transport_tpg.Config{}); err == nil {
+			t.Fatalf("expected error for empty ip_address slot in import ID, got nil")
+		}
+	})
+}
+
+func TestUnitComputeNetworkEndpoints_convertToStructAndAny(t *testing.T) {
+	t.Parallel()
+
+	t.Run("ipv6_endpoint_produces_camelCase_api_payload", func(t *testing.T) {
+		t.Parallel()
+		raw := map[string]interface{}{
+			"instance":     "projects/my-proj/zones/us-central1-a/instances/vm1",
+			"ipv6_address": "2600:1900:4000:318:0:0:0:1",
+			"port":         90,
+		}
+		s := NetworkEndpointsNetworkEndpointConvertToStruct(raw)
+		if s.Instance != "vm1" {
+			t.Errorf("expected normalized instance vm1, got %s", s.Instance)
+		}
+		if s.IPv6Address != "2600:1900:4000:318::1" {
+			t.Errorf("expected canonical IPv6 2600:1900:4000:318::1, got %s", s.IPv6Address)
+		}
+
+		apiPayload := NetworkEndpointsNetworkEndpointConvertToAny(s)
+		expected := map[string]interface{}{
+			"instance":    "vm1",
+			"ipv6Address": "2600:1900:4000:318::1",
+			"port":        90,
+		}
+		if !reflect.DeepEqual(apiPayload, expected) {
+			t.Errorf("got %#v, want %#v", apiPayload, expected)
+		}
+	})
+
+	t.Run("ipv4_endpoint_produces_camelCase_api_payload", func(t *testing.T) {
+		t.Parallel()
+		raw := map[string]interface{}{
+			"instance":   "vm1",
+			"ip_address": "10.0.0.2",
+			"port":       90,
+		}
+		s := NetworkEndpointsNetworkEndpointConvertToStruct(raw)
+		apiPayload := NetworkEndpointsNetworkEndpointConvertToAny(s)
+		expected := map[string]interface{}{
+			"instance":  "vm1",
+			"ipAddress": "10.0.0.2",
+			"port":      90,
+		}
+		if !reflect.DeepEqual(apiPayload, expected) {
+			t.Errorf("got %#v, want %#v", apiPayload, expected)
+		}
+	})
+}
+
+func TestUnitComputeNetworkEndpoints_diffGetChange(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceComputeNetworkEndpoints()
+	d := r.TestResourceData()
+	d.SetId("projects/my-proj/zones/us-central1-a/networkEndpointGroups/my-neg")
+	if err := d.Set("network_endpoint_group", "my-neg"); err != nil {
+		t.Fatalf("failed to set network_endpoint_group: %v", err)
+	}
+	if err := d.Set("network_endpoints", []interface{}{
+		map[string]interface{}{
+			"instance":     "vm1",
+			"ip_address":   "10.0.0.2",
+			"ipv6_address": "",
+			"port":         90,
+		},
+	}); err != nil {
+		t.Fatalf("failed to set network_endpoints: %v", err)
+	}
+	state := d.State()
+
+	schemaMap := schema.InternalMap(r.Schema)
+	diffEndpoints := func(endpoints []interface{}) (*schema.Set, *schema.Set) {
+		config := terraform.NewResourceConfigRaw(map[string]interface{}{
+			"network_endpoint_group": "my-neg",
+			"network_endpoints":      endpoints,
+		})
+		diff, err := schemaMap.Diff(context.Background(), state, config, nil, nil, false)
+		if err != nil {
+			t.Fatalf("unexpected error from schemaMap.Diff: %v", err)
+		}
+		dDiff, err := schemaMap.Data(state, diff)
+		if err != nil {
+			t.Fatalf("unexpected error from schemaMap.Data: %v", err)
+		}
+		o, n := dDiff.GetChange("network_endpoints")
+		return o.(*schema.Set), n.(*schema.Set)
+	}
+
+	oldSet, newSet := diffEndpoints([]interface{}{
+		map[string]interface{}{
+			"instance":   "vm1",
+			"ip_address": "10.0.0.2",
+			"port":       100,
+		},
+	})
+	if oldSet.Len() != 1 {
+		t.Fatalf("expected oldSet.Len() == 1, got %d: %#v", oldSet.Len(), oldSet.List())
+	}
+	if newSet.Len() != 1 {
+		t.Fatalf("expected newSet.Len() == 1 (no phantom removed endpoint), got %d: %#v", newSet.Len(), newSet.List())
+	}
+	gotNew := newSet.List()[0].(map[string]interface{})
+	if gotNew["port"] != 100 || gotNew["ip_address"] != "10.0.0.2" || gotNew["instance"] != "vm1" {
+		t.Errorf("unexpected new endpoint map: %#v", gotNew)
+	}
+
+	if _, emptyNewSet := diffEndpoints([]interface{}{}); emptyNewSet.Len() != 0 {
+		t.Fatalf("expected newSet.Len() == 0 on removal, got %d: %#v", emptyNewSet.Len(), emptyNewSet.List())
+	}
+
+	if err := d.Set("network_endpoints", []interface{}{
+		map[string]interface{}{"instance": "vm1", "ip_address": "10.0.0.2", "ipv6_address": "", "port": 90},
+		map[string]interface{}{"instance": "vm2", "ip_address": "", "ipv6_address": "2600:1900:4000:1::1", "port": 90},
+	}); err != nil {
+		t.Fatalf("failed to set network_endpoints: %v", err)
+	}
+	state = d.State()
+	if _, mixedNewSet := diffEndpoints([]interface{}{
+		map[string]interface{}{"instance": "vm1", "ip_address": "10.0.0.2", "port": 100},
+		map[string]interface{}{"instance": "vm2", "ipv6_address": "2600:1900:4000:0001:0000:0000:0000:0001", "port": 90},
+	}); mixedNewSet.Len() != 2 {
+		t.Fatalf("expected newSet.Len() == 2 with IPv6 sibling, got %d: %#v", mixedNewSet.Len(), mixedNewSet.List())
+	}
+}

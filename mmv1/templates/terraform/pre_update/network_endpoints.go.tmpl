@@ -31,12 +31,18 @@ for e := range endpointsToKeep {
 }
 
 var endpointsToDetach []interface{}
-for e := range oldEndpoints {
-    endpointsToDetach = append(endpointsToDetach, NetworkEndpointsNetworkEndpointConvertToAny(e))
+for _, e := range o.(*schema.Set).List() {
+    ep := NetworkEndpointsNetworkEndpointConvertToStruct(e)
+    if _, ok := oldEndpoints[ep]; ok {
+        endpointsToDetach = append(endpointsToDetach, NetworkEndpointsNetworkEndpointConvertToAny(ep))
+    }
 }
 var endpointsToAttach []interface{}
-for e := range newEndpoints {
-    endpointsToAttach = append(endpointsToAttach, NetworkEndpointsNetworkEndpointConvertToAny(e))
+for _, e := range n.(*schema.Set).List() {
+    ep := NetworkEndpointsNetworkEndpointConvertToStruct(e)
+    if _, ok := newEndpoints[ep]; ok {
+        endpointsToAttach = append(endpointsToAttach, NetworkEndpointsNetworkEndpointConvertToAny(ep))
+    }
 }
 
 log.Printf("number of endpoints to detach: %v\n", len(endpointsToDetach))

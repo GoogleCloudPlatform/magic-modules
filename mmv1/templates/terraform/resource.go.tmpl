@@ -372,14 +372,20 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.CustomCode.PreCreate }}
     {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
+{{- if $.ErrorRetryOnAsync }}
+    var res map[string]interface{}
+    err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() error {
+            var err error
+{{- end}}
 {{- if $.RPCCreateMethod }}
-    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
         Config: config,
         Product: "{{ $.ProductMetadata.Name -}}",
         RPCService: "{{ $.RPCService -}}",
         Method: "{{ $.RPCCreateMethod -}}",
 {{- else }}
-    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
 {{- end}}
@@ -528,6 +534,21 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
+{{- if $.ErrorRetryOnAsync }}
+            return nil
+        },
+        Timeout: d.Timeout(schema.TimeoutCreate),
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+        return err
+    }
+{{- end}}
 {{if $.CustomCode.PostCreate -}} 
     {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
@@ -1022,6 +1043,10 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 {{-             end}}
+{{- if $.ErrorRetryOnAsync }}
+    err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() error {
+{{- end}}
 {{- if $.RPCUpdateMethod }}
     res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
         Config: config,
@@ -1089,6 +1114,21 @@ if len(updateMask) > 0 {
     }
 {{-                 end}}
 {{-             end}}
+{{- if $.ErrorRetryOnAsync }}
+            return nil
+        },
+        Timeout: d.Timeout(schema.TimeoutUpdate),
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+        return err
+    }
+{{- end}}
 {{-              if $.UpdateMask -}}
   }
 {{-             end}}

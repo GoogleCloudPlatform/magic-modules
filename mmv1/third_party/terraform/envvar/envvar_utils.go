@@ -4,10 +4,38 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
 const TestEnvVar = "TF_ACC"
+
+// AccTestPreCheck ensures required environment variables are set before running acceptance tests.
+func AccTestPreCheck(t *testing.T) {
+	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
+		creds, err := os.ReadFile(v)
+		if err != nil {
+			t.Fatalf("Error reading GOOGLE_CREDENTIALS_FILE path: %s", err)
+		}
+		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
+	}
+
+	if v := MultiEnvSearch(CredsEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
+	}
+
+	if v := MultiEnvSearch(ProjectEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ProjectEnvVars, ", "))
+	}
+
+	if v := MultiEnvSearch(RegionEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(RegionEnvVars, ", "))
+	}
+
+	if v := MultiEnvSearch(ZoneEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ZoneEnvVars, ", "))
+	}
+}
 
 var CredsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
@@ -27,6 +55,13 @@ func CredsEnvVarsExcludingAdcs() []string {
 		}
 	}
 	return filtered
+}
+
+// AccessTokenEnvVars are the environment variables that can supply an OAuth2
+// access token. This matches the env var used for the provider's access_token
+// field.
+var AccessTokenEnvVars = []string{
+	"GOOGLE_OAUTH_ACCESS_TOKEN",
 }
 
 var ProjectNumberEnvVars = []string{
@@ -140,6 +175,12 @@ func GetTestCredsFromEnv() string {
 		return ""
 	}
 	return MultiEnvSearch(CredsEnvVars)
+}
+
+// GetTestAccessTokenFromEnv returns the OAuth2 access token configured in the
+// environment, if any.
+func GetTestAccessTokenFromEnv() string {
+	return MultiEnvSearch(AccessTokenEnvVars)
 }
 
 // Returns googleapis.com if there's no universe set.

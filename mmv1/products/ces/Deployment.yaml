@@ -22,6 +22,8 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
 autogen_status: RGVwbG95bWVudA==
+custom_code:
+  post_delete: templates/terraform/post_delete/sleep.go.tmpl
 samples:
   - name: ces_deployment_basic
     primary_resource_id: my-deployment
