@@ -35,6 +35,7 @@ sweeper:
     - region: us-central1
     - region: us-west1
     - region: us-east1
+    - region: northamerica-south1
 custom_diff:
   - customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)
   - tpgresource.DefaultProviderProject
