@@ -816,31 +816,31 @@ properties:
       - salesforce_marketing_cloud_profile
       - service_now_profile
     properties:
-      - name: domain
+      - name: tenantId
         type: String
         description: |
-          Domain for the Dataverse organization.
+          Tenant ID of the Microsoft Dataverse instance.
+        required: true
+      - name: environmentUrl
+        type: String
+        description: |
+          Environment URL of the Microsoft Dataverse instance. Example: `<subdomain>.crm.dynamics.com`
         required: true
       - name: oauthClientCredentials
         type: NestedObject
         description: |
-          OAuth credentials to use for Microsoft Dataverse authentication.
+          Credentials for authenticating with the Dataverse API.
         required: true
         properties:
-          - name: tenantId
-            type: String
-            description: |
-              Tenant ID (Directory ID) in Microsoft Entra ID.
-            required: true
           - name: clientId
             type: String
             description: |
-              Client ID (Application ID) to use for authentication.
+              Client ID for OAuth Client Credentials.
             required: true
           - name: clientSecret
             type: NestedObject
             description: |
-              Client secret to use for authentication.
+              Client secret for OAuth Client Credentials.
             required: true
             properties:
               - name: rawValue
@@ -883,23 +883,23 @@ properties:
       - name: subdomain
         type: String
         description: |
-          Subdomain for the Salesforce Marketing Cloud instance.
+          Subdomain for the Salesforce Marketing Cloud connection.
         required: true
       - name: oauthClientCredentials
         type: NestedObject
         description: |
-          OAuth2 client credentials to use for authentication.
+          Credentials for authenticating with the Salesforce Marketing Cloud API.
         required: true
         properties:
           - name: clientId
             type: String
             description: |
-              Client ID to use for authentication.
+              Client ID for OAuth Client Credentials.
             required: true
           - name: clientSecret
             type: NestedObject
             description: |
-              Client secret to use for authentication.
+              Client secret for OAuth Client Credentials.
             required: true
             properties:
               - name: rawValue
@@ -939,28 +939,29 @@ properties:
       - salesforce_marketing_cloud_profile
       - service_now_profile
     properties:
-      - name: hostname
+      - name: instance
         type: String
         description: |
-          Hostname for the ServiceNow connection.
+          The instance of the ServiceNow account. This is the `<instance>` part of
+          the URL `https://<instance>.service-now.com`.
         required: true
-      - name: userCredentials
+      - name: userPasswordCredentials
         type: NestedObject
         description: |
-          Username and password credentials to use for authentication.
+          User-password authentication.
         exactly_one_of:
-          - service_now_profile.0.user_credentials
-          - service_now_profile.0.oauth2_client_credentials
+          - service_now_profile.0.user_password_credentials
+          - service_now_profile.0.oauth_client_credentials
         properties:
           - name: username
             type: String
             description: |
-              Username to use for authentication.
+              Username for the connection.
             required: true
           - name: password
             type: NestedObject
             description: |
-              Password of the user.
+              Password for the connection.
             required: true
             properties:
               - name: rawValue
@@ -971,33 +972,33 @@ properties:
                 # raw_value is input-only and omitted by the Datastream API on GET responses.
                 ignore_read: true
                 exactly_one_of:
-                  - service_now_profile.0.user_credentials.0.password.0.raw_value
-                  - service_now_profile.0.user_credentials.0.password.0.secret_version
+                  - service_now_profile.0.user_password_credentials.0.password.0.raw_value
+                  - service_now_profile.0.user_password_credentials.0.password.0.secret_version
               - name: secretVersion
                 type: String
                 description: |
                   The resource name of the Secret Manager secret version. Format:
                   projects/{project}/secrets/{secret}/versions/{secret_version}
                 exactly_one_of:
-                  - service_now_profile.0.user_credentials.0.password.0.raw_value
-                  - service_now_profile.0.user_credentials.0.password.0.secret_version
-      - name: oauth2ClientCredentials
+                  - service_now_profile.0.user_password_credentials.0.password.0.raw_value
+                  - service_now_profile.0.user_password_credentials.0.password.0.secret_version
+      - name: oauthClientCredentials
         type: NestedObject
         description: |
-          OAuth2 client credentials to use for authentication.
+          Credentials for authenticating with the ServiceNow API.
         exactly_one_of:
-          - service_now_profile.0.user_credentials
-          - service_now_profile.0.oauth2_client_credentials
+          - service_now_profile.0.user_password_credentials
+          - service_now_profile.0.oauth_client_credentials
         properties:
           - name: clientId
             type: String
             description: |
-              Client ID to use for authentication.
+              Client ID for OAuth Client Credentials.
             required: true
           - name: clientSecret
             type: NestedObject
             description: |
-              Client secret to use for authentication.
+              Client secret for OAuth Client Credentials.
             required: true
             properties:
               - name: rawValue
@@ -1008,51 +1009,16 @@ properties:
                 # raw_value is input-only and omitted by the Datastream API on GET responses.
                 ignore_read: true
                 exactly_one_of:
-                  - service_now_profile.0.oauth2_client_credentials.0.client_secret.0.raw_value
-                  - service_now_profile.0.oauth2_client_credentials.0.client_secret.0.secret_version
+                  - service_now_profile.0.oauth_client_credentials.0.client_secret.0.raw_value
+                  - service_now_profile.0.oauth_client_credentials.0.client_secret.0.secret_version
               - name: secretVersion
                 type: String
                 description: |
                   The resource name of the Secret Manager secret version. Format:
                   projects/{project}/secrets/{secret}/versions/{secret_version}
                 exactly_one_of:
-                  - service_now_profile.0.oauth2_client_credentials.0.client_secret.0.raw_value
-                  - service_now_profile.0.oauth2_client_credentials.0.client_secret.0.secret_version
-          - name: userCredentials
-            type: NestedObject
-            description: |
-              User credentials to use with OAuth 2.0 Password Grant. If not
-              provided, Client Credentials Grant will be used.
-            properties:
-              - name: username
-                type: String
-                description: |
-                  Username to use for authentication.
-                required: true
-              - name: password
-                type: NestedObject
-                description: |
-                  Password of the user.
-                required: true
-                properties:
-                  - name: rawValue
-                    type: String
-                    description: |
-                      Input only. The raw secret value.
-                    sensitive: true
-                    # raw_value is input-only and omitted by the Datastream API on GET responses.
-                    ignore_read: true
-                    exactly_one_of:
-                      - service_now_profile.0.oauth2_client_credentials.0.user_credentials.0.password.0.raw_value
-                      - service_now_profile.0.oauth2_client_credentials.0.user_credentials.0.password.0.secret_version
-                  - name: secretVersion
-                    type: String
-                    description: |
-                      The resource name of the Secret Manager secret version. Format:
-                      projects/{project}/secrets/{secret}/versions/{secret_version}
-                    exactly_one_of:
-                      - service_now_profile.0.oauth2_client_credentials.0.user_credentials.0.password.0.raw_value
-                      - service_now_profile.0.oauth2_client_credentials.0.user_credentials.0.password.0.secret_version
+                  - service_now_profile.0.oauth_client_credentials.0.client_secret.0.raw_value
+                  - service_now_profile.0.oauth_client_credentials.0.client_secret.0.secret_version
   - name: forwardSshConnectivity
     is_missing_in_cai: true
     type: NestedObject

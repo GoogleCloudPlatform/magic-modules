@@ -1626,89 +1626,137 @@ properties:
             description: |
               Dataverse objects to retrieve from the source.
             properties:
-              - name: tables
+              - name: objects
                 type: Array
                 description: |
-                  Tables in the Microsoft Dataverse environment.
-                required: true
-                min_size: 1
+                  Source objects in the catalog.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: tableName
+                    - name: objectName
                       type: String
                       description: |
-                        Name of the table in Microsoft Dataverse.
-                    - name: columns
+                        The object name.
+                      required: true
+                    - name: properties
                       type: Array
                       description: |
-                        Columns in the Microsoft Dataverse table.
+                        Source properties. When unspecified as part of include objects, includes
+                        everything, when unspecified as part of exclude objects, excludes nothing.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: columnName
+                          - name: propertyName
                             type: String
                             description: |
-                              Column name.
-                          - name: dataType
-                            type: String
-                            description: |
-                              The Microsoft Dataverse original data type.
-                            output: true
-                          - name: isPrimaryKey
+                              The property name.
+                            required: true
+                          - name: primaryKey
                             type: Boolean
                             description: |
-                              Indicates whether the column is a primary key.
-                            output: true
-                          - name: isNullable
-                            type: Boolean
+                              Whether or not the property is a primary key.
+                          - name: properties
+                            type: Array
                             description: |
-                              Indicates whether the column is nullable.
-                            output: true
+                              Source properties. When specified, it means that the current property
+                              contains nested properties of its own.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: propertyName
+                                  type: String
+                                  description: |
+                                    The property name.
+                                  required: true
+                                - name: primaryKey
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the property is a primary key.
+                                - name: properties
+                                  type: Array
+                                  description: |
+                                    Source properties. When specified, it means that the current property
+                                    contains nested properties of its own.
+                                  item_type:
+                                    type: NestedObject
+                                    properties:
+                                      - name: propertyName
+                                        type: String
+                                        description: |
+                                          The property name.
+                                        required: true
+                                      - name: primaryKey
+                                        type: Boolean
+                                        description: |
+                                          Whether or not the property is a primary key.
           - name: excludeObjects
             type: NestedObject
             description: |
               Dataverse objects to exclude from the stream.
             properties:
-              - name: tables
+              - name: objects
                 type: Array
                 description: |
-                  Tables in the Microsoft Dataverse environment.
-                required: true
-                min_size: 1
+                  Source objects in the catalog.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: tableName
+                    - name: objectName
                       type: String
                       description: |
-                        Name of the table in Microsoft Dataverse.
-                    - name: columns
+                        The object name.
+                      required: true
+                    - name: properties
                       type: Array
                       description: |
-                        Columns in the Microsoft Dataverse table.
+                        Source properties. When unspecified as part of include objects, includes
+                        everything, when unspecified as part of exclude objects, excludes nothing.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: columnName
+                          - name: propertyName
                             type: String
                             description: |
-                              Column name.
-                          - name: dataType
-                            type: String
-                            description: |
-                              The Microsoft Dataverse original data type.
-                            output: true
-                          - name: isPrimaryKey
+                              The property name.
+                            required: true
+                          - name: primaryKey
                             type: Boolean
                             description: |
-                              Indicates whether the column is a primary key.
-                            output: true
-                          - name: isNullable
-                            type: Boolean
+                              Whether or not the property is a primary key.
+                          - name: properties
+                            type: Array
                             description: |
-                              Indicates whether the column is nullable.
-                            output: true
+                              Source properties. When specified, it means that the current property
+                              contains nested properties of its own.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: propertyName
+                                  type: String
+                                  description: |
+                                    The property name.
+                                  required: true
+                                - name: primaryKey
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the property is a primary key.
+                                - name: properties
+                                  type: Array
+                                  description: |
+                                    Source properties. When specified, it means that the current property
+                                    contains nested properties of its own.
+                                  item_type:
+                                    type: NestedObject
+                                    properties:
+                                      - name: propertyName
+                                        type: String
+                                        description: |
+                                          The property name.
+                                        required: true
+                                      - name: primaryKey
+                                        type: Boolean
+                                        description: |
+                                          Whether or not the property is a primary key.
           - name: pollingInterval
             type: String
             description: |
@@ -1741,52 +1789,66 @@ properties:
               - name: objects
                 type: Array
                 description: |
-                  Objects in the Salesforce Marketing Cloud instance.
-                required: true
-                min_size: 1
+                  Source objects in the catalog.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: objectKey
+                    - name: objectName
                       type: String
                       description: |
-                        Key of the object.
-                    - name: fields
+                        The object name.
+                      required: true
+                    - name: properties
                       type: Array
                       description: |
-                        Fields in the Salesforce Marketing Cloud object.
+                        Source properties. When unspecified as part of include objects, includes
+                        everything, when unspecified as part of exclude objects, excludes nothing.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: fieldName
+                          - name: propertyName
                             type: String
                             description: |
-                              Field name.
-                          - name: dataType
-                            type: String
-                            description: |
-                              The data type of the field.
-                            output: true
-                          - name: isPrimaryKey
+                              The property name.
+                            required: true
+                          - name: primaryKey
                             type: Boolean
                             description: |
-                              Indicates whether the field is a primary key.
-                            output: true
-                          - name: isNullable
-                            type: Boolean
+                              Whether or not the property is a primary key.
+                          - name: properties
+                            type: Array
                             description: |
-                              Indicates whether the field is nullable.
-                            output: true
-                          - name: maxLength
-                            type: Integer
-                            description: |
-                              Maximum length of the field.
-                            output: true
-                          - name: scale
-                            type: Integer
-                            description: |
-                              Scale of the field.
-                            output: true
+                              Source properties. When specified, it means that the current property
+                              contains nested properties of its own.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: propertyName
+                                  type: String
+                                  description: |
+                                    The property name.
+                                  required: true
+                                - name: primaryKey
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the property is a primary key.
+                                - name: properties
+                                  type: Array
+                                  description: |
+                                    Source properties. When specified, it means that the current property
+                                    contains nested properties of its own.
+                                  item_type:
+                                    type: NestedObject
+                                    properties:
+                                      - name: propertyName
+                                        type: String
+                                        description: |
+                                          The property name.
+                                        required: true
+                                      - name: primaryKey
+                                        type: Boolean
+                                        description: |
+                                          Whether or not the property is a primary key.
           - name: excludeObjects
             type: NestedObject
             description: |
@@ -1795,52 +1857,66 @@ properties:
               - name: objects
                 type: Array
                 description: |
-                  Objects in the Salesforce Marketing Cloud instance.
-                required: true
-                min_size: 1
+                  Source objects in the catalog.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: objectKey
+                    - name: objectName
                       type: String
                       description: |
-                        Key of the object.
-                    - name: fields
+                        The object name.
+                      required: true
+                    - name: properties
                       type: Array
                       description: |
-                        Fields in the Salesforce Marketing Cloud object.
+                        Source properties. When unspecified as part of include objects, includes
+                        everything, when unspecified as part of exclude objects, excludes nothing.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: fieldName
+                          - name: propertyName
                             type: String
                             description: |
-                              Field name.
-                          - name: dataType
-                            type: String
-                            description: |
-                              The data type of the field.
-                            output: true
-                          - name: isPrimaryKey
+                              The property name.
+                            required: true
+                          - name: primaryKey
                             type: Boolean
                             description: |
-                              Indicates whether the field is a primary key.
-                            output: true
-                          - name: isNullable
-                            type: Boolean
+                              Whether or not the property is a primary key.
+                          - name: properties
+                            type: Array
                             description: |
-                              Indicates whether the field is nullable.
-                            output: true
-                          - name: maxLength
-                            type: Integer
-                            description: |
-                              Maximum length of the field.
-                            output: true
-                          - name: scale
-                            type: Integer
-                            description: |
-                              Scale of the field.
-                            output: true
+                              Source properties. When specified, it means that the current property
+                              contains nested properties of its own.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: propertyName
+                                  type: String
+                                  description: |
+                                    The property name.
+                                  required: true
+                                - name: primaryKey
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the property is a primary key.
+                                - name: properties
+                                  type: Array
+                                  description: |
+                                    Source properties. When specified, it means that the current property
+                                    contains nested properties of its own.
+                                  item_type:
+                                    type: NestedObject
+                                    properties:
+                                      - name: propertyName
+                                        type: String
+                                        description: |
+                                          The property name.
+                                        required: true
+                                      - name: primaryKey
+                                        type: Boolean
+                                        description: |
+                                          Whether or not the property is a primary key.
           - name: pollingInterval
             type: String
             description: |
@@ -1854,7 +1930,7 @@ properties:
               Salesforce Marketing Cloud objects full refresh polling interval. The
               interval at which a full refresh will be performed for objects that do
               not support incremental extraction. The duration must be between 1 hour
-              and 7 days.
+              and 24 hours.
             required: true
       - name: serviceNowSourceConfig
         min_version: beta
@@ -1878,99 +1954,137 @@ properties:
             description: |
               ServiceNow objects to retrieve from the source.
             properties:
-              - name: tables
+              - name: objects
                 type: Array
                 description: |
-                  Tables in the ServiceNow instance.
-                required: true
-                min_size: 1
+                  Source objects in the catalog.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: tableName
+                    - name: objectName
                       type: String
                       description: |
-                        Name of the table in ServiceNow.
-                    - name: columns
+                        The object name.
+                      required: true
+                    - name: properties
                       type: Array
                       description: |
-                        Columns in the ServiceNow table.
+                        Source properties. When unspecified as part of include objects, includes
+                        everything, when unspecified as part of exclude objects, excludes nothing.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: columnName
+                          - name: propertyName
                             type: String
                             description: |
-                              Column name.
-                          - name: dataType
-                            type: String
-                            description: |
-                              The ServiceNow original data type.
-                            output: true
-                          - name: isPrimaryKey
+                              The property name.
+                            required: true
+                          - name: primaryKey
                             type: Boolean
                             description: |
-                              Indicates whether the column is a primary key.
-                            output: true
-                          - name: isNullable
-                            type: Boolean
+                              Whether or not the property is a primary key.
+                          - name: properties
+                            type: Array
                             description: |
-                              Indicates whether the column is nullable.
-                            output: true
-                          - name: maxLength
-                            type: Integer
-                            description: |
-                              Maximum length of the column.
-                            output: true
+                              Source properties. When specified, it means that the current property
+                              contains nested properties of its own.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: propertyName
+                                  type: String
+                                  description: |
+                                    The property name.
+                                  required: true
+                                - name: primaryKey
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the property is a primary key.
+                                - name: properties
+                                  type: Array
+                                  description: |
+                                    Source properties. When specified, it means that the current property
+                                    contains nested properties of its own.
+                                  item_type:
+                                    type: NestedObject
+                                    properties:
+                                      - name: propertyName
+                                        type: String
+                                        description: |
+                                          The property name.
+                                        required: true
+                                      - name: primaryKey
+                                        type: Boolean
+                                        description: |
+                                          Whether or not the property is a primary key.
           - name: excludeObjects
             type: NestedObject
             description: |
               ServiceNow objects to exclude from the stream.
             properties:
-              - name: tables
+              - name: objects
                 type: Array
                 description: |
-                  Tables in the ServiceNow instance.
-                required: true
-                min_size: 1
+                  Source objects in the catalog.
                 item_type:
                   type: NestedObject
                   properties:
-                    - name: tableName
+                    - name: objectName
                       type: String
                       description: |
-                        Name of the table in ServiceNow.
-                    - name: columns
+                        The object name.
+                      required: true
+                    - name: properties
                       type: Array
                       description: |
-                        Columns in the ServiceNow table.
+                        Source properties. When unspecified as part of include objects, includes
+                        everything, when unspecified as part of exclude objects, excludes nothing.
                       item_type:
                         type: NestedObject
                         properties:
-                          - name: columnName
+                          - name: propertyName
                             type: String
                             description: |
-                              Column name.
-                          - name: dataType
-                            type: String
-                            description: |
-                              The ServiceNow original data type.
-                            output: true
-                          - name: isPrimaryKey
+                              The property name.
+                            required: true
+                          - name: primaryKey
                             type: Boolean
                             description: |
-                              Indicates whether the column is a primary key.
-                            output: true
-                          - name: isNullable
-                            type: Boolean
+                              Whether or not the property is a primary key.
+                          - name: properties
+                            type: Array
                             description: |
-                              Indicates whether the column is nullable.
-                            output: true
-                          - name: maxLength
-                            type: Integer
-                            description: |
-                              Maximum length of the column.
-                            output: true
+                              Source properties. When specified, it means that the current property
+                              contains nested properties of its own.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: propertyName
+                                  type: String
+                                  description: |
+                                    The property name.
+                                  required: true
+                                - name: primaryKey
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the property is a primary key.
+                                - name: properties
+                                  type: Array
+                                  description: |
+                                    Source properties. When specified, it means that the current property
+                                    contains nested properties of its own.
+                                  item_type:
+                                    type: NestedObject
+                                    properties:
+                                      - name: propertyName
+                                        type: String
+                                        description: |
+                                          The property name.
+                                        required: true
+                                      - name: primaryKey
+                                        type: Boolean
+                                        description: |
+                                          Whether or not the property is a primary key.
           - name: pollingInterval
             type: String
             description: |
@@ -2676,7 +2790,7 @@ properties:
           - name: objects
             type: Array
             description: |
-              Objects in the SaaS source.
+              Source objects in the catalog.
             required: true
             min_size: 1
             item_type:
@@ -2685,86 +2799,59 @@ properties:
                 - name: objectName
                   type: String
                   description: |
-                    Name of the object.
+                    The object name.
+                  required: true
                 - name: properties
                   type: Array
                   description: |
-                    Properties in the SaaS object. When unspecified as part of
-                    include/exclude objects, includes/excludes everything.
+                    Source properties. When unspecified as part of include objects, includes
+                    everything, when unspecified as part of exclude objects, excludes nothing.
                   item_type:
                     type: NestedObject
                     properties:
                       - name: propertyName
                         type: String
                         description: |
-                          Property name.
-                      - name: dataType
-                        type: String
-                        description: |
-                          The SaaS source original data type.
-                        output: true
-                      - name: isPrimaryKey
+                          The property name.
+                        required: true
+                      - name: primaryKey
                         type: Boolean
                         description: |
-                          Indicates whether the property is a primary key.
-                        output: true
-                      - name: isNullable
-                        type: Boolean
-                        description: |
-                          Indicates whether the property is nullable.
-                        output: true
+                          Whether or not the property is a primary key.
                       - name: properties
                         type: Array
                         description: |
-                          Nested properties for complex types (Objects or Arrays of Objects).
+                          Source properties. When specified, it means that the current property
+                          contains nested properties of its own.
                         item_type:
                           type: NestedObject
                           properties:
                             - name: propertyName
                               type: String
                               description: |
-                                Property name.
-                            - name: dataType
-                              type: String
-                              description: |
-                                The SaaS source original data type.
-                              output: true
-                            - name: isPrimaryKey
+                                The property name.
+                              required: true
+                            - name: primaryKey
                               type: Boolean
                               description: |
-                                Indicates whether the property is a primary key.
-                              output: true
-                            - name: isNullable
-                              type: Boolean
-                              description: |
-                                Indicates whether the property is nullable.
-                              output: true
+                                Whether or not the property is a primary key.
                             - name: properties
                               type: Array
                               description: |
-                                Nested properties for complex types (Objects or Arrays of Objects).
+                                Source properties. When specified, it means that the current property
+                                contains nested properties of its own.
                               item_type:
                                 type: NestedObject
                                 properties:
                                   - name: propertyName
                                     type: String
                                     description: |
-                                      Property name.
-                                  - name: dataType
-                                    type: String
-                                    description: |
-                                      The SaaS source original data type.
-                                    output: true
-                                  - name: isPrimaryKey
+                                      The property name.
+                                    required: true
+                                  - name: primaryKey
                                     type: Boolean
                                     description: |
-                                      Indicates whether the property is a primary key.
-                                    output: true
-                                  - name: isNullable
-                                    type: Boolean
-                                    description: |
-                                      Indicates whether the property is nullable.
-                                    output: true
+                                      Whether or not the property is a primary key.
   - name: backfillNone
     type: NestedObject
     description: |

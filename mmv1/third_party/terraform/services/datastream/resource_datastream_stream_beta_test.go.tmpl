@@ -75,9 +75,9 @@ resource "google_datastream_connection_profile" "dv_source" {
   create_without_validation = true
 
   dataverse_profile {
-    domain = "org123.crm.dynamics.com"
+    tenant_id       = "00000000-0000-0000-0000-000000000000"
+    environment_url = "org123.crm.dynamics.com"
     oauth_client_credentials {
-      tenant_id = "00000000-0000-0000-0000-000000000000"
       client_id = "11111111-1111-1111-1111-111111111111"
       client_secret {
         raw_value = "raw-secret"
@@ -118,18 +118,22 @@ resource "google_datastream_stream" "default" {
     dataverse_source_config {
       polling_interval = "600s"
       include_objects {
-        tables {
-          table_name = "account"
-          columns {
-            column_name = "name"
+        objects {
+          object_name = "account"
+          properties {
+            property_name = "accountid"
+            primary_key   = true
+          }
+          properties {
+            property_name = "name"
           }
         }
       }
       exclude_objects {
-        tables {
-          table_name = "account"
-          columns {
-            column_name = "telephone1"
+        objects {
+          object_name = "account"
+          properties {
+            property_name = "telephone1"
           }
         }
       }
@@ -154,6 +158,7 @@ resource "google_datastream_stream" "default" {
             property_name = "location"
             properties {
               property_name = "zip_code"
+              primary_key   = false
             }
           }
         }
@@ -218,17 +223,21 @@ resource "google_datastream_stream" "default" {
       full_refresh_polling_interval = "86400s"
       include_objects {
         objects {
-          object_key = "Subscriber"
-          fields {
-            field_name = "EmailAddress"
+          object_name = "Subscriber"
+          properties {
+            property_name = "SubscriberKey"
+            primary_key   = true
+          }
+          properties {
+            property_name = "EmailAddress"
           }
         }
       }
       exclude_objects {
         objects {
-          object_key = "Subscriber"
-          fields {
-            field_name = "Status"
+          object_name = "Subscriber"
+          properties {
+            property_name = "Status"
           }
         }
       }
@@ -258,8 +267,8 @@ resource "google_datastream_connection_profile" "sn_source" {
   create_without_validation = true
 
   service_now_profile {
-    hostname = "dev12345.service-now.com"
-    user_credentials {
+    instance = "dev12345"
+    user_password_credentials {
       username = "sn-user"
       password {
         raw_value = "raw-password"
@@ -300,18 +309,22 @@ resource "google_datastream_stream" "default" {
     service_now_source_config {
       polling_interval = "600s"
       include_objects {
-        tables {
-          table_name = "incident"
-          columns {
-            column_name = "number"
+        objects {
+          object_name = "incident"
+          properties {
+            property_name = "sys_id"
+            primary_key   = true
+          }
+          properties {
+            property_name = "number"
           }
         }
       }
       exclude_objects {
-        tables {
-          table_name = "incident"
-          columns {
-            column_name = "short_description"
+        objects {
+          object_name = "incident"
+          properties {
+            property_name = "short_description"
           }
         }
       }
