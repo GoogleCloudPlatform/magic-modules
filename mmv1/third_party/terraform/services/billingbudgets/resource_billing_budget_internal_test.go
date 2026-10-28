@@ -34,6 +34,12 @@ func TestUnitBillingBudget_spendCapAddedCustomizeDiff(t *testing.T) {
 			after:    configured,
 			forceNew: true,
 		},
+		"spend_cap added, no prior value": {
+			id:       "billingAccounts/000000-000000-000000/budgets/budget",
+			before:   nil,
+			after:    configured,
+			forceNew: true,
+		},
 		"spend_cap removed": {
 			id:       "billingAccounts/000000-000000-000000/budgets/budget",
 			before:   configured,

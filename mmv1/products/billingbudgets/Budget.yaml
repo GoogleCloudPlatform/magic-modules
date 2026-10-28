@@ -566,13 +566,15 @@ properties:
       `enable_project_level_recipients = true`. See
       https://cloud.google.com/billing/docs/how-to/budgets-spend-caps.
 
-      While `output_state` is `ENFORCED`, only `input_state` can be changed.
-      A budget whose spend cap is `ENFORCED` cannot be deleted until the cap
-      is lifted (`input_state = AWAITING_NEXT_PERIOD`) or the next period
-      starts. The API rejects a spend cap budget whose project and service match an
-      existing spend cap budget. Removing the `spend_cap` block converts the
-      budget back to an alerts-only budget. A spend cap cannot be added to an
-      existing budget. Adding the block replaces the budget.
+      Of the budget's settings, only the display name, amount, project and
+      service can be changed, and only while the cap is not enforced. While
+      `output_state` is `ENFORCED`, only `input_state` can be changed, to lift
+      the cap. A budget whose spend cap is `ENFORCED` cannot be deleted. Apply
+      `input_state = AWAITING_NEXT_PERIOD` before destroying it, or wait for
+      the next period to start. The API rejects a spend cap budget whose
+      project and service match an existing spend cap budget. Removing the
+      `spend_cap` block converts the budget back to an alerts-only budget.
+      Adding a `spend_cap` block to an existing budget replaces the budget.
     update_mask_fields:
       - spendCap.inputState
     custom_flatten: templates/terraform/custom_flatten/billing_budget_spend_cap.go.tmpl
@@ -582,18 +584,19 @@ properties:
         description: |
           The desired state of the spend cap. Must be `CONFIGURED` on create.
           Set to `AWAITING_NEXT_PERIOD` to lift an enforced cap until the next
-          period starts; the API accepts it only while `output_state` is
-          `ENFORCED` and otherwise returns `INVALID_ARGUMENT`. Set it back to
-          `CONFIGURED` before changing any other field of the budget, because
-          every update of a capped budget re-sends this field and
-          `AWAITING_NEXT_PERIOD` is rejected once the cap is no longer
-          enforced.
+          period starts. The API accepts it only while `output_state` is
+          `ENFORCED` and otherwise returns `INVALID_ARGUMENT`. After the next
+          period starts, set it back to `CONFIGURED`, because every update of a
+          capped budget re-sends this field and `AWAITING_NEXT_PERIOD` is
+          rejected once the cap is no longer enforced. An update made while the
+          cap is lifted also re-sends the current value of this field.
 
           The API does not return this field. A cap lifted outside Terraform
           is visible in `output_state` (`AWAITING_NEXT_PERIOD`) and does not
-          produce a diff on this field. Re-applying `CONFIGURED` after a cap
-          was lifted outside Terraform may re-activate the cap. On import,
-          Terraform sets it to `CONFIGURED`.
+          produce a diff on this field. Any later Terraform update of the
+          budget re-sends `input_state = CONFIGURED`, which may re-activate a
+          cap lifted outside Terraform. On import, Terraform sets it to
+          `CONFIGURED`.
         required: true
         enum_values:
           - CONFIGURED
