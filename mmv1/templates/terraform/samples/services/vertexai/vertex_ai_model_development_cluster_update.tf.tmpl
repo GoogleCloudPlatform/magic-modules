@@ -91,11 +91,11 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
   model_development_cluster_id = "{{index $.ResourceIdVars "model_development_cluster_id"}}"
   display_name                 = "tftest-updated"
   deletion_policy              = "DELETE"
-  update_mode                  = "USER_AND_SERVICE"
+  update_mode                  = "{{index $.Vars "update_mode"}}"
   depends_on                   = [google_compute_firewall.internal]
 
   labels = {
-    env  = "prod"
+    env  = "{{index $.Vars "env"}}"
     team = "ml"
   }
 

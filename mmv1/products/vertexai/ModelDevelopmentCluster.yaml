@@ -45,7 +45,6 @@ async:
     resource_inside_response: true
 custom_code:
   decoder: templates/terraform/decoders/vertex_ai_model_development_cluster.go.tmpl
-  pre_update: templates/terraform/pre_update/vertex_ai_model_development_cluster.go.tmpl
 autogen_status: TW9kZWxEZXZlbG9wbWVudENsdXN0ZXJBdXRvZ2VuVjJBZ2VudA==
 samples:
   - name: vertex_ai_model_development_cluster_basic
@@ -74,8 +73,41 @@ samples:
           filestore_name: mdc-home
           data_filestore_name: mdc-data
           reservation_name: mdc-res
+        vars:
+          env: prod
+          update_mode: USER_AND_SERVICE
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+      - name: vertex_ai_model_development_cluster_update
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
+          filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
+        vars:
+          env: prod-user-only
+          update_mode: USER_ONLY
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - update_mode
+virtual_fields:
+  - name: update_mode
+    type: Enum
+    enum_values:
+      - USER_ONLY
+      - USER_AND_SERVICE
+    default_value: USER_AND_SERVICE
+    description: |-
+      Whether the service also refreshes service-managed fields (startup and
+      prolog/epilog scripts, default node images) on update. `USER_ONLY` applies
+      only your changes; adding a node pool requires `USER_AND_SERVICE`.
+      Only applies to Slurm clusters (`orchestrator_spec.slurm_spec`); ignored
+      for GKE clusters (`kubernetes_spec`).
 parameters:
   - name: region
     type: String
@@ -94,20 +126,6 @@ parameters:
       hyphens are not allowed (`/^[a-z][a-z0-9]{0,9}$/`).
     immutable: true
     url_param_only: true
-  - name: updateMode
-    type: Enum
-    enum_values:
-      - USER_ONLY
-      - USER_AND_SERVICE
-    url_param_only: true
-    default_value: USER_AND_SERVICE
-    min_version: beta
-    description: |-
-      Whether the service also refreshes service-managed fields (startup and
-      prolog/epilog scripts, default node images) on update. USER_ONLY applies
-      only your changes; adding a node pool requires USER_AND_SERVICE.
-      Only applies to Slurm clusters (`orchestrator_spec.slurm_spec`); ignored
-      for GKE clusters (`kubernetes_spec`).
 properties:
   - name: clusterEvents
     type: Array
