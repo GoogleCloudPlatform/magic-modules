@@ -42,6 +42,17 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
+sweeper:
+  query_string: "?force=true"
+  url_substitutions:
+    - region: us-central1
+    - region: us-east1
+    - region: us-east4
+    - region: us-east5
+    - region: us-west1
+    - region: us-west4
+    - region: europe-west1
+    - region: europe-west4
 custom_code:
 samples:
   - name: workstation_cluster_basic
@@ -50,37 +61,28 @@ samples:
       - name: workstation_cluster_basic
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
+        vars:
+          label_value: key
+          annotation_value: value-one
+      - name: workstation_cluster_basic
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+        vars:
+          label_value: updated-key
+          annotation_value: value-updated
   - name: workstation_cluster_private
     primary_resource_id: default
     steps:
       - name: workstation_cluster_private
         resource_id_vars:
           workstation_cluster_name: workstation-cluster-private
-  - name: workstation_cluster_custom_domain
-    primary_resource_id: default
-    steps:
-      - name: workstation_cluster_custom_domain
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster-custom-domain
-  - name: workstation_cluster_tags
-    primary_resource_id: default
-    steps:
-      - name: workstation_cluster_tags
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster-tags
           key_short_name: keyname
           value_short_name: valuename
-        test_vars_overrides:
-          key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-          value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
-  - name: workstation_cluster_urls
-    primary_resource_id: default
-    steps:
-      - name: workstation_cluster_custom_urls
-        vars:
-          cluster_id: custom-urls-cluster
+      - name: workstation_cluster_private_update
         resource_id_vars:
-          cluster_network_name: workstations-network
+          workstation_cluster_name: workstation-cluster-private
+          key_short_name: keyname
+          value_short_name: valuename
 parameters:
   - name: workstationClusterId
     type: String
