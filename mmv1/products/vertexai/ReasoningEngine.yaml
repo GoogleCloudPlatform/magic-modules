@@ -1009,6 +1009,9 @@ properties:
             properties:
               - name: 'defaultTtl'
                 type: String
+                exactly_one_of:
+                  - defaultTtl
+                  - granularTtlConfig
                 description: |-
                   The default TTL duration of the memories in the Memory Bank.
               - name: 'granularTtlConfig'
@@ -1059,6 +1062,9 @@ properties:
                       - name: 'managedMemoryTopic'
                         type: NestedObject
                         # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
+                        exactly_one_of:
+                          - managedMemoryTopic
+                          - customMemoryTopic
                         description: |-
                           Optional. Managed memory topic.
                         properties:

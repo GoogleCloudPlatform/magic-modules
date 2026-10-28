@@ -1805,9 +1805,15 @@ properties:
             - name: 'dnsName'
               type: String
               description: The SAN specified as a DNS Name.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
             - name: 'uniformResourceIdentifier'
               type: String
               description: The SAN specified as a URI.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
       - name: 'authenticationConfig'
         type: String
         description: |

@@ -316,6 +316,8 @@ properties:
           - name: url
             type: String
             description: Image URL.
+            exactly_one_of:
+              - url
   - name: homepageSetting
     type: NestedObject
     description: |
@@ -338,6 +340,8 @@ properties:
                 - name: url
                   type: String
                   description: Image URL.
+                  exactly_one_of:
+                    - url
             - name: destinationUri
               type: String
               description: Destination URL of shortcut.

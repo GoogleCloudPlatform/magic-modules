@@ -431,6 +431,9 @@ properties:
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and the server identity will be authenticated.
+            exactly_one_of:
+              - ssl_config.0.server_verification
+              - ssl_config.0.server_and_client_verification
             properties:
               - name: caCertificate
                 type: String
@@ -444,6 +447,9 @@ properties:
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and both the server identity and the client identity will be authenticated.
+            exactly_one_of:
+              - ssl_config.0.server_verification
+              - ssl_config.0.server_and_client_verification
             ignore_read: true
             properties:
               - name: clientCertificate
@@ -502,6 +508,9 @@ properties:
         type: NestedObject
         description: |
           User credentials to use for Salesforce authentication.
+        exactly_one_of:
+          - user_credentials
+          - oauth2_client_credentials
         properties:
           - name: username
             type: String
@@ -527,6 +536,9 @@ properties:
         type: NestedObject
         description: |
           OAuth credentials to use for Salesforce authentication.
+        exactly_one_of:
+          - user_credentials
+          - oauth2_client_credentials
         properties:
           - name: clientId
             type: String
