@@ -32,13 +32,19 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 				if valueVal.IsKnown() && !valueVal.IsNull() && valueVal.LengthInt() > 0 {
 					elem := valueVal.Index(cty.NumberIntVal(0))
 					if elem.IsKnown() && !elem.IsNull() && elem.Type().IsObjectType() {
-						if elem.Type().HasAttribute("string_value") && !elem.GetAttr("string_value").IsNull() {
-							transformed["stringValue"] = elem.GetAttr("string_value").AsString()
-							return transformed, nil
+						if elem.Type().HasAttribute("string_value") {
+							strAttr := elem.GetAttr("string_value")
+							if strAttr.IsKnown() && !strAttr.IsNull() {
+								transformed["stringValue"] = strAttr.AsString()
+								return transformed, nil
+							}
 						}
-						if elem.Type().HasAttribute("bool_value") && !elem.GetAttr("bool_value").IsNull() {
-							transformed["boolValue"] = elem.GetAttr("bool_value").True()
-							return transformed, nil
+						if elem.Type().HasAttribute("bool_value") {
+							boolAttr := elem.GetAttr("bool_value")
+							if boolAttr.IsKnown() && !boolAttr.IsNull() {
+								transformed["boolValue"] = boolAttr.True()
+								return transformed, nil
+							}
 						}
 					}
 				}
@@ -54,6 +60,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 			transformed["boolValue"] = b.(bool)
 			return transformed, nil
 		}
+		return transformed, nil
 	}
 
 	if sv, ok := raw["string_value"].(string); ok && sv != "" {

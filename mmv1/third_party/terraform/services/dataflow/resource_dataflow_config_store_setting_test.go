@@ -3,6 +3,8 @@ package dataflow
 import (
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestFlattenDataflowConfigStoreSettingValue(t *testing.T) {
@@ -105,6 +107,83 @@ func TestExpandDataflowConfigStoreSettingValue_FromMap(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tc.expected) {
 				t.Errorf("expandDataflowConfigStoreSettingValue(%v) = %v; want %v", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestExpandDataflowConfigStoreSettingValue_FromResourceData(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    []interface{}
+		rawMap   map[string]interface{}
+		expected map[string]interface{}
+	}{
+		{
+			name: "string value set (zero-value bool_value must not leak)",
+			rawMap: map[string]interface{}{
+				"value": []interface{}{
+					map[string]interface{}{
+						"string_value": "e2-standard-4",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"stringValue": "e2-standard-4",
+			},
+		},
+		{
+			name: "bool value true",
+			rawMap: map[string]interface{}{
+				"value": []interface{}{
+					map[string]interface{}{
+						"bool_value": true,
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"boolValue": true,
+			},
+		},
+		{
+			name: "bool value false",
+			rawMap: map[string]interface{}{
+				"value": []interface{}{
+					map[string]interface{}{
+						"bool_value": false,
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"boolValue": false,
+			},
+		},
+		{
+			name: "empty value block (must not fall through to raw bool_value = false)",
+			input: []interface{}{
+				map[string]interface{}{
+					"string_value": "",
+					"bool_value":   false,
+				},
+			},
+			rawMap:   map[string]interface{}{},
+			expected: map[string]interface{}{},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, ResourceDataflowConfigStoreSetting().Schema, tc.rawMap)
+			input := tc.input
+			if input == nil {
+				input = d.Get("value").([]interface{})
+			}
+			got, err := expandDataflowConfigStoreSettingValue(input, d, nil)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, tc.expected) {
+				t.Errorf("expandDataflowConfigStoreSettingValue(%v, d) = %v; want %v", input, got, tc.expected)
 			}
 		})
 	}

@@ -13,7 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 		config := acctest.GoogleProviderConfig(t)
+		origUserProjectOverride := config.UserProjectOverride
 		config.UserProjectOverride = true
+		defer func() {
+			config.UserProjectOverride = origUserProjectOverride
+		}()
+
 		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}DataflowBasePath{{"}}"}}{{"{{"}}parent{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/configStoreSettings/{{"{{"}}config_store_setting_id{{"}}"}}")
 		if err != nil {
 			return err
