@@ -108,6 +108,8 @@ virtual_fields:
       only your changes; adding a node pool requires `USER_AND_SERVICE`.
       Only applies to Slurm clusters (`orchestrator_spec.slurm_spec`); ignored
       for GKE clusters (`kubernetes_spec`).
+      Defaults to `USER_AND_SERVICE`. Possible values are `USER_ONLY` and
+      `USER_AND_SERVICE`.
 parameters:
   - name: region
     type: String
