@@ -124,6 +124,8 @@ samples:
     # Google does not document whether parent accounts can hold spend caps.
     # The exact cause is not confirmed. Generated tests can only use the
     # billing accounts the generator maps, so this sample is excluded.
+    # The handwritten spend cap tests run when GOOGLE_SPEND_CAP_BILLING_ACCOUNT
+    # is set.
     exclude_test: true
     steps:
       - name: billing_budget_spend_cap

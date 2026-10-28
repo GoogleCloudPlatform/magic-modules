@@ -128,6 +128,14 @@ var MasterBillingAccountEnvVars = []string{
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
 }
 
+// This is a first-party Cloud Billing account that can hold spend caps. Google does not document
+// whether parent accounts or subaccounts can hold spend caps. It must bill GOOGLE_PROJECT because
+// the budget filters on it, and use USD because the tests use USD. Tests that create spend caps
+// skip when it is unset. See https://cloud.google.com/billing/docs/how-to/budgets-spend-caps
+var SpendCapBillingAccountEnvVars = []string{
+	"GOOGLE_SPEND_CAP_BILLING_ACCOUNT",
+}
+
 // This value is the description used for test PublicAdvertisedPrefix setup to avoid required DNS
 // setup. This is only used during integration tests and would be invalid to surface to users
 var PapDescriptionEnvVars = []string{
@@ -238,6 +246,15 @@ func GetTestBillingAccountFromEnv(t *testing.T) string {
 func GetTestMasterBillingAccountFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, MasterBillingAccountEnvVars...)
 	return MultiEnvSearch(MasterBillingAccountEnvVars)
+}
+
+// This is a first-party Cloud Billing account that can hold spend caps. Google does not document
+// whether parent accounts or subaccounts can hold spend caps. It must bill GOOGLE_PROJECT because
+// the budget filters on it, and use USD because the tests use USD. Tests that create spend caps
+// skip when it is unset. See https://cloud.google.com/billing/docs/how-to/budgets-spend-caps
+func GetTestSpendCapBillingAccountFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, SpendCapBillingAccountEnvVars...)
+	return MultiEnvSearch(SpendCapBillingAccountEnvVars)
 }
 
 func GetTestServiceAccountFromEnv(t *testing.T) string {

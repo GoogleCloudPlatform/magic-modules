@@ -678,15 +678,22 @@ resource "google_billing_budget" "budget" {
 // changing the amount again, and checks import after each step.
 //
 // The API allows one spend cap per project and service, and the tests run in
-// parallel, so each spend cap test uses its own service. The sample uses
-// C7E2-9256-1C43 (Gemini Enterprise Agent Platform), this test
-// AEFD-7695-64FA (Gemini API) and TestAccBillingBudget_spendCapAdd
-// 152E-C115-5142 (Cloud Run).
+// parallel on GOOGLE_PROJECT, so each uses its own service. This test uses
+// AEFD-7695-64FA (Gemini API) and TestAccBillingBudget_spendCapAdd uses
+// 152E-C115-5142 (Cloud Run). The doc sample uses C7E2-9256-1C43 (Gemini
+// Enterprise Agent Platform).
 func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		// In CI the generated spend cap sample got a bare 400 on the master
+		// billing account. CI uses that account to create subaccounts, so it is
+		// likely a parent account. Google does not document whether parent
+		// accounts can hold spend caps. The exact cause is not confirmed. So these
+		// tests use GOOGLE_SPEND_CAP_BILLING_ACCOUNT, which must use USD (the
+		// config sets currency_code = "USD") and bill GOOGLE_PROJECT. They skip
+		// when it is unset. A non-USD account gives the same bare 400.
+		"billing_acct":  envvar.GetTestSpendCapBillingAccountFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"service":       "AEFD-7695-64FA",
 		"units":         "100",
@@ -757,7 +764,8 @@ func TestAccBillingBudget_spendCapAdd(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		// See TestAccBillingBudget_spendCapUpdate.
+		"billing_acct":  envvar.GetTestSpendCapBillingAccountFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"service":       "152E-C115-5142",
 		"units":         "100",
