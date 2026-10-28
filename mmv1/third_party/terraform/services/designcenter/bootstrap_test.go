@@ -1,3 +1,16 @@
+// Copyright 2026 Google Inc.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package designcenter_test
 
 import (
@@ -16,18 +29,29 @@ import (
 )
 
 const (
-	bootstrapDesignCenterLocation          = "us-central1"
-	bootstrapDesignCenterSpaceID           = "tf-bootstrap-space"
-	bootstrapDesignCenterCatalogID         = "tf-bootstrap-catalog"
-	bootstrapDesignCenterCatalogTemplateID = "tf-bootstrap-catalog-template"
+	bootstrapDesignCenterLocation            = "us-central1"
+	bootstrapDesignCenterSpaceID             = "tf-bootstrap-space"
+	bootstrapDesignCenterDestSpaceID         = "tf-bootstrap-dest-space"
+	bootstrapDesignCenterCatalogID           = "tf-bootstrap-catalog"
+	bootstrapDesignCenterCatalogTemplateID   = "tf-bootstrap-catalog-template"
+	bootstrapDesignCenterAppTemplateID       = "tf-bootstrap-app-template"
+	bootstrapDesignCenterComponentID         = "tf-bootstrap-src-component"
+	bootstrapDesignCenterDestComponentID     = "tf-bootstrap-dest-component"
+	bootstrapDesignCenterCloudRunTemplateURI = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/1b5e09c8-780f-484e-b8ed-c7178f4e4342/revisions/r-24"
+	bootstrapDesignCenterCloudSQLTemplateURI = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/45be1bc2-89bc-477b-9b5d-64c41ff3b146/revisions/r-12"
 )
 
 var (
-	bootstrapDesignCenterMu               sync.Mutex
-	bootstrapDesignCenterProjects         = make(map[string]string)
-	bootstrapDesignCenterSpaces           = make(map[string]string)
-	bootstrapDesignCenterCatalogs         = make(map[string]string)
-	bootstrapDesignCenterCatalogTemplates = make(map[string]string)
+	bootstrapDesignCenterMu                   sync.Mutex
+	bootstrapDesignCenterProjects             = make(map[string]string)
+	bootstrapDesignCenterSpaces               = make(map[string]string)
+	bootstrapDesignCenterDestSpaces           = make(map[string]string)
+	bootstrapDesignCenterCatalogs             = make(map[string]string)
+	bootstrapDesignCenterCatalogTemplates     = make(map[string]string)
+	bootstrapDesignCenterAppTemplates         = make(map[string]string)
+	bootstrapDesignCenterAppTemplateRevisions = make(map[string]string)
+	bootstrapDesignCenterComponents           = make(map[string]string)
+	bootstrapDesignCenterDestComponents       = make(map[string]string)
 
 	bootstrapDesignCenterProjectServices = []string{
 		"apphub.googleapis.com",
@@ -39,10 +63,6 @@ var (
 	}
 )
 
-// designCenterProjectPrefixForTest returns a dedicated project prefix (<= 18
-// chars) per Design Center acceptance test. Application Design Center allows
-// only one Space per region within a management project and only one Catalog
-// per Space.
 func designCenterProjectPrefixForTest(testName string) string {
 	switch {
 	case strings.HasPrefix(testName, "TestAccDesignCenterSpace_"):
@@ -61,6 +81,16 @@ func designCenterProjectPrefixForTest(testName string) string {
 		return "tf-boot-dc-ctr-"
 	case strings.HasPrefix(testName, "TestAccDesignCenterShare_"):
 		return "tf-boot-dc-shr-"
+	case strings.HasPrefix(testName, "TestAccDesignCenterApplication_"):
+		return "tf-boot-dc-app-"
+	case strings.HasPrefix(testName, "TestAccDesignCenterApplicationTemplate_"):
+		return "tf-boot-dc-at-"
+	case strings.HasPrefix(testName, "TestAccDesignCenterComponent_"):
+		return "tf-boot-dc-cmp-"
+	case strings.HasPrefix(testName, "TestAccDesignCenterConnection_"):
+		return "tf-boot-dc-cnn-"
+	case strings.HasPrefix(testName, "TestAccDesignCenterPolicy_"):
+		return "tf-boot-dc-pol-"
 	default:
 		return "tf-boot-dc-"
 	}
@@ -182,6 +212,14 @@ func BootstrapDesignCenterSpace(t *testing.T) string {
 	return bootstrapDesignCenterSpaceID
 }
 
+// BootstrapDesignCenterDestinationSpace ensures a destination Space exists for
+// sharing the bootstrapped Catalog and returns its space_id.
+func BootstrapDesignCenterDestinationSpace(t *testing.T) string {
+	t.Helper()
+
+	return BootstrapDesignCenterSpace(t)
+}
+
 // BootstrapDesignCenterCatalog ensures a shared Catalog exists in the
 // bootstrapped Design Center Space and returns its catalog_id.
 func BootstrapDesignCenterCatalog(t *testing.T) string {
@@ -251,14 +289,6 @@ func BootstrapDesignCenterCatalog(t *testing.T) string {
 	return bootstrapDesignCenterCatalogID
 }
 
-// BootstrapDesignCenterDestinationSpace ensures a destination Space exists for
-// sharing the bootstrapped Catalog and returns its space_id.
-func BootstrapDesignCenterDestinationSpace(t *testing.T) string {
-	t.Helper()
-
-	return BootstrapDesignCenterSpace(t)
-}
-
 // BootstrapDesignCenterCatalogTemplate ensures a shared CatalogTemplate exists
 // in the bootstrapped Design Center Catalog and returns its catalog_template_id.
 func BootstrapDesignCenterCatalogTemplate(t *testing.T) string {
@@ -326,6 +356,263 @@ func BootstrapDesignCenterCatalogTemplate(t *testing.T) string {
 
 	bootstrapDesignCenterCatalogTemplates[prefix] = bootstrapDesignCenterCatalogTemplateID
 	return bootstrapDesignCenterCatalogTemplateID
+}
+
+// BootstrapDesignCenterApplicationTemplate ensures an ApplicationTemplate
+// exists inside the bootstrapped Space and returns its application_template_id.
+func BootstrapDesignCenterApplicationTemplate(t *testing.T) string {
+	t.Helper()
+
+	project := BootstrapDesignCenterProject(t)
+	if project == "" {
+		return ""
+	}
+	spaceID := BootstrapDesignCenterSpace(t)
+	if spaceID == "" {
+		return ""
+	}
+
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil || os.Getenv("VCR_MODE") == "REPLAYING" {
+		return bootstrapDesignCenterAppTemplateID
+	}
+
+	bootstrapDesignCenterMu.Lock()
+	defer bootstrapDesignCenterMu.Unlock()
+
+	cacheKey := project + "/" + spaceID
+	if appTemplateID, ok := bootstrapDesignCenterAppTemplates[cacheKey]; ok && appTemplateID != "" {
+		return appTemplateID
+	}
+
+	retryPredicates := []transport_tpg.RetryErrorPredicateFunc{isDesignCenterBootstrapRetryableError}
+	appTemplateURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/projects/%s/locations/%s/spaces/%s/applicationTemplates/%s", project, bootstrapDesignCenterLocation, spaceID, bootstrapDesignCenterAppTemplateID)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               appTemplateURL,
+		UserAgent:            config.UserAgent,
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
+	})
+	if err != nil {
+		if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			t.Fatalf("Bootstrapping failed. Error getting Design Center application template %s: %s", appTemplateURL, err)
+		}
+
+		createURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/projects/%s/locations/%s/spaces/%s/applicationTemplates?applicationTemplateId=%s", project, bootstrapDesignCenterLocation, spaceID, bootstrapDesignCenterAppTemplateID)
+		op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    createURL,
+			UserAgent: config.UserAgent,
+			Body: map[string]interface{}{
+				"displayName": "Bootstrap Application Template",
+				"description": "Bootstrapped for Terraform acceptance tests",
+			},
+			Timeout:              5 * time.Minute,
+			ErrorRetryPredicates: retryPredicates,
+		})
+		if err != nil {
+			t.Fatalf("Bootstrapping failed. Error creating Design Center application template %s: %s", createURL, err)
+		}
+		waitForDesignCenterOperation(t, config, project, op)
+	}
+
+	bootstrapDesignCenterAppTemplates[cacheKey] = bootstrapDesignCenterAppTemplateID
+	return bootstrapDesignCenterAppTemplateID
+}
+
+// BootstrapDesignCenterApplicationTemplateRevisionURI ensures a committed
+// revision exists for the bootstrapped ApplicationTemplate and returns its
+// full revision URI.
+func BootstrapDesignCenterApplicationTemplateRevisionURI(t *testing.T) string {
+	t.Helper()
+
+	project := BootstrapDesignCenterProject(t)
+	if project == "" {
+		return ""
+	}
+	spaceID := BootstrapDesignCenterSpace(t)
+	if spaceID == "" {
+		return ""
+	}
+	appTemplateID := BootstrapDesignCenterApplicationTemplate(t)
+	if appTemplateID == "" {
+		return ""
+	}
+
+	defaultRevisionURI := fmt.Sprintf("projects/%s/locations/%s/spaces/%s/applicationTemplates/%s/revisions/r-1", project, bootstrapDesignCenterLocation, spaceID, appTemplateID)
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil || os.Getenv("VCR_MODE") == "REPLAYING" {
+		return defaultRevisionURI
+	}
+
+	bootstrapDesignCenterMu.Lock()
+	defer bootstrapDesignCenterMu.Unlock()
+
+	cacheKey := project + "/" + spaceID + "/" + appTemplateID
+	if revURI, ok := bootstrapDesignCenterAppTemplateRevisions[cacheKey]; ok && revURI != "" {
+		return revURI
+	}
+
+	ensureDesignCenterComponent(t, config, project, spaceID, appTemplateID, bootstrapDesignCenterComponentID, "Bootstrap Source Component", bootstrapDesignCenterCloudRunTemplateURI)
+
+	retryPredicates := []transport_tpg.RetryErrorPredicateFunc{isDesignCenterBootstrapRetryableError}
+	revURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/%s", defaultRevisionURI)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               revURL,
+		UserAgent:            config.UserAgent,
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
+	})
+	if err != nil {
+		if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			t.Fatalf("Bootstrapping failed. Error getting Design Center application template revision %s: %s", revURL, err)
+		}
+
+		commitURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/projects/%s/locations/%s/spaces/%s/applicationTemplates/%s:commit", project, bootstrapDesignCenterLocation, spaceID, appTemplateID)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:               config,
+			Method:               "POST",
+			Project:              project,
+			RawURL:               commitURL,
+			UserAgent:            config.UserAgent,
+			Body:                 map[string]interface{}{},
+			Timeout:              5 * time.Minute,
+			ErrorRetryPredicates: retryPredicates,
+		})
+		if err != nil {
+			t.Fatalf("Bootstrapping failed. Error committing Design Center application template %s: %s", commitURL, err)
+		}
+		waitForDesignCenterOperation(t, config, project, res)
+		if name, ok := res["name"].(string); ok && strings.Contains(name, "/revisions/") {
+			defaultRevisionURI = name
+		}
+	}
+
+	bootstrapDesignCenterAppTemplateRevisions[cacheKey] = defaultRevisionURI
+	return defaultRevisionURI
+}
+
+// BootstrapDesignCenterComponent ensures a source Component exists inside the
+// bootstrapped ApplicationTemplate and returns its component_id.
+func BootstrapDesignCenterComponent(t *testing.T) string {
+	t.Helper()
+
+	project := BootstrapDesignCenterProject(t)
+	if project == "" {
+		return ""
+	}
+	spaceID := BootstrapDesignCenterSpace(t)
+	if spaceID == "" {
+		return ""
+	}
+	appTemplateID := BootstrapDesignCenterApplicationTemplate(t)
+	if appTemplateID == "" {
+		return ""
+	}
+
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil || os.Getenv("VCR_MODE") == "REPLAYING" {
+		return bootstrapDesignCenterComponentID
+	}
+
+	bootstrapDesignCenterMu.Lock()
+	defer bootstrapDesignCenterMu.Unlock()
+
+	cacheKey := project + "/" + spaceID + "/" + appTemplateID
+	if componentID, ok := bootstrapDesignCenterComponents[cacheKey]; ok && componentID != "" {
+		return componentID
+	}
+
+	ensureDesignCenterComponent(t, config, project, spaceID, appTemplateID, bootstrapDesignCenterComponentID, "Bootstrap Source Component", bootstrapDesignCenterCloudRunTemplateURI)
+	bootstrapDesignCenterComponents[cacheKey] = bootstrapDesignCenterComponentID
+	return bootstrapDesignCenterComponentID
+}
+
+// BootstrapDesignCenterDestinationComponentURI ensures a destination Component
+// exists inside the bootstrapped ApplicationTemplate and returns its full
+// component URI.
+func BootstrapDesignCenterDestinationComponentURI(t *testing.T) string {
+	t.Helper()
+
+	project := BootstrapDesignCenterProject(t)
+	if project == "" {
+		return ""
+	}
+	spaceID := BootstrapDesignCenterSpace(t)
+	if spaceID == "" {
+		return ""
+	}
+	appTemplateID := BootstrapDesignCenterApplicationTemplate(t)
+	if appTemplateID == "" {
+		return ""
+	}
+
+	destURI := fmt.Sprintf("projects/%s/locations/%s/spaces/%s/applicationTemplates/%s/components/%s", project, bootstrapDesignCenterLocation, spaceID, appTemplateID, bootstrapDesignCenterDestComponentID)
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil || os.Getenv("VCR_MODE") == "REPLAYING" {
+		return destURI
+	}
+
+	bootstrapDesignCenterMu.Lock()
+	defer bootstrapDesignCenterMu.Unlock()
+
+	cacheKey := project + "/" + spaceID + "/" + appTemplateID
+	if uri, ok := bootstrapDesignCenterDestComponents[cacheKey]; ok && uri != "" {
+		return uri
+	}
+
+	ensureDesignCenterComponent(t, config, project, spaceID, appTemplateID, bootstrapDesignCenterDestComponentID, "Bootstrap Destination Component", bootstrapDesignCenterCloudSQLTemplateURI)
+	bootstrapDesignCenterDestComponents[cacheKey] = destURI
+	return destURI
+}
+
+func ensureDesignCenterComponent(t *testing.T, config *transport_tpg.Config, project, spaceID, appTemplateID, componentID, displayName, sharedTemplateRevisionURI string) {
+	t.Helper()
+
+	retryPredicates := []transport_tpg.RetryErrorPredicateFunc{isDesignCenterBootstrapRetryableError}
+	componentURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/projects/%s/locations/%s/spaces/%s/applicationTemplates/%s/components/%s", project, bootstrapDesignCenterLocation, spaceID, appTemplateID, componentID)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "GET",
+		Project:              project,
+		RawURL:               componentURL,
+		UserAgent:            config.UserAgent,
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
+	})
+	if err == nil {
+		return
+	}
+	if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		t.Fatalf("Bootstrapping failed. Error getting Design Center component %s: %s", componentURL, err)
+	}
+
+	createURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/projects/%s/locations/%s/spaces/%s/applicationTemplates/%s/components?componentId=%s", project, bootstrapDesignCenterLocation, spaceID, appTemplateID, componentID)
+	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    createURL,
+		UserAgent: config.UserAgent,
+		Body: map[string]interface{}{
+			"displayName":               displayName,
+			"sharedTemplateRevisionUri": sharedTemplateRevisionURI,
+		},
+		Timeout:              5 * time.Minute,
+		ErrorRetryPredicates: retryPredicates,
+	})
+	if err != nil {
+		t.Fatalf("Bootstrapping failed. Error creating Design Center component %s: %s", createURL, err)
+	}
+	waitForDesignCenterOperation(t, config, project, op)
 }
 
 func isDesignCenterBootstrapRetryableError(err error) (bool, string) {
@@ -535,7 +822,7 @@ func cleanupDesignCenterSpaces(t *testing.T, config *transport_tpg.Config, proje
 		}
 		log.Printf("[DEBUG] Deleting leftover Design Center space %s before test", name)
 		deleteURL := fmt.Sprintf("https://designcenter.googleapis.com/v1/%s?force=true", name)
-		op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:               config,
 			Method:               "DELETE",
 			Project:              project,
@@ -547,7 +834,7 @@ func cleanupDesignCenterSpaces(t *testing.T, config *transport_tpg.Config, proje
 		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			t.Fatalf("Bootstrapping failed. Error deleting leftover Design Center space %s: %s", name, err)
 		}
-		waitForDesignCenterOperation(t, config, project, op)
+
 	}
 }
 
