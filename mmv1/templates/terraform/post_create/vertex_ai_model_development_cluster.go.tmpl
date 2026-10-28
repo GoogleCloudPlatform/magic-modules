@@ -71,15 +71,23 @@ if len(postCreateMask) > 0 {
 		Timeout:   d.Timeout(schema.TimeoutCreate),
 		Headers:   headers,
 	})
+	// The cluster exists and is RUNNING here. Returning an error taints it, so tell the user how to
+	// keep it rather than let the next apply replace a healthy cluster.
+	versionErrHint := "The cluster was created at the service default version and is running, but Terraform " +
+		"marks it tainted and the next apply will replace it. To keep it, run `terraform untaint` on this " +
+		"resource and set control_plane_version and node_pool_versions to \"-\" or at most one minor version " +
+		"above the running version."
 	if err != nil {
+		log.Printf("[WARN] Applying versions to ModelDevelopmentCluster %q after creation failed: %s. %s", d.Id(), err, versionErrHint)
 		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
-		return fmt.Errorf("Error patching ModelDevelopmentCluster %q versions after creation: %s", d.Id(), err)
+		return fmt.Errorf("Error patching ModelDevelopmentCluster %q versions after creation: %s. %s", d.Id(), err, versionErrHint)
 	}
 	err = VertexAIOperationWaitTime(
 		config, patchRes, project, tpgresource.LocationFromId(d.Id()), "Updating ModelDevelopmentCluster", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
+		log.Printf("[WARN] Applying versions to ModelDevelopmentCluster %q after creation failed: %s. %s", d.Id(), err, versionErrHint)
 		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
-		return err
+		return fmt.Errorf("Error waiting to apply ModelDevelopmentCluster %q versions after creation: %s. %s", d.Id(), err, versionErrHint)
 	}
 }
