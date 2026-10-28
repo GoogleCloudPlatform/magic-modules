@@ -241,6 +241,34 @@ properties:
       - name: connectionAttributes
         type: KeyValuePairs
         description: Connection string attributes
+      - name: oracleSslConfig
+        type: NestedObject
+        description: |
+          Optional. SSL configuration for the Oracle connection.
+        properties:
+          - name: caCertificate
+            type: String
+            description: |
+              PEM-encoded certificate of the CA that signed the source database
+              server's certificate.
+            immutable: true
+            sensitive: true
+            # ca_certificate is input-only and omitted by the Datastream API on GET responses.
+            ignore_read: true
+          - name: caCertificateSet
+            type: Boolean
+            description: |
+              Indicates whether the caCertificate field has been set for this
+              Connection-Profile.
+            output: true
+          - name: serverCertificateDistinguishedName
+            type: String
+            description: |
+              The distinguished name (DN) mentioned in the server
+              certificate. This corresponds to SSL_SERVER_CERT_DN sqlnet parameter.
+              Refer
+              https://docs.oracle.com/en/database/oracle/oracle-database/19/netrf/local-naming-parameters-in-the-tnsnames-ora-file.html#GUID-70AB0695-A9AA-4A94-B141-4C605236EEB7
+              If this field is not provided, the DN matching is not enforced.
   - name: gcsProfile
     type: NestedObject
     description: |
@@ -432,8 +460,8 @@ properties:
               If this field is set, the communication will be encrypted with TLS encryption
               and the server identity will be authenticated.
             exactly_one_of:
-              - ssl_config.0.server_verification
-              - ssl_config.0.server_and_client_verification
+              - postgresql_profile.0.ssl_config.0.server_verification
+              - postgresql_profile.0.ssl_config.0.server_and_client_verification
             properties:
               - name: caCertificate
                 type: String
@@ -441,16 +469,22 @@ properties:
                 required: true
                 immutable: true
                 sensitive: true
+                # ca_certificate is input-only and omitted by the Datastream API on GET responses.
                 ignore_read: true
+              - name: serverCertificateHostname
+                type: String
+                description: |
+                  The hostname mentioned in the Subject or the Subject Alternative Name
+                  field of the server certificate. If this field is not provided, the
+                  hostname in the server certificate is not validated.
           - name: serverAndClientVerification
             type: NestedObject
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and both the server identity and the client identity will be authenticated.
             exactly_one_of:
-              - ssl_config.0.server_verification
-              - ssl_config.0.server_and_client_verification
-            ignore_read: true
+              - postgresql_profile.0.ssl_config.0.server_verification
+              - postgresql_profile.0.ssl_config.0.server_and_client_verification
             properties:
               - name: clientCertificate
                 type: String
@@ -463,6 +497,7 @@ properties:
                 immutable: true
                 required: true
                 sensitive: true
+                # client_certificate is input-only and omitted by the Datastream API on GET responses.
                 ignore_read: true
               - name: clientKey
                 type: String
@@ -474,6 +509,7 @@ properties:
                 immutable: true
                 required: true
                 sensitive: true
+                # client_key is input-only and omitted by the Datastream API on GET responses.
                 ignore_read: true
               - name: caCertificate
                 type: String
@@ -482,7 +518,14 @@ properties:
                 immutable: true
                 required: true
                 sensitive: true
+                # ca_certificate is input-only and omitted by the Datastream API on GET responses.
                 ignore_read: true
+              - name: serverCertificateHostname
+                type: String
+                description: |
+                  The hostname mentioned in the Subject or the Subject Alternative Name
+                  field of the server certificate. If this field is not provided, the
+                  hostname in the server certificate is not validated.
   - name: salesforceProfile
     min_version: beta
     type: NestedObject
@@ -625,6 +668,61 @@ properties:
         description: |
           Database for the SQL Server connection.
         required: true
+      - name: sslConfig
+        type: NestedObject
+        description: |
+          SSL configuration for the SQL Server connection.
+        properties:
+          - name: encryptionNotEnforced
+            type: NestedObject
+            description: |
+              If this field is set, Datastream will not enforce encryption for
+              communication with the database server. Encryption will be used only if
+              the database server forces it, without validating the server certificate.
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - sql_server_profile.0.ssl_config.0.encryption_not_enforced
+              - sql_server_profile.0.ssl_config.0.basic_encryption
+              - sql_server_profile.0.ssl_config.0.encryption_and_server_validation
+            properties: []
+          - name: basicEncryption
+            type: NestedObject
+            description: |
+              If this field is set, the communication will be encrypted with TLS
+              encryption, without validating the server certificate.
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - sql_server_profile.0.ssl_config.0.encryption_not_enforced
+              - sql_server_profile.0.ssl_config.0.basic_encryption
+              - sql_server_profile.0.ssl_config.0.encryption_and_server_validation
+            properties: []
+          - name: encryptionAndServerValidation
+            type: NestedObject
+            description: |
+              If this field is set, the communication will be encrypted with TLS
+              encryption and the server identity will be authenticated using the Common
+              Name (CN) and/or Subject Alternative Name (SAN) fields in the server
+              certificate.
+            exactly_one_of:
+              - sql_server_profile.0.ssl_config.0.encryption_not_enforced
+              - sql_server_profile.0.ssl_config.0.basic_encryption
+              - sql_server_profile.0.ssl_config.0.encryption_and_server_validation
+            properties:
+              - name: caCertificate
+                type: String
+                description: |
+                  PEM-encoded certificate of the CA that signed the source database
+                  server's certificate.
+                sensitive: true
+                # ca_certificate is input-only and omitted by the Datastream API on GET responses.
+                ignore_read: true
+              - name: serverCertificateHostname
+                type: String
+                description: |
+                  The hostname mentioned in the Subject or the Subject Alternative Name
+                  field of the server certificate.
   - name: mongodbProfile
     type: NestedObject
     description: Configuration for connecting to a MongoDB database.

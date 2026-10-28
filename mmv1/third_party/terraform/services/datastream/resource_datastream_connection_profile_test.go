@@ -751,3 +751,333 @@ resource "google_datastream_connection_profile" "default" {
 }
 `, context)
 }
+
+func TestAccDatastreamConnectionProfile_oracleSslConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_oracleSslConfigBasic(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					// password and ca_certificate are input-only and omitted by the Datastream API on GET responses.
+					"oracle_profile.0.password",
+					"oracle_profile.0.oracle_ssl_config.0.ca_certificate",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_oracleSslConfigUpdate(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					"oracle_profile.0.password",
+					"oracle_profile.0.oracle_ssl_config.0.ca_certificate",
+				},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_oracleSslConfigBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-oracle-ssl-profile"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-oracle-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 2484
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+
+    oracle_ssl_config {
+      ca_certificate                        = file("text-fixtures/ca-cert.pem")
+      server_certificate_distinguished_name = "CN=oracle.example.com"
+    }
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_oracleSslConfigUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-oracle-ssl-profile-updated"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-oracle-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  oracle_profile {
+    hostname         = "1.1.1.1"
+    port             = 2484
+    username         = "user"
+    password         = "password"
+    database_service = "ORCL"
+
+    oracle_ssl_config {
+      ca_certificate                        = file("text-fixtures/ca-cert.pem")
+      server_certificate_distinguished_name = "CN=updated-oracle.example.com"
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDatastreamConnectionProfile_sqlServerSslConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_sqlServerSslConfigNotEnforced(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					// password is input-only and omitted by the Datastream API on GET responses.
+					"sql_server_profile.0.password",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_sqlServerSslConfigBasicEncryption(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					"sql_server_profile.0.password",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_sqlServerSslConfigValidation(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					"sql_server_profile.0.password",
+					// ca_certificate is input-only and omitted by the Datastream API on GET responses.
+					"sql_server_profile.0.ssl_config.0.encryption_and_server_validation.0.ca_certificate",
+				},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_sqlServerSslConfigNotEnforced(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-sqlserver-ssl-profile"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-sqlsrv-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  sql_server_profile {
+    hostname = "1.1.1.1"
+    port     = 1433
+    username = "user"
+    password = "password"
+    database = "mydb"
+
+    ssl_config {
+      encryption_not_enforced {}
+    }
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_sqlServerSslConfigBasicEncryption(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-sqlserver-ssl-profile-basic"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-sqlsrv-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  sql_server_profile {
+    hostname = "1.1.1.1"
+    port     = 1433
+    username = "user"
+    password = "password"
+    database = "mydb"
+
+    ssl_config {
+      basic_encryption {}
+    }
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_sqlServerSslConfigValidation(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-sqlserver-ssl-profile-validated"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-sqlsrv-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  sql_server_profile {
+    hostname = "1.1.1.1"
+    port     = 1433
+    username = "user"
+    password = "password"
+    database = "mydb"
+
+    ssl_config {
+      encryption_and_server_validation {
+        ca_certificate              = file("text-fixtures/ca-cert.pem")
+        server_certificate_hostname = "sqlserver.example.com"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDatastreamConnectionProfile_postgresqlSslServerCertificateHostname(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_postgresqlSslServerVerification(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_verification.0.ca_certificate",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_postgresqlSslServerAndClientVerification(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"location",
+					"connection_profile_id",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.ca_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_key",
+				},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_postgresqlSslServerVerification(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-pg-ssl-profile"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-pg-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  postgresql_profile {
+    hostname = "1.1.1.1"
+    port     = 5432
+    username = "user"
+    password = "password"
+    database = "postgres"
+
+    ssl_config {
+      server_verification {
+        ca_certificate              = file("text-fixtures/ca-cert.pem")
+        server_certificate_hostname = "postgres.example.com"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_postgresqlSslServerAndClientVerification(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+  display_name              = "tf-pg-ssl-profile-mtls"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-pg-ssl-%{random_suffix}"
+  create_without_validation = true
+
+  postgresql_profile {
+    hostname = "1.1.1.1"
+    port     = 5432
+    username = "user"
+    password = "password"
+    database = "postgres"
+
+    ssl_config {
+      server_and_client_verification {
+        ca_certificate              = file("text-fixtures/ca-cert.pem")
+        client_certificate          = file("text-fixtures/cert.pem")
+        client_key                  = file("text-fixtures/private-key.pem")
+        server_certificate_hostname = "postgres-mtls.example.com"
+      }
+    }
+  }
+}
+`, context)
+}
