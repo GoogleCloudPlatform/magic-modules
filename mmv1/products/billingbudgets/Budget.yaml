@@ -123,10 +123,12 @@ samples:
       - name: billing_budget_spend_cap
         resource_id_vars:
           display_name: Example Spend Cap Budget
+          project_id: spend-cap
         test_vars_overrides:
           display_name: '"Example Spend Cap Budget" + randomSuffix'
         test_env_vars:
-          billing_acct: MASTER_BILLING_ACCT
+          billing_acct: BILLING_ACCT
+          org_id: ORG_ID
   - name: billing_budget_optional
     primary_resource_id: budget
     exclude_basic_doc: true

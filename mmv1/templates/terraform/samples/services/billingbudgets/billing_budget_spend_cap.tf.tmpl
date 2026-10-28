@@ -2,7 +2,12 @@ data "google_billing_account" "account" {
   billing_account = "{{index $.TestEnvVars "billing_acct"}}"
 }
 
-data "google_project" "project" {
+resource "google_project" "project" {
+  project_id      = "{{index $.ResourceIdVars "project_id"}}"
+  name            = "{{index $.ResourceIdVars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_acct"}}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_billing_budget" "{{$.PrimaryResourceId}}" {
@@ -10,7 +15,7 @@ resource "google_billing_budget" "{{$.PrimaryResourceId}}" {
   display_name    = "{{index $.ResourceIdVars "display_name"}}"
 
   budget_filter {
-    projects               = ["projects/${data.google_project.project.number}"]
+    projects               = ["projects/${google_project.project.number}"]
     services               = ["services/C7E2-9256-1C43"] # Gemini Enterprise Agent Platform
     credit_types_treatment = "EXCLUDE_ALL_CREDITS"
     calendar_period        = "MONTH"
@@ -18,8 +23,7 @@ resource "google_billing_budget" "{{$.PrimaryResourceId}}" {
 
   amount {
     specified_amount {
-      currency_code = "USD"
-      units         = "100"
+      units = "100"
     }
   }
 
