@@ -381,6 +381,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: includeObjects
             type: NestedObject
@@ -587,6 +590,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: includeObjects
             type: NestedObject
@@ -814,6 +820,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: includeObjects
             type: NestedObject
@@ -1014,6 +1023,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: includeObjects
             type: NestedObject
@@ -1229,6 +1241,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: includeObjects
             type: NestedObject
@@ -1317,6 +1332,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: changeStreamName
             type: String
@@ -1500,6 +1518,9 @@ properties:
           - source_config.0.salesforce_source_config
           - source_config.0.spanner_source_config
           - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
         properties:
           - name: includeObjects
             type: NestedObject
@@ -1583,6 +1604,380 @@ properties:
               Optional. Maximum number of concurrent backfill tasks. The number
               should be non-negative and less than or equal to 50. If not set
               (or set to 0), the system''s default value is used
+      - name: dataverseSourceConfig
+        min_version: beta
+        type: NestedObject
+        description: |
+          Dataverse data source configuration.
+        exactly_one_of:
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
+        properties:
+          - name: includeObjects
+            type: NestedObject
+            description: |
+              Dataverse objects to retrieve from the source.
+            properties:
+              - name: tables
+                type: Array
+                description: |
+                  Tables in the Microsoft Dataverse environment.
+                required: true
+                min_size: 1
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: tableName
+                      type: String
+                      description: |
+                        Name of the table in Microsoft Dataverse.
+                    - name: columns
+                      type: Array
+                      description: |
+                        Columns in the Microsoft Dataverse table.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: columnName
+                            type: String
+                            description: |
+                              Column name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The Microsoft Dataverse original data type.
+                            output: true
+                          - name: isPrimaryKey
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is a primary key.
+                            output: true
+                          - name: isNullable
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is nullable.
+                            output: true
+          - name: excludeObjects
+            type: NestedObject
+            description: |
+              Dataverse objects to exclude from the stream.
+            properties:
+              - name: tables
+                type: Array
+                description: |
+                  Tables in the Microsoft Dataverse environment.
+                required: true
+                min_size: 1
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: tableName
+                      type: String
+                      description: |
+                        Name of the table in Microsoft Dataverse.
+                    - name: columns
+                      type: Array
+                      description: |
+                        Columns in the Microsoft Dataverse table.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: columnName
+                            type: String
+                            description: |
+                              Column name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The Microsoft Dataverse original data type.
+                            output: true
+                          - name: isPrimaryKey
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is a primary key.
+                            output: true
+                          - name: isNullable
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is nullable.
+                            output: true
+          - name: pollingInterval
+            type: String
+            description: |
+              Dataverse objects polling interval. The interval at which new changes
+              will be polled for each object. The duration must be between 5 minutes
+              and 24 hours.
+            required: true
+      - name: salesforceMarketingCloudSourceConfig
+        min_version: beta
+        type: NestedObject
+        description: |
+          Salesforce Marketing Cloud data source configuration.
+        exactly_one_of:
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
+        properties:
+          - name: includeObjects
+            type: NestedObject
+            description: |
+              Salesforce Marketing Cloud objects to retrieve from the source.
+            properties:
+              - name: objects
+                type: Array
+                description: |
+                  Objects in the Salesforce Marketing Cloud instance.
+                required: true
+                min_size: 1
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: objectKey
+                      type: String
+                      description: |
+                        Key of the object.
+                    - name: fields
+                      type: Array
+                      description: |
+                        Fields in the Salesforce Marketing Cloud object.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: fieldName
+                            type: String
+                            description: |
+                              Field name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The data type of the field.
+                            output: true
+                          - name: isPrimaryKey
+                            type: Boolean
+                            description: |
+                              Indicates whether the field is a primary key.
+                            output: true
+                          - name: isNullable
+                            type: Boolean
+                            description: |
+                              Indicates whether the field is nullable.
+                            output: true
+                          - name: maxLength
+                            type: Integer
+                            description: |
+                              Maximum length of the field.
+                            output: true
+                          - name: scale
+                            type: Integer
+                            description: |
+                              Scale of the field.
+                            output: true
+          - name: excludeObjects
+            type: NestedObject
+            description: |
+              Salesforce Marketing Cloud objects to exclude from the stream.
+            properties:
+              - name: objects
+                type: Array
+                description: |
+                  Objects in the Salesforce Marketing Cloud instance.
+                required: true
+                min_size: 1
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: objectKey
+                      type: String
+                      description: |
+                        Key of the object.
+                    - name: fields
+                      type: Array
+                      description: |
+                        Fields in the Salesforce Marketing Cloud object.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: fieldName
+                            type: String
+                            description: |
+                              Field name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The data type of the field.
+                            output: true
+                          - name: isPrimaryKey
+                            type: Boolean
+                            description: |
+                              Indicates whether the field is a primary key.
+                            output: true
+                          - name: isNullable
+                            type: Boolean
+                            description: |
+                              Indicates whether the field is nullable.
+                            output: true
+                          - name: maxLength
+                            type: Integer
+                            description: |
+                              Maximum length of the field.
+                            output: true
+                          - name: scale
+                            type: Integer
+                            description: |
+                              Scale of the field.
+                            output: true
+          - name: pollingInterval
+            type: String
+            description: |
+              Salesforce Marketing Cloud objects polling interval. The interval at
+              which new changes will be polled for each object. The duration must be
+              between 5 minutes and 24 hours.
+            required: true
+          - name: fullRefreshPollingInterval
+            type: String
+            description: |
+              Salesforce Marketing Cloud objects full refresh polling interval. The
+              interval at which a full refresh will be performed for objects that do
+              not support incremental extraction. The duration must be between 1 hour
+              and 7 days.
+            required: true
+      - name: serviceNowSourceConfig
+        min_version: beta
+        type: NestedObject
+        description: |
+          ServiceNow data source configuration.
+        exactly_one_of:
+          - source_config.0.mysql_source_config
+          - source_config.0.oracle_source_config
+          - source_config.0.postgresql_source_config
+          - source_config.0.sql_server_source_config
+          - source_config.0.salesforce_source_config
+          - source_config.0.spanner_source_config
+          - source_config.0.mongodb_source_config
+          - source_config.0.dataverse_source_config
+          - source_config.0.salesforce_marketing_cloud_source_config
+          - source_config.0.service_now_source_config
+        properties:
+          - name: includeObjects
+            type: NestedObject
+            description: |
+              ServiceNow objects to retrieve from the source.
+            properties:
+              - name: tables
+                type: Array
+                description: |
+                  Tables in the ServiceNow instance.
+                required: true
+                min_size: 1
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: tableName
+                      type: String
+                      description: |
+                        Name of the table in ServiceNow.
+                    - name: columns
+                      type: Array
+                      description: |
+                        Columns in the ServiceNow table.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: columnName
+                            type: String
+                            description: |
+                              Column name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The ServiceNow original data type.
+                            output: true
+                          - name: isPrimaryKey
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is a primary key.
+                            output: true
+                          - name: isNullable
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is nullable.
+                            output: true
+                          - name: maxLength
+                            type: Integer
+                            description: |
+                              Maximum length of the column.
+                            output: true
+          - name: excludeObjects
+            type: NestedObject
+            description: |
+              ServiceNow objects to exclude from the stream.
+            properties:
+              - name: tables
+                type: Array
+                description: |
+                  Tables in the ServiceNow instance.
+                required: true
+                min_size: 1
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: tableName
+                      type: String
+                      description: |
+                        Name of the table in ServiceNow.
+                    - name: columns
+                      type: Array
+                      description: |
+                        Columns in the ServiceNow table.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: columnName
+                            type: String
+                            description: |
+                              Column name.
+                          - name: dataType
+                            type: String
+                            description: |
+                              The ServiceNow original data type.
+                            output: true
+                          - name: isPrimaryKey
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is a primary key.
+                            output: true
+                          - name: isNullable
+                            type: Boolean
+                            description: |
+                              Indicates whether the column is nullable.
+                            output: true
+                          - name: maxLength
+                            type: Integer
+                            description: |
+                              Maximum length of the column.
+                            output: true
+          - name: pollingInterval
+            type: String
+            description: |
+              ServiceNow objects polling interval. The interval at which new changes
+              will be polled for each object. The duration must be between 5 minutes
+              and 24 hours.
+            required: true
   - name: destinationConfig
     type: NestedObject
     description: |
@@ -2273,6 +2668,103 @@ properties:
                               name: field
                               description: |
                                 Field name.
+      - name: saasExcludedObjects
+        type: NestedObject
+        description: |
+          SaaS data source objects to avoid backfilling.
+        properties:
+          - name: objects
+            type: Array
+            description: |
+              Objects in the SaaS source.
+            required: true
+            min_size: 1
+            item_type:
+              type: NestedObject
+              properties:
+                - name: objectName
+                  type: String
+                  description: |
+                    Name of the object.
+                - name: properties
+                  type: Array
+                  description: |
+                    Properties in the SaaS object. When unspecified as part of
+                    include/exclude objects, includes/excludes everything.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: propertyName
+                        type: String
+                        description: |
+                          Property name.
+                      - name: dataType
+                        type: String
+                        description: |
+                          The SaaS source original data type.
+                        output: true
+                      - name: isPrimaryKey
+                        type: Boolean
+                        description: |
+                          Indicates whether the property is a primary key.
+                        output: true
+                      - name: isNullable
+                        type: Boolean
+                        description: |
+                          Indicates whether the property is nullable.
+                        output: true
+                      - name: properties
+                        type: Array
+                        description: |
+                          Nested properties for complex types (Objects or Arrays of Objects).
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: propertyName
+                              type: String
+                              description: |
+                                Property name.
+                            - name: dataType
+                              type: String
+                              description: |
+                                The SaaS source original data type.
+                              output: true
+                            - name: isPrimaryKey
+                              type: Boolean
+                              description: |
+                                Indicates whether the property is a primary key.
+                              output: true
+                            - name: isNullable
+                              type: Boolean
+                              description: |
+                                Indicates whether the property is nullable.
+                              output: true
+                            - name: properties
+                              type: Array
+                              description: |
+                                Nested properties for complex types (Objects or Arrays of Objects).
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: propertyName
+                                    type: String
+                                    description: |
+                                      Property name.
+                                  - name: dataType
+                                    type: String
+                                    description: |
+                                      The SaaS source original data type.
+                                    output: true
+                                  - name: isPrimaryKey
+                                    type: Boolean
+                                    description: |
+                                      Indicates whether the property is a primary key.
+                                    output: true
+                                  - name: isNullable
+                                    type: Boolean
+                                    description: |
+                                      Indicates whether the property is nullable.
+                                    output: true
   - name: backfillNone
     type: NestedObject
     description: |
