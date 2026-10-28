@@ -3,13 +3,13 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
   location               = "us-west4"
-  
+
   labels = {
-    "label" = "key"
+    "label" = "{{index $.Vars "label_value"}}"
   }
 
   annotations = {
-    label-one = "value-one"
+    label-one = "{{index $.Vars "annotation_value"}}"
   }
 }
 
