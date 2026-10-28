@@ -16,7 +16,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-east5"
   network       = google_compute_network.default.name
 }
 
@@ -24,26 +24,26 @@ resource "google_compute_disk" "my_source_disk" {
   name  = "{{index $.ResourceIdVars "workstation_config_name"}}-source-disk"
   size  = 10
   type  = "pd-ssd"
-  zone  = "us-central1-a"
+  zone  = "us-east5-a"
 }
 
 resource "google_compute_snapshot" "my_source_snapshot" {
   name        = "{{index $.ResourceIdVars "workstation_config_name"}}-source-snapshot"
   source_disk = google_compute_disk.my_source_disk.name
-  zone        = "us-central1-a"
+  zone        = "us-east5-a"
 }
 
 resource "google_workstations_workstation_cluster" "default" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
+  location               = "us-east5"
 }
 
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
-  location               = "us-central1"
+  location               = "us-east5"
 
   host {
       gce_instance {

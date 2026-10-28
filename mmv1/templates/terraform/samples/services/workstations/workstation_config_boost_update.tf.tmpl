@@ -6,7 +6,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "europe-west4"
   network       = google_compute_network.default.name
 }
 
@@ -14,7 +14,7 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
+  location               = "europe-west4"
   
   labels = {
     "label" = "key"
@@ -28,7 +28,10 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location               = "us-central1"
+  location               = "europe-west4"
+
+  idle_timeout = "600s"
+  idle_action  = "{{index $.Vars "idle_action"}}"
 
   host {
     gce_instance {

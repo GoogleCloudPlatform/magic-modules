@@ -16,7 +16,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-west4"
   network       = google_compute_network.default.name
 }
 
@@ -24,7 +24,7 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
+  location               = "us-west4"
   
   labels = {
     "label" = "key"
@@ -38,12 +38,12 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location   		         = "us-central1"
+  location   		         = "us-west4"
 
   idle_timeout = "600s"
   running_timeout = "21600s"
 
-  replica_zones = ["us-central1-a", "us-central1-b"]
+  replica_zones = ["us-west4-a", "us-west4-b"]
   annotations = {
     label-one = "value-one"
   }

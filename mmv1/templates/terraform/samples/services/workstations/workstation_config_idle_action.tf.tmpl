@@ -8,7 +8,7 @@ resource "google_compute_subnetwork" "default" {
   provider      = google-beta
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "europe-west4"
   network       = google_compute_network.default.name
 }
 
@@ -17,14 +17,14 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
+  location               = "europe-west4"
 }
 
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location               = "us-central1"
+  location               = "europe-west4"
 
   idle_timeout = "600s"
   idle_action  = "SUSPEND"
