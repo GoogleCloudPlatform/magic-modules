@@ -226,7 +226,14 @@ func BootstrapDesignCenterApplicationTemplateRevisionURI(t *testing.T) string {
 func BootstrapDesignCenterComponent(t *testing.T) string {
 	t.Helper()
 
-	bootstrapDesignCenterComponent(t, bootstrapDesignCenterComponentID, "Bootstrap Source Component", bootstrapDesignCenterCloudRunTemplateURI)
+	component := bootstrapDesignCenterComponent(t, bootstrapDesignCenterComponentID, "Bootstrap Source Component", bootstrapDesignCenterCloudRunTemplateURI)
+	if strings.HasPrefix(t.Name(), "TestAccDesignCenterConnection_") {
+		project := BootstrapDesignCenterProject(t)
+		bootstrapDesignCenterOnce(t, component+"/connections", "", func(config *transport_tpg.Config) string {
+			cleanupDesignCenterResources(t, config, project, component+"/connections", false)
+			return ""
+		})
+	}
 	return bootstrapDesignCenterComponentID
 }
 
@@ -329,7 +336,8 @@ func ensureDesignCenterResource(t *testing.T, config *transport_tpg.Config, proj
 // example projects/p/locations/l/spaces) left over from previous failed or
 // interrupted test runs. Otherwise creating a new one fails: only one Space is
 // allowed per region within a management project (409), one Catalog per Space
-// (FAILED_PRECONDITION), and one Share per Catalog (CATALOG_ALREADY_SHARED).
+// (FAILED_PRECONDITION), one Share per Catalog (CATALOG_ALREADY_SHARED), and
+// one Connection between two Components ("connection already exists").
 func cleanupDesignCenterResources(t *testing.T, config *transport_tpg.Config, project, collection string, force bool) {
 	t.Helper()
 
