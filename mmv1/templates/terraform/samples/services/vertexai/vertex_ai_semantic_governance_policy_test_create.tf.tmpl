@@ -108,16 +108,18 @@ resource "google_vertex_ai_semantic_governance_policy" "{{$.PrimaryResourceId}}"
   project                       = google_project.project.project_id
   semantic_governance_policy_id = "{{index $.ResourceIdVars "semantic_governance_policy_id"}}"
   region                        = "us-central1"
-  natural_language_constraint   = "Do not access internal developer endpoints"
+  display_name                  = "{{index $.Vars "display_name"}}"
+  description                   = "{{index $.Vars "description"}}"
+  natural_language_constraint   = "{{index $.Vars "natural_language_constraint"}}"
   agent                         = data.google_agent_registry_agent.agent.id
 
   mcp_tools {
     mcp_server = data.google_agent_registry_mcp_server.mcp_server.id
-    tools      = ["get_order_status"]
+    tools      = ["{{index $.Vars "mcp_tool"}}"]
   }
 
   agent_response_customization {
-    denial_message = "Access denied: constraint violation"
+    denial_message = "{{index $.Vars "denial_message"}}"
   }
 
   depends_on = [google_vertex_ai_semantic_governance_policy_engine.sgpe]

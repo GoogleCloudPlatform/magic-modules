@@ -211,16 +211,10 @@ properties:
           type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
-          exactly_one_of:
-            - linkedDataset
-            - linkedPubsubSubscription
         - name: linkedPubsubSubscription
           type: String
           description: Output only. Name of the Pub/Sub subscription, e.g. projects/subscriberproject/subscriptions/subscriptions/sub_id
           output: true
-          exactly_one_of:
-            - linkedDataset
-            - linkedPubsubSubscription
   - name: linkedResources
     type: Array
     description: |

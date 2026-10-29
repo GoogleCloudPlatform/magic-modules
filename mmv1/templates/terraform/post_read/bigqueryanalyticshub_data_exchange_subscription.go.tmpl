@@ -26,7 +26,7 @@
         if (shouldTriggerRefreshAPI) {
             log.Printf("[DEBUG] Attempting to refresh BigQuery Analytics Hub Subscription %q (ID: %s)", d.Get("name").(string), d.Id())
 
-            refreshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/subscriptions/{{"{{"}}subscription_id{{"}}"}}:refresh")
+            refreshUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/subscriptions/{{"{{"}}subscription_id{{"}}"}}:refresh")
             if err != nil {
                 return fmt.Errorf("Error constructing refresh URL for DataExchangeSubscription %q: %s", d.Id(), err)
             }

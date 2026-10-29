@@ -19,3 +19,4 @@ scopes:
 versions:
   - name: ga
     base_url: https://monitoring.googleapis.com/
+legacy_identity_import_test: true

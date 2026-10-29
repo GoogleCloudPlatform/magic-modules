@@ -23,6 +23,17 @@ func TestDetectMissingIdentityCoverage(t *testing.T) {
 			want:            map[string]*MissingIdentityInfo{},
 		},
 		{
+			name:            "resource with identity import step using RefreshState instead of ImportState is flagged",
+			resourceContent: fakeResourceWithFullCoverage(),
+			testContent:     fakeTestWithRefreshStateIdentity(),
+			resourceName:    "foo_instance",
+			want: map[string]*MissingIdentityInfo{
+				"foo_instance": {
+					MissingImportTest: true,
+				},
+			},
+		},
+		{
 			name:            "resource with identity missing Create and Update CRUD and import test is flagged",
 			resourceContent: fakeResourceMissingCreateUpdate(),
 			testContent:     "",
@@ -177,10 +188,76 @@ func TestAccFooInstance_importBlockWithResourceIdentity(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
+				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
 }
 `
+}
+
+// fakeTestWithRefreshStateIdentity returns a test file that mistakenly uses RefreshState: true with ImportBlockWithResourceIdentity.
+func fakeTestWithRefreshStateIdentity() string {
+	return `package fake
+
+func TestAccFooInstance_importBlockWithResourceIdentity(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				RefreshState:    true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+`
+}
+
+func TestDetectMissingIdentityCoverage_LegacyIdentityImportOptOut(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	productDir := filepath.Join(tmpDir, "mmv1", "products", "foo")
+	if err := os.MkdirAll(productDir, 0755); err != nil {
+		t.Fatalf("failed to create mmv1 product dir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(productDir, "product.yaml"), []byte("name: Foo\nlegacy_identity_import_test: true\n"), 0644); err != nil {
+		t.Fatalf("failed to write product.yaml: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(productDir, "Instance.yaml"), []byte("name: Instance\n"), 0644); err != nil {
+		t.Fatalf("failed to write Instance.yaml: %v", err)
+	}
+
+	servicesDir := filepath.Join(tmpDir, "services")
+	if err := os.MkdirAll(servicesDir, 0755); err != nil {
+		t.Fatalf("failed to create services dir: %v", err)
+	}
+
+	resourceWithConfigHeader := "// Configuration: https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products/foo/Instance.yaml\n" + fakeResourceWithFullCoverage()
+	if err := os.WriteFile(filepath.Join(servicesDir, "resource_foo_instance.go"), []byte(resourceWithConfigHeader), 0644); err != nil {
+		t.Fatalf("failed to write resource file: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(servicesDir, "resource_foo_instance_test.go"), []byte(fakeTestWithRefreshStateIdentity()), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
+
+	results, err := DetectMissingIdentityCoverage(servicesDir, []string{"foo_instance"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(results) != 0 {
+		t.Errorf("expected opted-out resource with RefreshState to pass, got %+v", results)
+	}
+
+	// Now flip the product opt-out to false and verify RefreshState is flagged
+	if err := os.WriteFile(filepath.Join(productDir, "product.yaml"), []byte("name: Foo\n"), 0644); err != nil {
+		t.Fatalf("failed to update product.yaml: %v", err)
+	}
+	results, err = DetectMissingIdentityCoverage(servicesDir, []string{"foo_instance"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if info, ok := results["foo_instance"]; !ok || !info.MissingImportTest {
+		t.Errorf("expected non-opted-out resource with RefreshState to be flagged with MissingImportTest, got %+v", results)
+	}
 }

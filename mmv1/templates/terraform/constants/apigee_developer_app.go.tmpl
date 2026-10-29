@@ -59,7 +59,7 @@ func updateDeveloperAppKeyProductsAndScopes(config *transport_tpg.Config, d *sch
 		return fmt.Errorf("cannot update api_products/scopes in place: no existing consumer_key found in state for DeveloperApp %q", d.Id())
 	}
 
-	keyURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ApigeeBasePath{{"}}"}}{{"{{"}}org_id{{"}}"}}/developers/{{"{{"}}developer_email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}/keys/"+consumerKey)
+	keyURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"{{"}}org_id{{"}}"}}/developers/{{"{{"}}developer_email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}/keys/"+consumerKey)
 	if err != nil {
 		return err
 	}

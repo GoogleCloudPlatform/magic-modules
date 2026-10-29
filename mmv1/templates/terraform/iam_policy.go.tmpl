@@ -50,7 +50,7 @@ func init() {
         Name: "{{ $.TerraformName }}_iam_binding",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Type: registry.SchemaTypeIAMResource,
-        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}),
+        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}{{ if $.IamPolicy.MaxBackoffTimeoutSeconds }}, tpgiamresource.IamWithMaxBackoffSeconds({{ $.IamPolicy.MaxBackoffTimeoutSeconds }}){{- end }}),
     }.Register()
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_member",
@@ -91,6 +91,9 @@ func New{{ $.ResourceName }}IamMemberResource() *schema.Resource {
         tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser),
 		{{- if $.IamPolicy.DeprecationMessage }}
 		tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"),
+		{{- end }}
+		{{- if $.IamPolicy.MaxBackoffTimeoutSeconds }}
+		tpgiamresource.IamWithMaxBackoffSeconds({{ $.IamPolicy.MaxBackoffTimeoutSeconds }}),
 		{{- end }}
     )
 }
@@ -359,7 +362,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier string) (string, error) {
-	urlTemplate := fmt.Sprintf("{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }}), methodIdentifier)
+	urlTemplate := fmt.Sprintf(transport_tpg.BaseUrl(Product, u.Config)+"%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }}), methodIdentifier)
   url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err

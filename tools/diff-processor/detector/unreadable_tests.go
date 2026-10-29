@@ -13,23 +13,7 @@ import (
 // it so that each step's Config is a call to a config function that returns a
 // single fmt.Sprintf or acctest.Nprintf template. When a test on this list
 // becomes readable, remove it.
-var KnownUnreadableTests = []string{
-	"TestAccComputeInstance_diskResourcePolicies_attachmentDiff",
-	"TestAccComputeNetwork_bgpModeAndMedInteractions",
-	"TestAccComputeNetwork_networkBgpStandardModeDeleteMed",
-	"TestAccComputeRouterNamedSet_updatePrefix",
-	"TestAccDNSManagedZone_update",
-	"TestAccEphemeralServiceAccountJwt_basic",
-	"TestAccEphemeralServiceAccountJwt_withDelegates",
-	"TestAccEphemeralServiceAccountJwt_withExpiresIn",
-	"TestAccEphemeralServiceAccountKey_create",
-	"TestAccEphemeralServiceAccountKey_fetch",
-	"TestAccEphemeralServiceAccountKey_upload",
-	"TestAccEphemeralServiceAccountToken_basic",
-	"TestAccEphemeralServiceAccountToken_withCustomLifetime",
-	"TestAccEphemeralServiceAccountToken_withDelegates",
-	"TestAccPubsubTopic_schema",
-}
+var KnownUnreadableTests = []string{}
 
 // The longest error message reported for a single unreadable test.
 const maxUnreadableTestErrorLength = 300

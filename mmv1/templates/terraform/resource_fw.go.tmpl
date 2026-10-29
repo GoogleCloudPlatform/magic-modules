@@ -276,7 +276,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"{{$.CreateUri}}")
     if resp.Diagnostics.HasError() {
         return
     }
@@ -493,7 +493,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"{{$.CreateUri}}")
     if resp.Diagnostics.HasError() {
         return
     }
@@ -638,7 +638,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"{{$.DeleteUri}}")
     if resp.Diagnostics.HasError() {
         return
     }
@@ -778,7 +778,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 	// Use provider_meta to set User-Agent
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 
-	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, transport_tpg.BaseUrl(Product, r.providerConfig)+"{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if diags.HasError() {
         return
     }

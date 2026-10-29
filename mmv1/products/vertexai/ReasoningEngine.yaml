@@ -46,8 +46,13 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: 'vertex_ai_reasoning_engine_deletion_policy'
+        config_path: 'templates/terraform/samples/services/vertexai/vertex_ai_reasoning_engine_basic.tf.tmpl'
         resource_id_vars:
           name: 'reasoning-engine'
+        vars:
+          description: 'A reasoning engine with deletion policy'
+          labels: null
+          deletion_policy: 'FORCE'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
@@ -57,6 +62,10 @@ samples:
       - name: 'vertex_ai_reasoning_engine_basic'
         resource_id_vars:
           name: 'reasoning-engine'
+        vars:
+          description: 'A basic reasoning engine'
+          labels: '{"key" = "value"}'
+          deletion_policy: null
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
@@ -1009,9 +1018,6 @@ properties:
             properties:
               - name: 'defaultTtl'
                 type: String
-                exactly_one_of:
-                  - defaultTtl
-                  - granularTtlConfig
                 description: |-
                   The default TTL duration of the memories in the Memory Bank.
               - name: 'granularTtlConfig'
@@ -1062,9 +1068,6 @@ properties:
                       - name: 'managedMemoryTopic'
                         type: NestedObject
                         # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
-                        exactly_one_of:
-                          - managedMemoryTopic
-                          - customMemoryTopic
                         description: |-
                           Optional. Managed memory topic.
                         properties:

@@ -21,3 +21,4 @@ versions:
     base_url: https://{{location}}-dialogflow.googleapis.com/v3/
   - name: beta
     base_url: https://{{location}}-dialogflow.googleapis.com/v3beta1/
+legacy_identity_import_test: true

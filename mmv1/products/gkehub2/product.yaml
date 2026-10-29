@@ -22,3 +22,4 @@ versions:
     base_url: https://gkehub.googleapis.com/v1beta/
   - name: ga
     base_url: https://gkehub.googleapis.com/v1/
+legacy_identity_import_test: true

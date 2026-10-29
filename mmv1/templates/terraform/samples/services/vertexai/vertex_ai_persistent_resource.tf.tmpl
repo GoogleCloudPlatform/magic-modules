@@ -8,7 +8,7 @@ resource "google_vertex_ai_persistent_resource" "{{.PrimaryResourceId}}" {
       machine_type = "n1-standard-8"
     }
 
-    replica_count = 2
+    replica_count = {{index $.Vars "replica_count"}}
   }
 
   resource_runtime_spec {

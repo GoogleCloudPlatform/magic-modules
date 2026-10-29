@@ -18,6 +18,13 @@ name: Acl
 description: |
   A Managed Service for Apache Kafka ACL. Apache Kafka is a trademark owned by the Apache Software Foundation.
 docs:
+  warning: |-
+    `google_managed_kafka_acl` cannot be used in conjunction with
+    `google_managed_kafka_acl_binding` for the same ACL (same `cluster` and
+    `acl_id`), or they will fight over which ACL entries are set.
+    `google_managed_kafka_acl` is authoritative: on every apply it replaces
+    the full `acl_entries` list, removing any entry added by a
+    `google_managed_kafka_acl_binding`.
 base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls
 self_link: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls/{{acl_id}}
 create_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/acls?aclId={{acl_id}}

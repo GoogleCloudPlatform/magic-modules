@@ -1,3 +1,13 @@
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = "organizations/{{index $.ResourceIdVars "org_id"}}"
+  short_name = "{{index $.ResourceIdVars "key_short_name"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.ResourceIdVars "value_short_name"}}"
+}
+
 resource "google_compute_network" "default" {
   name                    = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   auto_create_subnetworks = false
@@ -6,7 +16,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-west4"
   network       = google_compute_network.default.name
 }
 
@@ -14,8 +24,8 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
-  
+  location               = "us-west4"
+
   labels = {
     "label" = "key"
   }
@@ -25,10 +35,35 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   }
 }
 
+resource "google_service_account" "default" {
+  account_id   = "{{index $.ResourceIdVars "account_id"}}"
+  display_name = "Service Account"
+}
+
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
-  workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
-  workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location   		         = "us-central1"
+  workstation_config_id   = "{{index $.ResourceIdVars "workstation_config_name"}}"
+  workstation_cluster_id  = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
+  location                = "us-west4"
+  display_name            = "Display Name N"
+  idle_timeout            = "1200s"
+  running_timeout         = "43200s"
+  replica_zones           = ["us-west4-a", "us-west4-b"]
+  disable_tcp_connections = true
+  max_usable_workstations = 2
+
+  labels = {
+    foo = "bar"
+  }
+
+  readiness_checks {
+    path = "/"
+    port = 80
+  }
+
+  allowed_ports {
+    first = 80
+    last  = 80
+  }
 
   host {
     gce_instance {
@@ -36,11 +71,16 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
       boot_disk_size_gb            = 35
       disable_public_ip_addresses  = true
       enable_nested_virtualization = true
+      instance_metadata = {
+        "startup-key"  = "startup-value"
+        "custom-field" = "custom-value"
+      }
     }
   }
 
   container {
-    image = "intellij"
+    image       = "us-central1-docker.pkg.dev/cloud-workstations-images/predefined/code-oss:latest"
+    working_dir = "/test"
     env = {
       NAME = "FOO"
       BABE = "bar"
