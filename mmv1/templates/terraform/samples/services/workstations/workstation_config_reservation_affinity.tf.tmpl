@@ -8,7 +8,7 @@ resource "google_compute_subnetwork" "default" {
   provider      = google-beta
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-east4"
   network       = google_compute_network.default.name
 }
 
@@ -17,13 +17,13 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
+  location               = "us-east4"
 }
 
 resource "google_compute_reservation" "default" {
   provider = google-beta
   name     = "{{index $.ResourceIdVars "reservation_name"}}"
-  zone     = "us-central1-a"
+  zone     = "us-east4-a"
 
   specific_reservation {
     count = 1
@@ -40,9 +40,9 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location               = "us-central1"
+  location               = "us-east4"
 
-  replica_zones = ["us-central1-a", "us-central1-b"]
+  replica_zones = ["us-east4-a", "us-east4-b"]
 
   host {
     gce_instance {
