@@ -23,3 +23,4 @@ versions:
     cai_legacy_base_url: 'https://www.googleapis.com/compute/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/compute'
+legacy_identity_import_test: true

@@ -21,3 +21,4 @@ versions:
     base_url: 'https://ces.googleapis.com/v1beta/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+legacy_identity_import_test: true
