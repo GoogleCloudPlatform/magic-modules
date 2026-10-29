@@ -14,7 +14,6 @@ import (
 // single fmt.Sprintf or acctest.Nprintf template. When a test on this list
 // becomes readable, remove it.
 var KnownUnreadableTests = []string{
-	"TestAccDNSManagedZone_update",
 	"TestAccPubsubTopic_schema",
 }
 
