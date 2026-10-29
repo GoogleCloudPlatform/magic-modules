@@ -24,3 +24,4 @@ versions:
   - name: ga
     base_url: https://parametermanager.{{location}}.rep.googleapis.com/v1/
     cai_base_url: https://parametermanager.googleapis.com/v1/
+legacy_identity_import_test: true

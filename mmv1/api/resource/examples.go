@@ -26,7 +26,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
 
 // Generates configs to be shown as examples in docs and outputted as tests
@@ -183,12 +182,9 @@ type Examples struct {
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
+func (e *Examples) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type exampleAlias Examples
-	aliasObj := (*exampleAlias)(e)
-
-	err := value.Decode(aliasObj)
-	if err != nil {
+	if err := unmarshal((*exampleAlias)(e)); err != nil {
 		return err
 	}
 

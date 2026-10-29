@@ -19,3 +19,4 @@ scopes:
 versions:
   - name: ga
     base_url: https://{{location}}-discoveryengine.googleapis.com/v1/
+legacy_identity_import_test: true

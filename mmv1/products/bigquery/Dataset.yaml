@@ -52,14 +52,25 @@ samples:
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
+        vars:
+          max_time_travel_hours: null
+          is_case_insensitive: null
+          default_collation: null
+          owner_role: 'roles/bigquery.dataOwner'
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     exclude_basic_doc: true
     steps:
       - name: 'bigquery_dataset_with_max_time_travel_hours'
+        config_path: 'templates/terraform/samples/services/bigquery/bigquery_dataset_basic.tf.tmpl'
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
+        vars:
+          max_time_travel_hours: '72'
+          is_case_insensitive: null
+          default_collation: null
+          owner_role: 'OWNER'
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     exclude_test: true
@@ -97,17 +108,29 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: 'bigquery_dataset_case_insensitive_names'
+        config_path: 'templates/terraform/samples/services/bigquery/bigquery_dataset_basic.tf.tmpl'
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
+        vars:
+          max_time_travel_hours: null
+          is_case_insensitive: true
+          default_collation: null
+          owner_role: 'OWNER'
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     exclude_basic_doc: true
     steps:
       - name: 'bigquery_dataset_default_collation_set'
+        config_path: 'templates/terraform/samples/services/bigquery/bigquery_dataset_basic.tf.tmpl'
         resource_id_vars:
           dataset_id: 'example_dataset'
           account_name: 'bqowner'
+        vars:
+          max_time_travel_hours: null
+          is_case_insensitive: null
+          default_collation: 'und:ci'
+          owner_role: 'OWNER'
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     exclude_test: true

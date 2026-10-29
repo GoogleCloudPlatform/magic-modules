@@ -12,6 +12,6 @@ resource "google_service_usage_consumer_quota_override" "override" {
   service        = "servicemanagement.googleapis.com"
   metric         = urlencode("servicemanagement.googleapis.com/default_requests")
   limit          = urlencode("/min/project")
-  override_value = "95"
+  override_value = "{{index $.Vars "override_value"}}"
   force          = true
 }

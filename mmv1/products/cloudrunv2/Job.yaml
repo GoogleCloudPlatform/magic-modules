@@ -184,12 +184,16 @@ samples:
         min_version: beta
         resource_id_vars:
           cloud_run_job_name: cloudrun-job
+        vars:
+          identity_certificate_enabled: true
         ignore_read_extra:
           - deletion_protection
-      - name: cloudrunv2_job_agent_identity_update
+      - name: cloudrunv2_job_agent_identity
         min_version: beta
         resource_id_vars:
           cloud_run_job_name: cloudrun-job
+        vars:
+          identity_certificate_enabled: false
         ignore_read_extra:
           - deletion_protection
 virtual_fields:

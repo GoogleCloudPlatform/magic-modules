@@ -24,7 +24,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -77,6 +76,11 @@ type Product struct {
 	// Setting this is currently disallowed.
 	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 
+	// If true, generated acceptance tests for resources in this product use the
+	// legacy RefreshState: true step for ImportBlockWithResourceIdentity instead
+	// of ImportState: true.
+	LegacyIdentityImportTest bool `yaml:"legacy_identity_import_test,omitempty"`
+
 	// The version of the product which is currently being generated.
 	Version *product.Version `yaml:"-"`
 
@@ -90,11 +94,9 @@ type Product struct {
 	Runtime Runtime `yaml:"-"`
 }
 
-func (p *Product) UnmarshalYAML(value *yaml.Node) error {
+func (p *Product) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type productAlias Product
-	aliasObj := (*productAlias)(p)
-
-	if err := value.Decode(aliasObj); err != nil {
+	if err := unmarshal((*productAlias)(p)); err != nil {
 		return err
 	}
 

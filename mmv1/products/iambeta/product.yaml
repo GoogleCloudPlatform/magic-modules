@@ -28,3 +28,4 @@ versions:
     base_url: https://iam.googleapis.com/v1/
   - name: ga
     base_url: https://iam.googleapis.com/v1/
+legacy_identity_import_test: true

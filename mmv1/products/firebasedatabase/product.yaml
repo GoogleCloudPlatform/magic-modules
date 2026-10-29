@@ -19,3 +19,4 @@ scopes:
 versions:
   - name: beta
     base_url: https://firebasedatabase.googleapis.com/v1beta/
+legacy_identity_import_test: true

@@ -151,10 +151,6 @@ properties:
             - name: git
               type: NestedObject
               description: Remote git repository containing the Skaffold Config modules.
-              exactly_one_of:
-                - git
-                - googleCloudStorage
-                - googleCloudBuildRepo
               properties:
                 - name: repo
                   type: String
@@ -169,10 +165,6 @@ properties:
             - name: googleCloudStorage
               type: NestedObject
               description: Cloud Storage bucket containing Skaffold Config modules.
-              exactly_one_of:
-                - git
-                - googleCloudStorage
-                - googleCloudBuildRepo
               properties:
                 - name: source
                   type: String
@@ -184,10 +176,6 @@ properties:
             - name: googleCloudBuildRepo
               type: NestedObject
               description: Cloud Build 2nd gen repository containing the Skaffold Config modules.
-              exactly_one_of:
-                - git
-                - googleCloudStorage
-                - googleCloudBuildRepo
               properties:
                 - name: repository
                   type: String

@@ -141,19 +141,30 @@ samples:
       - name: dataproc_metastore_service_dpms2
         resource_id_vars:
           metastore_service_name: ms-dpms2
+        vars:
+          instance_size: EXTRA_SMALL
+          scaling_factor: null
   - name: dataproc_metastore_service_dpms2_scaling_factor
     primary_resource_id: dpms2_scaling_factor
     steps:
       - name: dataproc_metastore_service_dpms2_scaling_factor
+        config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_dpms2.tf.tmpl
         resource_id_vars:
           metastore_service_name: ms-dpms2sf
+        vars:
+          instance_size: null
+          scaling_factor: "2"
   - name: dataproc_metastore_service_dpms2_scaling_factor_lt1
     primary_resource_id: dpms2_scaling_factor_lt1
     exclude_basic_doc: true
     steps:
       - name: dataproc_metastore_service_dpms2_scaling_factor_lt1
+        config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_dpms2.tf.tmpl
         resource_id_vars:
           metastore_service_name: ms-dpms2sflt1
+        vars:
+          instance_size: null
+          scaling_factor: "0.1"
   - name: dataproc_metastore_service_scheduled_backup
     primary_resource_id: backup
     steps:

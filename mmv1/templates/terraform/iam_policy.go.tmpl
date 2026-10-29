@@ -362,7 +362,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier string) (string, error) {
-	urlTemplate := fmt.Sprintf("{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }}), methodIdentifier)
+	urlTemplate := fmt.Sprintf(transport_tpg.BaseUrl(Product, u.Config)+"%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }}), methodIdentifier)
   url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err

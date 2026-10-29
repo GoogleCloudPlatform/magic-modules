@@ -1,0 +1,93 @@
+{{/*
+	The license inside this block applies to this file.
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+var postCreateMask []string
+k8sPatch := make(map[string]interface{})
+
+cpVer, _ := d.Get("orchestrator_spec.0.kubernetes_spec.0.control_plane_version").(string)
+if cpVer != "" && cpVer != "-" {
+	postCreateMask = append(postCreateMask, "orchestrator_spec.kubernetes_spec.control_plane_version")
+	k8sPatch["controlPlaneVersion"] = cpVer
+}
+
+if v, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions"); ok {
+	if m, ok := v.(map[string]interface{}); ok && len(m) > 0 {
+		needsNodePoolPatch := len(postCreateMask) > 0
+		if !needsNodePoolPatch {
+			for _, rawVer := range m {
+				if ver, ok := rawVer.(string); ok && ver != "" && ver != "-" {
+					needsNodePoolPatch = true
+					break
+				}
+			}
+		}
+		if needsNodePoolPatch {
+			expanded, err := expandVertexAIModelDevelopmentClusterOrchestratorSpecKubernetesSpecNodePoolVersions(m, d, config)
+			if err != nil {
+				_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+				return err
+			}
+			if expanded != nil {
+				postCreateMask = append(postCreateMask, "orchestrator_spec.kubernetes_spec.node_pool_versions")
+				k8sPatch["nodePoolVersions"] = expanded
+			}
+		}
+	}
+}
+
+if len(postCreateMask) > 0 {
+	patchObj := map[string]interface{}{
+		"orchestratorSpec": map[string]interface{}{
+			"kubernetesSpec": k8sPatch,
+		},
+	}
+	patchUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.UpdateUri }}")
+	if err != nil {
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+		return err
+	}
+	patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": strings.Join(postCreateMask, ",")})
+	if err != nil {
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+		return err
+	}
+	log.Printf("[DEBUG] Patching ModelDevelopmentCluster %q versions after creation: %#v", d.Id(), patchObj)
+	patchRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    patchUrl,
+		UserAgent: userAgent,
+		Body:      patchObj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+		Headers:   headers,
+	})
+	// The cluster exists and is RUNNING here. Returning an error taints it, so tell the user how to
+	// keep it rather than let the next apply replace a healthy cluster.
+	versionErrHint := "The cluster was created at the service default version and is running, but Terraform " +
+		"marks it tainted and the next apply will replace it. To keep it, run `terraform untaint` on this " +
+		"resource and set control_plane_version and node_pool_versions to \"-\" or at most one minor version " +
+		"above the running version."
+	if err != nil {
+		log.Printf("[WARN] Applying versions to ModelDevelopmentCluster %q after creation failed: %s. %s", d.Id(), err, versionErrHint)
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+		return fmt.Errorf("Error patching ModelDevelopmentCluster %q versions after creation: %s. %s", d.Id(), err, versionErrHint)
+	}
+	err = VertexAIOperationWaitTime(
+		config, patchRes, project, tpgresource.LocationFromId(d.Id()), "Updating ModelDevelopmentCluster", userAgent,
+		d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		log.Printf("[WARN] Applying versions to ModelDevelopmentCluster %q after creation failed: %s. %s", d.Id(), err, versionErrHint)
+		_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+		return fmt.Errorf("Error waiting to apply ModelDevelopmentCluster %q versions after creation: %s. %s", d.Id(), err, versionErrHint)
+	}
+}

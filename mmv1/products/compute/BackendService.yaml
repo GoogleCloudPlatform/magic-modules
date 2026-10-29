@@ -1132,9 +1132,6 @@ properties:
           type: NestedObject
           description: |
             The configuration for a built-in load balancing policy.
-          exactly_one_of:
-            - 'policy'
-            - 'customPolicy'
           properties:
             - name: 'name'
               type: Enum
@@ -1187,9 +1184,6 @@ properties:
           description: |
             The configuration for a custom policy implemented by the user and
             deployed with the client.
-          exactly_one_of:
-            - 'policy'
-            - 'customPolicy'
           properties:
             - name: 'name'
               type: String
@@ -1717,7 +1711,7 @@ properties:
     type: String
     description: |
       URL to networkservices.ServiceLbPolicy resource.
-      Can only be set if load balancing scheme is EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED for a global backend service, and EXTERNAL_MANAGED or INTERNAL_MANAGED for a regional backend service. For a global backend service, the service lb policy must be global. For a regional backend service, the service lb policy must be regional and in the same region.
+      Can only be set if load balancing scheme is EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED. For a global backend service, the service lb policy must be global. For a regional backend service, the service lb policy must be regional and in the same region.
   - name: 'tlsSettings'
     type: NestedObject
     description: |
@@ -1748,15 +1742,9 @@ properties:
             - name: 'dnsName'
               type: String
               description: The SAN specified as a DNS Name.
-              exactly_one_of:
-                - tlsSettings.0.uniform_resource_identifier
-                - tlsSettings.0.dns_name
             - name: 'uniformResourceIdentifier'
               type: String
               description: The SAN specified as a URI.
-              exactly_one_of:
-                - tlsSettings.0.uniform_resource_identifier
-                - tlsSettings.0.dns_name
       - name: 'authenticationConfig'
         type: String
         description: |

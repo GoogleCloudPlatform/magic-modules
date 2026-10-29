@@ -4,13 +4,16 @@ resource "google_bigquery_dataset" "{{$.PrimaryResourceId}}" {
   description                 = "This is a test description"
   location                    = "EU"
   default_table_expiration_ms = 3600000
+  max_time_travel_hours       = "{{index $.Vars "max_time_travel_hours"}}"
+  is_case_insensitive         = {{index $.Vars "is_case_insensitive"}}
+  default_collation           = "{{index $.Vars "default_collation"}}"
 
   labels = {
     env = "default"
   }
 
   access {
-    role          = "roles/bigquery.dataOwner"
+    role          = "{{index $.Vars "owner_role"}}"
     user_by_email = google_service_account.bqowner.email
   }
 

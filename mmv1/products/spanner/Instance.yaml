@@ -198,38 +198,22 @@ properties:
             description: |
               Specifies minimum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000.
-            exactly_one_of:
-              - min_processing_units
-              - min_nodes
           - name: maxProcessingUnits
             type: Integer
             description: |
               Specifies maximum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000 and be greater than or equal to
               min_processing_units.
-            exactly_one_of:
-              - max_processing_units
-              - max_nodes
           - name: minNodes
             type: Integer
             description: |
               Specifies number of nodes allocated to the instance. If set, this number
               should be greater than or equal to 1.
-            exactly_one_of:
-              - min_processing_units
-              - min_nodes
-            required_with:
-              - max_nodes
           - name: maxNodes
             type: Integer
             description: |
               Specifies maximum number of nodes allocated to the instance. If set, this number
               should be greater than or equal to min_nodes.
-            exactly_one_of:
-              - max_processing_units
-              - max_nodes
-            required_with:
-              - min_nodes
       - name: autoscalingTargets
         type: NestedObject
         description: |
@@ -283,41 +267,21 @@ properties:
                       type: Integer
                       description: |
                         The minimum number of nodes for this specific replica.
-                      exactly_one_of:
-                        - min_nodes
-                        - min_processing_units
-                      required_with:
-                        - max_nodes
                     - name: maxNodes
                       type: Integer
                       description: |
                         The maximum number of nodes for this specific replica.
-                      exactly_one_of:
-                        - max_nodes
-                        - max_processing_units
-                      required_with:
-                        - min_nodes
                     - name: minProcessingUnits
                       type: Integer
                       description: |
                         The minimum number of processing units for this specific replica.
                         If set, this number should be multiples of 1000.
-                      exactly_one_of:
-                        - min_nodes
-                        - min_processing_units
-                      required_with:
-                        - max_processing_units
                     - name: maxProcessingUnits
                       type: Integer
                       description: |
                         The maximum number of processing units for this specific replica.
                         If set, this number should be multiples of 1000 and be greater than or equal to
                         min_processing_units.
-                      exactly_one_of:
-                        - max_nodes
-                        - max_processing_units
-                      required_with:
-                        - min_processing_units
                 - name: autoscalingTargetHighPriorityCpuUtilizationPercent
                   type: Integer
                   description: |

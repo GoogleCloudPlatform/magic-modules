@@ -58,7 +58,7 @@ log.Printf("[DEBUG] Set Terraform resource ID to: %s", endpointFull)
 
 // Extract deployedModelId and deployedModelDisplayName of model deployed to the endpoint
 // Make API call to read the endpoint and retrieve deployed model ID and display name
-readUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+readUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
 if err != nil {
     return err
 }

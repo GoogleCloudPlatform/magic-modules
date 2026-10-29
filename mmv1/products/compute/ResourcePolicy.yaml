@@ -47,13 +47,18 @@ samples:
       - name: resource_policy_basic
         resource_id_vars:
           name: gce-policy
+        vars:
+          start_time: "04:00"
   - name: resource_policy_hourly_format
     primary_resource_id: foo
     exclude_basic_doc: true
     steps:
       - name: resource_policy_hourly_format
+        config_path: templates/terraform/samples/services/compute/resource_policy_basic.tf.tmpl
         resource_id_vars:
           name: gce-policy
+        vars:
+          start_time: "4:00"
   - name: resource_policy_full
     primary_resource_id: bar
     steps:
