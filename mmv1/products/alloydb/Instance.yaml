@@ -23,8 +23,8 @@ docs:
     Deleting an instance with instanceType = SECONDARY does not delete the secondary instance, and abandons it instead.
     Use deletion_policy = "FORCE" in the associated secondary cluster and delete the cluster forcefully to delete the secondary cluster as well its associated secondary instance.
     Users can undo the delete secondary instance action by importing the deleted secondary instance by calling terraform import.
-base_url: '{{cluster}}/instances?instanceId={{instance_id}}'
-self_link: '{{cluster}}/instances/{{instance_id}}'
+base_url: "{{cluster}}/instances?instanceId={{instance_id}}"
+self_link: "{{cluster}}/instances/{{instance_id}}"
 update_mask: true
 update_verb: PATCH
 import_format:
@@ -44,7 +44,7 @@ async:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
-    base_url: '{{op_id}}'
+    base_url: "{{op_id}}"
   actions: [create, delete, update]
   result:
     resource_inside_response: false
@@ -338,6 +338,67 @@ properties:
       - name: nodeCount
         type: Integer
         description: Read capacity, i.e. number of nodes in a read pool instance.
+      - name: autoScalingConfig
+        type: NestedObject
+        description: Autoscaling configuration for the read pool instance. If not set, the read pool instance will not be autoscaled.
+        properties:
+          - name: policy
+            type: NestedObject
+            description: Policy for the MIG autoscaler.
+            properties:
+              - name: maxNodeCount
+                type: Integer
+                description: Maximum number of nodes for the autoscaler.
+              - name: coolDownPeriodSec
+                type: Integer
+                description: The period of time in seconds after a new node is created before the autoscaler will incorporate its resource usage (e.g. CPU utilization) into the autoscaling recommendation algorithm.
+                default_from_api: true
+              - name: cpuUtilization
+                type: NestedObject
+                description: CPU utilization policy for the autoscaler.
+                properties:
+                  - name: utilizationTarget
+                    type: Double
+                    description: Target CPU utilization as a float between 0 and 1.
+              - name: enabled
+                type: Boolean
+                description: If true, autoscaling is enabled for the instance. If not set, the default value is false.
+              - name: connectionsCount
+                type: NestedObject
+                description: Connections count policy for the autoscaler.
+                properties:
+                  - name: targetCount
+                    type: Integer
+                    description: The target number of connections for the autoscaler to scale the instance to.
+          - name: schedules
+            type: Array
+            description: Optional list of schedules for the MIG autoscaler. If not set, no schedules are created.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: name
+                  type: String
+                  description: Name of the schedule.
+                - name: cronExpression
+                  type: String
+                  description: Cron expression for the triggering the schedule. See https://cloud.google.com/compute/docs/autoscaler/scaling-schedules#cron_expressions for the syntax.
+                - name: durationSec
+                  type: Integer
+                  description: Duration of the schedule.
+                - name: minNodeCount
+                  type: Integer
+                  description: Minimum number of nodes in while the schedule is active.
+                - name: timeZone
+                  type: String
+                  description: The location-based IANA time zone for interpreting the schedule's start time. If no time zone is provided, UTC is used by default.
+                  default_from_api: true
+                - name: disabled
+                  type: Boolean
+                  description: If true, the schedule is disabled.
+                - name: description
+                  type: String
+                  description: Description of the schedule.
+
   - name: machineConfig
     type: NestedObject
     description: Configurations for the machines that host the underlying database engine.

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/alloydb"
@@ -1593,6 +1594,268 @@ data "google_project" "project" {}
 
 data "google_compute_network" "default" {
 	name = "%{network_name}"
+}
+`, context)
+}
+
+func TestAccAlloydbInstance_readPoolAutoScalingConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_readPoolAutoScalingConfigCpuAndSchedule(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.node_count", "2"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.max_node_count", "4"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.cool_down_period_sec"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.cpu_utilization.0.utilization_target", "0.5"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.connections_count.#", "0"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.name", "weekday-schedule"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.cron_expression", "0 8 * * 1-5"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.duration_sec", "30600"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.min_node_count", "3"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.time_zone", "UTC"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.disabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.description", "Weekday peak traffic schedule"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.read_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+			{
+				Config: testAccAlloydbInstance_readPoolAutoScalingConfigFullUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_alloydb_instance.read_pool", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.node_count", "2"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.max_node_count", "6"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.cool_down_period_sec", "600"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.cpu_utilization.0.utilization_target", "0.75"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.connections_count.0.target_count", "100"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.name", "weekend-schedule"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.cron_expression", "0 10 * * 0,6"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.duration_sec", "14400"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.min_node_count", "4"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.time_zone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.disabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.0.description", "Updated weekend schedule"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.read_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+			{
+				Config: testAccAlloydbInstance_readPoolAutoScalingConfigConnectionsAndDisabled(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_alloydb_instance.read_pool", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.node_count", "2"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.max_node_count", "6"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.cool_down_period_sec", "900"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.cpu_utilization.#", "0"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.policy.0.connections_count.0.target_count", "200"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.read_pool", "read_pool_config.0.auto_scaling_config.0.schedules.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_instance.read_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_readPoolAutoScalingConfigCpuAndSchedule(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "read_pool" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}-read"
+  instance_type = "READ_POOL"
+
+  read_pool_config {
+    node_count = 2
+    auto_scaling_config {
+      policy {
+        enabled        = true
+        max_node_count = 4
+        cpu_utilization {
+          utilization_target = 0.5
+        }
+      }
+      schedules {
+        name            = "weekday-schedule"
+        cron_expression = "0 8 * * 1-5"
+        duration_sec    = 30600
+        min_node_count  = 3
+        disabled        = false
+        description     = "Weekday peak traffic schedule"
+      }
+    }
+  }
+
+  depends_on = [google_alloydb_instance.primary]
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-east1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccAlloydbInstance_readPoolAutoScalingConfigFullUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "read_pool" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}-read"
+  instance_type = "READ_POOL"
+
+  read_pool_config {
+    node_count = 2
+    auto_scaling_config {
+      policy {
+        enabled              = true
+        max_node_count       = 6
+        cool_down_period_sec = 600
+        cpu_utilization {
+          utilization_target = 0.75
+        }
+        connections_count {
+          target_count = 100
+        }
+      }
+      schedules {
+        name            = "weekend-schedule"
+        cron_expression = "0 10 * * 0,6"
+        duration_sec    = 14400
+        min_node_count  = 4
+        time_zone       = "America/Los_Angeles"
+        disabled        = true
+        description     = "Updated weekend schedule"
+      }
+    }
+  }
+
+  depends_on = [google_alloydb_instance.primary]
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-east1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccAlloydbInstance_readPoolAutoScalingConfigConnectionsAndDisabled(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "primary" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+
+resource "google_alloydb_instance" "read_pool" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}-read"
+  instance_type = "READ_POOL"
+
+  read_pool_config {
+    node_count = 2
+    auto_scaling_config {
+      policy {
+        enabled              = false
+        max_node_count       = 6
+        cool_down_period_sec = 900
+        connections_count {
+          target_count = 200
+        }
+      }
+    }
+  }
+
+  depends_on = [google_alloydb_instance.primary]
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-east1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 `, context)
 }
