@@ -15,7 +15,11 @@
     if len(parts) < 3 {
         return nil, fmt.Errorf("Error parsing binding name. Should be in form {{"{{"}}parent{{"}}"}}/{{"{{"}}tag_type{{"}}"}}/{{"{{"}}tag_value{{"}}"}}")
     }
-    if err := d.Set("parent", parts[0]); err != nil {
+    // The parent segment of the binding name is percent-encoded (e.g.
+    // "%2F%2Fcloudresourcemanager.googleapis.com%2Fprojects%2F123"). Store the
+    // decoded full resource name so the subsequent Read queries the API with
+    // the same parent that Create used.
+    if err := d.Set("parent", tagsTagBindingParentFromName(parts[0])); err != nil {
         return nil, fmt.Errorf("Error setting parent, %s", err)
     }
 

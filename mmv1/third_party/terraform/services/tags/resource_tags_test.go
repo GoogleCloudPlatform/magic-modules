@@ -38,6 +38,7 @@ func TestAccTags(t *testing.T) {
 		"tagBindingBasic":                          testAccTagsTagBinding_tagBindingBasic,
 		"tagBindingBasicDynamic":                   testAccTagsTagBinding_tagBindingBasicDynamic,
 		"tagBindingNamespaced":                     testAccTagsTagBinding_tagBindingNamespaced,
+		"tagBindingParentWithPlus":                 testAccTagsTagBinding_tagBindingParentWithPlus,
 		"tagValueIamBinding":                       testAccTagsTagValueIamBinding,
 		"tagValueIamMember":                        testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                        testAccTagsTagValueIamPolicy,
@@ -626,6 +627,69 @@ resource "google_tags_tag_value" "value" {
 resource "google_tags_tag_binding" "binding" {
 	parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
 	tag_value = google_tags_tag_value.value.namespaced_name
+}
+`, context)
+}
+
+// Binds a tag to a resource whose full resource name contains "+" (valid in
+// Pub/Sub topic names). "+" is not path-escaped and is decoded as a space in a
+// query string, so this exercises the query escaping of parent on Read.
+// See https://github.com/hashicorp/terraform-provider-google/issues/28742.
+func testAccTagsTagBinding_tagBindingParentWithPlus(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckTagsTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagBinding_tagBindingParentWithPlusExample(context),
+			},
+			{
+				// Refresh and plan again; the binding must be found on Read.
+				Config:   testAccTagsTagBinding_tagBindingParentWithPlusExample(context),
+				PlanOnly: true,
+			},
+			{
+				ResourceName:      "google_tags_tag_binding.binding",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccTagsTagBinding_tagBindingParentWithPlusExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+	project_id = "%{project}"
+}
+
+resource "google_pubsub_topic" "topic" {
+	project = data.google_project.project.project_id
+	name    = "tf-test-%{random_suffix}+billing+dead-letter"
+}
+
+resource "google_tags_tag_key" "key" {
+	parent      = "organizations/%{org_id}"
+	short_name  = "tf-test-key-%{random_suffix}"
+	description = "Key for parent with plus test."
+}
+
+resource "google_tags_tag_value" "value" {
+	parent      = google_tags_tag_key.key.id
+	short_name  = "tf-test-val-%{random_suffix}"
+	description = "Value for parent with plus test."
+}
+
+resource "google_tags_tag_binding" "binding" {
+	parent    = "//pubsub.googleapis.com/projects/${data.google_project.project.number}/topics/${google_pubsub_topic.topic.name}"
+	tag_value = google_tags_tag_value.value.id
 }
 `, context)
 }
