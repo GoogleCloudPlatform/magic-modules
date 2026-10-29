@@ -76,6 +76,12 @@ resource "google_bigtable_table" "table" {
     retention_period = "72h0m0s"
     frequency = "24h0m0s"
   }
+
+  tiered_storage_config {
+    infrequent_access {
+      include_if_older_than = "720h0m0s"
+    }
+  }
 }
 ```
 
@@ -108,6 +114,12 @@ to delete/recreate the entire `google_bigtable_table` resource.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
     When set to "DELETE", deleting the resource is allowed.
+
+* `tiered_storage_config` - (Optional) Configuration to enable tiered storage on a table specified by `infrequent_access` and `include_if_older_than`. Enabling this configuration stores infrequently accessed data in a separate, lower-cost storage tier. The `tiered_storage_config` block supports:
+    - `infrequent_access` - (Required) Configuration of the infrequently accessed data.
+    - `include_if_older_than` - (Required) Configuration for the minimum duration to retain data in the standard storage tier. For the infrequent access tier, this value must be at least 30 days.
+  
+  To create a table with the tiered storage feature disabled or to disable the tiered storage config on an existing table, omit the `tiered_storage_config` argument entirely.
 
 -----
 
