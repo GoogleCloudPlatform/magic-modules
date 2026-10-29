@@ -61,25 +61,17 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
-      - name: secure_source_manager_repository_service_account
+      - name: secure_source_manager_repository_secret_scanning
         include_step_doc: true
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
-          deletion_policy: PREVENT
           sa_id: my-sa
-        test_vars_overrides:
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - deletion_policy
-      - name: secure_source_manager_repository_secret_scanning_default
-        include_step_doc: true
-        resource_id_vars:
-          repository_id: my-repository
-          instance_id: my-instance
           deletion_policy: PREVENT
+        vars:
+          secret_scanning_enabled: 'true'
+        test_env_vars:
+          project: PROJECT_NAME
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
@@ -87,11 +79,13 @@ samples:
         ignore_read_extra:
           - deletion_policy
       - name: secure_source_manager_repository_secret_scanning
-        include_step_doc: true
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
+          sa_id: my-sa
           deletion_policy: PREVENT
+        vars:
+          secret_scanning_enabled: 'false'
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:

@@ -85,36 +85,6 @@ samples:
         ignore_read_extra:
           - update_time
           - deletion_policy
-  - name: secure_source_manager_instance_private_trusted_cert
-    primary_resource_id: default
-    exclude_basic_doc: true
-    steps:
-      - name: secure_source_manager_instance_private_trusted_cert
-        resource_id_vars:
-          instance_id: my-instance
-        ignore_read_extra:
-          - update_time
-          - deletion_policy
-        test_env_vars:
-          org_id: ORG_ID
-  - name: secure_source_manager_instance_private
-    primary_resource_id: default
-    exclude_test: true
-    external_providers: [time]
-    steps:
-      - name: secure_source_manager_instance_private
-        resource_id_vars:
-          instance_id: my-instance
-          ca_pool_id: ca-pool
-          root_ca_id: root-ca
-          deletion_policy: PREVENT
-        test_vars_overrides:
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - update_time
-          - deletion_policy
   - name: secure_source_manager_instance_private_custom_host
     primary_resource_id: default
     external_providers: [time]
@@ -124,7 +94,10 @@ samples:
           instance_id: my-instance
           ca_pool_id: ca-pool
           root_ca_id: root-ca
+          psc_project_id: psc-project
           deletion_policy: PREVENT
+        test_env_vars:
+          org_id: ORG_ID
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
@@ -173,21 +146,6 @@ samples:
           instance_id: my-instance
           ca_pool_id: ca-pool
           root_ca_id: root-ca
-          deletion_policy: PREVENT
-        test_vars_overrides:
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - update_time
-          - deletion_policy
-  - name: secure_source_manager_instance_workforce_identity_federation
-    primary_resource_id: default
-    exclude_test: true
-    steps:
-      - name: secure_source_manager_instance_workforce_identity_federation
-        resource_id_vars:
-          instance_id: my-instance
           deletion_policy: PREVENT
         test_vars_overrides:
           deletion_policy: '"DELETE"'

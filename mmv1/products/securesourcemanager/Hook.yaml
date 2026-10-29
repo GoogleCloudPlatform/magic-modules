@@ -63,11 +63,13 @@ samples:
           hook_id: my-basic-hook
           repository_id: my-basic-repository
           instance_id: my-basic-instance
+          sa_id: my-basic-sa
           deletion_policy: PREVENT
         vars:
           target_uri: https://www.example.com
           sensitive_query_string: auth=fake_token
           disabled: 'false'
+          service_account_auth: 'true'
           branch_filter: main
         test_vars_overrides:
           deletion_policy: '"DELETE"'
@@ -80,26 +82,14 @@ samples:
           hook_id: my-basic-hook
           repository_id: my-basic-repository
           instance_id: my-basic-instance
+          sa_id: my-basic-sa
           deletion_policy: PREVENT
         vars:
           target_uri: https://www.update.com
           sensitive_query_string: auth=updated_token
           disabled: 'true'
+          service_account_auth: 'false'
           branch_filter: ''
-        test_vars_overrides:
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - deletion_policy
-      - name: secure_source_manager_hook_service_account_auth
-        include_step_doc: true
-        resource_id_vars:
-          hook_id: my-basic-hook
-          repository_id: my-basic-repository
-          instance_id: my-basic-instance
-          sa_id: my-basic-sa
-          deletion_policy: PREVENT
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
