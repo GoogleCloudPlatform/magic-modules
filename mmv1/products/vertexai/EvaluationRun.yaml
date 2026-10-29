@@ -1,0 +1,1710 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationRun
+description: |
+  EvaluationRun is a resource that represents a single evaluation run, which
+  includes a set of prompts, model responses, evaluation configuration and the
+  resulting metrics.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/evaluation/overview'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.evaluationRuns'
+base_url: projects/{{project}}/locations/{{region}}/evaluationRuns
+self_link: projects/{{project}}/locations/{{region}}/evaluationRuns/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/evaluationRuns
+immutable: true
+generate_list_resource: true
+sweeper:
+  identifier_field: displayName
+id_format: projects/{{project}}/locations/{{region}}/evaluationRuns/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/evaluationRuns/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 45
+error_retry_predicates:
+  - IsEvaluationRunOperationInProgressError
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['delete']
+custom_code:
+  constants: 'templates/terraform/constants/vertex_ai_evaluation_run.go.tmpl'
+samples:
+  - name: vertex_ai_evaluation_run
+    primary_resource_id: tf_test_evaluation_run
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    steps:
+      - name: vertex_ai_evaluation_run
+        resource_id_vars:
+          name: eval_run
+          display_name: eval-run
+          kms_key_name: projects/my-project/locations/us-central1/keyRings/my-key-ring/cryptoKeys/my-key
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+        test_env_vars:
+          project: PROJECT_NAME
+        ignore_read_extra:
+          - completion_time
+          - state
+          - evaluation_set_snapshot
+          - error
+          - evaluation_results
+  - name: vertex_ai_evaluation_run_gcs
+    primary_resource_id: tf_test_evaluation_run
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/storage.admin"
+    steps:
+      - name: vertex_ai_evaluation_run_gcs
+        resource_id_vars:
+          display_name: eval-run
+          bucket_name: eval-run-gcs-bucket
+        test_env_vars:
+          project: PROJECT_NAME
+        ignore_read_extra:
+          - completion_time
+          - state
+          - evaluation_set_snapshot
+          - error
+          - evaluation_results
+parameters:
+  - name: region
+    type: String
+    description: The region of the EvaluationRun. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the EvaluationRun. This is a unique identifier.
+      Format: projects/{project}/locations/{location}/evaluationRuns/{evaluation_run}
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      The display name of the Evaluation Run.
+    required: true
+    immutable: true
+  - name: metadata
+    type: String
+    description: |
+      Metadata about the evaluation run, can be used by the caller to store additional tracking information about the evaluation run.
+    immutable: true
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_evaluation_run_metadata.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+    validation:
+      function: 'validation.StringIsJSON'
+  - name: dataSource
+    type: NestedObject
+    description: |
+      The data source for the evaluation run.
+    required: true
+    immutable: true
+    properties:
+      - name: evaluationSet
+        type: String
+        description: |
+          The EvaluationSet resource name.
+          Format: projects/{project}/locations/{location}/evaluationSets/{evaluation_set}
+        immutable: true
+        exactly_one_of:
+          - data_source.0.evaluation_set
+          - data_source.0.bigquery_request_set
+      - name: bigqueryRequestSet
+        type: NestedObject
+        description: |
+          Evaluation data in bigquery.
+        immutable: true
+        exactly_one_of:
+          - data_source.0.evaluation_set
+          - data_source.0.bigquery_request_set
+        properties:
+          - name: uri
+            type: String
+            required: true
+            description: |
+              The URI of a BigQuery table. e.g. bq://projectId.bqDatasetId.bqTableId
+            immutable: true
+          - name: promptColumn
+            type: String
+            description: |
+              The name of the column that contains the requests to evaluate. This will be in evaluation_item.EvalPrompt format.
+            immutable: true
+          - name: rubricsColumn
+            type: String
+            description: |
+              The name of the column that contains the rubrics. This is in evaluation_rubric.RubricGroup format.
+            immutable: true
+          - name: candidateResponseColumns
+            type: KeyValuePairs
+            description: |
+              Map of candidate name to candidate response column name. The column will be in evaluation_item.CandidateResponse format.
+            immutable: true
+          - name: samplingConfig
+            type: NestedObject
+            description: |
+              The sampling config for the bigquery resource.
+            immutable: true
+            properties:
+              - name: samplingCount
+                type: Integer
+                description: |
+                  The total number of logged data to import. If available data is less than the sampling count, all data will be imported. Default is 100.
+                immutable: true
+              - name: samplingMethod
+                type: Enum
+                description: |
+                  The sampling method to use.
+                immutable: true
+                enum_values:
+                  - 'RANDOM'
+              - name: samplingDuration
+                type: String
+                description: |
+                  How long to wait before sampling data from the BigQuery table. If not specified, defaults to 0.
+                immutable: true
+  - name: inferenceConfigs
+    type: Map
+    description: |
+      The candidate to inference config map for the evaluation run. The candidate can be up to 128 characters long and can consist of any UTF-8 characters.
+    immutable: true
+    key_name: 'candidate'
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'model'
+          type: String
+          description: |
+            The fully qualified name of the publisher model or endpoint to use. Anthropic and Llama third-party models are also supported through Model Garden. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Third-party model formats: `projects/{project}/locations/{location}/publishers/anthropic/models/{model}` or `projects/{project}/locations/{location}/publishers/llama/models/{model}` Endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+        - name: 'generationConfig'
+          type: NestedObject
+          description: |
+            Generation config.
+          properties:
+            - name: 'temperature'
+              type: Double
+              description: |
+                Controls the randomness of predictions.
+            - name: 'topP'
+              type: Double
+              description: |
+                If specified, nucleus sampling will be used.
+            - name: 'topK'
+              type: Double
+              description: |
+                If specified, top-k sampling will be used.
+            - name: 'candidateCount'
+              type: Integer
+              description: |
+                Number of candidates to generate.
+            - name: 'maxOutputTokens'
+              type: Integer
+              description: |
+                The maximum number of output tokens to generate per message.
+            - name: 'stopSequences'
+              type: Array
+              description: |
+                Stop sequences.
+              item_type:
+                type: String
+            - name: 'responseLogprobs'
+              type: Boolean
+              description: |
+                If true, export the logprobs results in response.
+            - name: 'logprobs'
+              type: Integer
+              description: |
+                Logit probabilities.
+            - name: 'presencePenalty'
+              type: Double
+              description: |
+                Positive penalties.
+            - name: 'frequencyPenalty'
+              type: Double
+              description: |
+                Frequency penalties.
+            - name: 'seed'
+              type: Integer
+              description: |
+                Seed.
+            - name: 'responseMimeType'
+              type: String
+              description: |
+                Output response mimetype of the generated candidate text. Supported mimetype: - `text/plain`: (default) Text output. - `application/json`: JSON response in the candidates. The model needs to be prompted to output the appropriate response type, otherwise the behavior is undefined. This is a preview feature.
+            - name: 'responseSchema'
+              type: String
+              description: |
+                The `Schema` object allows the definition of input and output data types. These types can be objects, but also primitives and arrays. Represents a select subset of an OpenAPI 3.0 schema object. If set, a compatible response_mime_type must also be set. Compatible mimetypes: `application/json`: Schema for JSON response.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              validation:
+                function: 'validation.StringIsJSON'
+            - name: 'responseJsonSchema'
+              type: String
+              description: |
+                Output schema of the generated response. This is an alternative to `response_schema` that accepts JSON Schema. If set, `response_schema` must be omitted, but `response_mime_type` is required.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+              validation:
+                function: 'validation.StringIsJSON'
+            - name: 'routingConfig'
+              type: NestedObject
+              description: |
+                Routing configuration.
+              properties:
+                - name: 'autoMode'
+                  type: NestedObject
+                  description: |
+                    In this mode, the model will be routed to the best model automatically.
+                  properties:
+                    - name: 'modelRoutingPreference'
+                      type: Enum
+                      description: |
+                        The model routing preference.
+                      enum_values:
+                        - 'UNKNOWN'
+                        - 'PRIORITIZE_QUALITY'
+                        - 'BALANCED'
+                        - 'PRIORITIZE_COST'
+                - name: 'manualMode'
+                  type: NestedObject
+                  description: |
+                    In this mode, the model will be routed to the specified model.
+                  properties:
+                    - name: 'modelName'
+                      type: String
+                      description: |
+                        The model name to use.
+            - name: 'thinkingConfig'
+              type: NestedObject
+              description: |
+                Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+              properties:
+                - name: 'includeThoughts'
+                  type: Boolean
+                  description: |
+                    Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                - name: 'thinkingBudget'
+                  type: Integer
+                  description: |
+                    Indicates the thinking budget in tokens.
+        - name: 'agents'
+          type: Map
+          description: |
+            Contains the static configurations for each agent in the system. Key: agent_id (matches the `author` field in events). Value: The static configuration of the agent.
+          key_name: 'agent_key'
+          value_type:
+            type: NestedObject
+            properties:
+              - name: 'agentId'
+                type: String
+                required: true
+                description: |
+                  Unique identifier of the agent. This ID is used to refer to this agent, e.g., in AgentEvent.author, or in the `sub_agents` field. It must be unique within the `agents` map.
+              - name: 'agentType'
+                type: String
+                description: |
+                  The type or class of the agent (e.g., "LlmAgent", "RouterAgent", "ToolUseAgent"). Useful for the autorater to understand the expected behavior of the agent.
+              - name: 'description'
+                type: String
+                description: |
+                  A high-level description of the agent's role and responsibilities. Critical for evaluating if the agent is routing tasks correctly.
+              - name: 'instruction'
+                type: String
+                description: |
+                  Provides instructions for the LLM model, guiding the agent's behavior. Can be static or dynamic. Dynamic instructions can contain placeholders like {variable_name} that will be resolved at runtime using the `AgentEvent.state_delta` field.
+              - name: 'subAgents'
+                type: Array
+                description: |
+                  The list of valid agent IDs (names) that this agent can delegate to. This defines the directed edges in the agent system graph topology.
+                item_type:
+                  type: String
+              - name: 'tools'
+                type: String
+                description: |
+                  List of tools: each tool can have multiple function declarations.
+                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
+        - name: 'agentRunConfig'
+          type: NestedObject
+          description: |
+            Agent run config.
+          properties:
+            - name: 'sessionInput'
+              type: NestedObject
+              description: |
+                The session input to get agent running results.
+              properties:
+                - name: 'userId'
+                  type: String
+                  description: |
+                    The user id for the agent session. The ID can be up to 128 characters long.
+                - name: 'sessionState'
+                  type: String
+                  description: |
+                    Session specific memory which stores key conversation points.
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
+                    function: 'validation.StringIsJSON'
+                - name: 'parameters'
+                  type: KeyValuePairs
+                  description: |
+                    Additional parameters for the session, like app_name, etc. For example, {"app_name": "my-app"}.
+            - name: 'agentEngine'
+              type: String
+              description: |
+                The resource name of the Agent Engine. Format: projects/{project}/locations/{location}/reasoningEngines/{reasoning_engine} For example: projects/123/locations/us-central1/reasoningEngines/456
+            - name: 'geminiAgentConfig'
+              type: NestedObject
+              description: |
+                Config for scraping a Gemini Agent via the Interactions API. The scraping service creates interactions against the agent and returns the resulting interaction traces for evaluation.
+              properties:
+                - name: 'geminiAgent'
+                  type: String
+                  description: |
+                    The resource name of the Gemini Agent.
+                    Format: `projects/{project}/locations/{location}/agents/{agent}`
+                  required: true
+            - name: 'userSimulatorConfig'
+              type: NestedObject
+              description: |
+                The configuration for a user simulator that uses an LLM to generate messages on behalf of the user.
+              properties:
+                - name: 'modelName'
+                  type: String
+                  description: |
+                    The model name to use for multi-turn agent scraping to get next user message, e.g. "gemini-3-flash-preview".
+                - name: 'modelConfig'
+                  type: NestedObject
+                  description: |
+                    The configuration for the model.
+                  properties:
+                    - name: 'temperature'
+                      type: Double
+                      description: |
+                        Controls the randomness of predictions.
+                    - name: 'topP'
+                      type: Double
+                      description: |
+                        If specified, nucleus sampling will be used.
+                    - name: 'topK'
+                      type: Double
+                      description: |
+                        If specified, top-k sampling will be used.
+                    - name: 'candidateCount'
+                      type: Integer
+                      description: |
+                        Number of candidates to generate.
+                    - name: 'maxOutputTokens'
+                      type: Integer
+                      description: |
+                        The maximum number of output tokens to generate per message.
+                    - name: 'stopSequences'
+                      type: Array
+                      description: |
+                        Stop sequences.
+                      item_type:
+                        type: String
+                    - name: 'responseLogprobs'
+                      type: Boolean
+                      description: |
+                        If true, export the logprobs results in response.
+                    - name: 'logprobs'
+                      type: Integer
+                      description: |
+                        Logit probabilities.
+                    - name: 'presencePenalty'
+                      type: Double
+                      description: |
+                        Positive penalties.
+                    - name: 'frequencyPenalty'
+                      type: Double
+                      description: |
+                        Frequency penalties.
+                    - name: 'seed'
+                      type: Integer
+                      description: |
+                        Seed.
+                    - name: 'responseMimeType'
+                      type: String
+                      description: |
+                        Output response mimetype of the generated candidate text. Supported mimetype: - `text/plain`: (default) Text output. - `application/json`: JSON response in the candidates. The model needs to be prompted to output the appropriate response type, otherwise the behavior is undefined. This is a preview feature.
+                    - name: 'responseSchema'
+                      type: String
+                      description: |
+                        The `Schema` object allows the definition of input and output data types. These types can be objects, but also primitives and arrays. Represents a select subset of an OpenAPI 3.0 schema object. If set, a compatible response_mime_type must also be set. Compatible mimetypes: `application/json`: Schema for JSON response.
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                    - name: 'responseJsonSchema'
+                      type: String
+                      description: |
+                        Output schema of the generated response. This is an alternative to `response_schema` that accepts JSON Schema. If set, `response_schema` must be omitted, but `response_mime_type` is required.
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                    - name: 'routingConfig'
+                      type: NestedObject
+                      description: |
+                        Routing configuration.
+                      properties:
+                        - name: 'autoMode'
+                          type: NestedObject
+                          description: |
+                            In this mode, the model will be routed to the best model automatically.
+                          properties:
+                            - name: 'modelRoutingPreference'
+                              type: Enum
+                              description: |
+                                The model routing preference.
+                              enum_values:
+                                - 'UNKNOWN'
+                                - 'PRIORITIZE_QUALITY'
+                                - 'BALANCED'
+                                - 'PRIORITIZE_COST'
+                        - name: 'manualMode'
+                          type: NestedObject
+                          description: |
+                            In this mode, the model will be routed to the specified model.
+                          properties:
+                            - name: 'modelName'
+                              type: String
+                              description: |
+                                The model name to use.
+                    - name: 'thinkingConfig'
+                      type: NestedObject
+                      description: |
+                        Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                      properties:
+                        - name: 'includeThoughts'
+                          type: Boolean
+                          description: |
+                            Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                        - name: 'thinkingBudget'
+                          type: Integer
+                          description: |
+                            Indicates the thinking budget in tokens.
+                - name: 'maxTurn'
+                  type: Integer
+                  description: |
+                    Maximum number of invocations allowed by the multi-turn agent scraping. This property allows us to stop a run-off conversation, where the agent and the user simulator get into a never ending loop. The initial fixed prompt is also counted as an invocation.
+        - name: 'promptTemplate'
+          type: NestedObject
+          description: |
+            The prompt template used for inference. The values for variables in the prompt template are defined in EvaluationItem.EvaluationPrompt.PromptTemplateData.values. If not specified, the prompt template in the EvaluationConfig will be used.
+          properties:
+            - name: 'promptTemplate'
+              type: String
+              description: |
+                Inline prompt template. Template variables should be in the format "{var_name}". Example: "Translate the following from {source_lang} to {target_lang}: {text}"
+            - name: 'gcsUri'
+              type: String
+              description: |
+                Prompt template stored in Cloud Storage. Format: "gs://my-bucket/file-name.txt".
+        - name: 'parallelism'
+          type: Integer
+          description: |
+            The parallelism of the evaluation run for the inference step. If not specified, the default parallelism will be used.
+  - name: evaluationConfig
+    type: NestedObject
+    description: |
+      The configuration used for the evaluation.
+    immutable: true
+    properties:
+      - name: metrics
+        type: Array
+        description: |
+          The metrics to be calculated in the evaluation run.
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: metric
+              type: String
+              required: true
+              description: |
+                The name of the metric.
+              immutable: true
+            - name: metricConfig
+              type: NestedObject
+              description: |
+                The metric config.
+              immutable: true
+              properties:
+                - name: 'aggregationMetrics'
+                  type: Array
+                  description: |
+                    The aggregation metrics to use.
+                  item_type:
+                    type: Enum
+                    description: |
+                      The aggregation metric to use.
+                    enum_values:
+                      - 'AVERAGE'
+                      - 'MODE'
+                      - 'STANDARD_DEVIATION'
+                      - 'VARIANCE'
+                      - 'MINIMUM'
+                      - 'MAXIMUM'
+                      - 'MEDIAN'
+                      - 'PERCENTILE_P90'
+                      - 'PERCENTILE_P95'
+                      - 'PERCENTILE_P99'
+                - name: 'metadata'
+                  type: NestedObject
+                  description: |
+                    Metadata about the metric, used for visualization and organization.
+                  properties:
+                    - name: 'title'
+                      type: String
+                      description: |
+                        The user-friendly name for the metric. If not set for a registered metric, it will default to the metric's display name.
+                    - name: 'scoreRange'
+                      type: NestedObject
+                      description: |
+                        The range of possible scores for this metric, used for plotting.
+                      properties:
+                        - name: 'min'
+                          type: Double
+                          description: |
+                            The minimum value of the score range (inclusive).
+                          required: true
+                          send_empty_value: true
+                        - name: 'max'
+                          type: Double
+                          description: |
+                            The maximum value of the score range (inclusive).
+                          required: true
+                          send_empty_value: true
+                        - name: 'step'
+                          type: Double
+                          description: |
+                            The distance between discrete steps in the range. If unset, the range is assumed to be continuous.
+                        - name: 'description'
+                          type: String
+                          description: |
+                            The description of the score explaining the directionality etc.
+                    - name: 'otherMetadata'
+                      type: String
+                      description: |
+                        Flexible metadata for user-defined attributes.
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                - name: 'predefinedMetricSpec'
+                  type: NestedObject
+                  description: |
+                    The spec for a pre-defined metric.
+                  properties:
+                    - name: 'metricSpecName'
+                      type: String
+                      description: |
+                        The name of a pre-defined metric, such as "instruction_following_v1" or "text_quality_v1".
+                      required: true
+                    - name: 'metricSpecParameters'
+                      type: String
+                      description: |
+                        The parameters needed to run the pre-defined metric.
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                - name: 'computationBasedMetricSpec'
+                  type: NestedObject
+                  description: |
+                    Spec for a computation based metric.
+                  properties:
+                    - name: 'type'
+                      type: Enum
+                      description: |
+                        The type of the computation based metric.
+                      required: true
+                      enum_values:
+                        - 'EXACT_MATCH'
+                        - 'BLEU'
+                        - 'ROUGE'
+                    - name: 'parameters'
+                      type: String
+                      description: |
+                        A map of parameters for the metric, e.g. {"rouge_type": "rougeL"}.
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                - name: 'llmBasedMetricSpec'
+                  type: NestedObject
+                  description: |
+                    Spec for an LLM based metric.
+                  properties:
+                    - name: 'metricPromptTemplate'
+                      type: String
+                      description: |
+                        Template for the prompt sent to the judge model.
+                      required: true
+                    - name: 'systemInstruction'
+                      type: String
+                      description: |
+                        System instructions for the judge model.
+                    - name: 'judgeAutoraterConfig'
+                      type: NestedObject
+                      description: |
+                        Configuration for the judge LLM (Autorater).
+                      properties:
+                        - name: 'samplingCount'
+                          type: Integer
+                          description: |
+                            Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                        - name: 'flipEnabled'
+                          type: Boolean
+                          description: |
+                            Default is true. Whether to flip the candidate and baseline responses. This is only applicable to the pairwise metric. If enabled, also provide PairwiseMetricSpec.candidate_response_field_name and PairwiseMetricSpec.baseline_response_field_name. When rendering PairwiseMetricSpec.metric_prompt_template, the candidate and baseline fields will be flipped for half of the samples to reduce bias.
+                        - name: 'autoraterModel'
+                          type: String
+                          description: |
+                            The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                        - name: 'generationConfig'
+                          type: NestedObject
+                          description: |
+                            Configuration options for model generation and outputs.
+                          properties:
+                            - name: 'temperature'
+                              type: Double
+                              description: |
+                                Controls the randomness of predictions.
+                            - name: 'topP'
+                              type: Double
+                              description: |
+                                If specified, nucleus sampling will be used.
+                            - name: 'topK'
+                              type: Double
+                              description: |
+                                If specified, top-k sampling will be used.
+                            - name: 'seed'
+                              type: Integer
+                              description: |
+                                Seed.
+                            - name: 'thinkingConfig'
+                              type: NestedObject
+                              description: |
+                                Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                              properties:
+                                - name: 'includeThoughts'
+                                  type: Boolean
+                                  description: |
+                                    Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                                - name: 'thinkingBudget'
+                                  type: Integer
+                                  description: |
+                                    Indicates the thinking budget in tokens.
+                    - name: 'rubricGroupKey'
+                      type: String
+                      description: |
+                        Use a pre-defined group of rubrics associated with the input. Refers to a key in the rubric_groups map of EvaluationInstance.
+                    - name: 'rubricGenerationSpec'
+                      type: NestedObject
+                      description: |
+                        Dynamically generate rubrics using this specification.
+                      properties:
+                        - name: 'promptTemplate'
+                          type: String
+                          description: |
+                            Template for the prompt used to generate rubrics. The details should be updated based on the most-recent recipe requirements.
+                        - name: 'modelConfig'
+                          type: NestedObject
+                          description: |
+                            Configuration for the model used in rubric generation. Configs including sampling count and base model can be specified here. Flipping is not supported for rubric generation.
+                          properties:
+                            - name: 'samplingCount'
+                              type: Integer
+                              description: |
+                                Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                            - name: 'flipEnabled'
+                              type: Boolean
+                              description: |
+                                Default is true. Whether to flip the candidate and baseline responses. This is only applicable to the pairwise metric. If enabled, also provide PairwiseMetricSpec.candidate_response_field_name and PairwiseMetricSpec.baseline_response_field_name. When rendering PairwiseMetricSpec.metric_prompt_template, the candidate and baseline fields will be flipped for half of the samples to reduce bias.
+                            - name: 'autoraterModel'
+                              type: String
+                              description: |
+                                The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                            - name: 'generationConfig'
+                              type: NestedObject
+                              description: |
+                                Configuration options for model generation and outputs.
+                              properties:
+                                - name: 'temperature'
+                                  type: Double
+                                  description: |
+                                    Controls the randomness of predictions.
+                                - name: 'topP'
+                                  type: Double
+                                  description: |
+                                    If specified, nucleus sampling will be used.
+                                - name: 'topK'
+                                  type: Double
+                                  description: |
+                                    If specified, top-k sampling will be used.
+                                - name: 'seed'
+                                  type: Integer
+                                  description: |
+                                    Seed.
+                                - name: 'thinkingConfig'
+                                  type: NestedObject
+                                  description: |
+                                    Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                                  properties:
+                                    - name: 'includeThoughts'
+                                      type: Boolean
+                                      description: |
+                                        Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                                    - name: 'thinkingBudget'
+                                      type: Integer
+                                      description: |
+                                        Indicates the thinking budget in tokens.
+                        - name: 'rubricContentType'
+                          type: Enum
+                          description: |
+                            The type of rubric content to be generated.
+                          enum_values:
+                            - 'PROPERTY'
+                            - 'NL_QUESTION_ANSWER'
+                            - 'PYTHON_CODE_ASSERTION'
+                        - name: 'rubricTypeOntology'
+                          type: Array
+                          description: |
+                            A pre-defined list of allowed types for generated rubrics. If this field is provided, it implies `include_rubric_type` should be true, and the generated rubric types should be chosen from this ontology.
+                          item_type:
+                            type: String
+                    - name: 'predefinedRubricGenerationSpec'
+                      type: NestedObject
+                      description: |
+                        Dynamically generate rubrics using a predefined spec.
+                      properties:
+                        - name: 'metricSpecName'
+                          type: String
+                          description: |
+                            The name of a pre-defined metric, such as "instruction_following_v1" or "text_quality_v1".
+                          required: true
+                        - name: 'metricSpecParameters'
+                          type: String
+                          description: |
+                            The parameters needed to run the pre-defined metric.
+                          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                          validation:
+                            function: 'validation.StringIsJSON'
+                    - name: 'additionalConfig'
+                      type: String
+                      description: |
+                        Additional configuration for the metric.
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                    - name: 'resultParserConfig'
+                      type: NestedObject
+                      description: |
+                        The parser config for the metric result.
+                      properties:
+                        - name: 'customCodeParserConfig'
+                          type: NestedObject
+                          description: |
+                            Use custom code to parse the LLM response.
+                          properties:
+                            - name: 'parsingFunction'
+                              type: String
+                              description: |
+                                Python function for parsing results. The function should be defined within this string.
+                              required: true
+                - name: 'customCodeExecutionSpec'
+                  type: NestedObject
+                  description: |
+                    Spec for custom code execution metric.
+                  properties:
+                    - name: 'evaluationFunction'
+                      type: String
+                      description: |
+                        Python function. Expected user to define the following function, e.g.: def evaluate(instance: dict[str, Any]) -> float: Please include this function signature in the code snippet. Instance is the evaluation instance, any fields populated in the instance are available to the function as instance[field_name].
+                      required: true
+                - name: 'pointwiseMetricSpec'
+                  type: NestedObject
+                  description: |
+                    Spec for pointwise metric.
+                  properties:
+                    - name: 'metricPromptTemplate'
+                      type: String
+                      description: |
+                        Metric prompt template for pointwise metric.
+                      required: true
+                    - name: 'systemInstruction'
+                      type: String
+                      description: |
+                        System instructions for pointwise metric.
+                    - name: 'customOutputFormatConfig'
+                      type: NestedObject
+                      description: |
+                        CustomOutputFormatConfig allows customization of metric output. By default, metrics return a score and explanation. When this config is set, the default output is replaced with either: - The raw output string. - A parsed output based on a user-defined schema. If a custom format is chosen, the `score` and `explanation` fields in the corresponding metric result will be empty.
+                      properties:
+                        - name: 'returnRawOutput'
+                          type: Boolean
+                          description: |
+                            Whether to return raw output.
+            - name: metricResourceName
+              type: String
+              description: |
+                The resource name of the metric definition.
+              immutable: true
+            - name: predefinedMetricSpec
+              type: NestedObject
+              description: |
+                Spec for a pre-defined metric.
+              immutable: true
+              properties:
+                - name: metricSpecName
+                  type: String
+                  required: true
+                  description: |
+                    The name of a pre-defined metric, such as "instruction_following_v1" or "text_quality_v1".
+                  immutable: true
+                - name: parameters
+                  type: String
+                  description: |
+                    The parameters needed to run the pre-defined metric.
+                  immutable: true
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
+                    function: 'validation.StringIsJSON'
+            - name: computationBasedMetricSpec
+              type: NestedObject
+              description: |
+                Spec for a computation based metric.
+              immutable: true
+              properties:
+                - name: type
+                  type: Enum
+                  required: true
+                  description: |
+                    The type of the computation based metric.
+                  immutable: true
+                  enum_values:
+                    - 'EXACT_MATCH'
+                    - 'BLEU'
+                    - 'ROUGE'
+                - name: parameters
+                  type: String
+                  description: |
+                    A map of parameters for the metric, e.g. {"rouge_type": "rougeL"}.
+                  immutable: true
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
+                    function: 'validation.StringIsJSON'
+            - name: llmBasedMetricSpec
+              type: NestedObject
+              description: |
+                Spec for an LLM based metric.
+              immutable: true
+              properties:
+                - name: metricPromptTemplate
+                  type: String
+                  required: true
+                  description: |
+                    Template for the prompt sent to the judge model.
+                  immutable: true
+                - name: systemInstruction
+                  type: String
+                  description: |
+                    System instructions for the judge model.
+                  immutable: true
+                - name: judgeAutoraterConfig
+                  type: NestedObject
+                  description: |
+                    Configuration for the judge LLM (Autorater).
+                  immutable: true
+                  properties:
+                    - name: sampleCount
+                      type: Integer
+                      description: |
+                        Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                      immutable: true
+                    - name: autoraterModel
+                      type: String
+                      description: |
+                        The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                      immutable: true
+                    - name: generationConfig
+                      type: NestedObject
+                      description: |
+                        Configuration options for model generation and outputs.
+                      immutable: true
+                      properties:
+                        - name: 'temperature'
+                          type: Double
+                          description: |
+                            Controls the randomness of predictions.
+                        - name: 'topP'
+                          type: Double
+                          description: |
+                            If specified, nucleus sampling will be used.
+                        - name: 'topK'
+                          type: Double
+                          description: |
+                            If specified, top-k sampling will be used.
+                        - name: 'seed'
+                          type: Integer
+                          description: |
+                            Seed.
+                        - name: 'thinkingConfig'
+                          type: NestedObject
+                          description: |
+                            Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                          properties:
+                            - name: 'includeThoughts'
+                              type: Boolean
+                              description: |
+                                Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                            - name: 'thinkingBudget'
+                              type: Integer
+                              description: |
+                                Indicates the thinking budget in tokens.
+                - name: rubricGroupKey
+                  type: String
+                  description: |
+                    Use a pre-defined group of rubrics associated with the input. Refers to a key in the rubric_groups map of EvaluationInstance.
+                  immutable: true
+                - name: rubricGenerationSpec
+                  type: NestedObject
+                  description: |
+                    Dynamically generate rubrics using this specification.
+                  immutable: true
+                  properties:
+                    - name: promptTemplate
+                      type: String
+                      description: |
+                        Template for the prompt used to generate rubrics. The details should be updated based on the most-recent recipe requirements.
+                      immutable: true
+                    - name: modelConfig
+                      type: NestedObject
+                      description: |
+                        Configuration for the model used in rubric generation. Configs including sampling count and base model can be specified here. Flipping is not supported for rubric generation.
+                      immutable: true
+                      properties:
+                        - name: sampleCount
+                          type: Integer
+                          description: |
+                            Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                          immutable: true
+                        - name: autoraterModel
+                          type: String
+                          description: |
+                            The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                          immutable: true
+                        - name: generationConfig
+                          type: NestedObject
+                          description: |
+                            Configuration options for model generation and outputs.
+                          immutable: true
+                          properties:
+                            - name: 'temperature'
+                              type: Double
+                              description: |
+                                Controls the randomness of predictions.
+                            - name: 'topP'
+                              type: Double
+                              description: |
+                                If specified, nucleus sampling will be used.
+                            - name: 'topK'
+                              type: Double
+                              description: |
+                                If specified, top-k sampling will be used.
+                            - name: 'seed'
+                              type: Integer
+                              description: |
+                                Seed.
+                            - name: 'thinkingConfig'
+                              type: NestedObject
+                              description: |
+                                Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                              properties:
+                                - name: 'includeThoughts'
+                                  type: Boolean
+                                  description: |
+                                    Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                                - name: 'thinkingBudget'
+                                  type: Integer
+                                  description: |
+                                    Indicates the thinking budget in tokens.
+                    - name: rubricContentType
+                      type: Enum
+                      description: |
+                        The type of rubric content to be generated.
+                      immutable: true
+                      enum_values:
+                        - 'PROPERTY'
+                        - 'NL_QUESTION_ANSWER'
+                        - 'PYTHON_CODE_ASSERTION'
+                    - name: rubricTypeOntology
+                      type: Array
+                      description: |
+                        A pre-defined list of allowed types for generated rubrics. If this field is provided, it implies `include_rubric_type` should be true, and the generated rubric types should be chosen from this ontology.
+                      immutable: true
+                      item_type:
+                        type: String
+                    - name: metricResourceName
+                      type: String
+                      description: |
+                        Resource name of the metric definition.
+                      immutable: true
+                - name: predefinedRubricGenerationSpec
+                  type: NestedObject
+                  description: |
+                    Dynamically generate rubrics using a predefined spec.
+                  immutable: true
+                  properties:
+                    - name: metricSpecName
+                      type: String
+                      required: true
+                      description: |
+                        The name of a pre-defined metric, such as "instruction_following_v1" or "text_quality_v1".
+                      immutable: true
+                    - name: parameters
+                      type: String
+                      description: |
+                        The parameters needed to run the pre-defined metric.
+                      immutable: true
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                      validation:
+                        function: 'validation.StringIsJSON'
+                - name: additionalConfig
+                  type: String
+                  description: |
+                    Additional configuration for the metric.
+                  immutable: true
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
+                    function: 'validation.StringIsJSON'
+            - name: rubricBasedMetricSpec
+              type: NestedObject
+              description: |
+                Spec for rubric based metric.
+              immutable: true
+              properties:
+                - name: metricPromptTemplate
+                  type: String
+                  description: |
+                    Template for the prompt used by the judge model to evaluate against rubrics.
+                  immutable: true
+                - name: judgeAutoraterConfig
+                  type: NestedObject
+                  description: |
+                    Configuration for the judge LLM (Autorater).
+                  immutable: true
+                  properties:
+                    - name: sampleCount
+                      type: Integer
+                      description: |
+                        Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                      immutable: true
+                    - name: autoraterModel
+                      type: String
+                      description: |
+                        The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                      immutable: true
+                    - name: generationConfig
+                      type: NestedObject
+                      description: |
+                        Configuration options for model generation and outputs.
+                      immutable: true
+                      properties:
+                        - name: 'temperature'
+                          type: Double
+                          description: |
+                            Controls the randomness of predictions.
+                        - name: 'topP'
+                          type: Double
+                          description: |
+                            If specified, nucleus sampling will be used.
+                        - name: 'topK'
+                          type: Double
+                          description: |
+                            If specified, top-k sampling will be used.
+                        - name: 'seed'
+                          type: Integer
+                          description: |
+                            Seed.
+                        - name: 'thinkingConfig'
+                          type: NestedObject
+                          description: |
+                            Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                          properties:
+                            - name: 'includeThoughts'
+                              type: Boolean
+                              description: |
+                                Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                            - name: 'thinkingBudget'
+                              type: Integer
+                              description: |
+                                Indicates the thinking budget in tokens.
+                - name: inlineRubrics
+                  type: NestedObject
+                  description: |
+                    Use rubrics provided directly in the spec.
+                  immutable: true
+                  properties:
+                    - name: rubrics
+                      type: Array
+                      description: |
+                        The list of rubrics.
+                      immutable: true
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: rubricId
+                            type: String
+                            description: |
+                              Unique identifier for the rubric. This ID is used to refer to this rubric, e.g., in RubricVerdict.
+                          - name: content
+                            type: NestedObject
+                            required: true
+                            description: |
+                              The actual testable criteria for the rubric.
+                            properties:
+                              - name: property
+                                type: NestedObject
+                                description: |
+                                  Evaluation criteria based on a specific property.
+                                properties:
+                                  - name: description
+                                    type: String
+                                    description: |
+                                      Description of the property being evaluated.
+                          - name: type
+                            type: String
+                            description: |
+                              A type designator for the rubric, which can inform how it's evaluated or interpreted by systems or users. It's recommended to use consistent, well-defined, upper snake_case strings. Examples: "SUMMARIZATION_QUALITY", "SAFETY_HARMFUL_CONTENT", "INSTRUCTION_ADHERENCE".
+                          - name: importance
+                            type: Enum
+                            description: |
+                              The relative importance of this rubric.
+                            enum_values:
+                              - 'HIGH'
+                              - 'MEDIUM'
+                              - 'LOW'
+                - name: rubricGroupKey
+                  type: String
+                  description: |
+                    Use a pre-defined group of rubrics associated with the input content. This refers to a key in the `rubric_groups` map of `RubricEnhancedContents`.
+                  immutable: true
+                - name: rubricGenerationSpec
+                  type: NestedObject
+                  description: |
+                    Dynamically generate rubrics for evaluation using this specification.
+                  immutable: true
+                  properties:
+                    - name: promptTemplate
+                      type: String
+                      description: |
+                        Template for the prompt used to generate rubrics. The details should be updated based on the most-recent recipe requirements.
+                      immutable: true
+                    - name: modelConfig
+                      type: NestedObject
+                      description: |
+                        Configuration for the model used in rubric generation. Configs including sampling count and base model can be specified here. Flipping is not supported for rubric generation.
+                      immutable: true
+                      properties:
+                        - name: sampleCount
+                          type: Integer
+                          description: |
+                            Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                          immutable: true
+                        - name: autoraterModel
+                          type: String
+                          description: |
+                            The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                          immutable: true
+                        - name: generationConfig
+                          type: NestedObject
+                          description: |
+                            Configuration options for model generation and outputs.
+                          immutable: true
+                          properties:
+                            - name: 'temperature'
+                              type: Double
+                              description: |
+                                Controls the randomness of predictions.
+                            - name: 'topP'
+                              type: Double
+                              description: |
+                                If specified, nucleus sampling will be used.
+                            - name: 'topK'
+                              type: Double
+                              description: |
+                                If specified, top-k sampling will be used.
+                            - name: 'seed'
+                              type: Integer
+                              description: |
+                                Seed.
+                            - name: 'thinkingConfig'
+                              type: NestedObject
+                              description: |
+                                Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                              properties:
+                                - name: 'includeThoughts'
+                                  type: Boolean
+                                  description: |
+                                    Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                                - name: 'thinkingBudget'
+                                  type: Integer
+                                  description: |
+                                    Indicates the thinking budget in tokens.
+                    - name: rubricContentType
+                      type: Enum
+                      description: |
+                        The type of rubric content to be generated.
+                      immutable: true
+                      enum_values:
+                        - 'PROPERTY'
+                        - 'NL_QUESTION_ANSWER'
+                        - 'PYTHON_CODE_ASSERTION'
+                    - name: rubricTypeOntology
+                      type: Array
+                      description: |
+                        A pre-defined list of allowed types for generated rubrics. If this field is provided, it implies `include_rubric_type` should be true, and the generated rubric types should be chosen from this ontology.
+                      immutable: true
+                      item_type:
+                        type: String
+                    - name: metricResourceName
+                      type: String
+                      description: |
+                        Resource name of the metric definition.
+                      immutable: true
+      - name: outputConfig
+        type: NestedObject
+        description: |
+          The output config for the evaluation run.
+        immutable: true
+        properties:
+          - name: gcsDestination
+            type: NestedObject
+            description: |
+              Cloud Storage destination for evaluation output.
+            immutable: true
+            exactly_one_of:
+              - evaluation_config.0.output_config.0.gcs_destination
+              - evaluation_config.0.output_config.0.bigquery_destination
+            properties:
+              - name: outputUriPrefix
+                type: String
+                required: true
+                description: |
+                  Google Cloud Storage URI to output directory. If the uri doesn't end with '/', a '/' will be automatically appended. The directory is created if it doesn't exist.
+                immutable: true
+          - name: bigqueryDestination
+            type: NestedObject
+            description: |
+              BigQuery destination for evaluation output.
+            immutable: true
+            exactly_one_of:
+              - evaluation_config.0.output_config.0.gcs_destination
+              - evaluation_config.0.output_config.0.bigquery_destination
+            properties:
+              - name: outputUri
+                type: String
+                required: true
+                description: |
+                  BigQuery URI to a project or table, up to 2000 characters long. When only the project is specified, the Dataset and Table is created. When the full table reference is specified, the Dataset must exist and table must not exist.
+                  Accepted forms: - BigQuery path. For example: `bq://projectId` or `bq://projectId.bqDatasetId` or `bq://projectId.bqDatasetId.bqTableId`.
+                immutable: true
+      - name: autoraterConfig
+        type: NestedObject
+        description: |
+          The autorater config for the evaluation run.
+        immutable: true
+        properties:
+          - name: sampleCount
+            type: Integer
+            description: |
+              Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+            immutable: true
+          - name: autoraterModel
+            type: String
+            description: |
+              The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+            immutable: true
+          - name: generationConfig
+            type: NestedObject
+            description: |
+              Configuration options for model generation and outputs.
+            immutable: true
+            properties:
+              - name: 'temperature'
+                type: Double
+                description: |
+                  Controls the randomness of predictions.
+              - name: 'topP'
+                type: Double
+                description: |
+                  If specified, nucleus sampling will be used.
+              - name: 'topK'
+                type: Double
+                description: |
+                  If specified, top-k sampling will be used.
+              - name: 'seed'
+                type: Integer
+                description: |
+                  Seed.
+              - name: 'thinkingConfig'
+                type: NestedObject
+                description: |
+                  Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                properties:
+                  - name: 'includeThoughts'
+                    type: Boolean
+                    description: |
+                      Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                  - name: 'thinkingBudget'
+                    type: Integer
+                    description: |
+                      Indicates the thinking budget in tokens.
+      - name: promptTemplate
+        type: NestedObject
+        description: |
+          The prompt template used for inference. The values for variables in the prompt template are defined in EvaluationItem.EvaluationPrompt.PromptTemplateData.values.
+        immutable: true
+        properties:
+          - name: promptTemplate
+            type: String
+            description: |
+              Inline prompt template. Template variables should be in the format "{var_name}". Example: "Translate the following from {source_lang} to {target_lang}: {text}"
+            immutable: true
+            exactly_one_of:
+              - evaluation_config.0.prompt_template.0.prompt_template
+              - evaluation_config.0.prompt_template.0.gcs_uri
+          - name: gcsUri
+            type: String
+            description: |
+              Prompt template stored in Cloud Storage. Format: "gs://my-bucket/file-name.txt".
+            immutable: true
+            exactly_one_of:
+              - evaluation_config.0.prompt_template.0.prompt_template
+              - evaluation_config.0.prompt_template.0.gcs_uri
+      - name: rubricConfigs
+        type: Array
+        description: |
+          The rubric configs for the evaluation run. They are used to generate rubrics which can be used by rubric-based metrics. Multiple rubric configs can be specified for rubric generation but only one rubric config can be used for a rubric-based metric. If more than one rubric config is provided, the evaluation metric must specify a rubric group key. Note that if a generation spec is specified on both a rubric config and an evaluation metric, the rubrics generated for the metric will be used for evaluation.
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: rubricGroupKey
+              type: String
+              required: true
+              description: |
+                The key used to save the generated rubrics. If a generation spec is provided, this key will be used for the name of the generated rubric group. Otherwise, this key will be used to look up the existing rubric group on the evaluation item. Note that if a rubric group key is specified on both a rubric config and an evaluation metric, the key from the metric will be used to select the rubrics for evaluation.
+            - name: rubricGenerationSpec
+              type: NestedObject
+              description: |
+                Dynamically generate rubrics using this specification.
+              properties:
+                - name: promptTemplate
+                  type: String
+                  description: |
+                    Template for the prompt used to generate rubrics. The details should be updated based on the most-recent recipe requirements.
+                - name: modelConfig
+                  type: NestedObject
+                  description: |
+                    Configuration for the model used in rubric generation. Configs including sampling count and base model can be specified here. Flipping is not supported for rubric generation.
+                  properties:
+                    - name: sampleCount
+                      type: Integer
+                      description: |
+                        Number of samples for each instance in the dataset. If not specified, the default is 4. Minimum value is 1, maximum value is 32.
+                    - name: autoraterModel
+                      type: String
+                      description: |
+                        The fully qualified name of the publisher model or tuned autorater endpoint to use. Publisher model format: `projects/{project}/locations/{location}/publishers/*/models/*` Tuned model endpoint format: `projects/{project}/locations/{location}/endpoints/{endpoint}`
+                    - name: generationConfig
+                      type: NestedObject
+                      description: |
+                        Configuration options for model generation and outputs.
+                      properties:
+                        - name: 'temperature'
+                          type: Double
+                          description: |
+                            Controls the randomness of predictions.
+                        - name: 'topP'
+                          type: Double
+                          description: |
+                            If specified, nucleus sampling will be used.
+                        - name: 'topK'
+                          type: Double
+                          description: |
+                            If specified, top-k sampling will be used.
+                        - name: 'seed'
+                          type: Integer
+                          description: |
+                            Seed.
+                        - name: 'thinkingConfig'
+                          type: NestedObject
+                          description: |
+                            Configuration for thinking features. An error will be returned if this field is set for models that don't support thinking.
+                          properties:
+                            - name: 'includeThoughts'
+                              type: Boolean
+                              description: |
+                                Indicates whether to include thoughts in the response. If true, thoughts are returned only when available.
+                            - name: 'thinkingBudget'
+                              type: Integer
+                              description: |
+                                Indicates the thinking budget in tokens.
+                - name: rubricContentType
+                  type: Enum
+                  description: |
+                    The type of rubric content to be generated.
+                  enum_values:
+                    - 'PROPERTY'
+                    - 'NL_QUESTION_ANSWER'
+                    - 'PYTHON_CODE_ASSERTION'
+                - name: rubricTypeOntology
+                  type: Array
+                  description: |
+                    A pre-defined list of allowed types for generated rubrics. If this field is provided, it implies `include_rubric_type` should be true, and the generated rubric types should be chosen from this ontology.
+                  item_type:
+                    type: String
+                - name: metricResourceName
+                  type: String
+                  description: |
+                    Resource name of the metric definition.
+            - name: predefinedRubricGenerationSpec
+              type: NestedObject
+              description: |
+                Dynamically generate rubrics using a predefined spec.
+              properties:
+                - name: metricSpecName
+                  type: String
+                  required: true
+                  description: |
+                    The name of a pre-defined metric, such as "instruction_following_v1" or "text_quality_v1".
+                - name: parameters
+                  type: String
+                  description: |
+                    The parameters needed to run the pre-defined metric.
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
+                    function: 'validation.StringIsJSON'
+      - name: datasetCustomMetrics
+        type: Array
+        description: |
+          Specifications for custom dataset-level aggregations.
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: displayName
+              type: String
+              description: |
+                A display name for this custom summary metric. Used to prefix keys in the output summaryMetrics map. If not provided, a default name like "dataset_custom_metric_1", "dataset_custom_metric_2", etc., will be generated based on the order in the repeated field.
+            - name: aggregationFunction
+              type: String
+              required: true
+              description: |
+                The Python code string containing the aggregation function. Expected function signature: `def aggregate(instances: list[dict[str, Any]]) -> dict[str, float]:`
+      - name: lossAnalysisConfig
+        type: Array
+        description: |
+          Specifications for loss analysis. Each config can be specified for one metric.
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: metric
+              type: String
+              required: true
+              description: |
+                The metric to analyze (e.g., "tool_use_quality"). This filters the EvaluationItems in the EvalSet to only those where EvaluationResult.metric matches this value.
+            - name: candidate
+              type: String
+              required: true
+              description: |
+                The candidate model/agent to analyze (e.g., "gemini-3.0-pro"). This targets the specific CandidateResult within the EvaluationResult.
+      - name: cloudLoggingConfig
+        type: NestedObject
+        description: |
+          Configuration for exporting evaluation results to Cloud Logging.
+        immutable: true
+        properties:
+          - name: project
+            type: String
+            description: |
+              Google Cloud project to write logs to. Defaults to the request project.
+          - name: tracingContext
+            type: NestedObject
+            description: |
+              Tracing context for the evaluation run.
+            properties:
+              - name: traceId
+                type: String
+                description: |
+                  Trace ID being written to Cloud Trace in association with this log entry. e.g., `12345`, the numeric ID from the resource name. If a trace or span is being evaluated, this field should be populated.
+              - name: spanId
+                type: String
+                description: |
+                  ID of the Cloud Trace span associated with the current operation in which the log is being written. e.g., `7a2190356c3fc94b`. If a span is being evaluated, this field should be populated.
+              - name: conversationId
+                type: String
+                description: |
+                  Unique identifier for a conversation (session thread), used to store and correlate messages within a conversation. The value corresponds to the `gen_ai.conversation.id` field in the OpenTelemetry GenAI attributes.
+          - name: resourceType
+            type: String
+            description: |
+              MonitoredResource type. Defaults to "global" if unspecified.
+          - name: resourceLabels
+            type: KeyValuePairs
+            description: |
+              MonitoredResource labels to associate the log with. The backend will automatically inject project and location.
+      - name: allowCrossRegionModel
+        type: Boolean
+        description: |
+          Allows the evaluation run to use cross region models. When this flag is set, the service may route traffic to other regions if a model is unavailable in the current region (e.g., to a `global` endpoint). If a fully-qualified model endpoint resource name with a different region than the run location is provided elsewhere in the run config, this flag must be set to true or the request will fail.
+        immutable: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels for the evaluation run.
+    immutable: true
+  - name: evaluationSetSnapshot
+    type: String
+    description: |
+      The specific evaluation set of the evaluation run. For runs with an evaluation set input, this will be that same set. For runs with BigQuery input, it's the sampled BigQuery dataset.
+    output: true
+  - name: state
+    type: String
+    description: |
+      The state of the evaluation run.
+    output: true
+  - name: error
+    type: NestedObject
+    description: |
+      Only populated when the evaluation run's state is FAILED or CANCELLED.
+    output: true
+    properties:
+      - name: code
+        type: Integer
+        description: |
+          The status code, which should be an enum value of google.rpc.Code.
+        output: true
+      - name: message
+        type: String
+        description: |
+          A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
+        output: true
+      - name: details
+        type: Array
+        description: |
+          A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        output: true
+        item_type:
+          type: KeyValuePairs
+  - name: evaluationResults
+    type: NestedObject
+    description: |
+      The results of the evaluation run. Only populated when the evaluation run's state is SUCCEEDED.
+    output: true
+    properties:
+      - name: summaryMetrics
+        type: NestedObject
+        description: |
+          The summary metrics for the evaluation run.
+        output: true
+        properties:
+          - name: metrics
+            type: String
+            description: |
+              Map of metric name to metric value.
+            output: true
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          - name: totalItems
+            type: Integer
+            description: |
+              The total number of items that were evaluated.
+            output: true
+          - name: failedItems
+            type: Integer
+            description: |
+              The number of items that failed to be evaluated.
+            output: true
+      - name: evaluationSet
+        type: String
+        description: |
+          The evaluation set where item level results are stored.
+        output: true
+  - name: createTime
+    type: String
+    description: |
+      Time when the evaluation run was created.
+    output: true
+  - name: completionTime
+    type: String
+    description: |
+      Time when the evaluation run was completed.
+    output: true
+  - name: encryptionSpec
+    type: NestedObject
+    description: |
+      Customer-managed encryption key spec for this EvaluationRun. If set, this EvaluationRun will be secured by this key.
+    immutable: true
+    properties:
+      - name: kmsKeyName
+        type: String
+        description: |
+          Resource name of the Cloud KMS key used to protect the resource.
+          The Cloud KMS key must be in the same region as the resource.
+          It must have the format `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+        required: true
+        immutable: true

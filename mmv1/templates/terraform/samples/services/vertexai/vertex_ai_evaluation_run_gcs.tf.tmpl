@@ -1,0 +1,533 @@
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "eval_bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
+  region       = "us-central1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+
+  data_source {
+    evaluation_set = "projects/${data.google_project.project.number}/locations/us-central1/evaluationSets/12345"
+  }
+
+  inference_configs {
+    candidate   = "cand1"
+    model       = "publishers/google/models/gemini-2.0-flash-001"
+    parallelism = 2
+    generation_config {
+      temperature        = 0.5
+      top_p              = 0.8
+      top_k              = 10
+      candidate_count    = 1
+      max_output_tokens  = 256
+      stop_sequences     = ["STOP"]
+      response_logprobs  = true
+      logprobs           = 2
+      presence_penalty   = 0.1
+      frequency_penalty  = 0.2
+      seed               = 123
+      response_mime_type = "application/json"
+      response_schema    = jsonencode({
+        type = "STRING"
+      })
+      routing_config {
+        auto_mode {
+          model_routing_preference = "BALANCED"
+        }
+      }
+      thinking_config {
+        include_thoughts = true
+        thinking_budget  = 128
+      }
+    }
+    agents {
+      agent_key   = "root_agent"
+      agent_id    = "root_agent"
+      agent_type  = "LlmAgent"
+      description = "Root router agent"
+      instruction = "Route requests to sub-agents."
+      sub_agents  = ["sub_agent"]
+      tools       = jsonencode([
+        {
+          functionDeclarations = [
+            {
+              name        = "get_weather"
+              description = "Get weather for a location"
+            }
+          ]
+        }
+      ])
+    }
+    agent_run_config {
+      agent_engine = "projects/${data.google_project.project.project_id}/locations/us-central1/reasoningEngines/12345"
+      session_input {
+        user_id       = "user-1"
+        session_state = jsonencode({
+          topic = "weather"
+        })
+        parameters = {
+          app_name = "weather-app"
+        }
+      }
+      user_simulator_config {
+        model_name = "gemini-2.0-flash-001"
+        max_turn   = 3
+        model_config {
+          temperature        = 0.4
+          top_p              = 0.85
+          top_k              = 15
+          candidate_count    = 1
+          max_output_tokens  = 128
+          stop_sequences     = ["END"]
+          response_logprobs  = true
+          logprobs           = 1
+          presence_penalty   = 0.1
+          frequency_penalty  = 0.1
+          seed               = 7
+          response_mime_type = "application/json"
+          response_schema    = jsonencode({
+            type = "STRING"
+          })
+          routing_config {
+            auto_mode {
+              model_routing_preference = "PRIORITIZE_QUALITY"
+            }
+          }
+          thinking_config {
+            include_thoughts = true
+            thinking_budget  = 64
+          }
+        }
+      }
+    }
+    prompt_template {
+      prompt_template = "Answer: {prompt}"
+    }
+  }
+
+  inference_configs {
+    candidate   = "cand2"
+    parallelism = 1
+    generation_config {
+      temperature          = 0.3
+      top_p                = 0.9
+      top_k                = 20
+      candidate_count      = 1
+      max_output_tokens    = 128
+      response_logprobs    = true
+      logprobs             = 1
+      presence_penalty     = 0.1
+      frequency_penalty    = 0.1
+      seed                 = 456
+      response_mime_type   = "application/json"
+      response_json_schema = jsonencode({
+        type = "string"
+      })
+      routing_config {
+        manual_mode {
+          model_name = "gemini-2.0-flash-001"
+        }
+      }
+    }
+    agent_run_config {
+      gemini_agent_config {
+        gemini_agent = "projects/${data.google_project.project.project_id}/locations/us-central1/agents/my-agent"
+      }
+      user_simulator_config {
+        model_name = "gemini-2.0-flash-001"
+        max_turn   = 2
+        model_config {
+          temperature          = 0.3
+          top_p                = 0.9
+          top_k                = 20
+          candidate_count      = 1
+          max_output_tokens    = 128
+          response_logprobs    = true
+          logprobs             = 1
+          presence_penalty     = 0.1
+          frequency_penalty    = 0.1
+          seed                 = 8
+          response_mime_type   = "application/json"
+          response_json_schema = jsonencode({
+            type = "string"
+          })
+          routing_config {
+            manual_mode {
+              model_name = "gemini-2.0-flash-001"
+            }
+          }
+        }
+      }
+    }
+    prompt_template {
+      gcs_uri = "gs://${google_storage_bucket.eval_bucket.name}/prompt.txt"
+    }
+  }
+
+  evaluation_config {
+    allow_cross_region_model = true
+
+    output_config {
+      gcs_destination {
+        output_uri_prefix = "gs://${google_storage_bucket.eval_bucket.name}/output"
+      }
+    }
+
+    prompt_template {
+      gcs_uri = "gs://${google_storage_bucket.eval_bucket.name}/eval_prompt.txt"
+    }
+
+    rubric_configs {
+      rubric_group_key = "generated_rubrics"
+      rubric_generation_spec {
+        prompt_template      = "Generate rubrics for: {prompt}"
+        rubric_content_type  = "PROPERTY"
+        rubric_type_ontology = ["ACCURACY"]
+        metric_resource_name = "projects/${data.google_project.project.project_id}/locations/us-central1/evaluationMetrics/12345"
+        model_config {
+          sample_count    = 2
+          autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+          generation_config {
+            temperature = 0.2
+            top_p       = 0.9
+            top_k       = 20
+            seed        = 11
+            thinking_config {
+              include_thoughts = true
+              thinking_budget  = 64
+            }
+          }
+        }
+      }
+    }
+
+    rubric_configs {
+      rubric_group_key = "predefined_rubrics"
+      predefined_rubric_generation_spec {
+        metric_spec_name = "general_quality_v1"
+        parameters       = jsonencode({
+          guidelines = "The response should be accurate and concise."
+        })
+      }
+    }
+
+    dataset_custom_metrics {
+      display_name         = "custom_agg"
+      aggregation_function = "def aggregate(instances): return {'score': 1.0}"
+    }
+
+    loss_analysis_config {
+      metric    = "general_quality_v1"
+      candidate = "cand1"
+    }
+
+    cloud_logging_config {
+      project       = data.google_project.project.project_id
+      resource_type = "global"
+      resource_labels = {
+        env = "test"
+      }
+      tracing_context {
+        trace_id        = "12345"
+        span_id         = "7a2190356c3fc94b"
+        conversation_id = "conv-1"
+      }
+    }
+
+    metrics {
+      metric = "general_quality_v1"
+      predefined_metric_spec {
+        metric_spec_name = "general_quality_v1"
+        parameters       = jsonencode({
+          guidelines = "The response should be accurate and concise."
+        })
+      }
+    }
+
+    metrics {
+      metric = "comp_metric"
+      computation_based_metric_spec {
+        type       = "ROUGE"
+        parameters = jsonencode({
+          rouge_type = "rougeL"
+        })
+      }
+    }
+
+    metrics {
+      metric = "llm_group_metric"
+      llm_based_metric_spec {
+        metric_prompt_template = "Judge {response}"
+        system_instruction     = "Be objective"
+        rubric_group_key       = "generated_rubrics"
+        additional_config      = jsonencode({
+          strict = true
+        })
+        judge_autorater_config {
+          sample_count    = 2
+          autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+          generation_config {
+            temperature = 0.3
+            top_p       = 0.85
+            top_k       = 15
+            seed        = 21
+            thinking_config {
+              include_thoughts = true
+              thinking_budget  = 64
+            }
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "llm_gen_metric"
+      llm_based_metric_spec {
+        metric_prompt_template = "Judge {response}"
+        rubric_generation_spec {
+          prompt_template      = "Generate rubrics for {prompt}"
+          rubric_content_type  = "NL_QUESTION_ANSWER"
+          rubric_type_ontology = ["REASONING"]
+          metric_resource_name = "projects/${data.google_project.project.project_id}/locations/us-central1/evaluationMetrics/12345"
+          model_config {
+            sample_count    = 2
+            autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+            generation_config {
+              temperature = 0.3
+              top_p       = 0.85
+              top_k       = 15
+              seed        = 22
+              thinking_config {
+                include_thoughts = true
+                thinking_budget  = 64
+              }
+            }
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "llm_predef_metric"
+      llm_based_metric_spec {
+        metric_prompt_template = "Judge {response}"
+        predefined_rubric_generation_spec {
+          metric_spec_name = "instruction_following_v1"
+          parameters       = jsonencode({
+            strict = true
+          })
+        }
+      }
+    }
+
+    metrics {
+      metric = "rubric_inline_metric"
+      rubric_based_metric_spec {
+        metric_prompt_template = "Evaluate against rubrics: {response}"
+        inline_rubrics {
+          rubrics {
+            rubric_id  = "r1"
+            type       = "ACCURACY"
+            importance = "HIGH"
+            content {
+              property {
+                description = "Response is accurate."
+              }
+            }
+          }
+        }
+        judge_autorater_config {
+          sample_count    = 2
+          autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+          generation_config {
+            temperature = 0.2
+            top_p       = 0.9
+            top_k       = 10
+            seed        = 31
+            thinking_config {
+              include_thoughts = true
+              thinking_budget  = 64
+            }
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "rubric_group_metric"
+      rubric_based_metric_spec {
+        metric_prompt_template = "Evaluate {response}"
+        rubric_group_key       = "generated_rubrics"
+      }
+    }
+
+    metrics {
+      metric = "rubric_gen_metric"
+      rubric_based_metric_spec {
+        metric_prompt_template = "Evaluate {response}"
+        rubric_generation_spec {
+          prompt_template      = "Generate rubrics for {prompt}"
+          rubric_content_type  = "PYTHON_CODE_ASSERTION"
+          rubric_type_ontology = ["CODE"]
+          metric_resource_name = "projects/${data.google_project.project.project_id}/locations/us-central1/evaluationMetrics/12345"
+          model_config {
+            sample_count    = 2
+            autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+            generation_config {
+              temperature = 0.2
+              top_p       = 0.9
+              top_k       = 10
+              seed        = 32
+              thinking_config {
+                include_thoughts = true
+                thinking_budget  = 64
+              }
+            }
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_predef_metric"
+      metric_config {
+        aggregation_metrics = ["AVERAGE", "STANDARD_DEVIATION"]
+        metadata {
+          title = "Predefined Metric"
+          other_metadata = jsonencode({
+            category = "quality"
+          })
+          score_range {
+            min         = 0
+            max         = 5
+            step        = 1
+            description = "1 to 5 scale"
+          }
+        }
+        predefined_metric_spec {
+          metric_spec_name       = "general_quality_v1"
+          metric_spec_parameters = jsonencode({
+            version = 1
+          })
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_comp_metric"
+      metric_config {
+        computation_based_metric_spec {
+          type       = "BLEU"
+          parameters = jsonencode({
+            use_effective_order = true
+          })
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_code_metric"
+      metric_config {
+        custom_code_execution_spec {
+          evaluation_function = "def evaluate(instance): return 1.0"
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_pointwise_metric"
+      metric_config {
+        pointwise_metric_spec {
+          metric_prompt_template = "Rate {response}"
+          system_instruction     = "Rate from 1 to 5"
+          custom_output_format_config {
+            return_raw_output = true
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_llm_group_metric"
+      metric_config {
+        llm_based_metric_spec {
+          metric_prompt_template = "Judge {response}"
+          system_instruction     = "Be fair"
+          rubric_group_key       = "generated_rubrics"
+          additional_config      = jsonencode({
+            mode = "fast"
+          })
+          result_parser_config {
+            custom_code_parser_config {
+              parsing_function = "def parse(output): return 1.0"
+            }
+          }
+          judge_autorater_config {
+            sampling_count  = 2
+            flip_enabled    = true
+            autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+            generation_config {
+              temperature = 0.2
+              top_p       = 0.9
+              top_k       = 10
+              seed        = 41
+              thinking_config {
+                include_thoughts = true
+                thinking_budget  = 64
+              }
+            }
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_llm_gen_metric"
+      metric_config {
+        llm_based_metric_spec {
+          metric_prompt_template = "Judge {response}"
+          rubric_generation_spec {
+            prompt_template      = "Generate rubrics for {prompt}"
+            rubric_content_type  = "PROPERTY"
+            rubric_type_ontology = ["STYLE"]
+            model_config {
+              sampling_count  = 2
+              flip_enabled    = false
+              autorater_model = "publishers/google/models/gemini-2.0-flash-001"
+              generation_config {
+                temperature = 0.2
+                top_p       = 0.9
+                top_k       = 10
+                seed        = 42
+                thinking_config {
+                  include_thoughts = true
+                  thinking_budget  = 64
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    metrics {
+      metric = "mc_llm_predef_metric"
+      metric_config {
+        llm_based_metric_spec {
+          metric_prompt_template = "Judge {response}"
+          predefined_rubric_generation_spec {
+            metric_spec_name       = "text_quality_v1"
+            metric_spec_parameters = jsonencode({
+              strict = true
+            })
+          }
+        }
+      }
+    }
+  }
+}
