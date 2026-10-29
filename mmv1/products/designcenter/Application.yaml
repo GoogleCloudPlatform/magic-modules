@@ -66,7 +66,7 @@ properties:
     description: |
       DeploymentSource for the application.
     properties:
-      - name: 'applicationTemplateRevisionUri'
+      - name: 'applicationTemplateRevision'
         type: String
         description: |
           Application template revision URI.
