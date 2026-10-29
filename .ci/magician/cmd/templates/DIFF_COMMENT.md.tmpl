@@ -44,7 +44,7 @@ Please add an acceptance test which includes these fields. The test should inclu
 ## Unreadable test report
 {{- if .UnreadableTests.NewUnreadableTests }}
 
-Missing test detection may be incomplete because the following tests can't be read. Each test step's `Config` should call a function that returns a single `fmt.Sprintf` or `acctest.Nprintf` template.
+Missing test detection may be incomplete because the following tests can't be read. Each test step's `Config` should call a function that returns a single `fmt.Sprintf` or `acctest.Nprintf` template. See [Write tests the missing test detector can read](https://googlecloudplatform.github.io/magic-modules/test/test/#readable-tests).
 {{ range $testName, $err := .UnreadableTests.NewUnreadableTests }}
 - `{{ $testName }}`: {{ $err }}
 {{- end }}
