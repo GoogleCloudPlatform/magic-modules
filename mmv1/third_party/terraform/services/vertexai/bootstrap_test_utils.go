@@ -44,7 +44,7 @@ func BootstrapVertexAIModel(t *testing.T, region string) string {
 			"modelId": sharedVertexAIModelID,
 			"model": map[string]interface{}{
 				"displayName": sharedVertexAIModelID,
-				"artifactUri": "gs://cloud-samples-data/ai-platform-unified/models/tf2/flower-classification",
+				"artifactUri": "gs://cloud-samples-data/vertex-ai/model-deployment/models/resnet",
 				"containerSpec": map[string]interface{}{
 					"imageUri": "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest",
 				},
