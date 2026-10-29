@@ -72,12 +72,50 @@ properties:
     name: 'destinationComponentUri'
     description: 'Required. The component URI that the connection points to.'
     required: true
-  - type: KeyValuePairs
+  - type: Array
     name: 'sourceComponentParameters'
-    description: 'Optional. Parameters associated with the source component.'
-  - type: KeyValuePairs
+    description: |
+      Optional. Parameters associated with the source component. When unset, the
+      API fills these in from the connected components.
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: 'key'
+          description: 'The key of the parameter.'
+          required: true
+        - type: String
+          name: 'value'
+          description: 'The value of the parameter, as a JSON-encoded string. Use `jsonencode()` to set it.'
+          send_empty_value: true
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+          validation:
+            function: 'validation.StringIsJSON'
+  - type: Array
     name: 'destinationComponentParameters'
-    description: 'Optional. Parameters associated with the destination component.'
+    description: |
+      Optional. Parameters associated with the destination component. When unset,
+      the API fills these in from the connected components.
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: 'key'
+          description: 'The key of the parameter.'
+          required: true
+        - type: String
+          name: 'value'
+          description: 'The value of the parameter, as a JSON-encoded string. Use `jsonencode()` to set it.'
+          send_empty_value: true
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+          validation:
+            function: 'validation.StringIsJSON'
   - type: String
     name: 'dependencyType'
     description: 'Output only. The dependency type of the connection.'
