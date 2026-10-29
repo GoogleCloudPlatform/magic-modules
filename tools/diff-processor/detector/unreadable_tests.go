@@ -13,9 +13,7 @@ import (
 // it so that each step's Config is a call to a config function that returns a
 // single fmt.Sprintf or acctest.Nprintf template. When a test on this list
 // becomes readable, remove it.
-var KnownUnreadableTests = []string{
-	"TestAccPubsubTopic_schema",
-}
+var KnownUnreadableTests = []string{}
 
 // The longest error message reported for a single unreadable test.
 const maxUnreadableTestErrorLength = 300
