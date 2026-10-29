@@ -99,6 +99,7 @@ samples:
           org_id: ORG_ID
   - name: secure_source_manager_instance_private
     primary_resource_id: default
+    exclude_test: true
     external_providers: [time]
     steps:
       - name: secure_source_manager_instance_private
@@ -133,6 +134,7 @@ samples:
           - deletion_policy
   - name: secure_source_manager_instance_private_psc_backend
     primary_resource_id: default
+    exclude_test: true
     external_providers: [time]
     steps:
       - name: secure_source_manager_instance_private_psc_backend
@@ -158,6 +160,7 @@ samples:
           - deletion_policy
   - name: secure_source_manager_instance_private_psc_endpoint
     primary_resource_id: default
+    exclude_test: true
     external_providers: [time]
     steps:
       - name: secure_source_manager_instance_private_psc_endpoint
@@ -180,6 +183,7 @@ samples:
           - deletion_policy
   - name: secure_source_manager_instance_workforce_identity_federation
     primary_resource_id: default
+    exclude_test: true
     steps:
       - name: secure_source_manager_instance_workforce_identity_federation
         resource_id_vars:

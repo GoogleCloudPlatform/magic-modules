@@ -15,15 +15,15 @@ resource "google_secure_source_manager_repository" "repository" {
     deletion_policy = "{{index $.ResourceIdVars "deletion_policy"}}"
 }
 
-resource "google_secure_source_manager_hook" "default" {
+resource "google_secure_source_manager_hook" "{{$.PrimaryResourceId}}" {
     hook_id = "{{index $.ResourceIdVars "hook_id"}}"
     location = google_secure_source_manager_repository.repository.location
     repository_id = google_secure_source_manager_repository.repository.repository_id
-    target_uri = "https://www.example.com"
-    sensitive_query_string = "auth=fake_token"
-    disabled = false
+    target_uri = "{{index $.Vars "target_uri"}}"
+    sensitive_query_string = "{{index $.Vars "sensitive_query_string"}}"
+    disabled = {{index $.Vars "disabled"}}
     push_option {
-        branch_filter = "main"
+        branch_filter = "{{index $.Vars "branch_filter"}}"
     }
     events = ["PUSH", "PULL_REQUEST", "PULL_REQUEST_COMMENT"]
 }

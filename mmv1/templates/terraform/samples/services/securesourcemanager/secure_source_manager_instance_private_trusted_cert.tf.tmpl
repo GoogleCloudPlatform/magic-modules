@@ -15,6 +15,9 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
       google_project.psc_other_project.project_id
     ]
   }
+  workforce_identity_federation_config {
+    enabled = true
+  }
   deletion_policy = "DELETE"
 }
 

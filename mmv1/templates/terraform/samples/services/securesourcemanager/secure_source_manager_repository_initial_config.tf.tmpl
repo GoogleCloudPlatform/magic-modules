@@ -11,7 +11,7 @@ resource "google_secure_source_manager_repository" "{{$.PrimaryResourceId}}" {
     repository_id = "{{index $.ResourceIdVars "repository_id"}}"
     instance = google_secure_source_manager_instance.instance.name
 
-    description = "This is a test repository"
+    description = "{{index $.Vars "description"}}"
     initial_config {
       default_branch = "main"
       gitignores = ["python"]

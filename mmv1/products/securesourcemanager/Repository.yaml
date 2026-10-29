@@ -61,24 +61,8 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
-  - name: secure_source_manager_repository_initial_config
-    primary_resource_id: default
-    steps:
-      - name: secure_source_manager_repository_initial_config
-        resource_id_vars:
-          repository_id: my-repository
-          instance_id: my-instance
-          deletion_policy: PREVENT
-        test_vars_overrides:
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - deletion_policy
-  - name: secure_source_manager_repository_service_account
-    primary_resource_id: default
-    steps:
       - name: secure_source_manager_repository_service_account
+        include_step_doc: true
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
@@ -90,10 +74,20 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
-  - name: secure_source_manager_repository_secret_scanning
-    primary_resource_id: default
-    steps:
+      - name: secure_source_manager_repository_secret_scanning_default
+        include_step_doc: true
+        resource_id_vars:
+          repository_id: my-repository
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
       - name: secure_source_manager_repository_secret_scanning
+        include_step_doc: true
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
@@ -106,14 +100,29 @@ samples:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
-  - name: secure_source_manager_repository_secret_scanning_default
+  - name: secure_source_manager_repository_initial_config
     primary_resource_id: default
     steps:
-      - name: secure_source_manager_repository_secret_scanning_default
+      - name: secure_source_manager_repository_initial_config
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
           deletion_policy: PREVENT
+        vars:
+          description: This is a test repository
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
+      - name: secure_source_manager_repository_initial_config
+        resource_id_vars:
+          repository_id: my-repository
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        vars:
+          description: This is an updated test repository
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
