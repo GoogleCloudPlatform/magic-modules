@@ -26,4 +26,3 @@ scopes:
 versions:
   - name: ga
     base_url: https://sqladmin.googleapis.com/sql/v1beta4/
-legacy_identity_import_test: true
