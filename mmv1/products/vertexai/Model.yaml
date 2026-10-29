@@ -218,6 +218,5 @@ properties:
   - type: String
     name: modelId
     immutable: true
-    ignore_read: true
     default_from_api: true
     description: ID for the new copied Model.

@@ -2,7 +2,6 @@ package vertexai_test
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -166,11 +165,11 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				),
 			},
 			{
-				Config: strings.Replace(testAccVertexAIModel_copyWithOptionalFields(context), `version_aliases = ["`+context["version_alias"].(string)+`"]`, `version_aliases = []`, 1),
+				Config: testAccVertexAIModel_copyWithOptionalFieldsWithoutAliases(context),
 				Check:  resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "0"),
 			},
 			{
-				Config: strings.Replace(testAccVertexAIModel_copyWithOptionalFields(context), `version_aliases = [`, `version_aliases = ["default", `, 1),
+				Config: testAccVertexAIModel_copyWithOptionalFieldsWithDefaultAlias(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "2"),
 					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", "default"),
@@ -217,6 +216,40 @@ resource "google_vertex_ai_model" "model" {
   version_aliases = ["%{version_alias}", "%{updated_version_alias}"]
   description = "updated"
 
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIModel_copyWithOptionalFieldsWithoutAliases(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_model" "model" {
+  model_id = "%{model_id}"
+  project = "%{project_name}"
+  source_model = "%{source_model}"
+
+  region = "us-central1"
+  custom_service_account = "%{service_account}"
+  version_aliases = []
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIModel_copyWithOptionalFieldsWithDefaultAlias(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_model" "model" {
+  model_id = "%{model_id}"
+  project = "%{project_name}"
+  source_model = "%{source_model}"
+
+  region = "us-central1"
+  custom_service_account = "%{service_account}"
+  version_aliases = ["default", "%{version_alias}"]
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
