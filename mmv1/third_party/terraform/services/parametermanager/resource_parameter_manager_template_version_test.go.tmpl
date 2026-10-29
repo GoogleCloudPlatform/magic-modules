@@ -1,0 +1,137 @@
+package parametermanager_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanager"
+)
+
+func TestAccParameterManagerTemplateVersion_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckParameterManagerTemplateVersionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccParameterManagerTemplateVersion_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_template_version.template-version-update", "disabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_parameter_manager_template_version.template-version-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"template", "template_version_id"},
+			},
+			{
+				Config: testAccParameterManagerTemplateVersion_disabledTrue(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_template_version.template-version-update", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_template_version.template-version-update", "disabled", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_parameter_manager_template_version.template-version-update",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// When disabled = true, the API omits the payload object on GET, so payload is not returned on import
+				ImportStateVerifyIgnore: []string{"template", "template_version_id", "payload"},
+			},
+			{
+				Config: testAccParameterManagerTemplateVersion_disabledFalse(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_template_version.template-version-update", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_template_version.template-version-update", "disabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_parameter_manager_template_version.template-version-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"template", "template_version_id"},
+			},
+			{
+				Config: testAccParameterManagerTemplateVersion_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_parameter_manager_template_version.template-version-update", "disabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_parameter_manager_template_version.template-version-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"template", "template_version_id"},
+			},
+		},
+	})
+}
+
+func testAccParameterManagerTemplateVersion_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_template" "template-update" {
+  template_id = "tf_test_template%{random_suffix}"
+}
+
+resource "google_parameter_manager_template_version" "template-version-update" {
+  template = google_parameter_manager_template.template-update.id
+  template_version_id = "tf_test_template_version%{random_suffix}"
+  payload {
+    template_data = "app: my-app\nversion: 1\n"
+  }
+}
+`, context)
+}
+
+func testAccParameterManagerTemplateVersion_disabledTrue(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_template" "template-update" {
+  template_id = "tf_test_template%{random_suffix}"
+}
+
+resource "google_parameter_manager_template_version" "template-version-update" {
+  template = google_parameter_manager_template.template-update.id
+  template_version_id = "tf_test_template_version%{random_suffix}"
+  disabled = true
+  payload {
+    template_data = "app: my-app\nversion: 1\n"
+  }
+}
+`, context)
+}
+
+func testAccParameterManagerTemplateVersion_disabledFalse(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_template" "template-update" {
+  template_id = "tf_test_template%{random_suffix}"
+}
+
+resource "google_parameter_manager_template_version" "template-version-update" {
+  template = google_parameter_manager_template.template-update.id
+  template_version_id = "tf_test_template_version%{random_suffix}"
+  disabled = false
+  payload {
+    template_data = "app: my-app\nversion: 1\n"
+  }
+}
+`, context)
+}
+{{- end }}
