@@ -236,6 +236,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: registry.DatasourceMap(),
 {{- end }}
 		ResourcesMap: registry.ResourceMap(),
+		NoInternalValidate: true,
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
