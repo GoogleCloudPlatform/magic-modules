@@ -35,6 +35,10 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 custom_code:
   constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
+# The connector stays INITIALIZING for a while after setUpDataConnectorV2
+# returns, and updates are rejected with FAILED_PRECONDITION until it is done.
+error_retry_predicates:
+  - 'transport_tpg.IsDiscoveryEngineDataConnectorInitializingError'
 state_upgraders: true
 schema_version: 1
 timeouts:

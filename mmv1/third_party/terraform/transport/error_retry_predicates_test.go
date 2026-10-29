@@ -465,3 +465,41 @@ func TestIsResourceManagerBoundaryRetryableError(t *testing.T) {
 		})
 	}
 }
+
+func TestIsDiscoveryEngineDataConnectorInitializingError(t *testing.T) {
+	initializingBody := `{"error":{"code":400,"message":"Data Connector projects/794360760068/locations/global/collections/tf-test-collection-id17nlo9eumd/dataConnector is in INITIALIZING state. Please wait until initializing process is complete before updating.","status":"FAILED_PRECONDITION"}}`
+
+	cases := map[string]struct {
+		err      error
+		expected bool
+	}{
+		"400 connector initializing": {
+			err:      &googleapi.Error{Code: 400, Body: initializingBody},
+			expected: true,
+		},
+		"400 connector deleting": {
+			err: &googleapi.Error{
+				Code: 400,
+				Body: `{"error":{"code":400,"message":"Data Connector projects/123/locations/global/collections/c/dataConnector is in DELETING state. It is not allowed to be updated.","status":"FAILED_PRECONDITION"}}`,
+			},
+			expected: false,
+		},
+		"non-400 error with initializing message": {
+			err:      &googleapi.Error{Code: 409, Body: initializingBody},
+			expected: false,
+		},
+		"non-googleapi error": {
+			err:      fmt.Errorf("Data Connector is in INITIALIZING state"),
+			expected: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			isRetryable, _ := IsDiscoveryEngineDataConnectorInitializingError(tc.err)
+			if isRetryable != tc.expected {
+				t.Errorf("IsDiscoveryEngineDataConnectorInitializingError(%v) = %v, want %v", tc.err, isRetryable, tc.expected)
+			}
+		})
+	}
+}
