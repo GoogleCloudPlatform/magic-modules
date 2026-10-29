@@ -8,7 +8,7 @@ resource "google_design_center_application" "example" {
   deployment_region = "us-central1"
 
   source {
-    application_template_revision_uri = "{{index $.Vars "application_template_revision_uri"}}"
+    application_template_revision = "{{index $.Vars "application_template_revision_uri"}}"
   }
 
   scope {
