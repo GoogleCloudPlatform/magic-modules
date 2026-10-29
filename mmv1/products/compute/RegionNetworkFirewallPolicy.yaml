@@ -34,6 +34,8 @@ async:
     resource_inside_response: false
 legacy_long_form_project: true
 include_in_tgc_next: true
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
 samples:
   - name: 'region_network_firewall_policy_full'
     primary_resource_id: 'policy'
@@ -54,9 +56,6 @@ parameters:
     type: String
     description: The region of this resource.
     url_param_only: true
-    # region is a URL parameter not flattened from the API response; ignore_read
-    # enables HasRegion() so CustomizeDiff and Read populate the default region.
-    ignore_read: true
     immutable: true
     default_from_api: true
 properties:

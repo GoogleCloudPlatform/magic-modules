@@ -33,6 +33,8 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
 samples:
   - name: "region_network_policy_update"
     primary_resource_id: "policy"
@@ -53,9 +55,6 @@ parameters:
     type: String
     description: The region of this resource.
     url_param_only: true
-    # region is a URL parameter not flattened from the API response; ignore_read
-    # enables HasRegion() so CustomizeDiff and Read populate the default region.
-    ignore_read: true
     immutable: true
     default_from_api: true
 properties:
