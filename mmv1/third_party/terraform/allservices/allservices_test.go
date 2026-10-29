@@ -21,9 +21,10 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 )
 
-// TestProvider_InternalValidate runs InternalValidate with all service packages
-// registered via the blank import of google/allservices. Because
-// NoInternalValidate = true, InternalValidate is no longer ran at runtime.
+// TestProvider_InternalValidate must live in allservices (rather than
+// google/provider) so that all service packages are imported and registered
+// before calling InternalValidate. Because NoInternalValidate = true,
+// InternalValidate is no longer ran at runtime.
 func TestProvider_InternalValidate(t *testing.T) {
 	if err := provider.Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
