@@ -21,4 +21,3 @@ versions:
     base_url: 'https://run.googleapis.com/v2/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
-legacy_identity_import_test: true
