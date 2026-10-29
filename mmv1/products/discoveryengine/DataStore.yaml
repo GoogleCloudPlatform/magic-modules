@@ -253,12 +253,14 @@ properties:
         description: |
           Whether chunking mode is enabled.
         required: false
+        immutable: true
         properties:
           - name: 'layoutBasedChunkingConfig'
             type: NestedObject
             description: |
               Configuration for the layout based chunking.
             required: false
+            immutable: true
             send_empty_value: true
             allow_empty_object: true
             properties:
@@ -268,12 +270,14 @@ properties:
                   The token size limit for each chunk.
                   Supported values: 100-500 (inclusive). Default value: 500.
                 required: false
+                immutable: true
               - name: 'includeAncestorHeadings'
                 type: Boolean
                 description: |
                   Whether to include appending different levels of headings to chunks from the middle of the document to prevent context loss.
                   Default value: False.
                 required: false
+                immutable: true
       - name: 'defaultParsingConfig'
         type: NestedObject
         description: |
@@ -281,12 +285,14 @@ properties:
           will be configured to use a default DigitalParsingConfig, and the default parsing
           config will be applied to all file types for Document parsing.
         required: false
+        immutable: true
         properties:
           - name: 'digitalParsingConfig'
             type: NestedObject
             description: |
               Configurations applied to digital parser.
             required: false
+            immutable: true
             send_empty_value: true
             allow_empty_object: true
             exactly_one_of:
@@ -299,6 +305,7 @@ properties:
             description: |
               Configurations applied to OCR parser. Currently it only applies to PDFs.
             required: false
+            immutable: true
             exactly_one_of:
               - 'default_parsing_config.0.digital_parsing_config'
               - 'default_parsing_config.0.ocr_parsing_config'
@@ -309,11 +316,13 @@ properties:
                 description: |
                   If true, will use native text instead of OCR text on pages containing native text.
                 required: false
+                immutable: true
           - name: 'layoutParsingConfig'
             type: NestedObject
             description: |
               Configurations applied to layout parser.
             required: false
+            immutable: true
             send_empty_value: true
             allow_empty_object: true
             exactly_one_of:
@@ -326,24 +335,29 @@ properties:
                 description: |
                   If true, the LLM based annotation is added to the table during parsing.
                 required: false
+                immutable: true
               - name: 'enableImageAnnotation'
                 type: Boolean
                 description: |
                   If true, the LLM based annotation is added to the image during parsing.
                 required: false
+                immutable: true
               - name: 'enableLlmLayoutParsing'
                 type: Boolean
                 description: |
                   If true, the pdf layout will be refined using an LLM.
+                immutable: true
               - name: 'enableGetProcessedDocument'
                 type: Boolean
                 description: |
                   If true, the processed document will be made available for the GetProcessedDocument API.
+                immutable: true
               - name: 'structuredContentTypes'
                 type: Array
                 description: |
                   Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
                 required: false
+                immutable: true
                 item_type:
                   type: String
               - name: 'excludeHtmlElements'
@@ -351,6 +365,7 @@ properties:
                 description: |
                   List of HTML elements to exclude from the parsed content.
                 required: false
+                immutable: true
                 item_type:
                   type: String
               - name: 'excludeHtmlClasses'
@@ -358,6 +373,7 @@ properties:
                 description: |
                   List of HTML classes to exclude from the parsed content.
                 required: false
+                immutable: true
                 item_type:
                   type: String
               - name: 'excludeHtmlIds'
@@ -365,6 +381,7 @@ properties:
                 description: |
                   List of HTML ids to exclude from the parsed content.
                 required: false
+                immutable: true
                 item_type:
                   type: String
       - name: 'parsingConfigOverrides'
@@ -374,6 +391,7 @@ properties:
             * `pdf`: Override parsing config for PDF files, either digital parsing, ocr parsing or layout parsing is supported.
             * `html`: Override parsing config for HTML files, only digital parsing and or layout parsing are supported.
             * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
+        immutable: true
         key_name: 'file_type'
         value_type:
           type: NestedObject
@@ -383,6 +401,7 @@ properties:
               description: |
                 Configurations applied to digital parser.
               required: false
+              immutable: true
               send_empty_value: true
               allow_empty_object: true
               exactly_one_of:
@@ -395,6 +414,7 @@ properties:
               description: |
                 Configurations applied to OCR parser. Currently it only applies to PDFs.
               required: false
+              immutable: true
               exactly_one_of:
                 - 'default_parsing_config.0.digital_parsing_config'
                 - 'default_parsing_config.0.ocr_parsing_config'
@@ -405,11 +425,13 @@ properties:
                   description: |
                     If true, will use native text instead of OCR text on pages containing native text.
                   required: false
+                  immutable: true
             - name: 'layoutParsingConfig'
               type: NestedObject
               description: |
                 Configurations applied to layout parser.
               required: false
+              immutable: true
               send_empty_value: true
               allow_empty_object: true
               exactly_one_of:
@@ -422,24 +444,29 @@ properties:
                   description: |
                     If true, the LLM based annotation is added to the table during parsing.
                   required: false
+                  immutable: true
                 - name: 'enableImageAnnotation'
                   type: Boolean
                   description: |
                     If true, the LLM based annotation is added to the image during parsing.
                   required: false
+                  immutable: true
                 - name: 'enableLlmLayoutParsing'
                   type: Boolean
                   description: |
                     If true, the pdf layout will be refined using an LLM.
+                  immutable: true
                 - name: 'enableGetProcessedDocument'
                   type: Boolean
                   description: |
                     If true, the processed document will be made available for the GetProcessedDocument API.
+                  immutable: true
                 - name: 'structuredContentTypes'
                   type: Array
                   description: |
                     Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
                   required: false
+                  immutable: true
                   item_type:
                     type: String
                 - name: 'excludeHtmlElements'
@@ -447,6 +474,7 @@ properties:
                   description: |
                     List of HTML elements to exclude from the parsed content.
                   required: false
+                  immutable: true
                   item_type:
                     type: String
                 - name: 'excludeHtmlClasses'
@@ -454,6 +482,7 @@ properties:
                   description: |
                     List of HTML classes to exclude from the parsed content.
                   required: false
+                  immutable: true
                   item_type:
                     type: String
                 - name: 'excludeHtmlIds'
@@ -461,6 +490,7 @@ properties:
                   description: |
                     List of HTML ids to exclude from the parsed content.
                   required: false
+                  immutable: true
                   item_type:
                     type: String
   - name: 'createTime'
