@@ -126,6 +126,7 @@ properties:
     type: Array
     description: |
       List of skill configs for the companion agent.
+      At most one skill config of each type (for example, at most one `guidance_skill_config`) may be configured.
     item_type:
       type: NestedObject
       properties:
@@ -134,7 +135,6 @@ properties:
           description: |
             The event that should trigger the skill.
           enum_values:
-            - SKILL_TRIGGER_EVENT_UNSPECIFIED
             - END_OF_UTTERANCE
             - CUSTOMER_MESSAGE
             - AGENT_MESSAGE
@@ -176,7 +176,6 @@ properties:
                     description: |
                       Event that triggers the guidance instruction.
                     enum_values:
-                      - TRIGGER_EVENT_UNSPECIFIED
                       - END_OF_UTTERANCE
                       - CUSTOMER_MESSAGE
                       - AGENT_MESSAGE
@@ -209,11 +208,11 @@ properties:
           description: |
             Indicates whether the tool requires human confirmation.
           enum_values:
-            - CONFIRMATION_REQUIREMENT_UNSPECIFIED
             - REQUIRED
             - NOT_REQUIRED
         - name: proactiveEnabled
           type: Boolean
+          default_value: true
           send_empty_value: true
           description: |
             Indicates whether the tool is enabled in proactive mode.
@@ -270,7 +269,6 @@ properties:
           description: |
             Indicates whether the tool requires human confirmation.
           enum_values:
-            - CONFIRMATION_REQUIREMENT_UNSPECIFIED
             - REQUIRED
             - NOT_REQUIRED
         - name: proactiveEnabled
