@@ -21,4 +21,3 @@ versions:
     base_url: 'https://certificatemanager.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-identity'
-legacy_identity_import_test: true
