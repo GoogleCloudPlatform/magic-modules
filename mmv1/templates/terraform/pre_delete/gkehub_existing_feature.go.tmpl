@@ -3,7 +3,7 @@
 if d.Get("name").(string) == "rbacrolebindingactuation" {
 	log.Printf("[DEBUG] Mandatory feature 'rbacrolebindingactuation' detected. Resetting instead of deleting.")
 
-	patchUrl, err := tpgresource.ReplaceVarsForId(d, config, "{{"{{"}}GKEHub2BasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
+	patchUrl, err := tpgresource.ReplaceVarsForId(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return err
 	}

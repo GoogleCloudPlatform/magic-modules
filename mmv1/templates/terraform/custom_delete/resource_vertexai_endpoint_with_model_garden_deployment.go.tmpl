@@ -29,7 +29,7 @@ if !ok {
 }
 
 // Undeploy the model
-undeployUrl, err := tpgresource.ReplaceVars(d, config,  "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:undeployModel")
+undeployUrl, err := tpgresource.ReplaceVars(d, config,  transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:undeployModel")
 if err != nil {
     return err
 }
@@ -68,7 +68,7 @@ log.Printf("[DEBUG] Finished undeploying model %s from EndpointWithModelGardenDe
 
 
 // Delete Endpoint
-deleteUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+deleteUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
 if err != nil {
     return err
 }

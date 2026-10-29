@@ -83,7 +83,7 @@ body := map[string]interface{}{
 	"updateMask": strings.Join(updateMask, ","),
 }
 
-url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:mutateDeployedModel")
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:mutateDeployedModel")
 if err != nil {
 	return err
 }

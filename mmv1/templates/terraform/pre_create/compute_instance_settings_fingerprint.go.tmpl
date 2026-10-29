@@ -1,5 +1,5 @@
 
-fingerprintUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceSettings/{{"{{"}}name{{"}}"}}")
+fingerprintUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceSettings/{{"{{"}}name{{"}}"}}")
 if err != nil {
         return err
 }
