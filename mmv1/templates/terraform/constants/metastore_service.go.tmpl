@@ -19,8 +19,7 @@ import (
 )
 
 // Clean up PSC forwarding rules and reserved internal addresses created by the Dataproc Metastore
-// service agent in consumer subnetworks so that the subnetworks are not left in use after deletion
-// or failed creation.
+// service agent in consumer subnetworks so that the subnetworks are not left in use after deletion.
 func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
 	v, ok := d.GetOk("network_config.0.consumers")
 	if !ok {
@@ -42,11 +41,17 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 		if subnetwork == "" {
 			continue
 		}
-		var endpointIP string
-		if endpointUri, _ := consumer["endpoint_uri"].(string); endpointUri != "" {
-			if u, err := neturl.Parse(endpointUri); err == nil {
-				endpointIP = u.Hostname()
-			}
+		endpointUri, _ := consumer["endpoint_uri"].(string)
+		if endpointUri == "" {
+			continue
+		}
+		u, err := neturl.Parse(endpointUri)
+		if err != nil {
+			return fmt.Errorf("parsing consumer endpoint_uri %q for subnetwork %q: %w", endpointUri, subnetwork, err)
+		}
+		endpointIP := u.Hostname()
+		if endpointIP == "" {
+			continue
 		}
 
 		fv, err := tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
@@ -85,10 +90,9 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 			if !strings.HasSuffix(addrSubnetwork, subnetworkSuffix) {
 				continue
 			}
-			if endpointIP != "" {
-				if addrIP, _ := addr["address"].(string); addrIP != endpointIP {
-					continue
-				}
+			addrIP, _ := addr["address"].(string)
+			if addrIP != endpointIP {
+				continue
 			}
 
 			if users, ok := addr["users"].([]interface{}); ok {
