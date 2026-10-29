@@ -1,9 +1,9 @@
 import (
     "runtime"
-    "github.com/gammazero/workerpool"
+    "sync"
 )
 
 var (
     _ = runtime.GOARCH
-    _ = workerpool.New
+    _ = sync.Mutex{}
 )
