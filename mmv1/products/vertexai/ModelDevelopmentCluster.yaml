@@ -90,6 +90,8 @@ samples:
           filestore_name: mdc-home
           data_filestore_name: mdc-data
           reservation_name: mdc-res
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
   - name: vertex_ai_model_development_cluster_gke
     primary_resource_id: default
     min_version: beta
