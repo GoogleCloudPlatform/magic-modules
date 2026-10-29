@@ -1,5 +1,5 @@
 resource "google_secure_source_manager_instance" "instance" {
-    location = "us-central1"
+    location = "asia-east1"
     instance_id = "{{index $.ResourceIdVars "instance_id"}}"
 
     # Prevent accidental deletions.
@@ -15,7 +15,7 @@ resource "google_secure_source_manager_repository" "repository" {
     deletion_policy = "{{index $.ResourceIdVars "deletion_policy"}}"
 }
 
-resource "google_secure_source_manager_hook" "basic" {
+resource "google_secure_source_manager_hook" "{{$.PrimaryResourceId}}" {
     hook_id = "{{index $.ResourceIdVars "hook_id"}}"
     repository_id = google_secure_source_manager_repository.repository.repository_id
     location = google_secure_source_manager_repository.repository.location

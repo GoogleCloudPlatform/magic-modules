@@ -43,57 +43,56 @@ autogen_async: true
 custom_code: null
 samples:
   - name: secure_source_manager_hook_basic
-    primary_resource_id: basic
+    primary_resource_id: default
     steps:
       - name: secure_source_manager_hook_basic
         resource_id_vars:
           hook_id: my-basic-hook
           repository_id: my-basic-repository
           instance_id: my-basic-instance
-          prevent_destroy: "true"
-          deletion_policy: '"PREVENT"'
+          deletion_policy: PREVENT
         test_vars_overrides:
-          prevent_destroy: "false"
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          prevent_destroy: "false"
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
-  - name: secure_source_manager_hook_with_fields
-    primary_resource_id: default
-    steps:
+      - name: secure_source_manager_hook_with_fields
+        include_step_doc: true
+        resource_id_vars:
+          hook_id: my-basic-hook
+          repository_id: my-basic-repository
+          instance_id: my-basic-instance
+          sa_id: my-basic-sa
+          deletion_policy: PREVENT
+        vars:
+          target_uri: https://www.example.com
+          sensitive_query_string: auth=fake_token
+          disabled: 'false'
+          service_account_auth: 'true'
+          branch_filter: main
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
       - name: secure_source_manager_hook_with_fields
         resource_id_vars:
-          hook_id: my-initial-hook
-          repository_id: my-initial-repository
-          instance_id: my-initial-instance
-          prevent_destroy: "true"
-          deletion_policy: '"PREVENT"'
+          hook_id: my-basic-hook
+          repository_id: my-basic-repository
+          instance_id: my-basic-instance
+          sa_id: my-basic-sa
+          deletion_policy: PREVENT
+        vars:
+          target_uri: https://www.update.com
+          sensitive_query_string: auth=updated_token
+          disabled: 'true'
+          service_account_auth: 'false'
+          branch_filter: ''
         test_vars_overrides:
-          prevent_destroy: "false"
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          prevent_destroy: "false"
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - deletion_policy
-  - name: secure_source_manager_hook_service_account_auth
-    primary_resource_id: default
-    steps:
-      - name: secure_source_manager_hook_service_account_auth
-        resource_id_vars:
-          hook_id: my-sa-hook
-          repository_id: my-sa-repository
-          instance_id: my-sa-instance
-          sa_id: my-sa
-          prevent_destroy: "true"
-          deletion_policy: '"PREVENT"'
-        test_vars_overrides:
-          prevent_destroy: "false"
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          prevent_destroy: "false"
           deletion_policy: '"DELETE"'
         ignore_read_extra:
           - deletion_policy
@@ -130,6 +129,7 @@ properties:
     required: true
   - name: disabled
     type: Boolean
+    send_empty_value: true
     description: |
       Determines if the hook disabled or not.
       Set to true to stop sending traffic.
@@ -167,6 +167,7 @@ properties:
       The sensitive query string to be appended to the target URI.
   - name: serviceAccountAuth
     type: Boolean
+    send_empty_value: true
     description: |
       Determines if the hook uses the Repository Service Account to
       generate an OIDC ID Token for webhook authentication.
