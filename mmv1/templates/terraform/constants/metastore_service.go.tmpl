@@ -65,7 +65,7 @@ func deleteDataprocMetastoreServicePscEndpoints(d *schema.ResourceData, config *
 		// The Metastore API only exposes the reserved IP in endpoint_uri (e.g. thrift://10.0.0.2:9083),
 		// not the GCE address or forwarding rule names (metastore-addr-<uuid> / metastore-forwarding-rule-<uuid>),
 		// so we look up the address by IP in the consumer subnetwork to find its name and forwarding rule users.
-		addressesUrl := fmt.Sprintf("%sprojects/%s/regions/%s/addresses?filter=address%%3D%s", computeBasePath, fv.Project, fv.Region, u.Hostname())
+		addressesUrl := fmt.Sprintf("%sprojects/%s/regions/%s/addresses?filter=address%%3D%%22%s%%22", computeBasePath, fv.Project, fv.Region, u.Hostname())
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
