@@ -10,10 +10,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -883,6 +886,586 @@ func TestIamMember_MemberDiffSuppress(t *testing.T) {
 			t.Errorf("Testcase %s failed: expected equality to be %t but got %t", testcase.name, testcase.equal, areEqual)
 		}
 	}
+}
+
+type mockIamMemberUpdater struct {
+	mu         sync.Mutex
+	resourceId string
+	policy     *cloudresourcemanager.Policy
+	onSet      func(incoming *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error)
+	lastSet    *cloudresourcemanager.Policy
+}
+
+func cloneTestIamPolicy(p *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
+	if p == nil {
+		return nil, nil
+	}
+	b, err := json.Marshal(p)
+	if err != nil {
+		return nil, err
+	}
+	var cloned cloudresourcemanager.Policy
+	if err := json.Unmarshal(b, &cloned); err != nil {
+		return nil, err
+	}
+	return &cloned, nil
+}
+
+func (u *mockIamMemberUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	return cloneTestIamPolicy(u.policy)
+}
+
+func (u *mockIamMemberUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	incomingCopy, err := cloneTestIamPolicy(policy)
+	if err != nil {
+		return err
+	}
+	u.lastSet = incomingCopy
+	if u.onSet != nil {
+		next, err := u.onSet(incomingCopy)
+		if err != nil {
+			return err
+		}
+		u.policy = next
+		return nil
+	}
+	u.policy = incomingCopy
+	return nil
+}
+
+func (u *mockIamMemberUpdater) GetResourceId() string   { return u.resourceId }
+func (u *mockIamMemberUpdater) GetMutexKey() string     { return "iam-member-test-" + u.resourceId }
+func (u *mockIamMemberUpdater) DescribeResource() string { return fmt.Sprintf("bucket %q", u.resourceId) }
+
+func newTestIamMemberResource(updater *mockIamMemberUpdater) *schema.Resource {
+	parentSchema := map[string]*schema.Schema{
+		"bucket": {
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+		},
+	}
+	newUpdater := func(d tpgresource.TerraformResourceData, _ *transport_tpg.Config) (ResourceIamUpdater, error) {
+		return updater, nil
+	}
+	idParser := func(d *schema.ResourceData, _ *transport_tpg.Config) error {
+		return d.Set("bucket", d.Id())
+	}
+	return ResourceIamMember(parentSchema, newUpdater, idParser)
+}
+
+func TestResourceIamMemberRead_MergesDuplicateRoleAndConditionBindings(t *testing.T) {
+	t.Run("finds conditional member in subsequent binding with same role and condition", func(t *testing.T) {
+		cond := &cloudresourcemanager.Expr{
+			Title:       "conditional_object_readers",
+			Description: "Allow approved readers to read bucket objects.",
+			Expression:  "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/')",
+		}
+		updater := &mockIamMemberUpdater{
+			resourceId: "read-split-cond",
+			policy: &cloudresourcemanager.Policy{
+				Version: IamPolicyVersion,
+				Etag:    "etag-split",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:      "roles/storage.objectViewer",
+						Members:   []string{"user:first@example.com"},
+						Condition: cond,
+					},
+					{
+						Role:      "roles/storage.objectViewer",
+						Members:   []string{"user:reader@example.com"},
+						Condition: cond,
+					},
+				},
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:reader@example.com",
+			"condition": []interface{}{
+				map[string]interface{}{
+					"title":       cond.Title,
+					"description": cond.Description,
+					"expression":  cond.Expression,
+				},
+			},
+		})
+		d.SetId("b/tf-test-bucket/roles/storage.objectViewer/user:reader@example.com/" + conditionKeyFromCondition(cond).String())
+
+		if err := res.Read(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Read error: %v", err)
+		}
+		if d.Id() == "" {
+			t.Fatal("expected Read to retain resource ID when member is in second matching conditional binding, got empty ID")
+		}
+		if got := d.Get("member").(string); got != "user:reader@example.com" {
+			t.Fatalf("expected member %q, got %q", "user:reader@example.com", got)
+		}
+		if got := d.Get("etag").(string); got != "etag-split" {
+			t.Fatalf("expected etag %q, got %q", "etag-split", got)
+		}
+	})
+
+	t.Run("preserves case sensitivity for IAM principal identifiers", func(t *testing.T) {
+		aliceUpper := "principal://iam.googleapis.com/projects/12345/locations/global/workloadIdentityPools/tf-test-pool/subject/Alice"
+		aliceLower := "principal://iam.googleapis.com/projects/12345/locations/global/workloadIdentityPools/tf-test-pool/subject/alice"
+
+		updaterOnlyUpper := &mockIamMemberUpdater{
+			resourceId: "read-case-sensitive-missing",
+			policy: &cloudresourcemanager.Policy{
+				Version: IamPolicyVersion,
+				Etag:    "etag-cs-1",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:    "roles/storage.objectViewer",
+						Members: []string{aliceUpper},
+					},
+				},
+			},
+		}
+		resMissing := newTestIamMemberResource(updaterOnlyUpper)
+		dMissing := schema.TestResourceDataRaw(t, resMissing.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": aliceLower,
+		})
+		dMissing.SetId("b/tf-test-bucket/roles/storage.objectViewer/" + aliceLower)
+
+		if err := resMissing.Read(dMissing, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Read error: %v", err)
+		}
+		if dMissing.Id() != "" {
+			t.Fatalf("expected Read to clear ID when case-sensitive principal %q is absent (only %q present), got ID %q", aliceLower, aliceUpper, dMissing.Id())
+		}
+
+		updaterBoth := &mockIamMemberUpdater{
+			resourceId: "read-case-sensitive-both",
+			policy: &cloudresourcemanager.Policy{
+				Version: IamPolicyVersion,
+				Etag:    "etag-cs-2",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:    "roles/storage.objectViewer",
+						Members: []string{aliceUpper, aliceLower},
+					},
+				},
+			},
+		}
+		resBoth := newTestIamMemberResource(updaterBoth)
+		dBoth := schema.TestResourceDataRaw(t, resBoth.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": aliceLower,
+		})
+		dBoth.SetId("b/tf-test-bucket/roles/storage.objectViewer/" + aliceLower)
+
+		if err := resBoth.Read(dBoth, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Read error: %v", err)
+		}
+		if got := dBoth.Get("member").(string); got != aliceLower {
+			t.Fatalf("expected exact case-sensitive principal %q, got %q", aliceLower, got)
+		}
+	})
+}
+
+func TestResourceIamMemberImport_MergesDuplicateRoleAndConditionBindings(t *testing.T) {
+	t.Run("imports member when duplicate bindings share identical role and condition", func(t *testing.T) {
+		cond := &cloudresourcemanager.Expr{
+			Title:       "conditional_object_readers",
+			Description: "Allow approved readers to read bucket objects.",
+			Expression:  "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/')",
+		}
+		updater := &mockIamMemberUpdater{
+			resourceId: "import-split-cond",
+			policy: &cloudresourcemanager.Policy{
+				Version: IamPolicyVersion,
+				Etag:    "etag-import",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:      "roles/storage.objectViewer",
+						Members:   []string{"user:first@example.com", "user:reader@example.com"},
+						Condition: cond,
+					},
+					{
+						Role:      "roles/storage.objectViewer",
+						Members:   []string{"user:reader@example.com", "user:other@example.com"},
+						Condition: cond,
+					},
+				},
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("b/tf-test-bucket roles/storage.objectViewer user:reader@example.com conditional_object_readers")
+
+		imported, err := res.Importer.State(d, &transport_tpg.Config{})
+		if err != nil {
+			t.Fatalf("unexpected Import error on duplicate identical conditional bindings: %v", err)
+		}
+		if len(imported) != 1 {
+			t.Fatalf("expected 1 imported ResourceData, got %d", len(imported))
+		}
+		wantId := "b/tf-test-bucket/roles/storage.objectViewer/user:reader@example.com/" + conditionKeyFromCondition(cond).String()
+		if imported[0].Id() != wantId {
+			t.Fatalf("expected imported ID %q, got %q", wantId, imported[0].Id())
+		}
+	})
+
+	t.Run("rejects ambiguous import when distinct conditions share the same title", func(t *testing.T) {
+		updater := &mockIamMemberUpdater{
+			resourceId: "import-ambiguous-cond",
+			policy: &cloudresourcemanager.Policy{
+				Version: IamPolicyVersion,
+				Etag:    "etag-ambiguous",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:    "roles/storage.objectViewer",
+						Members: []string{"user:reader@example.com"},
+						Condition: &cloudresourcemanager.Expr{
+							Title:      "shared_title",
+							Expression: "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/a/')",
+						},
+					},
+					{
+						Role:    "roles/storage.objectViewer",
+						Members: []string{"user:reader@example.com"},
+						Condition: &cloudresourcemanager.Expr{
+							Title:      "shared_title",
+							Expression: "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/b/')",
+						},
+					},
+				},
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("b/tf-test-bucket roles/storage.objectViewer user:reader@example.com shared_title")
+
+		_, err := res.Importer.State(d, &transport_tpg.Config{})
+		if err == nil {
+			t.Fatal("expected error importing IAM member matching multiple distinct conditions with same title, got nil")
+		}
+		if !strings.Contains(err.Error(), "matches multiple conditions") {
+			t.Fatalf("expected 'matches multiple conditions' error, got: %v", err)
+		}
+	})
+}
+
+func TestResourceIamMemberCreateAndDelete(t *testing.T) {
+	t.Run("create returns descriptive error when conditional member is omitted after setIamPolicy", func(t *testing.T) {
+		t.Parallel()
+
+		cond := &cloudresourcemanager.Expr{
+			Title:       "conditional_object_readers",
+			Description: "Allow approved readers to read bucket objects.",
+			Expression:  "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/')",
+		}
+		initialPolicy := &cloudresourcemanager.Policy{
+			Version: IamPolicyVersion,
+			Etag:    "etag-before",
+			Bindings: []*cloudresourcemanager.Binding{
+				{
+					Role:      "roles/storage.objectViewer",
+					Members:   []string{"user:existing-1@example.com", "user:existing-2@example.com"},
+					Condition: cond,
+				},
+			},
+		}
+
+		updater := &mockIamMemberUpdater{
+			resourceId: "create-omitted-cond",
+			policy:     initialPolicy,
+			onSet: func(_ *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
+				// Simulate backend alias deduplication: HTTP 200 OK without adding the alias string.
+				unchanged, err := cloneTestIamPolicy(initialPolicy)
+				if err != nil {
+					return nil, err
+				}
+				unchanged.Etag = "etag-after"
+				return unchanged, nil
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:alias@example.com",
+			"condition": []interface{}{
+				map[string]interface{}{
+					"title":       cond.Title,
+					"description": cond.Description,
+					"expression":  cond.Expression,
+				},
+			},
+		})
+
+		err := res.Create(d, &transport_tpg.Config{})
+		if err == nil {
+			t.Fatal("expected error when member is omitted from policy after apply, got nil")
+		}
+		if !strings.Contains(err.Error(), "was not found in policy after apply") {
+			t.Fatalf("expected 'was not found in policy after apply' error, got: %v", err)
+		}
+		if !strings.Contains(err.Error(), "user:alias@example.com") || !strings.Contains(err.Error(), cond.Title) {
+			t.Fatalf("expected error to mention omitted member and condition title, got: %v", err)
+		}
+		if d.Id() != "" {
+			t.Fatalf("expected empty resource ID after failed Create, got %q", d.Id())
+		}
+	})
+
+	t.Run("create returns descriptive error when unconditional member is omitted after setIamPolicy", func(t *testing.T) {
+		t.Parallel()
+
+		initialPolicy := &cloudresourcemanager.Policy{
+			Version: 1,
+			Etag:    "etag-uncond-before",
+			Bindings: []*cloudresourcemanager.Binding{
+				{
+					Role:    "roles/storage.objectViewer",
+					Members: []string{"user:primary@example.com"},
+				},
+			},
+		}
+
+		updater := &mockIamMemberUpdater{
+			resourceId: "create-omitted-uncond",
+			policy:     initialPolicy,
+			onSet: func(_ *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
+				unchanged, err := cloneTestIamPolicy(initialPolicy)
+				if err != nil {
+					return nil, err
+				}
+				unchanged.Etag = "etag-uncond-after"
+				return unchanged, nil
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:alias@example.com",
+		})
+
+		err := res.Create(d, &transport_tpg.Config{})
+		if err == nil {
+			t.Fatal("expected error when unconditional member is omitted from policy after apply, got nil")
+		}
+		if !strings.Contains(err.Error(), "was not found in policy after apply") {
+			t.Fatalf("expected 'was not found in policy after apply' error, got: %v", err)
+		}
+		if strings.Contains(err.Error(), "with condition title") {
+			t.Fatalf("did not expect condition title in unconditional member error, got: %v", err)
+		}
+		if d.Id() != "" {
+			t.Fatalf("expected empty resource ID after failed Create, got %q", d.Id())
+		}
+	})
+
+	t.Run("create succeeds when backend returns newly created conditional member in split binding", func(t *testing.T) {
+		t.Parallel()
+
+		cond := &cloudresourcemanager.Expr{
+			Title:       "conditional_object_readers",
+			Description: "Allow approved readers to read bucket objects.",
+			Expression:  "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/')",
+		}
+		updater := &mockIamMemberUpdater{
+			resourceId: "create-split-cond",
+			policy: &cloudresourcemanager.Policy{
+				Version: IamPolicyVersion,
+				Etag:    "etag-1",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:      "roles/storage.objectViewer",
+						Members:   []string{"user:existing@example.com"},
+						Condition: cond,
+					},
+				},
+			},
+			onSet: func(_ *cloudresourcemanager.Policy) (*cloudresourcemanager.Policy, error) {
+				return &cloudresourcemanager.Policy{
+					Version: IamPolicyVersion,
+					Etag:    "etag-2",
+					Bindings: []*cloudresourcemanager.Binding{
+						{
+							Role:      "roles/storage.objectViewer",
+							Members:   []string{"user:existing@example.com"},
+							Condition: cond,
+						},
+						{
+							Role:      "roles/storage.objectViewer",
+							Members:   []string{"user:reader@example.com"},
+							Condition: cond,
+						},
+					},
+				}, nil
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:reader@example.com",
+			"condition": []interface{}{
+				map[string]interface{}{
+					"title":       cond.Title,
+					"description": cond.Description,
+					"expression":  cond.Expression,
+				},
+			},
+		})
+
+		if err := res.Create(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Create error with split conditional bindings: %v", err)
+		}
+		if d.Id() == "" {
+			t.Fatal("expected non-empty resource ID after Create")
+		}
+	})
+
+	t.Run("delete sets IamPolicyVersion when deleting conditional member", func(t *testing.T) {
+		t.Parallel()
+
+		cond := &cloudresourcemanager.Expr{
+			Title:       "conditional_object_readers",
+			Description: "Allow approved readers to read bucket objects.",
+			Expression:  "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/')",
+		}
+		updater := &mockIamMemberUpdater{
+			resourceId: "delete-cond-member",
+			policy: &cloudresourcemanager.Policy{
+				Version: 1,
+				Etag:    "etag-del-1",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:      "roles/storage.objectViewer",
+						Members:   []string{"user:reader@example.com"},
+						Condition: cond,
+					},
+				},
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:reader@example.com",
+			"condition": []interface{}{
+				map[string]interface{}{
+					"title":       cond.Title,
+					"description": cond.Description,
+					"expression":  cond.Expression,
+				},
+			},
+		})
+		d.SetId("b/tf-test-bucket/roles/storage.objectViewer/user:reader@example.com/" + conditionKeyFromCondition(cond).String())
+
+		if err := res.Delete(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Delete error: %v", err)
+		}
+		if updater.lastSet == nil {
+			t.Fatal("expected SetResourceIamPolicy to be called during Delete")
+		}
+		if updater.lastSet.Version != IamPolicyVersion {
+			t.Fatalf("expected Delete of conditional member to set policy version %d, got %d", IamPolicyVersion, updater.lastSet.Version)
+		}
+	})
+
+	t.Run("delete sets IamPolicyVersion when deleting unconditional member from policy with conditions", func(t *testing.T) {
+		t.Parallel()
+
+		cond := &cloudresourcemanager.Expr{
+			Title:      "other_condition",
+			Expression: "resource.name.startsWith('projects/_/buckets/tf-test-bucket/objects/')",
+		}
+		updater := &mockIamMemberUpdater{
+			resourceId: "delete-uncond-with-cond-policy",
+			policy: &cloudresourcemanager.Policy{
+				Version: 1,
+				Etag:    "etag-del-2",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:    "roles/storage.objectViewer",
+						Members: []string{"user:unconditional@example.com"},
+					},
+					{
+						Role:      "roles/storage.objectAdmin",
+						Members:   []string{"user:conditional@example.com"},
+						Condition: cond,
+					},
+				},
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:unconditional@example.com",
+		})
+		d.SetId("b/tf-test-bucket/roles/storage.objectViewer/user:unconditional@example.com")
+
+		if err := res.Delete(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Delete error: %v", err)
+		}
+		if updater.lastSet == nil {
+			t.Fatal("expected SetResourceIamPolicy to be called during Delete")
+		}
+		if updater.lastSet.Version != IamPolicyVersion {
+			t.Fatalf("expected Delete on policy containing conditions to set policy version %d, got %d", IamPolicyVersion, updater.lastSet.Version)
+		}
+	})
+
+	t.Run("delete preserves existing policy version when deleting unconditional member from policy without conditions", func(t *testing.T) {
+		t.Parallel()
+
+		updater := &mockIamMemberUpdater{
+			resourceId: "delete-uncond-v1-policy",
+			policy: &cloudresourcemanager.Policy{
+				Version: 1,
+				Etag:    "etag-del-3",
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Role:    "roles/storage.objectViewer",
+						Members: []string{"user:first@example.com", "user:second@example.com"},
+					},
+				},
+			},
+		}
+
+		res := newTestIamMemberResource(updater)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bucket": "b/tf-test-bucket",
+			"role":   "roles/storage.objectViewer",
+			"member": "user:first@example.com",
+		})
+		d.SetId("b/tf-test-bucket/roles/storage.objectViewer/user:first@example.com")
+
+		if err := res.Delete(d, &transport_tpg.Config{}); err != nil {
+			t.Fatalf("unexpected Delete error: %v", err)
+		}
+		if updater.lastSet == nil {
+			t.Fatal("expected SetResourceIamPolicy to be called during Delete")
+		}
+		if updater.lastSet.Version != 1 {
+			t.Fatalf("expected Delete on unconditional v1 policy to preserve version 1, got %d", updater.lastSet.Version)
+		}
+	})
 }
 
 func TestIamListFromIamBindingMap(t *testing.T) {
