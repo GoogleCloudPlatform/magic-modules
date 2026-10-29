@@ -74,7 +74,7 @@ samples:
         test_env_vars:
           org_id: "ORG_ID"
         test_vars_overrides:
-          network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "service-resource-network-config")'
+          network_name: 'servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "service-resource-network-config")'
         ignore_read_extra:
           - 'foo'
         exclude_import_test: true
