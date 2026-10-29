@@ -46,7 +46,9 @@ jobs:
           cd tools/diff-processor
           go test ./...
         env:
-          SERVICES_DIR: tools/diff-processor/new/google/services
+          # detector.KnownUnreadableTests is maintained against the beta
+          # provider, so only check it there.
+          SERVICES_DIR: ${{ matrix.repo == 'terraform-provider-google-beta' && format('{0}/tools/diff-processor/new/google/services', github.workspace) || '' }}
 
   go-changelog:
     runs-on: ubuntu-22.04
