@@ -20,4 +20,3 @@ versions:
 scopes:
   - 'https://www.googleapis.com/auth/bigtable'
 cai_asset_service: 'bigtable.googleapis.com'
-legacy_identity_import_test: true

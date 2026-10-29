@@ -19,4 +19,3 @@ versions:
     base_url: 'https://bigquerydatatransfer.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/bigquery'
-legacy_identity_import_test: true
