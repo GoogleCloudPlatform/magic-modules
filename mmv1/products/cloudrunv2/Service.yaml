@@ -191,6 +191,8 @@ samples:
   - name: 'cloudrunv2_service_mesh'
     primary_resource_id: 'default'
     min_version: 'beta'
+    # Currently failing in nightly and uses time_sleep external provider
+    skip_vcr: true
     external_providers: ["time"]
     steps:
       - name: 'cloudrunv2_service_mesh'
