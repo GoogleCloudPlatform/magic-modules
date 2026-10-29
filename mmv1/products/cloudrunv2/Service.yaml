@@ -1228,6 +1228,12 @@ properties:
         type: String
         description: |-
           A reference to a customer managed encryption key (CMEK) to use to encrypt this container image. For more information, go to https://cloud.google.com/run/docs/securing/using-cmek
+      - name: 'encryptionKeyRevocationAction'
+        type: String
+        description: |-
+          The action to take if the encryption key is revoked. Possible values are `PREVENT_NEW`, which prevents new instances from starting, and `SHUTDOWN`, which also shuts down existing instances.
+          If not set, the value returned by the API is kept. For more information, go to https://cloud.google.com/run/docs/reference/rest/v2/EncryptionKeyRevocationAction
+        default_from_api: true
       - name: 'maxInstanceRequestConcurrency'
         type: Integer
         description: |-
