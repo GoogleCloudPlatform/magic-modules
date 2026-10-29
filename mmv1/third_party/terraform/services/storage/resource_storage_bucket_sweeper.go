@@ -6,7 +6,6 @@ import (
 	"log"
 	"runtime"
 	"strings"
-	"sync"
 
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -85,7 +84,6 @@ func deleteObjects(config *transport_tpg.Config, bucket string) bool {
 			break
 		}
 		wp := tpgresource.NewWorkerPool(runtime.NumCPU() - 1)
-		var errMu sync.Mutex
 
 		for _, object := range res.Items {
 			log.Printf("[DEBUG] Found %s", object.Name)
@@ -94,9 +92,7 @@ func deleteObjects(config *transport_tpg.Config, bucket string) bool {
 			wp.Submit(func() {
 				log.Printf("[TRACE] Attempting to delete %s", object.Name)
 				if err := NewClient(config, userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
-					errMu.Lock()
 					deleteObjectError = err
-					errMu.Unlock()
 					log.Printf("[ERR] Failed to delete storage object %s: %s", object.Name, err)
 				} else {
 					log.Printf("[TRACE] Successfully deleted %s", object.Name)
