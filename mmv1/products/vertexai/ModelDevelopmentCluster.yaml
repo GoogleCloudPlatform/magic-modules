@@ -34,6 +34,11 @@ timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 120
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-east1
+    - region: us-east4
 async:
   operation:
     base_url: '{{op_id}}'
