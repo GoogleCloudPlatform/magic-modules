@@ -292,6 +292,26 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "expect-error-and-non-applying-steps-are-not-coverage",
+			changedFields: map[string]ResourceChanges{
+				"expect_error_resource": {
+					"field_one":   &Field{Added: true},
+					"field_two":   &Field{Added: true},
+					"field_three": &Field{Added: true},
+				},
+			},
+			expectedMissingTests: map[string]MissingTestInfo{
+				"expect_error_resource": {
+					UntestedFields: []string{"field_three", "field_two"},
+					SuggestedTest: `resource "expect_error_resource" "primary" {
+  field_three = # value needed
+  field_two   = # value needed
+}
+`,
+				},
+			},
+		},
 	} {
 		missingTests, err := getMissingTestsForChanges(test.changedFields, allTests)
 		if err != nil {

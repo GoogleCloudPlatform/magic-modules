@@ -106,6 +106,18 @@ samples:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
         ignore_read_extra:
           - update_mode
+      - name: vertex_ai_model_development_cluster_basic
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
+          filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
   - name: vertex_ai_model_development_cluster_gke
     primary_resource_id: default
     min_version: beta
@@ -426,7 +438,11 @@ properties:
   - name: nodePools
     type: Array
     required: true
-    description: The spec of the pools of different resources.
+    description: |-
+      The spec of the pools of different resources. Node pools can be added,
+      removed, or reordered in place; changing some fields on an existing node
+      pool may require replacing the node pool (validated server-side by the
+      API).
     item_type:
       type: NestedObject
       properties:
@@ -479,8 +495,10 @@ properties:
         - name: id
           type: String
           required: true
-          description: The unique ID referring to this node pool.
-          immutable: true
+          description: |-
+            The unique ID referring to this node pool. Cannot be modified in
+            place on an existing node pool; changing `id` updates the list of
+            node pools by adding/removing pools (validated server-side).
         - name: labels
           type: KeyValuePairs
           description: |-
@@ -506,7 +524,6 @@ properties:
           type: NestedObject
           required: true
           description: Specification of a single machine.
-          immutable: true
           properties:
             - name: machineType
               type: String
@@ -523,14 +540,12 @@ properties:
                 For DeployedModel this field is optional, and the default
                 value is `n1-standard-2`. For BatchPredictionJob or as part of
                 WorkerPoolSpec this field is required.
-              immutable: true
             - name: reservationAffinity
               type: NestedObject
               description: |-
                 A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
                 DeployedModel) to draw its Compute Engine resources from a Shared
                 Reservation, or exclusively from on-demand capacity.
-              immutable: true
               properties:
                 - name: reservationAffinityType
                   type: String
@@ -541,14 +556,12 @@ properties:
                     NO_RESERVATION
                     ANY_RESERVATION
                     SPECIFIC_RESERVATION
-                  immutable: true
                 - name: values
                   type: Array
                   description: |-
                     Corresponds to the label values of a reservation resource. This must be the
                     resource name of the reservation, reservation block, or reservation sub-
                     block.
-                  immutable: true
                   item_type:
                     type: String
         - name: nodeImage
@@ -588,7 +601,6 @@ properties:
             SPOT
             FLEX_START
           default_from_api: true
-          immutable: true
         - name: scalingSpec
           type: NestedObject
           description: The scaling spec of the node pool.
