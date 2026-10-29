@@ -250,23 +250,11 @@ func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string
 	return nil, fmt.Errorf("failed to find Steps in %v", testCaseCompLit.Elts)
 }
 
-func unwrapStepCompLit(elt ast.Expr) *ast.CompositeLit {
-	if compLit, ok := elt.(*ast.CompositeLit); ok {
-		return compLit
-	}
-	if unaryExpr, ok := elt.(*ast.UnaryExpr); ok && unaryExpr.Op == token.AND {
-		if compLit, ok := unaryExpr.X.(*ast.CompositeLit); ok {
-			return compLit
-		}
-	}
-	return nil
-}
-
 func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
 	test := &Test{}
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
-		if eltCompLit := unwrapStepCompLit(elt); eltCompLit != nil {
+		if eltCompLit, ok := elt.(*ast.CompositeLit); ok {
 			if shouldSkipStep(eltCompLit) {
 				continue
 			}
