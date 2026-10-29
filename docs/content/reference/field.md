@@ -258,7 +258,7 @@ is preferred because it will allow the user to see a clearer diff when the field
 
 The function specified can be a
 [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)
-(for example, `tgpresource.CaseDiffSuppress`) or a function defined in resource-specific
+(for example, `tpgresource.CaseDiffSuppress`) or a function defined in resource-specific
 [custom code]({{<ref "/develop/custom-code#add-reusable-variables-and-functions" >}}).
 
 Example:
