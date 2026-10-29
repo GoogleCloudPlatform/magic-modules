@@ -1,0 +1,14 @@
+resource "google_memorystore_instance" "instance" {
+  instance_id                 = "{{index $.ResourceIdVars "instance_name"}}"
+  location                    = "us-central1"
+  shard_count                 = 1
+  node_type                   = "SHARED_CORE_NANO"
+  authorization_mode          = "TOKEN_AUTH"
+  deletion_protection_enabled = false
+}
+
+resource "google_memorystore_token_auth_user" "{{$.PrimaryResourceId}}" {
+  location = google_memorystore_instance.instance.location
+  instance = google_memorystore_instance.instance.instance_id
+  user_id  = "{{index $.ResourceIdVars "user_name"}}"
+}
