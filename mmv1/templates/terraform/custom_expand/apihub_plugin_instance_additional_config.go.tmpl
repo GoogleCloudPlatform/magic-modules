@@ -18,6 +18,13 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
         {{- end }}
       {{ end }}
 
+    // ConfigVariable uses a protobuf oneof across its value fields, and the API
+    // requires `{"boolValue": false}` rather than `{}` for false boolean variables.
+    // Because additional_config is a TypeSet, SDKv2 populates `original["bool_value"] = false`
+    // on every entry (including string/int/enum entries), so `send_empty_value: true`
+    // on boolValue would send `"boolValue": false` alongside other oneof fields and
+    // fail proto oneof unmarshaling. Only send `"boolValue": false` when no other
+    // oneof field populated `transformed`.
     if len(transformed) == 0 {
       if b, ok := original["bool_value"].(bool); ok && !b {
         transformed["boolValue"] = false
