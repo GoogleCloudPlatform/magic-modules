@@ -70,12 +70,16 @@ samples:
           project: my-project
           odb_network_id: my-odbnetwork
           deletion_protection: "true"
+          network_attachment_name: my-attachment
+          subnetwork_name: my-subnet
         ignore_read_extra:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
           project: '"oasis-terraform-testing-prod"'
           odb_network_id: fmt.Sprintf("tf-test-odbnetwork-full-%s", acctest.RandString(t, 10))
+          network_attachment_name: fmt.Sprintf("tf-test-na-%s", acctest.RandString(t, 10))
+          subnetwork_name: fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
 virtual_fields:
   - name: deletion_protection
     type: Boolean
@@ -129,6 +133,28 @@ properties:
       Example: us-east4-b-r2.
       If not specified, the system will pick a zone based on availability.
     default_from_api: true
+  - name: serviceConnectivityConfig
+    type: NestedObject
+    description: |-
+      Configuration to enable the service (Oracledatabase@Google Cloud) to
+      establish connectivity to the database.
+      This should be specified if you intend to associate this OdbNetwork with
+      a DatabaseConnection resource to `ExecuteSQL` on the database, or to
+      create a ServiceIntegration with the Database.
+      Please don't specify it otherwise to avoid complicating the network setup.
+    properties:
+      - name: pscInterfaceConfig
+        type: NestedObject
+        description: Configuration for Private Service Connect (PSC) interface.
+        properties:
+          - name: networkAttachment
+            type: String
+            description: |-
+              The resource name of the Network Attachment that
+              Oracledatabase@Google Cloud will use to establish private
+              connectivity to the database via a Private Service Connect Interface
+              (PSC-I). Format:
+              projects/{project}/regions/{region}/networkAttachments/{network_attachment}
   - name: state
     type: String
     description: |-
