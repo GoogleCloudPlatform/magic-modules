@@ -125,10 +125,36 @@ properties:
     output: true
 
   - name: 'componentParameterSchema'
-    type: 'String'
+    type: 'Array'
     description: |
-      The component parameter schema.
+      The component parameter schema, which lists the parameters the component
+      accepts.
     output: true
+    item_type:
+      type: 'NestedObject'
+      properties:
+        - name: 'key'
+          type: 'String'
+          description: |
+            The key of the parameter.
+          output: true
+        - name: 'type'
+          type: 'String'
+          description: |
+            The type of the parameter, as a Terraform type constraint such as
+            `string` or `list(string)`.
+          output: true
+        - name: 'isRequired'
+          type: 'Boolean'
+          description: |
+            Whether the parameter is required.
+          output: true
+        - name: 'defaultValue'
+          type: 'String'
+          description: |
+            The default value of the parameter, as a JSON-encoded string.
+          output: true
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
 
   - name: 'createTime'
     type: 'Time'
