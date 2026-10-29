@@ -19,4 +19,3 @@ scopes:
 versions:
   - name: beta
     base_url: https://firebasestorage.googleapis.com/v1beta/
-legacy_identity_import_test: true
