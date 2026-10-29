@@ -1,0 +1,63 @@
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl({{ lower $.ProductMetadata.Name }}.Product, config)+"{{ $.SelfLinkUri }}")
+			if err != nil {
+				return err
+			}
+			if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
+				return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+			}
+
+			userPrincipal := rs.Primary.Attributes["user_principal"]
+			if userPrincipal != "" && !strings.ContainsAny(userPrincipal, ",=") {
+				url, err = transport_tpg.AddQueryParams(url, map[string]string{
+					"filter": fmt.Sprintf("user_principal=%s", userPrincipal),
+				})
+			} else {
+				url, err = transport_tpg.AddQueryParams(url, map[string]string{
+					"pageSize": "1000",
+				})
+			}
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+					continue
+				}
+				return err
+			}
+
+			deleteUnassigned := rs.Primary.Attributes["delete_unassigned_user_licenses"] == "true"
+			if items, ok := res["userLicenses"].([]interface{}); ok {
+				for _, itemRaw := range items {
+					item, ok := itemRaw.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					if p, ok := item["userPrincipal"].(string); ok && p == userPrincipal {
+						if deleteUnassigned {
+							return fmt.Errorf("DiscoveryEngineUserLicense still exists at %s", url)
+						}
+						if lc, ok := item["licenseConfig"].(string); ok && lc != "" {
+							return fmt.Errorf("DiscoveryEngineUserLicense still has license_config %q assigned at %s", lc, url)
+						}
+						if state, ok := item["licenseAssignmentState"].(string); ok && state == "ASSIGNED" {
+							return fmt.Errorf("DiscoveryEngineUserLicense is still ASSIGNED at %s", url)
+						}
+					}
+				}
+			}
