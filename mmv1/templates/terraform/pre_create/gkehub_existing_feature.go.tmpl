@@ -1,6 +1,6 @@
 // Check if the fleet feature already exists. Do an update if so.
 
-getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}GKEHub2BasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
+getUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return err
 }
