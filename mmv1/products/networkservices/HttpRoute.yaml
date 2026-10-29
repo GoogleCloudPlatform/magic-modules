@@ -153,26 +153,14 @@ properties:
                 type: String
                 description: |
                   The HTTP request path value should exactly match this value.
-                exactly_one_of:
-                  - fullPathMatch
-                  - prefixMatch
-                  - regexMatch
               - name: prefixMatch
                 type: String
                 description: |
                   The HTTP request path value must begin with specified prefixMatch. prefixMatch must begin with a /.
-                exactly_one_of:
-                  - fullPathMatch
-                  - prefixMatch
-                  - regexMatch
               - name: regexMatch
                 type: String
                 description: |
                   The HTTP request path value must satisfy the regular expression specified by regexMatch after removing any query parameters and anchor supplied with the original URL. For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
-                exactly_one_of:
-                  - fullPathMatch
-                  - prefixMatch
-                  - regexMatch
               - name: queryParameters
                 type: Array
                 description: |
@@ -188,26 +176,14 @@ properties:
                       type: String
                       description: |
                         The value of the query parameter must exactly match the contents of exactMatch.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - presentMatch
                     - name: regexMatch
                       type: String
                       description: |
                         The value of the query parameter must match the regular expression specified by regexMatch.For regular expression grammar, please see https://github.com/google/re2/wiki/Syntax
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - presentMatch
                     - name: presentMatch
                       type: Boolean
                       description: |
                         Specifies that the QueryParameterMatcher matches if request contains query parameter, irrespective of whether the parameter has a value or not.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - presentMatch
               - name: headers
                 type: Array
                 description: |
@@ -228,68 +204,26 @@ properties:
                       type: String
                       description: |
                         The value of the header should match exactly the content of exactMatch.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - prefixMatch
-                        - presentMatch
-                        - suffixMatch
-                        - rangeMatch
                     - name: regexMatch
                       type: String
                       description: |
                         The value of the header must match the regular expression specified in regexMatch.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - prefixMatch
-                        - presentMatch
-                        - suffixMatch
-                        - rangeMatch
                     - name: prefixMatch
                       type: String
                       description: |
                         The value of the header must start with the contents of prefixMatch.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - prefixMatch
-                        - presentMatch
-                        - suffixMatch
-                        - rangeMatch
                     - name: presentMatch
                       type: Boolean
                       description: |
                         A header with headerName must exist. The match takes place whether or not the header has a value.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - prefixMatch
-                        - presentMatch
-                        - suffixMatch
-                        - rangeMatch
                     - name: suffixMatch
                       type: String
                       description: |
                         The value of the header must end with the contents of suffixMatch.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - prefixMatch
-                        - presentMatch
-                        - suffixMatch
-                        - rangeMatch
                     - name: rangeMatch
                       type: NestedObject
                       description: |
                         If specified, the rule will match if the request header value is within the range.
-                      exactly_one_of:
-                        - exactMatch
-                        - regexMatch
-                        - prefixMatch
-                        - presentMatch
-                        - suffixMatch
-                        - rangeMatch
                       properties:
                         - name: start
                           type: Integer

@@ -1070,8 +1070,6 @@ properties:
                   type: NestedObject
                   description: |-
                     Cloud Storage source.
-                  exactly_one_of:
-                    - 'cloud_storage_source'
                   properties:
                     - name: 'bucket'
                       type: String
