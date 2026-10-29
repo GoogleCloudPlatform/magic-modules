@@ -1847,11 +1847,11 @@ func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_1),
-				ExpectError: regexp.MustCompile("The argument \"seconds\" is required, but no definition was found."),
+				ExpectError: regexp.MustCompile("The argument \"scheduling\\.0\\.graceful_shutdown\\.0\\.max_duration\\.0\\.seconds\" is\\s+required, but no definition was found\\."),
 			},
 			{
 				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_2),
-				ExpectError: regexp.MustCompile("The argument \"enabled\" is required, but no definition was found."),
+				ExpectError: regexp.MustCompile("The argument \"scheduling\\.0\\.graceful_shutdown\\.0\\.enabled\" is\\s+required, but no\\s+definition was found\\."),
 			},
 			{
 				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_3),
