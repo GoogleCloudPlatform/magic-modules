@@ -18,8 +18,6 @@ import (
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
 
 // IamListResourceOptions configures generation of a single IAM list resource kind.
@@ -207,16 +205,15 @@ func newIamPolicyWithDefaults() IamPolicy {
 
 // UnmarshalYAML implements a custom unmarshaler for the IamPolicy struct.
 // It sets default values and then decodes the YAML over them.
-func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
+func (p *IamPolicy) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	// Start with a struct containing all the default values.
 	*p = newIamPolicyWithDefaults()
 
 	// Use a type alias to prevent recursion when decoding.
 	type iamPolicyAlias IamPolicy
-	aliasObj := (*iamPolicyAlias)(p)
 
 	// Decode the provided YAML, which will overwrite any default values that are specified.
-	return google.DecodeYAMLStrict(value, aliasObj)
+	return unmarshal((*iamPolicyAlias)(p))
 }
 
 // MarshalYAML implements a custom marshaller for the IamPolicy struct.

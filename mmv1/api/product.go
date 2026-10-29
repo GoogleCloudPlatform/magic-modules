@@ -24,7 +24,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -90,11 +89,9 @@ type Product struct {
 	Runtime Runtime `yaml:"-"`
 }
 
-func (p *Product) UnmarshalYAML(value *yaml.Node) error {
+func (p *Product) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type productAlias Product
-	aliasObj := (*productAlias)(p)
-
-	if err := google.DecodeYAMLStrict(value, aliasObj); err != nil {
+	if err := unmarshal((*productAlias)(p)); err != nil {
 		return err
 	}
 

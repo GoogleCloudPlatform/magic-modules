@@ -19,8 +19,6 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
 
 // Base class from which other Async classes can inherit.
@@ -117,14 +115,12 @@ func newAsyncWithDefaults() Async {
 	return a
 }
 
-func (a *Async) UnmarshalYAML(value *yaml.Node) error {
+func (a *Async) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	// Start with a struct containing all the default values.
 	*a = newAsyncWithDefaults()
 
 	type asyncAlias Async
-	aliasObj := (*asyncAlias)(a)
-
-	if err := google.DecodeYAMLStrict(value, aliasObj); err != nil {
+	if err := unmarshal((*asyncAlias)(a)); err != nil {
 		return err
 	}
 
