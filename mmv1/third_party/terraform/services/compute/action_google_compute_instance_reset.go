@@ -22,8 +22,14 @@ import (
 )
 
 const (
-	computeInstanceResetActionName     = "google_compute_instance_reset"
+	computeInstanceResetActionName = "google_compute_instance_reset"
+
+	// The default matches the create and update timeouts on google_compute_instance. The reset operation itself
+	// completes in seconds. The longest legitimate wait is an instance that is still provisioning after
+	// creation, so 1h leaves ample headroom and still rejects unit mistakes such as "10h".
 	computeInstanceResetDefaultTimeout = 20 * time.Minute
+	computeInstanceResetMinTimeout     = time.Second
+	computeInstanceResetMaxTimeout     = time.Hour
 )
 
 var (
@@ -97,10 +103,13 @@ func (a *computeInstanceResetAction) Schema(_ context.Context, _ action.SchemaRe
 			},
 			"timeout": schema.StringAttribute{
 				Description: "How long to wait for the instance to be ready for a reset and for the reset operation " +
-					"to complete, as a duration string such as \"10m\". Defaults to \"20m\".",
+					"to complete, as a duration string such as \"10m\". Must be between 1s and 1h. Defaults to \"20m\".",
 				Optional: true,
 				Validators: []validator.String{
-					fwvalidators.NonNegativeDurationValidator(),
+					fwvalidators.BoundedDuration{
+						MinDuration: computeInstanceResetMinTimeout,
+						MaxDuration: computeInstanceResetMaxTimeout,
+					},
 				},
 			},
 		},
@@ -128,12 +137,6 @@ func (a *computeInstanceResetAction) ValidateConfig(ctx context.Context, req act
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-	if !data.Timeout.IsNull() && !data.Timeout.IsUnknown() {
-		// format is already checked by the attribute validator; only zero needs rejecting here.
-		if d, err := time.ParseDuration(data.Timeout.ValueString()); err == nil && d == 0 {
-			resp.Diagnostics.AddAttributeError(path.Root("timeout"), "Invalid timeout", "Timeout must be a positive duration")
-		}
 	}
 
 	if data.Instance.IsUnknown() || data.Project.IsUnknown() || data.Zone.IsUnknown() {
@@ -192,7 +195,12 @@ func (a *computeInstanceResetAction) Invoke(ctx context.Context, req action.Invo
 
 	instanceURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", transport_tpg.BaseUrl(Product, a.config), ref.Project, ref.Zone, ref.Name)
 	instanceID := ref.RelativeLink()
-	deadline := time.Now().Add(timeout)
+
+	// SendRequest and ComputeOperationWaitTime take per-call timeouts rather than a request context, so the
+	// overall budget is carried as a deadline on ctx and each call receives the time remaining until it.
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	deadline, _ := ctx.Deadline()
 
 	getStatus := func() (string, error) {
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{

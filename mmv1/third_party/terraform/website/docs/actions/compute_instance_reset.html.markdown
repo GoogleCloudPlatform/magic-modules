@@ -110,7 +110,7 @@ used, and then the provider zone. If you set both `zone` and a zone in `instance
 
 * `timeout` - (Optional) The maximum time to wait for the instance to be ready for a reset and for 
 the reset operation to complete, as a duration string such as `"10m"` or `"1h"`. The value must be
-greater than zero. Defaults to `"20m"`.
+between `"1s"` and `"1h"`. Defaults to `"20m"`.
 
 ## Behavior
 

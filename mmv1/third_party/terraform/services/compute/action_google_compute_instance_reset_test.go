@@ -134,6 +134,32 @@ func testAccCheckComputeInstanceResetCount(t *testing.T, n string, want int) res
 	}
 }
 
+func TestAccComputeInstanceResetAction_invalidTimeout(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					action "google_compute_instance_reset" "test" {
+						config {
+							instance = "project/p/zones/us-central1-a/instances/i"
+							timeout = "0s"
+						}
+					}
+				`,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("Invalid Duration"),
+			},
+		},
+	})
+}
+
 // Initial config with lifecycle trigger for after_create
 func testAccComputeInstanceResetAction_basic(context map[string]interface{}, trigger string) string {
 	context["trigger"] = trigger
