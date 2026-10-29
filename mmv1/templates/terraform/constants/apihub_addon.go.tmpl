@@ -1,3 +1,4 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func precheckAddonState(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
 	addonId, ok := d.GetOk("addon_id")
 	if !ok {
@@ -33,6 +34,7 @@ func precheckAddonState(d *schema.ResourceData, config *transport_tpg.Config, bi
 	}
 	return nil
 }
+{{- end }}
 
 func apihubAddonCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	return apihubAddonCustomizeDiffFunc(diff)

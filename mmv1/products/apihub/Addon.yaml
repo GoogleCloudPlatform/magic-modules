@@ -62,25 +62,39 @@ custom_code:
 samples:
   - name: apihub_addon_basic
     primary_resource_id: apihub_addon_basic
+    external_providers: ["time"]
     steps:
       - name: apihub_addon_basic
         resource_id_vars:
           addon_id: system-specboost
+          project_id: apihub-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         test_vars_overrides:
           addon_id: '"system-specboost"'
       - name: apihub_addon_update
         resource_id_vars:
           addon_id: system-specboost
+          project_id: apihub-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         test_vars_overrides:
           addon_id: '"system-specboost"'
   - name: apihub_addon_gateway_plugin
     primary_resource_id: apihub_addon_gateway_plugin
+    external_providers: ["time"]
     steps:
       - name: apihub_addon_gateway_plugin
         resource_id_vars:
           addon_id: system-advanced-api-security
           plugin_instance_id: edge-plugin-instance
           source_project_id: edge-org
+          project_id: apihub-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         test_vars_overrides:
           addon_id: '"system-advanced-api-security"'
       - name: apihub_addon_gateway_plugin_update
@@ -88,6 +102,10 @@ samples:
           addon_id: system-advanced-api-security
           plugin_instance_id: edge-plugin-instance
           source_project_id: edge-org
+          project_id: apihub-proj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
         test_vars_overrides:
           addon_id: '"system-advanced-api-security"'
 parameters:
