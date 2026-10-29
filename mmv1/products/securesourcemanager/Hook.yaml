@@ -129,6 +129,7 @@ properties:
     required: true
   - name: disabled
     type: Boolean
+    send_empty_value: true
     description: |
       Determines if the hook disabled or not.
       Set to true to stop sending traffic.
@@ -166,6 +167,7 @@ properties:
       The sensitive query string to be appended to the target URI.
   - name: serviceAccountAuth
     type: Boolean
+    send_empty_value: true
     description: |
       Determines if the hook uses the Repository Service Account to
       generate an OIDC ID Token for webhook authentication.

@@ -46,6 +46,11 @@ async:
     resource_inside_response: false
 deletion_policy_default: PREVENT
 autogen_async: true
+sweeper:
+  regions:
+    - us-central1
+    - asia-east1
+    - europe-west4
 samples:
   - name: secure_source_manager_repository_basic
     primary_resource_id: default
@@ -69,6 +74,7 @@ samples:
           sa_id: my-sa
           deletion_policy: PREVENT
         vars:
+          description: This is a test repository
           secret_scanning_enabled: 'true'
         test_env_vars:
           project: PROJECT_NAME
@@ -85,6 +91,7 @@ samples:
           sa_id: my-sa
           deletion_policy: PREVENT
         vars:
+          description: This is an updated test repository
           secret_scanning_enabled: 'false'
         test_env_vars:
           project: PROJECT_NAME
@@ -102,21 +109,6 @@ samples:
           repository_id: my-repository
           instance_id: my-instance
           deletion_policy: PREVENT
-        vars:
-          description: This is a test repository
-        test_vars_overrides:
-          deletion_policy: '"DELETE"'
-        oics_vars_overrides:
-          deletion_policy: '"DELETE"'
-        ignore_read_extra:
-          - deletion_policy
-      - name: secure_source_manager_repository_initial_config
-        resource_id_vars:
-          repository_id: my-repository
-          instance_id: my-instance
-          deletion_policy: PREVENT
-        vars:
-          description: This is an updated test repository
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
@@ -230,6 +222,9 @@ properties:
   - name: 'scanConfig'
     type: NestedObject
     diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+    update_mask_fields:
+      - scan_config.secret_scan_config.enabled
+      - scan_config.secret_scan_config.inspect_template
     description: |
       Provides configuration for scanning.
     properties:
@@ -240,6 +235,7 @@ properties:
         properties:
           - name: 'enabled'
             type: Boolean
+            send_empty_value: true
             description: |
               Enables secret scanning for the repository.
           - name: 'inspectTemplate'
