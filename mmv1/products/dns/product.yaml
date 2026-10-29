@@ -22,4 +22,3 @@ versions:
     base_url: https://dns.googleapis.com/dns/v1/
   - name: beta
     base_url: https://dns.googleapis.com/dns/v1beta2/
-legacy_identity_import_test: true
