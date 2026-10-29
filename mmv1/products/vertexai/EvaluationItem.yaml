@@ -103,7 +103,7 @@ properties:
     type: String
     description: |
       The Cloud Storage object where the request or response is stored.
-      Exactly one of evaluationRequest or gcsUri can be set.
+      Exactly one of `evaluation_request` or `gcs_uri` can be set.
     exactly_one_of:
       - evaluation_request
       - gcs_uri
@@ -111,7 +111,7 @@ properties:
     type: NestedObject
     description: |
       The request to evaluate.
-      Exactly one of evaluationRequest or gcsUri can be set.
+      Exactly one of `evaluation_request` or `gcs_uri` can be set.
     exactly_one_of:
       - evaluation_request
       - gcs_uri
@@ -125,10 +125,22 @@ properties:
             type: String
             description: |
               Text prompt.
+              At most one of `text`, `value`, `prompt_template_data`, `agent_data`, or `user_scenario` can be set.
+            conflicts:
+              - evaluation_request.0.prompt.0.value
+              - evaluation_request.0.prompt.0.prompt_template_data
+              - evaluation_request.0.prompt.0.agent_data
+              - evaluation_request.0.prompt.0.user_scenario
           - name: value
             type: String
             description: |
               Fields and values that can be used to populate the prompt template, as a JSON string.
+              At most one of `text`, `value`, `prompt_template_data`, `agent_data`, or `user_scenario` can be set.
+            conflicts:
+              - evaluation_request.0.prompt.0.text
+              - evaluation_request.0.prompt.0.prompt_template_data
+              - evaluation_request.0.prompt.0.agent_data
+              - evaluation_request.0.prompt.0.user_scenario
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             custom_expand: templates/terraform/custom_expand/json_value.tmpl
@@ -138,6 +150,12 @@ properties:
             type: NestedObject
             description: |
               Prompt template data.
+              At most one of `text`, `value`, `prompt_template_data`, `agent_data`, or `user_scenario` can be set.
+            conflicts:
+              - evaluation_request.0.prompt.0.text
+              - evaluation_request.0.prompt.0.value
+              - evaluation_request.0.prompt.0.agent_data
+              - evaluation_request.0.prompt.0.user_scenario
             properties:
               - name: values
                 type: String
@@ -155,6 +173,12 @@ properties:
               Represents the complete execution trace of a multi-turn conversation,
               which can involve single or multiple agents, as a JSON string. This
               serves as the input context for agent scraping.
+              At most one of `text`, `value`, `prompt_template_data`, `agent_data`, or `user_scenario` can be set.
+            conflicts:
+              - evaluation_request.0.prompt.0.text
+              - evaluation_request.0.prompt.0.value
+              - evaluation_request.0.prompt.0.prompt_template_data
+              - evaluation_request.0.prompt.0.user_scenario
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             custom_expand: templates/terraform/custom_expand/json_schema.tmpl
@@ -164,6 +188,12 @@ properties:
             type: NestedObject
             description: |
               The generated user scenario used to drive multi-turn agent running results.
+              At most one of `text`, `value`, `prompt_template_data`, `agent_data`, or `user_scenario` can be set.
+            conflicts:
+              - evaluation_request.0.prompt.0.text
+              - evaluation_request.0.prompt.0.value
+              - evaluation_request.0.prompt.0.prompt_template_data
+              - evaluation_request.0.prompt.0.agent_data
             properties:
               - name: startingPrompt
                 type: String
@@ -191,10 +221,18 @@ properties:
             type: String
             description: |
               Text response.
+              At most one of `text`, `value`, or `agent_data` can be set.
+            conflicts:
+              - evaluation_request.0.golden_response.0.value
+              - evaluation_request.0.golden_response.0.agent_data
           - name: value
             type: String
             description: |
               Fields and values that can be used to populate the response template, as a JSON string.
+              At most one of `text`, `value`, or `agent_data` can be set.
+            conflicts:
+              - evaluation_request.0.golden_response.0.text
+              - evaluation_request.0.golden_response.0.agent_data
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             custom_expand: templates/terraform/custom_expand/json_value.tmpl
@@ -207,6 +245,10 @@ properties:
               which can involve single or multiple agents, as a JSON string. This
               field is used to provide the full output of an agent's run, including
               all turns and events, for direct evaluation.
+              At most one of `text`, `value`, or `agent_data` can be set.
+            conflicts:
+              - evaluation_request.0.golden_response.0.text
+              - evaluation_request.0.golden_response.0.value
             state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             custom_expand: templates/terraform/custom_expand/json_schema.tmpl
@@ -242,10 +284,12 @@ properties:
               type: String
               description: |
                 Text response.
+                At most one of `text`, `value`, or `agent_data` can be set.
             - name: value
               type: String
               description: |
                 Fields and values that can be used to populate the response template, as a JSON string.
+                At most one of `text`, `value`, or `agent_data` can be set.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
               custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
               custom_expand: templates/terraform/custom_expand/json_value.tmpl
@@ -258,6 +302,7 @@ properties:
                 which can involve single or multiple agents, as a JSON string. This
                 field is used to provide the full output of an agent's run, including
                 all turns and events, for direct evaluation.
+                At most one of `text`, `value`, or `agent_data` can be set.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
               custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
               custom_expand: templates/terraform/custom_expand/json_schema.tmpl
