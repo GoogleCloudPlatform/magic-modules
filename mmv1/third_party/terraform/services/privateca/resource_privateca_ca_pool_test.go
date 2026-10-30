@@ -19,6 +19,9 @@ import (
 func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 	project := envvar.GetTestProjectFromEnv()
 	poolName := "static-ca-pool"
+	if acctest.IsVcrReplaying() {
+		return poolName
+	}
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {

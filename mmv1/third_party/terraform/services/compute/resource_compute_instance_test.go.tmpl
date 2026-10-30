@@ -5154,6 +5154,9 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 				// Clean up any NetworkEdgeSecurityService left over from a previously failed recording
 				// before creating a new one. Only one can exist per region.
 				PreConfig: func() {
+					if acctest.IsVcrReplaying() {
+						return
+					}
 					config := acctest.GoogleProviderConfig(t)
 					listUrl := fmt.Sprintf("%sprojects/%s/aggregated/networkEdgeSecurityServices", transport_tpg.BaseUrl(tpgcompute.Product, config), config.Project)
 					found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
