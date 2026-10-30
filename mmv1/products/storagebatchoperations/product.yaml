@@ -18,4 +18,3 @@ scopes:
 versions:
   - name: ga
     base_url: https://storagebatchoperations.googleapis.com/v1/
-legacy_identity_import_test: true
