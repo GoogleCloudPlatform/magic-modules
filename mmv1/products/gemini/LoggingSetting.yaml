@@ -32,6 +32,7 @@ sweeper:
     - region: global
 autogen_status: TG9nZ2luZ1NldHRpbmc=
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: gemini_logging_setting_basic
     primary_resource_id: example
