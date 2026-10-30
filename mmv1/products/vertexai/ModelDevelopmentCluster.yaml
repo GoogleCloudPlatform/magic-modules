@@ -74,6 +74,9 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
       - name: vertex_ai_model_development_cluster_update
         min_version: beta
         resource_id_vars:
@@ -89,6 +92,9 @@ samples:
           update_mode: USER_AND_SERVICE
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
       - name: vertex_ai_model_development_cluster_update
         min_version: beta
         resource_id_vars:
@@ -105,6 +111,8 @@ samples:
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
         ignore_read_extra:
+          - cluster_status
+          - update_time
           - update_mode
       - name: vertex_ai_model_development_cluster_basic
         min_version: beta
@@ -118,6 +126,9 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
   - name: vertex_ai_model_development_cluster_gke
     primary_resource_id: default
     min_version: beta
