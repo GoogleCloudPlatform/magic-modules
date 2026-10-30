@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -1393,6 +1394,62 @@ func TestResource_UseLegacyIdentityImportTest(t *testing.T) {
 			t.Parallel()
 			if got := tc.resource.UseLegacyIdentityImportTest(); got != tc.want {
 				t.Errorf("UseLegacyIdentityImportTest() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestResourceTimeoutsUnmarshalYAML(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		yamlContent string
+		want        api.Timeouts
+	}{
+		{
+			description: "partial top-level timeouts with insert_minutes only",
+			yamlContent: `
+name: TestResource
+base_url: test
+timeouts:
+  insert_minutes: 40
+`,
+			want: api.Timeouts{
+				InsertMinutes: 40,
+				UpdateMinutes: 20,
+				DeleteMinutes: 20,
+			},
+		},
+		{
+			description: "partial async operation timeouts with update_minutes only",
+			yamlContent: `
+name: TestResource
+base_url: test
+async:
+  operation:
+    timeouts:
+      update_minutes: 35
+`,
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 35,
+				DeleteMinutes: 20,
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			var res api.Resource
+			if err := yaml.Unmarshal([]byte(tc.yamlContent), &res); err != nil {
+				t.Fatalf("yaml.Unmarshal() failed: %v", err)
+			}
+			got := res.GetTimeouts()
+			if *got != tc.want {
+				t.Errorf("GetTimeouts() = %+v, want %+v", *got, tc.want)
 			}
 		})
 	}

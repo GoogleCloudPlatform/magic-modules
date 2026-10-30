@@ -35,6 +35,31 @@ func NewTimeouts() *Timeouts {
 	}
 }
 
+// UnmarshalYAML implements a custom unmarshaller for the Timeouts struct.
+// It initializes unset fields with default values.
+func (t *Timeouts) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	*t = *NewTimeouts()
+	type Alias Timeouts
+	alias := (*Alias)(t)
+
+	err := unmarshal(&alias)
+	if err != nil {
+		return err
+	}
+
+	if t.InsertMinutes == 0 {
+		t.InsertMinutes = DEFAULT_INSERT_TIMEOUT_MINUTES
+	}
+	if t.UpdateMinutes == 0 {
+		t.UpdateMinutes = DEFAULT_UPDATE_TIMEOUT_MINUTES
+	}
+	if t.DeleteMinutes == 0 {
+		t.DeleteMinutes = DEFAULT_DELETE_TIMEOUT_MINUTES
+	}
+
+	return nil
+}
+
 // IsZero enables the omitempty tag on the parent Resource struct.
 // If Timeouts matches the default values, it is considered zero and omitted entirely.
 func (t *Timeouts) IsZero() bool {
