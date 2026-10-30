@@ -424,6 +424,10 @@ resource "google_developer_connect_connection" "my-connection" {
       user_token_secret_version = "projects/devconnect-terraform-creds/secrets/tf-gle-asia-api/versions/latest"
     }
   }
+
+  git_proxy_config {
+    enabled = true
+  }
 }
 `, context)
 }
