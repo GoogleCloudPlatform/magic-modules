@@ -756,6 +756,25 @@ properties:
           - 'SEV'
           - 'SEV_SNP'
           - 'TDX'
+      - name: 'confidentialParavisorConfig'
+        type: NestedObject
+        description: |
+          Defines a set of Confidential Paravisor (SVSM) options for AMD SEV-SNP instances.
+        properties:
+          - name: 'confidentialTpmType'
+            type: Enum
+            description: |
+              The type of vTPM to use in the confidential paravisor (SVSM).
+            enum_values:
+              - 'EPHEMERAL'
+              - 'NO_CC_TPM'
+          - name: 'sevSnpIrqMode'
+            type: Enum
+            description: |
+              How interrupts (IRQs) are handled by the confidential paravisor (SVSM) on AMD SEV-SNP instances.
+            enum_values:
+              - 'UNRESTRICTED'
+              - 'RESTRICTED'
   - name: 'status'
     type: Enum
     description: |

@@ -1163,6 +1163,29 @@ be from 0 to 999,999,999 inclusive.`,
 								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
+						"confidential_paravisor_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Defines a set of Confidential Paravisor (SVSM) options for AMD SEV-SNP instances.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"confidential_tpm_type": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The type of vTPM to use in the confidential paravisor (SVSM). Possible values are EPHEMERAL and NO_CC_TPM.`,
+									},
+									"sev_snp_irq_mode": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `How interrupts (IRQs) are handled by the confidential paravisor (SVSM) on AMD SEV-SNP instances. Possible values are UNRESTRICTED and RESTRICTED.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1843,6 +1866,15 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	}
 	if props, ok := itBody["properties"].(map[string]interface{}); ok {
 		props["metadata"] = metadataMap
+		if cic := expandConfidentialInstanceConfig(d); cic != nil {
+			if cpc, ok := cic["confidentialParavisorConfig"].(map[string]interface{}); ok && len(cpc) > 0 {
+				if cicBody, ok := props["confidentialInstanceConfig"].(map[string]interface{}); ok {
+					cicBody["confidentialParavisorConfig"] = cpc
+				} else {
+					props["confidentialInstanceConfig"] = cic
+				}
+			}
+		}
 	}
 	{{- if ne $.TargetVersionName "ga" }}
 	if len(partnerMetadataConverted) > 0 {
@@ -2225,6 +2257,13 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		cicMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.ConfidentialInstanceConfig)
 		if convErr != nil {
 			return fmt.Errorf("Error converting confidential_instance_config: %s", convErr)
+		}
+		if props, ok := res["properties"].(map[string]interface{}); ok {
+			if rawCic, ok := props["confidentialInstanceConfig"].(map[string]interface{}); ok {
+				if cpc, ok := rawCic["confidentialParavisorConfig"]; ok {
+					cicMap["confidentialParavisorConfig"] = cpc
+				}
+			}
 		}
 		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(cicMap)); err != nil {
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)

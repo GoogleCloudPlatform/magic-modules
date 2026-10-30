@@ -1211,10 +1211,24 @@ func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) map[s
 	}
 
 	prefix := "confidential_instance_config.0"
-	return map[string]interface{}{
+	res := map[string]interface{}{
 		"enableConfidentialCompute": d.Get(prefix + ".enable_confidential_compute").(bool),
 		"confidentialInstanceType":  d.Get(prefix + ".confidential_instance_type").(string),
 	}
+	if _, ok := d.GetOk(prefix + ".confidential_paravisor_config"); ok {
+		paravisorPrefix := prefix + ".confidential_paravisor_config.0"
+		paravisor := map[string]interface{}{}
+		if v := d.Get(paravisorPrefix + ".confidential_tpm_type").(string); v != "" {
+			paravisor["confidentialTpmType"] = v
+		}
+		if v := d.Get(paravisorPrefix + ".sev_snp_irq_mode").(string); v != "" {
+			paravisor["sevSnpIrqMode"] = v
+		}
+		if len(paravisor) > 0 {
+			res["confidentialParavisorConfig"] = paravisor
+		}
+	}
+	return res
 }
 
 func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig map[string]interface{}) []map[string]interface{} {
@@ -1222,10 +1236,17 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig map[string]int
 		return nil
 	}
 
-	return []map[string]interface{}{{"{{"}}
+	res := map[string]interface{}{
 		"enable_confidential_compute": ConfidentialInstanceConfig["enableConfidentialCompute"],
 		"confidential_instance_type":  ConfidentialInstanceConfig["confidentialInstanceType"],
-	{{"}}"}}
+	}
+	if cpc, ok := ConfidentialInstanceConfig["confidentialParavisorConfig"].(map[string]interface{}); ok && len(cpc) > 0 {
+		res["confidential_paravisor_config"] = []map[string]interface{}{{"{{"}}
+			"confidential_tpm_type": cpc["confidentialTpmType"],
+			"sev_snp_irq_mode":      cpc["sevSnpIrqMode"],
+		{{"}}"}}
+	}
+	return []map[string]interface{}{res}
 }
 
 func performanceMonitoringUnitDiffSuppress(_ string, old, new string, d *schema.ResourceData) bool {

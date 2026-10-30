@@ -1562,6 +1562,29 @@ be from 0 to 999,999,999 inclusive.`,
 								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
+						"confidential_paravisor_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Defines a set of Confidential Paravisor (SVSM) options for AMD SEV-SNP instances.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"confidential_tpm_type": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The type of vTPM to use in the confidential paravisor (SVSM). Possible values are EPHEMERAL and NO_CC_TPM.`,
+									},
+									"sev_snp_irq_mode": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `How interrupts (IRQs) are handled by the confidential paravisor (SVSM) on AMD SEV-SNP instances. Possible values are UNRESTRICTED and RESTRICTED.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1993,6 +2016,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		}
 		if t, _ := cic["confidentialInstanceType"].(string); t != "" {
 			confidential["confidentialInstanceType"] = t
+		}
+		if cpc, ok := cic["confidentialParavisorConfig"].(map[string]interface{}); ok && len(cpc) > 0 {
+			confidential["confidentialParavisorConfig"] = cpc
 		}
 		instance["confidentialInstanceConfig"] = confidential
 	}
