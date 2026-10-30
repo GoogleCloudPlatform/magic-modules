@@ -23,19 +23,7 @@ description: |
 autogen_async: true
 async:
   operation:
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
-  result:
-    path: 'response'
-  status:
-    path: 'done'
-    complete: true
-    allowed_value:
-      - true
-  error:
-    path: 'error'
-    message: 'message'
   actions:
     - 'delete'
 import_format:
