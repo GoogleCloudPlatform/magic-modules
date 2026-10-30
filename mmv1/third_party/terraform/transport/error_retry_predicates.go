@@ -757,3 +757,16 @@ func IsResourceManagerBoundaryRetryableError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+// Retry when a Discovery Engine data connector is still initializing after
+// setUpDataConnectorV2 returns. Updates are rejected with a 400 FAILED_PRECONDITION
+// ("... is in INITIALIZING state. Please wait until initializing process is
+// complete before updating.") until the connector leaves the INITIALIZING state.
+func IsDiscoveryEngineDataConnectorInitializingError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "is in INITIALIZING state") {
+			return true, "Waiting for Discovery Engine data connector to finish initializing"
+		}
+	}
+	return false, ""
+}
