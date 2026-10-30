@@ -222,6 +222,15 @@ func TestAccAgentIdentityAuthProvider_xaaAuthProvider(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "auth_provider_id", "workload_ids"},
 			},
+			{
+				Config: testAccAgentIdentityAuthProvider_xaaAuthProviderStep3(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "auth_provider_id", "workload_ids"},
+			},
 		},
 	})
 }
@@ -550,6 +559,26 @@ func testAccAgentIdentityAuthProvider_xaaAuthProviderStep2(context map[string]in
         additional_parameters = {
           audience = "https://api.example.com/v2"
           resource = "https://resource.example.com"
+        }
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_xaaAuthProviderStep3(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-xaa-%{random_suffix}"
+    description      = "Updated Cross-App Access (XAA) auth provider with id_jag_auth_provider"
+    allowed_scopes   = ["https://www.googleapis.com/auth/cloud-platform"]
+  
+    auth_provider_type_params {
+      xaa_auth_provider {
+        workforce_identity_federation {}
+        id_token_input {
+          id_jag_auth_provider = "projects/my-project-name/locations/us-central1/authProviders/test-id-jag-provider"
         }
       }
     }
