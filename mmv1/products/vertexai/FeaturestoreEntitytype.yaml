@@ -20,6 +20,8 @@ references:
     Official Documentation: https://cloud.google.com/vertex-ai/docs
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes
 docs:
+  attributes: |
+    * `region` - The region of the EntityType.
 base_url: '{{featurestore}}/entityTypes'
 self_link: '{{featurestore}}/entityTypes/{{name}}'
 create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'

@@ -32,6 +32,8 @@ docs:
     You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
+  attributes: |
+    * `api_updated_member` - If true, represents that that the iam_member in the config was translated to a different member type by the API, and is stored in state as a different member type.
 base_url: 'projects/{{project}}/datasets/{{dataset_id}}'
 id_format: 'projects/{{project}}/datasets/{{dataset_id}}'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'

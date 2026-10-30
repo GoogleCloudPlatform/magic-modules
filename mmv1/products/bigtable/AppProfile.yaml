@@ -19,6 +19,10 @@ references:
   guides:
   api: https://cloud.google.com/bigtable/docs/reference/admin/rest/v2/projects.instances.appProfiles
 docs:
+  optional_properties: |
+    * `multi_cluster_routing_cluster_ids` - (Optional) The set of clusters to route to. The order is ignored; clusters will be tried in order of distance. If left empty, all clusters are eligible.
+
+    * `row_affinity` - (Optional) Must be used with multi-cluster routing. If true, then this app profile will use row affinity sticky routing. With row affinity, Bigtable will route single row key requests based on the row key, rather than randomly. Instead, each row key will be assigned to a cluster by Cloud Bigtable, and will stick to that cluster. Choosing this option improves read-your-writes consistency for most requests under most circumstances, without sacrificing availability. Consistency is not guaranteed, as requests may still fail over between clusters in the event of errors or latency.
 base_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}
 self_link: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}
 create_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}&ignoreWarnings={{ignore_warnings}}

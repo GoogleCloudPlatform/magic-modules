@@ -41,6 +41,11 @@ references:
     Cloud Networking: https://cloud.google.com/vpc/docs/using-vpc
     Private Google Access: https://cloud.google.com/vpc/docs/configure-private-google-access
   api: https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks
+docs:
+  attributes: |
+    * `fingerprint` - (Deprecated) Fingerprint of this resource. This field is used internally during updates of this resource.
+
+      ~> **Warning:** This field is not useful for users, and has been removed as an output.
 base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
 has_self_link: true
