@@ -118,6 +118,7 @@ var (
 	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
+		"addons_config.0.wiz_sensor_config",
 	{{- end }}
 	}
 
@@ -641,6 +642,38 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
+									},
+								},
+							},
+						},
+						"wiz_sensor_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `Configuration for the Wiz Sensor addon.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `The status of the Wiz Sensor addon. It is disabled by default. Set disabled = false to enable.`,
+									},
+									"registry_secret_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Description: `Optional. The GCP Secret Manager URI for the Wiz registry secret. Format: "projects/{project_id}/secrets/{secret_name}/versions/{version}" or Format: "projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}"`,
+									},
+									"api_key_secret_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Description: `Optional. The GCP Secret Manager URI for the Wiz API key secret. Format: "projects/{project_id}/secrets/{secret_name}/versions/{version}" or Format: "projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}"`,
+									},
+									"proxy_secret_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Description: `Optional. The GCP Secret Manager URI for the Wiz proxy configuration. Format: "projects/{project_id}/secrets/{secret_name}/versions/{version}" or Format: "projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}"`,
 									},
 								},
 							},
@@ -6077,6 +6110,17 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
+
+	if v, ok := config["wiz_sensor_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.WizSensorConfig = &container.WizSensorConfig{
+			Enabled:           addon["enabled"].(bool),
+			RegistrySecretUri: addon["registry_secret_uri"].(string),
+			ApiKeySecretUri:   addon["api_key_secret_uri"].(string),
+			ProxySecretUri:    addon["proxy_secret_uri"].(string),
+			ForceSendFields:   []string{"Enabled"},
+		}
+	}
 {{- end }}
 
 	return ac
@@ -7908,6 +7952,17 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["kalm_config"] = []map[string]interface{}{
 			{
 				"enabled": c.KalmConfig.Enabled,
+			},
+		}
+	}
+
+	if c.WizSensorConfig != nil {
+		result["wiz_sensor_config"] = []map[string]interface{}{
+			{
+				"enabled":             c.WizSensorConfig.Enabled,
+				"registry_secret_uri": c.WizSensorConfig.RegistrySecretUri,
+				"api_key_secret_uri:   c.WizSensorConfig.ApiKeySecretUri,
+				"proxy_secret_uri":    c.WizSensorConfig.ProxySecretUri,
 			},
 		}
 	}
