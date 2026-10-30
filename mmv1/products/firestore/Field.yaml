@@ -238,14 +238,10 @@ properties:
     custom_expand: templates/terraform/custom_expand/firestore_field_ttl_config.go.tmpl
     properties:
       - name: state
-        type: Enum
+        type: String
         description: |
           The state of TTL (time-to-live) configuration for documents that have this Field set.
         output: true
-        enum_values:
-          - CREATING
-          - ACTIVE
-          - NEEDS_REPAIR
       - name: expirationOffset
         type: String
         description: |

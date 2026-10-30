@@ -95,12 +95,7 @@ properties:
     description: Output only. A globally unique identifier (in UUID4 format) for the `ServiceProjectAttachment`.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       ServiceProjectAttachment state.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING

@@ -147,15 +147,10 @@ properties:
         description: |
           Latest site verification time.
   - name: 'indexingStatus'
-    type: Enum
+    type: String
     description: |
       The indexing status.
     output: true
-    enum_values:
-      - 'PENDING'
-      - 'FAILED'
-      - 'SUCCEEDED'
-      - 'DELETING'
   - name: 'updateTime'
     type: Time
     description: |

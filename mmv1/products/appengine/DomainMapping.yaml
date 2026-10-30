@@ -103,7 +103,7 @@ properties:
           - AUTOMATIC
           - MANUAL
       - name: pendingManagedCertificateId
-        type: Enum
+        type: String
         description: |
           ID of the managed `AuthorizedCertificate` resource currently being provisioned, if applicable. Until the new
           managed certificate has been successfully provisioned, the previous SSL state will be preserved. Once the
@@ -111,9 +111,6 @@ properties:
           field will be left empty. To remove SSL support while there is still a pending managed certificate, clear the
           `certificateId` field with an update request.
         output: true
-        enum_values:
-          - AUTOMATIC
-          - MANUAL
   - name: resourceRecords
     type: Array
     description: |

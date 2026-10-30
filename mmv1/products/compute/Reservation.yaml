@@ -450,13 +450,10 @@ properties:
             output: true
             properties:
               - name: 'type'
-                type: Enum
+                type: String
                 description: |
                   Defines the type of maintenance.
                 output: true
-                enum_values:
-                  - 'SCHEDULED'
-                  - 'UNSCHEDULED'
               - name: 'canReschedule'
                 type: Boolean
                 description: |
@@ -478,14 +475,10 @@ properties:
                   The latest time for the planned maintenance window to start. This timestamp value is in RFC3339 text format.
                 output: true
               - name: 'maintenanceStatus'
-                type: Enum
+                type: String
                 description: |
                   Status of the maintenance.
                 output: true
-                enum_values:
-                  - 'PENDING'
-                  - 'ONGOING'
-                  - 'COMPLETED'
               - name: 'maintenanceOnShutdown'
                 type: Boolean
                 description: |
@@ -497,10 +490,7 @@ properties:
                   The reasons for the maintenance. Only valid for vms.
                 output: true
                 item_type:
-                  type: Enum
-                  enum_values:
-                    - 'UNKNOWN_REASON'
-                    - 'HOST_MAINTENANCE'
+                  type: String
           - name: 'maintenanceOngoingCount'
             type: Integer
             description: |
@@ -512,13 +502,10 @@ properties:
               Progress for ongoing maintenance for this group of VMs/hosts. Describes number of hosts in the block that have pending maintenance.
             output: true
           - name: 'schedulingType'
-            type: Enum
+            type: String
             description: |
               The type of maintenance for the reservation.
             output: true
-            enum_values:
-              - 'PERIODIC'
-              - 'AS_NEEDED'
           - name: 'subblockInfraMaintenanceOngoingCount'
             type: Integer
             description: |
@@ -551,14 +538,10 @@ properties:
         output: true
         properties:
           - name: 'healthStatus'
-            type: Enum
+            type: String
             description: |
               The health status of the reservation.
             output: true
-            enum_values:
-              - 'HEALTHY'
-              - 'DEGRADED'
-              - 'UNHEALTHY'
           - name: 'healthyBlockCount'
             type: Integer
             description: |

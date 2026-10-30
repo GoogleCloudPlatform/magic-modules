@@ -144,13 +144,7 @@ properties:
       VLAN ID for this subnetwork. If not specified, one is assigned automatically.
     default_from_api: true
   - name: state
-    type: Enum
+    type: String
     description: |
       Current stage of the resource to the device by config push.
     output: true
-    enum_values:
-      - STATE_PENDING
-      - STATE_PROVISIONING
-      - STATE_RUNNING
-      - STATE_SUSPENDED
-      - STATE_DELETING

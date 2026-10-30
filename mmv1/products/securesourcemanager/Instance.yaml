@@ -229,16 +229,10 @@ properties:
     description: |
       Labels as key value pairs.
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the Instance.
     output: true
-    enum_values:
-      - CREATING
-      - ACTIVE
-      - DELETING
-      - PAUSED
-      - UNKNOWN
   - name: hostConfig
     type: NestedObject
     description: |
@@ -262,14 +256,10 @@ properties:
         description: Git SSH hostname.
         output: true
   - name: stateNote
-    type: Enum
+    type: String
     description: |
       Provides information about the current instance state.
     output: true
-    enum_values:
-      - STATE_NOTE_UNSPECIFIED
-      - PAUSED_CMEK_UNAVAILABLE
-      - INSTANCE_RESUMING
   - name: kmsKey
     type: String
     description: |

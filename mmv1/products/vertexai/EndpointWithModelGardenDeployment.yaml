@@ -905,13 +905,9 @@ properties:
                 description: Output only. Forwarding rule created by the PSC service automation.
                 output: true
               - name: state
-                type: Enum
+                type: String
                 description: Output only. The state of the PSC service automation.
                 output: true
-                enum_values:
-                  - PSC_AUTOMATION_STATE_UNSPECIFIED
-                  - PSC_AUTOMATION_STATE_SUCCESSFUL
-                  - PSC_AUTOMATION_STATE_FAILED
               - name: errorMessage
                 type: String
                 description: Output only. Error message if the PSC service automation failed.

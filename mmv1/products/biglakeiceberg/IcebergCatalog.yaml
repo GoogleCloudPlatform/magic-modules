@@ -185,14 +185,9 @@ properties:
           description: The region of the replica, e.g., `us-east1`.
           output: true
         - name: state
-          type: Enum
+          type: String
           description: If the IcebergCatalog is replicated to multiple regions, this describes the current state of the replica. STATE_UNKNOWN - The replica state is unknown. STATE_PRIMARY - The replica is the writable primary. STATE_PRIMARY_IN_PROGRESS - The replica has been recently assigned as the primary, but not all namespaces are writeable yet. STATE_SECONDARY - The replica is a read-only secondary replica.
           output: true
-          enum_values:
-            - STATE_UNKNOWN
-            - STATE_PRIMARY
-            - STATE_PRIMARY_IN_PROGRESS
-            - STATE_SECONDARY
     description: Output only. The replicas for the catalog metadata.
     output: true
   - name: restricted_locations_config
