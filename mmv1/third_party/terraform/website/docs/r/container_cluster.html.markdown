@@ -580,6 +580,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `kalm_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
+* `wiz_sensor_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)).
+    Structure is [documented below](#nested_wiz_sensor_config).
+
 *  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
@@ -707,6 +710,16 @@ addons_config {
     cluster. It is disabled by default. Set `disabled = false` to enable.
 
 * `auth` - (Optional) The authentication type between services in Istio. Available options include `AUTH_MUTUAL_TLS`.
+
+<a name="nested_wiz_sensor_config"></a>The `wiz_sensor_config` block supports:
+
+* `enabled` - (Optional) The status of the Wiz Sensor addon. It is disabled by default. Set `enabled=true` to enable.
+
+* `registry_secret_uri` - (Optional) The GCP Secret Manager URI for the Wiz registry secret. Format: `projects/{project_id}/secrets/{secret_name}/versions/{version}` or: `projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}`
+
+* `api_key_secret_uri` - (Optional) The GCP Secret Manager URI for the Wiz API key secret. Format: `projects/{project_id}/secrets/{secret_name}/versions/{version}` or `projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}`
+
+* `proxy_secret_uri` - (Optional) The GCP Secret Manager URI for the Wiz proxy configuration. Format: `projects/{project_id}/secrets/{secret_name}/versions/{version}` or `projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}`
 
 <a name="nested_cluster_autoscaling"></a>The `cluster_autoscaling` block supports:
 
