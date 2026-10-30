@@ -40,17 +40,17 @@ if isGke {
 		}
 	}
 	updateMask = newMask
-}
 
-hasOrchestratorMask := false
-for _, m := range updateMask {
-	if strings.HasPrefix(m, "orchestrator_spec.") {
-		hasOrchestratorMask = true
-		break
+	hasOrchestratorMask := false
+	for _, m := range updateMask {
+		if strings.HasPrefix(m, "orchestrator_spec.") {
+			hasOrchestratorMask = true
+			break
+		}
 	}
-}
-if !hasOrchestratorMask {
-	delete(obj, "orchestratorSpec")
+	if !hasOrchestratorMask {
+		delete(obj, "orchestratorSpec")
+	}
 }
 
 // AddQueryParams uses url.Values.Set, replacing the generated updateMask query parameter.
