@@ -1080,3 +1080,97 @@ func TestTypeValidateSiblingConstraints(t *testing.T) {
 		})
 	}
 }
+
+func TestTypeValidateDefaultFromApi(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		prop        *Type
+		resource    string
+		wantError   string
+	}{
+		{
+			description: "default_from_api and required not allowlisted returns error",
+			prop: &Type{
+				Name:           "customField",
+				Type:           "String",
+				DefaultFromApi: true,
+				Required:       true,
+			},
+			resource:  "MyResource",
+			wantError: "property custom_field cannot set both default_from_api and required in resource MyResource",
+		},
+		{
+			description: "default_from_api and output not allowlisted returns error",
+			prop: &Type{
+				Name:           "customField",
+				Type:           "String",
+				DefaultFromApi: true,
+				Output:         true,
+			},
+			resource:  "MyResource",
+			wantError: "property custom_field cannot set both default_from_api and output in resource MyResource",
+		},
+		{
+			description: "default_from_api and required allowlisted succeeds",
+			prop: &Type{
+				Name:           "name",
+				Type:           "String",
+				DefaultFromApi: true,
+				Required:       true,
+			},
+			resource:  "Hub",
+			wantError: "",
+		},
+		{
+			description: "default_from_api and output allowlisted succeeds",
+			prop: &Type{
+				Name:           "ruleId",
+				Type:           "String",
+				DefaultFromApi: true,
+				Output:         true,
+			},
+			resource:  "Rule",
+			wantError: "",
+		},
+	}
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{
+				Name:       tc.resource,
+				Properties: []*Type{tc.prop},
+			}
+			res.SetDefault(p)
+
+			errs := tc.prop.Validate(tc.resource)
+			if tc.wantError == "" {
+				if len(errs) > 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+}
+
