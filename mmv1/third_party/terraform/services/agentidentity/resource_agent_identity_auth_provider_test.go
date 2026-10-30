@@ -189,7 +189,112 @@ func TestAccAgentIdentityAuthProvider_switchAuthProviderType(t *testing.T) {
 }
 
 // ============================================================================
-// 7. Terraform HCL Config Generators
+// 7. Cross-App Access (XAA) Auth Provider Tests
+// ============================================================================
+
+func TestAccAgentIdentityAuthProvider_xaaAuthProvider(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgentIdentityAuthProvider_xaaAuthProviderStep1(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auth_provider_type_params.0.xaa_auth_provider.0.client_secret_auth.0.client_secret", "location", "auth_provider_id", "workload_ids"},
+			},
+			{
+				Config: testAccAgentIdentityAuthProvider_xaaAuthProviderStep2(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "auth_provider_id", "workload_ids"},
+			},
+		},
+	})
+}
+
+// ============================================================================
+// 8. Connector Reference Auth Provider Tests
+// ============================================================================
+
+func TestAccAgentIdentityAuthProvider_connectorReferenceAuthProvider(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgentIdentityAuthProvider_connectorReferenceAuthProviderStep1(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "auth_provider_id", "workload_ids"},
+			},
+			{
+				Config: testAccAgentIdentityAuthProvider_connectorReferenceAuthProviderStep2(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "auth_provider_id", "workload_ids"},
+			},
+		},
+	})
+}
+
+// ============================================================================
+// 9. Regional Endpoint Policies (REP) Tests
+// ============================================================================
+
+func TestAccAgentIdentityAuthProvider_preferRegionalEndpoints(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgentIdentityAuthProvider_preferRegionalEndpoints(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auth_provider_type_params", "location", "auth_provider_id", "workload_ids"},
+			},
+		},
+	})
+}
+
+// ============================================================================
+// 10. Terraform HCL Config Generators
 // ============================================================================
 
 func testAccAgentIdentityAuthProvider_updateStep1(context map[string]interface{}) string {
@@ -388,6 +493,130 @@ func testAccAgentIdentityAuthProvider_switchTypeStep2(context map[string]interfa
         default_continue_uri = "https://example.com/callback"
         enable_pkce          = true
         token_url            = "https://auth.example.com/token"
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_xaaAuthProviderStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-xaa-%{random_suffix}"
+    description      = "Test covering Cross-App Access (XAA) auth provider configuration"
+    allowed_scopes   = ["https://www.googleapis.com/auth/cloud-platform"]
+  
+    auth_provider_type_params {
+      xaa_auth_provider {
+        google_account {}
+        id_token_input {
+          agent_identity_pool {}
+          id_jag_additional_claims = jsonencode({
+            custom_claim = "claim_value"
+          })
+        }
+        client_secret_auth {
+          client_id     = "test-xaa-client-id"
+          client_secret = "test-xaa-client-secret"
+        }
+        additional_parameters = {
+          audience = "https://api.example.com"
+        }
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_xaaAuthProviderStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-xaa-%{random_suffix}"
+    description      = "Updated Cross-App Access (XAA) auth provider configuration"
+    allowed_scopes   = ["https://www.googleapis.com/auth/cloud-platform"]
+  
+    auth_provider_type_params {
+      xaa_auth_provider {
+        custom_issuer {
+          token_url = "https://auth.example.com/oauth/token"
+          issuer    = "https://auth.example.com"
+        }
+        id_jag_input {}
+        client_assertion_jwt_auth {
+          client_id = "test-xaa-jwt-client-id"
+        }
+        additional_parameters = {
+          audience = "https://api.example.com/v2"
+          resource = "https://resource.example.com"
+        }
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_connectorReferenceAuthProviderStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-connref-%{random_suffix}"
+    description      = "Test covering Connector Reference auth provider configuration"
+    allowed_scopes   = ["https://www.googleapis.com/auth/cloud-platform"]
+  
+    auth_provider_type_params {
+      connector_reference_auth_provider {
+        connector = "salesforce-connector-prod"
+        authorization_details = jsonencode([
+          {
+            type      = "custom_auth_detail"
+            locations = ["https://api.example.com/v1"]
+          }
+        ])
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_connectorReferenceAuthProviderStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-connref-%{random_suffix}"
+    description      = "Updated Connector Reference auth provider configuration"
+    allowed_scopes   = ["https://www.googleapis.com/auth/cloud-platform"]
+  
+    auth_provider_type_params {
+      connector_reference_auth_provider {
+        connector = "servicenow-connector-prod"
+        authorization_details = jsonencode([
+          {
+            type      = "updated_auth_detail"
+            locations = ["https://api.example.com/v2"]
+          }
+        ])
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_preferRegionalEndpoints(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  provider "google" {
+    prefer_regional_endpoints = true
+  }
+
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-rep-%{random_suffix}"
+    description      = "Test covering Regional Endpoint Policies (REP)"
+  
+    auth_provider_type_params {
+      api_key {
+        api_key = "test-api-key-rep"
       }
     }
   }

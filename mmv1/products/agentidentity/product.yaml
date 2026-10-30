@@ -19,5 +19,7 @@ scopes:
 versions:
     - base_url: https://agentidentity.googleapis.com/v1/
       name: ga
+      rep_url: https://agentidentity.{{location}}.rep.googleapis.com/v1/
     - base_url: https://agentidentity.googleapis.com/v1/
       name: beta
+      rep_url: https://agentidentity.{{location}}.rep.googleapis.com/v1/
