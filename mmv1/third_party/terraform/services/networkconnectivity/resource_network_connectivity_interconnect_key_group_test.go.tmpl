@@ -1,0 +1,170 @@
+package networkconnectivity_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+// Covers the custom keys handling: updating other fields without re-sending keys, reordering keys
+// without a diff, removing a key (update mask `keys.<name>`), and import (cak_wo is write-only and
+// never returned by the API). Adding a key after creation needs a start_time at least 6 hours in
+// the future, which can't be replayed by VCR, so that path is covered by manual testing.
+func TestAccNetworkConnectivityInterconnectKeyGroup_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityInterconnectKeyGroupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkConnectivityInterconnectKeyGroup_twoKeys(context),
+			},
+			{
+				ResourceName:      "google_network_connectivity_interconnect_key_group.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The API never returns the CAK and cak_wo is write-only.
+				ImportStateVerifyIgnore: []string{"keys.0.cak_wo", "keys.1.cak_wo", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkConnectivityInterconnectKeyGroup_twoKeysNewDescription(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_connectivity_interconnect_key_group.default", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				// Reordering keys is not a diff.
+				Config: testAccNetworkConnectivityInterconnectKeyGroup_twoKeysReordered(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+			{
+				Config: testAccNetworkConnectivityInterconnectKeyGroup_secondKeyOnly(context),
+			},
+			{
+				ResourceName:            "google_network_connectivity_interconnect_key_group.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"keys.0.cak_wo", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkConnectivityInterconnectKeyGroup_twoKeys(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider    = google-beta
+  name        = "tf-test-ikg-%{random_suffix}"
+  region      = "us-east4"
+  description = "initial description"
+  labels = {
+    env = "test"
+  }
+
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+  keys {
+    name       = "key2"
+    start_time = "2026-01-02T00:00:00Z"
+    ckn        = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "eedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+`, context)
+}
+
+func testAccNetworkConnectivityInterconnectKeyGroup_twoKeysNewDescription(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider    = google-beta
+  name        = "tf-test-ikg-%{random_suffix}"
+  region      = "us-east4"
+  description = "updated description"
+  labels = {
+    env = "test"
+  }
+
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+  keys {
+    name       = "key2"
+    start_time = "2026-01-02T00:00:00Z"
+    ckn        = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "eedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+`, context)
+}
+
+func testAccNetworkConnectivityInterconnectKeyGroup_twoKeysReordered(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider    = google-beta
+  name        = "tf-test-ikg-%{random_suffix}"
+  region      = "us-east4"
+  description = "updated description"
+  labels = {
+    env = "test"
+  }
+
+  keys {
+    name       = "key2"
+    start_time = "2026-01-02T00:00:00Z"
+    ckn        = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "eedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+`, context)
+}
+
+func testAccNetworkConnectivityInterconnectKeyGroup_secondKeyOnly(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider    = google-beta
+  name        = "tf-test-ikg-%{random_suffix}"
+  region      = "us-east4"
+  description = "updated description"
+  labels = {
+    env = "test"
+  }
+
+  keys {
+    name       = "key2"
+    start_time = "2026-01-02T00:00:00Z"
+    ckn        = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "eedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+`, context)
+}
+{{- end }}

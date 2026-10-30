@@ -1,0 +1,175 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// interconnectKeyGroupCaksFromConfig returns key name -> CAK for every `keys` block in the raw
+// configuration. `cak_wo` is write-only, so it is never in state or plan and can only be read from
+// the raw configuration. The second return value is false if any part of the configuration is still
+// unknown (for example, during plan when values come from resources that are not created yet).
+func interconnectKeyGroupCaksFromConfig(raw cty.Value) (map[string]string, bool) {
+	caks := make(map[string]string)
+	if raw.IsNull() || !raw.IsKnown() {
+		return caks, false
+	}
+	keys := raw.GetAttr("keys")
+	if keys.IsNull() {
+		return caks, true
+	}
+	if !keys.IsKnown() {
+		return caks, false
+	}
+	complete := true
+	for it := keys.ElementIterator(); it.Next(); {
+		_, k := it.Element()
+		if k.IsNull() || !k.IsKnown() {
+			complete = false
+			continue
+		}
+		name, cak := k.GetAttr("name"), k.GetAttr("cak_wo")
+		if !name.IsKnown() || !cak.IsKnown() {
+			complete = false
+			continue
+		}
+		if name.IsNull() || cak.IsNull() || !name.Type().Equals(cty.String) || !cak.Type().Equals(cty.String) {
+			continue
+		}
+		caks[name.AsString()] = cak.AsString()
+	}
+	return caks, complete
+}
+
+// interconnectKeyGroupSameTime reports whether two RFC3339 timestamps are the same instant. The API
+// may normalize the format (for example "Z" vs "+00:00", or fractional seconds).
+func interconnectKeyGroupSameTime(a, b string) bool {
+	if a == b {
+		return true
+	}
+	ta, errA := time.Parse(time.RFC3339Nano, a)
+	tb, errB := time.Parse(time.RFC3339Nano, b)
+	return errA == nil && errB == nil && ta.Equal(tb)
+}
+
+// interconnectKeyGroupKeysByName indexes a `keys` list by key name.
+func interconnectKeyGroupKeysByName(v interface{}) map[string]map[string]interface{} {
+	out := make(map[string]map[string]interface{})
+	l, _ := v.([]interface{})
+	for _, raw := range l {
+		m, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if name, _ := m["name"].(string); name != "" {
+			out[name] = m
+		}
+	}
+	return out
+}
+
+// interconnectKeyGroupSameKeySet reports whether two keys lists contain the same keys (by name,
+// start_time instant and ckn), ignoring order. cak_wo is ignored: it is write-only, and the planned
+// value can still carry the config value during CustomizeDiff, which is why the generic
+// unordered_list set comparison can't be used here.
+func interconnectKeyGroupSameKeySet(o, n interface{}) bool {
+	oldKeys, newKeys := interconnectKeyGroupKeysByName(o), interconnectKeyGroupKeysByName(n)
+	ol, _ := o.([]interface{})
+	nl, _ := n.([]interface{})
+	if len(oldKeys) != len(newKeys) || len(ol) != len(oldKeys) || len(nl) != len(newKeys) {
+		return false
+	}
+	for name, nk := range newKeys {
+		ok, found := oldKeys[name]
+		if !found {
+			return false
+		}
+		ns, _ := nk["start_time"].(string)
+		os, _ := ok["start_time"].(string)
+		nc, _ := nk["ckn"].(string)
+		oc, _ := ok["ckn"].(string)
+		if !interconnectKeyGroupSameTime(os, ns) || !strings.EqualFold(oc, nc) {
+			return false
+		}
+	}
+	return true
+}
+
+// interconnectKeyGroupKeysDiffSuppress hides diffs on keys.N.{name,start_time,ckn} when the keys
+// are only reordered (same keys by name, start_time instant and ckn), and when a start_time or ckn
+// is equivalent (timestamp format, hex case). keys can't use ResourceDiff.Clear (it isn't computed,
+// and blocks with write-only attributes can't be computed), so reorders are suppressed per field.
+func interconnectKeyGroupKeysDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	if strings.HasSuffix(k, ".start_time") && interconnectKeyGroupSameTime(old, new) {
+		return true
+	}
+	if strings.HasSuffix(k, ".ckn") && strings.EqualFold(old, new) {
+		return true
+	}
+	if d.Id() == "" {
+		return false
+	}
+	o, n := d.GetChange("keys")
+	return interconnectKeyGroupSameKeySet(o, n)
+}
+
+// networkConnectivityInterconnectKeyGroupKeysCustomizeDiff enforces at plan time that:
+//   - key names are unique;
+//   - existing keys are not changed in place (the API treats individual keys as immutable; to
+//     change start_time or ckn, add a new key and remove the old one);
+//   - every key that is being added has a cak_wo.
+func networkConnectivityInterconnectKeyGroupKeysCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if !diff.HasChange("keys") {
+		return nil
+	}
+	o, n := diff.GetChange("keys")
+	oldKeys := interconnectKeyGroupKeysByName(o)
+	caks, caksComplete := interconnectKeyGroupCaksFromConfig(diff.GetRawConfig())
+
+	seen := make(map[string]bool)
+	newList, _ := n.([]interface{})
+	for _, raw := range newList {
+		m, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, _ := m["name"].(string)
+		if name == "" {
+			// Unknown at plan time.
+			continue
+		}
+		if seen[name] {
+			return fmt.Errorf("keys: duplicate key name %q", name)
+		}
+		seen[name] = true
+
+		prev, exists := oldKeys[name]
+		if !exists {
+			if caksComplete && caks[name] == "" {
+				return fmt.Errorf("keys: key %q is being added, so cak_wo must be set", name)
+			}
+			continue
+		}
+
+		newStart, _ := m["start_time"].(string)
+		oldStart, _ := prev["start_time"].(string)
+		newCkn, _ := m["ckn"].(string)
+		oldCkn, _ := prev["ckn"].(string)
+		startChanged := newStart != "" && !interconnectKeyGroupSameTime(oldStart, newStart)
+		cknChanged := newCkn != "" && !strings.EqualFold(oldCkn, newCkn)
+		if startChanged || cknChanged {
+			return fmt.Errorf("keys: key %q already exists and keys can't be changed in place. "+
+				"To change its start_time or ckn, add a key with a new name and remove %q "+
+				"(or remove %q in one apply and add it back in a later apply)", name, name, name)
+		}
+	}
+	return nil
+}

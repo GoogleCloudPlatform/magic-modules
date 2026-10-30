@@ -1,0 +1,160 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: InterconnectKeyGroup
+description: |
+  An InterconnectKeyGroup holds a set of customer-provided MACsec keys (CKN/CAK pairs) that one or
+  more Cloud Interconnect connections can use for MACsec ("bring your own key"). Link an
+  Interconnect to a key group with the `macsec.interconnect_key_group` field of
+  `google_compute_interconnect`.
+
+  Individual keys can't be changed in place. To rotate keys, add a new key (with a `start_time`
+  at least 6 hours in the future) and remove the old key once the new key is active. Keys can be
+  added and removed while the key group is attached to Interconnects; the changes are pushed to
+  every linked Interconnect without disabling MACsec.
+min_version: beta
+references:
+  guides:
+    MACsec for Cloud Interconnect: https://cloud.google.com/network-connectivity/docs/interconnect/concepts/macsec-overview
+  api: https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.interconnectKeyGroups
+docs:
+  warning: |
+    `keys.cak_wo` is a write-only argument and requires Terraform 1.11 or later. The CAK is never
+    stored in Terraform state or plan files, and the API never returns it.
+base_url: projects/{{project}}/locations/{{region}}/interconnectKeyGroups
+self_link: projects/{{project}}/locations/{{region}}/interconnectKeyGroups/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/interconnectKeyGroups?interconnectKeyGroupId={{name}}
+update_verb: PATCH
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 30
+  delete_minutes: 20
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, update, delete]
+  result:
+    resource_inside_response: false
+custom_code:
+  constants: templates/terraform/constants/network_connectivity_interconnect_key_group.go.tmpl
+  pre_update: templates/terraform/pre_update/network_connectivity_interconnect_key_group.go.tmpl
+custom_diff:
+  - networkConnectivityInterconnectKeyGroupKeysCustomizeDiff
+samples:
+  - name: network_connectivity_interconnect_key_group_basic
+    primary_resource_id: default
+    min_version: beta
+    steps:
+      - name: network_connectivity_interconnect_key_group_basic
+        resource_id_vars:
+          key_group_name: my-key-group
+        # The API never returns the CAK and cak_wo is write-only, so it can't be verified on import.
+        ignore_read_extra:
+          - keys.0.cak_wo
+parameters:
+  - name: region
+    type: String
+    description: |
+      The region of the key group. Only Interconnects in this region can use it.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: name
+    type: String
+    description: |
+      The name of the key group.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: Time
+    description: |
+      The time the key group was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |
+      The time the key group was last updated.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: |
+      Labels as key-value pairs.
+  - name: description
+    type: String
+    description: |
+      An optional description of the key group.
+  - name: keys
+    type: Array
+    description: |
+      The MACsec keys in this group. A key group can have at most 5 keys, and the start times of
+      any two keys must be at least 6 hours apart. When the key group is created, keys can have a
+      `start_time` in the past; keys added later must start at least 6 hours in the future.
+
+      The order of the keys doesn't matter. Keys can't be changed in place: to change a key, add a
+      key with a new name and remove the old one.
+    custom_expand: templates/terraform/custom_expand/network_connectivity_interconnect_key_group_keys.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/network_connectivity_interconnect_key_group_keys.go.tmpl
+    item_type:
+      type: NestedObject
+      properties:
+        - name: name
+          type: String
+          required: true
+          diff_suppress_func: 'interconnectKeyGroupKeysDiffSuppress'
+          description: |
+            A name for this key, unique within the key group: 1-255 lowercase letters and digits.
+            The API only accepts alphanumeric names; uppercase letters aren't allowed because the
+            provider uses the name as an update-mask path (`keys.<name>`), and mask paths are
+            case-converted.
+          validation:
+            regex: ^[a-z0-9]{1,255}$
+        - name: startTime
+          type: String
+          required: true
+          diff_suppress_func: 'interconnectKeyGroupKeysDiffSuppress'
+          description: |
+            The RFC3339 timestamp from which this key takes effect, for example
+            `2026-10-01T00:00:00Z`.
+        - name: ckn
+          type: String
+          required: true
+          diff_suppress_func: 'interconnectKeyGroupKeysDiffSuppress'
+          description: |
+            The MACsec connectivity association key name (CKN): a 64-character hexadecimal string.
+          validation:
+            regex: ^[0-9a-fA-F]{64}$
+        - name: cakWo
+          api_name: cak
+          type: String
+          write_only: true
+          description: |
+            The MACsec connectivity association key (CAK): a 64-character hexadecimal string.
+            Write-only (requires Terraform 1.11 or later): it is sent to the API but never stored in
+            state or plan files, and the API never returns it. Required for every key that is being
+            added. Changing only `cak_wo` of an existing key has no effect; to change a CAK, add a
+            new key and remove the old one.
+          validation:
+            regex: ^[0-9a-fA-F]{64}$
+  - name: interconnects
+    type: Array
+    description: |
+      The names of the Interconnects that use this key group.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/network_connectivity_interconnect_key_group_interconnects.go.tmpl
+    item_type:
+      type: String
