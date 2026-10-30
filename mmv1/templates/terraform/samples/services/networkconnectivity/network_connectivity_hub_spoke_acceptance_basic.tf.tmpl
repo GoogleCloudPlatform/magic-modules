@@ -1,0 +1,29 @@
+resource "google_network_connectivity_hub" "hub" {
+  name        = "my-hub"
+  description = "Hub that accepts cross-project spokes"
+}
+
+resource "google_compute_network" "spoke_network" {
+  project                 = "spoke-project-id"
+  name                    = "spoke-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_connectivity_spoke" "spoke" {
+  project     = "spoke-project-id"
+  name        = "workload-spoke"
+  location    = "global"
+  description = "Spoke proposed from a workload project"
+  hub         = google_network_connectivity_hub.hub.id
+
+  linked_vpc_network {
+    uri                   = google_compute_network.spoke_network.self_link
+    include_export_ranges = ["10.0.0.0/8"]
+  }
+}
+
+resource "google_network_connectivity_hub_spoke_acceptance" "{{$.PrimaryResourceId}}" {
+  hub        = google_network_connectivity_hub.hub.id
+  spoke      = google_network_connectivity_spoke.spoke.id
+  spoke_etag = google_network_connectivity_spoke.spoke.etag
+}

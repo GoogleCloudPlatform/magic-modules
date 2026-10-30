@@ -1,0 +1,48 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+spokeUri, _ := d.Get("spoke").(string)
+
+spokes, hasSpokes := res["spokes"].([]interface{})
+if !hasSpokes {
+	if name, ok := res["name"].(string); ok && tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId("", spokeUri, name, nil) {
+		state, _ := res["state"].(string)
+		if !NetworkConnectivitySpokeIsAccepted(state) {
+			return nil, nil
+		}
+		res["spokeUri"] = name
+		return res, nil
+	}
+	return nil, nil
+}
+
+for _, raw := range spokes {
+	if raw == nil {
+		continue
+	}
+	spoke, ok := raw.(map[string]interface{})
+	if !ok {
+		continue
+	}
+	name, _ := spoke["name"].(string)
+	if !tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId("", spokeUri, name, nil) {
+		continue
+	}
+	state, _ := spoke["state"].(string)
+	if !NetworkConnectivitySpokeIsAccepted(state) {
+		return nil, nil
+	}
+	spoke["spokeUri"] = name
+	return spoke, nil
+}
+
+return nil, nil
