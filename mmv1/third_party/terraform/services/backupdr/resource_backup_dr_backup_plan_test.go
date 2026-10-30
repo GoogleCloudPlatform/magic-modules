@@ -319,3 +319,91 @@ resource "google_backup_dr_backup_plan" "bp" {
 }
 `, context)
 }
+
+func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBackupDRBackupPlan_mvbp(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_vault_service_account"),
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account"),
+				),
+			},
+			{
+				ResourceName:            "google_backup_dr_backup_plan.bp",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"resource"},
+			},
+		},
+	})
+}
+
+func testAccBackupDRBackupPlan_mvbp(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_backup_dr_backup_vault" "primary_vault" {
+  provider                                   = google-beta
+  location                                   = "us-central1"
+  backup_vault_id                            = "tf-test-bv-pri-%{random_suffix}"
+  backup_minimum_enforced_retention_duration = "100000s"
+}
+
+resource "google_backup_dr_backup_vault" "secondary_vault" {
+  provider                                   = google-beta
+  location                                   = "us-central1"
+  backup_vault_id                            = "tf-test-bv-sec-%{random_suffix}"
+  backup_minimum_enforced_retention_duration = "100000s"
+}
+
+resource "google_backup_dr_backup_plan" "bp" {
+  provider       = google-beta
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-mvbp-%{random_suffix}"
+  resource_type  = "compute.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.primary_vault.id
+
+  backup_rules {
+    rule_id               = "rule-primary"
+    backup_retention_days = 7
+
+    standard_schedule {
+      recurrence_type = "DAILY"
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 6
+      }
+    }
+  }
+
+  backup_rules {
+    rule_id               = "rule-secondary-vault"
+    backup_retention_days = 14
+    backup_vault          = google_backup_dr_backup_vault.secondary_vault.id
+
+    standard_schedule {
+      recurrence_type = "WEEKLY"
+      days_of_week    = ["SUNDAY"]
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 6
+        end_hour_of_day   = 12
+      }
+    }
+  }
+}
+`, context)
+}

@@ -458,3 +458,135 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 }
 `, context)
 }
+
+func TestAccBackupDRBackupPlanAssociation_mvbp(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBackupDRBackupPlanAssociation_mvbp(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.bpa", "rules_config_info.0.data_source"),
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.bpa", "rules_config_info.1.data_source"),
+				),
+			},
+			{
+				ResourceName:            "google_backup_dr_backup_plan_association.bpa",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"resource"},
+			},
+		},
+	})
+}
+
+func testAccBackupDRBackupPlanAssociation_mvbp(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "default" {
+  provider     = google-beta
+  account_id   = "tf-test-sa-%{random_suffix}"
+  display_name = "Custom SA for VM Instance"
+}
+
+resource "google_compute_instance" "default" {
+  provider     = google-beta
+  name         = "tf-test-vm-%{random_suffix}"
+  machine_type = "n2-standard-2"
+  zone         = "us-central1-a"
+  tags         = ["foo", "bar"]
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-13"
+      labels = {
+        my_label = "value"
+      }
+    }
+  }
+  scratch_disk {
+    interface = "NVME"
+  }
+  network_interface {
+    network = "default"
+    access_config {
+    }
+  }
+  service_account {
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
+  }
+}
+
+resource "google_backup_dr_backup_vault" "primary_vault" {
+  provider                                   = google-beta
+  location                                   = "us-central1"
+  backup_vault_id                            = "tf-test-bv-p-%{random_suffix}"
+  backup_minimum_enforced_retention_duration = "100000s"
+  force_delete                               = "true"
+}
+
+resource "google_backup_dr_backup_vault" "secondary_vault" {
+  provider                                   = google-beta
+  location                                   = "us-central1"
+  backup_vault_id                            = "tf-test-bv-s-%{random_suffix}"
+  backup_minimum_enforced_retention_duration = "100000s"
+  force_delete                               = "true"
+}
+
+resource "google_backup_dr_backup_plan" "plan" {
+  provider       = google-beta
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-%{random_suffix}"
+  resource_type  = "compute.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.primary_vault.name
+
+  backup_rules {
+    rule_id               = "rule-primary"
+    backup_retention_days = 7
+
+    standard_schedule {
+      recurrence_type = "DAILY"
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 6
+      }
+    }
+  }
+
+  backup_rules {
+    rule_id               = "rule-secondary"
+    backup_retention_days = 14
+    backup_vault          = google_backup_dr_backup_vault.secondary_vault.id
+
+    standard_schedule {
+      recurrence_type = "WEEKLY"
+      days_of_week    = ["SUNDAY"]
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 6
+        end_hour_of_day   = 12
+      }
+    }
+  }
+}
+
+resource "google_backup_dr_backup_plan_association" "bpa" {
+  provider                   = google-beta
+  location                   = "us-central1"
+  backup_plan_association_id = "tf-test-bpa-%{random_suffix}"
+  resource                   = google_compute_instance.default.id
+  resource_type              = "compute.googleapis.com/Instance"
+  backup_plan                = google_backup_dr_backup_plan.plan.name
+}
+`, context)
+}
