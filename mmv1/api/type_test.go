@@ -1169,4 +1169,3 @@ func TestTypeValidateOutputOnlyEnum(t *testing.T) {
 		})
 	}
 }
-
