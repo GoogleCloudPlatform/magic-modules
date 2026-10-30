@@ -113,16 +113,10 @@ properties:
       The time the transcoding finished.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the job.
     output: true
-    enum_values:
-      - PROCESSING_STATE_UNSPECIFIED
-      - PENDING
-      - RUNNING
-      - SUCCEEDED
-      - FAILED
   - name: labels
     type: KeyValueLabels
     description: |

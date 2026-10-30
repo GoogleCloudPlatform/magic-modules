@@ -96,12 +96,10 @@ properties:
     required: true
     properties:
       - name: format
-        type: Enum
+        type: String
         description: |
           The format of the key.
         output: true
-        enum_values:
-          - RSA_X509_PEM
       - name: notBeforeTime
         type: String
         description: |
@@ -137,14 +135,10 @@ properties:
           - RSA_3072
           - RSA_4096
   - name: state
-    type: Enum
+    type: String
     description: |
       The state of the key.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: use
     type: Enum
     description: |

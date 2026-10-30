@@ -336,13 +336,10 @@ properties:
         description: |
           Name of the customer managed encryption key (CMEK) in KMS.
       - name: kmsKeyState
-        type: Enum
+        type: String
         description: |
           Status of the customer managed encryption key (CMEK) in KMS.
         output: true
-        enum_values:
-          - VALID
-          - REVOKED
       - name: kmsKeyNameVersion
         type: String
         description: |
@@ -582,16 +579,10 @@ properties:
           type: NestedObject
           properties:
             - name: connectionStatus
-              type: Enum
+              type: String
               description: |
                 Status of the service attachment connection.
               output: true
-              enum_values:
-                - ACCEPTED
-                - PENDING
-                - REJECTED
-                - NEEDS_ATTENTION
-                - CLOSED
             - name: localFqdn
               type: String
               description: |

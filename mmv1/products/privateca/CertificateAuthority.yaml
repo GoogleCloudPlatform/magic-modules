@@ -740,16 +740,9 @@ properties:
             item_type:
               type: String
   - name: state
-    type: Enum
+    type: String
     description: The State for this CertificateAuthority.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ENABLED
-      - DISABLED
-      - STAGED
-      - AWAITING_USER_ACTIVATION
-      - PENDING_DELETION
   - name: pemCaCertificates
     type: Array
     description: |

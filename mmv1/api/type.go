@@ -508,6 +508,10 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
 	}
 
+	if t.Output && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) {
+		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
+	}
+
 	if t.DefaultFromApi && t.DefaultValue != nil {
 		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}

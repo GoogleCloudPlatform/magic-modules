@@ -218,17 +218,10 @@ properties:
       - 'PARTNER_PROVIDER'
       - 'L2_DEDICATED'
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       [Output Only] The current state of this attachment's functionality.
     output: true
-    enum_values:
-      - 'ACTIVE'
-      - 'DEFUNCT'
-      - 'PARTNER_REQUEST_RECEIVED'
-      - 'PENDING_CUSTOMER'
-      - 'PENDING_PARTNER'
-      - 'STATE_UNSPECIFIED'
   - name: 'googleReferenceId'
     type: String
     description: |

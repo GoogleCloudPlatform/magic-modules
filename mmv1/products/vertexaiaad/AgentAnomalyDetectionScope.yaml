@@ -105,13 +105,7 @@ properties:
     required: true
     immutable: true
   - name: 'state'
-    type: Enum
+    type: String
     description: |-
       The lifecycle state of the scope.
     output: true
-    enum_values:
-      - 'CREATING'
-      - 'ACTIVE'
-      - 'DELETING'
-      - 'FAILED'
-      - 'UPDATING'

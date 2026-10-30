@@ -78,16 +78,10 @@ properties:
     description: |
       A description of the backup with 2048 characters or less. Requests with longer descriptions will be rejected.
   - name: state
-    type: Enum
+    type: String
     description: |
       The backup state.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - FINALIZING
-      - CREATING
-      - READY
-      - DELETING
   - name: createTime
     type: Time
     description: |
@@ -119,19 +113,10 @@ properties:
     required: true
     immutable: true
   - name: sourceInstanceTier
-    type: Enum
+    type: String
     description: |
       The service tier of the source Cloud Filestore instance that this backup is created from.
     output: true
-    enum_values:
-      - STANDARD
-      - PREMIUM
-      - BASIC_HDD
-      - BASIC_SSD
-      - HIGH_SCALE_SSD
-      - ZONAL
-      - REGIONAL
-      - ENTERPRISE
   - name: downloadBytes
     type: String
     description: |

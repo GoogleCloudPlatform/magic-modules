@@ -85,7 +85,7 @@ properties:
     description: |
       A description of the namespace. Cannot exceed 256 characters.
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the namespace.
       * `ACTIVE`: The namespace is active.
@@ -94,9 +94,6 @@ properties:
       UndeleteWorkloadIdentityPoolNamespace. You cannot reuse the ID of a soft-deleted namespace
       until it is permanently deleted.
     output: true
-    enum_values:
-      - ACTIVE
-      - DELETED
   - name: disabled
     type: Boolean
     description: |

@@ -154,16 +154,10 @@ properties:
           - IDENTITY_TYPE_PER_CONFIG
           - IDENTITY_TYPE_PER_PROJECT
   - name: datasetConfigState
-    type: Enum
+    type: String
     description: |
       State of the DatasetConfig.
     output: true
-    enum_values:
-      - CONFIG_STATE_UNSPECIFIED
-      - CONFIG_STATE_ACTIVE
-      - CONFIG_STATE_VERIFICATION_IN_PROGRESS
-      - CONFIG_STATE_CREATED
-      - CONFIG_STATE_PROCESSING
   - name: description
     type: String
     description: |

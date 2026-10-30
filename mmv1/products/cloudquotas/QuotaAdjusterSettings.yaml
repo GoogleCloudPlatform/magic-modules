@@ -77,16 +77,12 @@ properties:
     deprecation_message: '`effectiveContainer` is deprecated and will be removed in a future major release. Use `inherited_from` instead.'
     output: true
   - name: 'effectiveEnablement'
-    type: Enum
+    type: String
     description: |
       Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
       Expect this field to be empty currently.
     deprecation_message: '`effectiveEnablement` is deprecated and will be removed in a future major release. Use `inherited` instead.'
     output: true
-    enum_values:
-      - 'DEFAULT'
-      - 'ENABLED'
-      - 'DISABLED'
   - name: 'inherited'
     type: Boolean
     description: |

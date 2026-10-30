@@ -820,13 +820,9 @@ properties:
           - INHERITED
           - DISABLED
       - name: enablementState
-        type: Enum
+        type: String
         description: This field returns whether scanning is active for this repository.
         output: true
-        enum_values:
-          - SCANNING_UNSUPPORTED
-          - SCANNING_DISABLED
-          - SCANNING_ACTIVE
       - name: enablementStateReason
         type: String
         description: This provides an explanation for the state of scanning on this repository.

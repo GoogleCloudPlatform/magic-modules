@@ -296,7 +296,7 @@ properties:
       type: NestedObject
       properties:
         - name: 'code'
-          type: Enum
+          type: String
           description: |
             A warning code, if applicable. For example, Compute Engine returns
             NO_RESULTS_ON_PAGE if there are no results in the response.
@@ -331,12 +331,7 @@ properties:
       The hub network that should handle matching packets, which should conform to RFC1035.
     output: true
   - name: 'routeType'
-    type: Enum
-    enum_values:
-      - 'TRANSIT'
-      - 'SUBNET'
-      - 'BGP'
-      - 'STATIC'
+    type: String
     description: |
       The type of this route, which can be one of the following values:
       - 'TRANSIT' for a transit route that this router learned from another Cloud Router and will readvertise to one of its BGP peers
@@ -351,18 +346,13 @@ properties:
       type: NestedObject
       properties:
         - name: 'pathSegmentType'
-          type: Enum
+          type: String
           description: |
             The type of the AS Path, which can be one of the following values:
             - 'AS_SET': unordered set of autonomous systems that the route in has traversed
             - 'AS_SEQUENCE': ordered set of autonomous systems that the route has traversed
             - 'AS_CONFED_SEQUENCE': ordered set of Member Autonomous Systems in the local confederation that the route has traversed
             - 'AS_CONFED_SET': unordered set of Member Autonomous Systems in the local confederation that the route has traversed
-          enum_values:
-            - 'AS_SET'
-            - 'AS_SEQUENCE'
-            - 'AS_CONFED_SEQUENCE'
-            - 'AS_CONFED_SET'
           output: true
         - name: 'asLists'
           type: Array
@@ -372,10 +362,7 @@ properties:
           item_type:
             type: Integer
   - name: 'routeStatus'
-    type: Enum
-    enum_values:
-      - 'ACTIVE'
-      - 'INACTIVE'
+    type: String
     description: |
       The status of the route, which can be one of the following values:
       - 'ACTIVE' for an active route

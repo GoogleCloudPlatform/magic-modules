@@ -282,16 +282,10 @@ properties:
     description: |
       User-defined labels for the scan. A list of key->value pairs.
   - name: state
-    type: Enum
+    type: String
     description: |
       Current state of the DataScan.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - CREATING
-      - DELETING
-      - ACTION_REQUIRED
   - name: createTime
     type: String
     description: |
@@ -443,16 +437,10 @@ properties:
               Service account email.
             required: true
   - name: type
-    type: Enum
+    type: String
     description: |
       The type of DataScan.
     output: true
-    enum_values:
-      - DATA_SCAN_TYPE_UNSPECIFIED
-      - DATA_QUALITY
-      - DATA_PROFILE
-      - DATA_DISCOVERY
-      - DATA_DOCUMENTATION
   - name: dataQualitySpec
     type: NestedObject
     description: |

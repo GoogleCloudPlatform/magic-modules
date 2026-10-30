@@ -90,19 +90,8 @@ properties:
       If a gateway advertised route is deleted and another with the same name is created, the new route is assigned a different uniqueId.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: The current lifecycle state of this gateway advertised route.
-    enum_values:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING
-      - ACCEPTING
-      - REJECTING
-      - UPDATING
-      - INACTIVE
-      - OBSOLETE
-      - FAILED
     output: true
   - name: ipRange
     type: String

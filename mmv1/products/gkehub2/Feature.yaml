@@ -157,16 +157,9 @@ properties:
     output: true
     properties:
       - name: state
-        type: Enum
+        type: String
         description: The current state of the Feature resource in the Hub API.
         output: true
-        enum_values:
-          - STATE_UNSPECIFIED
-          - ENABLING
-          - ACTIVE
-          - DISABLING
-          - UPDATING
-          - SERVICE_UPDATING
       - name: hasResources
         type: Boolean
         description: Whether this Feature has outstanding resources that need to be cleaned up before it can be disabled.
@@ -558,14 +551,9 @@ properties:
         output: true
         properties:
           - name: code
-            type: Enum
+            type: String
             description: The high-level, machine-readable status of this Feature.
             output: true
-            enum_values:
-              - CODE_UNSPECIFIED
-              - OK
-              - WARNING
-              - ERROR
           - name: description
             type: String
             description: A human-readable description of the current status.

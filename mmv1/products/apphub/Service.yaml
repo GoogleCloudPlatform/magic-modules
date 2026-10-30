@@ -164,26 +164,18 @@ properties:
         output: true
         properties:
           - name: type
-            type: Enum
+            type: String
             description: Output only. The functional type of a service or workload.
             output: true
-            enum_values:
-              - TYPE_UNSPECIFIED
-              - AGENT
-              - MCP_SERVER
       - name: registrationType
         type: NestedObject
         description: Output only. The registration type of the service.
         output: true
         properties:
           - name: type
-            type: Enum
+            type: String
             description: Output only. The registration type of a service.
             output: true
-            enum_values:
-              - TYPE_UNSPECIFIED
-              - EXCLUSIVE
-              - SHARED
       - name: extendedMetadata
         type: Array
         description: Output only. Additional metadata specific to the resource type.

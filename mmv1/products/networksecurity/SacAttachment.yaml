@@ -100,11 +100,6 @@ properties:
           Name to be used when creating a location on the customer's behalf in Symantec's Location API. Not to be confused with Google Cloud locations.
         immutable: true
   - name: state
-    type: Enum
+    type: String
     description: State of the attachment.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - PENDING_PARTNER_ATTACHMENT
-      - PARTNER_ATTACHED
-      - PARTNER_DETACHED

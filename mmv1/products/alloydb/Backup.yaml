@@ -205,13 +205,9 @@ properties:
     output: true
     properties:
       - name: encryptionType
-        type: Enum
+        type: String
         description: Output only. Type of encryption.
         output: true
-        enum_values:
-          - TYPE_UNSPECIFIED
-          - GOOGLE_DEFAULT_ENCRYPTION
-          - CUSTOMER_MANAGED_ENCRYPTION
       - name: kmsKeyVersions
         type: Array
         description: |

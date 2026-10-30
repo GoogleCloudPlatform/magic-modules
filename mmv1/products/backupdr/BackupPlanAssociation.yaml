@@ -130,14 +130,8 @@ properties:
           description: Backup Rule id fetched from backup plan.
           output: true
         - name: lastBackupState
-          type: Enum
+          type: String
           description: State of last backup taken.
-          enum_values:
-            - :LAST_BACKUP_STATE_UNSPECIFIED
-            - :FIRST_BACKUP_PENDING
-            - :PERMISSION_DENIED
-            - :SUCCEEDED
-            - :FAILED
           output: true
         - name: lastBackupError
           type: NestedObject

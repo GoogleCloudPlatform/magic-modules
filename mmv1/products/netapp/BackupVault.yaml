@@ -157,16 +157,10 @@ properties:
       backup encryption. Format:
       `projects/{{project}}/locations/{{location}}/kmsConfigs/{{kms_config}}`
   - name: encryptionState
-    type: Enum
+    type: String
     description: |
       Encryption state of customer-managed encryption keys (CMEK) backups.
     output: true
-    enum_values:
-      - ENCRYPTION_STATE_UNSPECIFIED
-      - ENCRYPTION_STATE_PENDING
-      - ENCRYPTION_STATE_COMPLETED
-      - ENCRYPTION_STATE_IN_PROGRESS
-      - ENCRYPTION_STATE_FAILED
   - name: backupsCryptoKeyVersion
     type: String
     description: |

@@ -265,15 +265,12 @@ properties:
                       Name of the secure tag, created with TagManager's TagValue API.
                       @pattern tagValues/[0-9]+
                   - name: 'state'
-                    type: Enum
+                    type: String
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
                       `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                       or its network is deleted.
                     output: true
-                    enum_values:
-                      - 'EFFECTIVE'
-                      - 'INEFFECTIVE'
         - name: 'targetSecureTag'
           type: Array
           description: |
@@ -298,15 +295,12 @@ properties:
                   Name of the secure tag, created with TagManager's TagValue API.
                   @pattern tagValues/[0-9]+
               - name: 'state'
-                type: Enum
+                type: String
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
                   `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                   or its network is deleted.
                 output: true
-                enum_values:
-                  - 'EFFECTIVE'
-                  - 'INEFFECTIVE'
         - name: 'action'
           type: String
           description: |
@@ -517,15 +511,12 @@ properties:
                       @pattern tagValues/[0-9]+
                     output: true
                   - name: 'state'
-                    type: Enum
+                    type: String
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
                       `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                       or its network is deleted.
                     output: true
-                    enum_values:
-                      - 'EFFECTIVE'
-                      - 'INEFFECTIVE'
         - name: 'targetSecureTag'
           type: Array
           description: |
@@ -552,15 +543,12 @@ properties:
                   @pattern tagValues/[0-9]+
                 output: true
               - name: 'state'
-                type: Enum
+                type: String
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
                   `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                   or its network is deleted.
                 output: true
-                enum_values:
-                  - 'EFFECTIVE'
-                  - 'INEFFECTIVE'
         - name: 'action'
           type: String
           description: |
@@ -568,13 +556,10 @@ properties:
             "allow", "deny", "apply_security_profile_group" or "goto_next".
           output: true
         - name: 'direction'
-          type: Enum
+          type: String
           description: |
             The direction in which this rule applies. If unspecified an INGRESS rule is created.
           output: true
-          enum_values:
-            - 'INGRESS'
-            - 'EGRESS'
         - name: 'enableLogging'
           type: Boolean
           description: |

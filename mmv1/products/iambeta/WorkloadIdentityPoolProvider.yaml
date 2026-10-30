@@ -138,7 +138,7 @@ properties:
     validation:
       function: ValidateWorkloadIdentityPoolProviderId
   - name: state
-    type: Enum
+    type: String
     description: |
       The state of the provider.
       * STATE_UNSPECIFIED: State unspecified.
@@ -148,10 +148,6 @@ properties:
         UndeleteWorkloadIdentityPoolProvider. You cannot reuse the ID of a soft-deleted provider
         until it is permanently deleted.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: displayName
     type: String
     description: A display name for the provider. Cannot exceed 32 characters.

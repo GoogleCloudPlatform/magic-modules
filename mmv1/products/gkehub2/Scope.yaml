@@ -97,16 +97,10 @@ properties:
     output: true
     properties:
       - name: code
-        type: Enum
+        type: String
         description: |
           Code describes the state of a Scope resource.
         output: true
-        enum_values:
-          - CODE_UNSPECIFIED
-          - CREATING
-          - READY
-          - DELETING
-          - UPDATING
   - name: namespaceLabels
     type: KeyValuePairs
     description: |

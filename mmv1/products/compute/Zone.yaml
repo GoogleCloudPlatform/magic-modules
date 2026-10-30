@@ -70,7 +70,7 @@ properties:
           resource as the deprecated resource.
         output: true
       - name: 'state'
-        type: Enum
+        type: String
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
           OBSOLETE, or DELETED. Operations which create a new resource
@@ -79,10 +79,6 @@ properties:
           replacement. Operations which use OBSOLETE or DELETED resources
           will be rejected and result in an error.
         output: true
-        enum_values:
-          - 'DEPRECATED'
-          - 'OBSOLETE'
-          - 'DELETED'
   - name: 'description'
     type: String
     description: 'An optional textual description of the resource.'
@@ -102,12 +98,9 @@ properties:
     resource: 'Region'
     imports: 'selfLink'
   - name: 'status'
-    type: Enum
+    type: String
     description: 'The status of the zone.'
     output: true
-    enum_values:
-      - 'UP'
-      - 'DOWN'
   - name: 'availableCpuPlatforms'
     type: Array
     description: 'The available CPU platforms in this zone'

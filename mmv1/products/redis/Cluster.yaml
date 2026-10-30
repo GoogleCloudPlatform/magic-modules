@@ -291,17 +291,11 @@ properties:
       digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of this cluster. Can be CREATING, READY, UPDATING, DELETING and SUSPENDED
     immutable: true
     output: true
-    enum_values:
-      - CREATING
-      - READY
-      - UPDATING
-      - DELETING
-      - SUSPENDED
   - name: uid
     type: String
     description: |
@@ -885,12 +879,8 @@ properties:
           description: |
             Service attachment URI which your self-created PscConnection should use as
         - name: connectionType
-          type: Enum
+          type: String
           output: true
-          enum_values:
-            - CONNECTION_TYPE_READER
-            - CONNECTION_TYPE_PRIMARY
-            - CONNECTION_TYPE_DISCOVERY
           description: Type of a PSC connection targeting this service attachment.
   - name: kmsKey
     type: String

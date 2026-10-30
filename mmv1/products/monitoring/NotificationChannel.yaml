@@ -153,13 +153,9 @@ properties:
       The [CHANNEL_ID] is automatically assigned by the server on creation.
     output: true
   - name: verificationStatus
-    type: Enum
+    type: String
     description: Indicates whether this channel has been verified or not. On a ListNotificationChannels or GetNotificationChannel operation, this field is expected to be populated.If the value is UNVERIFIED, then it indicates that the channel is non-functioning (it both requires verification and lacks verification); otherwise, it is assumed that the channel works.If the channel is neither VERIFIED nor UNVERIFIED, it implies that the channel is of a type that does not require verification or that this specific channel has been exempted from verification because it was created prior to verification being required for channels of this type.This field cannot be modified using a standard UpdateNotificationChannel operation. To change the value of this field, you must call VerifyNotificationChannel.
     output: true
-    enum_values:
-      - VERIFICATION_STATUS_UNSPECIFIED
-      - UNVERIFIED
-      - VERIFIED
   - name: type
     type: String
     description: The type of the notification channel. This field matches the value of the NotificationChannelDescriptor.type field. See https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannelDescriptors/list to get the list of valid values such as "email", "slack", etc...

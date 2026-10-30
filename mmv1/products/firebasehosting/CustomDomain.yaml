@@ -197,7 +197,7 @@ properties:
     min_version: beta
     output: true
   - name: ownershipState
-    type: Enum
+    type: String
     description: |
       The ownership state of your domain name. Ownership is determined at a
       Firebase project level, and established by adding `TXT` records to your
@@ -241,13 +241,6 @@ properties:
         permission to act on its behalf.
     min_version: beta
     output: true
-    enum_values:
-      - OWNERSHIP_MISSING
-      - OWNERSHIP_UNREACHABLE
-      - OWNERSHIP_MISMATCH
-      - OWNERSHIP_CONFLICT
-      - OWNERSHIP_PENDING
-      - ACTIVE
   - name: certPreference
     type: Enum
     description: |

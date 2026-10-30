@@ -76,20 +76,10 @@ properties:
     description: |
       A detailed description of the note
   - name: kind
-    type: Enum
+    type: String
     description: |
       The type of analysis this note describes
     output: true
-    enum_values:
-      - NOTE_KIND_UNSPECIFIED
-      - VULNERABILITY
-      - BUILD
-      - IMAGE
-      - PACKAGE
-      - DEPLOYMENT
-      - DISCOVERY
-      - ATTESTATION
-      - UPGRADE
   - name: relatedUrl
     type: Array
     description: |
