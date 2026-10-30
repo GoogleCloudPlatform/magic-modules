@@ -1,0 +1,14 @@
+resource "google_design_center_connection" "example" {
+  project                   = "{{index $.Vars "project"}}"
+  location                  = "us-central1"
+  space                     = "{{index $.Vars "space"}}"
+  application_template      = "{{index $.Vars "application_template"}}"
+  component                 = "{{index $.Vars "component"}}"
+  connection_id             = "{{index $.ResourceIdVars "connection_id"}}"
+  destination_component_uri = "{{index $.Vars "destination_component_uri"}}"
+
+  destination_component_parameters {
+    key   = "iam_users"
+    value = jsonencode([])
+  }
+}
