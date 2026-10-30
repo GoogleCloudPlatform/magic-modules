@@ -1,0 +1,150 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ApplicationTemplate'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates?applicationTemplateId={{application_template_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
+update_verb: 'PATCH'
+update_mask: true
+async:
+  actions: []
+description: |
+  Application template in Application Design Center.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
+parameters:
+  - type: String
+    name: 'location'
+    description: |
+      The location of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+  - type: String
+    name: 'space'
+    description: |
+      The space of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+  - type: String
+    name: 'application_template_id'
+    description: |
+      The ID of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - type: String
+    name: 'name'
+    description: |
+      Identifier. The resource name of the ApplicationTemplate. Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template_id}`
+    output: true
+  - type: String
+    name: 'displayName'
+    description: |
+      Optional. User-defined display name.
+  - type: String
+    name: 'description'
+    description: |
+      Optional. User-defined description.
+  - type: String
+    name: 'applicationParameters'
+    description: |
+      Optional. Application parameters.
+  - type: Enum
+    name: 'compositionType'
+    default_from_api: true
+    description: |
+      Optional. Composition type of the template.
+    immutable: true
+    enum_values:
+      - 'STANDARD'
+      - 'COMPOSITE'
+  - type: Array
+    name: 'rootInputVariables'
+    description: |
+      Optional. Root input variables.
+    item_type:
+      type: String
+  - type: Array
+    name: 'rootOutputVariables'
+    description: |
+      Optional. Root output variables.
+    item_type:
+      type: String
+  - type: String
+    name: 'saasRuntimeContext'
+    description: |
+      Optional. SaaS runtime context.
+  - type: Boolean
+    name: 'inputsAsRootModuleVariables'
+    default_from_api: true
+    description: |
+      Optional. Inputs as root module variables.
+  - type: String
+    name: 'iacFormat'
+    output: true
+    description: |
+      Output only. IaC format.
+  - type: String
+    name: 'serializedApplicationTemplate'
+    output: true
+    ignore_read: true
+    description: |
+      Output only. Serialized application template.
+  - type: String
+    name: 'latestRevision'
+    output: true
+    description: |
+      Output only. Latest revision.
+  - type: String
+    name: 'artifactLocation'
+    output: true
+    ignore_read: true
+    description: |
+      Output only. Artifact location.
+  - type: Time
+    name: 'createTime'
+    output: true
+    description: |
+      Output only. The time the resource was created.
+  - type: Time
+    name: 'updateTime'
+    output: true
+    description: |
+      Output only. The time the resource was last updated.
+samples:
+  - name: 'designcenter_application_template_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_application_template_basic'
+        resource_id_vars:
+          application_template_id: 'example-template'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+      - name: 'designcenter_application_template_update'
+        resource_id_vars:
+          application_template_id: 'example-template'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
