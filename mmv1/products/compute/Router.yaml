@@ -42,6 +42,8 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/router.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_router.go.tmpl'
+  tgc_ignore_terraform_encoder: true
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
 sweeper:
@@ -245,6 +247,7 @@ properties:
     type: NestedObject
     description: |
       Keys used for MD5 authentication.
+    deprecation_message: '`md5_authentication_keys` is deprecated and will be removed in a future major release. It has no effect; use the `md5_authentication_key` block of `google_compute_router_peer` to configure MD5 authentication for a BGP peer instead.'
     properties:
       - name: 'name'
         type: String
@@ -257,6 +260,7 @@ properties:
         description: |
           Value of the key used for MD5 authentication.
         required: true
+        sensitive: true
   - name: 'nccGateway'
     type: ResourceRef
     # nccGateway is not present in CAI asset
