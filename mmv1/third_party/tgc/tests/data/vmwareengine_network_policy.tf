@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
 resource "google_vmwareengine_network_policy" "gg_asset_17806_51c7" {
   name                  = "gg-asset-17806-51c7"
   location              = "us-central1"

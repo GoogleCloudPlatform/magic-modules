@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
 resource "google_bigquery_dataset" "my_dataset" {
   project    = "{{.Provider.project}}"
   dataset_id = "my_dataset"

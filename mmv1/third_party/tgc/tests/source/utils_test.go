@@ -50,7 +50,13 @@ func testConvertCommand(t *testing.T, dir, tfplanName string, jsonName string, o
 }
 
 func terraformWorkflow(t *testing.T, dir, name string) {
-	terraformInit(t, "terraform", dir)
+	tfBytes, err := os.ReadFile(filepath.Join(dir, name+".tf"))
+	if err != nil {
+		t.Fatalf("error reading %s.tf: %v", name, err)
+	}
+	if os.Getenv("TF_CLI_CONFIG_FILE") == "" || bytes.Contains(tfBytes, []byte("random_")) {
+		terraformInit(t, "terraform", dir)
+	}
 	terraformPlan(t, "terraform", dir, name+".tfplan")
 	payload := terraformShow(t, "terraform", dir, name+".tfplan")
 	saveFile(t, dir, name+".tfplan.json", payload)
