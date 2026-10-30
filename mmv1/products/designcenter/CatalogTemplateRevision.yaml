@@ -1,0 +1,146 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "CatalogTemplateRevision"
+description: "A revision of a CatalogTemplate."
+base_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions"
+create_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions?catalogTemplateRevisionId={{revision_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
+immutable: true
+import_format:
+  - "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: "OpAsync"
+  operation:
+    base_url: "{{op_id}}"
+  result:
+    resource_inside_response: true
+parameters:
+  - name: "location"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The location of the resource."
+  - name: "space"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The space of the resource."
+  - name: "catalog"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The catalog of the resource."
+  - name: "catalog_template"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The catalog template of the resource."
+  - name: "revision_id"
+    type: "String"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The ID of the revision."
+properties:
+  - name: "name"
+    type: "String"
+    output: true
+    description: "The resource name of the revision."
+  - name: "description"
+    type: "String"
+    immutable: true
+    description: "The description of the revision."
+  - name: "type"
+    type: "String"
+    immutable: true
+    description: "The type of the component template revision."
+  - name: "gitSource"
+    type: "NestedObject"
+    immutable: true
+    description: "Git repository source for the template revision."
+    properties:
+      - name: "repo"
+        type: "String"
+        required: true
+        immutable: true
+        description: "The Git repository URI."
+      - name: "dir"
+        type: "String"
+        immutable: true
+        description: "The directory path within the Git repository."
+      - name: "refTag"
+        type: "String"
+        required: true
+        immutable: true
+        description: "The Git reference tag or branch."
+      - name: "commitSha"
+        type: "String"
+        output: true
+        description: "The commit SHA resolved from the reference tag."
+  - name: "applicationTemplateRevisionSource"
+    type: "String"
+    immutable: true
+    description: "The application template revision source URI."
+  - name: "annotations"
+    type: "KeyValueAnnotations"
+    immutable: true
+    description: "The annotations of the revision."
+  - name: "state"
+    type: "String"
+    output: true
+    description: "The state of the revision."
+  - name: "uuid"
+    type: "String"
+    output: true
+    description: "The unique identifier of the revision."
+  - name: "templateCategory"
+    type: "String"
+    output: true
+    description: "The category of the parent catalog template."
+  - name: "createTime"
+    type: "Time"
+    output: true
+    description: "The creation time of the revision."
+  - name: "updateTime"
+    type: "Time"
+    output: true
+    description: "The last update time of the revision."
+samples:
+  - name: designcenter_catalog_template_revision_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_template_revision_basic
+        resource_id_vars:
+          revision_id: example-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-catalog-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterCatalogTemplate(t)
