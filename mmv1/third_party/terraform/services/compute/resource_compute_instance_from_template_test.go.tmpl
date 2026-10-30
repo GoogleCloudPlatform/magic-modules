@@ -2435,8 +2435,16 @@ resource "google_compute_instance_from_template" "inst1" {
   zone = "us-central1-a"
 
   source_instance_template = google_compute_instance_template.foobar7.self_link
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+    confidential_paravisor_config {
+      confidential_tpm_type = %q
+      sev_snp_irq_mode      = %q
+    }
+  }
 }
-`, templateDisk, image, template, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode, instance)
+`, templateDisk, image, template, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode, instance, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode)
 }
 
 func TestAccComputeInstanceFromTemplateWithOverride_interface(t *testing.T) {
