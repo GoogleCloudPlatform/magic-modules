@@ -709,6 +709,14 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"` or `"AMD Genoa"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
 
+* `confidential_paravisor_config` (Optional) Defines a set of Confidential Paravisor (SVSM) options for `SEV_SNP` instances. Structure is [documented below](#nested_confidential_paravisor_config).
+
+<a name="nested_confidential_paravisor_config"></a>The `confidential_paravisor_config` block supports:
+
+* `confidential_tpm_type` (Optional) The type of vTPM to use in the confidential paravisor (SVSM). Possible values are `EPHEMERAL` and `NO_CC_TPM`.
+
+* `sev_snp_irq_mode` (Optional) How interrupts (IRQs) are handled by the confidential paravisor (SVSM) on AMD SEV-SNP instances. Possible values are `UNRESTRICTED` and `RESTRICTED`.
+
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
 * `enable_nested_virtualization` - (Optional) Defines whether the instance should have [nested virtualization](#on_host_maintenance)  enabled. Defaults to false.
