@@ -286,6 +286,31 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_stockoutRetry(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	const retryTimeoutSeconds = 60
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_basicWithStockoutRetry(instanceName, retryTimeoutSeconds),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "current_status", "RUNNING"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "retry_on_stockout", "true"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "stockout_retry_timeout_seconds", fmt.Sprint(retryTimeoutSeconds)),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_basic2(t *testing.T) {
 	t.Parallel()
 
@@ -7135,6 +7160,11 @@ func testAccCheckComputeInstanceNicAccessConfigHasNoSecurityPolicy(instance *map
 {{- end }}
 
 func testAccComputeInstance_basic(instance string) string {
+	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium", "")
+}
+
+// extraArgs is inserted verbatim after desired_status; pass "" for none.
+func testAccComputeInstance_basicWithMachineType(instance, machineType, extraArgs string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-13"
@@ -7143,10 +7173,10 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "e2-medium"
+	machine_type   = "%s"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
-  desired_status  = "RUNNING"
+  desired_status  = "RUNNING"%s
 
   //deletion_protection = false is implicit in this config due to default value
 
@@ -7171,7 +7201,13 @@ resource "google_compute_instance" "foobar" {
     my_other_key = "my_other_value"
   }
 }
-`, instance)
+`, instance, machineType, extraArgs)
+}
+
+func testAccComputeInstance_basicWithStockoutRetry(instance string, retryTimeoutSeconds int) string {
+	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium", fmt.Sprintf(`
+  retry_on_stockout = true
+  stockout_retry_timeout_seconds = %d`, retryTimeoutSeconds))
 }
 
 func testAccComputeInstance_basic2(instance string) string {
