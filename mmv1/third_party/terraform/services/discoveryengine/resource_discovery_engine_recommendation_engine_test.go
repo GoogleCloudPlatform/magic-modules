@@ -30,7 +30,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 				ResourceName:            "google_discovery_engine_recommendation_engine.media",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"common_config", "engine_id", "industry_vertical", "location"},
+				ImportStateVerifyIgnore: []string{"common_config", "engine_id", "industry_vertical", "location", "data_store_ids"},
 			},
 			{
 				Config: testAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationengineMediaExample_update(context),
@@ -39,7 +39,7 @@ func TestAccDiscoveryEngineRecommendationEngine_discoveryengineRecommendationeng
 				ResourceName:            "google_discovery_engine_recommendation_engine.media",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"common_config", "engine_id", "industry_vertical", "location"},
+				ImportStateVerifyIgnore: []string{"common_config", "engine_id", "industry_vertical", "location", "data_store_ids"},
 			},
 		},
 	})
