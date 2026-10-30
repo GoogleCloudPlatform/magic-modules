@@ -783,6 +783,11 @@ func TestAccBillingBudget_spendCapAdd(t *testing.T) {
 				Check:  resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
 			},
 			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccBillingBudget_spendCap(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
