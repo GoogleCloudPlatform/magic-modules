@@ -1173,4 +1173,3 @@ func TestTypeValidateDefaultFromApi(t *testing.T) {
 		})
 	}
 }
-
