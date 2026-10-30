@@ -39,6 +39,9 @@ exclude_delete: true
 samples:
   - name: vertex_ai_cache_config
     primary_resource_id: cache_config
+    # Tested in resource_vertex_ai_cache_config_test.go alongside regional
+    # updates because CacheConfig is a project-level singleton.
+    exclude_test: true
     steps:
       - name: vertex_ai_cache_config
         test_env_vars:
