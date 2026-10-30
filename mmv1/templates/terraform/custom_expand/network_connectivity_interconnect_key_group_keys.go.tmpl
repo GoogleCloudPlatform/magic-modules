@@ -1,0 +1,43 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// The API models keys as a map keyed by key name; Terraform models them as a list (write-only
+// arguments aren't allowed inside sets). cak_wo is write-only, so it's read from the raw
+// configuration by key name instead of from v.
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	l, _ := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	caks, _ := interconnectKeyGroupCaksFromConfig(d.GetRawConfig())
+	keys := make(map[string]interface{}, len(l))
+	for _, raw := range l {
+		m, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, _ := m["name"].(string)
+		if name == "" {
+			continue
+		}
+		key := map[string]interface{}{
+			"name":      name,
+			"startTime": m["start_time"],
+			"ckn":       m["ckn"],
+		}
+		if cak := caks[name]; cak != "" {
+			key["cak"] = cak
+		}
+		keys[name] = key
+	}
+	return keys, nil
+}
