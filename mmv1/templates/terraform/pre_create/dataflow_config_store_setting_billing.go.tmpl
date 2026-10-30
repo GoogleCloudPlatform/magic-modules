@@ -1,0 +1,14 @@
+	if billingProject == "" {
+		if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+			billingProject = parts[1]
+		}
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+		if billingProject == "" && config.Project != "" {
+			billingProject = config.Project
+		}
+	}
+	if billingProject != "" {
+		headers.Set("X-Goog-User-Project", billingProject)
+	}
