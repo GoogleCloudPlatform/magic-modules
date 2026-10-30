@@ -63,13 +63,14 @@ var (
 	}
 )
 
-func designCenterProjectPrefixForTest(testName string) string {
+func designCenterProjectPrefixForTest(t *testing.T) string {
 	for _, p := range bootstrapDesignCenterProjectPrefixes {
-		if strings.HasPrefix(testName, p.test) {
+		if strings.HasPrefix(t.Name(), p.test) {
 			return p.project
 		}
 	}
-	return "tf-boot-dc-"
+	t.Fatalf("no bootstrap project prefix registered for %s; add one to bootstrapDesignCenterProjectPrefixes", t.Name())
+	return ""
 }
 
 // BootstrapDesignCenterProject returns an isolated App Hub management project
@@ -86,7 +87,7 @@ func BootstrapDesignCenterProject(t *testing.T) string {
 		return ""
 	}
 
-	prefix := designCenterProjectPrefixForTest(t.Name())
+	prefix := designCenterProjectPrefixForTest(t)
 
 	bootstrapDesignCenterMu.Lock()
 	defer bootstrapDesignCenterMu.Unlock()
