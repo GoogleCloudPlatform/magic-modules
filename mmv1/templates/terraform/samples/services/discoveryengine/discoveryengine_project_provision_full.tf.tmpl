@@ -19,7 +19,7 @@ resource "time_sleep" "wait_enable_service_api" {
 
 resource "google_discovery_engine_project_provision" "{{$.PrimaryResourceId}}" {
   project                = google_project.project.project_id
-  location               = "global"
+  location               = "us"
   accept_data_use_terms  = true
   data_use_terms_version = "2022-11-23"
 

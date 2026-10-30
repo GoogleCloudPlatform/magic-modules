@@ -16,13 +16,13 @@ name: ProjectProvision
 description: |
   Provisions a Google Cloud project for Discovery Engine and prepares and initializes related systems.
 references:
-  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations/provision
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects/provision
 docs:
   warning: |
     This resource is create-only and cannot be read, updated, or deleted from the API.
     Destroying this resource only removes it from Terraform state without unprovisioning the Google Cloud project.
-base_url: projects/{{project}}/locations/{{location}}
-create_url: projects/{{project}}/locations/{{location}}:provision
+base_url: projects/{{project}}
+create_url: projects/{{project}}:provision
 id_format: projects/{{project}}/locations/{{location}}
 immutable: true
 exclude_read: true
@@ -82,8 +82,8 @@ parameters:
   - name: location
     type: String
     description: |
-      The geographic location in which to provision the project. The value can
-      only be one of "global", "us" and "eu".
+      The geographic location in which to provision the project, such as
+      `global`, `us`, or `eu`.
     url_param_only: true
     immutable: true
     default_value: global
