@@ -60,6 +60,8 @@ func (c *ComputeResizeRequestCai2hclConverter) Convert(assets []caiasset.Asset, 
 		}
 		if zone, ok := data["zone"].(string); ok && zone != "" {
 			hclData["zone"] = zone
+		} else if zone := tgcresource.ParseFieldValue(asset.Name, "zones"); zone != "" {
+			hclData["zone"] = zone
 		}
 		if reqDuration := flattenResizeRequestRequestedRunDuration(data["requestedRunDuration"]); len(reqDuration) > 0 {
 			hclData["requested_run_duration"] = reqDuration
