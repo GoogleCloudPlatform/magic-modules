@@ -129,6 +129,27 @@ func TestUnitApihubAddon_customizeDiff(t *testing.T) {
 			},
 			wantError: true,
 		},
+		{
+			name: "valid - state is ACTIVE",
+			after: map[string]interface{}{
+				"state": "ACTIVE",
+			},
+			wantError: false,
+		},
+		{
+			name: "invalid - state is INACTIVE",
+			after: map[string]interface{}{
+				"state": "INACTIVE",
+			},
+			wantError: true,
+		},
+		{
+			name: "invalid - state is ERROR",
+			after: map[string]interface{}{
+				"state": "ERROR",
+			},
+			wantError: true,
+		},
 	}
 
 	for _, tc := range cases {

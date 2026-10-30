@@ -58,7 +58,6 @@ custom_diff:
 custom_code:
   constants: templates/terraform/constants/apihub_addon.go.tmpl
   pre_create: templates/terraform/pre_create/apihub_addon.go.tmpl
-  pre_update: templates/terraform/pre_update/apihub_addon.go.tmpl
 samples:
   - name: apihub_addon_basic
     primary_resource_id: apihub_addon_basic

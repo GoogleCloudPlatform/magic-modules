@@ -41,6 +41,9 @@ func apihubAddonCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta
 }
 
 func apihubAddonCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if state, ok := diff.GetOk("state"); ok && state.(string) != "ACTIVE" {
+		return fmt.Errorf("addon is in state %q; ManageAddonConfig requires ACTIVE", state.(string))
+	}
 	if v, ok := diff.GetOk("config.0.gateway_plugin_addon_config.0.gateway_plugin_configs"); ok {
 		configs := v.([]interface{})
 		for i, raw := range configs {
