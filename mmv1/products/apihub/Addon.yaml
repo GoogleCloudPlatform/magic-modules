@@ -18,8 +18,9 @@ description: |-
   Addons are used to configure value-added services inside the API Hub.
 references:
   guides:
-    Official Documentation: https://cloud.google.com/api-hub/docs/overview
-  api: https://cloud.google.com/api-hub/docs/reference/rest/v1/projects.locations.addons
+    Official Documentation: https://cloud.google.com/apigee/docs/apihub/what-is-api-hub
+    Manage add-ons: https://cloud.google.com/apigee/docs/apihub/manage-add-ons
+  api: https://cloud.google.com/apigee/docs/reference/apis/apihub/rest/v1/projects.locations.addons
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/addons/{{addon_id}}'
