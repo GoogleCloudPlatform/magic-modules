@@ -16,6 +16,12 @@ name: Space
 description: |
   Space is a top level resource for managing teams building applications
   through Application Design Center.
+docs:
+  note: |
+    The project must have application management enabled (an App Hub
+    management project), and only one Space is allowed per region within a
+    management project. See
+    [Set up Application Design Center](https://cloud.google.com/application-design-center/docs/setup).
 references:
   guides:
     'Application Design Center Overview': 'https://cloud.google.com/application-design-center/docs/overview'
@@ -35,7 +41,6 @@ custom_code:
   constants: 'templates/terraform/constants/design_center_space.go.tmpl'
 iam_policy:
   method_name_separator: ':'
-  parent: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
   parent_resource_attribute: space_id
   import_format:
     - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
@@ -76,10 +81,10 @@ properties:
   - name: tags
     type: KeyValuePairs
     description: |
-      Tags are key/value pairs bound to the space resource.
-      For example:
-      "123/environment": "production"
-      "123/costCenter": "marketing"
+      Input only. Resource Manager tags to bind to the space at creation, as a
+      map of namespaced tag keys to tag value short names, for example
+      `{"123/environment" = "production"}`. For more information, see
+      https://cloud.google.com/resource-manager/docs/tags/tags-overview.
     immutable: true
     ignore_read: true
   - name: name
