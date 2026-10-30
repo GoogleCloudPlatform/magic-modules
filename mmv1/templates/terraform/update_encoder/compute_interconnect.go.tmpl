@@ -1,0 +1,45 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// macsecEnabled=false is an empty value, so the generated code leaves it out of the PATCH body and
+// MACsec stays enabled. Send it explicitly when it is being turned off. (Skip the setLabels body.)
+if _, isSetLabels := obj["labelFingerprint"]; !isSetLabels && d.HasChange("macsec_enabled") && !d.Get("macsec_enabled").(bool) {
+	obj["macsecEnabled"] = false
+}
+{{- if ne $.TargetVersionName "ga" }}
+// Compute PATCH leaves omitted fields unchanged, and the generated code omits empty values. Send
+// explicit empty values when the user removes the key group or all pre-shared keys, so that they
+// are actually cleared on the Interconnect (detaching a key group, or the final step of a
+// pre-shared key -> key group migration).
+// This encoder also runs for the setLabels request; leave that body alone.
+if _, isSetLabels := obj["labelFingerprint"]; isSetLabels {
+	return obj, nil
+}
+oldKg, newKg := d.GetChange("macsec.0.interconnect_key_group")
+oldPsks, newPsks := d.GetChange("macsec.0.pre_shared_keys")
+clearKg := oldKg.(string) != "" && newKg.(string) == ""
+clearPsks := len(oldPsks.([]interface{})) > 0 && len(newPsks.([]interface{})) == 0
+if clearKg || clearPsks {
+	macsec, ok := obj["macsec"].(map[string]interface{})
+	if !ok || macsec == nil {
+		macsec = make(map[string]interface{})
+	}
+	if clearKg {
+		macsec["interconnectKeyGroup"] = nil
+	}
+	if clearPsks {
+		macsec["preSharedKeys"] = []interface{}{}
+	}
+	obj["macsec"] = macsec
+}
+{{- end }}
+return obj, nil
