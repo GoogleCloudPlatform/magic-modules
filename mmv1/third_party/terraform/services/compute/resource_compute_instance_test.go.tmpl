@@ -3107,6 +3107,14 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "TDX"),
 				),
 			},
+			{
+				Config: testAccComputeInstanceConfidentialInstanceConfigEnableSevSnpSvsm(instanceName, "AMD Milan", "SEV_SNP", "EPHEMERAL", "UNRESTRICTED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar7", &instance),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance, "EPHEMERAL", "UNRESTRICTED"),
+				),
+			},
 		},
 	})
 }
@@ -7036,6 +7044,22 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *map[stri
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, gotType)
 		}
 
+		return nil
+	}
+}
+
+func testAccCheckComputeInstanceHasConfidentialParavisorConfig(instance *map[string]interface{}, confidentialTpmType string, sevSnpIrqMode string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		cic, _ := (*instance)["confidentialInstanceConfig"].(map[string]interface{})
+		cpc, _ := cic["confidentialParavisorConfig"].(map[string]interface{})
+		gotTpmType, _ := cpc["confidentialTpmType"].(string)
+		if gotTpmType != confidentialTpmType {
+			return fmt.Errorf("Wrong ConfidentialParavisorConfig confidentialTpmType: expected %s, got %s", confidentialTpmType, gotTpmType)
+		}
+		gotIrqMode, _ := cpc["sevSnpIrqMode"].(string)
+		if gotIrqMode != sevSnpIrqMode {
+			return fmt.Errorf("Wrong ConfidentialParavisorConfig sevSnpIrqMode: expected %s, got %s", sevSnpIrqMode, gotIrqMode)
+		}
 		return nil
 	}
 }
@@ -11455,6 +11479,45 @@ resource "google_compute_instance" "foobar5" {
 
 }
 `, instance, confidentialInstanceType)
+}
+
+func testAccComputeInstanceConfidentialInstanceConfigEnableSevSnpSvsm(instance string, minCpuPlatform, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image4" {
+  family  = "ubuntu-2404-lts-amd64"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "foobar7" {
+  name         = "%s7"
+  machine_type = "n2d-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image4.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = %q
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+    confidential_paravisor_config {
+      confidential_tpm_type = %q
+      sev_snp_irq_mode      = %q
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance, minCpuPlatform, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode)
 }
 
 func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {

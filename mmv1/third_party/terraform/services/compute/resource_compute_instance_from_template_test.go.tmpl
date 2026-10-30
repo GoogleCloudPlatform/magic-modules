@@ -634,6 +634,21 @@ func TestAccComputeInstanceFromTemplate_confidentialInstanceConfigMain(t *testin
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "TDX"),
 				),
 			},
+			{
+				Config: testAccComputeInstanceFromTemplate_confidentialInstanceConfigNoConfigSevSnpSvsm(
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					"SEV_SNP",
+					"EPHEMERAL",
+					"UNRESTRICTED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_template.inst1", &instance),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance, "EPHEMERAL", "UNRESTRICTED"),
+				),
+			},
 		},
 	})
 }
@@ -2357,6 +2372,71 @@ resource "google_compute_instance_from_template" "inst2" {
   source_instance_template = google_compute_instance_template.foobar6.self_link
 }
 `, templateDisk, image, template, confidentialInstanceType, instance, template2, confidentialInstanceType, instance2)
+}
+
+func testAccComputeInstanceFromTemplate_confidentialInstanceConfigNoConfigSevSnpSvsm(templateDisk string, image string, template string, instance string, confidentialInstanceType string, confidentialTpmType string, sevSnpIrqMode string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image3" {
+  family  = "ubuntu-2404-lts-amd64"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_disk" "foobar3" {
+  name  = "%s"
+  image = data.google_compute_image.my_image3.self_link
+  size  = 10
+  type  = "pd-balanced"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_image" "foobar3" {
+  name        = "%s"
+  source_disk = google_compute_disk.foobar3.self_link
+}
+
+resource "google_compute_instance_template" "foobar7" {
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = google_compute_image.foobar3.name
+    auto_delete  = true
+    boot         = true
+    disk_type    = "pd-balanced"
+    type         = "PERSISTENT"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  scheduling {
+    automatic_restart   = false
+    on_host_maintenance = "TERMINATE"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+    confidential_paravisor_config {
+      confidential_tpm_type = %q
+      sev_snp_irq_mode      = %q
+    }
+  }
+}
+
+resource "google_compute_instance_from_template" "inst1" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar7.self_link
+}
+`, templateDisk, image, template, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode, instance)
 }
 
 func TestAccComputeInstanceFromTemplateWithOverride_interface(t *testing.T) {

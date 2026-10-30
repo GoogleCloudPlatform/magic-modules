@@ -871,6 +871,14 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
 				),
 			},
+			{
+				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableSevSnpSvsm(acctest.RandString(t, 10), "AMD Milan", "SEV_SNP", "EPHEMERAL", "UNRESTRICTED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar6", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "SEV_SNP"),
+					testAccCheckComputeRegionInstanceTemplateHasConfidentialParavisorConfig(&instanceTemplate, "EPHEMERAL", "UNRESTRICTED"),
+				),
+			},
 		},
 	})
 }
@@ -2908,6 +2916,23 @@ func testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(inst
 	}
 }
 
+func testAccCheckComputeRegionInstanceTemplateHasConfidentialParavisorConfig(instanceTemplate *map[string]interface{}, confidentialTpmType string, sevSnpIrqMode string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		props := instanceTemplateProperties(instanceTemplate)
+		confidential, _ := props["confidentialInstanceConfig"].(map[string]interface{})
+		cpc, _ := confidential["confidentialParavisorConfig"].(map[string]interface{})
+		actualTpmType, _ := cpc["confidentialTpmType"].(string)
+		if actualTpmType != confidentialTpmType {
+			return fmt.Errorf("Wrong ConfidentialParavisorConfig confidentialTpmType: expected %s, got %s", confidentialTpmType, actualTpmType)
+		}
+		actualIrqMode, _ := cpc["sevSnpIrqMode"].(string)
+		if actualIrqMode != sevSnpIrqMode {
+			return fmt.Errorf("Wrong ConfidentialParavisorConfig sevSnpIrqMode: expected %s, got %s", sevSnpIrqMode, actualIrqMode)
+		}
+		return nil
+	}
+}
+
 func testAccCheckComputeRegionInstanceTemplateLacksShieldedVmConfig(instanceTemplate *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		props := instanceTemplateProperties(instanceTemplate)
@@ -4380,6 +4405,45 @@ resource "google_compute_region_instance_template" "foobar5" {
 
 }
 `, suffix, confidentialInstanceType)
+}
+
+func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableSevSnpSvsm(suffix, minCpuPlatform, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image4" {
+  family  = "ubuntu-2404-lts-amd64"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar6" {
+  name         = "tf-test-instance-template-%s"
+  machine_type = "n2d-standard-2"
+  region       = "us-central1"
+
+  disk {
+    source_image = data.google_compute_image.my_image4.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = %q
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+    confidential_paravisor_config {
+      confidential_tpm_type = %q
+      sev_snp_irq_mode      = %q
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, suffix, minCpuPlatform, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode)
 }
 
 func testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(suffix string) string {

@@ -336,6 +336,16 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 				),
 
 			},
+			{
+				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnpSvsm(fmt.Sprintf("tf-test-svsm-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-svsm-generated-%s", acctest.RandString(t, 10)), "SEV_SNP", "EPHEMERAL", "UNRESTRICTED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar6", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar6", "min_cpu_platform", "AMD Milan"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar6", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance, "EPHEMERAL", "UNRESTRICTED"),
+				),
+			},
 		},
 	})
 }
@@ -882,6 +892,72 @@ resource "google_compute_instance_from_machine_image" "foobar5" {
   }
 }
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+
+func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnpSvsm(instance string, newInstance string, confidentialInstanceType string, confidentialTpmType string, sevSnpIrqMode string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm6" {
+  provider = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+    }
+  }
+
+  name             = "%s"
+  machine_type     = "n2d-standard-2"
+  min_cpu_platform = "AMD Milan"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = %q
+    confidential_paravisor_config {
+      confidential_tpm_type = %q
+      sev_snp_irq_mode      = %q
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar6" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm6.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar6" {
+  provider = google-beta
+  name     = "%s"
+  zone     = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar6.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  confidential_instance_config {
+    confidential_instance_type = %q
+    confidential_paravisor_config {
+      confidential_tpm_type = %q
+      sev_snp_irq_mode      = %q
+    }
+  }
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode, instance, newInstance, confidentialInstanceType, confidentialTpmType, sevSnpIrqMode)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
