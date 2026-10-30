@@ -1,6 +1,8 @@
 package detector
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"testing"
@@ -562,6 +564,34 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestDataSourceToDocFile(t *testing.T) {
+	repo := t.TempDir()
+	docDir := filepath.Join(repo, "website", "docs", "d")
+	if err := os.MkdirAll(docDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(docDir, "project_iam_policy.html.markdown")
+	if err := os.WriteFile(want, []byte("# google_project_iam_policy\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, dataSource := range []string{
+		"google_project_iam_policy",
+		"google_project_iam_binding",
+		"google_project_iam_member",
+		"google_project_iam_audit_config",
+	} {
+		t.Run(dataSource, func(t *testing.T) {
+			got, err := dataSourceToDocFile(dataSource, repo)
+			if err != nil {
+				t.Fatalf("dataSourceToDocFile(%q) = %v, want nil error", dataSource, err)
+			}
+			if got != want {
+				t.Errorf("dataSourceToDocFile(%q) = %q, want %q", dataSource, got, want)
 			}
 		})
 	}
