@@ -1,0 +1,8 @@
+resource "google_design_center_space" "example" {
+  project                     = "{{index $.Vars "project"}}"
+  location                    = "us-central1"
+  space_id                    = "{{index $.ResourceIdVars "space_id"}}"
+  display_name                = "Updated Example Design Center Space"
+  description                 = "Updated Managed by Terraform"
+  enable_gcp_shared_templates = true
+}

@@ -1,0 +1,5 @@
+resource "google_design_center_space" "example" {
+  project  = "{{index $.Vars "project"}}"
+  location = "us-central1"
+  space_id = "{{index $.ResourceIdVars "space_id"}}"
+}
