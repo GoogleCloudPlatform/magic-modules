@@ -17,7 +17,7 @@ description: An instance of a machine learning PipelineJob in Vertex AI.
 references:
   guides:
     Official Documentation: https://cloud.google.com/vertex-ai/docs/pipelines
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.pipelineJobs
+  api: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.pipelineJobs
 docs:
 base_url: projects/{{project}}/locations/{{region}}/pipelineJobs
 self_link: projects/{{project}}/locations/{{region}}/pipelineJobs/{{name}}
