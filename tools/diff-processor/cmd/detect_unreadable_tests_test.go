@@ -169,3 +169,48 @@ func TestDetectUnreadableTestsServiceReadError(t *testing.T) {
 		t.Errorf("run() error = %v, want an error reading tests for service notadir", err)
 	}
 }
+
+// Read every acceptance test in a real provider and check the result against
+// detector.KnownUnreadableTests, so that a reader change that breaks existing
+// tests, or a list entry that has become readable, fails here rather than
+// showing up in contributors' PR comments. Set SERVICES_DIR to the absolute
+// path of the beta provider's services directory to run it; the list is
+// maintained against the beta provider.
+func TestKnownUnreadableTestsMatchProvider(t *testing.T) {
+	servicesDir := os.Getenv("SERVICES_DIR")
+	if servicesDir == "" {
+		t.Skip("SERVICES_DIR is not set")
+	}
+	services, err := os.ReadDir(servicesDir)
+	if err != nil {
+		t.Fatalf("failed to list services in %s: %v", servicesDir, err)
+	}
+	var allTestNames []string
+	allErrs := make(map[string]error)
+	serviceCount := 0
+	for _, service := range services {
+		if !service.IsDir() {
+			continue
+		}
+		serviceCount++
+		testNames, errs, err := readServiceTests(filepath.Join(servicesDir, service.Name()))
+		if err != nil {
+			t.Fatalf("failed to read tests for service %s: %v", service.Name(), err)
+		}
+		allTestNames = append(allTestNames, testNames...)
+		for name, err := range errs {
+			allErrs[name] = err
+		}
+	}
+	if len(allTestNames) == 0 {
+		t.Fatalf("found no acceptance tests in %s", servicesDir)
+	}
+	report := detector.DetectUnreadableTests(allTestNames, allErrs, detector.KnownUnreadableTests)
+	for name, err := range report.NewUnreadableTests {
+		t.Errorf("%s can't be read and isn't in detector.KnownUnreadableTests: %s", name, err)
+	}
+	for _, name := range report.StaleUnreadableTests {
+		t.Errorf("%s is in detector.KnownUnreadableTests but can now be read; remove it from the list", name)
+	}
+	t.Logf("read %d acceptance tests in %d services", len(allTestNames), serviceCount)
+}
