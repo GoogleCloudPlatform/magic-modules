@@ -1,0 +1,6 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if s, ok := v.(string); ok && s == "0001-01-01T00:00:00Z" {
+		return nil
+	}
+	return v
+}

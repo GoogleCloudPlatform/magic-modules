@@ -1,0 +1,44 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+  if v == nil {
+    return map[string]interface{}{}, nil
+  }
+  m := make(map[string]interface{})
+  for _, raw := range v.(*schema.Set).List() {
+    original := raw.(map[string]interface{})
+    transformed := make(map[string]interface{})
+      {{- range $prop := $.NestedProperties }}
+        {{- if not (or (eq $prop.Name $prop.KeyName) $prop.ClientSide) }}
+
+    transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
+    if err != nil {
+      return nil, err
+    } else if val := reflect.ValueOf(transformed{{$prop.TitlelizeProperty}}); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+      transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
+    }
+        {{- end }}
+      {{ end }}
+
+    // ConfigVariable uses a protobuf oneof across its value fields, and the API
+    // requires `{"boolValue": false}` rather than `{}` for false boolean variables.
+    // Because additional_config is a TypeSet, SDKv2 populates `original["bool_value"] = false`
+    // on every entry (including string/int/enum entries), so `send_empty_value: true`
+    // on boolValue would send `"boolValue": false` alongside other oneof fields and
+    // fail proto oneof unmarshaling. Only send `"boolValue": false` when no other
+    // oneof field populated `transformed`.
+    if len(transformed) == 0 {
+      if b, ok := original["bool_value"].(bool); ok && !b {
+        transformed["boolValue"] = false
+      }
+    }
+
+    transformed{{ camelize $.KeyName "upper" }}, err := {{ $.KeyExpander }}(original["{{ underscore $.KeyName }}"], d, config)
+    if err != nil {
+      return nil, err
+    }
+    m[transformed{{ camelize $.KeyName "upper" }}] = transformed
+  }
+  return m, nil
+}
+{{- range $prop := $.NestedProperties }}
+  {{- template "expandPropertyMethod" $prop -}}
+{{- end }}

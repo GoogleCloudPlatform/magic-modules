@@ -337,3 +337,154 @@ properties:
           description: |-
             The time zone for the schedule cron expression. If not provided, UTC will
             be used.
+        - name: serviceAccount
+          type: String
+          custom_flatten: 'templates/terraform/custom_flatten/apihub_plugin_instance_action_service_account.go.tmpl'
+          description: |-
+            The service account of the plugin hosting service. This service account
+            should have the required permissions to invoke the remote service if the
+            gateway_type is PLUGIN_GATEWAY.
+  - name: additionalConfig
+    type: Map
+    custom_expand: 'templates/terraform/custom_expand/apihub_plugin_instance_additional_config.go.tmpl'
+    description: |-
+      The additional information for this plugin instance corresponding to
+      the additional config template of the plugin. This information will be sent
+      to plugin hosting service on each call to plugin hosted service. The key
+      will be the config_variable_template.id from the plugin and the value will
+      be the additional configuration provided by the user for the plugin
+      instance.
+    key_name: key
+    value_type:
+      type: NestedObject
+      description: |-
+        ConfigVariable represents a additional configuration variable present in a
+        PluginInstanceConfig or AuthConfig, based on a ConfigVariableTemplate.
+      properties:
+        - name: stringValue
+          type: String
+          description: |-
+            The config variable value in case of config variable of type string.
+        - name: intValue
+          type: Integer
+          description: |-
+            The config variable value in case of config variable of type integer.
+        - name: boolValue
+          type: Boolean
+          description: |-
+            The config variable value in case of config variable of type boolean.
+        - name: secretValue
+          type: NestedObject
+          description: |-
+            Secret provides a reference to entries in Secret Manager.
+          properties:
+            - name: secretVersion
+              type: String
+              required: true
+              description: |-
+                The resource name of the secret version in the format,
+                format as: `projects/*/secrets/*/versions/*`.
+        - name: enumValue
+          type: NestedObject
+          description: |-
+            ConfigValueOption represents an option for a config variable of type enum
+            or multi select.
+          properties:
+            - name: id
+              type: String
+              required: true
+              description: |-
+                Id of the option.
+            - name: displayName
+              type: String
+              required: true
+              description: |-
+                Display name of the option.
+            - name: description
+              type: String
+              description: |-
+                Description of the option.
+        - name: multiSelectValues
+          type: NestedObject
+          description: |-
+            The config variable value in case of config variable of type multi select.
+          properties:
+            - name: values
+              type: Array
+              description: |-
+                The config variable value in case of config variable of type multi select.
+              item_type:
+                type: NestedObject
+                description: |-
+                  ConfigValueOption represents an option for a config variable of type enum
+                  or multi select.
+                properties:
+                  - name: id
+                    type: String
+                    required: true
+                    description: |-
+                      Id of the option.
+                  - name: displayName
+                    type: String
+                    required: true
+                    description: |-
+                      Display name of the option.
+                  - name: description
+                    type: String
+                    description: |-
+                      Description of the option.
+        - name: multiStringValues
+          type: NestedObject
+          description: |-
+            The config variable value in case of config variable of type multi string.
+          properties:
+            - name: values
+              type: Array
+              description: |-
+                The config variable value in case of config variable of type multi string.
+              item_type:
+                type: String
+        - name: multiIntValues
+          type: NestedObject
+          description: |-
+            The config variable value in case of config variable of type multi integer.
+          properties:
+            - name: values
+              type: Array
+              description: |-
+                The config variable value in case of config variable of type multi integer.
+              item_type:
+                type: Integer
+  - name: sourceEnvironmentsConfig
+    type: Map
+    description: |-
+      The source environment's config present in the gateway instance linked to
+      the plugin instance. The key is the `source_environment` name from the
+      SourceEnvironment message.
+    key_name: key
+    value_type:
+      type: NestedObject
+      description: |-
+        SourceEnvironment represents the source environment details for an API proxy.
+      properties:
+        - name: sourceEnvironment
+          type: String
+          required: true
+          description: |-
+            The name of the environment at the source (e.g., "prod", "staging", "dev").
+            This is the unique key within the source_environments_config map.
+        - name: sourceEnvironmentUri
+          type: String
+          description: |-
+            The location where the environment details are stored or can be accessed
+            at the source.
+        - name: createTime
+          type: String
+          custom_flatten: 'templates/terraform/custom_flatten/apihub_zero_timestamp.go.tmpl'
+          description: |-
+            The time at which the environment was created at the source.
+        - name: updateTime
+          type: String
+          custom_flatten: 'templates/terraform/custom_flatten/apihub_zero_timestamp.go.tmpl'
+          description: |-
+            The time at which the environment was last updated at the source.
