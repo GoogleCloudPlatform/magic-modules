@@ -18,7 +18,7 @@ description: |
   ground truth, and rubrics for evaluation in Vertex AI.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/evaluation/overview'
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.evaluationItems'
 base_url: projects/{{project}}/locations/{{region}}/evaluationItems
 self_link: projects/{{project}}/locations/{{region}}/evaluationItems/{{name}}
@@ -40,13 +40,13 @@ async:
   actions: ['delete']
 samples:
   - name: vertex_ai_evaluation_item
-    primary_resource_id: tf_test_evaluation_item
+    primary_resource_id: evaluation_item
     steps:
       - name: vertex_ai_evaluation_item
         resource_id_vars:
           display_name: 'eval-item'
   - name: vertex_ai_evaluation_item_gcs
-    primary_resource_id: tf_test_evaluation_item_gcs
+    primary_resource_id: evaluation_item_gcs
     steps:
       - name: vertex_ai_evaluation_item_gcs
         resource_id_vars:
@@ -54,7 +54,7 @@ samples:
           bucket_name: 'eval-item-bucket'
   - name: vertex_ai_evaluation_item_variants
     exclude_basic_doc: true
-    primary_resource_id: tf_test_evaluation_item_variants
+    primary_resource_id: evaluation_item_variants
     steps:
       - name: vertex_ai_evaluation_item_variants
         resource_id_vars:
