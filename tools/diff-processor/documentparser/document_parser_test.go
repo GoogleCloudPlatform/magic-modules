@@ -93,6 +93,37 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestParseDashesInText(t *testing.T) {
+	doc := []string{
+		"# google_resource",
+		"",
+		"## Argument Reference",
+		"",
+		"* `ssl` - (Optional) SSL settings. Structure is [documented below](#nested_ssl).",
+		"",
+		"- - -",
+		"",
+		"* `project` - (Optional) The project.",
+		"",
+		"<a name=\"nested_ssl\"></a>The `ssl` block supports:",
+		"",
+		"* `ca_certificate` - (Optional) The CA certificate, for example:",
+		"  -----BEGIN CERTIFICATE-----",
+		"  MIIBszCCAVmgAwIBAgIUJ1",
+		"  -----END CERTIFICATE-----",
+		"",
+		"* `ssl_certificate` - (Optional) The SSL certificate.",
+	}
+	parser := NewParser()
+	if err := parser.Parse([]byte(strings.Join(doc, "\n"))); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"project", "ssl", "ssl.ca_certificate", "ssl.ssl_certificate"}
+	if diff := cmp.Diff(want, parser.FlattenFields()); diff != "" {
+		t.Errorf("FlattenFields() returned diff (-want, +got):\n%s", diff)
+	}
+}
+
 func TestTraverse(t *testing.T) {
 	n1 := &node{name: "n1"}
 	n2 := &node{name: "n2"}
