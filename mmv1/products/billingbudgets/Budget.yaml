@@ -124,8 +124,6 @@ samples:
         resource_id_vars:
           display_name: Example Spend Cap Budget
           project_id: spend-cap
-        test_vars_overrides:
-          display_name: '"Example Spend Cap Budget" + randomSuffix'
         test_env_vars:
           billing_acct: BILLING_ACCT
           org_id: ORG_ID
@@ -604,15 +602,10 @@ properties:
           - CONFIGURED
           - AWAITING_NEXT_PERIOD
       - name: outputState
-        type: Enum
+        type: String
         description: |
-          The actual resting state of the spend cap.
+          The actual resting state of the spend cap. Possible values: `STATE_UNSPECIFIED`, `CONFIGURED`, `ENFORCED`, `AWAITING_NEXT_PERIOD`.
         output: true
-        enum_values:
-          - STATE_UNSPECIFIED
-          - CONFIGURED
-          - ENFORCED
-          - AWAITING_NEXT_PERIOD
       - name: reconciling
         type: Boolean
         description: |

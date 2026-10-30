@@ -816,7 +816,7 @@ resource "google_project" "project" {
 
 resource "google_billing_budget" "budget" {
   billing_account = data.google_billing_account.account.id
-  display_name    = "Example Spend Cap Budget%{random_suffix}"
+  display_name    = "tf-test-spend-cap%{random_suffix}"
 
   budget_filter {
     projects               = ["projects/${google_project.project.number}"]
@@ -873,7 +873,7 @@ resource "google_project" "project" {
 
 resource "google_billing_budget" "budget" {
   billing_account = data.google_billing_account.account.id
-  display_name    = "Example Spend Cap Budget%{random_suffix}"
+  display_name    = "tf-test-spend-cap%{random_suffix}"
 
   budget_filter {
     projects               = ["projects/${google_project.project.number}"]
