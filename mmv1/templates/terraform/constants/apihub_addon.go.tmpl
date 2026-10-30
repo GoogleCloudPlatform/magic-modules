@@ -1,0 +1,70 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func precheckAddonState(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
+	addonId, ok := d.GetOk("addon_id")
+	if !ok {
+		return fmt.Errorf("addon_id is required")
+	}
+	location, ok := d.GetOk("location")
+	if !ok {
+		return fmt.Errorf("location is required")
+	}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project: %s", err)
+	}
+	addonName := fmt.Sprintf("projects/%s/locations/%s/addons/%s", project, location, addonId.(string))
+
+	getUrl := transport_tpg.BaseUrl(Product, config) + addonName
+	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    getUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			return fmt.Errorf("addon %q does not exist; verify the addon_id using 'gcloud apihub addons list'", addonName)
+		}
+		return fmt.Errorf("error reading addon %q before managing config: %s", addonName, err)
+	}
+
+	if state, ok := getRes["state"].(string); ok && state != "ACTIVE" {
+		return fmt.Errorf("addon %q is in state %q; ManageAddonConfig requires ACTIVE", addonName, state)
+	}
+	return nil
+}
+{{- end }}
+
+func apihubAddonCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return apihubAddonCustomizeDiffFunc(diff)
+}
+
+func apihubAddonCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if state, ok := diff.GetOk("state"); ok && state.(string) != "ACTIVE" {
+		return fmt.Errorf("addon is in state %q; ManageAddonConfig requires ACTIVE", state.(string))
+	}
+	if v, ok := diff.GetOk("config.0.gateway_plugin_addon_config.0.gateway_plugin_configs"); ok {
+		configs := v.([]interface{})
+		for i, raw := range configs {
+			cfg, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			setCount := 0
+			if _, ok := cfg["apigee_x_hybrid_config"]; ok && len(cfg["apigee_x_hybrid_config"].([]interface{})) > 0 {
+				setCount++
+			}
+			if _, ok := cfg["apigee_edge_config"]; ok && len(cfg["apigee_edge_config"].([]interface{})) > 0 {
+				setCount++
+			}
+			if _, ok := cfg["apigee_opdk_config"]; ok && len(cfg["apigee_opdk_config"].([]interface{})) > 0 {
+				setCount++
+			}
+			if setCount != 1 {
+				return fmt.Errorf("config.0.gateway_plugin_addon_config.0.gateway_plugin_configs.%d: exactly one of apigee_x_hybrid_config, apigee_edge_config, or apigee_opdk_config must be set, but %d were set", i, setCount)
+			}
+		}
+	}
+	return nil
+}
