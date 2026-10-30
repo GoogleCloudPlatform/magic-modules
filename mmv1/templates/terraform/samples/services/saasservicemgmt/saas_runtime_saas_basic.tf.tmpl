@@ -1,5 +1,4 @@
 resource "google_saas_runtime_saas" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   saas_id  = "{{index $.ResourceIdVars "saas_name"}}"
   location = "global"
 

@@ -15,7 +15,6 @@
 name: RolloutKind
 description: A RolloutKind is a reusable configuration resource that defines the policies, strategies, and targeting for Rollout operations. It acts as a template for repeatable Rollouts, providing guardrails and ensuring that updates are executed in a consistent manner across a fleet of Units.
 base_url: projects/{{project}}/locations/{{location}}/rolloutKinds
-min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 create_url: projects/{{project}}/locations/{{location}}/rolloutKinds?rolloutKindId={{rollout_kind_id}}
 update_mask: true
@@ -29,10 +28,8 @@ samples:
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
         role: roles/saasservicemgmt.serviceAgent
-    min_version: beta
     steps:
       - name: saas_runtime_rollout_kind_basic
-        min_version: beta
         resource_id_vars:
           rolloutkind_name: example-rolloutkind
           saas_name: example-saas

@@ -1,7 +1,5 @@
 package saasruntime_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"testing"
 
@@ -9,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/saasruntime"
 )
 
 func TestAccSaasRuntimeTenant_update(t *testing.T) {
@@ -30,7 +28,7 @@ func TestAccSaasRuntimeTenant_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSaasRuntimeTenant_basic(context),
@@ -62,7 +60,6 @@ func TestAccSaasRuntimeTenant_update(t *testing.T) {
 func testAccSaasRuntimeTenant_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "global"
 
@@ -72,7 +69,6 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_tenant" "example" {
-  provider = google-beta
   location = "global"
   tenant_id = "tf-test-example-tenant%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
@@ -84,7 +80,6 @@ resource "google_saas_runtime_tenant" "example" {
 func testAccSaasRuntimeTenant_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example_saas" {
-  provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
   location = "global"
 
@@ -94,7 +89,6 @@ resource "google_saas_runtime_saas" "example_saas" {
 }
 
 resource "google_saas_runtime_tenant" "example" {
-  provider = google-beta
   location = "global"
   tenant_id = "tf-test-example-tenant%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
@@ -108,4 +102,3 @@ resource "google_saas_runtime_tenant" "example" {
 }
 `, context)
 }
-{{- end }}
