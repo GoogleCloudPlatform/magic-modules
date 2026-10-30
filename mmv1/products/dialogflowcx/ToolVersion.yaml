@@ -113,7 +113,7 @@ properties:
           High level description of the Tool and its usage.
         required: true
       - name: toolType
-        type: Enum
+        type: String
         description: |
           The tool type.
         output: true

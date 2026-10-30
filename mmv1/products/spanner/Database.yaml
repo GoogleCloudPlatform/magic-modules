@@ -147,12 +147,9 @@ properties:
     item_type:
       type: String
   - name: 'state'
-    type: Enum
+    type: String
     description: An explanation of the status of the database.
     output: true
-    enum_values:
-      - 'READY'
-      - 'CREATING'
   - name: 'encryptionConfig'
     type: NestedObject
     description: |

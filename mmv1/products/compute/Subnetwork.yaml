@@ -619,7 +619,7 @@ properties:
     fingerprint_name: fingerprint
     is_missing_in_cai: true
   - name: ipv6GceEndpoint
-    type: Enum
+    type: String
     description: |
       Possible endpoints of this subnetwork. It can be one of the following:
         * VM_ONLY: The subnetwork can be used for creating instances and IPv6 addresses with VM endpoint type. Such a subnetwork
@@ -627,9 +627,6 @@ properties:
         * VM_AND_FR: The subnetwork can be used for creating both VM instances and Forwarding Rules. It can also be used to reserve
         IPv6 addresses with both VM and FR endpoint types. Such a subnetwork gets its IPv6 range from Google IP Pool directly.
     output: true
-    enum_values:
-      - VM_AND_FR
-      - VM_ONLY
   - name: allowSubnetCidrRoutesOverlap
     type: Boolean
     description: |
@@ -644,7 +641,7 @@ properties:
     default_from_api: true
     is_missing_in_cai: true
   - name: state
-    type: Enum
+    type: String
     description: |
       'The state of the subnetwork, which can be one of the following values:
        READY: Subnetwork is created and ready to use DRAINING: only applicable to subnetworks that have the purpose

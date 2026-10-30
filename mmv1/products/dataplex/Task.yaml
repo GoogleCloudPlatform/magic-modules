@@ -123,16 +123,10 @@ properties:
     description: |
       User friendly display name.
   - name: state
-    type: Enum
+    type: String
     description: |
       Current state of the task.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - CREATING
-      - DELETING
-      - ACTION_REQUIRED
   - name: labels
     type: KeyValueLabels
     description: |
@@ -233,31 +227,20 @@ properties:
               The time when the job ended.
             output: true
           - name: state
-            type: Enum
+            type: String
             description: |
               Execution state for the job.
             output: true
-            enum_values:
-              - STATE_UNSPECIFIED
-              - RUNNING
-              - CANCELLING
-              - CANCELLED
-              - SUCCEEDED
-              - FAILED
-              - ABORTED
           - name: retryCount
             type: Integer
             description: |
               The number of times the job has been retried (excluding the initial attempt).
             output: true
           - name: service
-            type: Enum
+            type: String
             description: |
               The underlying service running a job.
             output: true
-            enum_values:
-              - SERVICE_UNSPECIFIED
-              - DATAPROC
           - name: serviceJob
             type: String
             description: |

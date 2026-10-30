@@ -134,13 +134,9 @@ properties:
       that can be used for partition elimination to be specified.
     output: true
   - name: 'type'
-    type: Enum
+    type: String
     description: 'Describes the table type'
     output: true
-    enum_values:
-      - 'TABLE'
-      - 'VIEW'
-      - 'EXTERNAL'
   - name: 'view'
     type: NestedObject
     description: The view definition.

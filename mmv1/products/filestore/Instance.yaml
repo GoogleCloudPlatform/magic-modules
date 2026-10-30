@@ -437,7 +437,7 @@ properties:
       Output only fields for replication configuration.
     properties:
       - name: role
-        type: Enum
+        type: String
         description: |
           The replication role.
         output: true
@@ -454,7 +454,7 @@ properties:
                 The peer instance.
               output: true
             - name: state
-              type: Enum
+              type: String
               description: |
                 Output only. The replica state
               output: true
@@ -464,7 +464,7 @@ properties:
                 Output only. Additional information about the replication state, if available.
               output: true
               item_type:
-                type: Enum
+                type: String
             - name: lastActiveSyncTime
               type: String
               description: |

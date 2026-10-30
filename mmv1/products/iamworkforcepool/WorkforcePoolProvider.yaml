@@ -239,7 +239,7 @@ properties:
     type: String
     description: A user-specified description of the provider. Cannot exceed 256 characters.
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the provider.
       * STATE_UNSPECIFIED: State unspecified.
@@ -248,10 +248,6 @@ properties:
         deleted after approximately 30 days. You can restore a soft-deleted provider using
         [providers.undelete](https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers/undelete#google.iam.admin.v1.WorkforcePools.UndeleteWorkforcePoolProvider).
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: disabled
     type: Boolean
     description: |

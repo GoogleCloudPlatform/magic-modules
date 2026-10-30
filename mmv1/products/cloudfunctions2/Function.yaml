@@ -379,28 +379,17 @@ properties:
     type: String
     description: User-provided description of a function.
   - name: environment
-    type: Enum
+    type: String
     description: The environment the function is hosted on.
     output: true
-    enum_values:
-      - ENVIRONMENT_UNSPECIFIED
-      - GEN_1
-      - GEN_2
   - name: url
     type: String
     description: Output only. The deployed url for the function.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: Describes the current state of the function.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - FAILED
-      - DEPLOYING
-      - DELETING
-      - UNKNOWN
   - name: buildConfig
     type: NestedObject
     description: |

@@ -1007,7 +1007,7 @@ properties:
                           description: |-
                             If true, mount the NFS volume as read only in all mounts. Defaults to false.
               - name: 'servingState'
-                type: Enum
+                type: String
                 description: |-
                   ServingState holds a value describing the state the resources
                   are in for this Revision.
@@ -1015,10 +1015,6 @@ properties:
                   that the system will manipulate this based on routability and load.
                 output: true
                 deprecation_message: '`serving_state` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
-                enum_values:
-                  - 'ACTIVE'
-                  - 'RESERVE'
-                  - 'RETIRED'
   - name: 'status'
     type: NestedObject
     description: The current status of the Service.

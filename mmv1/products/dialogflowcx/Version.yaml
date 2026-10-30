@@ -128,14 +128,10 @@ properties:
     description: 'A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".'
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The state of this version.
       * RUNNING: Version is not ready to serve (e.g. training is running).
       * SUCCEEDED: Training has succeeded and this version is ready to serve.
       * FAILED: Version training failed.
     output: true
-    enum_values:
-      - RUNNING
-      - SUCCEEDED
-      - FAILED

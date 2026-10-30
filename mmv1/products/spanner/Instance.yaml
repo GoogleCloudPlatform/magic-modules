@@ -157,13 +157,10 @@ properties:
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - name: state
-    type: Enum
+    type: String
     description: |
       Instance status: `CREATING` or `READY`.
     output: true
-    enum_values:
-      - READY
-      - CREATING
   - name: autoscalingConfig
     type: NestedObject
     description: |

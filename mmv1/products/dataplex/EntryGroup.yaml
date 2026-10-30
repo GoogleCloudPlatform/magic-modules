@@ -112,12 +112,8 @@ properties:
     description: |
       User-defined labels for the EntryGroup.
   - name: transferStatus
-    type: Enum
+    type: String
     description: |
       Denotes the transfer status of the Entry Group. It is unspecified
       for Entry Group created from Dataplex API.
     output: true
-    enum_values:
-      - TRANSFER_STATUS_UNSPECIFIED
-      - TRANSFER_STATUS_MIGRATED
-      - TRANSFER_STATUS_TRANSFERRED

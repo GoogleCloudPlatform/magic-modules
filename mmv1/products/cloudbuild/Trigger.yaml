@@ -1319,18 +1319,10 @@ properties:
           The Developer Connect Git repository link, formatted as `projects/*/locations/*/connections/*/gitRepositoryLink/*`.
         required: true
       - name: 'gitRepositoryLinkType'
-        type: Enum
+        type: String
         description: |
           The type of DeveloperConnect GitRepositoryLink.
         output: true
-        enum_values:
-          - 'GIT_REPOSITORY_LINK_TYPE_UNSPECIFIED'
-          - 'GITHUB'
-          - 'GITHUB_ENTERPRISE'
-          - 'GITLAB'
-          - 'GITLAB_ENTERPRISE'
-          - 'BITBUCKET_DATA_CENTER'
-          - 'BITBUCKET_CLOUD'
       - name: 'pullRequest'
         type: NestedObject
         description: |

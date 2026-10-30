@@ -182,15 +182,10 @@ properties:
         output: true
         properties:
           - name: 'supportedSla'
-            type: Enum
+            type: String
             description: |
               Which level of reliability this group is configured to
               support.
-            enum_values:
-              - 'PRODUCTION_CRITICAL'
-              - 'PRODUCTION_NON_CRITICAL'
-              - 'NO_SLA'
-              - 'UNSPECIFIED'
             output: true
           - name: 'intendedCapabilityBlockers'
             type: Array
@@ -203,18 +198,11 @@ properties:
               type: NestedObject
               properties:
                 - name: 'blockerType'
-                  type: Enum
+                  type: String
                   description: |
                     The category of an unmet SLA requirement. The Intended
                     SLA Blockers section below explains this field and how it relates to
                     other fields in intendedCapabilityBlockers.
-                  enum_values:
-                    - 'UNSPECIFIED'
-                    - 'NO_INTERCONNECTS'
-                    - 'INCOMPATIBLE_METROS'
-                    - 'NO_INTERCONNECTS_IN_METRO_AND_ZONE'
-                    - 'NOT_AVAILABLE'
-                    - 'OTHER'
                   output: true
                 - name: 'explanation'
                   type: String

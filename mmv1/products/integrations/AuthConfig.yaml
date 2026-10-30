@@ -167,21 +167,10 @@ properties:
       Certificate id for client certificate.
     output: true
   - name: credentialType
-    type: Enum
+    type: String
     description: |
       Credential type of the encrypted credential.
     output: true
-    enum_values:
-      - USERNAME_AND_PASSWORD
-      - OAUTH2_AUTHORIZATION_CODE
-      - OAUTH2_IMPLICIT
-      - OAUTH2_CLIENT_CREDENTIALS
-      - OAUTH2_RESORUCE_OWNER_CREDENTIALS
-      - JWT
-      - AUTH_TOKEN
-      - SERVICE_ACCOUNT
-      - CLIENT_CERTIFICATE_ONLY
-      - OIDC_TOKEN
   - name: creatorEmail
     type: String
     description: |
@@ -214,17 +203,10 @@ properties:
       - PRIVATE
       - CLIENT_VISIBLE
   - name: state
-    type: Enum
+    type: String
     description: |
       The status of the auth config.
     output: true
-    enum_values:
-      - VALID
-      - INVALID
-      - SOFT_DELETED
-      - EXPIRED
-      - UNAUTHORIZED
-      - UNSUPPORTED
   - name: reason
     type: String
     description: |

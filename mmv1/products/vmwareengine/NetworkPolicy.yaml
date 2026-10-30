@@ -141,14 +141,10 @@ properties:
           True if the service is enabled; false otherwise.
         send_empty_value: true
       - name: state
-        type: Enum
+        type: String
         description: |
           State of the service. New values may be added to this enum when appropriate.
         output: true
-        enum_values:
-          - UNPROVISIONED
-          - RECONCILING
-          - ACTIVE
   - name: externalIp
     type: NestedObject
     description: |
@@ -162,11 +158,7 @@ properties:
           True if the service is enabled; false otherwise.
         send_empty_value: true
       - name: state
-        type: Enum
+        type: String
         description: |
           State of the service. New values may be added to this enum when appropriate.
         output: true
-        enum_values:
-          - UNPROVISIONED
-          - RECONCILING
-          - ACTIVE

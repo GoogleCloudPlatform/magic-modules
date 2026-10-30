@@ -328,15 +328,9 @@ properties:
     output: true
     properties:
       - name: stage
-        type: Enum
+        type: String
         description: Output only. Current step of the installation process.
         output: true
-        enum_values:
-          - STAGE_UNSPECIFIED
-          - PENDING_CREATE_APP
-          - PENDING_USER_OAUTH
-          - PENDING_INSTALL_APP
-          - COMPLETE
       - name: message
         type: String
         description: Output only. Message of what the user should do next to continue the installation. Empty string if the installation is already complete.

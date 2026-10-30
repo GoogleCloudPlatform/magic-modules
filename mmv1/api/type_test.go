@@ -1080,3 +1080,93 @@ func TestTypeValidateSiblingConstraints(t *testing.T) {
 		})
 	}
 }
+
+func TestTypeValidateOutputOnlyEnum(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	cases := []struct {
+		description string
+		prop        *Type
+		wantError   string
+	}{
+		{
+			description: "output-only Enum returns error",
+			prop: &Type{
+				Name:       "state",
+				Type:       "Enum",
+				Output:     true,
+				EnumValues: []string{"ACTIVE", "INACTIVE"},
+			},
+			wantError: "property state cannot be an output-only Enum in resource TestResource; use String instead",
+		},
+		{
+			description: "output-only Array of Enum returns error",
+			prop: &Type{
+				Name:   "states",
+				Type:   "Array",
+				Output: true,
+				ItemType: &Type{
+					Type:       "Enum",
+					EnumValues: []string{"ACTIVE", "INACTIVE"},
+				},
+			},
+			wantError: "property states cannot be an output-only Enum in resource TestResource; use String instead",
+		},
+		{
+			description: "input Enum succeeds",
+			prop: &Type{
+				Name:       "mode",
+				Type:       "Enum",
+				EnumValues: []string{"FAST", "SLOW"},
+			},
+			wantError: "",
+		},
+		{
+			description: "output String succeeds",
+			prop: &Type{
+				Name:   "state",
+				Type:   "String",
+				Output: true,
+			},
+			wantError: "",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{
+				Name:       "TestResource",
+				Properties: []*Type{tc.prop},
+			}
+			res.SetDefault(p)
+
+			errs := tc.prop.Validate(res.Name)
+			if tc.wantError == "" {
+				if len(errs) > 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+}
+

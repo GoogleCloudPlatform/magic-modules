@@ -99,17 +99,10 @@ properties:
       - IPV4_IPV6
       - IPV4_ONLY
   - name: state
-    type: Enum
+    type: String
     description: |
       [Output Only] State of the underlying connectivity.
     output: true
-    enum_values:
-      - CREATING
-      - PENDING_CONFIG
-      - PENDING_KEY
-      - ACTIVE
-      - DELETING
-      - DEPROVISIONED
   - name: mtuLimit
     type: Integer
     description: |

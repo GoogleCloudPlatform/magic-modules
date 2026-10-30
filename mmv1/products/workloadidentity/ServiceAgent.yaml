@@ -92,8 +92,5 @@ properties:
           type: String
           output: true
         - name: state
-          type: Enum
+          type: String
           output: true
-          enum_values:
-            - ACTIVE
-            - FAILED

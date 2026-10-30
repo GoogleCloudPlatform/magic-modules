@@ -1133,12 +1133,9 @@ properties:
           item_type:
             type: String
         - name: extraInfo
-          type: Enum
+          type: String
           description: Additional information about the error.
           output: true
-          enum_values:
-            - IMAGE_SCAN_UNAVAILABLE_IN_REGION
-            - FILE_STORE_CLUSTER_UNSUPPORTED
   - name: createTime
     type: String
     description: Output only. The creation timestamp of a ContentPolicy.
