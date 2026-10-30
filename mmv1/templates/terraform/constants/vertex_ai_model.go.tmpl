@@ -1,0 +1,110 @@
+func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// If the resource has no id then it hasn't been created yet
+	// Check to see if any fields are set in the config at create time that shouldn't be there
+	if diff.Id() == "" {
+		fieldNames := []string{
+			"description",
+			"display_name",
+		}
+		found := []string{}
+		for _, field := range fieldNames {
+			if _, ok := diff.GetOk(field); ok {
+				found = append(found, field)
+			}
+		}
+		if len(found) > 0 {
+			return fmt.Errorf("these fields cannot be set at create time: %s", strings.Join(found, ","))
+		}
+	}
+	// Either we are not creating a resource, or no disallowed fields are present
+	return nil
+}
+
+{{ if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
+func vertexAiModelMergeVersionAliases(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
+	baseURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
+	if err != nil {
+		return err
+	}
+	// Before the first read after create, version_id is unset and the GET resolves the copied model's default version.
+	readURL := baseURL
+	if versionID, ok := d.GetOk("version_id"); ok {
+		readURL += "@" + versionID.(string)
+	}
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	if billingProject, err := tpgresource.GetBillingProject(d, config); err == nil {
+		project = billingProject
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "GET",
+		Project: project,
+		RawURL: readURL,
+		UserAgent: userAgent,
+		Timeout: timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading Model %q before merging version aliases: %w", d.Id(), err)
+	}
+	versionID, ok := res["versionId"].(string)
+	if !ok || versionID == "" {
+		return fmt.Errorf("Model %q response did not include a version ID", d.Id())
+	}
+	var currentAliases []interface{}
+	if value, present := res["versionAliases"]; present {
+		currentAliases, ok = value.([]interface{})
+		if !ok {
+			return fmt.Errorf("Model %q response included invalid version aliases", d.Id())
+		}
+	}
+	aliases := vertexAiModelVersionAliasChanges(schema.NewSet(schema.HashString, currentAliases), d.Get("version_aliases").(*schema.Set))
+	if len(aliases) == 0 {
+		return nil
+	}
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: project,
+		RawURL: baseURL + "@" + versionID + ":mergeVersionAliases",
+		UserAgent: userAgent,
+		Body: map[string]interface{}{"versionAliases": aliases},
+		Timeout: timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error merging version aliases for Model %q version %q: %w", d.Id(), versionID, err)
+	}
+	return nil
+}
+
+func vertexAiModelVersionAliasChanges(current, desired *schema.Set) []interface{} {
+	aliases := desired.Difference(current).List()
+	for _, alias := range current.Difference(desired).List() {
+		// Every model must retain a default version; omission must not delete its reserved alias.
+		if alias != "default" {
+			aliases = append(aliases, "-"+alias.(string))
+		}
+	}
+	return aliases
+}
+
+// vertexAiModelFilterVersionAliases hides the API-managed default alias unless it is configured.
+func vertexAiModelFilterVersionAliases(aliases []interface{}, keepDefault bool) []interface{} {
+	if keepDefault {
+		return aliases
+	}
+	filtered := make([]interface{}, 0, len(aliases))
+	for _, alias := range aliases {
+		if alias != "default" {
+			filtered = append(filtered, alias)
+		}
+	}
+	return filtered
+}
+{{- end }}
