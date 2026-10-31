@@ -93,6 +93,78 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestParseFieldBullets(t *testing.T) {
+	cases := []struct {
+		name string
+		doc  []string
+		want []string
+	}{
+		{
+			name: "backticked name after bold text in a description",
+			doc: []string{
+				"# google_resource",
+				"",
+				"## Argument Reference",
+				"",
+				"* `disk_encryption_key` -",
+				"  (Optional) Encrypts the disk.",
+				"  ~>**NOTE** `kms_key_self_link` can be changed in place.",
+				"  Structure is [documented below](#nested_disk_encryption_key).",
+				"",
+				"<a name=\"nested_disk_encryption_key\"></a>The `disk_encryption_key` block supports:",
+				"",
+				"* `raw_key` - (Optional) A key.",
+			},
+			want: []string{"disk_encryption_key", "disk_encryption_key.raw_key"},
+		},
+		{
+			name: "indented bullets before the nested link",
+			doc: []string{
+				"# google_resource",
+				"",
+				"## Argument Reference",
+				"",
+				"* `source_snapshot` - (Optional) For example:",
+				"  * `global/snapshots/snapshot`",
+				"  * `snapshot`",
+				"  Structure is [documented below](#nested_source_snapshot).",
+				"",
+				"<a name=\"nested_source_snapshot\"></a>The `source_snapshot` block supports:",
+				"",
+				"* `key` - (Optional) A key.",
+			},
+			want: []string{"source_snapshot", "source_snapshot.key"},
+		},
+		{
+			name: "only indented bullets",
+			doc: []string{
+				"# google_resource",
+				"",
+				"## Attributes Reference",
+				"",
+				" In addition to the arguments listed above, the following computed attributes are",
+				"exported:",
+				"",
+				" * `deleted` - The current deleted state of the role.",
+				"",
+				" * `name` - The name of the role.",
+			},
+			want: []string{"deleted", "name"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			parser := NewParser()
+			if err := parser.Parse([]byte(strings.Join(tc.doc, "\n"))); err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(tc.want, parser.FlattenFields()); diff != "" {
+				t.Errorf("FlattenFields() returned diff (-want, +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestTraverse(t *testing.T) {
 	n1 := &node{name: "n1"}
 	n2 := &node{name: "n2"}
