@@ -1939,7 +1939,7 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 func (r Resource) IamResourceProperties() []*Type {
 	urlProperties := make([]*Type, 0)
 	for _, param := range r.IamResourceParams() {
-		if param == "project" || param == "organization" {
+		if param == "project" {
 			continue
 		}
 
