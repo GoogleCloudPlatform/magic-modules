@@ -18,22 +18,29 @@ if d.HasChange("pubsub_topic.0.data_affinity_regions"){
 	}
 }
 
-if d.HasChange("bigquery_dataset.0.replica_locations"){
-    // Split URL into base and query parts
+var bigqueryDatasetMasks []string
+if d.HasChange("bigquery_dataset.0.replica_locations") {
+	bigqueryDatasetMasks = append(bigqueryDatasetMasks, "bigqueryDataset.replicaLocations")
+}
+if d.HasChange("bigquery_dataset.0.restricted_export_policy") {
+	bigqueryDatasetMasks = append(bigqueryDatasetMasks, "bigqueryDataset.restrictedExportPolicy")
+}
+if len(bigqueryDatasetMasks) > 0 {
+	// Split URL into base and query parts
 	parts := strings.SplitN(url, "?", 2)
 	if len(parts) == 2 {
-	base := parts[0]
-	query := parts[1]
+		base := parts[0]
+		query := parts[1]
 
-	query = strings.ReplaceAll(query, "%2C", ",")
-	query = strings.ReplaceAll(query, "%2c", ",")
+		query = strings.ReplaceAll(query, "%2C", ",")
+		query = strings.ReplaceAll(query, "%2c", ",")
 
-	// Replace "bigqueryDataset" with "bigqueryDataset.replicaLocations"
-	query = strings.ReplaceAll(query, "bigqueryDataset", "bigqueryDataset.replicaLocations")
+		// Replace "bigqueryDataset" with changed subfields
+		query = strings.ReplaceAll(query, "bigqueryDataset", strings.Join(bigqueryDatasetMasks, ","))
 
-	// Re-encode commas back
-	query = strings.ReplaceAll(query, ",", "%2C")
+		// Re-encode commas back
+		query = strings.ReplaceAll(query, ",", "%2C")
 
-	url = base + "?" + query
+		url = base + "?" + query
 	}
 }
