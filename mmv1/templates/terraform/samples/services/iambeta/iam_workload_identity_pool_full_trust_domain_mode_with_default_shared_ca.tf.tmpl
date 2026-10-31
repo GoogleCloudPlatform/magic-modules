@@ -32,4 +32,5 @@ resource "google_iam_workload_identity_pool" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+  enable_mesh_ca_compatibility = true
 }
