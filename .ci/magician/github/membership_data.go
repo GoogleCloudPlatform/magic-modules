@@ -144,12 +144,8 @@ var (
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 4, 8),
-					endDate:   newDate(2026, 4, 15),
-				},
-				{
-					startDate: newDate(2026, 06, 01),
-					endDate:   newDate(2026, 06, 12),
+					startDate: newDate(2026, 11, 02),
+					endDate:   newDate(2026, 11, 06),
 				},
 			},
 		},
