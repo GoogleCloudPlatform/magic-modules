@@ -34,6 +34,11 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 			},
 			{
 				Config: testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_search_engine.basic", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_discovery_engine_search_engine.basic",
@@ -53,7 +58,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name", "data_store_ids"},
 			},
 			{
 				Config: testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_clearModelConfigs(context),
@@ -67,7 +72,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name", "data_store_ids"},
 			},
 		},
 	})
@@ -100,6 +105,7 @@ resource "google_discovery_engine_search_engine" "basic" {
   display_name = "Example Display Name"
   data_store_ids = [google_discovery_engine_data_store.basic.data_store_id, google_discovery_engine_data_store.second.data_store_id]
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
+  disable_analytics = true
   common_config {
     company_name = "Example Company Name"
   }
@@ -158,7 +164,7 @@ resource "google_discovery_engine_search_engine" "basic" {
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
   disable_analytics = true
   common_config {
-    company_name = "Updated Example Company Name"
+    company_name = "Example Company Name"
   }
   app_type = "APP_TYPE_INTRANET"
   search_engine_config {
@@ -219,11 +225,11 @@ resource "google_discovery_engine_search_engine" "basic" {
   collection_id = "default_collection"
   location = google_discovery_engine_data_store.basic.location
   display_name = "Updated Example Display Name"
-  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
+  data_store_ids = [google_discovery_engine_data_store.second.data_store_id, google_discovery_engine_data_store.basic.data_store_id]
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
   disable_analytics = true
   common_config {
-    company_name = "Updated Example Company Name"
+    company_name = "Example Company Name"
   }
   app_type = "APP_TYPE_INTRANET"
   search_engine_config {
@@ -283,11 +289,11 @@ resource "google_discovery_engine_search_engine" "basic" {
   collection_id = "default_collection"
   location = google_discovery_engine_data_store.basic.location
   display_name = "Updated Example Display Name"
-  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
+  data_store_ids = [google_discovery_engine_data_store.second.data_store_id, google_discovery_engine_data_store.basic.data_store_id]
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
   disable_analytics = true
   common_config {
-    company_name = "Updated Example Company Name"
+    company_name = "Example Company Name"
   }
   app_type = "APP_TYPE_INTRANET"
   search_engine_config {

@@ -1,10 +1,12 @@
 package discoveryengine_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
-	"testing"
 )
 
 func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(t *testing.T) {
@@ -29,6 +31,11 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(t *testin
 			},
 			{
 				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_chat_engine.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_discovery_engine_chat_engine.primary",

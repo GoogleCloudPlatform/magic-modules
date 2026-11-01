@@ -201,6 +201,7 @@ properties:
     type: Boolean
     description: |
       Whether to disable analytics for searches performed on this engine.
+    immutable: true
   - name: features
     type: KeyValuePairs
     default_from_api: true

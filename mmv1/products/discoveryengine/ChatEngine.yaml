@@ -61,6 +61,8 @@ samples:
           engine_id: chat-engine-id
           data_store_id: data-store
           data_store_2_id: data-store-2
+        ignore_read_extra:
+          - data_store_ids
   - name: discoveryengine_chat_engine_existing_dialogflow_agent
     primary_resource_id: primary
     steps:

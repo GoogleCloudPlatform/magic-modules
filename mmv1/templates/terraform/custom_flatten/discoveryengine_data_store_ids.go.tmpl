@@ -1,4 +1,8 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
 	rawConfigValue := d.Get("data_store_ids")
 
 	// Convert config value to []string
