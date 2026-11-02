@@ -35,4 +35,8 @@ resource "google_compute_image" "example" {
   guest_os_features {
     type = "SEV_LIVE_MIGRATABLE_V2"
   }
+
+  guest_os_features {
+    type = "SUSPEND_SAFE_FPR"
+  }
 }
