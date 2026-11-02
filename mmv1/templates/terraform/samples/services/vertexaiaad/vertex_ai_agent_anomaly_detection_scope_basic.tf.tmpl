@@ -1,3 +1,8 @@
+data "google_logging_project_cmek_settings" "cmek_settings" {
+  provider = google-beta
+  project  = data.google_project.project.project_id
+}
+
 resource "google_logging_project_bucket_config" "{{index $.ResourceIdVars "log_bucket_id"}}" {
   provider         = google-beta
   project          = data.google_project.project.project_id
@@ -5,6 +10,12 @@ resource "google_logging_project_bucket_config" "{{index $.ResourceIdVars "log_b
   retention_days   = 30
   bucket_id        = "{{index $.ResourceIdVars "log_bucket_id"}}"
   enable_analytics = true
+  cmek_settings {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
+  depends_on = [
+    data.google_logging_project_cmek_settings.cmek_settings,
+  ]
 }
 
 resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId}}" {

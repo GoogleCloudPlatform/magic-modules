@@ -46,33 +46,28 @@ async:
   check_response_func_absence: 'PollCheckForScopeDeleted'
   suppress_error: false
   target_occurrences: 1
-# Exercise all configurable fields in a single sample because only one scope may
-# exist per location ("us") per project, and generated samples run in parallel.
 samples:
   - name: 'vertex_ai_agent_anomaly_detection_scope_basic'
     primary_resource_id: 'scope'
     min_version: 'beta'
-    # Pre-grant project-level IAM to the Vertex AI service agent before
-    # Terraform runs to avoid IAM propagation races and teardown conflicts across
-    # parallel CI tests.
     bootstrap_iam:
-      # Required to create Cloud Logging / Observability links on attached buckets.
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
         role: "roles/logging.configWriter"
-      # Required for CMEK key validation at create time and BigQuery KMS grant delegation.
+      # Required by Vertex AI to validate the scope CMEK key and delegate BigQuery KMS access.
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+      # Required by Cloud Logging to encrypt the "us" log bucket with the co-located CMEK key.
+      - member: "serviceAccount:service-{project_number}@gcp-sa-logging.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     steps:
       - name: 'vertex_ai_agent_anomaly_detection_scope_basic'
         resource_id_vars:
           scope_id: 'agent-anomaly-detection-scope'
           log_bucket_id: 'aad-log-bucket'
-          # Rendered verbatim in public registry docs to show the expected
-          # multi-region ("us") KMS key format; overridden in acceptance tests below.
+          # Rendered verbatim in public registry docs; overridden in acceptance tests below.
           kms_key_name: 'projects/keys-project/locations/us/keyRings/key-ring/cryptoKeys/crypto-key'
         test_vars_overrides:
-          # Cloud KMS key rings cannot be deleted, so reuse the shared "us"
-          # multi-region key in the test project instead of creating one per run.
+          # Reuse the shared "us" multi-region key (Cloud KMS key rings cannot be deleted).
           kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
 parameters:
   - name: 'region'
