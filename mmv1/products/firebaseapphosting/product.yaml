@@ -21,4 +21,3 @@ versions:
     name: beta
   - base_url: https://firebaseapphosting.googleapis.com/v1/
     name: ga
-legacy_identity_import_test: true
