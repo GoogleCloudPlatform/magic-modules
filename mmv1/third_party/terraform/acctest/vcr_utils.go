@@ -423,6 +423,9 @@ func NewVcrMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Req
 		if stripStandardQueryParams(r.URL.String()) != stripStandardQueryParams(i.URL) {
 			return false
 		}
+		if r.Header.Get("X-Goog-Api-Version") != i.Headers.Get("X-Goog-Api-Version") {
+			return false
+		}
 		if r.Body == nil {
 			return true
 		}
