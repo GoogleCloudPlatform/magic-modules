@@ -828,6 +828,8 @@ service/sqladmin-infra:
 service/sqladmin-security:
   resources:
   - google_sql_ca_certs
+  - google_sql_customer_managed_certificate
+  - google_sql_customer_managed_certificates
   - google_sql_ssl_cert
 service/storage:
   team: gcs-terraform-eng

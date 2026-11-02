@@ -1,0 +1,25 @@
+resource: 'google_sql_customer_managed_certificate'
+generation_type: 'handwritten'
+api_service_name: 'sqladmin.googleapis.com'
+api_version: 'v1beta4'
+api_resource_type_kind: 'CustomerManagedCertificateConfig'
+fields:
+  - api_field: 'bundle'
+  - field: 'instance'
+    provider_only: true
+  - api_field: 'intent'
+  - api_field: 'primaryDnsRecord.dns'
+    field: 'primary_dns'
+  - api_field: 'primaryDnsRecord.ipv4Address'
+    field: 'primary_ipv4_address'
+  - field: 'server_ca_cert'
+  - field: 'client_cert'
+  - field: 'client_key'
+  - field: 'file_paths'
+  - field: 'server_ca_cert_file_path'
+  - field: 'client_cert_file_path'
+  - field: 'client_key_file_path'
+  - field: 'deletion_policy'
+    provider_only: true
+  - field: 'project'
+    provider_only: true
