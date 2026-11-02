@@ -222,10 +222,8 @@ func resourceGoogleProjectDefaultServiceAccountsDelete(d *schema.ResourceData, m
 
 var defaultSAEmail = regexp.MustCompile(`^([0-9]+-compute@developer|[^@]+@appspot)\.gserviceaccount\.com$`)
 
-// isDefaultServiceAccount reports whether email is the Compute Engine default
-// service account (<project_number>-compute@developer.gserviceaccount.com) or
-// an App Engine default service account (<project_id>@appspot.gserviceaccount.com).
-// The App Engine address is matched by domain because the project ID can be domain-scoped.
+// Default SAs are matched by e-mail: display names changed over time, and the
+// App Engine address is matched by domain because project IDs can be domain-scoped.
 func isDefaultServiceAccount(email string) bool {
 	return defaultSAEmail.MatchString(strings.ToLower(email))
 }
