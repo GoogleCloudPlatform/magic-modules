@@ -49,7 +49,10 @@ samples:
   - name: oracledatabase_exadb_vm_cluster_basic
     primary_resource_id: my_exadb_vm_cluster
     steps:
+      # Step 1 -> create test
       - name: oracledatabase_exadb_vm_cluster_basic
+        vars:
+          label_value: value-one
         resource_id_vars:
           project: my-project
           exadb_vm_cluster_id: my-instance
@@ -67,8 +70,30 @@ samples:
           # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
           # As a result these resources are not sweepable
           # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-          exadb_vm_cluster_id: fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", acctest.RandString(t, 10))
-          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))
+          exadb_vm_cluster_id: fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", randomSuffix)
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+      # Step 2 -> update test (in-place update of labels)
+      - name: oracledatabase_exadb_vm_cluster_basic
+        vars:
+          label_value: value-two
+        resource_id_vars:
+          project: my-project
+          exadb_vm_cluster_id: my-instance
+          exascale_db_storage_vault_id: my-storage-vault
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          exadb_vm_cluster_id: fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-basic-%s", randomSuffix)
+          exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", randomSuffix)
           odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
           odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
           backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'

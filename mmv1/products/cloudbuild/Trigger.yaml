@@ -29,6 +29,9 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
+# ListBuildTriggersResponse returns the list under "triggers"; without this the
+# sweeper would look for the derived default "buildTriggers" and find nothing.
+collection_url_key: 'triggers'
 update_verb: 'PATCH'
 # import by default only works with old-style self links ending in a name
 import_format:
@@ -49,6 +52,10 @@ custom_diff:
 schema_version: 2
 state_upgraders: true
 sweeper:
+  # The delete URL ends in {{trigger_id}}, so the sweeper would otherwise match
+  # on the output-only "id" (a server-generated UUID) rather than "name", which
+  # is where the tf-test prefix lives.
+  identifier_field: name
   url_substitutions:
     - region: "us-central1"
     - region: "global"
@@ -322,9 +329,6 @@ properties:
         type: NestedObject
         description: |
           Contains filter properties for matching Pull Requests.
-        exactly_one_of:
-          - 'pull_request'
-          - 'push'
         properties:
           - name: 'branch'
             type: String
@@ -333,8 +337,6 @@ properties:
 
               The syntax of the regular expressions accepted is the syntax accepted by
               RE2 and described at https://github.com/google/re2/wiki/Syntax
-            exactly_one_of:
-              - 'branch'
           - name: 'invertRegex'
             type: Boolean
             description: |
@@ -351,9 +353,6 @@ properties:
         type: NestedObject
         description: |
           Contains filter properties for matching git pushes.
-        exactly_one_of:
-          - 'pull_request'
-          - 'push'
         properties:
           - name: 'branch'
             type: String
@@ -362,9 +361,6 @@ properties:
 
               The syntax of the regular expressions accepted is the syntax accepted by
               RE2 and described at https://github.com/google/re2/wiki/Syntax
-            exactly_one_of:
-              - 'branch'
-              - 'tag'
           - name: 'tag'
             type: String
             description: |
@@ -372,9 +368,6 @@ properties:
 
               The syntax of the regular expressions accepted is the syntax accepted by
               RE2 and described at https://github.com/google/re2/wiki/Syntax
-            exactly_one_of:
-              - 'branch'
-              - 'tag'
           - name: 'invertRegex'
             type: Boolean
             description: |
@@ -1319,9 +1312,6 @@ properties:
     type: NestedObject
     description: |
       Configuration for triggers that respond to Developer Connect events.
-    exactly_one_of:
-      - 'pullRequest'
-      - 'push'
     properties:
       - name: 'gitRepositoryLink'
         type: String
@@ -1366,9 +1356,6 @@ properties:
         type: NestedObject
         description: |
           Filter to match changes in refs like branches and tags.
-        exactly_one_of:
-          - 'branch'
-          - 'tag'
         properties:
           - name: 'branch'
             type: String

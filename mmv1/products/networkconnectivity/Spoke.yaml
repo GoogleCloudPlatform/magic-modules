@@ -447,11 +447,6 @@ properties:
     type: String
     description: Output only. The current lifecycle state of this spoke.
     output: true
-    exactly_one_of:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING
   - name: reasons
     type: Array
     output: true

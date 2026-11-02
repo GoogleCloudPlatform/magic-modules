@@ -6,16 +6,35 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-west4"
   network       = google_compute_network.default.name
+}
+
+resource "google_compute_disk" "my_source_disk" {
+  name = "{{index $.ResourceIdVars "workstation_config_name"}}"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-west4-a"
+}
+
+resource "google_compute_snapshot" "my_source_snapshot" {
+  name        = "{{index $.ResourceIdVars "workstation_config_name"}}"
+  source_disk = google_compute_disk.my_source_disk.name
+  zone        = "us-west4-a"
+}
+
+resource "google_compute_image" "my_source_image" {
+  name              = "{{index $.ResourceIdVars "workstation_config_name"}}"
+  source_disk       = google_compute_disk.my_source_disk.self_link
+  storage_locations = ["us-west4"]
 }
 
 resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
-  
+  location               = "us-west4"
+
   labels = {
     "label" = "key"
   }
@@ -28,7 +47,21 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location   		         = "us-central1"
+  location               = "us-west4"
+
+  persistent_directories {
+    mount_path = "/home"
+    gce_pd {
+      source_snapshot = google_compute_snapshot.my_source_snapshot.id
+      reclaim_policy  = "DELETE"
+    }
+  }
+}
+
+resource "google_workstations_workstation_config" "persistent" {
+  workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}-pd"
+  workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
+  location               = "us-west4"
 
   host {
     gce_instance {
@@ -49,6 +82,34 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
       fs_type        = "ext4"
       disk_type      = "pd-standard"
       reclaim_policy = "DELETE"
+    }
+  }
+}
+
+resource "google_workstations_workstation_config" "ephemeral_snapshot" {
+  workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}-eph-snap"
+  workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
+  location               = "us-west4"
+
+  ephemeral_directories {
+    mount_path = "/cache"
+    gce_pd {
+      source_snapshot = google_compute_snapshot.my_source_snapshot.id
+      read_only       = true
+    }
+  }
+}
+
+resource "google_workstations_workstation_config" "ephemeral_image" {
+  workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}-eph-img"
+  workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
+  location               = "us-west4"
+
+  ephemeral_directories {
+    mount_path = "/cache"
+    gce_pd {
+      disk_type    = "pd-standard"
+      source_image = google_compute_image.my_source_image.id
     }
   }
 }

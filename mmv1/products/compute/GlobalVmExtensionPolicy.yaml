@@ -32,11 +32,23 @@ samples:
       - name: 'compute_global_vm_extension_policy_basic'
         resource_id_vars:
           policy_name: 'global-ops-agent-policy'
+        vars:
+          priority: 10
+          string_config: null
+          conflict_behavior: null
+          predefined_rollout_plan: 'FAST_ROLLOUT'
+          retry_uuid: null
         ignore_read_extra:
           - 'rollout_operation'
-      - name: 'compute_global_vm_extension_policy_update'
+      - name: 'compute_global_vm_extension_policy_basic'
         resource_id_vars:
           policy_name: 'global-ops-agent-policy'
+        vars:
+          priority: 20
+          string_config: 'logging:\n  receivers:\n    syslog:\n      type: files\n      include_paths:\n      - /var/log/messages\n'
+          conflict_behavior: null
+          predefined_rollout_plan: 'FAST_ROLLOUT'
+          retry_uuid: null
         ignore_read_extra:
           - 'rollout_operation'
   - name: 'compute_global_vm_extension_policy_rollout'
@@ -45,11 +57,23 @@ samples:
       - name: 'compute_global_vm_extension_policy_basic'
         resource_id_vars:
           policy_name: 'global-ops-agent-policy'
+        vars:
+          priority: 10
+          string_config: null
+          conflict_behavior: null
+          predefined_rollout_plan: 'FAST_ROLLOUT'
+          retry_uuid: null
         ignore_read_extra:
           - 'rollout_operation'
-      - name: 'compute_global_vm_extension_policy_update_rollout'
+      - name: 'compute_global_vm_extension_policy_basic'
         resource_id_vars:
           policy_name: 'global-ops-agent-policy'
+        vars:
+          priority: 10
+          string_config: null
+          conflict_behavior: 'overwrite'
+          predefined_rollout_plan: 'SLOW_ROLLOUT'
+          retry_uuid: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
         ignore_read_extra:
           - 'rollout_operation'
   - name: 'compute_global_vm_extension_policy_custom_rollout'

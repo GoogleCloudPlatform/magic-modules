@@ -1,0 +1,116 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ProjectProvision
+description: |
+  Provisions a Google Cloud project for Discovery Engine and prepares and initializes related systems.
+references:
+  api: https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects/provision
+docs:
+  warning: |
+    This resource is create-only and cannot be read, updated, or deleted from the API.
+    Destroying this resource only removes it from Terraform state without unprovisioning the Google Cloud project.
+base_url: projects/{{project}}
+create_url: projects/{{project}}:provision
+id_format: projects/{{project}}/locations/{{location}}
+immutable: true
+exclude_read: true
+exclude_delete: true
+exclude_import: true
+exclude_sweeper: true
+exclude_tgc: true
+exclude_identity_generation: true
+deletion_policy_exclude: true
+autogen_async: true
+async:
+  actions: [create]
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+samples:
+  - name: discoveryengine_project_provision_basic
+    primary_resource_id: default
+    external_providers:
+      - time
+    steps:
+      - name: discoveryengine_project_provision_basic
+        exclude_import_test: true
+        resource_id_vars:
+          project_id: example
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: discoveryengine_project_provision_saas_params
+    primary_resource_id: saas
+    external_providers:
+      - time
+    steps:
+      - name: discoveryengine_project_provision_saas_params
+        exclude_import_test: true
+        resource_id_vars:
+          project_id: saas-prj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+  - name: discoveryengine_project_provision_full
+    primary_resource_id: full
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    steps:
+      - name: discoveryengine_project_provision_full
+        exclude_import_test: true
+        resource_id_vars:
+          project_id: full-prj
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+parameters:
+  - name: location
+    type: String
+    description: |
+      The geographic location in which to provision the project, such as
+      `global`, `us`, or `eu`.
+    url_param_only: true
+    immutable: true
+    default_value: global
+properties:
+  - name: acceptDataUseTerms
+    type: Boolean
+    description: |
+      Set to `true` to specify that the caller has read and consents to the
+      [Terms for data use](https://cloud.google.com/retail/data-use-terms).
+  - name: dataUseTermsVersion
+    type: String
+    description: |
+      The version of the [Terms for data use](https://cloud.google.com/retail/data-use-terms)
+      that the caller has read and consents to. An acceptable version is `2022-11-23`,
+      and this may change over time.
+  - name: saasParams
+    type: NestedObject
+    description: |
+      Parameters for Gemini Enterprise (Agentspace) provisioning.
+    properties:
+      - name: acceptBizQos
+        type: Boolean
+        description: |
+          Set to `true` to specify that the caller has read and consents to the
+          Terms for business edition quality of service.
+      - name: isBiz
+        type: Boolean
+        description: |
+          Indicates whether the current request is for Business edition (`true`)
+          or not (`false`).

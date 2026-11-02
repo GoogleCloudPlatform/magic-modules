@@ -1,0 +1,8 @@
+// RemoveAclEntry needs the entry's fields in the body to know which one to
+// remove - Delete()'s default `obj` is unpopulated otherwise.
+obj = map[string]interface{}{
+	"principal":      d.Get("principal"),
+	"operation":      d.Get("operation"),
+	"permissionType": d.Get("permission_type"),
+	"host":           d.Get("host"),
+}

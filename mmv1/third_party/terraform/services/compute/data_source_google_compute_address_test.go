@@ -117,6 +117,7 @@ func testAccDataSourceComputeAddressCheck(t *testing.T, data_source_name string,
 		address_attrs_to_test := []string{
 			"name",
 			"address",
+			"address_id",
 		}
 
 		for _, attr_to_check := range address_attrs_to_test {
@@ -160,8 +161,14 @@ func testAccCheckDataSourceComputeAddressDestroy(t *testing.T, name string) reso
 				return err
 			}
 
-			_, err = compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Addresses.Get(
-				config.Project, addressId.Region, addressId.Name).Do()
+			url := fmt.Sprintf("%sprojects/%s/regions/%s/addresses/%s", transport_tpg.BaseUrl(compute.Product, config), config.Project, addressId.Region, addressId.Name)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("Address still exists")
 			}

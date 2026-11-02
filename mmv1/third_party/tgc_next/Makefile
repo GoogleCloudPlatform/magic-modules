@@ -28,7 +28,7 @@ mod-clean:
 test-integration-local: mod-clean test-integration
 
 test-go-licenses:
-	cd .. && go version && go install github.com/google/go-licenses@latest
+	cd .. && go version && go install github.com/google/go-licenses@5348b744d0983d85713295ea08a20cca1654a45e # v1.6.0
 	$$(go env GOPATH)/bin/go-licenses check ./... --ignore github.com/dnaeon/go-vcr
 
 run-docker:

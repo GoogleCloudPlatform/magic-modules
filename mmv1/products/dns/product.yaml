@@ -16,8 +16,10 @@ name: DNS
 display_name: Cloud DNS
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
   - name: ga
     base_url: https://dns.googleapis.com/dns/v1/
   - name: beta
     base_url: https://dns.googleapis.com/dns/v1beta2/
+legacy_identity_import_test: true

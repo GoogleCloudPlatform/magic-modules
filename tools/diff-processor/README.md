@@ -16,6 +16,11 @@ bin/diff-processor breaking-changes
 
 # Compute service labels to add bsaed on the resources changed between OLD_REF and NEW_REF
 bin/diff-processor changed-schema-labels
+
+# Report acceptance tests in the given services that the missing test detector
+# can't read and that aren't in detector.KnownUnreadableTests, and tests in
+# that list that it can now read
+bin/diff-processor detect-unreadable-tests path/to/google-beta/services compute container
 ```
 
 ## Test

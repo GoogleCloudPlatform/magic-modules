@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/netapp"
@@ -412,11 +411,8 @@ data "google_compute_network" "default" {
 }
 
 func testAccNetappStoragePool_FlexRegionalStoragePoolCreateExample_sleep_5_mins() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// wait 5 minutes before executing the switchback due to api zone switch issues
-		time.Sleep(5 * time.Minute)
-		return nil
-	}
+	// wait 5 minutes before executing the switchback due to api zone switch issues
+	return acctest.SleepTestCheckFunc(5 * time.Minute)
 }
 
 func testAccNetappStoragePool_FlexRegionalStoragePoolCreateExample_switchBackZone(context map[string]interface{}) string {
@@ -527,7 +523,7 @@ func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_full(con
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
-  location = "us-east4-a"
+  location = "us-east4-b"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
@@ -547,7 +543,7 @@ func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(c
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
-  location = "us-east4-a"
+  location = "us-east4-b"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
@@ -565,7 +561,7 @@ data "google_compute_network" "default" {
 
 func TestAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -600,7 +596,7 @@ func testAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_f
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
-  location = "us-east4-a"
+  location = "us-east4-c"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
@@ -619,7 +615,7 @@ func testAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_u
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
-  location = "us-east4-a"
+  location = "us-east4-c"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id

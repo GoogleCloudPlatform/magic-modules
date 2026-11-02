@@ -1,0 +1,56 @@
+data "google_project" "project" {
+}
+
+resource "google_tags_tag_key" "tag_key" {
+  parent     = "projects/${data.google_project.project.number}"
+  short_name = "{{index $.ResourceIdVars "key_short_name"}}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = "tagKeys/${google_tags_tag_key.tag_key.name}"
+  short_name = "{{index $.ResourceIdVars "value_short_name"}}"
+}
+
+resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
+  workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
+  network                = google_compute_network.default.id
+  subnetwork             = google_compute_subnetwork.default.id
+  location               = "europe-west4"
+  display_name           = "cluster-display-name-updated"
+
+  private_cluster_config {
+    enable_private_endpoint = true
+    allowed_projects        = ["${data.google_project.project.project_id}"]
+  }
+
+  domain_config {
+    domain = "workstations.example.com"
+  }
+
+  workstation_authorization_url = "https://console.cloud.google.com/workstations/auth-updated"
+  workstation_launch_url        = "https://console.cloud.google.com/workstations/launch-updated"
+
+  labels = {
+    foo = "bar"
+  }
+
+  annotations = {
+    label-one = "value-updated"
+  }
+
+  tags = {
+    "${data.google_project.project.project_id}/${google_tags_tag_key.tag_key.short_name}" = "${google_tags_tag_value.tag_value.short_name}"
+  }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "europe-west4"
+  network       = google_compute_network.default.name
+}

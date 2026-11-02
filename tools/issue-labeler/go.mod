@@ -1,12 +1,10 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler
 
-go 1.26
+go 1.26.0
 
 require (
-	github.com/golang/glog v1.2.5
 	github.com/google/go-github/v68 v68.0.0
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/exp v0.0.0-20230810033253-352e893a4cad
 	golang.org/x/oauth2 v0.36.0
 	gopkg.in/yaml.v2 v2.4.0
 )

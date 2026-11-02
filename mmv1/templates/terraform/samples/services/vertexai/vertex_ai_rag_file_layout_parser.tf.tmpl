@@ -1,0 +1,78 @@
+resource "google_vertex_ai_rag_file" "{{$.PrimaryResourceId}}" {
+  region     = "europe-west4"
+  rag_corpus = google_vertex_ai_rag_corpus.rag_corpus.name
+
+  gcs_source {
+    uris = ["gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.file.name}"]
+  }
+
+  rag_file_parsing_config {
+    layout_parser {
+      processor_name               = google_document_ai_processor.layout_parser.id
+      max_parsing_requests_per_min = 100
+    }
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.rag_service_agent,
+    google_project_iam_member.rag_service_agent_document_ai,
+  ]
+}
+
+resource "google_document_ai_processor" "layout_parser" {
+  location     = "eu"
+  display_name = "{{index $.ResourceIdVars "processor_display_name"}}"
+  type         = "LAYOUT_PARSER_PROCESSOR"
+}
+
+resource "google_vertex_ai_rag_corpus" "rag_corpus" {
+  display_name = "{{index $.ResourceIdVars "corpus_display_name"}}"
+  region       = "europe-west4"
+
+  vector_db_config {
+    rag_managed_db {
+      knn {}
+    }
+
+    rag_embedding_model_config {
+      vertex_prediction_endpoint {
+        endpoint = "projects/${data.google_project.project.number}/locations/europe-west4/publishers/google/models/text-embedding-005"
+      }
+    }
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "EUROPE-WEST4"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_object" "file" {
+  name         = "example.html"
+  bucket       = google_storage_bucket.bucket.name
+  content_type = "text/html"
+  content      = "<html><body><h1>Vertex AI RAG Engine</h1><p>RAG Engine lets large language models retrieve information from your own documents.</p></body></html>"
+}
+
+# The RAG Engine service agent is created on first use of RAG Engine, so grant it
+# access after the RagCorpus exists.
+resource "google_storage_bucket_iam_member" "rag_service_agent" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-vertex-rag.iam.gserviceaccount.com"
+
+  depends_on = [google_vertex_ai_rag_corpus.rag_corpus]
+}
+
+resource "google_project_iam_member" "rag_service_agent_document_ai" {
+  project = data.google_project.project.project_id
+  role    = "roles/documentai.apiUser"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-vertex-rag.iam.gserviceaccount.com"
+
+  depends_on = [google_vertex_ai_rag_corpus.rag_corpus]
+}
+
+data "google_project" "project" {
+}

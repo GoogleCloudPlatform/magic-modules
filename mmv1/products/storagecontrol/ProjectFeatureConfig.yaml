@@ -1,0 +1,153 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ProjectFeatureConfig
+api_resource_type_kind: FeatureConfig
+api_variant_patterns:
+  - projects/{project}/locations/{location}/featureConfigs/{feature_config}
+description: |
+  A feature configuration manages a Cloud Storage Smart Storage feature, such as Auto Annotate,
+  for a project. It defines the buckets that the feature applies to and the feature-specific
+  settings, such as the AI models used to generate annotations for objects.
+min_version: beta
+base_url: projects/{{project}}/locations/global/featureConfigs
+self_link: projects/{{project}}/locations/global/featureConfigs/{{feature_config_id}}
+create_url: projects/{{project}}/locations/global/featureConfigs?featureConfigId={{feature_config_id}}
+update_verb: PATCH
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/global/featureConfigs/{{feature_config_id}}
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+datasource_experimental:
+  generate: true
+  # The generated data source test doesn't set `provider = google-beta` on the data
+  # block, which this beta-only resource requires. The data source is covered by the
+  # handwritten data_source_storage_control_project_feature_config_test.go.tmpl.
+  exclude_test: true
+samples:
+  - name: storage_control_project_feature_config_basic
+    primary_resource_id: example
+    min_version: beta
+    steps:
+      - name: storage_control_project_feature_config_basic
+        resource_id_vars:
+          feature_config_id: feature-config
+  - name: storage_control_project_feature_config_full
+    primary_resource_id: example
+    min_version: beta
+    steps:
+      - name: storage_control_project_feature_config_full
+        resource_id_vars:
+          feature_config_id: feature-config
+          bucket_name: bucket
+      - name: storage_control_project_feature_config_update
+        resource_id_vars:
+          feature_config_id: feature-config
+          bucket_name: bucket
+          second_bucket_name: bucket-2
+parameters:
+  - name: featureConfigId
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID of the feature configuration, which becomes the final component of its resource name.
+      The ID must be 1 to 63 characters long, start with a lowercase letter, and contain only
+      lowercase letters, digits, and dashes. The last character can't be a dash.
+properties:
+  - name: name
+    type: String
+    output: true
+    description: |
+      The resource name of the feature configuration, in the format
+      `projects/{project}/locations/global/featureConfigs/{feature_config_id}`.
+  - name: description
+    type: String
+    description: |
+      A description of the feature configuration. The description can be up to 256 characters long.
+  - name: createTime
+    type: String
+    output: true
+    description: |
+      The time at which the feature configuration was created.
+  - name: updateTime
+    type: String
+    output: true
+    description: |
+      The time at which the feature configuration was last updated.
+  - name: type
+    type: String
+    output: true
+    description: |
+      The type of the feature configuration, for example `AUTO_ANNOTATE`.
+  - name: filter
+    type: NestedObject
+    description: |
+      A filter that limits the feature configuration to specific Cloud Storage buckets.
+    properties:
+      - name: includedCloudStorageBuckets
+        type: NestedObject
+        required: true
+        description: |
+          The buckets to include in the feature configuration.
+        properties:
+          - name: bucketIdRegexes
+            type: Array
+            required: true
+            item_type:
+              type: String
+            description: |
+              The names of the buckets to include. For Auto Annotate, regex wildcards aren't
+              supported, so specify exact bucket names (for example, `my-bucket`). Each bucket
+              must already exist in the feature configuration's project. Up to 1,000 buckets can
+              be specified.
+  - name: autoAnnotateConfig
+    type: NestedObject
+    required: true
+    description: |
+      The configuration for the Auto Annotate feature, which uses AI models to generate
+      annotations for objects in Cloud Storage buckets.
+    properties:
+      - name: models
+        type: Array
+        required: true
+        description: |
+          The list of unique models used to generate annotations. Each model is identified by
+          its `name`.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: name
+              type: String
+              required: true
+              description: |
+                The name of the model. Supported values include `face-detector`,
+                `object-detector`, `label-detector`, and `content-safety`.
+      - name: processingLocation
+        type: String
+        required: true
+        description: |
+          The geographic location (case-sensitive) where data is processed. Currently, only
+          multi-region locations such as `us`, `eu`, or `asia` are supported.
+
+          To avoid duplicate billing, configure exactly one processing location for each bucket
+          and model combination. If you configure multiple processing locations for the same
+          bucket and model across different feature configurations, a separate annotation run is
+          triggered in each location, and you're billed for each resulting annotation.

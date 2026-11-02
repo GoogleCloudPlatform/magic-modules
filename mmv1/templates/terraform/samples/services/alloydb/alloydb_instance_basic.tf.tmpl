@@ -12,7 +12,7 @@ resource "google_alloydb_instance" "{{$.PrimaryResourceId}}" {
 
 resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   cluster_id = "{{index $.ResourceIdVars "alloydb_cluster_name"}}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = google_compute_network.default.id
   }

@@ -14,7 +14,6 @@
 ---
 name: Hypercomputecluster
 display_name: Cluster Director
-packagepath: ""
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
@@ -22,3 +21,4 @@ versions:
     name: ga
   - base_url: https://hypercomputecluster.googleapis.com/v1beta/
     name: beta
+legacy_identity_import_test: true

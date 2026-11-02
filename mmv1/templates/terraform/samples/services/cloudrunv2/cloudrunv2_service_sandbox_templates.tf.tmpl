@@ -17,10 +17,10 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
         name  = "hello"
         image = "us-docker.pkg.dev/cloudrun/container/hello"
         command = ["/bin/sh"]
-        args = ["-c", "echo hello"]
+        args = {{index $.Vars "args"}}
         env {
           name = "PORT"
-          value = "9000"
+          value = "{{index $.Vars "env_value"}}"
         }
         volume_mounts {
           name = "empty-dir-volume"

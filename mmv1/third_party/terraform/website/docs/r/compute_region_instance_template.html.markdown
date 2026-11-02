@@ -314,7 +314,7 @@ The following arguments are supported:
   Resulting name for a `name_prefix` <= 37 characters:
   `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
   Resulting name for a `name_prefix` 38 - 54 characters:
-  `name_prefix` + YYmmdd + 3 digit incremental counter
+  `name_prefix` + 9 random lowercase alphanumeric characters
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.
@@ -798,9 +798,11 @@ The `specific_reservation` block supports:
 
 <a name="nested_workload_identity_config"></a>The `workload_identity_config` block supports:
 
-* `identity` - (Required) Identity SPIFFE id.
+* `identity` - (Optional) Identity SPIFFE id.
 
-* `identity_certificate_enabled` - (Required) Specifies whether identity certificates are enabled.
+* `identity_certificate_enabled` - (Optional) Specifies whether identity certificates are enabled.
+
+* `identity_type` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The type of identity to use.
 
 ## Attributes Reference
 

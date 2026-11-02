@@ -39,13 +39,18 @@ samples:
       - name: documentai_processor
         resource_id_vars:
           processor_name: test-processor
+        vars:
+          location: us
   - name: documentai_processor_eu
     primary_resource_id: processor
     exclude_basic_doc: true
     steps:
       - name: documentai_processor_eu
+        config_path: templates/terraform/samples/services/documentai/documentai_processor.tf.tmpl
         resource_id_vars:
           processor_name: test-processor
+        vars:
+          location: eu
 parameters:
   - name: location
     type: String

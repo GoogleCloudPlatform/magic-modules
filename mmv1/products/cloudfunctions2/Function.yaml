@@ -433,9 +433,6 @@ properties:
           - name: storageSource
             type: NestedObject
             description: If provided, get the source from this location in Google Cloud Storage.
-            exactly_one_of:
-              - storage_source
-              - repo_source
             properties:
               - name: bucket
                 type: String
@@ -455,9 +452,6 @@ properties:
           - name: repoSource
             type: NestedObject
             description: If provided, get the source from this location in a Cloud Source Repository.
-            exactly_one_of:
-              - storage_source
-              - repo_source
             properties:
               - name: projectId
                 type: String
@@ -471,24 +465,12 @@ properties:
               - name: branchName
                 type: String
                 description: Regex matching branches to build.
-                exactly_one_of:
-                  - branch_name
-                  - tag_name
-                  - commit_sha
               - name: tagName
                 type: String
                 description: Regex matching tags to build.
-                exactly_one_of:
-                  - branch_name
-                  - tag_name
-                  - commit_sha
               - name: commitSha
                 type: String
                 description: Regex matching tags to build.
-                exactly_one_of:
-                  - branch_name
-                  - tag_name
-                  - commit_sha
               - name: dir
                 type: String
                 description: |
@@ -523,9 +505,6 @@ properties:
         default_from_api: true
         send_empty_value: true
         allow_empty_object: true
-        exactly_one_of:
-          - automatic_update_policy
-          - on_deploy_update_policy
         properties: []
       - name: onDeployUpdatePolicy
         type: NestedObject
@@ -533,9 +512,6 @@ properties:
           Security patches are only applied when a function is redeployed.
         send_empty_value: true
         allow_empty_object: true
-        exactly_one_of:
-          - automatic_update_policy
-          - on_deploy_update_policy
         properties:
           - name: runtimeVersion
             type: String

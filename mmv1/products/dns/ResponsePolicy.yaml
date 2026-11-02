@@ -27,6 +27,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because pre_delete must detach associated networks and GKE clusters via PATCH before the response policy can be deleted.
+exclude_sweeper: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.tmpl
 samples:

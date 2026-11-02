@@ -255,6 +255,9 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
 		if eltCompLit, ok := elt.(*ast.CompositeLit); ok {
+			if shouldSkipStep(eltCompLit) {
+				continue
+			}
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
@@ -279,6 +282,31 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 		return test, fmt.Errorf("errors reading test steps: %v", errs)
 	}
 	return test, nil
+}
+
+// Report whether a test step composite literal does not apply its config, so
+// its fields should not count towards coverage: steps with ExpectError set
+// expect the config to be rejected, and steps with PlanOnly, Destroy,
+// ImportState or RefreshState set to true run a plan, destroy, import or
+// refresh rather than applying the config.
+func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
+	for _, elt := range stepCompLit.Elts {
+		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
+			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok {
+				switch ident.Name {
+				case "ExpectError":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); !ok || valIdent.Name != "nil" {
+						return true
+					}
+				case "PlanOnly", "Destroy", "ImportState", "RefreshState":
+					if valIdent, ok := keyValueExpr.Value.(*ast.Ident); ok && valIdent.Name == "true" {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 // Read a call expression that produces a config and return the config string.
@@ -309,7 +337,12 @@ func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.
 		if len(configCallExpr.Args) == 0 {
 			return "", fmt.Errorf("failed to find a config template in call to %s.%s", selectorExpr.X, selectorExpr.Sel.Name)
 		}
-		return readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
+		configStr, err := readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
+		if err != nil || selectorExpr.Sel.Name != "Sprintf" {
+			// Nprintf only replaces %{key}, so "%%" is not an escape there.
+			return configStr, err
+		}
+		return markEscapedPercents(configStr), nil
 	case "Sprint":
 		// Every argument is part of the config. This is used to join a shared
 		// setup config to the config under test.
@@ -365,13 +398,39 @@ func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, v
 	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
 }
 
-var subPattern = regexp.MustCompile("%({[^{}]*}|[vTtbcspqxXUeEfFgGdo])")
+// A substitution: an acctest.Nprintf key or a fmt verb. An Nprintf key may
+// also follow a percent sign escaped in a fmt.Sprintf template, as in
+// acctest.Nprintf(fmt.Sprintf("%%{key}"), ...), which formats to "%{key}".
+var subPattern = regexp.MustCompile("(?:%|" + escapedPercent + "){[^{}]*}|%[vTtbcspqxXUeEfFgGdo]")
 
 // A substitution alone on its line injects whole HCL statements rather than a
 // value: most often a shared "setup" block, sometimes a conditionally present
 // attribute or nested block. Substituting a value there leaves a bare token
 // where HCL requires an argument or block definition.
 var wholeLineSubPattern = regexp.MustCompile("(?m)^[ \t]*(?:" + subPattern.String() + ")[ \t]*$")
+
+// A substitution, or a percent sign escaped as "%%" in a fmt.Sprintf template.
+// Matching both in a single pass keeps an escaped percent sign followed by a
+// verb letter, such as "%%d", from being read as a percent sign followed by
+// the verb "%d".
+var sprintfEscapedPercentPattern = regexp.MustCompile("%%|" + subPattern.String())
+
+// Stands in for a percent sign escaped in a fmt.Sprintf template until the
+// substitutions have been removed, so it isn't read as part of one. It's a
+// private use character, so it doesn't occur in configs.
+const escapedPercent = "\uE000"
+
+// Mark the escaped percent signs in a fmt.Sprintf template, such as the one in
+// HCL's modulo operator written as "%%". readConfigStr turns them back into
+// percent signs.
+func markEscapedPercents(template string) string {
+	return sprintfEscapedPercentPattern.ReplaceAllStringFunc(template, func(match string) string {
+		if match == "%%" {
+			return escapedPercent
+		}
+		return match
+	})
+}
 
 // Read the config string and return a test step.
 func readConfigStr(configStr string) (Step, error) {
@@ -382,6 +441,7 @@ func readConfigStr(configStr string) (Step, error) {
 	configStr = wholeLineSubPattern.ReplaceAllString(configStr, "")
 	// Replace with a value that can be parsed outside quotation marks.
 	configStr = subPattern.ReplaceAllString(configStr, "true")
+	configStr = strings.ReplaceAll(configStr, escapedPercent, "%")
 	parser := hclparse.NewParser()
 	file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
 	if diagnostics.HasErrors() {

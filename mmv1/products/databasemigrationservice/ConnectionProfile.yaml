@@ -143,6 +143,9 @@ samples:
         resource_id_vars:
           destination_alloydb: destination-alloydb
           destination_cp: destination-cp
+          network_name: destination-alloydb
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
 parameters:
   - name: connectionProfileId
     type: String
@@ -383,8 +386,6 @@ properties:
               Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate.
               If this field is used then the 'clientCertificate' field is mandatory.
             immutable: true
-            required_with:
-              - client_certificate
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_client_key.go.tmpl
           - name: clientCertificate
@@ -393,8 +394,6 @@ properties:
               Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
               If this field is used then the 'clientKey' field is mandatory
             immutable: true
-            required_with:
-              - client_key
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_client_certificate.go.tmpl
           - name: caCertificate
@@ -495,8 +494,6 @@ properties:
               Input only. The unencrypted PKCS#1 or PKCS#8 PEM-encoded private key associated with the Client Certificate.
               If this field is used then the 'clientCertificate' field is mandatory.
             immutable: true
-            required_with:
-              - client_certificate
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_client_key.go.tmpl
           - name: clientCertificate
@@ -505,8 +502,6 @@ properties:
               Input only. The x509 PEM-encoded certificate that will be used by the replica to authenticate against the source database server.
               If this field is used then the 'clientKey' field is mandatory
             immutable: true
-            required_with:
-              - client_key
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_client_certificate.go.tmpl
           - name: caCertificate
@@ -525,19 +520,11 @@ properties:
           Static IP address connectivity configured on service project.
         send_empty_value: true
         allow_empty_object: true
-        exactly_one_of:
-          - static_service_ip_connectivity
-          - forward_ssh_connectivity
-          - private_connectivity
         properties: []
       - name: forwardSshConnectivity
         type: NestedObject
         description: |
           SSL configuration for the destination to connect to the source database.
-        exactly_one_of:
-          - static_service_ip_connectivity
-          - forward_ssh_connectivity
-          - private_connectivity
         properties:
           - name: hostname
             type: String
@@ -559,9 +546,6 @@ properties:
             description: |
               Input only. SSH password. Only one of `password` and `private_key` can be configured.
             immutable: true
-            exactly_one_of:
-              - forward_ssh_connectivity.0.password
-              - forward_ssh_connectivity.0.private_key
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_forward_ssh_password.go.tmpl
           - name: privateKey
@@ -673,9 +657,6 @@ properties:
                       type: Time
                       description: |
                         The time when this access control entry expires in RFC 3339 format.
-                      exactly_one_of:
-                        - expire_time
-                        - ttl
                     - name: ttl
                       type: Time
                       description: |

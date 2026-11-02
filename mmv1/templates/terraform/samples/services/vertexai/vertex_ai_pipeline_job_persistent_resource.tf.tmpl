@@ -1,0 +1,71 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_storage_bucket" "bucket" {
+  provider                    = google-beta
+  name                        = "{{index $.ResourceIdVars "storage_bucket"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
+  provider        = google-beta
+  display_name    = "{{index $.ResourceIdVars "pipeline_job_id"}}"
+  pipeline_job_id = "{{index $.ResourceIdVars "pipeline_job_id"}}"
+  region          = "us-central1"
+  deletion_policy = "FORCE"
+
+  pipeline_spec = jsonencode({
+    components = {
+      comp-hello-world = {
+        executorLabel = "exec-hello-world"
+      }
+    }
+    deploymentSpec = {
+      executors = {
+        exec-hello-world = {
+          container = {
+            command = [
+              "sh",
+              "-c",
+              "echo hello"
+            ]
+            image = "python:3.11"
+          }
+        }
+      }
+    }
+    pipelineInfo = {
+      name = "persistent-resource-pipeline"
+    }
+    root = {
+      dag = {
+        tasks = {
+          hello-world = {
+            componentRef = {
+              name = "comp-hello-world"
+            }
+            taskInfo = {
+              name = "hello-world"
+            }
+          }
+        }
+      }
+    }
+    schemaVersion = "2.1.0"
+    sdkVersion    = "kfp-2.7.0"
+  })
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.bucket.name}/output"
+    default_runtime {
+      persistent_resource_runtime_detail {
+        persistent_resource_name                   = "projects/${data.google_project.project.number}/locations/us-central1/persistentResources/{{index $.ResourceIdVars "persistent_resource_id"}}"
+        task_resource_unavailable_wait_time_ms     = "60000"
+        task_resource_unavailable_timeout_behavior = "FALL_BACK_TO_ON_DEMAND"
+      }
+    }
+  }
+}
