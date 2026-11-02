@@ -1,7 +1,9 @@
 package resourcemanager_test
 
 import (
+	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +16,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/iam/v1"
 )
 
 func TestAccResourceGoogleProjectDefaultServiceAccountsBasic(t *testing.T) {
@@ -79,6 +83,8 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDisable(t *testing.T) {
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "id", "projects/"+project),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
+					// Only the Compute Engine default SA exists: the test project has no App Engine app.
+					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "service_accounts.%", "1"),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
@@ -108,6 +114,8 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDelete(t *testing.T) {
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "id", "projects/"+project),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
+					// Only the Compute Engine default SA exists: the test project has no App Engine app.
+					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "service_accounts.%", "1"),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
@@ -136,6 +144,8 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeleteRevertIgnoreFailure
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "id", "projects/"+project),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
+					// Only the Compute Engine default SA exists: the test project has no App Engine app.
+					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "service_accounts.%", "1"),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
@@ -164,6 +174,8 @@ func TestAccResourceGoogleProjectDefaultServiceAccountsDeprivilege(t *testing.T)
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "id", "projects/"+project),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "action", action),
+					// Only the Compute Engine default SA exists: the test project has no App Engine app.
+					resource.TestCheckResourceAttr("google_project_default_service_accounts.acceptance", "service_accounts.%", "1"),
 					resource.TestCheckResourceAttrSet("google_project_default_service_accounts.acceptance", "project"),
 					acctest.SleepTestCheckFunc(10*time.Second),
 					testAccCheckGoogleProjectDefaultServiceAccountsChanges(t, project, action),
@@ -202,12 +214,12 @@ resource "google_project_default_service_accounts" "acceptance" {
 func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, project, action string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-		response, err := iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.List(resourcemanager.PrefixedProject(project)).Do()
+		accounts, err := testAccListServiceAccounts(config, project)
 		if err != nil {
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 		}
-		for _, sa := range response.Accounts {
-			if testAccIsDefaultServiceAccount(sa.DisplayName) {
+		for _, sa := range accounts {
+			if testAccIsDefaultServiceAccount(sa.Email) {
 				switch action {
 				case "DISABLE":
 					if !sa.Disabled {
@@ -245,13 +257,13 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 		maxDelay := 30 * time.Second
 
 		for i := 0; i < attempts; i++ {
-			response, err := iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.List(resourcemanager.PrefixedProject(project)).Do()
+			accounts, err := testAccListServiceAccounts(config, project)
 
 			if err != nil {
 				return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 			}
-			for _, sa := range response.Accounts {
-				if testAccIsDefaultServiceAccount(sa.DisplayName) {
+			for _, sa := range accounts {
+				if testAccIsDefaultServiceAccount(sa.Email) {
 					// We agreed to not revert the DEPRIVILEGE action because will be hard to track the roles over the time
 					if action == "DISABLE" {
 						if !sa.Disabled {
@@ -283,17 +295,22 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 	}
 }
 
+var testAccDefaultSAEmail = regexp.MustCompile(`^([0-9]+-compute@developer|[^@]+@appspot)\.gserviceaccount\.com$`)
+
 // testAccIsDefaultServiceAccount is a helper function to facilitate TDD when there is a need
 // to update how we determine whether it's a default SA or not.
 // If you follow TDD, it is going to be different from isDefaultServiceAccount func while coding
 // but they must be identical before commit/push
-func testAccIsDefaultServiceAccount(displayName string) bool {
-	gceDefaultSA := "compute engine default service account"
-	appEngineDefaultSA := "app engine default service account"
-	saDisplayName := strings.ToLower(displayName)
-	if saDisplayName == gceDefaultSA || saDisplayName == appEngineDefaultSA {
-		return true
-	}
+func testAccIsDefaultServiceAccount(email string) bool {
+	return testAccDefaultSAEmail.MatchString(strings.ToLower(email))
+}
 
-	return false
+// testAccListServiceAccounts returns all service accounts of the project, following pagination.
+func testAccListServiceAccounts(config *transport_tpg.Config, project string) ([]*iam.ServiceAccount, error) {
+	var accounts []*iam.ServiceAccount
+	err := iambeta.NewClient(config, config.UserAgent).Projects.ServiceAccounts.List(resourcemanager.PrefixedProject(project)).Pages(context.Background(), func(resp *iam.ListServiceAccountsResponse) error {
+		accounts = append(accounts, resp.Accounts...)
+		return nil
+	})
+	return accounts, err
 }
