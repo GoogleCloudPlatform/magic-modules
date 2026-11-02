@@ -1,0 +1,224 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EndpointDeployedModel
+api_resource_type_kind: Endpoint
+description: A model deployed to a Vertex AI Endpoint.
+references:
+  guides:
+    Deploy a model to an endpoint: https://cloud.google.com/vertex-ai/docs/predictions/deploy-model-api
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/deployModel
+base_url: '{{endpoint}}'
+self_link: '{{endpoint}}'
+create_url: '{{endpoint}}:deployModel'
+delete_url: '{{endpoint}}:undeployModel'
+delete_verb: POST
+id_format: '{{endpoint}}/deployedModels/{{deployed_model_id}}'
+import_format:
+  - projects/{{project}}/locations/{{region}}/endpoints/{{endpoint}}/deployedModels/{{deployed_model_id}}
+immutable: true
+timeouts:
+  insert_minutes: 60
+  delete_minutes: 60
+exclude_identity_generation: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+  result:
+    resource_inside_response: true
+  include_project: true
+custom_code:
+  encoder: templates/terraform/encoders/vertex_ai_endpoint_deployed_model.go.tmpl
+  decoder: templates/terraform/decoders/vertex_ai_endpoint_deployed_model.go.tmpl
+  pre_delete: templates/terraform/pre_delete/vertex_ai_endpoint_deployed_model.go.tmpl
+  custom_import: templates/terraform/custom_import/vertex_ai_endpoint_deployed_model.go.tmpl
+samples:
+  - name: vertex_ai_endpoint_deployed_model_basic
+    primary_resource_id: deployed_model
+    steps:
+      - name: vertex_ai_endpoint_deployed_model_basic
+        vars:
+          source_model: projects/my-project-name/locations/us-central1/models/my-source-model
+        resource_id_vars:
+          endpoint_name: endpoint-name
+          model_id: model-id
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
+        ignore_read_extra:
+          - project
+parameters:
+  - name: endpoint
+    type: ResourceRef
+    description: |
+      The Endpoint to deploy the Model to, in the format
+      `projects/{{project}}/locations/{{region}}/endpoints/{{endpoint}}`.
+    url_param_only: true
+    required: true
+    resource: Endpoint
+    imports: name
+  - name: region
+    type: String
+    description: The region of the Endpoint.
+    url_param_only: true
+    default_from_api: true
+properties:
+  - name: deployedModelId
+    api_name: id
+    type: String
+    description: |
+      The user-specified ID of the DeployedModel. The ID must contain 1 to 10
+      numeric characters and must be unique among the models deployed to the Endpoint.
+    required: true
+  - name: model
+    type: String
+    description: |
+      The resource name of the Model to deploy. The resource name may include a
+      version ID or version alias, for example
+      `projects/{project}/locations/{location}/models/{model}@2`.
+    required: true
+  - name: displayName
+    type: String
+    description: The display name of the DeployedModel. If omitted, the Model's display name is used.
+    default_from_api: true
+  - name: serviceAccount
+    type: String
+    description: |
+      The service account that the DeployedModel's container runs as. The user
+      deploying the Model must have the `iam.serviceAccounts.actAs` permission
+      on this service account.
+  - name: enableAccessLogging
+    type: Boolean
+    description: Whether online prediction access logs are sent to Cloud Logging.
+    default_from_api: true
+  - name: disableContainerLogging
+    type: Boolean
+    description: |
+      Whether container `stderr` and `stdout` logging is disabled. This is only
+      supported for custom-trained Models and AutoML Tabular Models.
+    default_from_api: true
+  - name: automaticResources
+    type: NestedObject
+    description: Resources for which Vertex AI automatically manages the machine configuration.
+    exactly_one_of:
+      - automatic_resources
+      - dedicated_resources
+      - shared_resources
+    properties:
+      - name: minReplicaCount
+        type: Integer
+        description: The minimum number of replicas that will always be deployed.
+        default_from_api: true
+      - name: maxReplicaCount
+        type: Integer
+        description: The maximum number of replicas that may be deployed.
+        default_from_api: true
+  - name: dedicatedResources
+    type: NestedObject
+    description: Dedicated resources used by the DeployedModel.
+    exactly_one_of:
+      - automatic_resources
+      - dedicated_resources
+      - shared_resources
+    properties:
+      - name: machineSpec
+        type: NestedObject
+        description: The specification of a single machine used by the deployment.
+        required: true
+        properties:
+          - name: machineType
+            type: String
+            description: The machine type used by each replica.
+          - name: acceleratorType
+            type: String
+            description: The type of accelerator attached to the machine.
+          - name: acceleratorCount
+            type: Integer
+            description: The number of accelerators attached to the machine.
+          - name: tpuTopology
+            type: String
+            description: The TPU topology.
+      - name: minReplicaCount
+        type: Integer
+        description: The minimum number of machine replicas that will always be deployed.
+        required: true
+      - name: maxReplicaCount
+        type: Integer
+        description: The maximum number of machine replicas that may be deployed.
+        default_from_api: true
+      - name: requiredReplicaCount
+        type: Integer
+        description: |
+          The number of available replicas required for the deployment operation
+          to succeed. If omitted, this defaults to `min_replica_count`.
+        default_from_api: true
+      - name: spot
+        type: Boolean
+        description: Whether to schedule the deployment workload on Spot VMs.
+        default_from_api: true
+      - name: autoscalingMetricSpecs
+        type: Array
+        description: Autoscaling metrics for the deployment.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: metricName
+              type: String
+              description: The resource metric name.
+              required: true
+            - name: target
+              type: Integer
+              description: The target resource utilization percentage for the metric.
+              required: true
+  - name: sharedResources
+    type: String
+    description: |
+      The shared DeploymentResourcePool to deploy on, in the format
+      `projects/{project}/locations/{location}/deploymentResourcePools/{deployment_resource_pool}`.
+    exactly_one_of:
+      - automatic_resources
+      - dedicated_resources
+      - shared_resources
+  - name: modelVersionId
+    type: String
+    description: The version ID of the deployed Model.
+    output: true
+  - name: createTime
+    type: String
+    description: The timestamp when the DeployedModel was created.
+    output: true
+  - name: privateEndpoints
+    type: NestedObject
+    description: Private paths for sending requests to the deployed model.
+    output: true
+    properties:
+      - name: predictHttpUri
+        type: String
+        description: The HTTP path for prediction requests.
+        output: true
+      - name: explainHttpUri
+        type: String
+        description: The HTTP path for explanation requests.
+        output: true
+      - name: healthHttpUri
+        type: String
+        description: The HTTP path for health check requests.
+        output: true
+      - name: serviceAttachment
+        type: String
+        description: The service attachment resource used by Private Service Connect.
+        output: true

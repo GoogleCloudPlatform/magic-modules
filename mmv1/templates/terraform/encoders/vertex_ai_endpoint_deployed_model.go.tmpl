@@ -1,0 +1,6 @@
+deployedModel := obj
+deployedModel["id"] = d.Get("deployed_model_id")
+delete(deployedModel, "deployedModelId")
+delete(deployedModel, "endpoint")
+delete(deployedModel, "region")
+return map[string]interface{}{"deployedModel": deployedModel}, nil

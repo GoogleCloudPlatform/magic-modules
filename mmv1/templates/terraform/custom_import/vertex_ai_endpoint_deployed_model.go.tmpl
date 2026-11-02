@@ -1,0 +1,22 @@
+config := meta.(*transport_tpg.Config)
+
+if err := tpgresource.ParseImportId([]string{
+	"(?P<endpoint>.+)/deployedModels/(?P<deployed_model_id>[^/]+)",
+}, d, config); err != nil {
+	return nil, err
+}
+
+endpointRe := regexp.MustCompile(`^projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/endpoints/[^/]+$`)
+if m := endpointRe.FindStringSubmatch(d.Get("endpoint").(string)); m != nil {
+	if err := d.Set("region", m[2]); err != nil {
+		return nil, fmt.Errorf("Error setting region: %s", err)
+	}
+}
+
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}endpoint{{"}}"}}/deployedModels/{{"{{"}}deployed_model_id{{"}}"}}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

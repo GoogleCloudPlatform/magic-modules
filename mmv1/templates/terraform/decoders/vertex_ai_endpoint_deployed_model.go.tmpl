@@ -1,0 +1,29 @@
+if d.Get("region").(string) == "" {
+	endpointRe := regexp.MustCompile(`^projects/[^/]+/locations/(?P<region>[^/]+)/endpoints/[^/]+$`)
+	if m := endpointRe.FindStringSubmatch(d.Get("endpoint").(string)); m != nil {
+		if err := d.Set("region", m[1]); err != nil {
+			return nil, fmt.Errorf("Error setting region: %s", err)
+		}
+	}
+}
+
+rawDeployedModels, ok := res["deployedModels"]
+if !ok || rawDeployedModels == nil {
+	return nil, nil
+}
+deployedModels, ok := rawDeployedModels.([]interface{})
+if !ok {
+	return nil, fmt.Errorf("expected deployedModels to be an array, got %T", rawDeployedModels)
+}
+for _, rawDeployedModel := range deployedModels {
+	deployedModel, ok := rawDeployedModel.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected deployed model to be an object, got %T", rawDeployedModel)
+	}
+	if deployedModel["id"] == d.Get("deployed_model_id") {
+		deployedModel["endpoint"] = d.Get("endpoint")
+		deployedModel["deployedModelId"] = d.Get("deployed_model_id")
+		return deployedModel, nil
+	}
+}
+return nil, nil

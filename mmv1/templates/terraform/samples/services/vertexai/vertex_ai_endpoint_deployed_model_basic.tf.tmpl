@@ -1,0 +1,28 @@
+resource "google_vertex_ai_endpoint_deployed_model" "{{$.PrimaryResourceId}}" {
+  endpoint          = google_vertex_ai_endpoint.endpoint.id
+  deployed_model_id = "1234567890"
+  model             = google_vertex_ai_model.model.id
+
+  dedicated_resources {
+    machine_spec {
+      machine_type = "n1-standard-2"
+    }
+
+    min_replica_count = 1
+    max_replica_count = 1
+  }
+}
+
+resource "google_vertex_ai_endpoint" "endpoint" {
+  name         = "{{index $.ResourceIdVars "endpoint_name"}}"
+  display_name = "Terraform deployed model endpoint"
+  location     = "us-central1"
+  region       = "us-central1"
+}
+
+resource "google_vertex_ai_model" "model" {
+  model_id     = "{{index $.ResourceIdVars "model_id"}}"
+  project      = "{{index $.TestEnvVars "project_name"}}"
+  region       = "us-central1"
+  source_model = "{{index $.Vars "source_model"}}"
+}
