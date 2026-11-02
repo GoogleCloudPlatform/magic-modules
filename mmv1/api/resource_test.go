@@ -1397,3 +1397,81 @@ func TestResource_UseLegacyIdentityImportTest(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceValidate_AutogenStatus(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description   string
+		resource      api.Resource
+		expectErrText string
+	}{
+		{
+			description: "empty autogen_status is valid",
+			resource: api.Resource{
+				Name:          "Widget",
+				AutogenStatus: "",
+			},
+			expectErrText: "",
+		},
+		{
+			description: "matching v1 autogen_status is valid",
+			resource: api.Resource{
+				Name:          "Widget",
+				AutogenStatus: "V2lkZ2V0", // base64("Widget")
+			},
+			expectErrText: "",
+		},
+		{
+			description: "matching v2 agent autogen_status is valid",
+			resource: api.Resource{
+				Name:          "Widget",
+				AutogenStatus: "V2lkZ2V0QXV0b2dlblYyQWdlbnQ=", // base64("WidgetAutogenV2Agent")
+			},
+			expectErrText: "",
+		},
+		{
+			description: "mismatched autogen_status returns error",
+			resource: api.Resource{
+				Name:          "Widget",
+				AutogenStatus: "T3RoZXJSZXNvdXJjZQ==", // base64("OtherResource")
+			},
+			expectErrText: "`autogen_status` \"T3RoZXJSZXNvdXJjZQ==\" (decoded: \"OtherResource\") does not match resource `name` \"Widget\"",
+		},
+		{
+			description: "invalid base64 autogen_status returns error",
+			resource: api.Resource{
+				Name:          "Widget",
+				AutogenStatus: "!!!not-valid-base64!!!",
+			},
+			expectErrText: "`autogen_status` \"!!!not-valid-base64!!!\"",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			errs := tc.resource.Validate()
+			var autogenErr error
+			for _, e := range errs {
+				if strings.Contains(e.Error(), "autogen_status") {
+					autogenErr = e
+					break
+				}
+			}
+
+			if tc.expectErrText == "" {
+				if autogenErr != nil {
+					t.Errorf("expected no autogen_status error, got: %v", autogenErr)
+				}
+			} else {
+				if autogenErr == nil {
+					t.Errorf("expected error containing %q, got nil", tc.expectErrText)
+				} else if !strings.Contains(autogenErr.Error(), tc.expectErrText) {
+					t.Errorf("expected error containing %q, got: %v", tc.expectErrText, autogenErr)
+				}
+			}
+		})
+	}
+}

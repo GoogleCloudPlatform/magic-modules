@@ -26,7 +26,6 @@ mutex: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tool
 sweeper:
   url_substitutions:
     - region: global
-autogen_status: RGF0YVNoYXJpbmdXaXRoR29vZ2xlU2V0dGluZw==
 autogen_async: false
 samples:
   - name: gemini_code_tools_setting_basic

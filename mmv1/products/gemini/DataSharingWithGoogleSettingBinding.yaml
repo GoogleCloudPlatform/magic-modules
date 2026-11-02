@@ -44,7 +44,7 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: U2V0dGluZ0JpbmRpbmc=
+autogen_status: RGF0YVNoYXJpbmdXaXRoR29vZ2xlU2V0dGluZ0JpbmRpbmc=
 autogen_async: true
 samples:
   - name: gemini_data_sharing_with_google_setting_binding_basic

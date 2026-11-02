@@ -48,7 +48,7 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: U2V0dGluZ0JpbmRpbmdCeVByb2plY3RBbmRMb2NhdGlvbkFuZEdpYnFvYnNlcnZhYmlsaXR5c2V0dGluZ0F1dG9nZW5WMkFnZW50
+autogen_status: R2licU9ic2VydmFiaWxpdHlTZXR0aW5nQmluZGluZ0F1dG9nZW5WMkFnZW50
 autogen_async: true
 samples:
   - name: gemini_gibq_observability_setting_binding_basic

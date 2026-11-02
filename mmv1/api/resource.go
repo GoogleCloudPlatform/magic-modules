@@ -604,6 +604,14 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("missing `description` for resource %s", r.Name))
 	}
 
+	if r.AutogenStatus != "" {
+		decodedBytes, err := base64.StdEncoding.DecodeString(r.AutogenStatus)
+		decoded := strings.TrimSuffix(string(decodedBytes), "AutogenV2Agent")
+		if err != nil || decoded != r.Name {
+			es = append(es, fmt.Errorf("`autogen_status` %q (decoded: %q) does not match resource `name` %q; remove `autogen_status` if this file was copied from another resource, or update it to %q if the resource was renamed after autogeneration", r.AutogenStatus, string(decodedBytes), r.Name, base64.StdEncoding.EncodeToString([]byte(r.Name))))
+		}
+	}
+
 	if !r.Exclude {
 		// Ensures we have all properties defined
 		for _, i := range r.Identity {

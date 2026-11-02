@@ -42,7 +42,6 @@ async:
   include_project: false
 # The default domain can't be deleted, only disabled
 exclude_delete: true
-autogen_status: RG9tYWlu
 autogen_async: true
 samples:
   - name: firebase_app_hosting_default_domain_minimal
