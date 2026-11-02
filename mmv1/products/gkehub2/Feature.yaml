@@ -230,7 +230,6 @@ properties:
             type: NestedObject
             description: |
               Post conditions to override for the specified upgrade.
-            required: true
             default_from_api: true
             properties:
               - name: soaking

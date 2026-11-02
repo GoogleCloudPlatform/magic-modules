@@ -694,7 +694,6 @@ properties:
                     - name: enabled
                       type: Boolean
                       default_from_api: true
-                      required: true
                       description: Enables hierarchical namespace setup for the bucket.
                       diff_suppress_func: tpgresource.EmptyOrFalseSuppressBoolean
                 - name: storageClass

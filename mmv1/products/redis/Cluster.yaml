@@ -267,7 +267,6 @@ parameters:
       Unique name of the resource in this scope including project and location using the form:
       projects/{projectId}/locations/{locationId}/clusters/{clusterId}
     url_param_only: true
-    required: true
     immutable: true
     default_from_api: true
   - name: region
