@@ -317,7 +317,6 @@ properties:
               type: Enum
               description: |
                 Type of the manifest.
-              required: true
               default_from_api: true
               enum_values:
                 - MANIFEST_TYPE_UNSPECIFIED

@@ -1113,17 +1113,6 @@ func TestTypeValidateDefaultFromApi(t *testing.T) {
 			wantError: "property custom_field cannot set both default_from_api and output in resource MyResource",
 		},
 		{
-			description: "default_from_api and required allowlisted succeeds",
-			prop: &Type{
-				Name:           "name",
-				Type:           "String",
-				DefaultFromApi: true,
-				Required:       true,
-			},
-			resource:  "Hub",
-			wantError: "",
-		},
-		{
 			description: "default_from_api and output allowlisted succeeds",
 			prop: &Type{
 				Name:           "ruleId",

@@ -276,7 +276,6 @@ properties:
 
           - DISABLED: 	Persistence is disabled for the instance, and any existing snapshots are deleted.
           - RDB: RDB based Persistence is enabled.
-        required: true
         default_from_api: true
         enum_values:
           - DISABLED

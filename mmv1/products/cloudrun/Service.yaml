@@ -387,14 +387,12 @@ properties:
           - name: 'spec'
             type: NestedObject
             description: RevisionSpec holds the desired state of the Revision (from the client).
-            required: true
             default_from_api: true
             properties:
               - name: 'containers'
                 type: Array
                 description: |-
                   Containers defines the unit of execution for this Revision.
-                required: true
                 default_from_api: true
                 item_type:
                   type: NestedObject

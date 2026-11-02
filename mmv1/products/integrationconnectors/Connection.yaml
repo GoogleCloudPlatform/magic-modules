@@ -528,13 +528,11 @@ properties:
     properties:
       - name: minNodeCount
         type: Integer
-        required: true
         description: |
           Minimum number of nodes in the runtime nodes.
         default_from_api: true
       - name: maxNodeCount
         type: Integer
-        required: true
         description: |
           Minimum number of nodes in the runtime nodes.
         default_from_api: true

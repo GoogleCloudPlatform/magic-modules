@@ -366,7 +366,6 @@ properties:
               default_from_api: true
             - name: type
               type: Enum
-              required: true
               description: |
                 Type of the manifest.
               enum_values:

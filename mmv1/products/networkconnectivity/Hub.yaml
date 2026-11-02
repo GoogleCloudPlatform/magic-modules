@@ -93,7 +93,6 @@ properties:
   - name: name
     type: String
     description: 'Immutable. The name of the hub. Hub names must be unique. They use the following form: `projects/{project_number}/locations/global/hubs/{hub_id}`'
-    required: true
     immutable: true
     default_from_api: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
