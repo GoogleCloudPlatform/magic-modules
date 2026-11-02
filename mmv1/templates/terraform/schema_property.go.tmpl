@@ -71,7 +71,7 @@ Default value: {{ .ItemType.DefaultValue -}}
     {{- " "}}Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{- end -}}`,
 {{ if eq .Type "NestedObject" -}}
-  {{ if not .Output -}}
+  {{ if and (not .Output) (not .IgnoreWrite) -}}
   MaxItems: 1,
   {{ end -}}
   Elem: &schema.Resource{

@@ -186,7 +186,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
               {{- range $p := .IdentityProperties }}
               "{{ underscore $p.Name}}": {
                 Type:     {{ $p.TFType $p.Type }},
-                {{- if or $p.Required $p.Output }}
+                {{- if or $p.Required $p.Output $p.IgnoreWrite }}
                 RequiredForImport: true,
                 {{- else }}
                 OptionalForImport: true,
@@ -488,7 +488,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if $prop.Output }}
+    {{-     if or $prop.Output $prop.IgnoreWrite }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
@@ -1636,7 +1636,7 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if $prop.Output }}
+    {{-     if or $prop.Output $prop.IgnoreWrite }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }

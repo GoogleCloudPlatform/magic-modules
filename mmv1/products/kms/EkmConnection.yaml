@@ -144,7 +144,6 @@ properties:
                 description: |
                   Output only. The subject Alternative DNS names. Only present if parsed is true.
                 default_from_api: true
-                output: true
                 item_type:
                   type: String
         - name: endpointFilter

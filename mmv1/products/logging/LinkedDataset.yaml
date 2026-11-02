@@ -139,7 +139,7 @@ properties:
       with it, in the same project as the LogBucket it's linked to. This dataset will also have BigQuery
       Views corresponding to the LogViews in the bucket.
     default_from_api: true
-    output: true
+    ignore_write: true
     properties:
       - name: datasetId
         type: String

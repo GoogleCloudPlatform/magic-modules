@@ -26,7 +26,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Existing resources that combine default_from_api with required or output.
+// Existing resources that combine default_from_api with required.
 // These are grandfathered to avoid breaking existing resource schemas.
 // Do not add new fields to this list; see:
 // https://github.com/hashicorp/terraform-provider-google/issues/18832
@@ -35,16 +35,13 @@ var defaultFromApiConflictAllowlist = []string{
 	"Cluster.storage_resources.config.new_bucket.hierarchical_namespace.enabled",
 	"Connection.node_config.max_node_count",
 	"Connection.node_config.min_node_count",
-	"DataPolicy.etag",
 	"EdgeCacheService.log_config.enable",
-	"EkmConnection.service_resolvers.server_certificates.subject_alternative_dns_names",
 	"Feature.spec.clusterupgrade.post_conditions",
 	"FeatureOnlineStoreFeatureview.region",
 	"Hub.name",
 	"Instance.persistence_config.persistence_mode",
 	"Job.config.manifests.type",
 	"JobTemplate.config.manifests.type",
-	"LinkedDataset.bigquery_dataset",
 	"NetworkAttachment.region",
 	"NodeGroup.autoscaling_policy.max_nodes",
 	"NodeGroup.autoscaling_policy.mode",
@@ -54,7 +51,6 @@ var defaultFromApiConflictAllowlist = []string{
 	"QuotaPreference.parent",
 	"QuotaPreference.quota_id",
 	"QuotaPreference.service",
-	"Rule.rule_id",
 	"Service.template.spec",
 	"Service.template.spec.containers",
 }
@@ -545,7 +541,7 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and required in resource %s", fullFieldPath, rName))
 	}
 
-	if t.DefaultFromApi && t.Output && !slices.Contains(defaultFromApiConflictAllowlist, fmt.Sprintf("%s.%s", rName, fullFieldPath)) {
+	if t.DefaultFromApi && t.Output {
 		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and output in resource %s", fullFieldPath, rName))
 	}
 
@@ -1509,8 +1505,8 @@ func (t *Type) IsForceNew() bool {
 		return false
 	}
 
-	// Output fields (except effective labels) can't be immutable
-	if t.Output && !t.IsA("KeyValueEffectiveLabels") {
+	// Output or ignore_write fields (except effective/user labels and annotations) can't be immutable
+	if (t.Output || (t.IgnoreWrite && !t.IsA("KeyValueLabels") && !t.IsA("KeyValueAnnotations"))) && !t.IsA("KeyValueEffectiveLabels") {
 		return false
 	}
 

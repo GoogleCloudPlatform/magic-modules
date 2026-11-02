@@ -1123,17 +1123,6 @@ func TestTypeValidateDefaultFromApi(t *testing.T) {
 			resource:  "Hub",
 			wantError: "",
 		},
-		{
-			description: "default_from_api and output allowlisted succeeds",
-			prop: &Type{
-				Name:           "ruleId",
-				Type:           "String",
-				DefaultFromApi: true,
-				Output:         true,
-			},
-			resource:  "Rule",
-			wantError: "",
-		},
 	}
 
 	p := &Product{

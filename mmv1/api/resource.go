@@ -964,7 +964,7 @@ func (r Resource) SettableProperties() []*Type {
 	})
 
 	props = google.Reject(props, func(v *Type) bool {
-		return v.IsA("KeyValueLabels") || v.IsA("KeyValueAnnotations")
+		return v.IgnoreWrite || v.IsA("KeyValueLabels") || v.IsA("KeyValueAnnotations")
 	})
 
 	return props
