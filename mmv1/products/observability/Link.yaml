@@ -47,6 +47,8 @@ samples:
   - name: "observability_link_basic"
     primary_resource_id: "primary"
     external_providers: [time]
+    # Parallel google_project_service resources cause non-deterministic batchEnable request ordering
+    skip_vcr: true
     steps:
       - name: "observability_link_basic"
         test_env_vars:

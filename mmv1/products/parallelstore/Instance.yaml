@@ -27,9 +27,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-sweeper:
-  url_substitutions:
-    - region: us-central1-a
+deprecation_message: '`google_parallelstore_instance` is deprecated and will be removed in a future major release. Use `google_lustre_instance` instead.'
+exclude_sweeper: true
 async:
   type: OpAsync
   operation:

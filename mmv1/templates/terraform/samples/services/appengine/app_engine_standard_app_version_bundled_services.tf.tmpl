@@ -35,7 +35,7 @@ resource "google_storage_bucket_object" "main" {
 resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
   version_id   = "v1"
   service      = "{{index $.ResourceIdVars "service_id"}}"
-  runtime      = "python310"
+  runtime      = "python312"
 
   deployment {
     files {

@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
 resource "google_vmwareengine_cluster" "main" {
   provider = google-beta
   name = "gg-asset-cl-38930-c6db"

@@ -782,6 +782,8 @@ func getAnywhereCacheListResult(d *schema.ResourceData, config *transport_tpg.Co
 }
 
 func deleteAnywhereCacheIfAny(d *schema.ResourceData, config *transport_tpg.Config) error {
+	sleepDuration := 60 * config.SleepUnit
+
 	for {
 		// Get the list of Anywhere Caches
 		cacheList, err := getAnywhereCacheListResult(d, config)
@@ -835,7 +837,7 @@ func deleteAnywhereCacheIfAny(d *schema.ResourceData, config *transport_tpg.Conf
 		}
 
 		// Sleep for 1 minute
-		time.Sleep(1 * time.Minute)
+		time.Sleep(sleepDuration)
 	}
 
 	return nil

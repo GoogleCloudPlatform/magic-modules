@@ -10,6 +10,11 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+project = billingProject
+
 newRules := d.Get("enable_rules")
 newServices := getServices(newRules)
 newCatalogs := getCatalogs(newRules)
@@ -39,7 +44,7 @@ if validateDependenciesEnabled {
     timeout := d.Timeout(schema.TimeoutCreate)
     var opRes map[string]interface{}
     err = ServiceUsageV2OperationWaitTimeWithResponse(
-        config, resp, &opRes, "Updating ConsumerPolicy", config.UserAgent, timeout)
+        config, resp, &opRes, billingProject, "Updating ConsumerPolicy", config.UserAgent, timeout)
 
     if err != nil {
         return err

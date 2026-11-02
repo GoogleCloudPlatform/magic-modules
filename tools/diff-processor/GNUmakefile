@@ -21,7 +21,7 @@ clean:
 		git clean -f .
 	rm -rf bin/
 
-build:
+copy-provider:
 ifndef OLD_REF
 	$(error OLD_REF is undefined)
 endif
@@ -54,7 +54,10 @@ endif
 		find . -type f -name "*.go" -exec sed -i.bak "s~$$real_package_name/$$real_folder_name~$$fake_package_name/google~g" {} +; \
 		sed -i.bak "s|$$real_package_name|$$fake_package_name|g" go.mod
 	go mod tidy
+
+build:
+	$(MAKE) copy-provider
 	mkdir -p bin/
 	go build -o ./bin/ .
 
-.PHONY: clone clean build
+.PHONY: clone clean copy-provider build

@@ -50,6 +50,7 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/workbench_instance.go.tmpl'
   post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
+  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
 sweeper:
@@ -160,6 +161,8 @@ virtual_fields:
     default_value: "ACTIVE"
 error_retry_predicates:
   - 'transport_tpg.IsWorkbenchQueueError'
+  - 'transport_tpg.IsSubnetworkNotReadyLROError'
+error_retry_on_async: true
 parameters:
   - name: 'location'
     type: String
@@ -431,6 +434,8 @@ properties:
               diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
             - name: 'resourcePolicies'
               type: Array
+              # resourcePolicies is not present in CAI asset
+              is_missing_in_cai: true
               default_from_api: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               description: |

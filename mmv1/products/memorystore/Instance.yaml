@@ -31,6 +31,9 @@ sweeper:
   url_substitutions:
     - region: us-central1
     - region: us-west1
+    - region: us-east4
+    - region: northamerica-south1
+    - region: europe-north1
 timeouts:
   insert_minutes: 60
   update_minutes: 120
@@ -79,7 +82,7 @@ samples:
           kms_key_name: my-key
         test_vars_overrides:
           prevent_destroy: "false"
-          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-west1").CryptoKey.Name
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "northamerica-south1").CryptoKey.Name
         ignore_read_extra:
           - update_time
   - name: memorystore_instance_persistence_aof
@@ -286,12 +289,10 @@ properties:
   - name: authorizationMode
     type: String
     description: |-
-      Optional. Immutable. Authorization mode of the instance. Possible values:
+      Optional. Authorization mode of the instance. Possible values:
        AUTH_DISABLED
-      IAM_AUTH.
-
-      TOKEN_AUTH is also supported, but only available in the google-beta provider.
-    immutable: true
+      IAM_AUTH
+      TOKEN_AUTH
     default_from_api: true
   - name: aclPolicy
     type: String

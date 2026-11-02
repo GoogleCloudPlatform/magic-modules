@@ -21,3 +21,4 @@ versions:
     name: ga
   - base_url: https://lustre.googleapis.com/v1/
     name: beta
+legacy_identity_import_test: true

@@ -20,12 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
-
-	"golang.org/x/exp/maps"
 )
 
 type ParameterList []any
@@ -45,7 +45,7 @@ type mockRunner struct {
 }
 
 func sortedEnvString(env map[string]string) string {
-	keys := maps.Keys(env)
+	keys := slices.Collect(maps.Keys(env))
 	sort.Strings(keys)
 	kvs := make([]string, len(keys))
 	for i, k := range keys {
@@ -73,6 +73,7 @@ func NewMockRunner() MockRunner {
 			"/mock/dir/magic-modules/tools/diff-processor make [build] " + sortedEnvString(diffProcessorEnv):                                                                                      "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [schema-diff] map[]":                                                                                                 "{\"AddedResources\": [\"google_alloydb_instance\"]}",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-missing-tests /mock/dir/tpgb/google-beta/services] map[]":                                                    `{"google_folder_access_approval_settings":{"SuggestedTest":"resource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}","Tests":["a","b","c"]}}`,
+			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-unreadable-tests /mock/dir/tpgb/google-beta/services] map[]":                                                 `{"NewUnreadableTests":{},"StaleUnreadableTests":[]}`,
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-missing-docs /mock/dir/tpgb] map[]":                                                                          `{"Resource":[],"DataSource":[]}`,
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-missing-identity /mock/dir/tpgb/google-beta/services] map[]":                                                 `{}`,
 			"/mock/dir/tgc git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                          " 1 file changed, 10 insertions(+)\n",

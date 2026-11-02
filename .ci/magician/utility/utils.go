@@ -23,10 +23,9 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/slices"
 )
 
 // retryConfig holds configuration for request retries

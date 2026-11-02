@@ -16,15 +16,48 @@ package api
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
+
+// Existing resources that combine default_from_api with required or output.
+// These are grandfathered to avoid breaking existing resource schemas.
+// Do not add new fields to this list; see:
+// https://github.com/hashicorp/terraform-provider-google/issues/18832
+var defaultFromApiConflictAllowlist = []string{
+	"Cluster.name",
+	"Cluster.storage_resources.config.new_bucket.hierarchical_namespace.enabled",
+	"Connection.node_config.max_node_count",
+	"Connection.node_config.min_node_count",
+	"DataPolicy.etag",
+	"EdgeCacheService.log_config.enable",
+	"EkmConnection.service_resolvers.server_certificates.subject_alternative_dns_names",
+	"Feature.spec.clusterupgrade.post_conditions",
+	"FeatureOnlineStoreFeatureview.region",
+	"Hub.name",
+	"Instance.persistence_config.persistence_mode",
+	"Job.config.manifests.type",
+	"JobTemplate.config.manifests.type",
+	"LinkedDataset.bigquery_dataset",
+	"NetworkAttachment.region",
+	"NodeGroup.autoscaling_policy.max_nodes",
+	"NodeGroup.autoscaling_policy.mode",
+	"PluginInstance.actions",
+	"PluginInstance.actions.curation_config.curation_type",
+	"QuotaAdjusterSettings.parent",
+	"QuotaPreference.parent",
+	"QuotaPreference.quota_id",
+	"QuotaPreference.service",
+	"Rule.rule_id",
+	"Service.template.spec",
+	"Service.template.spec.containers",
+}
 
 // Represents a property type
 type Type struct {
@@ -508,6 +541,14 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
 	}
 
+	if t.DefaultFromApi && t.Required && !slices.Contains(defaultFromApiConflictAllowlist, fmt.Sprintf("%s.%s", rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and required in resource %s", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Output && !slices.Contains(defaultFromApiConflictAllowlist, fmt.Sprintf("%s.%s", rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and output in resource %s", fullFieldPath, rName))
+	}
+
 	if t.DefaultFromApi && t.DefaultValue != nil {
 		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}
@@ -547,36 +588,53 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot set update_mask_fields because it is nested in resource %s", fullFieldPath, rName))
 	}
 
-	if !t.isExcluded() && len(t.Conflicting()) > 0 {
-		t.cullHigherVersionConflicts()
-		for _, c := range t.Conflicting() {
-			if _, path := t.ResourceMetadata.resolvePropertySchemaPath(c); path == "" {
-				es = append(es, fmt.Errorf("property %s has `conflicts` entry %q that resolved to an empty ConflictsWith in resource %s", fullFieldPath, c, rName))
-			}
-		}
+	if !t.isExcluded() {
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "conflicts", "ConflictsWith", &t.Conflicts, &t.ConflictsGroup, Type.Conflicting)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "at_least_one_of", "AtLeastOneOf", &t.AtLeastOneOf, &t.AtLeastOneOfGroup, Type.AtLeastOneOfList)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "exactly_one_of", "ExactlyOneOf", &t.ExactlyOneOf, &t.ExactlyOneOfGroup, Type.ExactlyOneOfList)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "required_with", "RequiredWith", &t.RequiredWith, &t.RequiredWithGroup, Type.RequiredWithList)...)
 	}
 
 	return es
 }
 
-// Remove conflicts that are valid, in the max version of the schema, but between
-// groups that are not necessarily present in the current run.
-func (t *Type) cullHigherVersionConflicts() {
-	raw := t.Conflicting()
+// Validate a schema-path constraint list (`conflicts`, `at_least_one_of`,
+// `exactly_one_of`, or `required_with`), first culling entries that are valid
+// in the maximum schema version for the run (e.g. beta) when generating a
+// lower version (e.g. GA).
+func (t *Type) validateSchemaPathConstraint(
+	fullFieldPath, rName, yamlAttr, schemaAttr string,
+	rawField *[]string,
+	groupField **[]string,
+	getter func(Type) []string,
+) []error {
+	raw := getter(*t)
+	if len(raw) == 0 {
+		return nil
+	}
+
 	filtered := make([]string, 0, len(raw))
-	for _, c := range raw {
-		_, resolved := t.ResourceMetadata.resolvePropertySchemaPath(c)
-		if resolved == "" && t.isValidHigherVersionConflict(c) {
+	for _, entry := range raw {
+		_, resolved := t.ResourceMetadata.resolvePropertySchemaPath(entry)
+		if resolved == "" && t.isValidHigherVersionConstraint(entry, getter) {
 			continue
 		}
-		filtered = append(filtered, c)
+		filtered = append(filtered, entry)
 	}
 	if len(filtered) != len(raw) {
-		t.Conflicts = filtered
-		if t.ConflictsGroup != nil {
-			t.ConflictsGroup = &filtered
+		*rawField = filtered
+		if *groupField != nil {
+			*groupField = &filtered
 		}
 	}
+
+	var es []error
+	for _, entry := range getter(*t) {
+		if _, path := t.ResourceMetadata.resolvePropertySchemaPath(entry); path == "" {
+			es = append(es, fmt.Errorf("property %s has `%s` entry %q that resolved to an empty %s in resource %s", fullFieldPath, yamlAttr, entry, schemaAttr, rName))
+		}
+	}
+	return es
 }
 
 // Hierarchical exclusion check against self, parent (if nested), resource
@@ -597,9 +655,6 @@ func (t *Type) isExcluded() bool {
 // check :description, required: true
 // check :update_verb, allowed: %i[POST PUT PATCH NONE],
 // check_default_value_property
-// check_at_least_one_of
-// check_exactly_one_of
-// check_required_with
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.
@@ -826,6 +881,8 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 		}
 	} else if t.IsA("Array") && t.ItemType.IsA("NestedObject") {
 		t.ItemType.ExcludeIfNotInVersion(version)
+	} else if t.IsA("Map") && t.ValueType != nil {
+		t.ValueType.ExcludeIfNotInVersion(version)
 	}
 }
 
@@ -1504,8 +1561,8 @@ func (t *Type) ProviderOnly() bool {
 	return parent != nil && parent.ProviderOnly()
 }
 
-func (t *Type) isValidHigherVersionConflict(conflictPath string) bool {
-	if t.ResourceMetadata == nil {
+func (t *Type) isValidHigherVersionConstraint(targetPath string, getter func(Type) []string) bool {
+	if t.ResourceMetadata == nil || t.ResourceMetadata.maxVersionSchema == nil {
 		return false
 	}
 	highSchema := t.ResourceMetadata.maxVersionSchema
@@ -1514,12 +1571,12 @@ func (t *Type) isValidHigherVersionConflict(conflictPath string) bool {
 		return false
 	}
 
-	highTarget, highTargetPath := highSchema.resolvePropertySchemaPath(conflictPath)
+	highTarget, highTargetPath := highSchema.resolvePropertySchemaPath(targetPath)
 	if highTarget == nil || highTargetPath == "" {
 		return false
 	}
 
-	for _, rev := range highTarget.Conflicting() {
+	for _, rev := range getter(*highTarget) {
 		if _, revPath := highSchema.resolvePropertySchemaPath(rev); revPath == highSelfPath {
 			return true
 		}

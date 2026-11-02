@@ -159,8 +159,13 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 			},
 			{{- if not $.Res.ExcludeIdentityGeneration }}
 			{
+				{{- if $.Res.UseLegacyIdentityImportTest }}
 				ResourceName:       "{{ $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
 				RefreshState:       true,
+				{{- else }}
+				ResourceName:       "{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
+				ImportState:        true,
+				{{- end }}
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
@@ -221,10 +226,10 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 			RawURL: url,
 			UserAgent: config.UserAgent,
 		{{- if $.Res.ErrorRetryPredicates }}
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.Res.ErrorRetryPredicates "," -}} },
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- range $i, $p := $.Res.ErrorRetryPredicates }}{{ if $i }},{{ end }}{{ if not (contains $p ".") }}{{ lower $.Res.ProductMetadata.Name }}.{{ end }}{{ $p }}{{ end -}} },
 		{{- end }}
 		{{- if $.Res.ErrorAbortPredicates }}
-			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.Res.ErrorAbortPredicates "," -}} },
+			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- range $i, $p := $.Res.ErrorAbortPredicates }}{{ if $i }},{{ end }}{{ if not (contains $p ".") }}{{ lower $.Res.ProductMetadata.Name }}.{{ end }}{{ $p }}{{ end -}} },
 		{{- end }}
 		})
 		if err == nil {

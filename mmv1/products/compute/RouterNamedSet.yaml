@@ -31,6 +31,7 @@ update_verb: 'POST'
 update_mask: true
 delete_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/deleteNamedSet?namedSet={{name}}'
 delete_verb: 'POST'
+mutex: 'router/{{region}}/{{router}}'
 import_format:
   - '{{project}}/{{region}}/{{router}}/namedSets/{{name}}'
 timeouts:

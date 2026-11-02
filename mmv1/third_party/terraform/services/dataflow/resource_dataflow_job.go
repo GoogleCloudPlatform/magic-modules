@@ -572,7 +572,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 			if strings.Contains(gerr.Message, "not yet ready for canceling") {
 				// Retry cancelling job if it's not ready.
 				// Sleep to avoid hitting update quota with repeated attempts.
-				time.Sleep(5 * time.Second)
+				time.Sleep(5 * config.SleepUnit)
 				return retry.RetryableError(updateErr)
 			}
 
@@ -593,7 +593,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	ok := shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
 	for !ok {
 		log.Printf("[DEBUG] Waiting for job with job state %q to terminate...", d.Get("state").(string))
-		time.Sleep(5 * time.Second)
+		time.Sleep(5 * config.SleepUnit)
 
 		err = resourceDataflowJobRead(d, meta)
 		if err != nil {

@@ -96,6 +96,11 @@ properties:
     send_empty_value: true
     description: |
       The description allows for additional details about `BackupPlan` and its use cases to be provided.
+  - name: labels
+    type: KeyValueLabels
+    immutable: true
+    description: |
+      This collection of key/value pairs allows for custom labels to be supplied by the user.
   - name: backupVault
     type: String
     description: |

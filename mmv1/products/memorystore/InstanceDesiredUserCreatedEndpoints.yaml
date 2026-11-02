@@ -42,6 +42,8 @@ sweeper:
   url_substitutions:
     - region: us-central1
     - region: us-west1
+    - region: us-east4
+    - region: northamerica-south1
 async:
   type: OpAsync
   operation:

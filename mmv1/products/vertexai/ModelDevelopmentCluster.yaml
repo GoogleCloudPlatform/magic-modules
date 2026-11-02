@@ -25,14 +25,20 @@ references:
 base_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters
 self_link: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}
 create_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters?modelDevelopmentClusterId={{model_development_cluster_id}}
+update_url: projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}?updateMode={{update_mode}}
 update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{region}}/modelDevelopmentClusters/{{model_development_cluster_id}}
 timeouts:
   insert_minutes: 120
-  update_minutes: 120
+  update_minutes: 240
   delete_minutes: 120
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-east1
+    - region: us-east4
 async:
   operation:
     base_url: '{{op_id}}'
@@ -42,8 +48,14 @@ async:
     - delete
   result:
     resource_inside_response: true
+custom_diff:
+  - resourceVertexAIModelDevelopmentClusterCustomDiff
 custom_code:
+  constants: templates/terraform/constants/vertex_ai_model_development_cluster.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_model_development_cluster.go.tmpl
+  pre_create: templates/terraform/pre_create/vertex_ai_model_development_cluster.go.tmpl
+  post_create: templates/terraform/post_create/vertex_ai_model_development_cluster.go.tmpl
+  pre_update: templates/terraform/pre_update/vertex_ai_model_development_cluster.go.tmpl
 autogen_status: TW9kZWxEZXZlbG9wbWVudENsdXN0ZXJBdXRvZ2VuVjJBZ2VudA==
 samples:
   - name: vertex_ai_model_development_cluster_basic
@@ -62,7 +74,47 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
       - name: vertex_ai_model_development_cluster_update
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
+          filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
+        vars:
+          env: prod
+          update_mode: USER_AND_SERVICE
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
+      - name: vertex_ai_model_development_cluster_update
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest
+          network_name: mdc-net
+          subnetwork_name: mdc-subnet
+          firewall_name: mdc-fw
+          filestore_name: mdc-home
+          data_filestore_name: mdc-data
+          reservation_name: mdc-res
+        vars:
+          env: prod-user-only
+          update_mode: USER_ONLY
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
+          - update_mode
+      - name: vertex_ai_model_development_cluster_basic
         min_version: beta
         resource_id_vars:
           model_development_cluster_id: tftest
@@ -74,6 +126,57 @@ samples:
           reservation_name: mdc-res
         test_vars_overrides:
           model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+        ignore_read_extra:
+          - cluster_status
+          - update_time
+  - name: vertex_ai_model_development_cluster_gke
+    primary_resource_id: default
+    min_version: beta
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com"
+        role: "roles/resourcemanager.projectIamAdmin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com"
+        role: "roles/container.admin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com"
+        role: "roles/compute.admin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com"
+        role: "roles/hypercomputecluster.editor"
+    steps:
+      - name: vertex_ai_model_development_cluster_gke
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest-gke
+          network_name: mdc-gke-net
+          subnetwork_name: mdc-gke-subnet
+          firewall_name: mdc-gke-fw
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+      - name: vertex_ai_model_development_cluster_gke_update
+        min_version: beta
+        resource_id_vars:
+          model_development_cluster_id: tftest-gke
+          network_name: mdc-gke-net
+          subnetwork_name: mdc-gke-subnet
+          firewall_name: mdc-gke-fw
+        test_vars_overrides:
+          model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+virtual_fields:
+  - name: update_mode
+    type: Enum
+    enum_values:
+      - USER_ONLY
+      - USER_AND_SERVICE
+    default_value: USER_AND_SERVICE
+    description: |-
+      Whether the service also refreshes service-managed fields (startup and
+      prolog/epilog scripts, default node images) on update. `USER_ONLY` applies
+      only your changes; adding a node pool requires `USER_AND_SERVICE`.
+      Only applies to Slurm clusters (`orchestrator_spec.slurm_spec`); ignored
+      for GKE clusters (`kubernetes_spec`).
+      Defaults to `USER_AND_SERVICE`. Possible values are `USER_ONLY` and
+      `USER_AND_SERVICE`.
 parameters:
   - name: region
     type: String
@@ -346,7 +449,11 @@ properties:
   - name: nodePools
     type: Array
     required: true
-    description: The spec of the pools of different resources.
+    description: |-
+      The spec of the pools of different resources. Node pools can be added,
+      removed, or reordered in place; changing some fields on an existing node
+      pool may require replacing the node pool (validated server-side by the
+      API).
     item_type:
       type: NestedObject
       properties:
@@ -399,8 +506,10 @@ properties:
         - name: id
           type: String
           required: true
-          description: The unique ID referring to this node pool.
-          immutable: true
+          description: |-
+            The unique ID referring to this node pool. Cannot be modified in
+            place on an existing node pool; changing `id` updates the list of
+            node pools by adding/removing pools (validated server-side).
         - name: labels
           type: KeyValuePairs
           description: |-
@@ -426,7 +535,6 @@ properties:
           type: NestedObject
           required: true
           description: Specification of a single machine.
-          immutable: true
           properties:
             - name: machineType
               type: String
@@ -443,14 +551,12 @@ properties:
                 For DeployedModel this field is optional, and the default
                 value is `n1-standard-2`. For BatchPredictionJob or as part of
                 WorkerPoolSpec this field is required.
-              immutable: true
             - name: reservationAffinity
               type: NestedObject
               description: |-
                 A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
                 DeployedModel) to draw its Compute Engine resources from a Shared
                 Reservation, or exclusively from on-demand capacity.
-              immutable: true
               properties:
                 - name: reservationAffinityType
                   type: String
@@ -461,14 +567,12 @@ properties:
                     NO_RESERVATION
                     ANY_RESERVATION
                     SPECIFIC_RESERVATION
-                  immutable: true
                 - name: values
                   type: Array
                   description: |-
                     Corresponds to the label values of a reservation resource. This must be the
                     resource name of the reservation, reservation block, or reservation sub-
                     block.
-                  immutable: true
                   item_type:
                     type: String
         - name: nodeImage
@@ -508,7 +612,6 @@ properties:
             SPOT
             FLEX_START
           default_from_api: true
-          immutable: true
         - name: scalingSpec
           type: NestedObject
           description: The scaling spec of the node pool.
@@ -535,6 +638,7 @@ properties:
     type: NestedObject
     required: true
     description: The spec of the orchestrator. Only one orchestrator may be specified.
+    custom_expand: templates/terraform/custom_expand/vertex_ai_model_development_cluster_orchestrator_spec.go.tmpl
     update_mask_fields:
       - orchestrator_spec.slurm_spec.accounting
       - orchestrator_spec.slurm_spec.config
@@ -549,6 +653,8 @@ properties:
       - name: slurmSpec
         type: NestedObject
         description: The Slurm orchestrator related spec of the cluster.
+        conflicts:
+          - orchestrator_spec.0.kubernetes_spec
         properties:
           - name: config
             type: KeyValuePairs
@@ -671,6 +777,59 @@ properties:
             description: Custom bash scripts executed before each slurm job on every allocated node.
             item_type:
               type: String
+      - name: kubernetesSpec
+        type: NestedObject
+        description: The GKE orchestrator related spec of the cluster.
+        allow_empty_object: true
+        conflicts:
+          - orchestrator_spec.0.slurm_spec
+        properties:
+          - name: nodePoolIds
+            type: Array
+            description: |-
+              IDs of the NodePools to be included in this GKE cluster. These IDs must
+              correspond to NodePools defined in the `node_pools` field.
+            immutable: true
+            item_type:
+              type: String
+          - name: enableIpAlias
+            type: Boolean
+            description: Whether to enable IP alias.
+            immutable: true
+          - name: publicAccessEndpointEnabled
+            type: Boolean
+            description: |-
+              Whether the GKE cluster's control plane endpoint is publicly accessible.
+              If true, the cluster is created with a public access endpoint (i.e. the
+              private cluster configuration is disabled). If false or unset, the cluster
+              is created with only private control plane access by default.
+            immutable: true
+          - name: controlPlaneVersion
+            type: String
+            description: |-
+              The Kubernetes version of the GKE control plane.
+              Accepted formats are minor version (for example, `"1.30"`), patch version
+              (for example, `"1.30.5"`), full GKE release version (for example,
+              `"1.30.5-gke.1014001"`), or `"-"` to use the service default version.
+              Upgrades can advance at most one minor version at a time; downgrades are
+              rejected.
+            default_from_api: true
+            diff_suppress_func: 'vertexAiModelDevelopmentClusterGkeVersionDiffSuppress'
+          - name: nodePoolVersions
+            type: KeyValuePairs
+            description: |-
+              The Kubernetes versions for specific node pools, keyed by node pool ID.
+              When specified, all node pool IDs in the cluster must be included.
+              Accepted formats are minor version (for example, `"1.30"`), patch version
+              (for example, `"1.30.5"`), full GKE release version (for example,
+              `"1.30.5-gke.1014001"`), or `"-"` to align with the control plane version.
+              Node pools cannot be newer than the control plane or more than 2 minor
+              versions behind it; upgrades can advance at most one minor version at a
+              time and downgrades are rejected.
+            default_from_api: true
+            diff_suppress_func: 'vertexAiModelDevelopmentClusterGkeVersionDiffSuppress'
+            custom_expand: templates/terraform/custom_expand/vertex_ai_model_development_cluster_node_pool_versions.go.tmpl
+            custom_flatten: templates/terraform/custom_flatten/vertex_ai_model_development_cluster_node_pool_versions.go.tmpl
   - name: runtime
     type: NestedObject
     description: The runtime backfilled records of the cluster.

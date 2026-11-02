@@ -83,17 +83,23 @@ samples:
           source_sqldb_user: username
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
+    # Destination AlloyDB instance in us-central1 experiences resource pool stockouts in CI
+    # https://github.com/hashicorp/terraform-provider-google/issues/29342
+    skip_vcr: true
     steps:
       - name: database_migration_service_migration_job_postgres_to_alloydb
         resource_id_vars:
           destination_alloydb: destination-alloydb
           destination_cp: destination-cp
           migration_id: my-migrationid
+          network_name: destination-alloydb
           source_cp: source-cp
           source_csql: source-csql
           source_sqldb_cert: cert
           source_sqldb_pass: password
           source_sqldb_user: username
+        test_vars_overrides:
+          network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
 parameters:
   - name: migrationJobId
     type: String

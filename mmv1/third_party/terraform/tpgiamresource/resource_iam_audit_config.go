@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -50,10 +51,10 @@ func ResourceIamAuditConfig(parentSpecificSchema map[string]*schema.Schema, newU
 	settings := NewIamSettings(options...)
 
 	return &schema.Resource{
-		Create: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, settings.EnableBatching),
+		Create: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, settings.EnableBatching, settings.MaxBackoffTimeout),
 		Read:   resourceIamAuditConfigRead(newUpdaterFunc),
-		Update: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, settings.EnableBatching),
-		Delete: resourceIamAuditConfigDelete(newUpdaterFunc, settings.EnableBatching),
+		Update: resourceIamAuditConfigCreateUpdate(newUpdaterFunc, settings.EnableBatching, settings.MaxBackoffTimeout),
+		Delete: resourceIamAuditConfigDelete(newUpdaterFunc, settings.EnableBatching, settings.MaxBackoffTimeout),
 		Schema: tpgresource.MergeSchemas(iamAuditConfigSchema, parentSpecificSchema),
 		Importer: &schema.ResourceImporter{
 			State: iamAuditConfigImport(resourceIdParser),
@@ -135,7 +136,7 @@ func iamAuditConfigImport(resourceIdParser ResourceIdParserFunc) schema.StateFun
 	}
 }
 
-func resourceIamAuditConfigCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool) func(*schema.ResourceData, interface{}) error {
+func resourceIamAuditConfigCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, maxBackoffTimeout time.Duration) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -152,9 +153,9 @@ func resourceIamAuditConfigCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc
 		}
 		if enableBatching {
 			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
-				"Overwrite audit config for service %s on resource %q", ac.Service, updater.DescribeResource()))
+				"Overwrite audit config for service %s on resource %q", ac.Service, updater.DescribeResource()), maxBackoffTimeout)
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, maxBackoffTimeout)
 		}
 		if err != nil {
 			return err
@@ -164,7 +165,7 @@ func resourceIamAuditConfigCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc
 	}
 }
 
-func resourceIamAuditConfigDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool) schema.DeleteFunc {
+func resourceIamAuditConfigDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBatching bool, maxBackoffTimeout time.Duration) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*transport_tpg.Config)
 
@@ -180,9 +181,9 @@ func resourceIamAuditConfigDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enab
 		}
 		if enableBatching {
 			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
-				"Delete audit config for service %s on resource %q", ac.Service, updater.DescribeResource()))
+				"Delete audit config for service %s on resource %q", ac.Service, updater.DescribeResource()), maxBackoffTimeout)
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF)
+			err = iamPolicyReadModifyWrite(updater, modifyF, maxBackoffTimeout)
 		}
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %s with IAM audit config %q", updater.DescribeResource(), d.Id()))

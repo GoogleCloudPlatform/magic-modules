@@ -3,8 +3,7 @@ package tpgdclresource
 import (
 	"context"
 	"fmt"
-
-	glog "github.com/golang/glog"
+	"log"
 )
 
 // ReqCtxKey is the key type for storing values in the context.
@@ -28,7 +27,7 @@ func APIRequestID(ctx context.Context) string {
 	}
 	requestID, ok := val.(string)
 	if !ok {
-		glog.Warning("Could not convert APIRequestID val to string")
+		log.Print("Could not convert APIRequestID val to string")
 		return ""
 	}
 	return requestID

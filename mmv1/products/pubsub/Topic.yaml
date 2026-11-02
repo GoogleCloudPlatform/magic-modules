@@ -302,10 +302,6 @@ properties:
               Configuration for reading Cloud Storage data in text format. Each line of
               text as specified by the delimiter will be set to the `data` field of a
               Pub/Sub message.
-            exactly_one_of:
-              - text_format
-              - avro_format
-              - pubsub_avro_format
             properties:
               - name: delimiter
                 type: String
@@ -322,10 +318,6 @@ properties:
               bytes of each object will be set to the `data` field of a Pub/Sub message.
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - text_format
-              - avro_format
-              - pubsub_avro_format
             properties: []
             # Meant to be an empty object with no properties.
           - name: pubsubAvroFormat
@@ -337,10 +329,6 @@ properties:
               will be restored when publishing.
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - text_format
-              - avro_format
-              - pubsub_avro_format
             properties: []
             # Meant to be an empty object with no properties.
           - name: minimumObjectCreateTime
@@ -479,9 +467,6 @@ properties:
       order specified.
     item_type:
       type: NestedObject
-      exactly_one_of:
-        - javascript_udf
-        - ai_inference
       properties:
         - name: aiInference
           type: NestedObject
@@ -514,6 +499,27 @@ properties:
               description: |
                 The service account to use to make prediction requests against
                 endpoints.
+        - name: compression
+          type: NestedObject
+          description: |
+            Configuration for compressing/decompressing message data using a
+            user-specified compression algorithm.
+          properties:
+            - name: compressionAlgorithm
+              type: String
+              required: true
+              description: |
+                Specifies the compression algorithm to use.
+                Possible values include `ZLIB`.
+                See [CompressionAlgorithm](https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics#CompressionAlgorithm) for allowed values.
+            - name: compressionMode
+              type: Enum
+              required: true
+              description: |
+                Specifies whether to compress or decompress the message.
+              enum_values:
+                - COMPRESS
+                - DECOMPRESS
         - name: javascriptUdf
           type: NestedObject
           description: |
