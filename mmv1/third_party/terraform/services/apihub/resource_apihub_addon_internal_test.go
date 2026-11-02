@@ -1,18 +1,54 @@
 package apihub
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
+type apihubAddonDiffMock struct {
+	tpgresource.ResourceDiffMock
+	id string
+}
+
+func (d *apihubAddonDiffMock) Id() string {
+	return d.id
+}
+
+func (d *apihubAddonDiffMock) HasChange(key string) bool {
+	old, new := d.GetChange(key)
+	return !reflect.DeepEqual(old, new)
+}
+
 func TestUnitApihubAddon_customizeDiff(t *testing.T) {
 	t.Parallel()
 
 	key := "config.0.gateway_plugin_addon_config.0.gateway_plugin_configs"
+	addonId := "projects/p/locations/l/addons/system-specboost"
+	oldConfig := []interface{}{
+		map[string]interface{}{
+			"all_data_addon_config": []interface{}{
+				map[string]interface{}{
+					"enabled": false,
+				},
+			},
+		},
+	}
+	newConfig := []interface{}{
+		map[string]interface{}{
+			"all_data_addon_config": []interface{}{
+				map[string]interface{}{
+					"enabled": true,
+				},
+			},
+		},
+	}
 
 	cases := []struct {
 		name      string
+		id        string
+		before    map[string]interface{}
 		after     map[string]interface{}
 		wantError bool
 	}{
@@ -130,25 +166,61 @@ func TestUnitApihubAddon_customizeDiff(t *testing.T) {
 			wantError: true,
 		},
 		{
-			name: "valid - state is ACTIVE",
+			name: "valid - update when state is ACTIVE and config changed",
+			id:   addonId,
+			before: map[string]interface{}{
+				"config": oldConfig,
+			},
 			after: map[string]interface{}{
-				"state": "ACTIVE",
+				"state":  "ACTIVE",
+				"config": newConfig,
 			},
 			wantError: false,
 		},
 		{
-			name: "invalid - state is INACTIVE",
+			name: "invalid - update when state is INACTIVE and config changed",
+			id:   addonId,
+			before: map[string]interface{}{
+				"config": oldConfig,
+			},
 			after: map[string]interface{}{
-				"state": "INACTIVE",
+				"state":  "INACTIVE",
+				"config": newConfig,
 			},
 			wantError: true,
 		},
 		{
-			name: "invalid - state is ERROR",
+			name: "invalid - update when state is ERROR and config changed",
+			id:   addonId,
+			before: map[string]interface{}{
+				"config": oldConfig,
+			},
 			after: map[string]interface{}{
-				"state": "ERROR",
+				"state":  "ERROR",
+				"config": newConfig,
 			},
 			wantError: true,
+		},
+		{
+			name: "valid - no-op plan when state is ERROR and config unchanged",
+			id:   addonId,
+			before: map[string]interface{}{
+				"config": oldConfig,
+			},
+			after: map[string]interface{}{
+				"state":  "ERROR",
+				"config": oldConfig,
+			},
+			wantError: false,
+		},
+		{
+			name: "valid - create when id is empty",
+			id:   "",
+			after: map[string]interface{}{
+				"state":  "INACTIVE",
+				"config": newConfig,
+			},
+			wantError: false,
 		},
 	}
 
@@ -156,9 +228,16 @@ func TestUnitApihubAddon_customizeDiff(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			d := &tpgresource.ResourceDiffMock{
-				Before: map[string]interface{}{},
-				After:  tc.after,
+			before := tc.before
+			if before == nil {
+				before = map[string]interface{}{}
+			}
+			d := &apihubAddonDiffMock{
+				ResourceDiffMock: tpgresource.ResourceDiffMock{
+					Before: before,
+					After:  tc.after,
+				},
+				id: tc.id,
 			}
 			err := apihubAddonCustomizeDiffFunc(d)
 			if tc.wantError && err == nil {
