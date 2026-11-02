@@ -248,6 +248,10 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
+		if hasSameCommitSHA(repo.Name, rnr) {
+			fmt.Printf("Skipping clone of %q; new and old commit SHAs match\n", repo.Name)
+			continue
+		}
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
 			fmt.Printf("Failed to clone repo %q at branch %q: %s\n", repo.Name, newBranch, err)
@@ -264,7 +268,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	diffs := []Diff{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		if !repo.Cloned {
-			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
+			if len(errors[repo.Title]) > 0 {
+				fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
+			}
 			continue
 		}
 		shortStat, err := ctlr.DiffShortStat(repo, oldBranch, newBranch)
@@ -316,7 +322,11 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
-			fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
+			if len(errors[repo.Title]) > 0 {
+				fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
+			} else {
+				fmt.Println("Skipping diff processor; no diff: ", repo.Name)
+			}
 			continue
 		}
 		if len(repo.ChangedFiles) == 0 {
@@ -416,7 +426,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	changedFilesAffectedResources := map[string]struct{}{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
-			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
+			if len(errors[repo.Title]) > 0 {
+				fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
+			}
 			continue
 		}
 		for _, path := range repo.ChangedFiles {
@@ -551,6 +563,20 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		fmt.Printf("Warning: failed to save comment ID to file: %v\n", err)
 	}
 	return nil
+}
+
+// hasSameCommitSHA reports whether the new and old commit SHA files for a
+// downstream repository exist, are non-empty, and contain the same commit SHA.
+func hasSameCommitSHA(repoName string, rnr ExecRunner) bool {
+	variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repoName)
+	oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repoName)
+	commitSHA, newErr := rnr.ReadFile(variablePath)
+	oldCommitSHA, oldErr := rnr.ReadFile(oldVariablePath)
+	if newErr != nil || oldErr != nil {
+		return false
+	}
+	trimmedNew := strings.TrimSpace(commitSHA)
+	return trimmedNew != "" && trimmedNew == strings.TrimSpace(oldCommitSHA)
 }
 
 // Build the diff processor for tpg or tpgb
