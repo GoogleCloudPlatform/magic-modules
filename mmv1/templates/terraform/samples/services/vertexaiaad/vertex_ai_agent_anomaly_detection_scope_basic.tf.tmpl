@@ -12,12 +12,16 @@ resource "google_vertex_ai_agent_anomaly_detection_scope" "{{$.PrimaryResourceId
   region                           = "us"
   agent_anomaly_detection_scope_id = "{{index $.ResourceIdVars "scope_id"}}"
   display_name                     = "Basic AAD scope"
+  auto_enroll                      = true
   log_buckets = [
     google_logging_project_bucket_config.{{index $.ResourceIdVars "log_bucket_id"}}.id,
   ]
   observability_buckets = [
     "projects/${data.google_project.project.project_id}/locations/us/buckets/_Trace/datasets/Spans",
   ]
+  encryption_spec {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
 }
 
 data "google_project" "project" {
