@@ -33,10 +33,17 @@ async:
       delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
+    # Polling on create is required: while a custom domain is being created,
+    # GET can return a placeholder Domain without user-configured fields (e.g.
+    # `serve`), which would otherwise be read into state as a diff.
+    - create
     - update
     - delete
   include_project: false
-  check_response_func_existence: transport_tpg.PollCheckForExistence
+  # Waits for the output-only `type` field, which is only set once the full
+  # Domain is readable. `reconciling` can't be used: it stays true until DNS and
+  # certificate setup finish, which can take far longer than any timeout.
+  check_response_func_existence: PollCheckForFirebaseAppHostingDomainMaterialized
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   # Errors are on the Domain resource itself
   suppress_error: true

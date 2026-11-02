@@ -43,6 +43,14 @@ samples:
       - name: vertex_ai_cache_config
         test_env_vars:
           project: PROJECT_NAME
+parameters:
+  - name: region
+    type: String
+    description: |
+      The region of the Vertex AI API endpoint used to manage the cache config, e.g. `us-central1`.
+      The cache config is a project-level setting, so this only selects which regional endpoint
+      requests are sent to. If not specified, the provider-level region is used.
+    url_param_only: true
 properties:
   - name: name
     type: String

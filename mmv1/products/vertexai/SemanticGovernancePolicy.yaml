@@ -65,9 +65,15 @@ samples:
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
+        vars:
+          display_name: null
+          description: null
+          natural_language_constraint: 'Do not access internal developer endpoints'
+          mcp_tool: 'get_order_status'
+          denial_message: 'Access denied: constraint violation'
         ignore_read_extra:
           - 'etag'
-      - name: 'vertex_ai_semantic_governance_policy_test_update'
+      - name: 'vertex_ai_semantic_governance_policy_test_create'
         resource_id_vars:
           project_id: 'sgp'
           semantic_governance_policy_id: 'sgp'
@@ -81,6 +87,8 @@ samples:
           display_name: 'updated-policy'
           description: 'Updated description for semantic governance policy'
           natural_language_constraint: 'Do not access restricted storage buckets'
+          mcp_tool: 'get_customer_profile'
+          denial_message: 'Access denied by semantic governance policy'
         ignore_read_extra:
           - 'etag'
       # Switches the policy to a different agent and removes every optional

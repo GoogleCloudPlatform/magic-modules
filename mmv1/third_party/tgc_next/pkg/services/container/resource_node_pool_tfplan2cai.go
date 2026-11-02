@@ -94,6 +94,31 @@ func GetContainerNodePoolApiObject(d tpgresource.TerraformResourceData, config *
 	} else if v, ok := d.GetOkExists("location"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
 		obj["location"] = locationProp
 	}
+	if v, ok := d.GetOk("best_effort_provisioning"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			bep := l[0].(map[string]interface{})
+			if enabled, ok := bep["enabled"].(bool); ok && enabled {
+				bepMap := map[string]interface{}{"enabled": true}
+				if minNodes, ok := bep["min_provision_nodes"].(int); ok && minNodes != 0 {
+					bepMap["minProvisionNodes"] = minNodes
+				}
+				obj["bestEffortProvisioning"] = bepMap
+			}
+		}
+	}
+	if v, ok := d.GetOk("maintenance_policy"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			mp := l[0].(map[string]interface{})
+			if eu, ok := mp["exclusion_until_end_of_support"].([]interface{}); ok && len(eu) > 0 && eu[0] != nil {
+				euMap := eu[0].(map[string]interface{})
+				obj["maintenancePolicy"] = map[string]interface{}{
+					"exclusionUntilEndOfSupport": map[string]interface{}{
+						"enabled": euMap["enabled"],
+					},
+				}
+			}
+		}
+	}
 
 	return obj, nil
 }
@@ -548,13 +573,42 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 		}
 	}
 
+	if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			bep := l[0].(map[string]interface{})
+			enabled := bep["enabled"].(bool)
+			minProvisionNodes := bep["min_provision_nodes"].(int)
+			if enabled {
+				np.BestEffortProvisioning = &container.BestEffortProvisioning{
+					Enabled:           true,
+					MinProvisionNodes: int64(minProvisionNodes),
+				}
+			}
+		}
+	}
+
+	if v, ok := d.GetOk(prefix + "maintenance_policy"); ok {
+		if l := v.([]interface{}); len(l) > 0 && l[0] != nil {
+			maintenancePolicy := l[0].(map[string]interface{})
+			if v, ok := maintenancePolicy["exclusion_until_end_of_support"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+				np.MaintenancePolicy = &container.NodePoolMaintenancePolicy{
+					ExclusionUntilEndOfSupport: &container.ExclusionUntilEndOfSupport{},
+				}
+				exclusionUntilEndOfSupport := v.([]interface{})[0].(map[string]interface{})
+				if v, ok := exclusionUntilEndOfSupport["enabled"]; ok {
+					np.MaintenancePolicy.ExclusionUntilEndOfSupport.Enabled = v.(bool)
+				}
+			}
+		}
+	}
+
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &container.MaxPodsConstraint{
 			MaxPodsPerNode: int64(v.(int)),
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "management"); ok {
+	if v, ok := d.GetOk(prefix + "management"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		managementConfig := v.([]interface{})[0].(map[string]interface{})
 		np.Management = &container.NodeManagement{}
 
@@ -567,7 +621,7 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
+	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 		np.UpgradeSettings = &container.UpgradeSettings{}
 
@@ -593,7 +647,7 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 			}
 		}
 
-		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 {
+		if v, ok := upgradeSettingsConfig["blue_green_settings"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			blueGreenSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 			np.UpgradeSettings.BlueGreenSettings = &container.BlueGreenSettings{}
 
@@ -605,7 +659,7 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 				np.UpgradeSettings.BlueGreenSettings.NodePoolSoakDuration = v.(string)
 			}
 
-			if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+			if v, ok := blueGreenSettingsConfig["standard_rollout_policy"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 				standardRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
 				standardRolloutPolicy := &container.StandardRolloutPolicy{}
 
@@ -625,7 +679,7 @@ func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*contai
 		}
 	}
 
-	if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
+	if v, ok := d.GetOk(prefix + "node_drain_config"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		nodeDrainConfig := v.([]interface{})[0].(map[string]interface{})
 		np.NodeDrainConfig = &container.NodeDrainConfig{}
 
@@ -642,7 +696,7 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 
 	nnc := &container.NodeNetworkConfig{}
 
-	if len(networkNodeConfigs) == 0 {
+	if len(networkNodeConfigs) == 0 || networkNodeConfigs[0] == nil {
 		return nnc
 	}
 
@@ -702,7 +756,7 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 
 	nnc.PodCidrOverprovisionConfig = expandPodCidrOverprovisionConfig(networkNodeConfig["pod_cidr_overprovision_config"])
 
-	if v, ok := networkNodeConfig["network_performance_config"]; ok && len(v.([]interface{})) > 0 {
+	if v, ok := networkNodeConfig["network_performance_config"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		nnc.NetworkPerformanceConfig = &container.NetworkPerformanceConfig{}
 		network_performance_config := v.([]interface{})[0].(map[string]interface{})
 		if total_egress_bandwidth_tier, ok := network_performance_config["total_egress_bandwidth_tier"]; ok {

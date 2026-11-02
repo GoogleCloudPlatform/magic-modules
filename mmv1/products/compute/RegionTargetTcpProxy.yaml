@@ -35,6 +35,8 @@ async:
   operation:
     base_url: '{{op_id}}'
 include_in_tgc_next: true
+custom_code:
+  tgc_decoder: templates/tgc_next/decoders/compute_target_tcp_proxy.go.tmpl
 samples:
   - name: region_target_tcp_proxy_basic
     primary_resource_id: default
@@ -128,6 +130,8 @@ properties:
     default_from_api: true
   - name: loadBalancingScheme
     type: Enum
+    # loadBalancingScheme is not present in CAI asset
+    is_missing_in_cai: true
     description: |
       Specifies the load balancer type. A target TCP proxy created for one type
       of load balancer cannot be used with another. For more information, refer

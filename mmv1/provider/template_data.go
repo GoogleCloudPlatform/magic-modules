@@ -15,18 +15,17 @@ package provider
 
 import (
 	"bytes"
-	"fmt"
 	"go/format"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
+	"text/template" // NOLINT
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -81,11 +80,11 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 	metadata := metadata.FromResource(resource)
 	metadataBytes, err := yaml.Marshal(metadata)
 	if err != nil {
-		glog.Exit("error marshalling yaml %v: %v", filePath)
+		log.Fatalf("error marshalling yaml %v: %v", filePath, err)
 	}
 	err = os.WriteFile(filePath, metadataBytes, 0644)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 }
 
@@ -315,7 +314,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 
 	err := os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
-		glog.Exit(err)
+		log.Fatal(err)
 	}
 }
 
@@ -343,12 +342,12 @@ func (td *TemplateData) renderFile(filePath, templatePath string, input any, tem
 	cacheKey := "GenerateFile:" + templatePath + ":" + strings.Join(templates, "|")
 	tmpl, err := google.ParseTemplatesCached(td.templateFS, cacheKey, templateFileName, funcs, templates...)
 	if err != nil {
-		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
+		log.Fatalf("error parsing %s for filepath %s: %v", templateFileName, filePath, err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templateFileName, filePath), err)
+		log.Fatalf("error executing %s for filepath %s: %v", templateFileName, filePath, err)
 	}
 
 	sourceByte := contents.Bytes()
@@ -364,7 +363,7 @@ func (td *TemplateData) renderFile(filePath, templatePath string, input any, tem
 func formatGoSource(filePath string, source []byte) []byte {
 	formattedByte, err := format.Source(source)
 	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %s: %s", filePath, err))
+		log.Printf("error formatting %s: %v", filePath, err)
 		return source
 	}
 	return formattedByte

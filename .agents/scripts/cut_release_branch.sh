@@ -103,7 +103,7 @@ git checkout -b changelog-${RELEASE_VERSION}
 COMMIT_SHA_OF_LAST_COMMIT_IN_CURRENT_RELEASE=$(git rev-list -n 1 HEAD)
 
 echo "Installing changelog-gen..."
-go install github.com/paultyng/changelog-gen@master
+go install github.com/paultyng/changelog-gen@a35a38c6ab41fed4e46ab59501994613c6470a1f
 
 echo "Fetching authoritative templates directly from magic-modules main via GitHub raw URLs..."
 TMP_DIR=$(mktemp -d)

@@ -1,0 +1,283 @@
+package vertexai
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func init() {
+	// Initialize base sweeper object
+	s := &sweeper.Sweeper{
+		Name:           "google_vertex_ai_index_endpoint",
+		ListAndAction:  listAndActionVertexAIIndexEndpoint,
+		DeleteFunction: testSweepVertexAIIndexEndpoint,
+	}
+
+	// Register the sweeper
+	sweeper.AddTestSweepers(s)
+}
+
+func testSweepVertexAIIndexEndpoint(_ string) error {
+	return listAndActionVertexAIIndexEndpoint(deleteResourceVertexAIIndexEndpoint)
+}
+
+func listAndActionVertexAIIndexEndpoint(action sweeper.ResourceAction) error {
+	var lastError error
+	resourceName := "VertexAIIndexEndpoint"
+	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
+
+	// Prepare configurations to iterate over
+	var configs []*tpgresource.ResourceDataMock
+	intermediateValues := []map[string]string{
+		{
+			"region": "us-central1",
+		},
+		{
+			"region": "europe-west4",
+		},
+	}
+
+	// Create configs from intermediate values
+	for _, values := range intermediateValues {
+		mockConfig := &tpgresource.ResourceDataMock{
+			FieldsInSchema: map[string]interface{}{
+				"project": envvar.GetTestProjectFromEnv(),
+			},
+		}
+
+		// Apply all provided values
+		for key, value := range values {
+			mockConfig.FieldsInSchema[key] = value
+		}
+
+		// Set fallback values for common fields
+		region, hasRegion := mockConfig.FieldsInSchema["region"].(string)
+		if !hasRegion {
+			region = "us-central1"
+			mockConfig.FieldsInSchema["region"] = region
+		}
+
+		if _, hasLocation := mockConfig.FieldsInSchema["location"]; !hasLocation {
+			mockConfig.FieldsInSchema["location"] = region
+		}
+
+		if _, hasZone := mockConfig.FieldsInSchema["zone"]; !hasZone {
+			mockConfig.FieldsInSchema["zone"] = region + "-a"
+		}
+
+		configs = append(configs, mockConfig)
+	}
+
+	// Process all configurations (either from parent resources or direct substitutions)
+	for _, mockConfig := range configs {
+		// Get region from config
+		region := sweeper.GetFieldOrDefault(mockConfig, "region", "us-central1")
+
+		// Create shared config for this region
+		config, err := sweeper.SharedConfigForRegion(region)
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
+			lastError = err
+			continue
+		}
+
+		err = config.LoadAndValidate(context.Background())
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
+			lastError = err
+			continue
+		}
+
+		// Prepare list URL
+		listTemplate := transport_tpg.BaseUrl(Product, config) + "projects/{{project}}/locations/{{region}}/indexEndpoints"
+		listUrl, err := tpgresource.ReplaceVars(mockConfig, config, listTemplate)
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
+			lastError = err
+			continue
+		}
+
+		// Log additional info for parent-based resources
+		log.Printf("[INFO][SWEEPER_LOG] Listing %s resources at %s", resourceName, listUrl)
+
+		// Page zero's URL is the raw list URL. Successive pages will return the token for the next page.
+		pageUrl := listUrl
+		for {
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    pageUrl,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", pageUrl, err)
+				lastError = err
+				break
+			}
+
+			// First try the expected resource key
+			resourceList, ok := res["indexEndpoints"]
+			if ok {
+				log.Printf("[INFO][SWEEPER_LOG] Found resources under expected key 'indexEndpoints'")
+			} else {
+				// Next, try the common "items" pattern
+				resourceList, ok = res["items"]
+				if ok {
+					log.Printf("[INFO][SWEEPER_LOG] Found resources under standard 'items' key")
+				} else {
+					log.Printf("[INFO][SWEEPER_LOG] no resources found")
+				}
+			}
+
+			if ok {
+				rl := resourceList.([]interface{})
+
+				log.Printf("[INFO][SWEEPER_LOG] Found %d items in %s list response.", len(rl), resourceName)
+				// Keep count of items that aren't sweepable for logging.
+				nonPrefixCount := 0
+				for _, ri := range rl {
+					obj, ok := ri.(map[string]interface{})
+					if !ok {
+						log.Printf("[INFO][SWEEPER_LOG] Item was not a map: %T", ri)
+						continue
+					}
+
+					if err := action(config, mockConfig, obj); err != nil {
+						log.Printf("[INFO][SWEEPER_LOG] Error in action: %s", err)
+						lastError = err
+					} else {
+						nonPrefixCount++
+					}
+				}
+			}
+
+			pageToken, ok := res["nextPageToken"].(string)
+			if !ok || pageToken == "" {
+				break
+			}
+			pageUrl, err = transport_tpg.AddQueryParams(listUrl, map[string]string{"pageToken": pageToken})
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] error preparing paginated list url: %s", err)
+				lastError = err
+				break
+			}
+		}
+	}
+
+	return lastError
+}
+
+func deleteResourceVertexAIIndexEndpoint(config *transport_tpg.Config, d *tpgresource.ResourceDataMock, obj map[string]interface{}) error {
+	var deletionerror error
+	resourceName := "VertexAIIndexEndpoint"
+	var name string
+	var deleteId string
+	if obj["displayName"] == nil {
+		log.Printf("[INFO][SWEEPER_LOG] %s resource displayName was nil", resourceName)
+		return fmt.Errorf("%s resource displayName was nil", resourceName)
+	}
+	name = obj["displayName"].(string)
+
+	// displayName decides whether this resource is sweepable, but the delete
+	// URL needs the resource's own id, which is usually a different value.
+	if obj["name"] != nil {
+		deleteId = tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
+	} else if obj["id"] != nil {
+		deleteId = tpgresource.GetResourceNameFromSelfLink(obj["id"].(string))
+	} else {
+		// The list response carries no id of its own, so displayName is all
+		// there is to delete by.
+		deleteId = name
+	}
+
+	// Skip resources that shouldn't be sweeped
+	prefixes := []string{
+		"tf-test-",
+		"sample-endpoint",
+	}
+	if !sweeper.IsSweepableTestResource(name) && !sweeper.HasAnyPrefix(name, prefixes) {
+		return nil
+	}
+
+	deleteTemplate := transport_tpg.BaseUrl(Product, config) + "projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}"
+
+	url, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
+		return err
+	}
+	url = url + deleteId
+
+	// An IndexEndpoint cannot be deleted while it has DeployedIndexes attached.
+	// Undeploy any attached DeployedIndexes and wait for the operation before deleting the endpoint.
+	if deployedIndexesRaw, ok := obj["deployedIndexes"]; ok && deployedIndexesRaw != nil {
+		if deployedIndexes, ok := deployedIndexesRaw.([]interface{}); ok {
+			region := sweeper.GetFieldOrDefault(d, "region", "us-central1")
+			for _, diRaw := range deployedIndexes {
+				di, ok := diRaw.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				deployedIndexId, ok := di["id"].(string)
+				if !ok || deployedIndexId == "" {
+					continue
+				}
+
+				undeployUrl := url + ":undeployIndex"
+				undeployBody := map[string]interface{}{
+					"deployedIndexId": deployedIndexId,
+				}
+				log.Printf("[INFO][SWEEPER_LOG] Undeploying DeployedIndex %s from %s resource: %s (%s)", deployedIndexId, resourceName, name, deleteId)
+				opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   config.Project,
+					RawURL:    undeployUrl,
+					UserAgent: config.UserAgent,
+					Body:      undeployBody,
+				})
+				if err != nil {
+					log.Printf("[INFO][SWEEPER_LOG] Error undeploying index %s for url %s: %s", deployedIndexId, undeployUrl, err)
+					deletionerror = err
+					continue
+				}
+
+				err = VertexAIOperationWaitTime(
+					config, opRes, config.Project, region, "Undeploying IndexEndpointDeployedIndex", config.UserAgent,
+					time.Minute*20,
+				)
+				if err != nil {
+					log.Printf("[INFO][SWEEPER_LOG] Error waiting for undeploy of index %s for url %s: %s", deployedIndexId, undeployUrl, err)
+					deletionerror = err
+				} else {
+					log.Printf("[INFO][SWEEPER_LOG] Undeployed DeployedIndex %s from %s resource: %s (%s)", deployedIndexId, resourceName, name, deleteId)
+				}
+			}
+		}
+	}
+
+	// Don't wait on operations as we may have a lot to delete
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   config.Project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", url, err)
+		deletionerror = err
+	} else {
+		log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, name)
+	}
+
+	return deletionerror
+}

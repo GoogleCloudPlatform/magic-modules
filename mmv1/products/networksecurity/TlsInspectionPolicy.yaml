@@ -133,3 +133,11 @@ properties:
     type: Boolean
     description: |
       If FALSE (the default), use our default set of public CAs in addition to any CAs specified in trustConfig. These public CAs are currently based on the Mozilla Root Program and are subject to change over time. If TRUE, do not accept our default set of public CAs. Only CAs specified in trustConfig will be accepted.
+  - name: certificateIssuanceMode
+    type: Enum
+    description: |
+      The mode used to issue certificates (local CA signing vs direct leaf).
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("CERTIFICATE_ISSUANCE_MODE_UNSPECIFIED")'
+    enum_values:
+      - DIRECT_LEAF_PROVISIONING
+      - LOCAL_INTERMEDIATE_CA_SIGNING

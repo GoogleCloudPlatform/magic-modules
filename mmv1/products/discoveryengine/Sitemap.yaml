@@ -43,7 +43,7 @@ async:
   actions: [create, delete]
   result:
     resource_inside_response: true
-autogen_async: false
+autogen_async: true
 custom_code:
   post_read: templates/terraform/post_read/discoveryengine_sitemap_post_read.go.tmpl
   custom_import: templates/terraform/custom_import/discoveryengine_sitemap_set_id.go.tmpl

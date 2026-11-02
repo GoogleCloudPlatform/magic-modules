@@ -11,6 +11,7 @@ resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
   }
 
   scaling_config {
-    instance_size = "EXTRA_SMALL"
+    instance_size  = "{{index $.Vars "instance_size"}}"
+    scaling_factor = "{{index $.Vars "scaling_factor"}}"
   }
 }

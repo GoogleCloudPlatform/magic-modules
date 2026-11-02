@@ -35,6 +35,7 @@ resource "google_database_migration_service_connection_profile" "{{$.PrimaryReso
     port = 5432
     username = google_sql_user.sqldb_user.name
     password = google_sql_user.sqldb_user.password
+    database = "postgres"
     ssl {
       type = "NONE"
     }

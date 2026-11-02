@@ -16,6 +16,7 @@ name: Dataflow
 display_name: Dataflow
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
   - name: ga
     base_url: https://dataflow.googleapis.com/v1b3/

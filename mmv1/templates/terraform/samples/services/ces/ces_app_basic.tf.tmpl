@@ -1,7 +1,7 @@
 data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "fake_private_key_secret" {
-  secret_id = "fake-pk-secret-app-tf{{index $.ResourceIdVars "secret_id"}}"
+  secret_id = "{{index $.ResourceIdVars "secret_id"}}"
 
   replication {
     auto{}
@@ -89,8 +89,9 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-3.0-flash-001"
-    temperature = 0.5
+    model          = "gemini-3.0-flash-001"
+    temperature    = 0.5
+    thinking_level = "LOW"
   }
 
   evaluation_metrics_thresholds {

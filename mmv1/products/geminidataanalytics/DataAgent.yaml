@@ -144,14 +144,12 @@ properties:
             type: NestedObject
             description: |-
               Required. Data sources that are available for answering questions.
-              This Terraform resource currently supports BigQuery table references.
             required: true
             properties:
               - name: 'bq'
                 type: NestedObject
                 description: |-
-                  References to BigQuery tables.
-                required: true
+                  References to BigQuery tables and property graphs.
                 properties:
                   - name: 'tableReferences'
                     type: Array
@@ -174,6 +172,277 @@ properties:
                           type: String
                           description: |-
                             Required. The table ID.
+                          required: true
+                        - name: 'schema'
+                          type: NestedObject
+                          description: |-
+                            Optional. The schema of the datasource.
+                          properties:
+                            - name: 'description'
+                              type: String
+                              description: |-
+                                Optional. A textual description of the table's content and purpose.
+                            - name: 'displayName'
+                              type: String
+                              description: |-
+                                Optional. Table display name.
+                            - name: 'synonyms'
+                              type: Array
+                              description: |-
+                                Optional. A list of alternative names or synonyms that can be used to refer to the table.
+                              item_type:
+                                type: String
+                            - name: 'tags'
+                              type: Array
+                              description: |-
+                                Optional. A list of tags or keywords associated with the table, used for categorization.
+                              item_type:
+                                type: String
+                            - name: 'fields'
+                              type: Array
+                              description: |-
+                                Optional. The fields in the schema.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      Optional. The name of the field.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of the field.
+                                  - name: 'description'
+                                    type: String
+                                    description: |-
+                                      Optional. A brief description of the field.
+                                  - name: 'mode'
+                                    type: String
+                                    description: |-
+                                      Optional. The mode of the field (e.g., NULLABLE, REPEATED).
+                                  - name: 'synonyms'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of alternative names or synonyms that can be used to refer to this field.
+                                    item_type:
+                                      type: String
+                                  - name: 'tags'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of tags or keywords associated with the field, used for categorization.
+                                    item_type:
+                                      type: String
+                                  - name: 'subfields'
+                                    type: String
+                                    description: |-
+                                      Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
+                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                    validation:
+                                      function: 'validation.StringIsJSON'
+                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  - name: 'category'
+                                    type: String
+                                    description: |-
+                                      Optional. Field category.
+                                  - name: 'valueFormat'
+                                    type: String
+                                    description: |-
+                                      Optional. Value format of the field.
+                            - name: 'filters'
+                              type: Array
+                              description: |-
+                                Optional. The filters on the datasource's underlying data.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'field'
+                                    type: String
+                                    description: |-
+                                      Optional. The field to filter on.
+                                  - name: 'value'
+                                    type: String
+                                    description: |-
+                                      Optional. The default value used for this filter if the filter is not overridden in a query.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of filter present on a datasource, such as ALWAYS_FILTER.
+                  - name: 'propertyGraphReferences'
+                    type: Array
+                    description: |-
+                      Optional. References to BigQuery property graphs.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            Required. The project that the property graph belongs to.
+                          required: true
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            Required. The dataset that the property graph belongs to.
+                          required: true
+                        - name: 'propertyGraphId'
+                          type: String
+                          description: |-
+                            Required. The property graph ID.
+                          required: true
+              - name: 'looker'
+                type: NestedObject
+                description: |-
+                  References to Looker explores.
+                properties:
+                  - name: 'exploreReferences'
+                    type: Array
+                    description: |-
+                      Required. References to Looker explores.
+                    required: true
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'lookmlModel'
+                          type: String
+                          description: |-
+                            Required. Name of the LookML model.
+                          required: true
+                        - name: 'explore'
+                          type: String
+                          description: |-
+                            Required. Name of the LookML Explore.
+                          required: true
+                        - name: 'lookerInstanceUri'
+                          type: String
+                          description: |-
+                            Optional. The base URL of the Looker instance.
+                        - name: 'privateLookerInstanceInfo'
+                          type: NestedObject
+                          description: |-
+                            Optional. Private Looker instance info if the Looker instance is behind a private network.
+                          properties:
+                            - name: 'lookerInstanceId'
+                              type: String
+                              description: |-
+                                Optional. The Looker instance ID.
+                            - name: 'serviceDirectoryName'
+                              type: String
+                              description: |-
+                                Optional. The service directory name of the Looker instance.
+                        - name: 'schema'
+                          type: NestedObject
+                          description: |-
+                            Optional. The schema of the datasource.
+                          properties:
+                            - name: 'description'
+                              type: String
+                              description: |-
+                                Optional. A textual description of the explore's content and purpose.
+                            - name: 'displayName'
+                              type: String
+                              description: |-
+                                Optional. Explore display name.
+                            - name: 'synonyms'
+                              type: Array
+                              description: |-
+                                Optional. A list of alternative names or synonyms that can be used to refer to the explore.
+                              item_type:
+                                type: String
+                            - name: 'tags'
+                              type: Array
+                              description: |-
+                                Optional. A list of tags or keywords associated with the explore, used for categorization.
+                              item_type:
+                                type: String
+                            - name: 'fields'
+                              type: Array
+                              description: |-
+                                Optional. The fields in the schema.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      Optional. The name of the field.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of the field.
+                                  - name: 'description'
+                                    type: String
+                                    description: |-
+                                      Optional. A brief description of the field.
+                                  - name: 'mode'
+                                    type: String
+                                    description: |-
+                                      Optional. The mode of the field (e.g., NULLABLE, REPEATED).
+                                  - name: 'synonyms'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of alternative names or synonyms that can be used to refer to this field.
+                                    item_type:
+                                      type: String
+                                  - name: 'tags'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of tags or keywords associated with the field, used for categorization.
+                                    item_type:
+                                      type: String
+                                  - name: 'subfields'
+                                    type: String
+                                    description: |-
+                                      Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
+                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                    validation:
+                                      function: 'validation.StringIsJSON'
+                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  - name: 'category'
+                                    type: String
+                                    description: |-
+                                      Optional. Field category.
+                                  - name: 'valueFormat'
+                                    type: String
+                                    description: |-
+                                      Optional. Value format of the field.
+                            - name: 'filters'
+                              type: Array
+                              description: |-
+                                Optional. The filters on the datasource's underlying data.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'field'
+                                    type: String
+                                    description: |-
+                                      Optional. The field to filter on.
+                                  - name: 'value'
+                                    type: String
+                                    description: |-
+                                      Optional. The default value used for this filter if the filter is not overridden in a query.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of filter present on a datasource, such as ALWAYS_FILTER.
+              - name: 'studio'
+                type: NestedObject
+                description: |-
+                  References to Looker Studio datasources.
+                properties:
+                  - name: 'studioReferences'
+                    type: Array
+                    description: |-
+                      Optional. The references to the studio datasources.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'datasourceId'
+                          type: String
+                          description: |-
+                            Required. The ID of the datasource.
                           required: true
           - name: 'options'
             type: NestedObject
@@ -203,6 +472,11 @@ properties:
                     type: Integer
                     description: |-
                       Optional. Limits the bytes billed for each BigQuery query job.
+              - name: 'model'
+                type: String
+                description: |-
+                  Optional. The model to use for the agent loop.
+                default_from_api: true
           - name: 'exampleQueries'
             type: Array
             description: |-
@@ -219,6 +493,95 @@ properties:
                   description: |-
                     Optional. The SQL query that should be generated to answer
                     the natural language question.
+                - name: 'parameters'
+                  type: Array
+                  description: |-
+                    Optional. The list of query parameters.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        description: |-
+                          Required. The name of the parameter reference in the SQL query.
+                        required: true
+                      - name: 'description'
+                        type: String
+                        description: |-
+                          Optional. The description of the parameter that can be used by the LLM to extract the parameter value from the user question.
+                      - name: 'dataType'
+                        type: String
+                        description: |-
+                          Required. The data type of the parameter, e.g. "STRING", "INT64", "DATE".
+                        required: true
+          - name: 'lookerGoldenQueries'
+            type: Array
+            description: |-
+              Optional. A list of golden queries for Looker data sources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'naturalLanguageQuestions'
+                  type: Array
+                  description: |-
+                    Optional. Natural language questions that a user might ask.
+                  item_type:
+                    type: String
+                - name: 'lookerQuery'
+                  type: NestedObject
+                  description: |-
+                    Optional. The Looker Query corresponding to the natural language questions.
+                  properties:
+                    - name: 'model'
+                      type: String
+                      description: |-
+                        Required. The LookML model used to generate the query.
+                      required: true
+                    - name: 'explore'
+                      type: String
+                      description: |-
+                        Required. The LookML explore used to generate the query.
+                      required: true
+                    - name: 'fields'
+                      type: Array
+                      description: |-
+                        Optional. The fields to retrieve from the explore.
+                      item_type:
+                        type: String
+                    - name: 'filters'
+                      type: Array
+                      description: |-
+                        Optional. The filters to apply to the explore.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'field'
+                            type: String
+                            description: |-
+                              Required. The field to filter on.
+                            required: true
+                          - name: 'value'
+                            type: String
+                            description: |-
+                              Optional. The value for the field to filter on.
+                    - name: 'sorts'
+                      type: Array
+                      description: |-
+                        Optional. The sorts to apply to the explore.
+                      item_type:
+                        type: String
+                    - name: 'limit'
+                      type: String
+                      description: |-
+                        Optional. Limit in the query.
+                    - name: 'queryId'
+                      type: String
+                      description: |-
+                        Optional. The primary identifier for the query resource in Looker.
+                    - name: 'clientId'
+                      type: String
+                      description: |-
+                        Optional. The short alphanumeric identifier for the query, used for share links and Explore URLs.
           - name: 'glossaryTerms'
             type: Array
             description: |-
@@ -297,6 +660,39 @@ properties:
                   type: Double
                   description: |-
                     Optional. A confidence score for the suggested relationship.
+          - name: 'userFunctions'
+            type: NestedObject
+            description: |-
+              Optional. A collection of user functions to be included in context.
+            properties:
+              - name: 'bqRoutines'
+                type: Array
+                description: |-
+                  Optional. A list of BigQuery routines to include in the context.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'description'
+                      type: String
+                      description: |-
+                        Optional. User override or addition to description, to tell the agent when to use the UDF.
+                    - name: 'routineReference'
+                      type: NestedObject
+                      description: |-
+                        Optional. The reference to the BigQuery routine.
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            Optional. The project ID of the routine.
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            Optional. The dataset ID of the routine.
+                        - name: 'routineId'
+                          type: String
+                          description: |-
+                            Optional. The routine ID of the routine.
       - name: 'publishedContext'
         type: NestedObject
         description: |-
@@ -312,14 +708,12 @@ properties:
             type: NestedObject
             description: |-
               Required. Data sources that are available for answering questions.
-              This Terraform resource currently supports BigQuery table references.
             required: true
             properties:
               - name: 'bq'
                 type: NestedObject
                 description: |-
-                  References to BigQuery tables.
-                required: true
+                  References to BigQuery tables and property graphs.
                 properties:
                   - name: 'tableReferences'
                     type: Array
@@ -342,6 +736,277 @@ properties:
                           type: String
                           description: |-
                             Required. The table ID.
+                          required: true
+                        - name: 'schema'
+                          type: NestedObject
+                          description: |-
+                            Optional. The schema of the datasource.
+                          properties:
+                            - name: 'description'
+                              type: String
+                              description: |-
+                                Optional. A textual description of the table's content and purpose.
+                            - name: 'displayName'
+                              type: String
+                              description: |-
+                                Optional. Table display name.
+                            - name: 'synonyms'
+                              type: Array
+                              description: |-
+                                Optional. A list of alternative names or synonyms that can be used to refer to the table.
+                              item_type:
+                                type: String
+                            - name: 'tags'
+                              type: Array
+                              description: |-
+                                Optional. A list of tags or keywords associated with the table, used for categorization.
+                              item_type:
+                                type: String
+                            - name: 'fields'
+                              type: Array
+                              description: |-
+                                Optional. The fields in the schema.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      Optional. The name of the field.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of the field.
+                                  - name: 'description'
+                                    type: String
+                                    description: |-
+                                      Optional. A brief description of the field.
+                                  - name: 'mode'
+                                    type: String
+                                    description: |-
+                                      Optional. The mode of the field (e.g., NULLABLE, REPEATED).
+                                  - name: 'synonyms'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of alternative names or synonyms that can be used to refer to this field.
+                                    item_type:
+                                      type: String
+                                  - name: 'tags'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of tags or keywords associated with the field, used for categorization.
+                                    item_type:
+                                      type: String
+                                  - name: 'subfields'
+                                    type: String
+                                    description: |-
+                                      Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
+                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                    validation:
+                                      function: 'validation.StringIsJSON'
+                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  - name: 'category'
+                                    type: String
+                                    description: |-
+                                      Optional. Field category.
+                                  - name: 'valueFormat'
+                                    type: String
+                                    description: |-
+                                      Optional. Value format of the field.
+                            - name: 'filters'
+                              type: Array
+                              description: |-
+                                Optional. The filters on the datasource's underlying data.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'field'
+                                    type: String
+                                    description: |-
+                                      Optional. The field to filter on.
+                                  - name: 'value'
+                                    type: String
+                                    description: |-
+                                      Optional. The default value used for this filter if the filter is not overridden in a query.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of filter present on a datasource, such as ALWAYS_FILTER.
+                  - name: 'propertyGraphReferences'
+                    type: Array
+                    description: |-
+                      Optional. References to BigQuery property graphs.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            Required. The project that the property graph belongs to.
+                          required: true
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            Required. The dataset that the property graph belongs to.
+                          required: true
+                        - name: 'propertyGraphId'
+                          type: String
+                          description: |-
+                            Required. The property graph ID.
+                          required: true
+              - name: 'looker'
+                type: NestedObject
+                description: |-
+                  References to Looker explores.
+                properties:
+                  - name: 'exploreReferences'
+                    type: Array
+                    description: |-
+                      Required. References to Looker explores.
+                    required: true
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'lookmlModel'
+                          type: String
+                          description: |-
+                            Required. Name of the LookML model.
+                          required: true
+                        - name: 'explore'
+                          type: String
+                          description: |-
+                            Required. Name of the LookML Explore.
+                          required: true
+                        - name: 'lookerInstanceUri'
+                          type: String
+                          description: |-
+                            Optional. The base URL of the Looker instance.
+                        - name: 'privateLookerInstanceInfo'
+                          type: NestedObject
+                          description: |-
+                            Optional. Private Looker instance info if the Looker instance is behind a private network.
+                          properties:
+                            - name: 'lookerInstanceId'
+                              type: String
+                              description: |-
+                                Optional. The Looker instance ID.
+                            - name: 'serviceDirectoryName'
+                              type: String
+                              description: |-
+                                Optional. The service directory name of the Looker instance.
+                        - name: 'schema'
+                          type: NestedObject
+                          description: |-
+                            Optional. The schema of the datasource.
+                          properties:
+                            - name: 'description'
+                              type: String
+                              description: |-
+                                Optional. A textual description of the explore's content and purpose.
+                            - name: 'displayName'
+                              type: String
+                              description: |-
+                                Optional. Explore display name.
+                            - name: 'synonyms'
+                              type: Array
+                              description: |-
+                                Optional. A list of alternative names or synonyms that can be used to refer to the explore.
+                              item_type:
+                                type: String
+                            - name: 'tags'
+                              type: Array
+                              description: |-
+                                Optional. A list of tags or keywords associated with the explore, used for categorization.
+                              item_type:
+                                type: String
+                            - name: 'fields'
+                              type: Array
+                              description: |-
+                                Optional. The fields in the schema.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      Optional. The name of the field.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of the field.
+                                  - name: 'description'
+                                    type: String
+                                    description: |-
+                                      Optional. A brief description of the field.
+                                  - name: 'mode'
+                                    type: String
+                                    description: |-
+                                      Optional. The mode of the field (e.g., NULLABLE, REPEATED).
+                                  - name: 'synonyms'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of alternative names or synonyms that can be used to refer to this field.
+                                    item_type:
+                                      type: String
+                                  - name: 'tags'
+                                    type: Array
+                                    description: |-
+                                      Optional. A list of tags or keywords associated with the field, used for categorization.
+                                    item_type:
+                                      type: String
+                                  - name: 'subfields'
+                                    type: String
+                                    description: |-
+                                      Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
+                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                    validation:
+                                      function: 'validation.StringIsJSON'
+                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                  - name: 'category'
+                                    type: String
+                                    description: |-
+                                      Optional. Field category.
+                                  - name: 'valueFormat'
+                                    type: String
+                                    description: |-
+                                      Optional. Value format of the field.
+                            - name: 'filters'
+                              type: Array
+                              description: |-
+                                Optional. The filters on the datasource's underlying data.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'field'
+                                    type: String
+                                    description: |-
+                                      Optional. The field to filter on.
+                                  - name: 'value'
+                                    type: String
+                                    description: |-
+                                      Optional. The default value used for this filter if the filter is not overridden in a query.
+                                  - name: 'type'
+                                    type: String
+                                    description: |-
+                                      Optional. The type of filter present on a datasource, such as ALWAYS_FILTER.
+              - name: 'studio'
+                type: NestedObject
+                description: |-
+                  References to Looker Studio datasources.
+                properties:
+                  - name: 'studioReferences'
+                    type: Array
+                    description: |-
+                      Optional. The references to the studio datasources.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'datasourceId'
+                          type: String
+                          description: |-
+                            Required. The ID of the datasource.
                           required: true
           - name: 'options'
             type: NestedObject
@@ -371,6 +1036,11 @@ properties:
                     type: Integer
                     description: |-
                       Optional. Limits the bytes billed for each BigQuery query job.
+              - name: 'model'
+                type: String
+                description: |-
+                  Optional. The model to use for the agent loop.
+                default_from_api: true
           - name: 'exampleQueries'
             type: Array
             description: |-
@@ -387,6 +1057,95 @@ properties:
                   description: |-
                     Optional. The SQL query that should be generated to answer
                     the natural language question.
+                - name: 'parameters'
+                  type: Array
+                  description: |-
+                    Optional. The list of query parameters.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        description: |-
+                          Required. The name of the parameter reference in the SQL query.
+                        required: true
+                      - name: 'description'
+                        type: String
+                        description: |-
+                          Optional. The description of the parameter that can be used by the LLM to extract the parameter value from the user question.
+                      - name: 'dataType'
+                        type: String
+                        description: |-
+                          Required. The data type of the parameter, e.g. "STRING", "INT64", "DATE".
+                        required: true
+          - name: 'lookerGoldenQueries'
+            type: Array
+            description: |-
+              Optional. A list of golden queries for Looker data sources.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'naturalLanguageQuestions'
+                  type: Array
+                  description: |-
+                    Optional. Natural language questions that a user might ask.
+                  item_type:
+                    type: String
+                - name: 'lookerQuery'
+                  type: NestedObject
+                  description: |-
+                    Optional. The Looker Query corresponding to the natural language questions.
+                  properties:
+                    - name: 'model'
+                      type: String
+                      description: |-
+                        Required. The LookML model used to generate the query.
+                      required: true
+                    - name: 'explore'
+                      type: String
+                      description: |-
+                        Required. The LookML explore used to generate the query.
+                      required: true
+                    - name: 'fields'
+                      type: Array
+                      description: |-
+                        Optional. The fields to retrieve from the explore.
+                      item_type:
+                        type: String
+                    - name: 'filters'
+                      type: Array
+                      description: |-
+                        Optional. The filters to apply to the explore.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'field'
+                            type: String
+                            description: |-
+                              Required. The field to filter on.
+                            required: true
+                          - name: 'value'
+                            type: String
+                            description: |-
+                              Optional. The value for the field to filter on.
+                    - name: 'sorts'
+                      type: Array
+                      description: |-
+                        Optional. The sorts to apply to the explore.
+                      item_type:
+                        type: String
+                    - name: 'limit'
+                      type: String
+                      description: |-
+                        Optional. Limit in the query.
+                    - name: 'queryId'
+                      type: String
+                      description: |-
+                        Optional. The primary identifier for the query resource in Looker.
+                    - name: 'clientId'
+                      type: String
+                      description: |-
+                        Optional. The short alphanumeric identifier for the query, used for share links and Explore URLs.
           - name: 'glossaryTerms'
             type: Array
             description: |-
@@ -465,11 +1224,45 @@ properties:
                   type: Double
                   description: |-
                     Optional. A confidence score for the suggested relationship.
+          - name: 'userFunctions'
+            type: NestedObject
+            description: |-
+              Optional. A collection of user functions to be included in context.
+            properties:
+              - name: 'bqRoutines'
+                type: Array
+                description: |-
+                  Optional. A list of BigQuery routines to include in the context.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'description'
+                      type: String
+                      description: |-
+                        Optional. User override or addition to description, to tell the agent when to use the UDF.
+                    - name: 'routineReference'
+                      type: NestedObject
+                      description: |-
+                        Optional. The reference to the BigQuery routine.
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |-
+                            Optional. The project ID of the routine.
+                        - name: 'datasetId'
+                          type: String
+                          description: |-
+                            Optional. The dataset ID of the routine.
+                        - name: 'routineId'
+                          type: String
+                          description: |-
+                            Optional. The routine ID of the routine.
       - name: 'lastPublishedContext'
         type: NestedObject
         description: |-
           Output only. The last published context for the agent.
         output: true
+        custom_expand: 'templates/terraform/custom_expand/gemini_data_analytics_data_agent_last_published_context.go.tmpl'
         properties:
           - name: 'systemInstruction'
             type: String

@@ -111,6 +111,12 @@ properties:
     description: |
       Resource name of data source which will be used as storage location for backups taken
     output: true
+  - name: autoProtectionPolicyBinding
+    type: String
+    min_version: beta
+    description: |
+      The resource name of the auto protection policy binding that manages this backup plan association, if any.
+    output: true
   - name: rulesConfigInfo
     type: Array
     output: true

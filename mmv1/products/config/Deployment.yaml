@@ -79,11 +79,9 @@ properties:
       - name: gcsSource
         type: String
         description: URI of a GCS object containing the zipped Terraform blueprint.
-        exactly_one_of: [gcsSource, gitSource]
       - name: gitSource
         type: NestedObject
         description: Public Git repository containing the blueprint.
-        exactly_one_of: [gcsSource, gitSource]
         properties:
           - name: repo
             type: String

@@ -20,3 +20,4 @@ versions:
     base_url: 'https://iap.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+legacy_identity_import_test: true

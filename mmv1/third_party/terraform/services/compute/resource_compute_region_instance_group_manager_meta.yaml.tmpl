@@ -24,7 +24,6 @@ fields:
   - api_field: 'distributionPolicy.zones.zone'
     field: 'distribution_policy_zones'
   - api_field: 'fingerprint'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.value.disks.architecture'
     field: 'instance_flexibility_policy.instance_selections.disks.architecture'
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.value.disks.autoDelete'
@@ -93,15 +92,12 @@ fields:
     field: 'instance_flexibility_policy.instance_selections.disks.source'
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.value.disks.type'
     field: 'instance_flexibility_policy.instance_selections.disks.type'
-{{- end }}
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.value.machineTypes'
     field: 'instance_flexibility_policy.instance_selections.machine_types'
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.key'
     field: 'instance_flexibility_policy.instance_selections.name'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.value.minCpuPlatform'
     field: 'instance_flexibility_policy.instance_selections.min_cpu_platform'
-{{- end }}
   - api_field: 'instanceFlexibilityPolicy.instanceSelections.value.rank'
     field: 'instance_flexibility_policy.instance_selections.rank'
   - api_field: 'instanceGroup'

@@ -1,0 +1,45 @@
+{{- /*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for i, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		item := map[string]interface{}{
+			"api_key_header":  original["apiKeyHeader"],
+			"api_key_name":    original["apiKeyName"],
+			"client_id":       original["clientId"],
+			"description":     original["description"],
+			"display_name":    original["displayName"],
+			"enabled":         original["enabled"],
+			"oauth_token_url": original["oauthTokenUrl"],
+			"prompt":          original["prompt"],
+			"server_url":      original["serverUrl"],
+		}
+		if apiKey, ok := d.GetOk(fmt.Sprintf("mcp_data_sources.%d.api_key", i)); ok {
+			item["api_key"] = apiKey
+		}
+		if clientSecret, ok := d.GetOk(fmt.Sprintf("mcp_data_sources.%d.client_secret", i)); ok {
+			item["client_secret"] = clientSecret
+		}
+		transformed = append(transformed, item)
+	}
+	return transformed
+}

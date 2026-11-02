@@ -24,6 +24,7 @@ Read this index at decision points; open only the source the task needs. Format 
 - Fix diffs and permadiffs — `docs/content/develop/diffs.md`
 - Client-side fields — `docs/content/develop/client-side-fields.md`
 - Promote beta → GA — `docs/content/develop/promote-to-ga.md`
+- Update provider dependencies (`go.mod` / `go.sum`) — `docs/content/develop/update-dependencies.md`
 - Generate the providers / set up the environment — `docs/content/develop/generate-providers.md`, `docs/content/develop/set-up-dev-environment.md`
 
 **Testing:**

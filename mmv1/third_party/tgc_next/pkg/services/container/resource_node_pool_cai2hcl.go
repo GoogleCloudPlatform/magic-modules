@@ -252,6 +252,35 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 		}
 	}
 
+	if v, ok := np["bestEffortProvisioning"].(map[string]interface{}); ok {
+		if enabled, ok := v["enabled"].(bool); ok && enabled {
+			nodePool["best_effort_provisioning"] = []map[string]interface{}{
+				{
+					"enabled":             true,
+					"min_provision_nodes": v["minProvisionNodes"],
+				},
+			}
+		}
+	}
+
+	if v, ok := np["maintenancePolicy"].(map[string]interface{}); ok {
+		if eu, ok := v["exclusionUntilEndOfSupport"].(map[string]interface{}); ok {
+			enabled := false
+			if e, ok := eu["enabled"].(bool); ok {
+				enabled = e
+			}
+			nodePool["maintenance_policy"] = []map[string]interface{}{
+				{
+					"exclusion_until_end_of_support": []map[string]interface{}{
+						{
+							"enabled": enabled,
+						},
+					},
+				},
+			}
+		}
+	}
+
 	if v, ok := np["maxPodsConstraint"].(map[string]interface{}); ok {
 		nodePool["max_pods_per_node"] = v["maxPodsPerNode"]
 	}
