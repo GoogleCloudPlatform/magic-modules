@@ -3,6 +3,7 @@ package resourcemanager
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -157,9 +158,9 @@ func resourceGoogleProjectDefaultServiceAccountsCreate(d *schema.ResourceData, m
 	changedServiceAccounts := make(map[string]interface{})
 	for _, sa := range serviceAccounts {
 		// As per documentation https://cloud.google.com/iam/docs/service-accounts#default
-		// we have just two default SAs and the e-mail may change. So, it is been filtered
-		// by the Display Name
-		if isDefaultServiceAccount(sa.DisplayName) {
+		// there are just two default SAs. Their display names have changed over time,
+		// so they are matched by e-mail address.
+		if isDefaultServiceAccount(sa.Email, pid) {
 			err := resourceGoogleProjectDefaultServiceAccountsDoAction(d, meta, action, sa.UniqueId, sa.Email, pid)
 			if err != nil {
 				return fmt.Errorf("error doing action %s on Service Account %s: %v", action, sa.Email, err)
@@ -214,15 +215,15 @@ func resourceGoogleProjectDefaultServiceAccountsDelete(d *schema.ResourceData, m
 	return nil
 }
 
-func isDefaultServiceAccount(displayName string) bool {
-	gceDefaultSA := "compute engine default service account"
-	appEngineDefaultSA := "app engine default service account"
-	saDisplayName := strings.ToLower(displayName)
-	if saDisplayName == gceDefaultSA || saDisplayName == appEngineDefaultSA {
-		return true
-	}
+var gceDefaultSAEmail = regexp.MustCompile(`^[0-9]+-compute@developer\.gserviceaccount\.com$`)
 
-	return false
+// isDefaultServiceAccount reports whether email is the Compute Engine default
+// service account (<project_number>-compute@developer.gserviceaccount.com) or
+// the App Engine default service account (<project_id>@appspot.gserviceaccount.com).
+func isDefaultServiceAccount(email, projectID string) bool {
+	email = strings.ToLower(email)
+	return gceDefaultSAEmail.MatchString(email) ||
+		email == fmt.Sprintf("%s@appspot.gserviceaccount.com", strings.ToLower(projectID))
 }
 
 func init() {

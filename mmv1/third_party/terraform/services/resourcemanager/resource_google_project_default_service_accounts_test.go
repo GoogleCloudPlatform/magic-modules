@@ -2,6 +2,7 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -207,7 +208,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsChanges(t *testing.T, projec
 			return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 		}
 		for _, sa := range response.Accounts {
-			if testAccIsDefaultServiceAccount(sa.DisplayName) {
+			if testAccIsDefaultServiceAccount(sa.Email, project) {
 				switch action {
 				case "DISABLE":
 					if !sa.Disabled {
@@ -251,7 +252,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 				return fmt.Errorf("failed to list service accounts on project %q: %v", project, err)
 			}
 			for _, sa := range response.Accounts {
-				if testAccIsDefaultServiceAccount(sa.DisplayName) {
+				if testAccIsDefaultServiceAccount(sa.Email, project) {
 					// We agreed to not revert the DEPRIVILEGE action because will be hard to track the roles over the time
 					if action == "DISABLE" {
 						if !sa.Disabled {
@@ -287,13 +288,10 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 // to update how we determine whether it's a default SA or not.
 // If you follow TDD, it is going to be different from isDefaultServiceAccount func while coding
 // but they must be identical before commit/push
-func testAccIsDefaultServiceAccount(displayName string) bool {
-	gceDefaultSA := "compute engine default service account"
-	appEngineDefaultSA := "app engine default service account"
-	saDisplayName := strings.ToLower(displayName)
-	if saDisplayName == gceDefaultSA || saDisplayName == appEngineDefaultSA {
-		return true
-	}
+var testAccGceDefaultSAEmail = regexp.MustCompile(`^[0-9]+-compute@developer\.gserviceaccount\.com$`)
 
-	return false
+func testAccIsDefaultServiceAccount(email, projectID string) bool {
+	email = strings.ToLower(email)
+	return testAccGceDefaultSAEmail.MatchString(email) ||
+		email == fmt.Sprintf("%s@appspot.gserviceaccount.com", strings.ToLower(projectID))
 }
