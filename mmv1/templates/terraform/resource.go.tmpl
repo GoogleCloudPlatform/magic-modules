@@ -670,7 +670,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
 {{- if $.ApiVersion }}
-        ApiVersion: "{{ $.ApiVersion }}",
+            ApiVersion: "{{ $.ApiVersion }}",
 {{- end}}
         })
         if err != nil {

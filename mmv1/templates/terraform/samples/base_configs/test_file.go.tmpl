@@ -116,10 +116,11 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 		"random_suffix": randomSuffix,
 	}
 	{{- end }}
-
 	{{- if $.Res.ApiVersion }}
+
 	acctest.AssertRequestApiVersion(t, "{{ $.Res.BaseUrl }}", "{{ $.Res.ApiVersion }}")
 	{{- end }}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 	{{- if $.Res.VersionedProvider $s.MinVersion }}
