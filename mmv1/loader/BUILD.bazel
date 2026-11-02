@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "loader",
@@ -13,6 +13,15 @@ go_library(
         "//mmv1/api",
         "//mmv1/api/resource",
         "//mmv1/api/utils",
+        "//mmv1/google",
+    ],
+)
+
+go_test(
+    name = "loader_test",
+    srcs = ["loader_test.go"],
+    embed = [":loader"],
+    deps = [
         "//mmv1/google",
     ],
 )
