@@ -43,6 +43,8 @@ async:
   operation:
     base_url: '{{op_id}}'
 autogen_async: true
+error_retry_predicates:
+  - transport_tpg.DataprocResourceNotReady
 include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl

@@ -282,6 +282,11 @@ type Resource struct {
 	// If true, skip identity generation for this resource
 	ExcludeIdentityGeneration bool `yaml:"exclude_identity_generation,omitempty"`
 
+	// If true, generated acceptance tests for this resource use the legacy
+	// RefreshState: true step for ImportBlockWithResourceIdentity instead of
+	// ImportState: true.
+	LegacyIdentityImportTest bool `yaml:"legacy_identity_import_test,omitempty"`
+
 	// Override sweeper settings
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
 
@@ -296,6 +301,10 @@ type Resource struct {
 	// Names without a package qualifier refer to exported functions in the
 	// resource's service package (for example, from custom_code.constants).
 	ErrorAbortPredicates []string `yaml:"error_abort_predicates,omitempty"`
+
+	// If true, retries the Create and Update requests when the async operation
+	// fails with a retryable error matching ErrorRetryPredicates.
+	ErrorRetryOnAsync bool `yaml:"error_retry_on_async,omitempty"`
 
 	// Optional attributes for declaring a resource's current version and generating
 	// state_upgrader code to the output .go file from files stored at
@@ -829,6 +838,16 @@ func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []
 	return props
 }
 
+func (r Resource) UseLegacyIdentityImportTest() bool {
+	if r.LegacyIdentityImportTest {
+		return true
+	}
+	if r.ProductMetadata != nil && r.ProductMetadata.LegacyIdentityImportTest {
+		return true
+	}
+	return false
+}
+
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
 	identities := r.Identity
@@ -1177,7 +1196,11 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
 		}
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		if idx := slices.Index(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff"); idx != -1 {
+			r.CustomDiff[idx] = "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		}
 	}
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
@@ -1214,7 +1237,11 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	if parent == nil {
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetAnnotationsDiff")
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+		if idx := slices.Index(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff"); idx != -1 {
+			r.CustomDiff[idx] = "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+		}
 	}
 
 	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
@@ -1912,7 +1939,7 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 func (r Resource) IamResourceProperties() []*Type {
 	urlProperties := make([]*Type, 0)
 	for _, param := range r.IamResourceParams() {
-		if param == "project" || param == "organization" {
+		if param == "project" {
 			continue
 		}
 
@@ -2687,7 +2714,7 @@ func (r Resource) ShouldGenerateSweepers() bool {
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false
 	}
-	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PreDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete {
+	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete || (r.DeleteVerb != "" && strings.ToUpper(r.DeleteVerb) != "DELETE") {
 		return false
 	}
 	return true

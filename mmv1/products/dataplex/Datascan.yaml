@@ -30,6 +30,7 @@ read_query_params: ?view=FULL
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: data_scan_id
+  max_backoff_timeout_seconds: 1200
   import_format:
     - projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}
     - '{{data_scan_id}}'
@@ -173,25 +174,23 @@ samples:
       - name: dataplex_datascan_documentation
         resource_id_vars:
           datascan_name: datadocumentation
-        test_vars_overrides:
-          # for backward compatible
-          datascan_name: '"datadocumentation" + randomSuffix'
         test_env_vars:
           project_name: PROJECT_NAME
           location: REGION
         vars:
           sql_dialect: GOOGLE_SQL
+          catalog_publishing_enabled: "true"
       - name: dataplex_datascan_documentation
         resource_id_vars:
           datascan_name: datadocumentation
-        test_vars_overrides:
-          # for backward compatible
-          datascan_name: '"datadocumentation" + randomSuffix'
         test_env_vars:
           project_name: PROJECT_NAME
           location: REGION
         vars:
-          sql_dialect: SPARK_SQL
+          # SPARK_SQL is only accepted by the API for BLMS IRC table resources,
+          # so the update step mutates catalog_publishing_enabled instead.
+          sql_dialect: GOOGLE_SQL
+          catalog_publishing_enabled: "false"
   - name: dataplex_datascan_onetime_documentation
     primary_resource_id: onetime_documentation
     steps:
@@ -726,6 +725,24 @@ properties:
                         required: true
                         description: |
                           The string representation of the parameter value.
+            - name: debugQueries
+              type: Array
+              description: |
+                Specifies the debug queries for this rule.
+                Currently, only one query is supported, but this may be expanded in the future.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: description
+                    type: String
+                    description: |
+                      Specifies the description of the debug query.
+                      The maximum length is 1,024 characters.
+                  - name: sqlStatement
+                    type: String
+                    required: true
+                    description: |
+                      Specifies the SQL statement to be executed.
         min_size: 1
       - name: catalogPublishingEnabled
         type: Boolean
@@ -810,6 +827,13 @@ properties:
         type: Boolean
         description: |
           If set, the latest DataScan job result will be published to Dataplex Catalog.
+      - name: mode
+        type: Enum
+        description: |
+          The execution mode for the profile scan.
+        enum_values:
+          - STANDARD
+          - LIGHTWEIGHT
   - name: dataDiscoverySpec
     type: NestedObject
     description: |
@@ -931,3 +955,17 @@ properties:
           - GOOGLE_SQL
           - SPARK_SQL
         default_from_api: true
+      - name: generationScopes
+        type: Array
+        immutable: true
+        description: |
+          Specifies which components of the data documentation to generate. Any component that is required to generate the specified components will also be generated. If no generation scope is specified, all available documentation components will be generated.
+        item_type:
+          type: Enum
+          description: |
+            The data documentation generation scope.
+          enum_values:
+            - ALL
+            - TABLE_AND_COLUMN_DESCRIPTIONS
+            - SQL_QUERIES
+            - BUSINESS_GLOSSARY_TERM_ASSOCIATIONS

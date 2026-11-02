@@ -232,6 +232,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["enable_k8s_beta_apis"] = flattenEnableK8sBetaApis(asset.Resource.Data["enableK8sBetaApis"])
 	hclData["logging_config"] = flattenContainerClusterLoggingConfig(asset.Resource.Data["loggingConfig"])
 	hclData["monitoring_config"] = flattenMonitoringConfig(asset.Resource.Data["monitoringConfig"])
+	hclData["managed_opentelemetry_config"] = flattenManagedOpenTelemetryConfig(asset.Resource.Data["managedOpentelemetryConfig"])
 	hclData["node_pool_auto_config"] = flattenNodePoolAutoConfig(asset.Resource.Data["nodePoolAutoConfig"])
 	hclData["rbac_binding_config"] = flattenRBACBindingConfig(asset.Resource.Data["rbacBindingConfig"])
 
@@ -2037,4 +2038,23 @@ func flattenNodeCreationConfig(v interface{}) []map[string]interface{} {
 		"node_creation_mode": ncc["nodeCreationMode"],
 	}
 	return []map[string]interface{}{transformed}
+}
+
+func flattenManagedOpenTelemetryConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	scope, ok := c["scope"].(string)
+	if !ok || scope == "" || scope == "SCOPE_UNSPECIFIED" {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"scope": scope,
+		},
+	}
 }

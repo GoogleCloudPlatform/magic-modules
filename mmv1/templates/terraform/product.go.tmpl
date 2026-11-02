@@ -33,7 +33,9 @@ var Product = registry.Product{
     CustomEndpointField: "{{ underscore $.Name }}_custom_endpoint",
     CustomEndpointEnvVar: "GOOGLE_{{ upper (underscore $.Name) }}_CUSTOM_ENDPOINT",
 }
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 
 func init() {
     Product.Register()
 }
+{{- end }}

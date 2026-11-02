@@ -329,9 +329,6 @@ properties:
         type: NestedObject
         description: |
           Contains filter properties for matching Pull Requests.
-        exactly_one_of:
-          - 'pull_request'
-          - 'push'
         properties:
           - name: 'branch'
             type: String
@@ -340,8 +337,6 @@ properties:
 
               The syntax of the regular expressions accepted is the syntax accepted by
               RE2 and described at https://github.com/google/re2/wiki/Syntax
-            exactly_one_of:
-              - 'branch'
           - name: 'invertRegex'
             type: Boolean
             description: |
@@ -358,9 +353,6 @@ properties:
         type: NestedObject
         description: |
           Contains filter properties for matching git pushes.
-        exactly_one_of:
-          - 'pull_request'
-          - 'push'
         properties:
           - name: 'branch'
             type: String
@@ -369,9 +361,6 @@ properties:
 
               The syntax of the regular expressions accepted is the syntax accepted by
               RE2 and described at https://github.com/google/re2/wiki/Syntax
-            exactly_one_of:
-              - 'branch'
-              - 'tag'
           - name: 'tag'
             type: String
             description: |
@@ -379,9 +368,6 @@ properties:
 
               The syntax of the regular expressions accepted is the syntax accepted by
               RE2 and described at https://github.com/google/re2/wiki/Syntax
-            exactly_one_of:
-              - 'branch'
-              - 'tag'
           - name: 'invertRegex'
             type: Boolean
             description: |
@@ -1326,9 +1312,6 @@ properties:
     type: NestedObject
     description: |
       Configuration for triggers that respond to Developer Connect events.
-    exactly_one_of:
-      - 'pullRequest'
-      - 'push'
     properties:
       - name: 'gitRepositoryLink'
         type: String
@@ -1373,9 +1356,6 @@ properties:
         type: NestedObject
         description: |
           Filter to match changes in refs like branches and tags.
-        exactly_one_of:
-          - 'branch'
-          - 'tag'
         properties:
           - name: 'branch'
             type: String

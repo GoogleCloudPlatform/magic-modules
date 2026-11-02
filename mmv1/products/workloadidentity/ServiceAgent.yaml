@@ -52,12 +52,17 @@ samples:
     steps:
       - name: workload_identity_service_agent_basic
         exclude_import_test: true
+        vars:
+          service_producer: healthcare.googleapis.com
   - name: workload_identity_service_agent_test
     primary_resource_id: primary
     exclude_basic_doc: true
     steps:
       - name: workload_identity_service_agent_test
+        config_path: templates/terraform/samples/services/workloadidentity/workload_identity_service_agent_basic.tf.tmpl
         exclude_import_test: true
+        vars:
+          service_producer: chemisttest.googleapis.com
 parameters:
   - name: parent
     type: String

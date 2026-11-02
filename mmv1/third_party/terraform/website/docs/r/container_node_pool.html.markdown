@@ -25,11 +25,9 @@ resource "google_container_cluster" "primary" {
   name     = "my-gke-cluster"
   location = "us-central1"
 
-  # We can't create a cluster with no node pool defined, but we want to only use
-  # separately managed node pools. So we create the smallest possible default
-  # node pool and immediately delete it.
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  # Required prior to GKE 1.36.4-gke.1469000 to use separately managed node pools
+  # remove_default_node_pool = true
+  # initial_node_count       = 1
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
@@ -302,7 +300,7 @@ cluster.
 
 `max_surge` and `max_unavailable` must not be negative and at least one of them must be greater than zero.
 
-* `strategy` - (Default `SURGE`) The upgrade strategy to be used for upgrading the nodes.
+* `strategy` - (Default `SURGE`) The upgrade strategy to be used for upgrading the nodes. Strategy can only be one of BLUE_GREEN, SURGE, or SHORT_LIVED.
 
 * `blue_green_settings` - (Optional) The settings to adjust [blue green upgrades](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pool-upgrade-strategies#blue-green-upgrade-strategy).
     Structure is [documented below](#nested_blue_green_settings)

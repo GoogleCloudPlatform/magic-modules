@@ -114,6 +114,70 @@ func TestProjectIDDiffSuppress(t *testing.T) {
 		}
 	}
 }
+
+func TestCompareProjectNames(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"bare project id and prefixed project id": {
+			Old:                "my-project",
+			New:                "projects/my-project",
+			ExpectDiffSuppress: true,
+		},
+		"prefixed project id and bare project id": {
+			Old:                "projects/my-project",
+			New:                "my-project",
+			ExpectDiffSuppress: true,
+		},
+		"prefixed project number and prefixed project id": {
+			Old:                "projects/1234",
+			New:                "projects/my-project",
+			ExpectDiffSuppress: true,
+		},
+		"prefixed project number and bare project id": {
+			Old:                "projects/1234",
+			New:                "my-project",
+			ExpectDiffSuppress: true,
+		},
+		"bare project id and prefixed project number": {
+			Old:                "my-project",
+			New:                "projects/1234",
+			ExpectDiffSuppress: true,
+		},
+		"bare project id and bare project number": {
+			Old:                "my-project",
+			New:                "1234",
+			ExpectDiffSuppress: true,
+		},
+		"different project ids": {
+			Old:                "my-project",
+			New:                "projects/other-project",
+			ExpectDiffSuppress: false,
+		},
+		"different project numbers": {
+			Old:                "projects/1234",
+			New:                "projects/5678",
+			ExpectDiffSuppress: false,
+		},
+		"empty old with project number": {
+			Old:                "",
+			New:                "projects/1234",
+			ExpectDiffSuppress: false,
+		},
+		"empty new with project id": {
+			Old:                "my-project",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if CompareProjectNames("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
 func TestEmptyOrUnsetBlockDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Key, Old, New      string
@@ -285,6 +349,75 @@ func TestEmptyOrDefaultStringSuppress_IAP(t *testing.T) {
 
 	for tn, tc := range cases {
 		if suppressor("iap.0.oauth2_client_id", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("failed case %s: Old='%s', New='%s', expected suppress=%t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestIpAddressDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"identical IPv6": {
+			Old:                "2600:1900:4000:1::1",
+			New:                "2600:1900:4000:1::1",
+			ExpectDiffSuppress: true,
+		},
+		"IPv6 compressed vs uncompressed": {
+			Old:                "2600:1900:4000:0001:0000:0000:0000:0001",
+			New:                "2600:1900:4000:1::1",
+			ExpectDiffSuppress: true,
+		},
+		"IPv6 trailing zeros uncompressed vs compressed": {
+			Old:                "2600:1900:4000:318:0:0:0:0",
+			New:                "2600:1900:4000:318::",
+			ExpectDiffSuppress: true,
+		},
+		"IPv6 leading zeros omitted": {
+			Old:                "2001:0db8:0000:0000:0000:0000:0000:0001",
+			New:                "2001:db8::1",
+			ExpectDiffSuppress: true,
+		},
+		"IPv6 uppercase vs lowercase hex": {
+			Old:                "2001:DB8::ABCD",
+			New:                "2001:db8::abcd",
+			ExpectDiffSuppress: true,
+		},
+		"different IPv6": {
+			Old:                "2600:1900:4000:1::1",
+			New:                "2600:1900:4000:1::2",
+			ExpectDiffSuppress: false,
+		},
+		"both empty": {
+			Old:                "",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+		"old empty, new set": {
+			Old:                "",
+			New:                "2600:1900:4000:1::1",
+			ExpectDiffSuppress: false,
+		},
+		"old set, new empty": {
+			Old:                "2600:1900:4000:1::1",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+		"invalid IP matching": {
+			Old:                "not-an-ip",
+			New:                "not-an-ip",
+			ExpectDiffSuppress: true,
+		},
+		"invalid IP not matching": {
+			Old:                "not-an-ip-1",
+			New:                "not-an-ip-2",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if IpAddressDiffSuppress("ipv6_address", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("failed case %s: Old='%s', New='%s', expected suppress=%t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}

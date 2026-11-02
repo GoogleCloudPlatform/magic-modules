@@ -1,0 +1,4 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	// Output-only field; the API rejects requests that populate last_published_context.
+	return nil, nil
+}

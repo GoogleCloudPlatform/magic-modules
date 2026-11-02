@@ -1,0 +1,123 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+// vertexAIRagFileCount parses an int64 count from an operation response, where
+// int64 values are serialized as JSON strings.
+func vertexAIRagFileCount(v interface{}) int64 {
+	var n int64
+	switch c := v.(type) {
+	case string:
+		if _, err := fmt.Sscan(c, &n); err != nil {
+			return 0
+		}
+	case float64:
+		n = int64(c)
+	}
+	return n
+}
+
+// vertexAIRagFileMatchesSource reports whether a RagFile returned by the API was
+// imported from the source configured on the resource.
+func vertexAIRagFileMatchesSource(d *schema.ResourceData, ragFile map[string]interface{}) bool {
+	if uri, ok := d.GetOk("gcs_source.0.uris.0"); ok {
+		gcsSource, _ := ragFile["gcsSource"].(map[string]interface{})
+		uris, _ := gcsSource["uris"].([]interface{})
+		for _, u := range uris {
+			if u == uri.(string) {
+				return true
+			}
+		}
+		return false
+	}
+	if resourceId, ok := d.GetOk("google_drive_source.0.resource_ids.0.resource_id"); ok {
+		driveSource, _ := ragFile["googleDriveSource"].(map[string]interface{})
+		resourceIds, _ := driveSource["resourceIds"].([]interface{})
+		for _, r := range resourceIds {
+			if rm, ok := r.(map[string]interface{}); ok && rm["resourceId"] == resourceId.(string) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// vertexAIRagFileWaitForImportAndSetName waits for the ragFiles:import operation,
+// verifies that it created a RagFile, and sets `name` to the ID of the newly
+// created RagFile. The import response only contains counts, so the RagFile is
+// located by listing the RagCorpus and matching on the configured source.
+func vertexAIRagFileWaitForImportAndSetName(d *schema.ResourceData, config *transport_tpg.Config, op map[string]interface{}, project, billingProject, userAgent string, timeout time.Duration) error {
+	region, err := tpgresource.GetRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	var opRes map[string]interface{}
+	if err := VertexAIOperationWaitTimeWithResponse(config, op, &opRes, project, region, "Importing RagFile", userAgent, timeout); err != nil {
+		return fmt.Errorf("Error waiting to import RagFile: %s", err)
+	}
+
+	if imported := vertexAIRagFileCount(opRes["importedRagFilesCount"]); imported == 0 {
+		msg := fmt.Sprintf("Error importing RagFile: no file was imported (failed: %d, skipped: %d)",
+			vertexAIRagFileCount(opRes["failedRagFilesCount"]), vertexAIRagFileCount(opRes["skippedRagFilesCount"]))
+		if path, ok := opRes["partialFailuresGcsPath"].(string); ok && path != "" {
+			msg += fmt.Sprintf("; see failure details in %s", path)
+		}
+		return fmt.Errorf("%s. Skipped files usually already exist in the RagCorpus, and failed files are usually not readable by the RAG Engine service agent", msg)
+	}
+
+	listUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"projects/{{project}}/locations/{{region}}/ragCorpora/{{rag_corpus}}/ragFiles"}}")
+	if err != nil {
+		return err
+	}
+
+	var newestName string
+	var newestCreateTime time.Time
+	pageToken := ""
+	for {
+		params := map[string]string{"pageSize": "100"}
+		if pageToken != "" {
+			params["pageToken"] = pageToken
+		}
+		u, err := transport_tpg.AddQueryParams(listUrl, params)
+		if err != nil {
+			return err
+		}
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    u,
+			UserAgent: userAgent,
+			Timeout:   timeout,
+		})
+		if err != nil {
+			return fmt.Errorf("Error listing RagFiles to locate the imported RagFile: %s", err)
+		}
+
+		ragFiles, _ := res["ragFiles"].([]interface{})
+		for _, f := range ragFiles {
+			ragFile, ok := f.(map[string]interface{})
+			if !ok || !vertexAIRagFileMatchesSource(d, ragFile) {
+				continue
+			}
+			name, _ := ragFile["name"].(string)
+			createTimeStr, _ := ragFile["createTime"].(string)
+			createTime, _ := time.Parse(time.RFC3339Nano, createTimeStr)
+			if newestName == "" || createTime.After(newestCreateTime) {
+				newestName = name
+				newestCreateTime = createTime
+			}
+		}
+
+		pageToken, _ = res["nextPageToken"].(string)
+		if pageToken == "" {
+			break
+		}
+	}
+
+	if newestName == "" {
+		return fmt.Errorf("Error importing RagFile: the import succeeded but no RagFile matching the configured source was found")
+	}
+
+	log.Printf("[DEBUG] Imported RagFile %q", newestName)
+	return d.Set("name", tpgresource.GetResourceNameFromSelfLink(newestName))
+}
+{{- end }}

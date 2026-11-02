@@ -31,26 +31,48 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.26'
+          go-version: '1.26.10'
+          cache: false
+
+      - name: Restore Go cache
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        if: github.event_name != 'push'
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ inputs.repo }}-${{ hashFiles('go.mod', 'go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ inputs.repo }}-${{ hashFiles('go.mod', 'go.sum') }}-
+            ${{ runner.os }}-go-${{ inputs.repo }}-
+
+      - name: Cache Go on main
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        if: github.event_name == 'push'
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ inputs.repo }}-${{ hashFiles('go.mod', 'go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ inputs.repo }}-${{ hashFiles('go.mod', 'go.sum') }}-
+            ${{ runner.os }}-go-${{ inputs.repo }}-
 
       - name: Get dependencies
         run: |
           go mod download
 
 
-      # `make vet` runs `go vet ./...`, which compiles all provider packages and
-      # typechecks all test files without linking an unused binary via `go build`.
-      - name: Build Provider
-        run: |
-          make vet
-
+      # `make testnolint` compiles all provider and unit test packages into the
+      # Go build cache without linking an unused root binary via `go build`, so
+      # `make lint` (`fmtcheck` + `go vet ./...`) can reuse the cached artifacts.
       - name: Run Unit Tests
         run: |
           make testnolint
 
-      - name: Lint Check
+      - name: Full Build & Lint Check
         run: |
-          make fmtcheck
+          make lint
 
       - name: Documentation Check
         run: |

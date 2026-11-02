@@ -17,11 +17,10 @@ package github
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 	"time"
-
-	"golang.org/x/exp/slices"
 )
 
 func TestChooseCoreReviewers(t *testing.T) {

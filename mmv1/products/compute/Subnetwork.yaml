@@ -128,6 +128,15 @@ samples:
         resource_id_vars:
           network_name: subnet-purpose-test-network
           subnetwork_name: subnet-purpose-test-subnetwork
+  - name: subnetwork_purpose_custom_hardware_link
+    primary_resource_id: subnetwork-purpose-custom-hardware-link
+    min_version: beta
+    steps:
+      - name: subnetwork_purpose_custom_hardware_link
+        min_version: beta
+        resource_id_vars:
+          network_name: subnet-purpose-chl-test-network
+          subnetwork_name: subnet-purpose-chl-test-subnetwork
   - name: subnetwork_resolve_subnet_mask
     primary_resource_id: subnetwork-resolve-subnet-mask
     steps:
@@ -171,6 +180,9 @@ samples:
         resource_id_vars:
           network_name: network-ipv6-only
           subnetwork_name: subnet-ipv6-only
+        vars:
+          ipv6_access_type: INTERNAL
+          enable_ula_internal_ipv6: true
   - name: subnetwork_with_subnet_mode_pdp
     primary_resource_id: subnetwork-with-subnet-mode-pdp
     exclude_basic_doc: true
@@ -180,6 +192,9 @@ samples:
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
           network_name: network-byoipv6-external
           subnetwork_name: subnet-mode-pdp-subnet
+        vars:
+          ipv6_access_type: EXTERNAL
+          internal_ipv6_prefix: null
         test_vars_overrides:
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
   - name: subnetwork_with_internal_subnet_mode_pdp
@@ -187,10 +202,14 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: subnetwork_with_internal_subnet_mode_pdp
+        config_path: templates/terraform/samples/services/compute/subnetwork_with_subnet_mode_pdp.tf.tmpl
         resource_id_vars:
           ip_collection_url: projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp
           network_name: network-byoipv6-internal
           subnetwork_name: internal-subnet-mode-pdp-subnet
+        vars:
+          ipv6_access_type: INTERNAL
+          internal_ipv6_prefix: null
         test_vars_overrides:
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
   - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
@@ -198,11 +217,14 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
+        config_path: templates/terraform/samples/services/compute/subnetwork_with_subnet_mode_pdp.tf.tmpl
         resource_id_vars:
-          internal_ipv6_prefix: 2600:1904:9:10::/64
           ip_collection_url: projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp
           network_name: network-byoipv6-internal-prefix
           subnetwork_name: subnet-mode-pdp-subnet-internal-prefix
+        vars:
+          ipv6_access_type: INTERNAL
+          internal_ipv6_prefix: 2600:1904:9:10::/64
         test_vars_overrides:
           internal_ipv6_prefix: fmt.Sprintf("2600:1904:9:%x::/64", acctest.RandIntRange(t, 16, 95))
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/terraform-v6-internal-sub-pdp"'
@@ -211,9 +233,13 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: subnetwork_ipv6_only_external
+        config_path: templates/terraform/samples/services/compute/subnetwork_ipv6_only_internal.tf.tmpl
         resource_id_vars:
           network_name: network-ipv6-only
           subnetwork_name: subnet-ipv6-only
+        vars:
+          ipv6_access_type: EXTERNAL
+          enable_ula_internal_ipv6: null
   - name: subnetwork_with_secondary_ipv6_range
     primary_resource_id: subnetwork_with_secondary_ipv6_range
     min_version: 'beta'
@@ -311,12 +337,13 @@ properties:
   - name: purpose
     type: String
     description: |
-      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION` or `PRIVATE_NAT`([Beta](../guides/provider_versions.html.markdown)).
+      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION`, `PRIVATE_NAT`([Beta](../guides/provider_versions.html.markdown)) or `CUSTOM_HARDWARE_LINK`([Beta](../guides/provider_versions.html.markdown)).
       A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
       A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
       A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
       A subnetwork with purpose set to `PEER_MIGRATION` is a user created subnetwork that is reserved for migrating resources from one peered network to another.
       A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
+      A subnetwork with purpose set to `CUSTOM_HARDWARE_LINK` is used by Custom Hardware Link.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE`.
     update_verb: PATCH

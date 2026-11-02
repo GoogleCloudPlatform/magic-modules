@@ -100,6 +100,16 @@ again. Server-populated (`output: true`) fields must have their values asserted,
 **Do NOT:** treat green as done. This class is invisible to CI today and is the most common human review
 catch; the test-adequacy check exists specifically to find it.
 
+## 7. Operation timeout waiting for state
+
+**Symptom:** acceptance test fails during create, update, or delete with `Error waiting for Creating/Updating/Deleting <Resource>: timeout while waiting for state to become ...` (typically `'done: true'` for standard GCP LROs, `'DONE'` for Compute operations, or a resource-specific target state).
+
+**Cause:** the GCP Long-Running Operation (LRO) legitimately took longer to complete than the resource's configured timeout (defaulting to 20m), or stalled on the backend.
+
+**Fix:** retrieve the operation ID/URL from the debug log's polling `GET` requests and query the operation URL using `python3 .agents/scripts/query_operation.py "<operation_url>"` to inspect creation (`metadata.createTime`/`createTime` or `startTime`/`insertTime`) and completion (`metadata.endTime`/`updateTime` or `endTime`) timestamps and find the total operation length. Bump the resource timeout in `mmv1/products/<product>/<Resource>.yaml` (`timeouts:` and `async.operation.timeouts:` if present — always specifying all three keys `insert_minutes`, `update_minutes`, and `delete_minutes`, as omitted keys in a non-nil `timeouts:` block unmarshal as `0`) or handwritten resource Go code + docs up to an appropriate higher interval (`20`, `30`, or a multiple of `30` minutes generally, such as `30`, `60`, `90`, `120`), and include a `bug` or `enhancement` release note. If the operation is stuck indefinitely on the backend, report it as a service-side issue rather than inflating the timeout.
+
+**Do NOT:** guess a timeout without checking the operation's actual total duration, or inflate timeouts to mask a permanently stuck backend operation.
+
 ---
 
 *This reference grows via retros: when a new failure class is diagnosed in a session, add an entry in the

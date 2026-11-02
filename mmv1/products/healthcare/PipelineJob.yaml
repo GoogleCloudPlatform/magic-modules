@@ -36,6 +36,7 @@ async:
   actions: [create, update]
   result:
     resource_inside_response: true
+  include_project: true
 autogen_async: true
 custom_code:
   decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl

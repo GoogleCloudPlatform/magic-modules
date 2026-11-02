@@ -19,3 +19,4 @@ scopes:
 versions:
   - name: ga
     base_url: https://storage.googleapis.com/storage/v1/
+legacy_identity_import_test: true

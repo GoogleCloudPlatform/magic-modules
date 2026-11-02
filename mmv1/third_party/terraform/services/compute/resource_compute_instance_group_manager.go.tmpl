@@ -1403,7 +1403,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	attempt := 0
 	for err != nil && attempt < 20 {
 		attempt++
-		time.Sleep(2000 * time.Millisecond)
+		time.Sleep(2 * config.SleepUnit)
 		op, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -1494,11 +1494,13 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, 
 
 func computeIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
 	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
+	config := meta.(*transport_tpg.Config)
 	conf := retry.StateChangeConf{
-		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
-		Target:  []string{"created"},
-		Refresh: instanceGroupManagerStatusRefreshFunc(waitForUpdates, d, meta),
-		Timeout: d.Timeout(schema.TimeoutCreate),
+		Pending:    []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
+		Target:     []string{"created"},
+		Refresh:    instanceGroupManagerStatusRefreshFunc(waitForUpdates, d, meta),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		MinTimeout: config.SleepUnit / 2,
 	}
 	_, err := conf.WaitForState()
 	if err != nil {

@@ -83,6 +83,9 @@ samples:
           source_sqldb_user: username
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
+    # Destination AlloyDB instance in us-central1 experiences resource pool stockouts in CI
+    # https://github.com/hashicorp/terraform-provider-google/issues/29342
+    skip_vcr: true
     steps:
       - name: database_migration_service_migration_job_postgres_to_alloydb
         resource_id_vars:

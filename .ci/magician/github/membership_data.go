@@ -175,5 +175,7 @@ var (
 		"trodge":            {},
 		"zli82016":          {},
 		"vr-ibm":            {},
+		"NA2047":            {},
+		"ShuaiXia-GCP":      {},
 	}
 )

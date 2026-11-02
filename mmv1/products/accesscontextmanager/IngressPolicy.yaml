@@ -67,6 +67,8 @@ parameters:
     immutable: true
     resource: ServicePerimeter
     imports: name
+    validation:
+      regex: '^accessPolicies/[^/]+/servicePerimeters/[^/]+$'
 properties:
   - name: resource
     type: String

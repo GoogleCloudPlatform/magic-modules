@@ -18,7 +18,6 @@ import (
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"gopkg.in/yaml.v3"
 )
 
 // IamListResourceOptions configures generation of a single IAM list resource kind.
@@ -174,6 +173,10 @@ type IamPolicy struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 
+	// [Optional] Timeout in seconds for retrying IAM policy read-modify-write operations.
+	// If unset, defaults to maxBackoffTimeout (90 seconds).
+	MaxBackoffTimeoutSeconds int `yaml:"max_backoff_timeout_seconds,omitempty"`
+
 	// [Optional] IAM list resources (terrafrom query) to generate for this resource.
 	//
 	// list_resource:
@@ -202,16 +205,15 @@ func newIamPolicyWithDefaults() IamPolicy {
 
 // UnmarshalYAML implements a custom unmarshaler for the IamPolicy struct.
 // It sets default values and then decodes the YAML over them.
-func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
+func (p *IamPolicy) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	// Start with a struct containing all the default values.
 	*p = newIamPolicyWithDefaults()
 
 	// Use a type alias to prevent recursion when decoding.
 	type iamPolicyAlias IamPolicy
-	aliasObj := (*iamPolicyAlias)(p)
 
 	// Decode the provided YAML, which will overwrite any default values that are specified.
-	return value.Decode(aliasObj)
+	return unmarshal((*iamPolicyAlias)(p))
 }
 
 // MarshalYAML implements a custom marshaller for the IamPolicy struct.

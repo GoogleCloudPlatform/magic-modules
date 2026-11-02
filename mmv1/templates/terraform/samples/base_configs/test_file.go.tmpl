@@ -159,8 +159,13 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 			},
 			{{- if not $.Res.ExcludeIdentityGeneration }}
 			{
+				{{- if $.Res.UseLegacyIdentityImportTest }}
 				ResourceName:       "{{ $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
 				RefreshState:       true,
+				{{- else }}
+				ResourceName:       "{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
+				ImportState:        true,
+				{{- end }}
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},

@@ -22,3 +22,4 @@ versions:
     base_url: 'https://bigqueryreservation.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/bigquery'
+legacy_identity_import_test: true
