@@ -49,7 +49,7 @@ async:
   actions: [create, delete]
   result:
     resource_inside_response: true
-autogen_async: false
+autogen_async: true
 custom_code:
   encoder: templates/terraform/encoders/discovery_engine_chat_engine_hardcode_solution_type.go.tmpl
 samples:

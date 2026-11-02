@@ -28,8 +28,11 @@ update_verb: 'PATCH'
 update_mask: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
 generate_list_resource: true
+autogen_async: true
 async:
   type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
   actions: ['create', 'delete']
   result:
     resource_inside_response: true
@@ -176,7 +179,7 @@ properties:
         default_from_api: true
         immutable: true
         description: 'Disable end user credential access for the runtime.'
-        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("false")'
   - name: shieldedVmConfig
     type: NestedObject
     default_from_api: true
@@ -188,7 +191,7 @@ properties:
         type: Boolean
         default_from_api: true
         description: 'Enables secure boot for the runtime.'
-        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+        diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("false")'
   - name: 'networkTags'
     type: Array
     immutable: true

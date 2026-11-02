@@ -1,0 +1,122 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: OdbDnsZone
+description: An OdbDnsZone resource which represents a custom DNS zone under an OdbNetwork.
+references:
+  guides:
+    OracleDatabase@Google Cloud: https://cloud.google.com/oracle/database/docs/overview
+base_url: projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones/{{odb_dns_zone_id}}
+create_url: projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones?odbDnsZoneId={{odb_dns_zone_id}}
+id_format: projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones/{{odb_dns_zone_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones/{{odb_dns_zone_id}}
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: T2RiRG5zWm9uZUF1dG9nZW5WMkFnZW50
+autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/oracledatabase_odbdnszone.go.tmpl
+samples:
+  - name: oracledatabase_odbdnszone_basic
+    primary_resource_id: my-odbdnszone
+    steps:
+      - name: oracledatabase_odbdnszone_basic
+        resource_id_vars:
+          domain: example.com
+          project: my-project
+          odb_network_id: my-odbnetwork
+          odb_dns_zone_id: my-odbdnszone
+          deletion_protection: "true"
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          odb_network_id: '"tf-test-permanent-odbnetwork"'
+          odb_dns_zone_id: fmt.Sprintf("tf-test-odbdnszone-%s", acctest.RandString(t, 10))
+          domain: fmt.Sprintf("tftest%s.example.com", acctest.RandString(t, 10))
+virtual_fields:
+  - name: deletion_protection
+    type: Boolean
+    default_value: true
+    description: Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    url_param_only: true
+    required: true
+  - name: odbnetwork
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    url_param_only: true
+    required: true
+  - name: odbDnsZoneId
+    type: String
+    description: |-
+      The ID of the OdbDnsZone to create. This value is restricted
+      to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of 63
+      characters in length. The value must start with a letter and end with
+      a letter or a number.
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: The date and time that the OdbDnsZone was created.
+    output: true
+  - name: domain
+    type: String
+    description: |-
+      The DNS suffix for the zone.
+      Ex: abc.example.com.
+    required: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels or tags associated with the resource.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the OdbDnsZone resource in the following format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbDnsZones/{odb_dns_zone}
+    output: true
+  - name: state
+    type: String
+    description: |-
+      State of the ODB DNS Zone.
+      Possible values:
+      STATE_UNSPECIFIED
+      PROVISIONING
+      AVAILABLE
+      INACTIVE
+      TERMINATING
+      FAILED
+    output: true

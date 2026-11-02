@@ -21,3 +21,4 @@ versions:
     base_url: https://orgpolicy.googleapis.com/v2/
   - name: beta
     base_url: https://orgpolicy.googleapis.com/v2/
+legacy_identity_import_test: true

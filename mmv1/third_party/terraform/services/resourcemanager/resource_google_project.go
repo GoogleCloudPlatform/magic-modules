@@ -240,7 +240,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Sleep to let the billing account settle before other resources
 	// try to use this project.
-	time.Sleep(15 * time.Second)
+	time.Sleep(15 * config.SleepUnit)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -267,7 +267,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		// Retry if API is not yet enabled.
 		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
-			time.Sleep(15 * time.Second)
+			time.Sleep(15 * config.SleepUnit)
 			err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		}
 		if err != nil {
@@ -748,7 +748,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		if baName == name {
 			return nil
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(3 * config.SleepUnit)
 	}
 	return fmt.Errorf("Timed out waiting for billing account to return correct value.  Waiting for %s, got %s.",
 		name, strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/"))
@@ -938,7 +938,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 func waitForServiceUsageEnabledServices(services []string, project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) error {
 	missing := make([]string, 0, len(services))
 	delay := time.Duration(0)
-	interval := time.Second
+	interval := config.SleepUnit
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			// Get the list of services that are enabled on the project

@@ -92,12 +92,18 @@ samples:
       - name: certificate_manager_self_managed_certificate
         resource_id_vars:
           cert_name: self-managed-cert
+        vars:
+          pem_certificate: test-fixtures/cert.pem
+          pem_private_key: test-fixtures/private-key.pem
       # Second step updates the self-managed certificate data in place
       # (via PATCH) to verify it does not force recreation. See
       # https://github.com/hashicorp/terraform-provider-google/issues/17312
-      - name: certificate_manager_self_managed_certificate_update
+      - name: certificate_manager_self_managed_certificate
         resource_id_vars:
           cert_name: self-managed-cert
+        vars:
+          pem_certificate: test-fixtures/cert-updated.pem
+          pem_private_key: test-fixtures/private-key-updated.pem
   - name: certificate_manager_self_managed_certificate_write_only
     primary_resource_id: default
     skip_vcr: true

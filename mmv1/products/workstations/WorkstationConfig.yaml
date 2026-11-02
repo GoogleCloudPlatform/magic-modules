@@ -48,6 +48,13 @@ async:
   result:
     resource_inside_response: false
 autogen_async: true
+sweeper:
+  query_string: "?force=true"
+  parent:
+    resource_type: google_workstations_workstation_cluster
+    parent_field: name
+    parent_field_extract_name: true
+    child_field: workstation_cluster_id
 custom_code:
 samples:
   - name: workstation_config_basic
@@ -55,19 +62,106 @@ samples:
     steps:
       - name: workstation_config_basic
         resource_id_vars:
+          account_id: my-account
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
           key_short_name: keyname
           value_short_name: valuename
           org_id: '123456789'
         test_vars_overrides:
-          key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-          value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
           org_id: envvar.GetTestOrgFromEnv(t)
-  - name: workstation_config_container
+      - name: workstation_config_container
+        include_step_doc: true
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          key_short_name: keyname
+          value_short_name: valuename
+          org_id: '123456789'
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
+      - name: workstation_config_allowed_ports
+        include_step_doc: true
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          key_short_name: keyname
+          value_short_name: valuename
+          org_id: '123456789'
+        vars:
+          working_dir: null
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
+      - name: workstation_config_shielded_instance_config
+        include_step_doc: true
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          key_short_name: keyname
+          value_short_name: valuename
+          org_id: '123456789'
+        vars:
+          enable_audit_agent: 'true'
+          enable_secure_boot: 'true'
+          enable_vtpm: 'true'
+          enable_integrity_monitoring: 'true'
+          enable_confidential_compute: 'true'
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
+      - name: workstation_config_shielded_instance_config
+        resource_id_vars:
+          account_id: my-account
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          key_short_name: keyname
+          value_short_name: valuename
+          org_id: '123456789'
+        vars:
+          enable_audit_agent: 'false'
+          enable_secure_boot: null
+          enable_vtpm: null
+          enable_integrity_monitoring: null
+          enable_confidential_compute: null
+        test_vars_overrides:
+          org_id: envvar.GetTestOrgFromEnv(t)
+  - name: workstation_config_boost
     primary_resource_id: default
     steps:
-      - name: workstation_config_container
+      - name: workstation_config_boost
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+      - name: workstation_config_boost_update
+        min_version: beta
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          enable_automatic_failover: 'true'
+      - name: workstation_config_boost_update
+        min_version: beta
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          enable_automatic_failover: 'false'
+      - name: workstation_config_accelerators
+        include_step_doc: true
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+  - name: workstation_config_persistent_directories
+    primary_resource_id: default
+    steps:
+      - name: workstation_config_persistent_directories
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+      - name: workstation_config_source_snapshot
+        include_step_doc: true
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
@@ -78,68 +172,17 @@ samples:
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
-  - name: workstation_config_hyperdisk_source_snapshot
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_hyperdisk_source_snapshot
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
           key_short_name: keyname
           value_short_name: valuename
           org_id: '0123456789'
         test_vars_overrides:
-          key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-          value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
           org_id: envvar.GetTestOrgFromEnv(t)
-  - name: workstation_config_persistent_directories
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_persistent_directories
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_source_snapshot
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_source_snapshot
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_shielded_instance_config
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_shielded_instance_config
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_accelerators
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_accelerators
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_boost
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_boost
-        resource_id_vars:
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
   - name: workstation_config_encryption_key
     primary_resource_id: default
     steps:
       - name: workstation_config_encryption_key
         resource_id_vars:
           account_id: my-account
-          workstation_cluster_name: workstation-cluster
-          workstation_config_name: workstation-config
-  - name: workstation_config_allowed_ports
-    primary_resource_id: default
-    steps:
-      - name: workstation_config_allowed_ports
-        resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
   - name: workstation_config_idle_action
@@ -150,6 +193,14 @@ samples:
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
+        vars:
+          idle_action: 'SUSPEND'
+      - name: workstation_config_idle_action
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+        vars:
+          idle_action: 'STOP'
 parameters:
   - name: workstationConfigId
     type: String
@@ -398,6 +449,11 @@ properties:
                   type: Integer
                   description: Number of instances to pool for faster workstation boosting.
                   default_from_api: true
+                - name: enableAutomaticFailover
+                  type: Boolean
+                  description: |
+                    Indicates if this boost config is eligible for automatic failover when the service cannot provision the default VM type. Defaults to false.
+                  min_version: beta
                 - name: accelerators
                   type: Array
                   description: |

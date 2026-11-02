@@ -740,7 +740,7 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 }
 
 func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
-	// Instance template uses UniqueId in some cases
+	// name_prefix appends a random suffix to the generated name, which VCR cannot replay.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -935,7 +935,7 @@ func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, "DISABLED"),
+				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, true, "DISABLED"),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -943,7 +943,15 @@ func TestAccComputeBackendService_withCompressionMode(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, "AUTOMATIC"),
+				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, true, "AUTOMATIC"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withCompressionMode(backendName, checkName, false, "AUTOMATIC"),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -1938,9 +1946,18 @@ func testAccComputeBackendService_withCdnPolicy(serviceName, checkName string) s
 resource "google_compute_backend_service" "foobar" {
   name          = "%s"
   health_checks = [google_compute_http_health_check.zero.self_link]
+  enable_cdn    = true
 
   cdn_policy {
-    negative_caching = false
+    // client_ttl and default_ttl are explicitly 0 here. They are Optional + Computed, so an
+    // explicit 0 has to be told apart from an unset field: dropping it makes the API apply its own
+    // default and produces a permadiff, while sending it unconditionally breaks cache modes that
+    // forbid TTLs. testAccComputeBackendService_withCdnPolicyUseOriginHeaders covers the unset side.
+    cache_mode        = "CACHE_ALL_STATIC"
+    client_ttl        = 0
+    default_ttl       = 0
+    max_ttl       = 0
+    negative_caching  = false
     serve_while_stale = 0
     cache_key_policy {
       include_protocol       = true
@@ -2668,12 +2685,12 @@ resource "google_compute_health_check" "zero" {
 `, serviceName, reqHeader, respHeader, checkName)
 }
 
-func testAccComputeBackendService_withCompressionMode(serviceName, checkName, compressionMode string) string {
+func testAccComputeBackendService_withCompressionMode(serviceName, checkName string, enableCdn bool, compressionMode string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
   name             = "%s"
   health_checks    = [google_compute_http_health_check.zero.self_link]
-  enable_cdn       = true
+  enable_cdn       = %t
   compression_mode = "%s"
 }
 
@@ -2683,7 +2700,7 @@ resource "google_compute_http_health_check" "zero" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-`, serviceName, compressionMode, checkName)
+`, serviceName, enableCdn, compressionMode, checkName)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}

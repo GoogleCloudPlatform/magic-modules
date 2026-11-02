@@ -220,9 +220,6 @@ properties:
               description: |
                 Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=, !=.
                 Only one of `order` and `arrayConfig` can be specified.
-              exactly_one_of:
-                - order
-                - arrayConfig
               enum_values:
                 - ASCENDING
                 - DESCENDING
@@ -231,9 +228,6 @@ properties:
               description: |
                 Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
                 be specified.
-              exactly_one_of:
-                - order
-                - arrayConfig
               enum_values:
                 - CONTAINS
   - name: ttlConfig

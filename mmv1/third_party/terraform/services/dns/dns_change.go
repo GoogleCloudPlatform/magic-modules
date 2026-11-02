@@ -13,6 +13,7 @@ type DnsChangeWaiter struct {
 	Change      *dns.Change
 	Project     string
 	ManagedZone string
+	SleepUnit   time.Duration
 }
 
 func (w *DnsChangeWaiter) RefreshFunc() retry.StateRefreshFunc {
@@ -32,11 +33,15 @@ func (w *DnsChangeWaiter) RefreshFunc() retry.StateRefreshFunc {
 }
 
 func (w *DnsChangeWaiter) Conf() *retry.StateChangeConf {
+	sleepUnit := w.SleepUnit
+	if sleepUnit <= 0 {
+		sleepUnit = time.Second
+	}
 	return &retry.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"done"},
 		Refresh:    w.RefreshFunc(),
 		Timeout:    10 * time.Minute,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: 2 * sleepUnit,
 	}
 }

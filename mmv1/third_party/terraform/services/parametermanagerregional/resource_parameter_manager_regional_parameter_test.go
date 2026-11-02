@@ -164,11 +164,9 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 		},
 	})
 
-	context := map[string]interface{}{
-		"kms_key":       kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key1").CryptoKey.Name,
-		"kms_key_other": kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key2").CryptoKey.Name,
-		"random_suffix": acctest.RandString(t, 10),
-	}
+	kmsKey := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key1").CryptoKey.Name
+	kmsKeyOther := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key2").CryptoKey.Name
+	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -176,7 +174,10 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 		CheckDestroy:             testAccCheckParameterManagerRegionalRegionalParameterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccParameterManagerRegionalRegionalParameter_withoutKmsKey(context),
+				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       nil,
+					"random_suffix": randomSuffix,
+				}),
 			},
 			{
 				ResourceName:            "google_parameter_manager_regional_parameter.regional-parameter-with-kms-key",
@@ -185,7 +186,10 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 				ImportStateVerifyIgnore: []string{"labels", "location", "parameter_id", "terraform_labels"},
 			},
 			{
-				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(context),
+				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       kmsKey,
+					"random_suffix": randomSuffix,
+				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_parameter_manager_regional_parameter.regional-parameter-with-kms-key", plancheck.ResourceActionUpdate),
@@ -199,7 +203,10 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 				ImportStateVerifyIgnore: []string{"labels", "location", "parameter_id", "terraform_labels"},
 			},
 			{
-				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdateOther(context),
+				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       kmsKeyOther,
+					"random_suffix": randomSuffix,
+				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_parameter_manager_regional_parameter.regional-parameter-with-kms-key", plancheck.ResourceActionUpdate),
@@ -213,7 +220,10 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 				ImportStateVerifyIgnore: []string{"labels", "location", "parameter_id", "terraform_labels"},
 			},
 			{
-				Config: testAccParameterManagerRegionalRegionalParameter_withoutKmsKey(context),
+				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       nil,
+					"random_suffix": randomSuffix,
+				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_parameter_manager_regional_parameter.regional-parameter-with-kms-key", plancheck.ResourceActionUpdate),
@@ -230,18 +240,6 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 	})
 }
 
-func testAccParameterManagerRegionalRegionalParameter_withoutKmsKey(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "project" {}
-
-resource "google_parameter_manager_regional_parameter" "regional-parameter-with-kms-key" {
-  parameter_id = "tf_test_parameter%{random_suffix}"
-  location = "us-central1"
-  format = "JSON"
-}
-`, context)
-}
-
 func testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {}
@@ -252,21 +250,6 @@ resource "google_parameter_manager_regional_parameter" "regional-parameter-with-
   format = "JSON"
 
   kms_key = "%{kms_key}"
-}
-`, context)
-}
-
-func testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdateOther(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "project" {
-}
-
-resource "google_parameter_manager_regional_parameter" "regional-parameter-with-kms-key" {
-  parameter_id = "tf_test_parameter%{random_suffix}"
-  location = "us-central1"
-  format = "JSON"
-
-  kms_key = "%{kms_key_other}"
 }
 `, context)
 }

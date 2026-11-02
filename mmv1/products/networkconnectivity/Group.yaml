@@ -86,10 +86,6 @@ properties:
     type: String
     description: Output only. The current lifecycle state of this hub.
     output: true
-    exactly_one_of:
-      - CREATING
-      - ACTIVE
-      - DELETING
   - name: autoAccept
     type: NestedObject
     description: Optional. The auto-accept setting for this group.

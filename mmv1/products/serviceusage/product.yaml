@@ -22,3 +22,4 @@ versions:
     base_url: https://serviceusage.googleapis.com/v1/
   - name: beta
     base_url: https://serviceusage.googleapis.com/v1beta1/
+legacy_identity_import_test: true

@@ -37,7 +37,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: false
+autogen_async: true
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -67,7 +67,7 @@ samples:
           data_store_id: 'data-store-id'
           kms_key_name: 'kms-key'
         test_vars_overrides:
-          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+          kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-discoveryengine-datastore-key").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     steps:
@@ -289,20 +289,12 @@ properties:
             required: false
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
             properties: []
           - name: 'ocrParsingConfig'
             type: NestedObject
             description: |
               Configurations applied to OCR parser. Currently it only applies to PDFs.
             required: false
-            exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
             properties:
               - name: 'useNativeText'
                 type: Boolean
@@ -316,10 +308,6 @@ properties:
             required: false
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
             properties:
               - name: 'enableTableAnnotation'
                 type: Boolean
@@ -385,20 +373,12 @@ properties:
               required: false
               send_empty_value: true
               allow_empty_object: true
-              exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
               properties: []
             - name: 'ocrParsingConfig'
               type: NestedObject
               description: |
                 Configurations applied to OCR parser. Currently it only applies to PDFs.
               required: false
-              exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
               properties:
                 - name: 'useNativeText'
                   type: Boolean
@@ -412,10 +392,6 @@ properties:
               required: false
               send_empty_value: true
               allow_empty_object: true
-              exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
               properties:
                 - name: 'enableTableAnnotation'
                   type: Boolean

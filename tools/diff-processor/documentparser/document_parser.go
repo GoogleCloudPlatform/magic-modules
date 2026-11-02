@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	fieldNameRegex      = regexp.MustCompile("[\\*|-]\\s+`([a-z0-9_\\./]+)`") // * `xxx`
-	nestedObjectRegex   = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`)     // <a name="xxx">
-	nestedHashTagRegex  = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)      // #(nested_xxx)
-	horizontalLineRegex = regexp.MustCompile("- - -|-{3,}")                   // - - - or ---
+	// * `xxx` or - `xxx` at the start of a line, possibly indented
+	fieldNameRegex      = regexp.MustCompile("(?m)^([ \\t]*)[*-][ \\t]+`([a-z0-9_\\./]+)`")
+	nestedObjectRegex   = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`) // <a name="xxx">
+	nestedHashTagRegex  = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)  // #(nested_xxx)
+	horizontalLineRegex = regexp.MustCompile("- - -|-{3,}")               // - - - or ---
 
 	sectionSeparator = "## "
 )
@@ -126,14 +127,14 @@ func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
 	for len(queue) > 0 {
 		l := len(queue)
 		for _, cur := range queue {
-			// the separator should always at the beginning of the line
-			parts := splitWithRegexp(cur.text, fieldNameRegex)
+			parts := splitFieldBullets(cur.text)
 			for _, p := range parts[1:] {
 				p = strings.ReplaceAll(p, "\n", "")
-				fieldName := findPattern(p, fieldNameRegex)
-				if fieldName == "" {
+				match := fieldNameRegex.FindStringSubmatch(p)
+				if match == nil {
 					return fmt.Errorf("could not find field name in %s", p)
 				}
+				fieldName := match[2]
 				// There is a special case in some hand written resource eg. in compute_instance, where its attributes is in a.0.b.0.c format.
 				fieldName = strings.ReplaceAll(fieldName, ".0.", ".")
 				newNode := &node{
@@ -152,6 +153,33 @@ func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
 		queue = queue[l:]
 	}
 	return nil
+}
+
+// Split text at the bullets of the fields it documents. The fields are the
+// least indented bullets at the start of a line, usually unindented. More
+// indented bullets, such as lists of example values, and backticked names in
+// the middle of a line are part of the description of the field before them.
+func splitFieldBullets(text string) []string {
+	matches := fieldNameRegex.FindAllStringSubmatchIndex(text, -1)
+	if len(matches) == 0 {
+		return []string{text}
+	}
+	minIndent := -1
+	for _, m := range matches {
+		if indent := m[3] - m[2]; minIndent < 0 || indent < minIndent {
+			minIndent = indent
+		}
+	}
+	var parts []string
+	start := 0
+	for _, m := range matches {
+		if m[3]-m[2] != minIndent {
+			continue
+		}
+		parts = append(parts, text[start:m[0]])
+		start = m[0]
+	}
+	return append(parts, text[start:])
 }
 
 func findPattern(text string, re *regexp.Regexp) string {

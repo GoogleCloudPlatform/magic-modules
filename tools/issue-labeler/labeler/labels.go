@@ -3,13 +3,13 @@ package labeler
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strings"
 
 	_ "embed"
 
-	"github.com/golang/glog"
 	"github.com/google/go-github/v68/github"
 	"gopkg.in/yaml.v2"
 )
@@ -79,7 +79,7 @@ func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 	for _, resource := range resources {
 		for _, rl := range regexpLabels {
 			if rl.Regexp.MatchString(resource) {
-				glog.Infof("found resource %q, applying label %q", resource, rl.Label)
+				log.Printf("found resource %q, applying label %q", resource, rl.Label)
 				labelSet[rl.Label] = struct{}{}
 				break
 			}

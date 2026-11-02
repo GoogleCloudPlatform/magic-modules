@@ -6,7 +6,7 @@ resource "google_memorystore_instance" "primary_instance" {
     network                      = google_compute_network.primary_producer_net.id
     project_id                   = data.google_project.project.project_id
   }
-  location                       = "asia-east1"
+  location                       = "northamerica-south1"
   replica_count                  = 1
   node_type                      = "SHARED_CORE_NANO"
   transit_encryption_mode        = "TRANSIT_ENCRYPTION_DISABLED"
@@ -16,7 +16,7 @@ resource "google_memorystore_instance" "primary_instance" {
   }
   zone_distribution_config {
     mode                         = "SINGLE_ZONE"
-    zone                         = "asia-east1-c"
+    zone                         = "northamerica-south1-a"
   }
   deletion_protection_enabled    = {{index $.ResourceIdVars "primary_instance_deletion_protection_enabled"}}
   persistence_config {
@@ -38,7 +38,7 @@ resource "google_memorystore_instance" "primary_instance" {
 
 resource "google_network_connectivity_service_connection_policy" "primary_policy" {
   name                           = "{{index $.ResourceIdVars "primary_instance_policy_name"}}"
-  location                       = "asia-east1"
+  location                       = "northamerica-south1"
   service_class                  = "gcp-memorystore"
   description                    = "my basic service connection policy"
   network                        = google_compute_network.primary_producer_net.id
@@ -50,7 +50,7 @@ resource "google_network_connectivity_service_connection_policy" "primary_policy
 resource "google_compute_subnetwork" "primary_producer_subnet" {
   name                           = "{{index $.ResourceIdVars "primary_instance_subnet_name"}}"
   ip_cidr_range                  = "10.0.1.0/29"
-  region                         = "asia-east1"
+  region                         = "northamerica-south1"
   network                        = google_compute_network.primary_producer_net.id
 }
 

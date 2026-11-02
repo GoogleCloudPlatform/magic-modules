@@ -1,4 +1,13 @@
 
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
 resource "google_workbench_instance" "basic" {
   name = "workbench-instance-cai"
   location = "us-central1-a"

@@ -1,17 +1,16 @@
 package cmd
 
 import (
-	"slices"
-
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"os"
+	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/maps"
 
 	newProvider "google/provider/new/google/provider"
 	oldProvider "google/provider/old/google/provider"
@@ -85,8 +84,7 @@ func (o *detectMissingDocsOptions) run(args []string) error {
 }
 
 func sortMissingDocDetails(m map[string]detector.MissingDocDetails) []detector.MissingDocDetails {
-	itemNames := maps.Keys(m)
-	slices.Sort(itemNames)
+	itemNames := slices.Sorted(maps.Keys(m))
 	arr := []detector.MissingDocDetails{}
 	for _, itemName := range itemNames {
 		details := m[itemName]

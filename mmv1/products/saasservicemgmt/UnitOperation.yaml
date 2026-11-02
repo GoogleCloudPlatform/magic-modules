@@ -21,6 +21,15 @@ create_url: projects/{{project}}/locations/{{location}}/unitOperations?unitOpera
 import_format:
   - projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
 autogen_status: VW5pdE9wZXJhdGlvbg==
+# DeleteUnitOperation returns before the resource is removed (no long-running
+# operation); poll until GET returns 404 so destroy completes only once the
+# UnitOperation is gone.
+async:
+  type: PollAsync
+  actions: [delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
 custom_code:
   post_create: templates/terraform/post_create/saas_runtime_unit_operation_wait.go.tmpl
 samples:

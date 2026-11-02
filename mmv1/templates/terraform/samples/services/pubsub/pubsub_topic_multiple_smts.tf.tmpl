@@ -33,4 +33,11 @@ EOF
       code = "..."
     }
   }
+
+  message_transforms {
+    compression {
+      compression_algorithm = "ZLIB"
+      compression_mode      = "COMPRESS"
+    }
+  }
 }

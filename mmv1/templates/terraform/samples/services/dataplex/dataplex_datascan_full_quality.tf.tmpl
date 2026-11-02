@@ -44,6 +44,10 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
         priority = "high"
       }
       non_null_expectation {}
+      debug_queries {
+        description = "test debug query description"
+        sql_statement = "select * from bigquery-public-data.austin_bikeshare.bikeshare_stations where address is null"
+      }
     }
 
     rules {

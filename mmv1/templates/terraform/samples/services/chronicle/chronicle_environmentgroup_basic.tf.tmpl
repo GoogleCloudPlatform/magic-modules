@@ -2,8 +2,8 @@ resource "google_chronicle_environment_group" "{{$.PrimaryResourceId}}" {
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
 
-  display_name = "myEnvironmentGroup"
-  description = "My Environment Description"
+  display_name = "{{index $.Vars "display_name"}}"
+  description = "{{index $.Vars "description"}}"
   environments_ids = [
     "Default Environment"
   ]

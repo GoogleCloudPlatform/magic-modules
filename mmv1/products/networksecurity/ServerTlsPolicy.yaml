@@ -75,6 +75,13 @@ samples:
         resource_id_vars:
           resource_name: my-server-tls-policy
           trust_config_name: my-trust-config
+  - name: network_security_server_tls_policy_mtls_validation_relaxations
+    primary_resource_id: default
+    steps:
+      - name: network_security_server_tls_policy_mtls_validation_relaxations
+        resource_id_vars:
+          resource_name: my-server-tls-policy
+          trust_config_name: my-trust-config
 parameters:
   - name: name
     type: String
@@ -124,9 +131,6 @@ properties:
         type: NestedObject
         description: |
           gRPC specific configuration to access the gRPC server to obtain the cert and private key.
-        exactly_one_of:
-          - grpc_endpoint
-          - certificate_provider_instance
         properties:
           - name: targetUri
             type: String
@@ -138,9 +142,6 @@ properties:
         description: |
           Optional if policy is to be used with Traffic Director. For external HTTPS load balancer must be empty.
           Defines a mechanism to provision server identity (public and private keys). Cannot be combined with allowOpen as a permissive mode that allows both plain text and TLS is not supported.
-        exactly_one_of:
-          - grpc_endpoint
-          - certificate_provider_instance
         properties:
           - name: pluginInstance
             type: String
@@ -158,18 +159,33 @@ properties:
         description: |
           When the client presents an invalid certificate or no certificate to the load balancer, the clientValidationMode specifies how the client connection is handled.
           Required if the policy is to be used with the external HTTPS load balancing. For Traffic Director it must be empty.
-        immutable: true
         enum_values:
           - CLIENT_VALIDATION_MODE_UNSPECIFIED
           - ALLOW_INVALID_OR_MISSING_CLIENT_CERT
           - REJECT_INVALID
+          - ALLOW_VALIDATION_RELAXATIONS
+      - name: clientValidationRelaxations
+        type: Array
+        description: |
+          List of validation relaxations to apply when validating client certificates.
+          Must be non-empty when clientValidationMode is set to ALLOW_VALIDATION_RELAXATIONS,
+          and must be empty for all other clientValidationMode values.
+        is_set: true
+        item_type:
+          type: Enum
+          description: |
+            Specific validation relaxation to apply during client certificate verification.
+          enum_values:
+            - ALLOW_MISSING_EKU
+            - ALLOW_SHA1_HASHING
+            - ALLOW_EXPIRED_LEAF_CERTIFICATE
       - name: clientValidationTrustConfig
         type: String
         description: |
           Reference to the TrustConfig from certificatemanager.googleapis.com namespace.
           If specified, the chain validation will be performed against certificates configured in the given TrustConfig.
           Allowed only if the policy is to be used with external HTTPS load balancers.
-        immutable: true
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
       - name: clientValidationCa
         type: Array
         description: |
@@ -182,9 +198,6 @@ properties:
               type: NestedObject
               description: |
                 gRPC specific configuration to access the gRPC server to obtain the cert and private key.
-              exactly_one_of:
-                - grpc_endpoint
-                - certificate_provider_instance
               properties:
                 - name: targetUri
                   type: String
@@ -196,9 +209,6 @@ properties:
               description: |
                 Optional if policy is to be used with Traffic Director. For external HTTPS load balancer must be empty.
                 Defines a mechanism to provision server identity (public and private keys). Cannot be combined with allowOpen as a permissive mode that allows both plain text and TLS is not supported.
-              exactly_one_of:
-                - grpc_endpoint
-                - certificate_provider_instance
               properties:
                 - name: pluginInstance
                   type: String
