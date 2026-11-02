@@ -38,6 +38,8 @@ custom_code:
   decoder: 'templates/terraform/decoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
   post_create: 'templates/terraform/post_create/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
 legacy_long_form_project: true
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
 sweeper:
   url_substitutions:
     - region: "us-west2"
