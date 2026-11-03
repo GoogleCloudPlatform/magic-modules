@@ -210,8 +210,5 @@ properties:
       CREATING: The instance partition is being created. Resources are being
       allocated for the instance partition.
       READY: The instance partition has been allocated resources and is ready for use.
-    type: Enum
+    type: String
     output: true
-    enum_values:
-      - CREATING
-      - READY

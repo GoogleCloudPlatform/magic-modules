@@ -149,17 +149,10 @@ properties:
       System-generated unique identifier for the resource.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       State of the resource. New values may be added to this enum when appropriate.
     output: true
-    enum_values:
-      - ACTIVE
-      - CREATING
-      - UPDATING
-      - FAILED
-      - DELETED
-      - PURGING
   - name: networkConfig
     type: NestedObject
     description: |

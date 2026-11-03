@@ -180,14 +180,10 @@ properties:
     description: |
       The resource labels for connection profile to use to annotate any related underlying resources such as Compute Engine VMs.
   - name: state
-    type: Enum
+    type: String
     description: |
       The current connection profile state.
     output: true
-    enum_values:
-      - DRAFT
-      - READY
-      - FAILED
   - name: error
     type: NestedObject
     description: |
@@ -213,15 +209,10 @@ properties:
           type: KeyValuePairs
   - name: dbprovider
     api_name: provider
-    type: Enum
+    type: String
     description: |
       The database provider.
     output: true
-    enum_values:
-      - CLOUDSQL
-      - RDS
-      - AURORA
-      - ALLOYDB
   - name: role
     type: Enum
     description: |
@@ -413,13 +404,10 @@ properties:
         description: |
           If the connection profile is an AlloyDB instance, use this field to provide the AlloyDB cluster ID.
       - name: networkArchitecture
-        type: Enum
+        type: String
         description: |
           Output only. If the source is a Cloud SQL database, this field indicates the network architecture it's associated with.
         output: true
-        enum_values:
-          - NETWORK_ARCHITECTURE_OLD_CSQL_PRODUCER
-          - NETWORK_ARCHITECTURE_NEW_CSQL_PRODUCER
       - name: privateConnectivity
         type: NestedObject
         description: |
@@ -481,13 +469,10 @@ properties:
           SSL configuration for the destination to connect to the source database.
         properties:
           - name: type
-            type: Enum
+            type: String
             description: |
               The current connection profile state.
             output: true
-            enum_values:
-              - SERVER_ONLY
-              - SERVER_CLIENT
           - name: clientKey
             type: String
             description: |

@@ -68,13 +68,9 @@ properties:
     type: String
     description: Specifies the client-specified AgentPool description.
   - name: state
-    type: Enum
+    type: String
     description: Specifies the state of the AgentPool.
     output: true
-    enum_values:
-      - CREATING
-      - CREATED
-      - DELETING
   - name: bandwidthLimit
     type: NestedObject
     description: |
