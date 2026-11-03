@@ -39,6 +39,11 @@ var cloudIdentityPolicyScopes = []interface{}{
 }
 
 func TestAccCloudIdentityPolicy_cloudidentityPolicyBasic(t *testing.T) {
+	// Skip this test in CI because it requires Google Workspace administrator privileges
+	// (and domain-wide delegation) not held by the CI service account.
+	// To run locally, comment out this t.Skip() call.
+	t.Skip("Skipping in CI: requires Google Workspace administrator privileges not held by the CI service account.")
+
 	orgUnit := os.Getenv(cloudIdentityPolicyOrgUnitEnvVar)
 
 	context := map[string]interface{}{
