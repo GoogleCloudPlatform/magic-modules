@@ -1,0 +1,84 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AllowlistedDomain
+description: |
+  A domain on the external sharing allowlist (trusted domains) of the Google
+  Workspace or Cloud Identity customer that the caller belongs to.
+references:
+  guides:
+    Allowlisted Domains API overview: https://cloud.google.com/identity/docs/concepts/overview-allowlisted-domains
+    Setting up the Allowlisted Domains API: https://cloud.google.com/identity/docs/how-to/setup-allowlisted-domains
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/allowlistedDomains
+docs:
+  warning: |
+    The Allowlisted Domains API only accepts the
+    `https://www.googleapis.com/auth/cloud-identity.allowlisteddomains` or
+    `https://www.googleapis.com/auth/cloud-identity` OAuth scopes; the provider's
+    default `https://www.googleapis.com/auth/cloud-platform` scope is rejected.
+    Set `scopes` in the provider configuration accordingly.
+    The API operates on the customer of the calling user, and the caller must be
+    a Google Workspace / Cloud Identity administrator with the allowlisted domain
+    management privilege (for example, a super admin). Service accounts must use
+    domain-wide delegation to act as such an administrator.
+base_url: allowlistedDomains
+immutable: true
+self_link: '{{name}}'
+create_url: allowlistedDomains
+delete_url: '{{name}}'
+delete_verb: DELETE
+id_format: '{{name}}'
+import_format:
+  - '{{name}}'
+# The whole allowlist of a customer is rewritten on every create/delete, and the
+# API rejects a mutation while another one is still pending.
+mutex: 'cloudidentity/allowlistedDomains'
+# Create/Delete return a google.longrunning.Operation, but the Operations service
+# is not public, so wait for the resource itself to appear / disappear instead.
+async:
+  type: PollAsync
+  actions: [create, delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
+  target_occurrences: 1
+# Resource names are opaque and can't be matched against a test prefix.
+exclude_sweeper: true
+custom_code:
+  post_create: templates/terraform/post_create/cloud_identity_allowlisted_domain.go.tmpl
+  custom_import: templates/terraform/custom_import/cloud_identity_allowlisted_domain.go.tmpl
+samples:
+  - name: cloud_identity_allowlisted_domain_basic
+    primary_resource_id: allowlisted_domain
+    # Has a handwritten test, as the test needs to override the provider scopes.
+    exclude_test: true
+    steps:
+      - name: cloud_identity_allowlisted_domain_basic
+        resource_id_vars:
+          domain: example.com
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the allowlisted domain, assigned by the server.
+      Format: `allowlistedDomains/{allowlisted_domain}`.
+    output: true
+  - name: domain
+    type: String
+    description: |
+      The domain to add to the allowlist, e.g. `example.com`. The domain must not
+      be one of the customer's own (primary or alias) domains.
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
