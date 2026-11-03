@@ -1,0 +1,33 @@
+// Boundaries must be disassociated before the capability config can be deleted
+if d.Get("boundaries.#").(int) > 0 {
+	log.Printf("[DEBUG] Disassociating boundaries from CapabilityConfig %q before deletion", d.Id())
+	patchUrl, err := transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "boundaries"})
+	if err != nil {
+		return err
+	}
+
+	patchObj := map[string]interface{}{
+		"boundaries": []interface{}{},
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    patchUrl,
+		UserAgent: userAgent,
+		Body:      patchObj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers,
+	})
+	if err != nil {
+		return fmt.Errorf("Error disassociating boundaries from CapabilityConfig %q: %s", d.Id(), err)
+	}
+
+	err = ResourceManagerV3OperationWaitTime(
+		config, res, "Disassociating boundaries from CapabilityConfig", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return err
+	}
+}
