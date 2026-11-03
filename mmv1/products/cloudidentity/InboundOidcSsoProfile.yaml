@@ -1,0 +1,128 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: InboundOidcSsoProfile
+description: |
+  An OIDC federation between a Google enterprise customer and an OIDC identity provider.
+references:
+  guides:
+    Assign SSO profiles: https://cloud.google.com/identity/docs/how-to/assign-sso-profiles
+    Set up SSO with OIDC: https://support.google.com/a/answer/13511217
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/inboundOidcSsoProfiles
+docs:
+  warning: |
+    The caller must be a Google Workspace / Cloud Identity administrator of the
+    customer with the SSO settings privilege (for example a super admin);
+    Google Cloud IAM roles are not sufficient.
+
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project` you defined.
+base_url: inboundOidcSsoProfiles
+self_link: '{{name}}'
+create_url: inboundOidcSsoProfiles
+update_url: '{{name}}'
+update_verb: PATCH
+update_mask: true
+delete_url: '{{name}}'
+id_format: '{{name}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+exclude_sweeper: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+  custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
+samples:
+  - name: cloud_identity_inbound_oidc_sso_profile_basic
+    primary_resource_id: oidc_profile
+    steps:
+      - name: cloud_identity_inbound_oidc_sso_profile_basic
+        resource_id_vars:
+          display_name: oidc-profile
+        test_env_vars:
+          cust_id: CUST_ID
+        ignore_read_extra:
+          - 'rp_config.0.client_secret'
+properties:
+  - name: name
+    type: String
+    description: |
+      Resource name of the OIDC SSO profile, in the format `inboundOidcSsoProfiles/{inbound_oidc_sso_profile}`.
+    output: true
+  - name: customer
+    type: String
+    description: |
+      The customer. For example: `customers/C0123abc`. If omitted, the customer of the caller is used.
+    immutable: true
+    default_from_api: true
+  - name: displayName
+    type: String
+    description: |
+      Human-readable name of the OIDC SSO profile.
+  - name: idpConfig
+    type: NestedObject
+    description: |
+      OIDC identity provider configuration.
+    required: true
+    properties:
+      - name: issuerUri
+        type: String
+        description: |
+          The Issuer identifier for the IdP. Must be a URL. The discovery URL will be derived
+          from this as described in Section 4 of the OIDC specification.
+        required: true
+      - name: changePasswordUri
+        type: String
+        description: |
+          The **Change Password URL** of the identity provider. Users will be sent to this URL
+          when changing their passwords at `myaccount.google.com`. This takes precedence over
+          the change password URL configured at customer-level. Must use `HTTPS`.
+  - name: rpConfig
+    type: NestedObject
+    description: |
+      OIDC relying party (RP) configuration for this OIDC SSO profile. These are the RP details
+      provided by Google that should be configured on the corresponding identity provider.
+    # The API always returns the output-only `redirect_uris`, even when no client is configured.
+    default_from_api: true
+    properties:
+      - name: clientId
+        type: String
+        description: |
+          OAuth2 client ID for OIDC. Must be set together with `client_secret`.
+      - name: clientSecret
+        type: String
+        description: |
+          Input only. OAuth2 client secret for OIDC. Must be set together with `client_id`.
+        sensitive: true
+        ignore_read: true
+      - name: redirectUris
+        type: Array
+        description: |
+          The URL(s) that this client may use in authentication requests.
+        output: true
+        item_type:
+          type: String
