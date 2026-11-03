@@ -19,12 +19,9 @@ description: |
 references:
   guides:
     Policy API overview: https://docs.cloud.google.com/identity/docs/concepts/overview-policies
-  api: https://cloud.google.com/identity/docs/reference/rest/v1beta1/policies
-docs:
-  note: This is available only in beta
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/policies
 # API settings
 base_url: policies
-min_version: beta
 self_link: '{{name}}'
 create_url: policies
 delete_url: '{{name}}'
@@ -39,6 +36,9 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+# Policy names are server-assigned numeric IDs (policies/{id}) that never carry the tf-test
+# prefix, so a generated sweeper could never safely identify test resources.
+exclude_sweeper: true
 custom_code:
   update_encoder: templates/terraform/update_encoder/cloud_identity_policy_update_mask.go.tmpl
   constants: templates/terraform/custom_code/cloud_identity_policy_constants.go.tmpl
@@ -48,11 +48,9 @@ samples:
     primary_resource_id: primary
     # Created a handwritten test as otherwise example will have to override scopes causing confusion for end users.
     exclude_test: true
-    min_version: beta
     steps:
       - name: cloudidentity_policy_basic
         resource_id_vars:
-        min_version: beta
 properties:
   - name: name
     description: |

@@ -1,16 +1,18 @@
 resource "google_cloud_identity_policy" "{{$.PrimaryResourceId}}" {
-    provider = google-beta
+  customer = "customers/C01234567"
 
-    customer = "customers/C01234567"
+  policy_query {
+    org_unit = "orgUnits/03abcxyz"
+  }
 
-    policy_query {
-        org_unit = "orgUnits/03abcxyz"
-        group = "groups/0123456789"
-        query = "true"
-    }
-
-    setting {
-        type = "something.googleapis.com/SettingType"
-	value_json = jsonencode({enabled = true})
-    }
+  setting {
+    type = "settings/detector.word_list"
+    value_json = jsonencode({
+      displayName = "Project Sensitive Terms"
+      description = "Detector for project-specific confidential keywords."
+      wordList = {
+        words = ["confidential", "top-secret"]
+      }
+    })
+  }
 }
