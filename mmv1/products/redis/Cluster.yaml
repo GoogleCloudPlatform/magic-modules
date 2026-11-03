@@ -445,7 +445,7 @@ properties:
       - name: zones
         type: Array
         description: |
-          Optional. Specify the zones of a multi-zone cluster where Redis Cluster
+          Specify the zones of a multi-zone cluster where Redis Cluster
           allocates resources. This flag isn't applicable for single-zone clusters.
         immutable: true
         item_type:
@@ -453,7 +453,7 @@ properties:
       - name: activeZones
         type: Array
         description: |
-          Output only. The exact list of zones where the cluster currently has active VMs.
+          The exact list of zones where the cluster currently has active VMs.
         output: true
         item_type:
           type: String

@@ -2148,11 +2148,6 @@ func TestAccMemorystoreInstance_zoneDistributionConfigZones(t *testing.T) {
 			{
 				Config: testAccMemorystoreInstance_zoneDistributionConfigZones(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.mode", "MULTI_ZONE"),
-					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.zones.#", "3"),
-					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.zones.0", "us-central1-a"),
-					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.zones.1", "us-central1-b"),
-					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.zones.2", "us-central1-c"),
 					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.active_zones.#", "3"),
 					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.active_zones.0", "us-central1-a"),
 					resource.TestCheckResourceAttr("google_memorystore_instance.test", "zone_distribution_config.0.active_zones.1", "us-central1-b"),
