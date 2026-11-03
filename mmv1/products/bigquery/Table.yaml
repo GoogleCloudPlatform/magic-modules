@@ -257,6 +257,23 @@ properties:
             - name: 'name'
               type: String
               description: The field name
+            - name: 'dataPolicyList'
+              type: NestedObject
+              description: |
+                Specifies the data policies on this field.
+              properties:
+                - name: 'dataPolicies'
+                  type: Array
+                  description: |
+                    The list of data policies.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        required: true
+                        description: |
+                          The resource name of the data policy.
             - name: 'type'
               type: Enum
               description: 'The field data type'
@@ -406,6 +423,23 @@ properties:
                 - name: 'name'
                   type: String
                   description: Field name
+                - name: 'dataPolicyList'
+                  type: NestedObject
+                  description: |
+                    Specifies the data policies on this field.
+                  properties:
+                    - name: 'dataPolicies'
+                      type: Array
+                      description: |
+                        The list of data policies.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'name'
+                            type: String
+                            required: true
+                            description: |
+                              The resource name of the data policy.
                 - name: 'type'
                   type: Enum
                   description: Field data type

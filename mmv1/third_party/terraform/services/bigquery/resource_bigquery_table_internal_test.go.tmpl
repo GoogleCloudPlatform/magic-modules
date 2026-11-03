@@ -580,6 +580,79 @@ type testUnitBigQueryDataTableJSONChangeableTestCase struct {
 	ignoreSchemaChanges []interface{}
 }
 
+
+func TestBigQueryTableSchemaDiffSuppress_WithIgnore_DataPolicyList(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Old                string
+		New                string
+		ExpectDiffSuppress bool
+	}{
+		"ignore top level policy removal": {
+			Old:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "p1"}]}}]`,
+			New:                `[{"name": "col1"}]`,
+			ExpectDiffSuppress: true,
+		},
+		"ignore nested policy removal": {
+			Old: `[{
+				"name": "parent",
+				"type": "RECORD",
+				"fields": [{
+					"name": "child",
+					"dataPolicyList": {"dataPolicies": [{"name": "p1"}]}
+				}]
+			}]`,
+			New: `[{
+				"name": "parent",
+				"type": "RECORD",
+				"fields": [{
+					"name": "child"
+				}]
+			}]`,
+			ExpectDiffSuppress: true,
+		},
+		"do NOT ignore description change (even if ignore set)": {
+			Old:                `[{"name": "col1", "description": "old desc"}]`,
+			New:                `[{"name": "col1", "description": "new desc"}]`,
+			ExpectDiffSuppress: false,
+		},
+		"do NOT ignore explicit policy change (user override)": {
+			Old:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "old_policy"}]}}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "new_policy"}]}}]`,
+			ExpectDiffSuppress: false,
+		},
+		"suppress if explicit policy matches backend": {
+			Old:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "same_policy"}]}}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "same_policy"}]}}]`,
+			ExpectDiffSuppress: true,
+		},
+		"mixed: ignore policy removal but detect description change": {
+			Old:                `[{"name": "col1", "description": "old", "dataPolicyList": {"dataPolicies": [{"name": "p1"}]}}]`,
+			New:                `[{"name": "col1", "description": "new"}]`,
+			ExpectDiffSuppress: false, // Should be false because description changed
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			// Create a real ResourceData object with the ignore flag set.
+			// This simulates `ignore_schema_changes = ["dataPolicyList"]` in HCL.
+			d := schema.TestResourceDataRaw(t, ResourceBigQueryTable().Schema, map[string]interface{}{
+				"ignore_schema_changes": []interface{}{"dataPolicyList"},
+			})
+
+			suppressed := bigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, d)
+
+			if suppressed != tc.ExpectDiffSuppress {
+				t.Errorf("Expected DiffSuppress to be %v, got %v", tc.ExpectDiffSuppress, suppressed)
+			}
+		})
+	}
+}
+
+
+
 func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testing.T) {
 	var old, new interface{}
 	if err := json.Unmarshal([]byte(testcase.jsonOld), &old); err != nil {
@@ -772,6 +845,14 @@ var testUnitBigQueryDataTableIsChangeableTestCases = []testUnitBigQueryDataTable
 		]`,
 		changeable: true,
 	},
+
+	{
+		name:                "ignoreDataPolicyListRemoval",
+		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicyList\": {\"dataPolicies\": [{\"name\": \"p1\"}]}}]",
+		jsonNew:             "[{\"name\": \"col1\", \"type\" : \"STRING\"}]",
+		ignoreSchemaChanges: []interface{}{"dataPolicyList"},
+		changeable:          true, // Should not trigger ForceNew
+	},
 	{
 		name:                "ignoreDataPolicyRemoval",
 		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicies\": [{\"name\": \"p1\"}]}]",
@@ -833,6 +914,30 @@ func TestUnitBigQueryDataTable_schemaIsChangeableNested(t *testing.T) {
 			nil,
 		}
 		testcaseNested.check(t)
+	}
+}
+
+
+func TestMergeDataPoliciesIntoMap_DataPolicyList(t *testing.T) {
+	t.Parallel()
+
+	old := []interface{}{
+		map[string]interface{}{
+			"name": "col1",
+			"dataPolicyList": map[string]interface{}{
+				"dataPolicies": []interface{}{map[string]interface{}{"name": "p1"}},
+			},
+		},
+	}
+	new := []interface{}{
+		map[string]interface{}{"name": "col1"}, // Policy missing here
+	}
+
+	mergeDataPoliciesIntoMap(old, new)
+
+	updatedField := new[0].(map[string]interface{})
+	if _, ok := updatedField["dataPolicyList"]; !ok {
+		t.Errorf("dataPolicyList was not merged into the map")
 	}
 }
 

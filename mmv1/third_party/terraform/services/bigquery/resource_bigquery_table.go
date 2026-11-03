@@ -160,12 +160,17 @@ func mergeDataPoliciesIntoMap(old, new []interface{}) {
 
 		if oldField, exists := oldMap[name]; exists {
 			// If config doesn't have dataPolicies, but backend does, copy them over
+			if _, specified := newField["dataPolicyList"]; !specified {
+				if dp, hasDP := oldField["dataPolicyList"]; hasDP {
+					newField["dataPolicyList"] = dp
+				}
+			}
 			if _, specified := newField["dataPolicies"]; !specified {
 				if dp, hasDP := oldField["dataPolicies"]; hasDP {
 					newField["dataPolicies"] = dp
-					log.Printf("[DEBUG] Added live data policy to schema: %v", dp)
 				}
 			}
+
 
 			// Recursively handle nested fields (RECORD types)
 			if oldNested, ok1 := oldField["fields"].([]interface{}); ok1 {
@@ -210,6 +215,24 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 	case "dataGovernanceTagsInfo":
 		eq := bigQueryTableNormalizeDataGovernanceTagsInfo(valA) == nil && bigQueryTableNormalizeDataGovernanceTagsInfo(valB) == nil
 		return eq
+	case "name":
+		if strA, ok := valA.(string); ok {
+			if strB, ok := valB.(string); ok {
+				// Suppress diffs for data policy names when they differ only by project number vs ID.
+				// Format: projects/<project>/locations/<location>/dataPolicies/<id>
+				re := regexp.MustCompile(`^projects/[^/]+/(locations/.+/dataPolicies/.+)$`)
+				matchA := re.FindStringSubmatch(strA)
+				matchB := re.FindStringSubmatch(strB)
+				if len(matchA) == 2 && len(matchB) == 2 {
+					if matchA[1] == matchB[1] {
+						return true
+					}
+				}
+			}
+		}
+		return false
+
+
 	case "dataPolicies":
 		if d == nil {
 			return false
@@ -221,7 +244,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		}
 
 		// If dataPolicies is ignored...
-		if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
 			// Check if the NEW value (valB) is empty or nil.
 			// If it is empty, we suppress the diff (return true) to keep backend values.
 			if valB == nil {
@@ -236,6 +259,33 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 			return false
 		}
 		return false
+
+	case "dataPolicyList":
+		if d == nil {
+			return false
+		}
+		// Access the ignore_schema_changes list from the Terraform configuration
+		var ignoreSchemaChanges []interface{}
+		if val := d.Get("ignore_schema_changes"); val != nil {
+			ignoreSchemaChanges = val.([]interface{})
+		}
+
+		// If dataPolicyList is ignored...
+		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+			// Check if the NEW value (valB) is empty or nil.
+			// If it is empty, we suppress the diff (return true) to keep backend values.
+			if valB == nil {
+				return true
+			}
+			if s, ok := valB.(map[string]interface{}); ok && len(s) == 0 {
+				return true
+			}
+
+			// If the user EXPLICITLY provided dataPolicyList, we return false.
+			// This tells Terraform "There is a difference, and I want you to apply it."
+			return false
+		}
+		return false
 	}
 
 	// otherwise rely on default behavior
@@ -243,6 +293,32 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 }
 
 // Compare the JSON strings are equal
+
+
+
+
+func normalizeDataPoliciesToDataPolicyList(v interface{}) {
+	switch val := v.(type) {
+	case []interface{}:
+		for _, item := range val {
+			normalizeDataPoliciesToDataPolicyList(item)
+		}
+	case map[string]interface{}:
+		if dp, ok := val["dataPolicies"]; ok {
+			// If dataPolicyList doesn't exist, create it
+			if _, okList := val["dataPolicyList"]; !okList {
+				val["dataPolicyList"] = map[string]interface{}{
+					"dataPolicies": dp,
+				}
+			}
+			delete(val, "dataPolicies")
+		}
+		if fields, ok := val["fields"]; ok {
+			normalizeDataPoliciesToDataPolicyList(fields)
+		}
+	}
+}
+
 func bigQueryTableSchemaDiffSuppress(name, old, new string, d *schema.ResourceData) bool {
 	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
@@ -251,9 +327,13 @@ func bigQueryTableSchemaDiffSuppress(name, old, new string, d *schema.ResourceDa
 	var a, b interface{}
 	if err := json.Unmarshal([]byte(old), &a); err != nil {
 		log.Printf("[DEBUG] unable to unmarshal old json - %v", err)
+	} else {
+		normalizeDataPoliciesToDataPolicyList(a)
 	}
 	if err := json.Unmarshal([]byte(new), &b); err != nil {
 		log.Printf("[DEBUG] unable to unmarshal new json - %v", err)
+	} else {
+		normalizeDataPoliciesToDataPolicyList(b)
 	}
 
 	eq, err := jsonCompareWithMapKeyOverride(name, a, b, bigQueryTableMapKeyOverride, d)
@@ -541,7 +621,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			ignoreSchemaChanges = val.([]interface{})
 		}
 
-		if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
 			oldList, okOld := old.([]interface{})
 			newList, okNew := new.([]interface{})
 			if okOld && okNew {
@@ -550,13 +630,20 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 
 				// Marshal the modified 'new' state back to JSON
 				updatedNewJSON, err := json.Marshal(newList)
+
 				if err == nil {
 					// Update the diff so Terraform's UI sees the policies as "present" in the new state
-					if err := d.SetNew("schema", string(updatedNewJSON)); err != nil {
-						return err
+					if bigQueryTableSchemaDiffSuppress("schema", oldSchemaText, string(updatedNewJSON), nil) {
+						if err := d.SetNew("schema", oldSchemaText); err != nil {
+							return err
+						}
+						new = old
+					} else {
+						if err := d.SetNew("schema", string(updatedNewJSON)); err != nil {
+							return err
+						}
+						new = newList
 					}
-					// Update local variable for subsequent logic in this function
-					new = newList
 				}
 			}
 		}
@@ -2607,7 +2694,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 	// Logic to fetch oldTable if needed for Dropping Columns OR Merging Data Policies
 	ignoreSchemaChanges := d.Get("ignore_schema_changes").([]interface{})
-	shouldIgnoreDataPolicies := slices.Contains(ignoreSchemaChanges, "dataPolicies")
+	shouldIgnoreDataPolicies := slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies")
 	shouldDropColumns := !d.Get("ignore_auto_generated_schema").(bool)
 
 	var oldTableRaw map[string]interface{}
