@@ -25,6 +25,15 @@ import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 autogen_status: UmVsZWFzZQ==
 autogen_async: false
+# DeleteRelease returns before the resource is removed (no long-running
+# operation); poll until GET returns 404 so destroy completes only once the
+# Release is gone.
+async:
+  type: PollAsync
+  actions: [delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
 samples:
   - name: saas_runtime_release_basic
     primary_resource_id: example

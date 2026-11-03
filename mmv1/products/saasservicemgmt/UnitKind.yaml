@@ -25,6 +25,15 @@ import_format:
   - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 autogen_status: VW5pdEtpbmQ=
 autogen_async: false
+# DeleteUnitKind returns before the resource is removed (no long-running
+# operation); poll until GET returns 404 so destroy completes only once the
+# UnitKind is gone.
+async:
+  type: PollAsync
+  actions: [delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
 samples:
   - name: saas_runtime_unit_kind_basic
     primary_resource_id: example
