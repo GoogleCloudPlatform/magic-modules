@@ -137,13 +137,12 @@ properties:
           output: true
         - type: Array
           name: exportableContent
-          description: The content of this Model that may be exported.
+          description: |
+            The content of this Model that may be exported. Possible values are `ARTIFACT` and `IMAGE`.
+            See https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models#Model.ExportFormat
           output: true
           item_type:
-            type: Enum
-            enum_values:
-              - :ARTIFACT
-              - :IMAGE
+            type: String
   - type: String
     name: trainingPipeline
     description: Resource name of the TrainingPipeline that uploaded this Model.
