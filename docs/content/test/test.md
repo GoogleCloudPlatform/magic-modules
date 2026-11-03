@@ -481,7 +481,7 @@ func TestAccProductResourceName_update(t *testing.T) {
 }
 
 func testAccProductResourceName_update1(context map[string]interface{}) string {
-  return accest.Nprintf(`
+  return acctest.Nprintf(`
 // Set up a test project
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"

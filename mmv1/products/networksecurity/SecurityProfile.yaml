@@ -248,15 +248,9 @@ properties:
               description: Vendor-specific ID of a threat to override.
               required: true
             - name: 'type'
-              type: Enum
+              type: String
               description: Type of threat.
               output: true
-              enum_values:
-                - 'ANTIVIRUS'
-                - 'DNS'
-                - 'UNKNOWN'
-                - 'VULNERABILITY'
-                - 'SPYWARE'
       - name: 'antivirusOverrides'
         type: Array
         is_set: true

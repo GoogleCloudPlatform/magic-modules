@@ -1,0 +1,25 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(backupdr.Product, config)+"{{$.SelfLinkUri}}")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err == nil && res != nil {
+	if state, ok := res["state"].(string); !ok || state != "DELETION_INITIATED" {
+		return fmt.Errorf("{{ $.ResourceName }} still exists at %s (state=%v)", url, res["state"])
+	}
+}

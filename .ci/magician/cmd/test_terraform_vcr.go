@@ -193,11 +193,12 @@ func listTTVRequiredEnvironmentVariables() string {
 func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch, workspace string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester, gcs CloudstorageClient) error {
 	buildStepUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
 
+	if !hasVCRDiffs(workspace, gh, rnr) {
+		fmt.Println("Skipping tests: No diffs generated")
+		return nil
+	}
+
 	if isOutdated, headSha := isCommitOutdated(prNumber, mmCommitSha, gh); isOutdated {
-		if !hasVCRDiffs(workspace, gh, rnr) {
-			fmt.Println("Skipping tests: No diffs generated")
-			return nil
-		}
 		fmt.Printf("Skipping REPLAYING mode: commit %s is not the most recent commit (%s) on PR %s\n", mmCommitSha, headSha, prNumber)
 		statusErr := gh.PostBuildStatus(prNumber, "VCR-test", "failure", buildStepUrl, mmCommitSha)
 		comment := fmt.Sprintf("## Test report\n\n**Step 1: Replaying Mode**\n\nSkipped REPLAYING mode because a newer commit (%s) was pushed to the PR.", headSha)

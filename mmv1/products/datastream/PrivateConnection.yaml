@@ -134,16 +134,10 @@ properties:
     description: Display name.
     required: true
   - name: state
-    type: Enum
+    type: String
     description: |
       State of the PrivateConnection.
     output: true
-    enum_values:
-      - CREATING
-      - CREATED
-      - FAILED
-      - DELETING
-      - FAILED_TO_DELETE
   - name: error
     type: NestedObject
     description: |

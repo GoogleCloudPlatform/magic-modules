@@ -282,6 +282,11 @@ type Resource struct {
 	// If true, skip identity generation for this resource
 	ExcludeIdentityGeneration bool `yaml:"exclude_identity_generation,omitempty"`
 
+	// If true, generated acceptance tests for this resource use the legacy
+	// RefreshState: true step for ImportBlockWithResourceIdentity instead of
+	// ImportState: true.
+	LegacyIdentityImportTest bool `yaml:"legacy_identity_import_test,omitempty"`
+
 	// Override sweeper settings
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
 
@@ -831,6 +836,16 @@ func (r Resource) appendSynthesizedProviderDefaultFields(props []*Type, scope []
 		}
 	}
 	return props
+}
+
+func (r Resource) UseLegacyIdentityImportTest() bool {
+	if r.LegacyIdentityImportTest {
+		return true
+	}
+	if r.ProductMetadata != nil && r.ProductMetadata.LegacyIdentityImportTest {
+		return true
+	}
+	return false
 }
 
 func (r Resource) IdentityProperties() []*Type {
@@ -1924,7 +1939,7 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 func (r Resource) IamResourceProperties() []*Type {
 	urlProperties := make([]*Type, 0)
 	for _, param := range r.IamResourceParams() {
-		if param == "project" || param == "organization" {
+		if param == "project" {
 			continue
 		}
 

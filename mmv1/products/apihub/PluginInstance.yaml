@@ -235,7 +235,6 @@ properties:
   - name: actions
     type: Array
     description: The action status for the plugin instance.
-    required: true
     default_from_api: true
     item_type:
       type: NestedObject
@@ -330,7 +329,6 @@ properties:
                 CURATION_TYPE_UNSPECIFIED
                 DEFAULT_CURATION_FOR_API_METADATA
                 CUSTOM_CURATION_FOR_API_METADATA
-              required: true
         - name: scheduleTimeZone
           type: String
           default_from_api: true

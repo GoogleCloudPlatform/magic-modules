@@ -43,6 +43,12 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"organization_id"},
 			},
 			{
+				ResourceName:       "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{
 				Config: testAccAccessContextManagerGcpUserAccessBinding_accessContextManagerGcpUserAccessBindingNamedExample(context),
 			},
 			{
@@ -50,6 +56,12 @@ func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+			{
+				ResourceName:       "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -273,6 +285,12 @@ func testAccAccessContextManagerGcpUserAccessBinding_principalTest(t *testing.T)
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
 			},
+			{
+				ResourceName:       "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
 		},
 	})
 }
@@ -342,6 +360,12 @@ func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest(t
 				ImportStateVerifyIgnore: []string{"organization_id"},
 			},
 			{
+				ResourceName:       "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_project",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{
 				Config: testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeExample(context, "7200s"),
 			},
 			{
@@ -349,6 +373,12 @@ func testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest(t
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization_id"},
+			},
+			{
+				ResourceName:       "google_access_context_manager_gcp_user_access_binding.gcp_user_access_binding_restricted_project",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})

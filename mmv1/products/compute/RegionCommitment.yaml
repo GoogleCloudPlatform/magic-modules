@@ -106,15 +106,11 @@ properties:
     description: |
       An optional description of this resource.
   - name: 'status'
-    type: Enum
+    type: String
     description: |
       Status of the commitment with regards to eventual expiration
       (each commitment has an end date defined).
     output: true
-    enum_values:
-      - 'NOT_YET_ACTIVE'
-      - 'ACTIVE'
-      - 'EXPIRED'
   - name: 'statusMessage'
     type: String
     description: |

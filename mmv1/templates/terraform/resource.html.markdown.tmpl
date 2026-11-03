@@ -116,6 +116,9 @@ The following arguments are supported:
 {{- end }}
 {{- range $f := $.VirtualFields }}
 * `{{$f.Name}}` - (Optional) {{$f.Description}}
+  {{- if and (not $f.FlattenObject) $f.NestedProperties }}
+  Structure is [documented below](#nested_{{ join $f.Lineage "_" }}).
+  {{- end }}
 {{- end }}
 {{- if not $.Docs.OptionalProperties }}
 {{ "" }}
@@ -133,6 +136,9 @@ The following arguments are supported:
 	{{- if and (not $p.Required) (not $p.Output) }}
 {{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
 	{{- end}}
+{{- end }}
+{{- range $f := $.VirtualFields }}
+{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $f -}}
 {{- end }}
 {{- "" }}
 ## Attributes Reference

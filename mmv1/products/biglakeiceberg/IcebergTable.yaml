@@ -32,9 +32,6 @@ iam_policy:
   import_format:
     - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
     - '{{name}}'
-  additional_parent_resource_attributes:
-    - catalog
-    - namespace
 id_format: projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}
 import_format:
   - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}

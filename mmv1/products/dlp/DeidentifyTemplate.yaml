@@ -44,13 +44,20 @@ samples:
       - name: dlp_deidentify_template_basic
         test_env_vars:
           project: PROJECT_NAME
+        vars:
+          common_characters_to_ignore: PUNCTUATION
+          characters_to_skip: null
   - name: dlp_deidentify_template_skip_characters
     primary_resource_id: basic
     exclude_basic_doc: true
     steps:
       - name: dlp_deidentify_template_skip_characters
+        config_path: templates/terraform/samples/services/dlp/dlp_deidentify_template_basic.tf.tmpl
         test_env_vars:
           project: PROJECT_NAME
+        vars:
+          common_characters_to_ignore: null
+          characters_to_skip: "@"
   - name: dlp_deidentify_template_image_transformations
     primary_resource_id: basic
     steps:

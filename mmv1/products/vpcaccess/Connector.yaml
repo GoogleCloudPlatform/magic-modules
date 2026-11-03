@@ -108,16 +108,10 @@ properties:
       - network
     immutable: true
   - name: state
-    type: Enum
+    type: String
     description: |
       State of the VPC access connector.
     output: true
-    enum_values:
-      - READY
-      - CREATING
-      - DELETING
-      - ERROR
-      - UPDATING
     immutable: true
   - name: machineType
     type: String

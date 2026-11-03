@@ -253,16 +253,10 @@ properties:
       consecutive failures. The default value is 2.
     default_value: 2
   - name: 'type'
-    type: Enum
+    type: String
     description: |-
       The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
     output: true
-    enum_values:
-      - 'TCP'
-      - 'SSL'
-      - 'HTTP'
-      - 'HTTPS'
-      - 'HTTP2'
   - name: 'httpHealthCheck'
     type: NestedObject
     exactly_one_of:

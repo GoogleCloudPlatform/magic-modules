@@ -120,6 +120,7 @@ properties:
     description: |
       The data stores associated with this engine. For SOLUTION_TYPE_SEARCH type of engines, they can only associate with at most one data store.
     required: true
+    custom_flatten: templates/terraform/custom_flatten/discoveryengine_data_store_ids.go.tmpl
     item_type:
       type: String
   - name: createTime
@@ -200,6 +201,7 @@ properties:
     type: Boolean
     description: |
       Whether to disable analytics for searches performed on this engine.
+    immutable: true
   - name: features
     type: KeyValuePairs
     default_from_api: true
