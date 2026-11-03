@@ -39,9 +39,9 @@ async:
   result:
     resource_inside_response: false
 sweeper:
-  query_string: "?force=true&deletePolicy=ABANDON"
+  query_string: "?force=true&deletePolicy=DELETE"
 custom_code:
-  pre_delete: templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl
+  pre_delete: templates/terraform/pre_delete/force_delete.go.tmpl
 samples:
   - name: config_deployment_basic
     primary_resource_id: default
