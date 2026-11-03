@@ -146,6 +146,7 @@ properties:
       - name: pscInterfaceConfig
         type: NestedObject
         description: Configuration for Private Service Connect (PSC) interface.
+        required: true
         properties:
           - name: networkAttachment
             type: String
@@ -155,6 +156,7 @@ properties:
               connectivity to the database via a Private Service Connect Interface
               (PSC-I). Format:
               projects/{project}/regions/{region}/networkAttachments/{network_attachment}
+            required: true
   - name: state
     type: String
     description: |-
