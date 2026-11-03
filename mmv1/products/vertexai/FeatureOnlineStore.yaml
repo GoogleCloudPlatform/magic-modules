@@ -59,14 +59,6 @@ samples:
           region: 'us-central1'
         ignore_read_extra:
           - force_destroy
-  - name: vertex_ai_featureonlinestore_with_optimized
-    primary_resource_id: featureonlinestore
-    steps:
-      - name: vertex_ai_featureonlinestore_with_optimized
-        resource_id_vars:
-          name: example_feature_online_store_optimized
-        ignore_read_extra:
-          - force_destroy
   - name: vertex_ai_featureonlinestore_with_beta_fields_bigtable
     primary_resource_id: featureonlinestore
     min_version: beta
