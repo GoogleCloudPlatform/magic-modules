@@ -296,6 +296,14 @@ The `disk_encryption_key` block supports:
 
 * `enable_confidential_compute` Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
+* `confidential_paravisor_config` Configuration for the paravisor (SVSM) in a confidential VM. Structure is [documented below](#nested_confidential_paravisor_config).
+
+<a name="nested_confidential_paravisor_config"></a>The `confidential_paravisor_config` block supports:
+
+* `confidential_tpm_type` Defines the confidential TPM type used by the paravisor. Possible values are: `EPHEMERAL`, `NO_CC_TPM`.
+
+* `sev_snp_irq_mode` Defines the interrupt mode for AMD SEV-SNP with paravisor. Possible values are: `UNRESTRICTED`, `RESTRICTED`.
+
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
 * `total_egress_bandwidth_tier` - The egress bandwidth tier for the instance.

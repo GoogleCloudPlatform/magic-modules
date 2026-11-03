@@ -756,6 +756,25 @@ properties:
           - 'SEV'
           - 'SEV_SNP'
           - 'TDX'
+      - name: 'confidentialParavisorConfig'
+        type: NestedObject
+        description: 'The Confidential Paravisor config being used by the instance.'
+        immutable: true
+        properties:
+          - name: 'confidentialTpmType'
+            type: Enum
+            description: 'Defines the type of confidential TPM for the instance.'
+            immutable: true
+            enum_values:
+              - 'EPHEMERAL'
+              - 'NO_CC_TPM'
+          - name: 'sevSnpIrqMode'
+            type: Enum
+            description: 'Defines the interrupt mode for the SEV-SNP instance.'
+            immutable: true
+            enum_values:
+              - 'UNRESTRICTED'
+              - 'RESTRICTED'
   - name: 'status'
     type: Enum
     description: |

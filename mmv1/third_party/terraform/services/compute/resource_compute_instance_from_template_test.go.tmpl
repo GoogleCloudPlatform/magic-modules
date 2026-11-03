@@ -599,6 +599,41 @@ func TestAccComputeInstanceFromTemplate_confidentialInstanceConfigMain(t *testin
 	})
 }
 
+func TestAccComputeInstanceFromTemplate_confidentialParavisorConfig(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	var instance2 map[string]interface{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplate_confidentialParavisorConfig(
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_template.inst1", &instance),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance, "EPHEMERAL", "RESTRICTED"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.inst1", "confidential_instance_config.0.confidential_paravisor_config.0.confidential_tpm_type", "EPHEMERAL"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.inst1", "confidential_instance_config.0.confidential_paravisor_config.0.sev_snp_irq_mode", "RESTRICTED"),
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_template.inst2", &instance2),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance2, "NO_CC_TPM", "UNRESTRICTED"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.inst2", "confidential_instance_config.0.confidential_paravisor_config.0.confidential_tpm_type", "NO_CC_TPM"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.inst2", "confidential_instance_config.0.confidential_paravisor_config.0.sev_snp_irq_mode", "UNRESTRICTED"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceFromTemplate_DiskForceAttach(t *testing.T) {
 	t.Parallel()
 
@@ -2275,6 +2310,89 @@ resource "google_compute_instance_from_template" "inst2" {
   source_instance_template = google_compute_instance_template.foobar6.self_link
 }
 `, templateDisk, image, template, confidentialInstanceType, instance, template2, confidentialInstanceType, instance2)
+}
+
+func testAccComputeInstanceFromTemplate_confidentialParavisorConfig(template, instance, template2, instance2 string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "ubuntu-2204-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance_template" "foobar1" {
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  scheduling {
+    automatic_restart   = false
+    on_host_maintenance = "TERMINATE"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "EPHEMERAL"
+      sev_snp_irq_mode      = "RESTRICTED"
+    }
+  }
+}
+
+resource "google_compute_instance_from_template" "inst1" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar1.self_link
+}
+
+resource "google_compute_instance_template" "foobar2" {
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  scheduling {
+    automatic_restart   = false
+    on_host_maintenance = "TERMINATE"
+  }
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "NO_CC_TPM"
+      sev_snp_irq_mode      = "UNRESTRICTED"
+    }
+  }
+}
+
+resource "google_compute_instance_from_template" "inst2" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar2.self_link
+}
+`, template, instance, template2, instance2)
 }
 
 func TestAccComputeInstanceFromTemplateWithOverride_interface(t *testing.T) {

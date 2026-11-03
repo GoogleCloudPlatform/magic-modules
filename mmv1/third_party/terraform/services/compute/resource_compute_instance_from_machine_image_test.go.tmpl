@@ -340,6 +340,45 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 	})
 }
 
+func TestAccComputeInstanceFromMachineImage_confidentialParavisorConfig(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	var instance2 map[string]interface{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_confidentialParavisorConfig(
+					fmt.Sprintf("tf-test-svsm1-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-svsm1-gen-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-svsm2-%s", acctest.RandString(t, 10)),
+					fmt.Sprintf("tf-test-svsm2-gen-%s", acctest.RandString(t, 10)),
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar1", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "min_cpu_platform", "AMD Milan"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance, "EPHEMERAL", "RESTRICTED"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "confidential_instance_config.0.confidential_paravisor_config.0.confidential_tpm_type", "EPHEMERAL"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar1", "confidential_instance_config.0.confidential_paravisor_config.0.sev_snp_irq_mode", "RESTRICTED"),
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar2", &instance2),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "min_cpu_platform", "AMD Milan"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "scheduling.0.on_host_maintenance", "TERMINATE"),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
+					testAccCheckComputeInstanceHasConfidentialParavisorConfig(&instance2, "NO_CC_TPM", "UNRESTRICTED"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "confidential_instance_config.0.confidential_paravisor_config.0.confidential_tpm_type", "NO_CC_TPM"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar2", "confidential_instance_config.0.confidential_paravisor_config.0.sev_snp_irq_mode", "UNRESTRICTED"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(t *testing.T) {
 	t.Parallel()
 
@@ -764,6 +803,124 @@ resource "google_compute_instance_from_machine_image" "foobar3" {
   }
 }
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
+}
+
+func testAccComputeInstanceFromMachineImage_confidentialParavisorConfig(instance1, newInstance1, instance2, newInstance2 string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm1" {
+  provider = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "EPHEMERAL"
+      sev_snp_irq_mode      = "RESTRICTED"
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar1" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm1.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar1" {
+  provider = google-beta
+  name     = "%s"
+  zone     = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar1.self_link
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "EPHEMERAL"
+      sev_snp_irq_mode      = "RESTRICTED"
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_instance" "vm2" {
+  provider = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n2d-standard-2"
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "NO_CC_TPM"
+      sev_snp_irq_mode      = "UNRESTRICTED"
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_machine_image" "foobar2" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm2.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar2" {
+  provider = google-beta
+  name     = "%s"
+  zone     = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar2.self_link
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "NO_CC_TPM"
+      sev_snp_irq_mode      = "UNRESTRICTED"
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, instance1, instance1, newInstance1, instance2, instance2, newInstance2)
 }
 
 func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigSevSnp(instance string, newInstance string, confidentialInstanceType string) string {
