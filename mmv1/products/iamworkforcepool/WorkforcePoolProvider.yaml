@@ -644,3 +644,13 @@ properties:
   - name: detailedAuditLogging
     type: Boolean
     description: If true, populates additional debug information in Cloud Audit Logs for this provider. Logged attribute mappings and values can be found in `sts.googleapis.com` data access logs. Default value is false.
+  - name: attributeSyncInterval
+    type: String
+    description: |
+      An interval that determines how often user attributes are synced from the
+      IdP. Must be between 30 minutes (1800s) and 12 hours (43200s). This
+      configuration is used only when the Google Cloud session length policy is
+      configured. When Google Cloud session length policy is configured and
+      `attributeSyncInterval` is not configured, attributes are synced after a
+      default interval of 30 minutes (1800 seconds).
+      A duration in seconds with up to nine fractional digits, ending with '`s`'. Example: "`3600s`".
