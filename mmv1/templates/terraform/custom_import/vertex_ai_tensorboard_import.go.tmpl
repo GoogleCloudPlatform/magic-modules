@@ -8,6 +8,10 @@
 		return nil, err
 	}
 
+	if err := d.Set("name", tpgresource.GetResourceNameFromSelfLink(d.Get("name").(string))); err != nil {
+		return nil, fmt.Errorf("Error setting name: %s", err)
+	}
+
 	// Replace import id for the resource id
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/tensorboards/{{"{{"}}name{{"}}"}}")
 	if err != nil {

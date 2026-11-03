@@ -1,7 +1,7 @@
 privateCloudPollRead := func(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
         return func() (map[string]interface{}, error) {
             config := meta.(*transport_tpg.Config)
-            url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+            url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
             if err != nil {
                 return nil, err
             }
@@ -33,7 +33,7 @@ privateCloudPollRead := func(d *schema.ResourceData, meta interface{}) transport
         }
     }
 
-err = transport_tpg.PollingWaitTime(privateCloudPollRead(d, meta), pollCheckForPrivateCloudAbsence, "Deleting {{$.Name}}", d.Timeout(schema.TimeoutDelete), 10)
+err = transport_tpg.PollingWaitTime(privateCloudPollRead(d, meta), pollCheckForPrivateCloudAbsence, "Deleting {{$.Name}}", d.Timeout(schema.TimeoutDelete), 10, config.SleepUnit)
 if err != nil {
     return fmt.Errorf("Error waiting to delete PrivateCloud: %s", err)
 }

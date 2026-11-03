@@ -98,17 +98,13 @@ properties:
     type: String
     description: A user-specified description of the provider. Cannot exceed 256 characters.
   - name: state
-    type: Enum
+    type: String
     output: true
     description: |
       The current state of the scim tenant.
       * ACTIVE: The scim tenant is active and may be used to validate authentication credentials.
       * DELETED: The scim tenant is soft-deleted. Soft-deleted scim tenants are permanently
         deleted after approximately 30 days.
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: baseUri
     type: String
     description: |

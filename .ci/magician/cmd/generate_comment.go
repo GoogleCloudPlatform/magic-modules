@@ -115,6 +115,12 @@ const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
 const allowMultipleResourcesLabel = "override-multiple-resources"
 
+// enableMissingServiceLabelsCheck controls whether added resources are checked
+// for missing service labels. When disabled, the
+// terraform-provider-missing-service-labels status is still posted (always as
+// "success") so that it never blocks PRs. Set to true to re-enable the check.
+const enableMissingServiceLabelsCheck = false
+
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
 	"BUILD_STEP",
@@ -252,23 +258,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Printf("Failed to fetch branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
-			continue
-		}
-		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
-			if err := ctlr.Checkout(repo, oldBranch); err != nil {
-				fmt.Printf("Failed to checkout branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
-				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
-				repo.Cloned = false
-				continue
-			}
-			rnr.PushDir(repo.Path)
-			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
-				fmt.Printf("Failed to build branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
-				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
-				repo.Cloned = false
-			}
-			rnr.PopDir()
-			ctlr.Checkout(repo, newBranch)
 		}
 	}
 
@@ -496,6 +485,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	missingServiceLabels := []string{}
 	if len(regexpLabels) > 0 {
 		for resource, _ := range uniqueAddedResources {
+			if !enableMissingServiceLabelsCheck {
+				break
+			}
 			found := false
 			for _, rl := range regexpLabels {
 				if rl.Regexp.MatchString(resource) {

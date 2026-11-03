@@ -134,6 +134,9 @@ var (
 	workloadIdentityConfigKeys = []string{
 		"workload_identity_config.0.identity",
 		"workload_identity_config.0.identity_certificate_enabled",
+		{{- if ne $.TargetVersionName "ga" }}
+		"workload_identity_config.0.identity_type",
+		{{- end }}
 	}
 )
 
@@ -1905,21 +1908,33 @@ be from 0 to 999,999,999 inclusive.`,
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
+				ForceNew:    true,
 				Description: `Workload identity config.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"identity": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							Computed:     true,
 							ForceNew:     true,
 							Description:  `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
 							Type:         schema.TypeBool,
 							Optional:     true,
+							Computed:     true,
 							ForceNew:     true,
 							Description:  `Specifies whether identity certificates are enabled.`,
 						},
+						{{- if ne $.TargetVersionName "ga" }}
+						"identity_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ForceNew:     true,
+							Description:  `The type of identity to use.`,
+						},
+						{{- end }}
 					},
 				},
 			},
@@ -2239,13 +2254,18 @@ func waitUntilInstanceHasDesiredStatus(config *transport_tpg.Config, d *schema.R
 			status, _ := instance["status"].(string)
 			return instance["id"], status, nil
 		}
+		var pollInterval time.Duration
+		if config.SleepUnit > 0 && config.SleepUnit != time.Second {
+			pollInterval = config.SleepUnit
+		}
 		stateChangeConf := retry.StateChangeConf{
-			Delay:      5 * time.Second,
-			Pending:    getAllStatusBut(status),
-			Refresh:    stateRefreshFunc,
-			Target:     []string{status},
-			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			MinTimeout: 2 * time.Second,
+			Delay:        5 * config.SleepUnit,
+			Pending:      getAllStatusBut(status),
+			Refresh:      stateRefreshFunc,
+			Target:       []string{status},
+			Timeout:      d.Timeout(schema.TimeoutUpdate),
+			MinTimeout:   2 * config.SleepUnit,
+			PollInterval: pollInterval,
 		}
 		_, err := stateChangeConf.WaitForState()
 
@@ -2771,6 +2791,15 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 	instanceEncryptionKeyMap, _ := instance["instanceEncryptionKey"].(map[string]interface{})
 	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instanceEncryptionKeyMap)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
+	}
+	if wicMap, ok := instance["workloadIdentityConfig"].(map[string]interface{}); ok && len(wicMap) > 0 {
+		if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(wicMap)); err != nil {
+			return fmt.Errorf("Error setting workload_identity_config: %s", err)
+		}
+	} else {
+		if err := d.Set("workload_identity_config", nil); err != nil {
+			return fmt.Errorf("Error setting workload_identity_config: %s", err)
+		}
 	}
 
 	{{- if ne $.TargetVersionName `ga` }}
@@ -3520,6 +3549,23 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if opErr != nil {
 				return opErr
 			}
+			// re-read fingerprint
+			freshUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+			if err != nil {
+				return err
+			}
+			instance, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    freshUrl,
+				UserAgent: userAgent,
+			})
+			if err != nil {
+				return err
+			}
+			instNics, _ = instance["networkInterfaces"].([]interface{})
+			instNetworkInterface, _ = instNics[i].(map[string]interface{})
 		}
 
 		if !updateDuringStop && d.HasChange(prefix+".igmp_query") {
@@ -3551,6 +3597,23 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if opErr != nil {
 				return opErr
 			}
+			// re-read fingerprint
+			freshUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+			if err != nil {
+				return err
+			}
+			instance, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    freshUrl,
+				UserAgent: userAgent,
+			})
+			if err != nil {
+				return err
+			}
+			instNics, _ = instance["networkInterfaces"].([]interface{})
+			instNetworkInterface, _ = instNics[i].(map[string]interface{})
 		}
 
 		if !updateDuringStop && d.HasChange(prefix+".ipv6_address") {
@@ -3582,12 +3645,29 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if opErr != nil {
 				return opErr
 			}
+			// re-read fingerprint
+			freshUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}")
+			if err != nil {
+				return err
+			}
+			instance, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    freshUrl,
+				UserAgent: userAgent,
+			})
+			if err != nil {
+				return err
+			}
+			instNics, _ = instance["networkInterfaces"].([]interface{})
+			instNetworkInterface, _ = instNics[i].(map[string]interface{})
 		}
 
 		if !updateDuringStop && d.HasChange(prefix+".internal_ipv6_prefix_length") {
 
 			niBody := map[string]interface{}{
-				"internalIpv6PrefixLength": d.Get(prefix+".internal_ipv6_prefix_length").(int64),
+				"internalIpv6PrefixLength": int64(d.Get(prefix + ".internal_ipv6_prefix_length").(int)),
 				"fingerprint":              instNetworkInterface["fingerprint"],
 			}
 			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/updateNetworkInterface")

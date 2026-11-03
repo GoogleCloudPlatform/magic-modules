@@ -24,7 +24,7 @@ steps:
           - checkout
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: build-magician-binary
       waitFor: ["checkout"]

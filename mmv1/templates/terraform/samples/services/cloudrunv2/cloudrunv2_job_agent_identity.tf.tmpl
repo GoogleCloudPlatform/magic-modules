@@ -13,7 +13,7 @@ resource "google_cloud_run_v2_job" "{{$.PrimaryResourceId}}" {
       }
       workload_identity_config {
         identity_type                = "IDENTITY_TYPE_AGENT_IDENTITY"
-        identity_certificate_enabled = true
+        identity_certificate_enabled = {{index $.Vars "identity_certificate_enabled"}}
       }
     }
   }

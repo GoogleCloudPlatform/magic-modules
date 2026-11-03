@@ -32,7 +32,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 	}{{- end }}
 {{- end }}
 
-	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
+	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, transport_tpg.BaseUrl(Product, config)+"{{$.BaseUrl}}")
 	if err != nil {
 		return err
 	}

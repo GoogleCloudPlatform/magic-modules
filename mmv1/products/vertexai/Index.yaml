@@ -183,9 +183,6 @@ properties:
                 description: |-
                   Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
                   Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
-                exactly_one_of:
-                  - treeAhConfig
-                  - bruteForceConfig
                 properties:
                   - name: leafNodeEmbeddingCount
                     type: Integer
@@ -213,9 +210,6 @@ properties:
                   standard linear search in the database for each query.
                 send_empty_value: true
                 allow_empty_object: true
-                exactly_one_of:
-                  - treeAhConfig
-                  - bruteForceConfig
                 properties: []
   - name: metadataSchemaUri
     type: String

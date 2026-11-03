@@ -18,11 +18,10 @@ description: |
   eligible resources that match the policy's criteria, instead of protecting each resource
   individually. A policy takes effect only after it is attached to a scope, such as a
   project, with a `google_backup_dr_auto_protection_policy_binding`.
-min_version: beta
 references:
   guides:
     Official Documentation: https://cloud.google.com/backup-disaster-recovery/docs
-  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1beta/projects.locations.autoProtectionPolicies
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1/projects.locations.autoProtectionPolicies
 base_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies
 self_link: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}
 create_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies?autoProtectionPolicyId={{auto_protection_policy_id}}
@@ -38,7 +37,6 @@ autogen_async: true
 samples:
   - name: backup_dr_auto_protection_policy_basic
     primary_resource_id: my-auto-protection-policy
-    min_version: beta
     steps:
       - name: backup_dr_auto_protection_policy_basic
         resource_id_vars:
@@ -47,7 +45,6 @@ samples:
           auto_protection_policy_id: app
   - name: backup_dr_auto_protection_policy_update
     primary_resource_id: my-auto-protection-policy
-    min_version: beta
     steps:
       - name: backup_dr_auto_protection_policy_full
         resource_id_vars:

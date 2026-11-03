@@ -34,6 +34,8 @@ update_url: '{{parent}}/boundaries/{{boundary_id}}'
 update_verb: 'PATCH'
 update_mask: true
 delete_url: '{{parent}}/boundaries/{{boundary_id}}'
+error_retry_predicates:
+  - 'transport_tpg.IsResourceManagerBoundaryRetryableError'
 id_format: '{{parent}}/boundaries/{{boundary_id}}'
 import_format:
   - '{{%parent}}/boundaries/{{boundary_id}}'

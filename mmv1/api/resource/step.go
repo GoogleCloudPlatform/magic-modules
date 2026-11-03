@@ -74,7 +74,7 @@ type Step struct {
 	// A value of `null` (or `~` / `"null"`) sets the test context variable to `nil`
 	// and omits the attribute line (or renders unquoted HCL `null` when inline) in
 	// documentation and OiCS configs.
-	Vars map[string]string `yaml:"vars,omitempty"`
+	Vars StepVars `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -145,36 +145,29 @@ type Step struct {
 	TestContextVars      map[string]string `yaml:"-"`
 }
 
-// UnmarshalYAML implements a custom YAML unmarshaler for Step so that explicit
-// YAML null values (`field: null` or `field: ~`) in `vars` are preserved as
-// `"null"` rather than being decoded as empty strings (`""`).
-func (s *Step) UnmarshalYAML(value *yaml.Node) error {
-	type stepAlias Step
-	aliasObj := (*stepAlias)(s)
+// StepVars is a map of template variable names to string values that preserves
+// explicit YAML null scalars (`field: null` or `field: ~`) as `"null"` rather
+// than decoding them as empty strings (`""`).
+type StepVars map[string]string
 
-	if err := value.Decode(aliasObj); err != nil {
+func (v *StepVars) UnmarshalYAML(value *yaml.Node) error {
+	var raw map[string]*string
+	if err := value.Decode(&raw); err != nil {
 		return err
 	}
-
-	if value.Kind == yaml.MappingNode {
-		for i := 0; i+1 < len(value.Content); i += 2 {
-			keyNode := value.Content[i]
-			valNode := value.Content[i+1]
-			if keyNode.Value == "vars" && valNode.Kind == yaml.MappingNode {
-				for j := 0; j+1 < len(valNode.Content); j += 2 {
-					varKey := valNode.Content[j].Value
-					varVal := valNode.Content[j+1]
-					if varVal.Kind == yaml.ScalarNode && varVal.Tag == "!!null" {
-						if s.Vars == nil {
-							s.Vars = make(map[string]string)
-						}
-						s.Vars[varKey] = "null"
-					}
-				}
-			}
+	if raw == nil {
+		*v = nil
+		return nil
+	}
+	out := make(StepVars, len(raw))
+	for k, val := range raw {
+		if val == nil {
+			out[k] = "null"
+		} else {
+			out[k] = *val
 		}
 	}
-
+	*v = out
 	return nil
 }
 
@@ -199,6 +192,9 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 		}
 		if strings.HasPrefix(val, "servicenetworking.") {
 			deps["services/servicenetworking"] = ""
+		}
+		if strings.HasPrefix(val, "tags.") {
+			deps["services/tags"] = ""
 		}
 	}
 	matches := hclResourceRegexp.FindAllStringSubmatch(s.TestHCLText, -1)

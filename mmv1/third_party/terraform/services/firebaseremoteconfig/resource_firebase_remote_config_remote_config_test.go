@@ -59,7 +59,7 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			},
 			{
 				ResourceName:       "google_firebase_remote_config_remote_config.basic",
-				RefreshState:       true,
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
@@ -78,7 +78,7 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			},
 			{
 				ResourceName:       "google_firebase_remote_config_remote_config.basic",
-				RefreshState:       true,
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
@@ -97,7 +97,7 @@ func TestAccFirebaseRemoteConfigRemoteConfig_update(t *testing.T) {
 			},
 			{
 				ResourceName:       "google_firebase_remote_config_remote_config.basic",
-				RefreshState:       true,
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},

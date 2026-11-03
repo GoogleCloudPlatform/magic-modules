@@ -41,7 +41,7 @@ samples:
           display_name: findings_refinement_display_name
         vars:
           enabled: true
-      - name: 'chronicle_findings_refinement_deployment_update'
+      - name: 'chronicle_findings_refinement_deployment_full'
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
         resource_id_vars:

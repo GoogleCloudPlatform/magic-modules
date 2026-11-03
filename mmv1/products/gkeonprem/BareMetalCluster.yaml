@@ -802,17 +802,9 @@ properties:
       The unique identifier of the Bare Metal User Cluster.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: The current state of this cluster.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - PROVISIONING
-      - RUNNING
-      - RECONCILING
-      - STOPPING
-      - ERROR
-      - DEGRADED
   - name: endpoint
     type: String
     description: |
@@ -921,14 +913,9 @@ properties:
                 Last time the condition transit from one status to another.
               output: true
             - name: state
-              type: Enum
+              type: String
               description: The lifecycle state of the condition.
               output: true
-              enum_values:
-                - STATE_UNSPECIFIED
-                - STATE_TRUE
-                - STATE_FALSE
-                - STATE_UNKNOWN
   - name: validationCheck
     type: NestedObject
     description: |
@@ -936,13 +923,9 @@ properties:
     output: true
     properties:
       - name: options
-        type: Enum
+        type: String
         description: Options used for the validation check.
         output: true
-        enum_values:
-          - OPTIONS_UNSPECIFIED
-          - SKIP_VALIDATION_CHECK_BLOCKING
-          - SKIP_VALIDATION_ALL
       - name: status
         type: NestedObject
         description: |
@@ -957,16 +940,9 @@ properties:
               type: NestedObject
               properties:
                 - name: options
-                  type: Enum
+                  type: String
                   description: Options used for the validation check.
                   output: true
-                  enum_values:
-                    - STATE_UNKNOWN
-                    - STATE_FAILURE
-                    - STATE_SKIPPED
-                    - STATE_UNKNOWN
-                    - STATE_FATAL
-                    - STATE_WARNING
                 - name: description
                   type: String
                   description: |
@@ -988,10 +964,6 @@ properties:
                     Detailed failure information, which might be unformatted.
                   output: true
       - name: scenario
-        type: Enum
+        type: String
         description: The scenario when the preflight checks were run..
         output: true
-        enum_values:
-          - SCENARIO_UNSPECIFIED
-          - CREATE
-          - UPDATE

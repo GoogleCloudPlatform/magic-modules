@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -50,8 +51,13 @@ func waitForBackupdrOperation(ctx context.Context, t *testing.T, backupdrService
 
 // BootstrapBackupDRVault creates or gets a BackupDR backup vault for testing.
 func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
-	ctx := context.Background()
 	project := envvar.GetTestProjectFromEnv()
+	vaultName := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, vaultID)
+	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") == "REPLAYING" {
+		return vaultName
+	}
+
+	ctx := context.Background()
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap config.")
@@ -59,7 +65,6 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
 
 	// Create a backupdr client and check if the vault exists, if not create a vault
 	// backupdrClient := NewClient(config, config.UserAgent)
-	vaultName := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, vaultID)
 	projectAndLocation := fmt.Sprintf("projects/%s/locations/%s", project, location)
 
 	log.Printf("[DEBUG] Getting BackupDR vault %q", vaultName)

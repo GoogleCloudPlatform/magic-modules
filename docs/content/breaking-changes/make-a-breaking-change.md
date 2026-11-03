@@ -111,7 +111,7 @@ The deprecation message will automatically show up in the resource documentation
 
    ```go
    "api_field_name": {
-      Type:       schema.String,
+      Type:       schema.TypeString,
       Deprecated: "`api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.",
       ...
    }

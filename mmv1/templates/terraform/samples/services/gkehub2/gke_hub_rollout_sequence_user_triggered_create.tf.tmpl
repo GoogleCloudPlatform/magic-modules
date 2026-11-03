@@ -72,6 +72,7 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
   display_name        = "User Triggered Rollout Sequence"
 
   min_control_plane_version = data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]
+  min_node_version          = {{index $.Vars "min_node_version"}}
 
   # Ensures that any rollouts created from this sequence will ignore all clusters in the project, other than the cluster we create for this test.
   ignored_clusters_selector {

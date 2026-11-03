@@ -60,6 +60,11 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 		opt.Timeout = DefaultRequestTimeout
 	}
 
+	var pollInterval time.Duration
+	if opt.Config != nil && opt.Config.SleepUnit > 0 && opt.Config.SleepUnit != time.Second {
+		pollInterval = opt.Config.SleepUnit
+	}
+
 	var res *http.Response
 	err := Retry(RetryOptions{
 		RetryFunc: func() error {
@@ -94,6 +99,7 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 			return nil
 		},
 		Timeout:              opt.Timeout,
+		PollInterval:         pollInterval,
 		ErrorRetryPredicates: opt.ErrorRetryPredicates,
 		ErrorAbortPredicates: opt.ErrorAbortPredicates,
 	})
@@ -138,6 +144,11 @@ func SendRequestRPC(opt SendRequestOptions) (map[string]interface{}, error) {
 
 	if opt.Timeout == 0 {
 		opt.Timeout = DefaultRequestTimeout
+	}
+
+	var pollInterval time.Duration
+	if opt.Config != nil && opt.Config.SleepUnit > 0 && opt.Config.SleepUnit != time.Second {
+		pollInterval = opt.Config.SleepUnit
 	}
 
 	var res *http.Response
@@ -187,6 +198,7 @@ func SendRequestRPC(opt SendRequestOptions) (map[string]interface{}, error) {
 			return nil
 		},
 		Timeout:              opt.Timeout,
+		PollInterval:         pollInterval,
 		ErrorRetryPredicates: opt.ErrorRetryPredicates,
 		ErrorAbortPredicates: opt.ErrorAbortPredicates,
 	})
@@ -435,6 +447,11 @@ func ListArrayPages(opt ListArrayPagesOptions) error {
 		}
 	}
 
+	var pollInterval time.Duration
+	if opt.Config != nil && opt.Config.SleepUnit > 0 && opt.Config.SleepUnit != time.Second {
+		pollInterval = opt.Config.SleepUnit
+	}
+
 	var res *http.Response
 	err = Retry(RetryOptions{
 		RetryFunc: func() error {
@@ -458,6 +475,7 @@ func ListArrayPages(opt ListArrayPagesOptions) error {
 			return nil
 		},
 		Timeout:              DefaultRequestTimeout,
+		PollInterval:         pollInterval,
 		ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 	})
 	if err != nil {

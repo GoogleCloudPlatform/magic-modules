@@ -19,5 +19,7 @@ scopes:
 versions:
   - name: ga
     base_url: https://workstations.googleapis.com/v1/
+    rep_url: 'https://workstations.{{location}}.rep.googleapis.com/v1/'
   - name: beta
     base_url: https://workstations.googleapis.com/v1beta/
+    rep_url: 'https://workstations.{{location}}.rep.googleapis.com/v1beta/'
