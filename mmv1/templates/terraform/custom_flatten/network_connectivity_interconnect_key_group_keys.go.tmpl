@@ -1,0 +1,73 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// Converts the API's keys map back into a list. Keys already in state keep their position (so
+// reordering in config never causes a diff) and keep their configured formatting when the API value
+// is equivalent; keys only known to the API are appended in name order. The CAK is never returned by
+// the API and cak_wo is write-only, so it's never set here.
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	apiKeys, ok := v.(map[string]interface{})
+	if !ok || len(apiKeys) == 0 {
+		return nil
+	}
+
+	flattenKey := func(name string, apiKey interface{}, prior map[string]interface{}) map[string]interface{} {
+		k, _ := apiKey.(map[string]interface{})
+		startTime, _ := k["startTime"].(string)
+		ckn, _ := k["ckn"].(string)
+		if prior != nil {
+			if p, _ := prior["start_time"].(string); interconnectKeyGroupSameTime(p, startTime) {
+				startTime = p
+			}
+			if p, _ := prior["ckn"].(string); strings.EqualFold(p, ckn) {
+				ckn = p
+			}
+		}
+		if n, _ := k["name"].(string); n != "" {
+			name = n
+		}
+		return map[string]interface{}{
+			"name":       name,
+			"start_time": startTime,
+			"ckn":        ckn,
+		}
+	}
+
+	transformed := make([]interface{}, 0, len(apiKeys))
+	seen := make(map[string]bool, len(apiKeys))
+	prior, _ := d.Get("keys").([]interface{})
+	for _, raw := range prior {
+		p, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, _ := p["name"].(string)
+		apiKey, found := apiKeys[name]
+		if !found || seen[name] {
+			continue
+		}
+		transformed = append(transformed, flattenKey(name, apiKey, p))
+		seen[name] = true
+	}
+
+	remaining := make([]string, 0, len(apiKeys))
+	for name := range apiKeys {
+		if !seen[name] {
+			remaining = append(remaining, name)
+		}
+	}
+	sort.Strings(remaining)
+	for _, name := range remaining {
+		transformed = append(transformed, flattenKey(name, apiKeys[name], nil))
+	}
+	return transformed
+}

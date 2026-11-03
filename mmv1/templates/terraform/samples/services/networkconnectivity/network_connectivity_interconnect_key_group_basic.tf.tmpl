@@ -1,0 +1,18 @@
+resource "google_network_connectivity_interconnect_key_group" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "key_group_name"}}"
+  region      = "us-east4"
+  description = "MACsec keys for my Interconnects"
+  labels = {
+    env = "test"
+  }
+
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    # Write-only (Terraform 1.11+): sent to the API but never stored in state or plan files.
+    # In real configurations, pass this from an ephemeral variable or ephemeral resource.
+    cak_wo     = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
