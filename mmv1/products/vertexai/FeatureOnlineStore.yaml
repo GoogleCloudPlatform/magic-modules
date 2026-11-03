@@ -145,6 +145,7 @@ properties:
   - name: optimized
     type: NestedObject
     description: Settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
+    deprecation_message: '`optimized` is deprecated because Vertex AI Feature Store Optimized online serving is deprecated and new FeatureOnlineStore creation is no longer supported. Use `bigtable` for online serving instead.'
     # The fields below are necessary to include the "Optimized" transformation in the payload
     send_empty_value: true
     allow_empty_object: true
