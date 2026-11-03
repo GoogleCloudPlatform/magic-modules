@@ -245,13 +245,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data := diffCommentData{
 		CommitSHA: commitSha,
 	}
+	var repos []*source.Repo
+	var providerRepos []*source.Repo
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
-		errors[repo.Title] = []string{}
-		repo.Branch = newBranch
 		if hasSameCommitSHA(repo.Name, rnr) {
 			fmt.Printf("Skipping clone of %q; new and old commit SHAs match\n", repo.Name)
 			continue
 		}
+		repos = append(repos, repo)
+		if repo == &tpgRepo || repo == &tpgbRepo {
+			providerRepos = append(providerRepos, repo)
+		}
+	}
+	for _, repo := range repos {
+		errors[repo.Title] = []string{}
+		repo.Branch = newBranch
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
 			fmt.Printf("Failed to clone repo %q at branch %q: %s\n", repo.Name, newBranch, err)
@@ -266,11 +274,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	diffs := []Diff{}
-	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
+	for _, repo := range repos {
 		if !repo.Cloned {
-			if len(errors[repo.Title]) > 0 {
-				fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
-			}
+			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
 			continue
 		}
 		shortStat, err := ctlr.DiffShortStat(repo, oldBranch, newBranch)
@@ -320,13 +326,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		"GOPATH": os.Getenv("GOPATH"),
 		"HOME":   os.Getenv("HOME"),
 	}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+	for _, repo := range providerRepos {
 		if !repo.Cloned {
-			if len(errors[repo.Title]) > 0 {
-				fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
-			} else {
-				fmt.Println("Skipping diff processor; no diff: ", repo.Name)
-			}
+			fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
 			continue
 		}
 		if len(repo.ChangedFiles) == 0 {
@@ -379,13 +381,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 			data.MissingIdentity = missingIdentity
 
-			errStrs := checkDocumentFrontmatter(repo)
+			errStrs := checkDocumentFrontmatter(*repo)
 			if len(errStrs) > 0 {
 				errors[repo.Title] = append(errors[repo.Title], errStrs...)
 			}
 		}
 
-		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
+		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, *repo)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
@@ -424,11 +426,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+	for _, repo := range providerRepos {
 		if !repo.Cloned {
-			if len(errors[repo.Title]) > 0 {
-				fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
-			}
+			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
 			continue
 		}
 		for _, path := range repo.ChangedFiles {
@@ -531,7 +531,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Add errors to data as an ordered list
 	errorsList := []Errors{}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
+	for _, repo := range repos {
 		if len(errors[repo.Title]) > 0 {
 			errorsList = append(errorsList, Errors{
 				Title:  repo.Title,
