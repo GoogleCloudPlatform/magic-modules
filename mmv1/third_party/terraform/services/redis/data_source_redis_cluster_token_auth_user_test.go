@@ -44,16 +44,19 @@ resource "google_redis_cluster" "cluster" {
 resource "google_redis_cluster_token_auth_user" "user-basic" {
   cluster                     = google_redis_cluster.cluster.name
   user_id                     = "tf-test-user-%{random_suffix}"
+  region                      = "europe-west4"
 }
 
 data "google_redis_cluster_token_auth_user" "custom" {
   cluster                     = google_redis_cluster.cluster.name
   user_id                     = google_redis_cluster_token_auth_user.user-basic.user_id
+  region                      = "europe-west4"
 }
 
 data "google_redis_cluster_token_auth_user" "default" {
   cluster                     = google_redis_cluster.cluster.name
   user_id                     = "default"
+  region                      = "europe-west4"
 }
 `, context)
 }

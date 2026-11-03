@@ -9,4 +9,5 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}-cluster" {
 resource "google_redis_cluster_token_auth_user" "{{$.PrimaryResourceId}}" {
   cluster                     = google_redis_cluster.{{$.PrimaryResourceId}}-cluster.name
   user_id                     = "{{index $.ResourceIdVars "user_id"}}"
+  region                      = "europe-west4"
 }
