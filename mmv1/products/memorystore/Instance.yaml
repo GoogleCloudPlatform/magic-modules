@@ -567,6 +567,22 @@ properties:
         enum_values:
           - MULTI_ZONE
           - SINGLE_ZONE
+      - name: zones
+        type: Array
+        description: |
+          Optional. Specify the zones of a multi-zone instance where Memorystore
+          instance allocates resources. This flag isn't applicable for single-zone
+          instances.
+        immutable: true
+        item_type:
+          type: String
+      - name: activeZones
+        type: Array
+        description: |
+          Output only. The exact list of zones where the instance currently has active VMs.
+        output: true
+        item_type:
+          type: String
   - name: deletionProtectionEnabled
     type: Boolean
     update_id: deletionProtectionEnabled
