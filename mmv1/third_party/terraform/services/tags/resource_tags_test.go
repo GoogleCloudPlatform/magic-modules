@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/tagslocation"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -105,9 +106,23 @@ func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall(t *testing.T) {
 				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallExample(context),
 			},
 			{
-				ResourceName:      "google_tags_tag_key.key",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_tags_tag_key.key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"purpose_data"},
+			},
+			{
+				ResourceName:    "google_tags_tag_key.key",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithID,
+			},
+			{
+				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_tags_tag_key.key", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 		},
 	})
@@ -160,6 +175,18 @@ func TestTagsTagKeyPurposeDataDiffSuppress(t *testing.T) {
 			New:                "",
 			ExpectDiffSuppress: false,
 		},
+		"network different vpc name in state is not suppressed": {
+			K:                  "purpose_data.network",
+			Old:                "my-project/tf-test-vpc-1",
+			New:                "my-project/tf-test-vpc-2",
+			ExpectDiffSuppress: false,
+		},
+		"network same vpc name in state is suppressed": {
+			K:                  "purpose_data.network",
+			Old:                "my-project/tf-test-vpc-1",
+			New:                "my-project/tf-test-vpc-1",
+			ExpectDiffSuppress: true,
+		},
 	}
 
 	for tn, tc := range cases {
@@ -186,6 +213,29 @@ resource "google_tags_tag_key" "key" {
 	  # purpose_data expects either a selfLinkWithId (not a property of google_compute_network) or the format <project-name>/<vpc-name>.
 	  # selfLink is not sufficient and will result in an error, so we build a string to match the second option.
 	  purpose_data = {network = "${google_compute_network.tag_network.project}/${google_compute_network.tag_network.name}"}
+	}
+
+`, context)
+}
+
+func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "tag_network" {
+	name = "tf-test-vpc-%{random_suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_network" "tag_network_2" {
+	name = "tf-test-vpc-2-%{random_suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_tags_tag_key" "key" {
+	  parent = "organizations/%{org_id}"
+	  short_name = "tf-test-foo%{random_suffix}"
+	  description = "For foo%{random_suffix} resources."
+	  purpose = "GCE_FIREWALL"
+	  purpose_data = {network = "${google_compute_network.tag_network_2.project}/${google_compute_network.tag_network_2.name}"}
 	}
 
 `, context)

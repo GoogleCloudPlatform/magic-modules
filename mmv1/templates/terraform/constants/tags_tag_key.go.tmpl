@@ -1,6 +1,30 @@
 func TagsTagKeyPurposeDataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if k == "purpose_data.%" {
+	switch k {
+	case "purpose_data.organization":
+		if new == "auto" && old != "" {
+			return true
+		}
+		return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
+	case "purpose_data.network":
+		if tpgresource.CompareSelfLinkOrResourceName("", old, new, d) {
+			return true
+		}
+		oldParts := strings.Split(old, "/")
+		newParts := strings.Split(new, "/")
+		if len(oldParts) >= 2 && len(newParts) >= 2 {
+			if oldParts[len(oldParts)-1] == newParts[len(newParts)-1] {
+				return true
+			}
+			for i, part := range oldParts {
+				if part == "projects" && i+1 < len(oldParts) && len(newParts) == 2 {
+					if oldParts[i+1] == newParts[0] {
+						return true
+					}
+				}
+			}
+		}
+		return false
+	default:
 		return old == new
 	}
-	return (old != "" && new != "") || old == new
 }
