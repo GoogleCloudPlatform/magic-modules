@@ -7217,7 +7217,8 @@ resource "google_compute_instance" "foobar" {
 	machine_type   = "%s"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
-  desired_status  = "RUNNING"%s
+	desired_status = "RUNNING"
+%s
 
   //deletion_protection = false is implicit in this config due to default value
 
@@ -7246,9 +7247,45 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_basicWithStockoutRetry(instance string, retryTimeoutSeconds int) string {
-	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium", fmt.Sprintf(`
-  retry_on_stockout = true
-  stockout_retry_timeout_seconds = %d`, retryTimeoutSeconds))
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-13"
+	project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+	name           = "%s"
+	machine_type   = "e2-medium"
+	zone           = "us-central1-a"
+	tags           = ["foo", "bar"]
+	desired_status = "RUNNING"
+	retry_on_stockout = true
+	stockout_retry_timeout_seconds = %d
+
+	//deletion_protection = false is implicit in this config due to default value
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	metadata = {
+		foo            = "bar"
+		baz            = "qux"
+		startup-script = "echo Hello"
+	}
+
+	labels = {
+		my_key       = "my_value"
+		my_other_key = "my_other_value"
+	}
+}
+`, instance, retryTimeoutSeconds)
 }
 
 func testAccComputeInstance_basic2(instance string) string {
