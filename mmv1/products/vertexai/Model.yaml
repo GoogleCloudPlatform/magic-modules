@@ -38,7 +38,6 @@ async:
     resource_inside_response: true
 custom_code:
   constants: templates/terraform/constants/vertex_ai_model.go.tmpl
-  custom_import: templates/terraform/custom_import/vertex_ai_model.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
   encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
@@ -63,8 +62,9 @@ samples:
     steps:
       - name: 'vertex_ai_model_source_basic_2'
         vars:
-          model_id: 'test-model'
           source_model: 'projects/my-project-name/locations/us-central1/models/my-source-model'
+        resource_id_vars:
+          model_id: 'test-model'
         test_env_vars:
           project_name: 'PROJECT_NAME'
         test_vars_overrides:
@@ -135,13 +135,15 @@ properties:
           name: id
           description: The ID of the export format, such as `tflite`, `tf-saved-model`, or `custom-trained`.
           output: true
-        - type: Enum
+        - type: Array
           name: exportableContent
           description: The content of this Model that may be exported.
           output: true
-          enum_values:
-            - :ARTIFACT
-            - :IMAGE
+          item_type:
+            type: Enum
+            enum_values:
+              - :ARTIFACT
+              - :IMAGE
   - type: String
     name: trainingPipeline
     description: Resource name of the TrainingPipeline that uploaded this Model.
