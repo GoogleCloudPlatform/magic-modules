@@ -233,7 +233,6 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		}
 		return false
 
-
 	case "dataPolicyList":
 		// If both old and new have no policies (nil, {}, or {"dataPolicies": []}), they are equivalent.
 		if bigQueryTableNormalizeDataPolicyList(valA) == nil && bigQueryTableNormalizeDataPolicyList(valB) == nil {

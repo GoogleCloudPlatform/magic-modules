@@ -672,7 +672,6 @@ type testUnitBigQueryDataTableJSONChangeableTestCase struct {
 	ignoreSchemaChanges []interface{}
 }
 
-
 func TestBigQueryTableSchemaDiffSuppress_WithIgnore_DataPolicyList(t *testing.T) {
 	t.Parallel()
 
@@ -786,8 +785,6 @@ func TestBigQueryTableSchemaDiffSuppress_WithIgnore_DataPolicyList(t *testing.T)
 		})
 	}
 }
-
-
 
 func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testing.T) {
 	var old, new interface{}
@@ -981,7 +978,6 @@ var testUnitBigQueryDataTableIsChangeableTestCases = []testUnitBigQueryDataTable
 		]`,
 		changeable: true,
 	},
-
 	{
 		name:                "ignoreDataPolicyListRemoval",
 		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicyList\": {\"dataPolicies\": [{\"name\": \"p1\"}]}}]",
@@ -1066,7 +1062,6 @@ func TestUnitBigQueryDataTable_schemaIsChangeableNested(t *testing.T) {
 		testcaseNested.check(t)
 	}
 }
-
 
 func TestMergeDataPoliciesIntoMap_DataPolicyList(t *testing.T) {
 	t.Parallel()
