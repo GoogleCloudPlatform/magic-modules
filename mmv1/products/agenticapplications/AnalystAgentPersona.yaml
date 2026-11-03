@@ -119,6 +119,19 @@ samples:
           persona_id: audit_trail
         test_env_vars:
           project_number: PROJECT_NUMBER
+  - name: analyst_agent_persona_mcp_headers
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_mcp_headers
+        resource_id_vars:
+          persona_id: mcp-headers
+        test_env_vars:
+          project_number: PROJECT_NUMBER
+      - name: analyst_agent_persona_mcp_headers_update
+        resource_id_vars:
+          persona_id: mcp-headers
+        test_env_vars:
+          project_number: PROJECT_NUMBER
 
 parameters:
   - name: location
@@ -815,6 +828,18 @@ properties:
           type: String
           required: true
           description: The URL of the MCP server.
+        - name: sessionIdHeader
+          type: String
+          description: |-
+            The HTTP header name used to pass the agent session ID in MCP server
+            requests (defaults to `X-Session-Id` when unset). Must be a valid HTTP
+            header field name (RFC 9110 token).
+        - name: taskIdHeader
+          type: String
+          description: |-
+            The HTTP header name used to pass the agent task ID in MCP server
+            requests (defaults to `X-Task-Id` when unset). Must be a valid HTTP
+            header field name (RFC 9110 token).
   - name: modelDescription
     type: String
     description: The description of the persona review, used by the model.
