@@ -46,11 +46,9 @@ async:
     resource_inside_response: false
 deletion_policy_default: PREVENT
 autogen_async: true
-sweeper:
-  regions:
-    - us-central1
-    - asia-east1
-    - europe-west4
+# Repositories are deleted automatically when their parent Instance is swept,
+# and ListRepositories requires ?instance=<full_instance_name>.
+exclude_sweeper: true
 samples:
   - name: secure_source_manager_repository_basic
     primary_resource_id: default

@@ -19,7 +19,8 @@ references:
     Official Documentation: https://cloud.google.com/secure-source-manager/docs/create-instance
   api: https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances
 docs:
-base_url: projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}
+base_url: projects/{{project}}/locations/{{location}}/instances
+create_url: projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 iam_policy:
@@ -55,10 +56,11 @@ include_in_tgc_next: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl
 sweeper:
-  regions:
-    - us-central1
-    - asia-east1
-    - europe-west4
+  query_string: "?force=true"
+  url_substitutions:
+    - region: us-central1
+    - region: asia-east1
+    - region: europe-west4
 samples:
   - name: secure_source_manager_instance_basic
     primary_resource_id: default
