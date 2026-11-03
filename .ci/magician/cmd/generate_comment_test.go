@@ -44,6 +44,7 @@ func TestExecGenerateComment(t *testing.T) {
 		"terraform-provider-google",
 		"terraform-provider-google-beta",
 		"terraform-google-conversion",
+		"docs-examples",
 	} {
 		variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
 		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
@@ -269,53 +270,58 @@ func TestExecGenerateComment_SkipUnchangedRepos(t *testing.T) {
 		}
 		assert.Equal(t, expectedRunCalls, actualRunCalls)
 	})
-}
 
-func TestHasSameCommitSHA(t *testing.T) {
-	cases := []struct {
-		name   string
-		newSHA string
-		oldSHA string
-		want   bool
-	}{
-		{
-			name:   "matching SHAs",
-			newSHA: "abc123\n",
-			oldSHA: "abc123",
-			want:   true,
-		},
-		{
-			name:   "differing SHAs",
-			newSHA: "abc123",
-			oldSHA: "def456",
-			want:   false,
-		},
-		{
-			name:   "empty SHAs",
-			newSHA: "",
-			oldSHA: "",
-			want:   false,
-		},
-		{
-			name:   "only new SHA present",
-			newSHA: "abc123",
-			oldSHA: "",
-			want:   false,
-		},
-	}
+	t.Run("missing commit SHA file skips clone and records error", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		// terraform-provider-google is missing commitSHA .txt file.
+		// terraform-provider-google-beta has .txt file but is missing -old.txt file.
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt", "1a2a3a4a"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+		for _, repo := range []string{
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			mr := NewMockRunner()
-			if tc.newSHA != "" {
-				assert.NoError(t, mr.WriteFile("/workspace/commitSHA_modular-magician_test-repo.txt", tc.newSHA))
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		for _, method := range []string{"Run", "Copy", "RemoveAll"} {
+			if actualCalls, ok := mr.Calls(method); ok {
+				t.Fatalf("Expected no calls for %s when SHA files are missing or unchanged, got %v", method, actualCalls)
 			}
-			if tc.oldSHA != "" {
-				assert.NoError(t, mr.WriteFile("/workspace/commitSHA_modular-magician_test-repo-old.txt", tc.oldSHA))
-			}
-			assert.Equal(t, tc.want, hasSameCommitSHA("test-repo", mr))
-		})
-	}
+		}
+
+		postCommentCalls, ok := gh.calledMethods["PostComment"]
+		if !ok || len(postCommentCalls) != 1 {
+			t.Fatalf("Expected 1 call to PostComment, got %v", postCommentCalls)
+		}
+		comment, _ := postCommentCalls[0][1].(string)
+		assert.Contains(t, comment, "## Errors")
+		assert.Contains(t, comment, "`google` provider:\n- Failed to read commit sha from file")
+		assert.Contains(t, comment, "`google-beta` provider:\n- Failed to read old commit sha from file")
+	})
 }
 
 func TestFormatDiffComment(t *testing.T) {

@@ -247,18 +247,34 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 	var repos []*source.Repo
 	var providerRepos []*source.Repo
+	commitSHAs := map[string]string{}
+	oldCommitSHAs := map[string]string{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
-		if hasSameCommitSHA(repo.Name, rnr) {
+		errors[repo.Title] = []string{}
+		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
+		oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
+		commitSHA, err := rnr.ReadFile(variablePath)
+		if err != nil {
+			errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
+			continue
+		}
+		oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
+		if err != nil {
+			errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
+			continue
+		}
+		if strings.TrimSpace(commitSHA) != "" && strings.TrimSpace(commitSHA) == strings.TrimSpace(oldCommitSHA) {
 			fmt.Printf("Skipping clone of %q; new and old commit SHAs match\n", repo.Name)
 			continue
 		}
+		commitSHAs[repo.Name] = commitSHA
+		oldCommitSHAs[repo.Name] = oldCommitSHA
 		repos = append(repos, repo)
 		if repo == &tpgRepo || repo == &tpgbRepo {
 			providerRepos = append(providerRepos, repo)
 		}
 	}
 	for _, repo := range repos {
-		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
@@ -285,24 +301,12 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
-			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
-			commitSHA, err := rnr.ReadFile(variablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
-				continue
-			}
-			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
-				continue
-			}
 			diffs = append(diffs, Diff{
 				Title:        repo.Title,
 				Repo:         repo.Name,
 				ShortStat:    shortStat,
-				CommitSHA:    commitSHA,
-				OldCommitSHA: oldCommitSHA,
+				CommitSHA:    commitSHAs[repo.Name],
+				OldCommitSHA: oldCommitSHAs[repo.Name],
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
@@ -531,7 +535,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Add errors to data as an ordered list
 	errorsList := []Errors{}
-	for _, repo := range repos {
+	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
 		if len(errors[repo.Title]) > 0 {
 			errorsList = append(errorsList, Errors{
 				Title:  repo.Title,
@@ -563,20 +567,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		fmt.Printf("Warning: failed to save comment ID to file: %v\n", err)
 	}
 	return nil
-}
-
-// hasSameCommitSHA reports whether the new and old commit SHA files for a
-// downstream repository exist, are non-empty, and contain the same commit SHA.
-func hasSameCommitSHA(repoName string, rnr ExecRunner) bool {
-	variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repoName)
-	oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repoName)
-	commitSHA, newErr := rnr.ReadFile(variablePath)
-	oldCommitSHA, oldErr := rnr.ReadFile(oldVariablePath)
-	if newErr != nil || oldErr != nil {
-		return false
-	}
-	trimmedNew := strings.TrimSpace(commitSHA)
-	return trimmedNew != "" && trimmedNew == strings.TrimSpace(oldCommitSHA)
 }
 
 // Build the diff processor for tpg or tpgb
