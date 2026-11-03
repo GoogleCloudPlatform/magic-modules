@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 // MissingIdentityInfo holds the results for a single resource.
@@ -153,7 +151,6 @@ func checkImportTest(resourcePath string) (bool, error) {
 	dir := filepath.Dir(resourcePath)
 	baseName := filepath.Base(resourcePath)
 	resourcePrefix := strings.TrimSuffix(baseName, ".go")
-	allowLegacyRefreshState := isLegacyIdentityImportOptedOut(resourcePath)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return true, fmt.Errorf("error reading directory %s: %w", dir, err)
@@ -166,82 +163,14 @@ func checkImportTest(resourcePath string) (bool, error) {
 		if err != nil {
 			return true, err
 		}
-		if hasValidIdentityImportStep(content, allowLegacyRefreshState) {
+		if hasValidIdentityImportStep(content) {
 			return false, nil
 		}
 	}
 	return true, nil
 }
 
-var mmv1ConfigURLPattern = regexp.MustCompile(`Configuration:\s+\S+/mmv1/(products/[^/\s]+/[^/\s]+\.yaml)`)
-
-type legacyIdentityOptOutYAML struct {
-	LegacyIdentityImportTest bool `yaml:"legacy_identity_import_test"`
-}
-
-// isLegacyIdentityImportOptedOut checks whether the MMv1 resource or its parent product
-// has `legacy_identity_import_test: true` set in YAML.
-func isLegacyIdentityImportOptedOut(resourcePath string) bool {
-	content, err := os.ReadFile(resourcePath)
-	if err != nil {
-		return false
-	}
-	matches := mmv1ConfigURLPattern.FindSubmatch(content)
-	if matches == nil {
-		return false
-	}
-	relResourceYAML := filepath.FromSlash(string(matches[1]))
-	relProductYAML := filepath.Join(filepath.Dir(relResourceYAML), "product.yaml")
-
-	mmv1Root := findMMv1Root(filepath.Dir(resourcePath))
-	if mmv1Root == "" {
-		return false
-	}
-
-	if yamlHasLegacyIdentityOptOut(filepath.Join(mmv1Root, relResourceYAML)) {
-		return true
-	}
-	if yamlHasLegacyIdentityOptOut(filepath.Join(mmv1Root, relProductYAML)) {
-		return true
-	}
-	return false
-}
-
-func findMMv1Root(startDir string) string {
-	candidates := []string{startDir}
-	if cwd, err := os.Getwd(); err == nil {
-		candidates = append(candidates, cwd)
-	}
-	for _, base := range candidates {
-		dir := base
-		for {
-			mmv1Dir := filepath.Join(dir, "mmv1")
-			if info, err := os.Stat(filepath.Join(mmv1Dir, "products")); err == nil && info.IsDir() {
-				return mmv1Dir
-			}
-			parent := filepath.Dir(dir)
-			if parent == dir {
-				break
-			}
-			dir = parent
-		}
-	}
-	return ""
-}
-
-func yamlHasLegacyIdentityOptOut(yamlPath string) bool {
-	data, err := os.ReadFile(yamlPath)
-	if err != nil {
-		return false
-	}
-	var cfg legacyIdentityOptOutYAML
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return false
-	}
-	return cfg.LegacyIdentityImportTest
-}
-
-func hasValidIdentityImportStep(content []byte, allowLegacyRefreshState bool) bool {
+func hasValidIdentityImportStep(content []byte) bool {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "", content, 0)
 	if err != nil {
@@ -294,11 +223,9 @@ func hasValidIdentityImportStep(content []byte, allowLegacyRefreshState bool) bo
 			}
 		}
 
-		if hasIdentityKind {
-			if (hasImportState && !hasRefreshState) || (allowLegacyRefreshState && hasRefreshState) {
-				found = true
-				return false
-			}
+		if hasIdentityKind && hasImportState && !hasRefreshState {
+			found = true
+			return false
 		}
 		return true
 	})
