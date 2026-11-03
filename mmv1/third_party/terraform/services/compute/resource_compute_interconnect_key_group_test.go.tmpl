@@ -1,0 +1,209 @@
+package compute_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
+)
+
+// Covers macsec.interconnect_key_group: migrating from pre-shared keys to a key group with MACsec
+// on (PSK -> PSK + key group -> key group), import, and detaching (MACsec off and the key group
+// removed in the same apply, which must clear the field on the API and leave a clean plan).
+func TestAccComputeInterconnect_interconnectKeyGroup(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInterconnectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// MACsec can't be enabled on create.
+				Config: testAccComputeInterconnect_interconnectKeyGroupMacsecOff(context),
+			},
+			{
+				Config: testAccComputeInterconnect_interconnectKeyGroupPsk(context),
+			},
+			{
+				Config: testAccComputeInterconnect_interconnectKeyGroupPskAndKeyGroup(context),
+			},
+			{
+				Config: testAccComputeInterconnect_interconnectKeyGroupKeyGroup(context),
+			},
+			{
+				ResourceName:            "google_compute_interconnect.example-interconnect",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+			{
+				// Detach: MACsec off and the macsec block removed in one apply.
+				Config: testAccComputeInterconnect_interconnectKeyGroupMacsecOff(context),
+			},
+			{
+				ResourceName:            "google_compute_interconnect.example-interconnect",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccComputeInterconnect_interconnectKeyGroupMacsecOff(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider = google-beta
+  name     = "tf-test-ikg-%{random_suffix}"
+  region   = "us-east4"
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "2123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "dedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  provider             = google-beta
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR" # MACsec is always available on 100G links.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-pniada-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  macsec_enabled       = false
+  noc_contact_email    = "user@example.com"
+}
+`, context)
+}
+
+func testAccComputeInterconnect_interconnectKeyGroupPsk(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider = google-beta
+  name     = "tf-test-ikg-%{random_suffix}"
+  region   = "us-east4"
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "2123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "dedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  provider             = google-beta
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR" # MACsec is always available on 100G links.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-pniada-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  macsec_enabled       = true
+  noc_contact_email    = "user@example.com"
+  macsec {
+    pre_shared_keys {
+      name       = "test-key"
+      start_time = "2023-07-01T21:00:01.000Z"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeInterconnect_interconnectKeyGroupPskAndKeyGroup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider = google-beta
+  name     = "tf-test-ikg-%{random_suffix}"
+  region   = "us-east4"
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "2123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "dedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  provider             = google-beta
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR" # MACsec is always available on 100G links.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-pniada-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  macsec_enabled       = true
+  noc_contact_email    = "user@example.com"
+  macsec {
+    interconnect_key_group = google_network_connectivity_interconnect_key_group.default.id
+    pre_shared_keys {
+      name       = "test-key"
+      start_time = "2023-07-01T21:00:01.000Z"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeInterconnect_interconnectKeyGroupKeyGroup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_connectivity_interconnect_key_group" "default" {
+  provider = google-beta
+  name     = "tf-test-ikg-%{random_suffix}"
+  region   = "us-east4"
+  keys {
+    name       = "key1"
+    start_time = "2026-01-01T00:00:00Z"
+    ckn        = "2123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    cak_wo     = "dedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  }
+}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  provider             = google-beta
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR" # MACsec is always available on 100G links.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-pniada-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  macsec_enabled       = true
+  noc_contact_email    = "user@example.com"
+  macsec {
+    interconnect_key_group = google_network_connectivity_interconnect_key_group.default.id
+  }
+}
+`, context)
+}
+{{- end }}
