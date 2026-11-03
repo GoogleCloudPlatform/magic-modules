@@ -6379,6 +6379,60 @@ EOF
 `, tableID)
 }
 
+func testAccBigQueryTableDataPolicyListMergeStage4(datasetID, tableID, taxonomyName, policyID1, policyID2 string) string {
+	return testAccBigQueryTableDataPolicyListBaseResources(datasetID, taxonomyName, policyID1, policyID2) + fmt.Sprintf(`
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id            = "%s"
+  dataset_id          = google_bigquery_dataset.test.dataset_id
+  description         = "Stage 4 Table - Clear vs Omit"
+
+  ignore_schema_changes = ["dataPolicyList"]
+
+  schema = <<EOF
+[
+  {
+    "name": "col1",
+    "type": "STRING"
+  },
+  {
+    "name": "col2",
+    "type": "STRING",
+    "description": "new description",
+    "dataPolicyList": {}
+  },
+  {
+    "name": "col3",
+    "type": "STRING",
+    "dataPolicyList": { "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p1.data_policy_id}" }] }
+  },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      {
+        "name": "sub1",
+        "type": "STRING"
+      },
+      {
+        "name": "sub2",
+        "type": "STRING",
+        "description": "new nested desc",
+        "dataPolicyList": { "dataPolicies": [] }
+      },
+      {
+        "name": "sub3",
+        "type": "STRING",
+        "dataPolicyList": { "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p1.data_policy_id}" }] }
+      }
+    ]
+  }
+]
+EOF
+}
+`, tableID)
+}
+
 func TestAccBigQueryTable_IgnoreSchemaDataPolicyListMerge(t *testing.T) {
 	t.Parallel()
 
@@ -6445,6 +6499,28 @@ func TestAccBigQueryTable_IgnoreSchemaDataPolicyListMerge(t *testing.T) {
 					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{
 						"col1", "col2", "col3",
 						"nested_col.sub1", "nested_col.sub2", "nested_col.sub3",
+					}),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+			},
+			// Stage 4: Distinguish between field omitted vs explicitly empty sent
+			// ignore_schema_changes = ["dataPolicyList"]
+			// col1 & nested_col.sub1: dataPolicyList omitted -> preserved from backend
+			// col2: dataPolicyList explicitly empty {} -> cleared on backend
+			// nested_col.sub2: dataPolicyList explicitly empty {"dataPolicies": []} -> cleared on backend
+			// col3 & nested_col.sub3: explicit policy retained
+			{
+				Config: testAccBigQueryTableDataPolicyListMergeStage4(datasetID, tableID, taxonomyName, policyID1, policyID2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_table.test", "description", "Stage 4 Table - Clear vs Omit"),
+					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{
+						"col1", "col3",
+						"nested_col.sub1", "nested_col.sub3",
 					}),
 				),
 			},

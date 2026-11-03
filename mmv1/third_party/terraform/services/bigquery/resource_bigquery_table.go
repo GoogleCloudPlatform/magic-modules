@@ -159,18 +159,19 @@ func mergeDataPoliciesIntoMap(old, new []interface{}) {
 		name := newField["name"].(string)
 
 		if oldField, exists := oldMap[name]; exists {
-			// If config doesn't have dataPolicies, but backend does, copy them over
-			if _, specified := newField["dataPolicyList"]; !specified {
-				if dp, hasDP := oldField["dataPolicyList"]; hasDP {
+			// If config doesn't have dataPolicies or dataPolicyList, but backend does, copy them over.
+			// If the user explicitly specified either field (including an empty object/list to clear policies),
+			// do not overwrite or merge old backend policies into newField.
+			_, hasDataPolicyList := newField["dataPolicyList"]
+			_, hasDataPolicies := newField["dataPolicies"]
+			if !hasDataPolicyList && !hasDataPolicies {
+				if dp, hasDP := oldField["dataPolicyList"]; hasDP && bigQueryTableNormalizeDataPolicyList(dp) != nil {
 					newField["dataPolicyList"] = dp
 				}
-			}
-			if _, specified := newField["dataPolicies"]; !specified {
-				if dp, hasDP := oldField["dataPolicies"]; hasDP {
+				if dp, hasDP := oldField["dataPolicies"]; hasDP && bigQueryTableNormalizeDataPolicyList(dp) != nil {
 					newField["dataPolicies"] = dp
 				}
 			}
-
 
 			// Recursively handle nested fields (RECORD types)
 			if oldNested, ok1 := oldField["fields"].([]interface{}); ok1 {
@@ -233,34 +234,11 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		return false
 
 
-	case "dataPolicies":
-		if d == nil {
-			return false
-		}
-		// Access the ignore_schema_changes list from the Terraform configuration
-		var ignoreSchemaChanges []interface{}
-		if val := d.Get("ignore_schema_changes"); val != nil {
-			ignoreSchemaChanges = val.([]interface{})
-		}
-
-		// If dataPolicies is ignored...
-		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
-			// Check if the NEW value (valB) is empty or nil.
-			// If it is empty, we suppress the diff (return true) to keep backend values.
-			if valB == nil {
-				return true
-			}
-			if s, ok := valB.([]interface{}); ok && len(s) == 0 {
-				return true
-			}
-
-			// If the user EXPLICITLY provided dataPolicies, we return false.
-			// This tells Terraform "There is a difference, and I want you to apply it."
-			return false
-		}
-		return false
-
 	case "dataPolicyList":
+		// If both old and new have no policies (nil, {}, or {"dataPolicies": []}), they are equivalent.
+		if bigQueryTableNormalizeDataPolicyList(valA) == nil && bigQueryTableNormalizeDataPolicyList(valB) == nil {
+			return true
+		}
 		if d == nil {
 			return false
 		}
@@ -270,19 +248,14 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 			ignoreSchemaChanges = val.([]interface{})
 		}
 
-		// If dataPolicyList is ignored...
+		// If dataPolicyList (or legacy dataPolicies) is ignored...
 		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
-			// Check if the NEW value (valB) is empty or nil.
-			// If it is empty, we suppress the diff (return true) to keep backend values.
+			// Only suppress the diff if the field is omitted (nil) in the new config.
+			// If the user EXPLICITLY provided dataPolicyList (including an empty {} or {"dataPolicies": []}
+			// to clear existing policies), return false so Terraform applies the change.
 			if valB == nil {
 				return true
 			}
-			if s, ok := valB.(map[string]interface{}); ok && len(s) == 0 {
-				return true
-			}
-
-			// If the user EXPLICITLY provided dataPolicyList, we return false.
-			// This tells Terraform "There is a difference, and I want you to apply it."
 			return false
 		}
 		return false
@@ -293,10 +266,6 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 }
 
 // Compare the JSON strings are equal
-
-
-
-
 func normalizeDataPoliciesToDataPolicyList(v interface{}) {
 	switch val := v.(type) {
 	case []interface{}:
@@ -433,6 +402,26 @@ func bigQueryTableNormalizeDataGovernanceTagsInfo(val interface{}) interface{} {
 		if dgTags, ok := dgTagsInfo["dataGovernanceTags"].(map[string]interface{}); ok && len(dgTags) == 0 {
 			return nil
 		}
+	}
+	return val
+}
+
+func bigQueryTableNormalizeDataPolicyList(val interface{}) interface{} {
+	if val == nil {
+		return nil
+	}
+	if dataPolicyList, ok := val.(map[string]interface{}); ok {
+		// dataPolicyList = {} is same as nil.
+		if len(dataPolicyList) == 0 {
+			return nil
+		}
+		// dataPolicyList = {dataPolicies = []} is same as nil.
+		if policies, ok := dataPolicyList["dataPolicies"].([]interface{}); ok && len(policies) == 0 {
+			return nil
+		}
+	}
+	if policies, ok := val.([]interface{}); ok && len(policies) == 0 {
+		return nil
 	}
 	return val
 }

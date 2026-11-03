@@ -472,6 +472,88 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			]`,
 			ExpectDiffSuppress: false,
 		},
+		"dataPolicyList: nil vs empty map": {
+			Old: `[
+				{
+					"name": "col",
+					"type": "STRING"
+				}
+			]`,
+			New: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {}
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+		"dataPolicyList: nil vs empty dataPolicies": {
+			Old: `[
+				{
+					"name": "col",
+					"type": "STRING"
+				}
+			]`,
+			New: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": []
+					}
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+		"dataPolicyList: policies removed via empty map": {
+			Old: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": [
+							{
+								"name": "projects/my-project/locations/us-central1/dataPolicies/p1"
+							}
+						]
+					}
+				}
+			]`,
+			New: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {}
+				}
+			]`,
+			ExpectDiffSuppress: false,
+		},
+		"dataPolicyList: policies removed via empty dataPolicies": {
+			Old: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": [
+							{
+								"name": "projects/my-project/locations/us-central1/dataPolicies/p1"
+							}
+						]
+					}
+				}
+			]`,
+			New: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": []
+					}
+				}
+			]`,
+			ExpectDiffSuppress: false,
+		},
 		{{- if ne $.TargetVersionName "ga" }}
 		"foreignTypeDefinition from generated schema -> original schema": {
 			Old:                "[{\"name\": \"someValue\", \"type\": \"RECORD\", \"foreignTypeDefinition\" : \"STRUCT<id:STRING, name:STRING>\", \"fields\": [{\"name\": \"id\", \"type\": \"STRING\"}, {\"name\": \"name\", \"type\": \"STRING\"}]}]",
@@ -552,6 +634,16 @@ func TestBigQueryTableSchemaDiffSuppress_WithIgnore(t *testing.T) {
 			New:                `[{"name": "col1", "description": "new"}]`,
 			ExpectDiffSuppress: false, // Should be false because description changed
 		},
+		"do NOT ignore explicit empty dataPolicies slice when backend has policy": {
+			Old:                `[{"name": "col1", "dataPolicies": [{"name": "p1"}]}]`,
+			New:                `[{"name": "col1", "dataPolicies": []}]`,
+			ExpectDiffSuppress: false,
+		},
+		"suppress explicit empty dataPolicies slice when backend has no policy": {
+			Old:                `[{"name": "col1"}]`,
+			New:                `[{"name": "col1", "dataPolicies": []}]`,
+			ExpectDiffSuppress: true,
+		},
 	}
 
 	for name, tc := range cases {
@@ -631,6 +723,50 @@ func TestBigQueryTableSchemaDiffSuppress_WithIgnore_DataPolicyList(t *testing.T)
 			Old:                `[{"name": "col1", "description": "old", "dataPolicyList": {"dataPolicies": [{"name": "p1"}]}}]`,
 			New:                `[{"name": "col1", "description": "new"}]`,
 			ExpectDiffSuppress: false, // Should be false because description changed
+		},
+		"do NOT ignore explicit empty dataPolicyList map when backend has policy": {
+			Old:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "p1"}]}}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {}}]`,
+			ExpectDiffSuppress: false,
+		},
+		"do NOT ignore explicit empty dataPolicies slice in dataPolicyList when backend has policy": {
+			Old:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": [{"name": "p1"}]}}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": []}}]`,
+			ExpectDiffSuppress: false,
+		},
+		"do NOT ignore nested explicit empty dataPolicyList when backend has policy": {
+			Old: `[{
+				"name": "parent",
+				"type": "RECORD",
+				"fields": [{
+					"name": "child",
+					"dataPolicyList": {"dataPolicies": [{"name": "p1"}]}
+				}]
+			}]`,
+			New: `[{
+				"name": "parent",
+				"type": "RECORD",
+				"fields": [{
+					"name": "child",
+					"dataPolicyList": {}
+				}]
+			}]`,
+			ExpectDiffSuppress: false,
+		},
+		"suppress explicit empty dataPolicyList map when backend has no policy": {
+			Old:                `[{"name": "col1"}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {}}]`,
+			ExpectDiffSuppress: true,
+		},
+		"suppress explicit empty dataPolicies slice in dataPolicyList when backend has no policy": {
+			Old:                `[{"name": "col1"}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": []}}]`,
+			ExpectDiffSuppress: true,
+		},
+		"suppress explicit empty dataPolicyList when backend has empty dataPolicyList": {
+			Old:                `[{"name": "col1", "dataPolicyList": {}}]`,
+			New:                `[{"name": "col1", "dataPolicyList": {"dataPolicies": []}}]`,
+			ExpectDiffSuppress: true,
 		},
 	}
 
@@ -854,6 +990,20 @@ var testUnitBigQueryDataTableIsChangeableTestCases = []testUnitBigQueryDataTable
 		changeable:          true, // Should not trigger ForceNew
 	},
 	{
+		name:                "clearDataPolicyListWithEmptyMapAndIgnore",
+		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicyList\": {\"dataPolicies\": [{\"name\": \"p1\"}]}}]",
+		jsonNew:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicyList\": {}}]",
+		ignoreSchemaChanges: []interface{}{"dataPolicyList"},
+		changeable:          true, // Should not trigger ForceNew
+	},
+	{
+		name:                "clearDataPolicyListWithEmptySliceAndIgnore",
+		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicyList\": {\"dataPolicies\": [{\"name\": \"p1\"}]}}]",
+		jsonNew:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicyList\": {\"dataPolicies\": []}}]",
+		ignoreSchemaChanges: []interface{}{"dataPolicyList"},
+		changeable:          true, // Should not trigger ForceNew
+	},
+	{
 		name:                "ignoreDataPolicyRemoval",
 		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"dataPolicies\": [{\"name\": \"p1\"}]}]",
 		jsonNew:             "[{\"name\": \"col1\", \"type\" : \"STRING\"}]",
@@ -927,17 +1077,70 @@ func TestMergeDataPoliciesIntoMap_DataPolicyList(t *testing.T) {
 			"dataPolicyList": map[string]interface{}{
 				"dataPolicies": []interface{}{map[string]interface{}{"name": "p1"}},
 			},
+			"dataPolicies": []interface{}{map[string]interface{}{"name": "p1"}},
+		},
+		map[string]interface{}{
+			"name": "col2",
+			"dataPolicyList": map[string]interface{}{
+				"dataPolicies": []interface{}{map[string]interface{}{"name": "p2"}},
+			},
+			"dataPolicies": []interface{}{map[string]interface{}{"name": "p2"}},
+		},
+		map[string]interface{}{
+			"name": "col3",
+			"dataPolicyList": map[string]interface{}{
+				"dataPolicies": []interface{}{map[string]interface{}{"name": "p3"}},
+			},
+			"dataPolicies": []interface{}{map[string]interface{}{"name": "p3"}},
+		},
+		map[string]interface{}{
+			"name":           "col4",
+			"dataPolicyList": map[string]interface{}{},
 		},
 	}
 	new := []interface{}{
-		map[string]interface{}{"name": "col1"}, // Policy missing here
+		map[string]interface{}{"name": "col1"}, // Policy omitted -> should merge from old
+		map[string]interface{}{
+			"name":           "col2",
+			"dataPolicyList": map[string]interface{}{}, // Explicitly empty map -> should NOT merge from old
+		},
+		map[string]interface{}{
+			"name": "col3",
+			"dataPolicyList": map[string]interface{}{
+				"dataPolicies": []interface{}{}, // Explicitly empty slice -> should NOT merge from old
+			},
+		},
+		map[string]interface{}{"name": "col4"}, // Old has empty dataPolicyList -> should NOT merge empty map
 	}
 
 	mergeDataPoliciesIntoMap(old, new)
 
-	updatedField := new[0].(map[string]interface{})
-	if _, ok := updatedField["dataPolicyList"]; !ok {
-		t.Errorf("dataPolicyList was not merged into the map")
+	col1 := new[0].(map[string]interface{})
+	if _, ok := col1["dataPolicyList"]; !ok {
+		t.Errorf("col1: expected dataPolicyList to be merged when omitted in new")
+	}
+
+	col2 := new[1].(map[string]interface{})
+	if dpList, ok := col2["dataPolicyList"].(map[string]interface{}); !ok || len(dpList) != 0 {
+		t.Errorf("col2: expected explicitly empty dataPolicyList map to remain empty, got %v", col2["dataPolicyList"])
+	}
+	if _, ok := col2["dataPolicies"]; ok {
+		t.Errorf("col2: expected dataPolicies not to be merged when dataPolicyList is explicitly specified, got %v", col2["dataPolicies"])
+	}
+
+	col3 := new[2].(map[string]interface{})
+	if dpList, ok := col3["dataPolicyList"].(map[string]interface{}); !ok {
+		t.Errorf("col3: expected dataPolicyList map, got %v", col3["dataPolicyList"])
+	} else if dpSlice, ok := dpList["dataPolicies"].([]interface{}); !ok || len(dpSlice) != 0 {
+		t.Errorf("col3: expected explicitly empty dataPolicies slice to remain empty, got %v", dpList["dataPolicies"])
+	}
+	if _, ok := col3["dataPolicies"]; ok {
+		t.Errorf("col3: expected dataPolicies not to be merged when dataPolicyList is explicitly specified, got %v", col3["dataPolicies"])
+	}
+
+	col4 := new[3].(map[string]interface{})
+	if _, ok := col4["dataPolicyList"]; ok {
+		t.Errorf("col4: expected empty dataPolicyList in old not to be merged into new, got %v", col4["dataPolicyList"])
 	}
 }
 
