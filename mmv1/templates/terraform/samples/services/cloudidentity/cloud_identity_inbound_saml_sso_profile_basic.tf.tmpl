@@ -1,0 +1,11 @@
+resource "google_cloud_identity_inbound_saml_sso_profile" "{{$.PrimaryResourceId}}" {
+  customer     = "customers/{{index $.TestEnvVars "cust_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+
+  idp_config {
+    entity_id                  = "https://idp.example.com/{{index $.ResourceIdVars "display_name"}}"
+    single_sign_on_service_uri = "https://idp.example.com/sso"
+    logout_redirect_uri        = "https://idp.example.com/logout"
+    change_password_uri        = "https://idp.example.com/change-password"
+  }
+}
