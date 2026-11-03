@@ -65,15 +65,14 @@ samples:
         ignore_read_extra:
           - deletion_policy
       - name: secure_source_manager_repository_secret_scanning
-        include_step_doc: true
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
-          sa_id: my-sa
           deletion_policy: PREVENT
         vars:
           description: This is a test repository
           secret_scanning_enabled: 'true'
+          inspect_template: null
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
@@ -86,15 +85,34 @@ samples:
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
-          sa_id: my-sa
           deletion_policy: PREVENT
         vars:
           description: This is an updated test repository
           secret_scanning_enabled: 'false'
+          inspect_template: null
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
           deletion_policy: '"DELETE"'
+        oics_vars_overrides:
+          deletion_policy: '"DELETE"'
+        ignore_read_extra:
+          - deletion_policy
+      - name: secure_source_manager_repository_secret_scanning
+        include_step_doc: true
+        resource_id_vars:
+          repository_id: my-repository
+          instance_id: my-instance
+          deletion_policy: PREVENT
+        vars:
+          description: This is a test repository
+          secret_scanning_enabled: 'true'
+          inspect_template: google_data_loss_prevention_inspect_template.template.id
+        test_env_vars:
+          project: PROJECT_NAME
+        test_vars_overrides:
+          deletion_policy: '"DELETE"'
+          inspect_template: '"google_data_loss_prevention_inspect_template.template.id"'
         oics_vars_overrides:
           deletion_policy: '"DELETE"'
         ignore_read_extra:
@@ -106,6 +124,7 @@ samples:
         resource_id_vars:
           repository_id: my-repository
           instance_id: my-instance
+          sa_id: my-sa
           deletion_policy: PREVENT
         test_vars_overrides:
           deletion_policy: '"DELETE"'
