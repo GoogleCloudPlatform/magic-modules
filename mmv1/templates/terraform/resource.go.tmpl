@@ -555,7 +555,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{if and ($.GetAsync) ($.GetAsync.Allow "Create") -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
     if err != nil {
 {{- if $.GetAsync.SuppressError -}}
 
@@ -1101,7 +1101,7 @@ if len(updateMask) > 0 {
 {{""}}
 {{-             end}}
 {{-                  else if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
     if err != nil {
 {{                      if $.GetAsync.SuppressError -}}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
@@ -1309,7 +1309,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        return err
 	    }
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
-	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
 	    if err != nil {
 {{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
@@ -1466,7 +1466,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
         {{ if $.GetAsync.IsA "PollAsync" }}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }}, config.SleepUnit)
     if err != nil {
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
