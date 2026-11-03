@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,8 +42,6 @@ async:
   error:
     path: 'error'
     message: 'message'
-custom_diff:
-  - 'vertexAiModelDiffSuppress'
 custom_code:
   constants: templates/terraform/constants/vertex_ai_model.go.tmpl
   custom_import: templates/terraform/custom_import/vertex_ai_model.go.tmpl
@@ -151,7 +149,7 @@ properties:
             - :ARTIFACT
             - :IMAGE
   - type: String
-    name: trainerPipeline
+    name: trainingPipeline
     description: Resource name of the TrainingPipeline that uploaded this Model.
     output: true
   - type: String
@@ -183,9 +181,8 @@ properties:
     name: versionAliases
     description: |
       User-provided version aliases, managed after the Model is copied and on updates.
-      Aliases are unordered. The API-required `default` alias is preserved when omitted
-      from configuration and is only included in state when explicitly configured
-      or when this field is unset.
+      Aliases are unordered. The API-managed `default` alias is omitted from state unless
+      explicitly configured.
     default_from_api: true
     is_set: true
     custom_flatten: templates/terraform/custom_flatten/vertex_ai_model_version_aliases.go.tmpl
