@@ -13,9 +13,10 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 )
 
-// The API returns the project number, and source_model and custom_service_account
-// are write-only inputs used only when copying a model.
-var vertexAIModelImportStateVerifyIgnore = []string{"project", "source_model", "custom_service_account"}
+// The API returns the project number, source_model and custom_service_account are
+// write-only inputs used only when copying a model, and version_aliases includes
+// the API-managed default alias when imported without configuration.
+var vertexAIModelImportStateVerifyIgnore = []string{"project", "source_model", "custom_service_account", "version_aliases"}
 
 func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
 	t.Parallel()
