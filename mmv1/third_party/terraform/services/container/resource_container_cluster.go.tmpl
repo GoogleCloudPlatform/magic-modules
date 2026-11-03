@@ -6325,6 +6325,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 					Recurrence:     rmw["recurrence"].(string),
 				},
 			},
+			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
 
@@ -8309,6 +8310,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					},
 				},
 				"maintenance_exclusion": exclusions,
+				"disruption_budget": budget,
 			},
 		}
 
