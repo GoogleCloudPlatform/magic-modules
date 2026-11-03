@@ -22,7 +22,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/url-map-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/urlMaps'
 docs:
-api_version: '2026-11-01'
+api_version:
+  ga: '2026-11-01'
 base_url: 'projects/{{project}}/global/urlMaps'
 has_self_link: true
 timeouts:

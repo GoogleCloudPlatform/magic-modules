@@ -1351,3 +1351,193 @@ func TestResourceShouldGenerateSweepers(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceApiVersion(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		want        string
+	}{
+		{
+			description: "empty ApiVersions returns empty string",
+			resource: api.Resource{
+				TargetVersionName: "ga",
+			},
+			want: "",
+		},
+		{
+			description: "exact match for ga",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga": "2026-11-01",
+				},
+				TargetVersionName: "ga",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "empty TargetVersionName defaults to ga",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga": "2026-11-01",
+				},
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "beta falls back to ga when only ga is set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga": "2026-11-01",
+				},
+				TargetVersionName: "beta",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "nightly uses nightly when both ga and nightly are set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga":      "2026-11-01",
+					"nightly": "2026-11-01-preview",
+				},
+				TargetVersionName: "nightly",
+			},
+			want: "2026-11-01-preview",
+		},
+		{
+			description: "beta falls back to ga when ga and nightly are set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga":      "2026-11-01",
+					"nightly": "2026-11-01-preview",
+				},
+				TargetVersionName: "beta",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "nightly falls back to beta when ga and beta are set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga":   "2026-05-01",
+					"beta": "2026-11-01",
+				},
+				TargetVersionName: "nightly",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "ga does not use higher version when only nightly is set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"nightly": "2026-11-01-preview",
+				},
+				TargetVersionName: "ga",
+			},
+			want: "",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ApiVersion(); got != tc.want {
+				t.Errorf("ApiVersion() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestResourceValidateApiVersions(t *testing.T) {
+	t.Parallel()
+
+	baseResource := func(apiVersions map[string]string) api.Resource {
+		return api.Resource{
+			Name:        "TestResource",
+			Description: "A test resource",
+			Exclude:     true,
+			CreateVerb:  "POST",
+			ReadVerb:    "GET",
+			DeleteVerb:  "DELETE",
+			UpdateVerb:  "PUT",
+			ApiVersions: apiVersions,
+		}
+	}
+
+	t.Run("valid provider versions pass validation", func(t *testing.T) {
+		t.Parallel()
+		r := baseResource(map[string]string{
+			"ga":      "2026-11-01",
+			"beta":    "2026-11-01-beta",
+			"nightly": "2026-11-01-preview",
+		})
+		if errs := r.Validate(); len(errs) != 0 {
+			t.Errorf("Validate() returned unexpected errors: %v", errs)
+		}
+	})
+
+	t.Run("invalid provider version fails validation", func(t *testing.T) {
+		t.Parallel()
+		r := baseResource(map[string]string{
+			"v1": "2026-11-01",
+		})
+		errs := r.Validate()
+		if len(errs) != 1 || !strings.Contains(errs[0].Error(), `invalid provider version "v1" in `+"`api_version`") {
+			t.Errorf("Validate() = %v, want error containing invalid provider version \"v1\"", errs)
+		}
+	})
+}
+
+func TestMergeApiVersions(t *testing.T) {
+	t.Parallel()
+
+	t.Run("merges override map into existing map", func(t *testing.T) {
+		t.Parallel()
+		base := &api.Resource{
+			Name: "UrlMap",
+			ApiVersions: map[string]string{
+				"ga": "2026-11-01",
+			},
+		}
+		override := api.Resource{
+			ApiVersions: map[string]string{
+				"nightly": "2026-11-01-preview",
+			},
+		}
+
+		api.Merge(reflect.ValueOf(base), reflect.ValueOf(override), "nightly")
+
+		want := map[string]string{
+			"ga":      "2026-11-01",
+			"nightly": "2026-11-01-preview",
+		}
+		if diff := cmp.Diff(want, base.ApiVersions); diff != "" {
+			t.Errorf("Merge() ApiVersions mismatch (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("sets map when base map is nil", func(t *testing.T) {
+		t.Parallel()
+		base := &api.Resource{
+			Name: "UrlMap",
+		}
+		override := api.Resource{
+			ApiVersions: map[string]string{
+				"nightly": "2026-11-01-preview",
+			},
+		}
+
+		api.Merge(reflect.ValueOf(base), reflect.ValueOf(override), "nightly")
+
+		want := map[string]string{
+			"nightly": "2026-11-01-preview",
+		}
+		if diff := cmp.Diff(want, base.ApiVersions); diff != "" {
+			t.Errorf("Merge() ApiVersions mismatch (-want +got):\n%s", diff)
+		}
+	})
+}
