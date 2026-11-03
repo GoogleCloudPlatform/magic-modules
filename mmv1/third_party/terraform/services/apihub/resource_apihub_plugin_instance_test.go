@@ -51,7 +51,10 @@ func TestAccApihubPluginInstance_apihubPluginInstanceSystemPlugin(t *testing.T) 
 }
 
 func TestAccApihubPluginInstance_apihubPluginInstanceAdditionalConfig(t *testing.T) {
-	t.Parallel()
+	// Skipped: testing additional_config end-to-end requires a user-owned plugin with
+	// config_template.additional_config_template, which the API Hub backend requires to
+	// be backed by a live external gRPC Plugin Hosting Service endpoint.
+	t.Skip("Requires an external gRPC Plugin Hosting Service endpoint")
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
