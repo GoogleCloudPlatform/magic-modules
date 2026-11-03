@@ -36,7 +36,7 @@ async:
   actions: [create, delete, update]
   result:
     resource_inside_response: true
-autogen_status: V29ya2xvYWQK
+autogen_status: V29ya2xvYWQ=
 autogen_async: true
 include_in_tgc_next: true
 custom_code:

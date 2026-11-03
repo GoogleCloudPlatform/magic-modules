@@ -35,7 +35,7 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: QWNjZXNzUG9saWN5
+autogen_status: UHJvamVjdEFjY2Vzc1BvbGljeQ==
 autogen_async: true
 samples:
   - name: access_policy_project_test

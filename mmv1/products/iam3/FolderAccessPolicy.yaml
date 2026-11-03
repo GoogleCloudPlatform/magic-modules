@@ -36,7 +36,7 @@ async:
   result:
     resource_inside_response: true
   include_project: true
-autogen_status: QWNjZXNzUG9saWN5QnlGb2xkZXJBbmRMb2NhdGlvbg==
+autogen_status: Rm9sZGVyQWNjZXNzUG9saWN5
 autogen_async: true
 samples:
   - name: access_policy_folder_test

@@ -44,7 +44,7 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: U2V0dGluZ0JpbmRpbmdCeVByb2plY3RBbmRMb2NhdGlvbkFuZEdlbWluaWdjcGVuYWJsZW1lbnRzZXR0aW5n
+autogen_status: R2VtaW5pR2NwRW5hYmxlbWVudFNldHRpbmdCaW5kaW5n
 autogen_async: true
 samples:
   - name: gemini_gemini_gcp_enablement_setting_binding_basic

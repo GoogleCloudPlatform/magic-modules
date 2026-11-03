@@ -48,7 +48,7 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: U2V0dGluZ0JpbmRpbmdCeVByb2plY3RBbmRMb2NhdGlvbkFuZExvZ2dpbmdzZXR0aW5n
+autogen_status: TG9nZ2luZ1NldHRpbmdCaW5kaW5n
 autogen_async: true
 samples:
   - name: gemini_logging_setting_binding_basic
