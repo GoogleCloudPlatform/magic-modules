@@ -1805,6 +1805,10 @@ such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 
 * `container_log_max_files` - (Optional) Defines the maximum number of container log files that can be present for a container. The integer must be between 2 and 10, inclusive.
 
+* `container_log_max_workers` - (Optional) Defines the maximum number of concurrent workers to rotate container log files. The integer must be between 1 and 10, inclusive. Defaults to `1` if unspecified.
+
+* `container_log_monitor_interval` - (Optional) Specifies the interval at which the container logs are monitored for performing the log rotate operation. Specified in seconds terminated by `'s'`, such as `"10s"`, `"30s"`. The value must be between `"3s"` and `"300s"`, inclusive. Defaults to `"10s"` if unspecified.
+
 * `image_gc_low_threshold_percent` - (Optional) Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to. The integer must be between 10 and 85, inclusive.
 
 * `image_gc_high_threshold_percent` - (Optional) Defines the percent of disk usage after which image garbage collection is always run. The integer must be between 10 and 85, inclusive.

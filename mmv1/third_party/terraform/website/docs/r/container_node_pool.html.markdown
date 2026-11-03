@@ -413,6 +413,10 @@ In addition to the arguments listed above, the following computed attributes are
 
 <a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
 
+* `container_log_max_workers` - (Optional) Defines the maximum number of concurrent workers to rotate container log files. The integer must be between 1 and 10, inclusive. Defaults to `1` if unspecified.
+
+* `container_log_monitor_interval` - (Optional) Specifies the interval at which the container logs are monitored for performing the log rotate operation. Specified in seconds terminated by `'s'`, such as `"10s"`, `"30s"`. The value must be between `"3s"` and `"300s"`, inclusive. Defaults to `"10s"` if unspecified.
+
 * `shutdown_grace_period_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown. This is the time allocated for all pods (critical and non-critical) to terminate. The value must be between 10 and 10000. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
 
 * `shutdown_grace_period_critical_pods_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown for critical pods. This value must be less than or equal to `shutdown_grace_period_seconds`. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
