@@ -13,6 +13,10 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/vertexai"
 )
 
+// The API returns the project number, and source_model and custom_service_account
+// are write-only inputs used only when copying a model.
+var vertexAIModelImportStateVerifyIgnore = []string{"project", "source_model", "custom_service_account"}
+
 func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
 	t.Parallel()
 
@@ -149,6 +153,12 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            "google_vertex_ai_model.model",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
+			},
+			{
 				Config: testAccVertexAIModel_copyWithOptionalFieldsUpdate(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "2"),
@@ -158,6 +168,12 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            "google_vertex_ai_model.model",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
+			},
+			{
 				Config: testAccVertexAIModel_copyWithOptionalFields(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
@@ -165,8 +181,20 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            "google_vertex_ai_model.model",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
+			},
+			{
 				Config: testAccVertexAIModel_copyWithOptionalFieldsWithoutAliases(context),
 				Check:  resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "0"),
+			},
+			{
+				ResourceName:            "google_vertex_ai_model.model",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
 			},
 			{
 				Config: testAccVertexAIModel_copyWithOptionalFieldsWithDefaultAlias(context),
@@ -177,11 +205,23 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            "google_vertex_ai_model.model",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
+			},
+			{
 				Config: testAccVertexAIModel_copyWithOptionalFields(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
 					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
 				),
+			},
+			{
+				ResourceName:            "google_vertex_ai_model.model",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
 			},
 		},
 	})
