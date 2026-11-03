@@ -20,4 +20,3 @@ versions:
   - name: ga
     base_url: https://{{region}}-pubsublite.googleapis.com/v1/admin/
     cai_base_url: https://pubsublite.googleapis.com/v1/admin/
-legacy_identity_import_test: true

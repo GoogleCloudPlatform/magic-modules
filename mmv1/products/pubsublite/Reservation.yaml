@@ -43,6 +43,9 @@ parameters:
     type: String
     description: The region of the pubsub lite reservation.
     url_param_only: true
+    # region is a URL parameter not returned by the API
+    ignore_read: true
+    default_from_api: true
   - name: name
     type: String
     description: Name of the reservation.
