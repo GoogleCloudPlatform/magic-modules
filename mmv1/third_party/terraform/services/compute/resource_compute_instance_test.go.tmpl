@@ -259,7 +259,9 @@ func TestFlattenWorkloadIdentityConfigHTTP_identityType(t *testing.T) {
 				"identity_type":                identityType,
 			},
 		}
-		assert.Equal(t, want, got)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
 	}
 }
 {{- end }}
