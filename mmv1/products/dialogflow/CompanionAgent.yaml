@@ -20,14 +20,14 @@ references:
     Official Documentation: https://cloud.google.com/agent-assist/docs
   api: https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.companionAgents
 base_url: projects/{{project}}/locations/{{location}}/companionAgents
-self_link: '{{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/companionAgents/{{companion_agent_id}}'
 create_url: projects/{{project}}/locations/{{location}}/companionAgents?companionAgentId={{companion_agent_id}}
 update_mask: true
 update_verb: PATCH
-id_format: '{{name}}'
+id_format: 'projects/{{project}}/locations/{{location}}/companionAgents/{{companion_agent_id}}'
 import_format:
-  - '{{name}}'
-# Sweeper skipped because pre_delete dynamically rewrites the regional endpoint host and self_link is {{name}}.
+  - 'projects/{{project}}/locations/{{location}}/companionAgents/{{companion_agent_id}}'
+# Sweeper skipped because pre_delete dynamically rewrites the regional endpoint host.
 exclude_sweeper: true
 autogen_status: Q29tcGFuaW9uQWdlbnRBdXRvZ2VuVjJBZ2VudA==
 custom_code:
@@ -35,7 +35,6 @@ custom_code:
   pre_read: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
   pre_update: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
   pre_delete: templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl
-  custom_import: templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl
   test_check_destroy: templates/terraform/test_check_destroy/dialogflow_companion_agent.go.tmpl
 samples:
   - name: dialogflow_companion_agent_basic
@@ -91,12 +90,11 @@ parameters:
       The location of the companion agent.
   - name: companionAgentId
     type: String
-    default_from_api: true
+    required: true
     immutable: true
-    custom_flatten: templates/terraform/custom_flatten/id_from_name.tmpl
+    url_param_only: true
     description: |
       The ID to use for the companion agent, which will become the final component of the companion agent's resource name.
-      If the field is not provided, an ID will be auto-generated.
 properties:
   - name: name
     type: String
