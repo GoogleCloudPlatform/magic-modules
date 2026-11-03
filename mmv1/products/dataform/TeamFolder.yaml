@@ -19,12 +19,10 @@ references:
   guides:
     Official Documentation: https://cloud.google.com/dataform/docs/
   api: https://cloud.google.com/dataform/reference/rest/v1/projects.locations.teamFolders
-base_url: projects/{{project}}/locations/{{region}}/teamFolders
 self_link: projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}
 create_url: projects/{{project}}/locations/{{region}}/teamFolders
 update_mask: true
 update_verb: PATCH
-generate_list_resource: true
 id_format: projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}
 import_format:
   - projects/{{project}}/locations/{{region}}/teamFolders/{{teamfolder_id}}
