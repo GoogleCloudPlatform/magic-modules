@@ -3,12 +3,11 @@ package dataproc
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/dataproc/v1"
 )
@@ -92,19 +91,19 @@ func DataprocClusterIdParseFunc(d *schema.ResourceData, config *transport_tpg.Co
 func (u *DataprocClusterIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	req := &dataproc.GetIamPolicyRequest{}
 
-	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
 
 	p, err := NewClient(u.Config, userAgent).Projects.Regions.Clusters.GetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	cloudResourcePolicy, err := dataprocToResourceManagerPolicy(p)
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Invalid IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return cloudResourcePolicy, nil
@@ -113,10 +112,10 @@ func (u *DataprocClusterIamUpdater) GetResourceIamPolicy() (*cloudresourcemanage
 func (u *DataprocClusterIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	dataprocPolicy, err := resourceManagerToDataprocPolicy(policy)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return fmt.Errorf("Invalid IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
-	userAgent, err :=  tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -124,7 +123,7 @@ func (u *DataprocClusterIamUpdater) SetResourceIamPolicy(policy *cloudresourcema
 	req := &dataproc.SetIamPolicyRequest{Policy: dataprocPolicy}
 	_, err = NewClient(u.Config, userAgent).Projects.Regions.Clusters.SetIamPolicy(u.GetResourceId(), req).Do()
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return fmt.Errorf("Error setting IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil

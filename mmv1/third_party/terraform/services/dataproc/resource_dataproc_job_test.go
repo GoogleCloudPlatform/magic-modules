@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
-	"strconv"
 
 	// "regexp"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -19,8 +18,8 @@ import (
 	tpgdataproc "github.com/hashicorp/terraform-provider-google/google/services/dataproc"
 	"github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/dataproc/v1"
+	"google.golang.org/api/googleapi"
 )
 
 type jobTestField struct {
@@ -318,7 +317,7 @@ func TestAccDataprocJob_Presto(t *testing.T) {
 	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "dataproc-cluster")
 	subnetworkName := BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
-	
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -417,17 +416,17 @@ func testAccCheckDataprocJobCompletesSuccessfully(t *testing.T, n string, job *d
 			}
 			l, err := storage.NewClient(config, config.UserAgent).Objects.List(u[0]).Prefix(u[1]).Do()
 			if err != nil {
-				return errwrap.Wrapf("Job completed in ERROR state, found error when trying to list logs: {{"{{"}}err{{"}}"}}", err)
+				return fmt.Errorf("Job completed in ERROR state, found error when trying to list logs: %w", err)
 			}
 			for _, item := range l.Items {
 				resp, err := storage.NewClient(config, config.UserAgent).Objects.Get(item.Bucket, item.Name).Download()
 				if err != nil {
-					return errwrap.Wrapf("Job completed in ERROR state, found error when trying to read logs: {{"{{"}}err{{"}}"}}", err)
+					return fmt.Errorf("Job completed in ERROR state, found error when trying to read logs: %w", err)
 				}
 				defer resp.Body.Close()
 				body, err := ioutil.ReadAll(resp.Body)
 				if err != nil {
-					return errwrap.Wrapf("Job completed in ERROR state, found error when trying to read logs: {{"{{"}}err{{"}}"}}", err)
+					return fmt.Errorf("Job completed in ERROR state, found error when trying to read logs: %w", err)
 				}
 				log.Printf("[ERROR] Job failed, driver logs:\n%s", body)
 			}
