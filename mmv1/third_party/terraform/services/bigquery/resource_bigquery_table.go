@@ -49,10 +49,39 @@ func bigQueryTablecheckNameExists(jsonList []interface{}) error {
 	return nil
 }
 
+type bigQueryTableFieldGetter interface {
+	Get(string) interface{}
+}
+
+func getIgnoreSchemaChanges(d bigQueryTableFieldGetter) []interface{} {
+	if d == nil {
+		return nil
+	}
+	// During DiffSuppressFunc, d is a *schema.ResourceData with d.diff == nil.
+	// When an optional list attribute like ignore_schema_changes is removed from HCL config,
+	// d.Get("ignore_schema_changes") falls back to prior state via MultiLevelFieldReader.ReadFieldMerge.
+	// Check GetRawConfig() first when available so removing ignore_schema_changes from HCL is respected.
+	if rd, ok := d.(*schema.ResourceData); ok {
+		rawCfg := rd.GetRawConfig()
+		if !rawCfg.IsNull() && rawCfg.IsKnown() && rawCfg.Type().HasAttribute("ignore_schema_changes") {
+			attr := rawCfg.GetAttr("ignore_schema_changes")
+			if attr.IsNull() || !attr.IsKnown() {
+				return nil
+			}
+		}
+	}
+	if val := d.Get("ignore_schema_changes"); val != nil {
+		if list, ok := val.([]interface{}); ok {
+			return list
+		}
+	}
+	return nil
+}
+
 // Compares two json's while optionally taking in a compareMapKeyVal function.
 // This function will override any comparison of a given map[string]interface{}
 // on a specific key value allowing for a separate equality in specific scenarios
-func jsonCompareWithMapKeyOverride(key string, a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}, d *schema.ResourceData) bool, d *schema.ResourceData) (bool, error) {
+func jsonCompareWithMapKeyOverride(key string, a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}, d bigQueryTableFieldGetter) bool, d bigQueryTableFieldGetter) (bool, error) {
 	switch a.(type) {
 	case []interface{}:
 		arrayA := a.([]interface{})
@@ -138,6 +167,9 @@ func valueIsInArray(value interface{}, array []interface{}) bool {
 	return false
 }
 
+var dataPolicyNameRegex = regexp.MustCompile(`^projects/([^/]+)/locations/([^/]+)/dataPolicies/(.+)$`)
+var projectNumberRegex = regexp.MustCompile(`^[0-9]+$`)
+
 // If the same table column is found in both the TF config and live state,
 // and the column in the live state has data policies when the column in the TF config doesn't,
 // copy the data policies from live state into the TF config.
@@ -156,14 +188,24 @@ func mergeDataPoliciesIntoMap(old, new []interface{}) {
 		if !ok {
 			continue
 		}
-		name := newField["name"].(string)
+		name, _ := newField["name"].(string)
+		_, hasDataPolicyList := newField["dataPolicyList"]
+		_, hasDataPolicies := newField["dataPolicies"]
+
+		// If the user explicitly specified an empty legacy dataPolicies slice ("dataPolicies": [])
+		// to clear policies, normalize it to "dataPolicyList": {} because BigQuery's proto3 API
+		// ignores empty "dataPolicies": [] on PUT.
+		if hasDataPolicies && !hasDataPolicyList && bigQueryTableNormalizeDataPolicyList(newField["dataPolicies"]) == nil {
+			delete(newField, "dataPolicies")
+			newField["dataPolicyList"] = map[string]interface{}{}
+			hasDataPolicyList = true
+			hasDataPolicies = false
+		}
 
 		if oldField, exists := oldMap[name]; exists {
 			// If config doesn't have dataPolicies or dataPolicyList, but backend does, copy them over.
 			// If the user explicitly specified either field (including an empty object/list to clear policies),
 			// do not overwrite or merge old backend policies into newField.
-			_, hasDataPolicyList := newField["dataPolicyList"]
-			_, hasDataPolicies := newField["dataPolicies"]
 			if !hasDataPolicyList && !hasDataPolicies {
 				if dp, hasDP := oldField["dataPolicyList"]; hasDP && bigQueryTableNormalizeDataPolicyList(dp) != nil {
 					newField["dataPolicyList"] = dp
@@ -179,11 +221,64 @@ func mergeDataPoliciesIntoMap(old, new []interface{}) {
 					mergeDataPoliciesIntoMap(oldNested, newNested)
 				}
 			}
+		} else if newNested, ok := newField["fields"].([]interface{}); ok {
+			mergeDataPoliciesIntoMap(nil, newNested)
 		}
 	}
 }
 
-func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}, d *schema.ResourceData) bool {
+// In authoritative mode (when ignore_schema_changes does not include dataPolicyList or dataPolicies),
+// omitting dataPolicyList/dataPolicies on PUT does not clear existing policies on the BigQuery backend.
+// When a column had policies in old state/backend and omits both fields in the new config, explicitly
+// inject "dataPolicyList": {} so the API clears the removed policies.
+func clearRemovedDataPoliciesFromMap(old, new []interface{}) {
+	oldMap := make(map[string]map[string]interface{})
+	for _, v := range old {
+		if m, ok := v.(map[string]interface{}); ok {
+			if name, ok := m["name"].(string); ok {
+				oldMap[name] = m
+			}
+		}
+	}
+
+	for _, v := range new {
+		newField, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, _ := newField["name"].(string)
+		_, hasDataPolicyList := newField["dataPolicyList"]
+		_, hasDataPolicies := newField["dataPolicies"]
+
+		// Normalize explicit empty legacy "dataPolicies": [] into "dataPolicyList": {} so the API clears it.
+		if hasDataPolicies && !hasDataPolicyList && bigQueryTableNormalizeDataPolicyList(newField["dataPolicies"]) == nil {
+			delete(newField, "dataPolicies")
+			newField["dataPolicyList"] = map[string]interface{}{}
+			hasDataPolicyList = true
+			hasDataPolicies = false
+		}
+
+		if oldField, exists := oldMap[name]; exists {
+			if !hasDataPolicyList && !hasDataPolicies {
+				oldHasPolicies := bigQueryTableNormalizeDataPolicyList(oldField["dataPolicyList"]) != nil ||
+					bigQueryTableNormalizeDataPolicyList(oldField["dataPolicies"]) != nil
+				if oldHasPolicies {
+					newField["dataPolicyList"] = map[string]interface{}{}
+				}
+			}
+
+			if oldNested, ok1 := oldField["fields"].([]interface{}); ok1 {
+				if newNested, ok2 := newField["fields"].([]interface{}); ok2 {
+					clearRemovedDataPoliciesFromMap(oldNested, newNested)
+				}
+			}
+		} else if newNested, ok := newField["fields"].([]interface{}); ok {
+			clearRemovedDataPoliciesFromMap(nil, newNested)
+		}
+	}
+}
+
+func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}, d bigQueryTableFieldGetter) bool {
 	// we rely on the fallback to nil if the object does not have the key
 	valA := objectA[key]
 	valB := objectB[key]
@@ -219,13 +314,16 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 	case "name":
 		if strA, ok := valA.(string); ok {
 			if strB, ok := valB.(string); ok {
-				// Suppress diffs for data policy names when they differ only by project number vs ID.
-				// Format: projects/<project>/locations/<location>/dataPolicies/<id>
-				re := regexp.MustCompile(`^projects/[^/]+/(locations/.+/dataPolicies/.+)$`)
-				matchA := re.FindStringSubmatch(strA)
-				matchB := re.FindStringSubmatch(strB)
-				if len(matchA) == 2 && len(matchB) == 2 {
-					if matchA[1] == matchB[1] {
+				// Suppress diffs for data policy names when they differ only by project number vs ID
+				// (or location casing). Format: projects/<project>/locations/<location>/dataPolicies/<id>
+				matchA := dataPolicyNameRegex.FindStringSubmatch(strA)
+				matchB := dataPolicyNameRegex.FindStringSubmatch(strB)
+				if len(matchA) == 4 && len(matchB) == 4 {
+					sameOrAliasProject := matchA[1] == matchB[1] ||
+						projectNumberRegex.MatchString(matchA[1]) != projectNumberRegex.MatchString(matchB[1])
+					sameLocation := strings.EqualFold(matchA[2], matchB[2])
+					samePolicyID := matchA[3] == matchB[3]
+					if sameOrAliasProject && sameLocation && samePolicyID {
 						return true
 					}
 				}
@@ -242,10 +340,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 			return false
 		}
 		// Access the ignore_schema_changes list from the Terraform configuration
-		var ignoreSchemaChanges []interface{}
-		if val := d.Get("ignore_schema_changes"); val != nil {
-			ignoreSchemaChanges = val.([]interface{})
-		}
+		ignoreSchemaChanges := getIgnoreSchemaChanges(d)
 
 		// If dataPolicyList (or legacy dataPolicies) is ignored...
 		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
@@ -288,6 +383,14 @@ func normalizeDataPoliciesToDataPolicyList(v interface{}) {
 }
 
 func bigQueryTableSchemaDiffSuppress(name, old, new string, d *schema.ResourceData) bool {
+	var diff bigQueryTableFieldGetter
+	if d != nil {
+		diff = d
+	}
+	return bigQueryTableSchemaDiffSuppressWithDiff(name, old, new, diff)
+}
+
+func bigQueryTableSchemaDiffSuppressWithDiff(name, old, new string, d bigQueryTableFieldGetter) bool {
 	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
 		old = "[]"
@@ -604,10 +707,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
 		}
 
-		var ignoreSchemaChanges []interface{}
-		if val := d.Get("ignore_schema_changes"); val != nil {
-			ignoreSchemaChanges = val.([]interface{})
-		}
+		ignoreSchemaChanges := getIgnoreSchemaChanges(d)
 
 		if slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies") {
 			oldList, okOld := old.([]interface{})
@@ -621,7 +721,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 
 				if err == nil {
 					// Update the diff so Terraform's UI sees the policies as "present" in the new state
-					if bigQueryTableSchemaDiffSuppress("schema", oldSchemaText, string(updatedNewJSON), nil) {
+					if bigQueryTableSchemaDiffSuppressWithDiff("schema", oldSchemaText, string(updatedNewJSON), d) {
 						if err := d.SetNew("schema", oldSchemaText); err != nil {
 							return err
 						}
@@ -646,7 +746,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 				if len(autogenFields) > 0 {
 					filteredOldJsonStr, err := flattenSchema(filteredOldSchema)
 					if err == nil {
-						if bigQueryTableSchemaDiffSuppress("schema", filteredOldJsonStr, newSchemaText, nil) {
+						if bigQueryTableSchemaDiffSuppressWithDiff("schema", filteredOldJsonStr, newSchemaText, d) {
 							// Suppress diff by setting new to old in diff
 							if err := d.SetNew("schema", oldSchemaText); err != nil {
 								return err
@@ -2680,14 +2780,14 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		tableID:   tableID,
 	}
 
-	// Logic to fetch oldTable if needed for Dropping Columns OR Merging Data Policies
-	ignoreSchemaChanges := d.Get("ignore_schema_changes").([]interface{})
+	// Logic to fetch oldTable if needed for Dropping Columns OR Merging/Clearing Data Policies
+	ignoreSchemaChanges := getIgnoreSchemaChanges(d)
 	shouldIgnoreDataPolicies := slices.Contains(ignoreSchemaChanges, "dataPolicyList") || slices.Contains(ignoreSchemaChanges, "dataPolicies")
 	shouldDropColumns := !d.Get("ignore_auto_generated_schema").(bool)
 
 	var oldTableRaw map[string]interface{}
 
-	if shouldDropColumns || shouldIgnoreDataPolicies {
+	if shouldDropColumns || shouldIgnoreDataPolicies || d.HasChange("schema") {
 		oldTableURL, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 		if err != nil {
 			return err
@@ -2714,14 +2814,20 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// 2. Data Policy Merge Logic
-	// If we are ignoring dataPolicies, check if we need to preserve existing ones
-	if shouldIgnoreDataPolicies && oldTableRaw != nil {
+	// 2. Data Policy Merge / Authoritative Clear Logic
+	// If we are ignoring dataPolicies/dataPolicyList, preserve existing policies when omitted in config.
+	// Otherwise (authoritative mode), explicitly send "dataPolicyList": {} when policies were removed
+	// from a column, since the BigQuery API preserves existing policies when the field is omitted on PUT.
+	if oldTableRaw != nil {
 		if tableSchemaMap, ok := table["schema"].(map[string]interface{}); ok {
 			if oldTableSchemaMap, ok := oldTableRaw["schema"].(map[string]interface{}); ok {
 				tableFields, _ := tableSchemaMap["fields"].([]interface{})
 				oldTableFields, _ := oldTableSchemaMap["fields"].([]interface{})
-				mergeDataPoliciesIntoMap(oldTableFields, tableFields)
+				if shouldIgnoreDataPolicies {
+					mergeDataPoliciesIntoMap(oldTableFields, tableFields)
+				} else {
+					clearRemovedDataPoliciesFromMap(oldTableFields, tableFields)
+				}
 			}
 		}
 	}

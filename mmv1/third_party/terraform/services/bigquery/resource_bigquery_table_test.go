@@ -6433,6 +6433,55 @@ EOF
 `, tableID)
 }
 
+func testAccBigQueryTableDataPolicyListMergeStage5(datasetID, tableID, taxonomyName, policyID1, policyID2 string) string {
+	return testAccBigQueryTableDataPolicyListBaseResources(datasetID, taxonomyName, policyID1, policyID2) + fmt.Sprintf(`
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id            = "%s"
+  dataset_id          = google_bigquery_dataset.test.dataset_id
+  description         = "Stage 5 Table - Authoritative Removal"
+
+  schema = <<EOF
+[
+  {
+    "name": "col1",
+    "type": "STRING"
+  },
+  {
+    "name": "col2",
+    "type": "STRING",
+    "description": "new description"
+  },
+  {
+    "name": "col3",
+    "type": "STRING",
+    "dataPolicyList": { "dataPolicies": [{ "name": "projects/${data.google_project.project.project_id}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p1.data_policy_id}" }] }
+  },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      {
+        "name": "sub1",
+        "type": "STRING"
+      },
+      {
+        "name": "sub2",
+        "type": "STRING",
+        "description": "new nested desc"
+      },
+      {
+        "name": "sub3",
+        "type": "STRING"
+      }
+    ]
+  }
+]
+EOF
+}
+`, tableID)
+}
+
 func TestAccBigQueryTable_IgnoreSchemaDataPolicyListMerge(t *testing.T) {
 	t.Parallel()
 
@@ -6521,6 +6570,24 @@ func TestAccBigQueryTable_IgnoreSchemaDataPolicyListMerge(t *testing.T) {
 					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{
 						"col1", "col3",
 						"nested_col.sub1", "nested_col.sub3",
+					}),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+			},
+			// Stage 5: Authoritative Removal (ignore_schema_changes unset)
+			// Omitting dataPolicyList on col1, nested_col.sub1, and nested_col.sub3 must clear them on backend
+			// without requiring "dataPolicyList": {} in HCL, and col3 (using project_id) remains attached.
+			{
+				Config: testAccBigQueryTableDataPolicyListMergeStage5(datasetID, tableID, taxonomyName, policyID1, policyID2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_table.test", "description", "Stage 5 Table - Authoritative Removal"),
+					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{
+						"col3",
 					}),
 				),
 			},

@@ -554,6 +554,64 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 			]`,
 			ExpectDiffSuppress: false,
 		},
+		"dataPolicyList: project number vs project ID suppressed": {
+			Old: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": [
+							{
+								"name": "projects/123456789/locations/us-central1/dataPolicies/p1"
+							}
+						]
+					}
+				}
+			]`,
+			New: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": [
+							{
+								"name": "projects/my-project/locations/us-central1/dataPolicies/p1"
+							}
+						]
+					}
+				}
+			]`,
+			ExpectDiffSuppress: true,
+		},
+		"dataPolicyList: different project IDs NOT suppressed": {
+			Old: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": [
+							{
+								"name": "projects/project-a/locations/us-central1/dataPolicies/p1"
+							}
+						]
+					}
+				}
+			]`,
+			New: `[
+				{
+					"name": "col",
+					"type": "STRING",
+					"dataPolicyList": {
+						"dataPolicies": [
+							{
+								"name": "projects/project-b/locations/us-central1/dataPolicies/p1"
+							}
+						]
+					}
+				}
+			]`,
+			ExpectDiffSuppress: false,
+		},
 		{{- if ne $.TargetVersionName "ga" }}
 		"foreignTypeDefinition from generated schema -> original schema": {
 			Old:                "[{\"name\": \"someValue\", \"type\": \"RECORD\", \"foreignTypeDefinition\" : \"STRUCT<id:STRING, name:STRING>\", \"fields\": [{\"name\": \"id\", \"type\": \"STRING\"}, {\"name\": \"name\", \"type\": \"STRING\"}]}]",
@@ -1136,6 +1194,87 @@ func TestMergeDataPoliciesIntoMap_DataPolicyList(t *testing.T) {
 	col4 := new[3].(map[string]interface{})
 	if _, ok := col4["dataPolicyList"]; ok {
 		t.Errorf("col4: expected empty dataPolicyList in old not to be merged into new, got %v", col4["dataPolicyList"])
+	}
+}
+
+func TestClearRemovedDataPoliciesFromMap(t *testing.T) {
+	t.Parallel()
+
+	old := []interface{}{
+		map[string]interface{}{
+			"name": "col1",
+			"dataPolicyList": map[string]interface{}{
+				"dataPolicies": []interface{}{map[string]interface{}{"name": "p1"}},
+			},
+		},
+		map[string]interface{}{
+			"name":           "col2",
+			"dataPolicyList": map[string]interface{}{}, // Already empty on backend
+		},
+		map[string]interface{}{
+			"name": "col3", // Never had policies
+		},
+		map[string]interface{}{
+			"name": "col4",
+			"dataPolicies": []interface{}{map[string]interface{}{"name": "p4"}},
+		},
+		map[string]interface{}{
+			"name": "nested_col",
+			"fields": []interface{}{
+				map[string]interface{}{
+					"name": "sub1",
+					"dataPolicyList": map[string]interface{}{
+						"dataPolicies": []interface{}{map[string]interface{}{"name": "p1"}},
+					},
+				},
+			},
+		},
+	}
+
+	new := []interface{}{
+		map[string]interface{}{"name": "col1"}, // Removed in authoritative mode -> should inject empty dataPolicyList: {}
+		map[string]interface{}{"name": "col2"}, // Was already empty -> should NOT inject
+		map[string]interface{}{"name": "col3"}, // Never had policies -> should NOT inject
+		map[string]interface{}{
+			"name":         "col4",
+			"dataPolicies": []interface{}{}, // Explicit empty legacy slice -> should normalize to dataPolicyList: {}
+		},
+		map[string]interface{}{
+			"name": "nested_col",
+			"fields": []interface{}{
+				map[string]interface{}{"name": "sub1"}, // Removed nested policy -> should inject empty dataPolicyList: {}
+			},
+		},
+	}
+
+	clearRemovedDataPoliciesFromMap(old, new)
+
+	col1 := new[0].(map[string]interface{})
+	if dpList, ok := col1["dataPolicyList"].(map[string]interface{}); !ok || len(dpList) != 0 {
+		t.Errorf("col1: expected empty dataPolicyList map to be injected for authoritative removal, got %v", col1["dataPolicyList"])
+	}
+
+	col2 := new[1].(map[string]interface{})
+	if _, ok := col2["dataPolicyList"]; ok {
+		t.Errorf("col2: expected no dataPolicyList injection when old was already empty, got %v", col2["dataPolicyList"])
+	}
+
+	col3 := new[2].(map[string]interface{})
+	if _, ok := col3["dataPolicyList"]; ok {
+		t.Errorf("col3: expected no dataPolicyList injection when old had no policies, got %v", col3["dataPolicyList"])
+	}
+
+	col4 := new[3].(map[string]interface{})
+	if _, ok := col4["dataPolicies"]; ok {
+		t.Errorf("col4: expected empty legacy dataPolicies key to be deleted, got %v", col4["dataPolicies"])
+	}
+	if dpList, ok := col4["dataPolicyList"].(map[string]interface{}); !ok || len(dpList) != 0 {
+		t.Errorf("col4: expected empty dataPolicyList map after normalizing empty dataPolicies slice, got %v", col4["dataPolicyList"])
+	}
+
+	nested := new[4].(map[string]interface{})["fields"].([]interface{})[0].(map[string]interface{})
+	if dpList, ok := nested["dataPolicyList"].(map[string]interface{}); !ok || len(dpList) != 0 {
+		t.Errorf("nested.sub1: expected empty dataPolicyList map to be injected for authoritative removal, got %v", nested["dataPolicyList"])
 	}
 }
 
