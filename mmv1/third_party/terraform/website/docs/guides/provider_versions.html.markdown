@@ -9,32 +9,49 @@ description: |-
 There are three versions of the Terraform Provider for Google Cloud:
 
 * `google`
-
 * `google-beta`
-
 * `google-nightly`
 
 Most users will regularly interact with `google` and `google-beta`, which cover generally available (GA) and public preview ("beta") products and APIs respectively.
+
 * The `google` provider [documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs) covers both `google` and `google-beta`. `google-beta`-only features are clearly marked.
-* `google-beta` is a superset of `google` and contains all GA products and features
-* Both `google` and `google-beta` are stable providers and will only release breaking changes as part of major releases
-* `google-beta` sends all requests to a beta endpoint (such as `v1beta`) for the product when one exists, even if not using any public preview features
-* Many public modules freely mix `google` and `google-beta`, or use exclusively `google-beta`
+* `google-beta` is a superset of `google` and contains all GA products and features.
+* Both `google` and `google-beta` are stable providers and will only release breaking changes as part of major releases.
+* `google-beta` sends all requests to a beta endpoint (such as `v1beta`) for the product when one exists, even if not using any public preview features.
+* Many public modules freely mix `google` and `google-beta`, or use exclusively `google-beta`.
 
 -> In short, using `google-beta` over `google` is similar to using `gcloud beta`
 over `gcloud`. Features that are exclusively available in `google-beta` are
 Google Cloud features that are not yet GA, and they will be made available in
 `google` after they go to GA.
 
-
 ## The `google-nightly` provider
 
-The `google-nightly` provider is an unstable provider where fields may be added and removed at will. `google-nightly` is built off of the providers' shared source code outside of the regular release cadence and approximates the closest release version. `google-nightly` is documented at https://registry.terraform.io/providers/hashicorp/google-nightly/latest/docs
+The `google-nightly` provider is an unstable provider where fields and resources may be added, modified, or removed at will. `google-nightly` is a superset of `google-beta` built from the providers' shared source code outside of the regular release cadence, and its version number includes the closest release version. `google-nightly` is documented in the [Terraform Registry](https://registry.terraform.io/providers/hashicorp/google-nightly/latest/docs).
 
 `google-nightly` supports early previews, unstable APIs, and other similar cases. Pre-GA products and features might have limited support, and changes to pre-GA products and features might not be compatible with other pre-GA versions. For more information, see the [launch stage descriptions](https://cloud.google.com/products#product-launch-stages).
 
-We recommend pinning exact `google-nightly` versions, such as `= v2026.10.26-8.8.1`, and only using it where absolutely required, as underlying APIs or provider schemas may change without prior warning.
+We recommend only using `google-nightly` where required, as underlying APIs or provider schemas may change without prior warning.
 
+### Versioning and upgrades for `google-nightly`
+
+Every `google-nightly` release is published in the format `YYYY.M.D-X.Y.Z` (for example, `2026.10.26-8.8.1`), where `YYYY.M.D` is the build date and `-X.Y.Z` is the closest provider release version.
+
+Because Terraform treats versions with a `-` suffix as SemVer pre-release versions:
+
+* You **must** declare `google-nightly` in a `required_providers` block with an exact version constraint (such as `= 2026.10.26-8.8.1`, without a `v` prefix). Omitting `required_providers`, omitting `version`, or using range constraints (`~>`, `>=`, etc.) will fail during `terraform init` because Terraform does not match pre-release versions against inexact constraints.
+* To upgrade `google-nightly`, update the exact `version` string in `required_providers` to the new version and then run `terraform init -upgrade` to update `.terraform.lock.hcl`. Running `terraform init -upgrade` without changing the pinned version will not select a newer build.
+
+```hcl
+terraform {
+  required_providers {
+    google-nightly = {
+      source  = "hashicorp/google-nightly"
+      version = "= 2026.10.26-8.8.1"
+    }
+  }
+}
+```
 
 ## Using the `google-beta` or `google-nightly` provider
 
@@ -54,20 +71,40 @@ provider blocks, which accept the same arguments as the `google` provider block:
 
 ```hcl
 provider "google-beta" {
-  project     = "my-project-id"
-  region      = "us-central1"
+  project = "my-project-id"
+  region  = "us-central1"
 }
 ```
 
-~> If the `provider` field is omitted, Terraform will implicitly use the `google`
- provider by default even if you have only defined a `google-beta` or
- `google-nightly` provider block.
+For `google` and `google-beta`, you can use standard version constraints (such as `~> 8.0`) in `required_providers` and upgrade to the latest matching release with `terraform init -upgrade`. For `google-nightly`, you must also include a `required_providers` entry pinned to an exact version as shown above.
+
+~> Because all resource types begin with `google_`, if the `provider` field is
+omitted on a resource, Terraform will implicitly use the `google` provider by
+default even if you have only defined a `google-beta` or `google-nightly`
+provider block.
 
 ## Using multiple provider versions together
 
-Multiple provider versions can be used together.
+Multiple provider versions can be used together in the same configuration:
 
 ```hcl
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 8.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 8.0"
+    }
+    google-nightly = {
+      source  = "hashicorp/google-nightly"
+      version = "= 2026.10.26-8.8.1"
+    }
+  }
+}
+
 resource "google_compute_instance" "ga-instance" {
   # Implicitly treated as `provider = google`
 
@@ -91,13 +128,18 @@ Provider settings are managed per-provider and must be duplicated when using the
 
 ```hcl
 provider "google" {
-  project     = "my-project-id"
-  region      = "us-central1"
+  project = "my-project-id"
+  region  = "us-central1"
 }
 
 provider "google-beta" {
-  project     = "my-project-id"
-  region      = "us-central1"
+  project = "my-project-id"
+  region  = "us-central1"
+}
+
+provider "google-nightly" {
+  project = "my-project-id"
+  region  = "us-central1"
 }
 ```
 
@@ -105,22 +147,31 @@ provider "google-beta" {
 
 ## Importing resources with `google-beta` or `google-nightly`
 
-Terraform will respect the defined provider automatically, similar to importing with aliased providers:
-
+When importing into a resource block in your configuration, Terraform will respect the resource's `provider` field automatically, similar to importing with aliased providers:
 
 ```bash
 terraform import google_compute_instance.beta-instance my-instance
 ```
 
+If you are using an `import` block without an existing `resource` block (for example, when generating configuration with `terraform plan -generate-config-out`), specify `provider = google-beta` or `provider = google-nightly` on the `import` block itself so Terraform does not default to `google`:
+
+```hcl
+import {
+  to       = google_compute_instance.beta-instance
+  id       = "projects/my-project-id/zones/us-central1-a/instances/my-instance"
+  provider = google-beta
+}
+```
+
 ## Converting resources between versions
 
-Resources can safely be converted from one version to the other by changing the `provider` block. For example:
+Resources can safely be converted from one provider version to another without rebuilding infrastructure by changing the `provider` field on the resource and running `terraform apply` (or `terraform refresh`). For example:
 
-To go from GA to beta, change the `provider` field from `"google"` to `"google-beta"`.
+To go from GA to beta, change the `provider` field on the resource from `google` to `google-beta` and run `terraform apply` or `terraform refresh` to update the provider recorded in state.
 
-To go from beta to GA, do the reverse. If you were previously using beta features that you no longer wish to use:
+To go from beta to GA (or from `google-nightly` to `google-beta` or `google`), do the reverse. If you were previously using pre-GA fields that are not supported in the target provider and that you no longer wish to use:
 
-1. (Optional) Explicitly set the fields back to their default values in your Terraform config file, and run `terraform apply`.
-1. Change the `provider` field to `"google"`.
-1. Remove any beta fields from your Terraform config.
-1. Run `terraform plan` or `terraform refresh`+`terraform show` to see that the beta fields are no longer in state.
+1. (Optional) Explicitly set the fields back to their default values in your Terraform configuration, and run `terraform apply`.
+1. Change the `provider` field on the resource (for example, to `google`).
+1. Remove any unsupported pre-GA fields from your Terraform configuration.
+1. Run `terraform apply` or `terraform refresh` to update the state, and run `terraform show` to verify that those fields are no longer in state.
