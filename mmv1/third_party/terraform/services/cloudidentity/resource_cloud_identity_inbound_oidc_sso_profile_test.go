@@ -13,6 +13,7 @@ import (
 // tests require the test credentials to hold that privilege on GOOGLE_CUST_ID.
 
 func TestAccCloudIdentityInboundOidcSsoProfile_update(t *testing.T) {
+	t.Skip("Require Google Workspace admin privileges not held by the CI service account")
 	t.Parallel()
 
 	context := map[string]interface{}{
