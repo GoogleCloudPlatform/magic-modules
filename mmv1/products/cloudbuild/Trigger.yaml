@@ -1251,6 +1251,11 @@ properties:
               Option to specify a WorkerPool for the build. Format projects/{project}/workerPools/{workerPool}
 
               This field is experimental.
+          - name: 'workerRelease'
+            type: String
+            description: |
+              Option to specify which release or release channel to use to run this build.
+              Possible values are `rapid`, `regular`, `stable`, or a specific release version.
           - name: 'logging'
             type: Enum
             description: |
