@@ -1,0 +1,102 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Catalog'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs?catalogId={{catalog_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog_id}}'
+update_verb: 'PATCH'
+update_mask: true
+autogen_async: true
+async:
+  actions: ["delete"]
+  operation:
+    base_url: "{{op_id}}"
+description: |
+  A Design Center Catalog.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+parameters:
+  - type: String
+    name: 'location'
+    description: |
+      The location of the catalog.
+    required: true
+    immutable: true
+    url_param_only: true
+  - type: String
+    name: 'space'
+    description: |
+      The space for the catalog.
+    required: true
+    immutable: true
+    url_param_only: true
+  - type: String
+    name: 'catalog_id'
+    description: |
+      The ID of the catalog.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - type: String
+    name: 'name'
+    description: |
+      Identifier. The name of the catalog. Format:
+      `projects/{project}/locations/{location}/spaces/{space}/catalogs/{catalog}`
+    output: true
+  - type: String
+    name: 'displayName'
+    description: |
+      Optional. The display name of the catalog.
+  - type: String
+    name: 'description'
+    description: |
+      Optional. The description of the catalog.
+  - type: Time
+    name: 'createTime'
+    description: |
+      Output only. [Output only] Create time stamp.
+    output: true
+  - type: Time
+    name: 'updateTime'
+    description: |
+      Output only. [Output only] Update time stamp.
+    output: true
+samples:
+  - name: designcenter_catalog_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_basic
+        resource_id_vars:
+          catalog_id: example-catalog
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_catalog_update
+        resource_id_vars:
+          catalog_id: example-catalog
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
