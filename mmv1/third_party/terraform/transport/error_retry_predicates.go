@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -699,26 +698,6 @@ func IsAgentGatewayInUseError(err error) (bool, string) {
 	if err != nil && strings.Contains(err.Error(), "is already being used by resource") {
 		return true, "Agent Gateway is still being used by another resource"
 	}
-	return false, ""
-}
-
-// Retry when a regional backend service is still referenced by another resource.
-func IsRegionBackendServiceInUseError(err error) (bool, string) {
-	if err == nil {
-		return false, ""
-	}
-
-	var apiErr *googleapi.Error
-	if !errors.As(err, &apiErr) || apiErr.Code != 400 {
-		return false, ""
-	}
-
-	errorText := err.Error() + apiErr.Message + apiErr.Body
-	if strings.Contains(errorText, "The backend_service resource") &&
-		strings.Contains(errorText, "resourceInUseByAnotherResource") {
-		return true, "RegionBackendService is still being used by another resource"
-	}
-
 	return false, ""
 }
 

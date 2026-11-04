@@ -398,55 +398,6 @@ func TestIsAgentConnectivityTemplateInUse(t *testing.T) {
 	}
 }
 
-func TestIsRegionBackendServiceInUseError(t *testing.T) {
-	inUseMessage := "The backend_service resource 'projects/test/regions/us-central1/backendServices/backend' is already being used by 'projects/test/regions/us-central1/urlMaps/url-map', resourceInUseByAnotherResource"
-	expectedReason := "RegionBackendService is still being used by another resource"
-
-	tests := map[string]struct {
-		err            error
-		expected       bool
-		expectedReason string
-	}{
-		"nil error": {
-			err: nil,
-		},
-		"backend service in use": {
-			err: &googleapi.Error{
-				Code:    400,
-				Message: inUseMessage,
-			},
-			expected:       true,
-			expectedReason: expectedReason,
-		},
-		"wrapped backend service in use": {
-			err:            fmt.Errorf("Error when reading or editing RegionBackendService: %w", &googleapi.Error{Code: 400, Message: inUseMessage}),
-			expected:       true,
-			expectedReason: expectedReason,
-		},
-		"other resource in use": {
-			err: &googleapi.Error{
-				Code:    400,
-				Message: "The url_map resource is already being used by another resource, resourceInUseByAnotherResource",
-			},
-		},
-		"other API error": {
-			err: &googleapi.Error{
-				Code:    500,
-				Message: inUseMessage,
-			},
-		},
-	}
-
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			retry, reason := IsRegionBackendServiceInUseError(test.err)
-			if retry != test.expected || reason != test.expectedReason {
-				t.Errorf("IsRegionBackendServiceInUseError(%v) = (%v, %q), want (%v, %q)", test.err, retry, reason, test.expected, test.expectedReason)
-			}
-		})
-	}
-}
-
 func TestIsSubnetworkNotReadyLROError_retryable(t *testing.T) {
 	opErr := fmt.Errorf("Error code 9, message: The resource 'projects/test-project/regions/us-central1/subnetworks/default' is not ready")
 	isRetryable, _ := IsSubnetworkNotReadyLROError(opErr)
