@@ -143,7 +143,7 @@ The following arguments are supported:
 * `allow_stopping_for_update` - (Optional) If true, allows Terraform to stop the instance to update its properties.
   If you try to update a property that requires stopping the instance without setting this field, the update will fail.
 
-* `retry_on_stockout` - (Optional) Whether to retry instance creation when Compute Engine reports zonal capacity exhaustion. Defaults to `false`. When `true`, `terraform apply` waits and retries with exponential backoff. Stockout retry messages are logged only at INFO level (`TF_LOG=INFO`).
+* `retry_on_stockout` - (Optional) Whether to retry instance creation when Compute Engine reports zonal capacity exhaustion. Defaults to `false`. When `true`, `terraform apply` waits and retries with exponential backoff. Stockout retry messages appear only in debug logs (`TF_LOG=DEBUG` or `TF_LOG_PROVIDER=DEBUG`).
 
 * `stockout_retry_timeout_seconds` - (Optional) How long to retry after the first stockout response, in seconds. Defaults to `300`. Retries are also bounded by the resource's create [timeout](#timeouts), so to retry for longer than the create timeout, also increase `timeouts.create`. This setting is only used when `retry_on_stockout` is `true`.
 

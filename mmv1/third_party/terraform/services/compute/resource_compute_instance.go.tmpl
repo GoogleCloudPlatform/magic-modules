@@ -1325,7 +1325,7 @@ func ResourceComputeInstance() *schema.Resource {
 			"retry_on_stockout": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: `Whether to retry instance creation when Compute Engine reports a zonal capacity exhaustion error. Defaults to false. When true, terraform apply waits and retries with exponential backoff. Stockout retry messages are logged only at INFO level (TF_LOG=INFO).`,
+				Description: `Whether to retry instance creation when Compute Engine reports a zonal capacity exhaustion error. Defaults to false. When true, terraform apply waits and retries with exponential backoff. Stockout retry messages appear only in debug logs (TF_LOG=DEBUG or TF_LOG_PROVIDER=DEBUG).`,
 			},
 			"stockout_retry_timeout_seconds": {
 				Type:         schema.TypeInt,
