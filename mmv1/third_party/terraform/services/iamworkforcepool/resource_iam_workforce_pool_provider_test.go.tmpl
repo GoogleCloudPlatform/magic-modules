@@ -48,6 +48,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProvider_oidc_update_users_groups(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider.my_provider", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_iam_workforce_pool_provider.my_provider",
