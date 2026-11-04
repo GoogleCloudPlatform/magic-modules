@@ -60,16 +60,22 @@ samples:
           reservation_name: 'example-reservation'
         test_env_vars:
           project: 'PROJECT_NAME'
+        vars:
+          principal: null
   - name: 'bigquery_reservation_assignment_full_with_principal'
     primary_resource_id: 'assignment'
     exclude_basic_doc: true
     steps:
       - name: 'bigquery_reservation_assignment_full_with_principal'
+        config_path: 'templates/terraform/samples/services/bigqueryreservation/bigquery_reservation_assignment_full.tf.tmpl'
         resource_id_vars:
           reservation_name: 'example-reservation'
         test_env_vars:
           project: 'PROJECT_NAME'
-          service_account: 'SERVICE_ACCT'
+        vars:
+          principal: 'principal://iam.googleapis.com/projects/-/serviceAccounts/my@service-account.com'
+        test_vars_overrides:
+          principal: 'fmt.Sprintf("principal://iam.googleapis.com/projects/-/serviceAccounts/%s", envvar.GetTestServiceAccountFromEnv(t))'
   - name: 'bigquery_reservation_assignment_scheduling_policy'
     primary_resource_id: 'assignment'
     exclude_basic_doc: true

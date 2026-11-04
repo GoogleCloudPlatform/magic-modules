@@ -33,7 +33,7 @@ func isMultiNodePrivateCloud(d *schema.ResourceData) bool {
 }
 
 func isPrivateCloudInDeletedState(config *transport_tpg.Config, d *schema.ResourceData, billingProject string, userAgent string) (bool, error) {
-    baseurl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+    baseurl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
     if err != nil {
         return false, err
     }

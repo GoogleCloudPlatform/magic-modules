@@ -139,7 +139,7 @@ properties:
     description: The IP address range, in CIDR format, represented by this public delegated prefix.
     required: true
   - name: 'ipv6AccessType'
-    type: Enum
+    type: String
     description: |
       The internet access type for IPv6 Public Delegated Prefixes. Inherited
       from parent prefix and can be one of following:
@@ -149,9 +149,6 @@ properties:
         be used privately within Google Cloud. All children PDPs will have
         access type as INTERNAL.
     output: true
-    enum_values:
-      - 'EXTERNAL'
-      - 'INTERNAL'
   - name: 'enableEnhancedIpv4Allocation'
     type: Boolean
     description: |
@@ -211,7 +208,7 @@ properties:
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
         - name: 'ipv6AccessType'
-          type: Enum
+          type: String
           description: |
             The internet access type for IPv6 Public Delegated Prefixes. Inherited
             from parent prefix and can be one of following:
@@ -221,9 +218,6 @@ properties:
               be used privately within Google Cloud. All children PDPs will have
               access type as INTERNAL.
           output: true
-          enum_values:
-            - 'EXTERNAL'
-            - 'INTERNAL'
         - name: 'enableEnhancedIpv4Allocation'
           type: Boolean
           description: |

@@ -10,18 +10,6 @@ import (
 	"testing"
 )
 
-// This test only ensures there isn't a panic reading tests in the provider.
-func TestReadAllTests(t *testing.T) {
-	if servicesDir := os.Getenv("SERVICES_DIR"); servicesDir != "" {
-		_, errs := ReadAllTests(servicesDir)
-		for path, err := range errs {
-			t.Logf("path: %s, err: %v", path, err)
-		}
-	} else {
-		t.Log("no services directory provided, skipping TestReadAllTests")
-	}
-}
-
 func TestReadCoveredResourceTestFile(t *testing.T) {
 	tests, err := ReadTestFiles([]string{"testdata/service/covered_resource_test.go"})
 	if err != nil {

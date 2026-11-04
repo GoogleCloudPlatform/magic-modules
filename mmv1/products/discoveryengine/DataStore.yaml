@@ -295,10 +295,6 @@ properties:
             immutable: true
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
             properties: []
           - name: 'ocrParsingConfig'
             type: NestedObject
@@ -306,10 +302,6 @@ properties:
               Configurations applied to OCR parser. Currently it only applies to PDFs.
             required: false
             immutable: true
-            exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
             properties:
               - name: 'useNativeText'
                 type: Boolean
@@ -325,10 +317,6 @@ properties:
             immutable: true
             send_empty_value: true
             allow_empty_object: true
-            exactly_one_of:
-              - 'default_parsing_config.0.digital_parsing_config'
-              - 'default_parsing_config.0.ocr_parsing_config'
-              - 'default_parsing_config.0.layout_parsing_config'
             properties:
               - name: 'enableTableAnnotation'
                 type: Boolean
@@ -404,10 +392,6 @@ properties:
               immutable: true
               send_empty_value: true
               allow_empty_object: true
-              exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
               properties: []
             - name: 'ocrParsingConfig'
               type: NestedObject
@@ -415,10 +399,6 @@ properties:
                 Configurations applied to OCR parser. Currently it only applies to PDFs.
               required: false
               immutable: true
-              exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
               properties:
                 - name: 'useNativeText'
                   type: Boolean
@@ -434,10 +414,6 @@ properties:
               immutable: true
               send_empty_value: true
               allow_empty_object: true
-              exactly_one_of:
-                - 'default_parsing_config.0.digital_parsing_config'
-                - 'default_parsing_config.0.ocr_parsing_config'
-                - 'default_parsing_config.0.layout_parsing_config'
               properties:
                 - name: 'enableTableAnnotation'
                   type: Boolean

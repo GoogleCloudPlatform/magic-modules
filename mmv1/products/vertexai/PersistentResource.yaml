@@ -48,9 +48,13 @@ samples:
       - name: vertex_ai_persistent_resource
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
-      - name: vertex_ai_persistent_resource_update
+        vars:
+          replica_count: 2
+      - name: vertex_ai_persistent_resource
         resource_id_vars:
           persistent_resource_id: example-persistent-resource
+        vars:
+          replica_count: 1
   - name: vertex_ai_persistent_resource_autoscaling
     primary_resource_id: persistent_resource
     steps:

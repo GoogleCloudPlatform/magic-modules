@@ -12,6 +12,8 @@ import (
 )
 
 func TestAccComputeResourceUsageExportBucket(t *testing.T) {
+	t.Parallel()
+
 	org := envvar.GetTestOrgFromEnv(t)
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 

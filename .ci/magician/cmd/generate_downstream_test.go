@@ -18,6 +18,9 @@ package cmd
 import (
 	"errors"
 	"magician/github"
+	"magician/provider"
+	"magician/source"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -178,4 +181,63 @@ func TestGetPullRequest(t *testing.T) {
 			t.Errorf("expected GetPullRequests fallback to be called")
 		}
 	})
+}
+
+func TestRunMake(t *testing.T) {
+	cases := map[string]struct {
+		repo     *source.Repo
+		command  string
+		wantRuns []ParameterList
+	}{
+		"terraform runs make provider without separate clean-provider": {
+			repo: &source.Repo{
+				Title:   "terraform",
+				Path:    "/mock/dir/tpg",
+				Version: provider.GA,
+			},
+			command: "downstream",
+			wantRuns: []ParameterList{
+				{"/mock/dir/magic-modules/.ci/magician", "make", []string{"provider", "OUTPUT_PATH=/mock/dir/tpg", "VERSION=ga"}, map[string]string(nil)},
+			},
+		},
+		"terraform-google-conversion downstream updates go.mod without make build": {
+			repo: &source.Repo{
+				Title:  "terraform-google-conversion",
+				Path:   "/mock/dir/tgc",
+				Branch: "main",
+			},
+			command: "downstream",
+			wantRuns: []ParameterList{
+				{"/mock/dir/magic-modules/.ci/magician", "make", []string{"clean-tgc", "OUTPUT_PATH=/mock/dir/tgc"}, map[string]string(nil)},
+				{"/mock/dir/magic-modules/.ci/magician", "make", []string{"tgc", "OUTPUT_PATH=/mock/dir/tgc"}, map[string]string(nil)},
+				{"/mock/dir/tgc", "go", []string{"get", "-d", "github.com/hashicorp/terraform-provider-google-beta@main"}, map[string]string(nil)},
+				{"/mock/dir/tgc", "go", []string{"mod", "tidy"}, map[string]string(nil)},
+			},
+		},
+		"terraform-google-conversion head only cleans and generates tgc": {
+			repo: &source.Repo{
+				Title:  "terraform-google-conversion",
+				Path:   "/mock/dir/tgc",
+				Branch: "main",
+			},
+			command: "head",
+			wantRuns: []ParameterList{
+				{"/mock/dir/magic-modules/.ci/magician", "make", []string{"clean-tgc", "OUTPUT_PATH=/mock/dir/tgc"}, map[string]string(nil)},
+				{"/mock/dir/magic-modules/.ci/magician", "make", []string{"tgc", "OUTPUT_PATH=/mock/dir/tgc"}, map[string]string(nil)},
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			rnr := NewMockRunner()
+			if err := runMake(tc.repo, tc.command, rnr); err != nil {
+				t.Fatalf("runMake() unexpected error: %v", err)
+			}
+			gotRuns, _ := rnr.Calls("Run")
+			if !reflect.DeepEqual(gotRuns, tc.wantRuns) {
+				t.Errorf("runMake() Run calls = %v, want %v", gotRuns, tc.wantRuns)
+			}
+		})
+	}
 }

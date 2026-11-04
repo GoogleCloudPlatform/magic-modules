@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
+}
+
 resource "google_vmwareengine_network_peering" "peering" {
   name                  = "network-peering-test"
   peer_network          = "projects/{{.Provider.Project}}/locations/global/vmwareEngineNetworks/network-peering-test-nw"

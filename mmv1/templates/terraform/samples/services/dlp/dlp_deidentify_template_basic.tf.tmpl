@@ -46,7 +46,8 @@ resource "google_data_loss_prevention_deidentify_template" "{{$.PrimaryResourceI
 						number_to_mask = 4
 						reverse_order = true
 						characters_to_ignore {
-							common_characters_to_ignore = "PUNCTUATION"
+							common_characters_to_ignore = "{{index $.Vars "common_characters_to_ignore"}}"
+							characters_to_skip = "{{index $.Vars "characters_to_skip"}}"
 						}
 					}
 				}

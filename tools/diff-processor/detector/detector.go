@@ -301,7 +301,7 @@ func dataSourceToDocFile(resource string, repoPath string) (string, error) {
 		resource,
 	}
 	// There are only iam_policy files, no iam_binding, iam_member, iam_audit_config.
-	suffix := []string{"_iam_binding", "_iam_member", "iam_audit_config"}
+	suffix := []string{"_iam_binding", "_iam_member", "_iam_audit_config"}
 	for _, s := range suffix {
 		if strings.HasSuffix(resource, s) {
 			iamName := strings.ReplaceAll(resource, s, "_iam_policy")

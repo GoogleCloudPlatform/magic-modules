@@ -86,14 +86,8 @@ func TestExecGenerateComment(t *testing.T) {
 		"Run": {
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
 			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "make", []string{"build"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "make", []string{"build"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
 			{"/mock/dir/tgc", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
@@ -732,6 +726,16 @@ func TestCheckDocumentFrontmatter(t *testing.T) {
 subcategory: Example Subcategory
 ---	
 `,
+		"missingclosing.markdown": `
+---
+subcategory: Example Subcategory
+`,
+		"invalidyaml.markdown": `
+---
+subcategory: [unclosed
+---
+`,
+		"crlf.markdown": "\r\n---\r\nsubcategory: Example Subcategory\r\n--- \t\r\n",
 		"sample.markdown": `
 ---
 subcategory: Example Subcategory
@@ -782,6 +786,16 @@ random: Example Subcategory
 			wantErr:      true,
 		},
 		{
+			name:         "missing closing delimiter",
+			changedFiles: []string{"website/docs/r/missingclosing.markdown"},
+			wantErr:      true,
+		},
+		{
+			name:         "invalid yaml frontmatter",
+			changedFiles: []string{"website/docs/r/invalidyaml.markdown"},
+			wantErr:      true,
+		},
+		{
 			name:         "markdown not exist",
 			changedFiles: []string{"website/docs/d/sample.markdown"},
 			wantErr:      true,
@@ -789,6 +803,11 @@ random: Example Subcategory
 		{
 			name:         "correct format",
 			changedFiles: []string{"website/docs/r/sample.markdown"},
+			wantErr:      false,
+		},
+		{
+			name:         "correct format with CRLF",
+			changedFiles: []string{"website/docs/r/crlf.markdown"},
 			wantErr:      false,
 		},
 	}

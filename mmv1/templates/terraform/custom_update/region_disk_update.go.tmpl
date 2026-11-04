@@ -48,7 +48,7 @@ if d.HasChange("label_fingerprint") || d.HasChange("effective_labels") {
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/setLabels")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/setLabels")
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ if d.HasChange("size") {
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/resize")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/resize")
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ if d.HasChange("provisioned_iops") || d.HasChange("provisioned_throughput") {
 		return err
 	}
 
-	baseUrl, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}")
+	baseUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}")
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ if d.HasChange("access_mode") {
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}?paths=accessMode")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}?paths=accessMode")
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ if d.HasChange("disk_encryption_key.0.kms_key_name") {
 		return fmt.Errorf("error updating RegionDisk %q KMS key: %w", d.Id(), err)
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}ComputeBasePath{{ "}}" }}projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/updateKmsKey")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{ "{{" }}project{{ "}}" }}/regions/{{ "{{" }}region{{ "}}" }}/disks/{{ "{{" }}name{{ "}}" }}/updateKmsKey")
 	if err != nil {
 		return err
 	}

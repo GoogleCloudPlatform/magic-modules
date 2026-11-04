@@ -213,30 +213,17 @@ properties:
                 Last time the condition transit from one status to another.
               output: true
             - name: state
-              type: Enum
+              type: String
               description: The lifecycle state of the condition.
               output: true
-              enum_values:
-                - STATE_UNSPECIFIED
-                - STATE_TRUE
-                - STATE_FALSE
-                - STATE_UNKNOWN
   - name: uid
     type: String
     description: The unique identifier of the Bare Metal Node Pool.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: The current state of this cluster.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - PROVISIONING
-      - RUNNING
-      - RECONCILING
-      - STOPPING
-      - ERROR
-      - DEGRADED
   - name: reconciling
     type: Boolean
     description: |

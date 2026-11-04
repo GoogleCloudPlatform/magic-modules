@@ -123,6 +123,10 @@ parameters:
     type: String
     description: A reference to the region
     url_param_only: true
+    # region is a URL parameter not flattened from the API response; ignore_read
+    # enables HasRegion() so CustomizeDiff and Read populate the default region.
+    ignore_read: true
+    default_from_api: true
     immutable: true
 properties:
   - name: name

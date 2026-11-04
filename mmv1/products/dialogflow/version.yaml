@@ -70,11 +70,7 @@ properties:
     description: |
       The developer-provided description of this version.
   - name: status
-    type: Enum
+    type: String
     description: |
       The status of this version.
     output: true
-    enum_values:
-      - IN_PROGRESS
-      - READY
-      - FAILED

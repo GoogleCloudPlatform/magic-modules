@@ -211,7 +211,7 @@ properties:
       The time the instance was last updated in RFC3339 UTC "Zulu" format, accurate to nanoseconds.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of this Data Fusion instance.
       - CREATING: Instance is being created
@@ -221,13 +221,6 @@ properties:
       - UPGRADING: Instance is being upgraded
       - RESTARTING: Instance is being restarted
     output: true
-    enum_values:
-      - CREATING
-      - RUNNING
-      - FAILED
-      - DELETING
-      - UPGRADING
-      - RESTARTING
   - name: stateMessage
     type: String
     description: |
@@ -468,15 +461,10 @@ properties:
             The end time of the maintenance event provided in RFC 3339 format.
           output: true
         - name: state
-          type: Enum
+          type: String
           description: |
             The state of the maintenance event.
           output: true
-          enum_values:
-            - STATE_UNSPECIFIED
-            - SCHEDULED
-            - STARTED
-            - COMPLETED
   - name: tags
     type: KeyValuePairs
     description: |

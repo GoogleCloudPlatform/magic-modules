@@ -1,0 +1,91 @@
+resource "google_vertex_ai_evaluation_item" "{{$.PrimaryResourceId}}" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "display_name"}}"
+  evaluation_item_type = "REQUEST"
+
+  evaluation_request {
+    prompt {
+      value = jsonencode({
+        question = "What is the capital of France?"
+      })
+    }
+    golden_response {
+      candidate = "ground-truth"
+      value = jsonencode({
+        answer = "Paris"
+      })
+    }
+  }
+}
+
+resource "google_vertex_ai_evaluation_item" "prompt_template" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "display_name"}}-template"
+  evaluation_item_type = "REQUEST"
+
+  evaluation_request {
+    prompt {
+      prompt_template_data {
+        values = jsonencode({
+          context = {
+            role = "user"
+            parts = [
+              {
+                text = "France is in Europe."
+              }
+            ]
+          }
+        })
+      }
+    }
+    golden_response {
+      candidate = "ground-truth"
+      agent_data = jsonencode({
+        agents = {
+          agent_1 = {
+            agentId     = "agent_1"
+            agentType   = "LlmAgent"
+            description = "Assistant"
+            instruction = "Be helpful"
+          }
+        }
+      })
+    }
+  }
+}
+
+resource "google_vertex_ai_evaluation_item" "agent_data" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "display_name"}}-agent"
+  evaluation_item_type = "REQUEST"
+
+  evaluation_request {
+    prompt {
+      agent_data = jsonencode({
+        agents = {
+          agent_1 = {
+            agentId     = "agent_1"
+            agentType   = "LlmAgent"
+            description = "Assistant"
+            instruction = "Be helpful"
+          }
+        }
+      })
+    }
+  }
+}
+
+resource "google_vertex_ai_evaluation_item" "user_scenario" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "display_name"}}-scenario"
+  evaluation_item_type = "REQUEST"
+
+  evaluation_request {
+    prompt {
+      user_scenario {
+        starting_prompt   = "Help me book a flight to Paris."
+        conversation_plan = "Ask about departure dates and airline preferences."
+      }
+    }
+  }
+}

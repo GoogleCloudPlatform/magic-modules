@@ -116,14 +116,10 @@ properties:
       type: NestedObject
       properties:
         - name: type
-          type: Enum
+          type: String
           description: |
             Type of VPC network (INTRANET, INTERNET, or GOOGLE_CLOUD)
           output: true
-          enum_values:
-            - INTRANET
-            - INTERNET
-            - GOOGLE_CLOUD
         - name: network
           type: String
           description: |
@@ -131,15 +127,10 @@ properties:
             For example: projects/123123/global/networks/my-network
           output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       State of the VMware Engine network.
     output: true
-    enum_values:
-      - CREATING
-      - ACTIVE
-      - UPDATING
-      - DELETING
   - name: type
     type: Enum
     description: |
