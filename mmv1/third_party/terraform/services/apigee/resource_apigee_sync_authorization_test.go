@@ -77,23 +77,64 @@ resource "google_apigee_organization" "apigee_org" {
   depends_on         = [google_project_service.apigee]
 }
 
-resource "google_service_account" "service_account" {
-  account_id   = "tf-test-my-account%{random_suffix}"
+resource "google_service_account" "service_account1" {
+  account_id   = "tf-test-my-account1%{random_suffix}"
   display_name = "Service Account"
 }
 
-resource "google_project_iam_member" "synchronizer-iam" {
+resource "google_service_account" "service_account2" {
+  account_id   = "tf-test-my-account2%{random_suffix}"
+  display_name = "Service Account"
+}
+
+resource "google_service_account" "service_account3" {
+  account_id   = "tf-test-my-account3%{random_suffix}"
+  display_name = "Service Account"
+}
+
+resource "google_project_iam_member" "synchronizer-iam-1" {
   project = google_project.project.project_id
   role    = "roles/apigee.synchronizerManager"
-  member = "serviceAccount:${google_service_account.service_account.email}"
+  member  = "serviceAccount:${google_service_account.service_account1.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
+resource "google_project_iam_member" "synchronizer-iam-2" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account2.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
+resource "google_project_iam_member" "synchronizer-iam-3" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account3.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
 }
 
 resource "google_apigee_sync_authorization" "apigee_sync_authorization" {
   name       = google_apigee_organization.apigee_org.name
   identities = [
-    "serviceAccount:${google_service_account.service_account.email}",
+    "serviceAccount:${google_service_account.service_account1.email}",
   ]
-  depends_on = [google_project_iam_member.synchronizer-iam]
+  depends_on = [
+    google_project_iam_member.synchronizer-iam-1,
+    google_project_iam_member.synchronizer-iam-2,
+    google_project_iam_member.synchronizer-iam-3,
+  ]
 }
 `, context)
 }
@@ -136,13 +177,36 @@ resource "google_service_account" "service_account3" {
   display_name = "Service Account"
 }
 
-resource "google_project_iam_binding" "synchronizer-iam" {
+resource "google_project_iam_member" "synchronizer-iam-1" {
   project = google_project.project.project_id
   role    = "roles/apigee.synchronizerManager"
-  members = [
-    "serviceAccount:${google_service_account.service_account1.email}",
-    "serviceAccount:${google_service_account.service_account2.email}",
-    "serviceAccount:${google_service_account.service_account3.email}",
+  member  = "serviceAccount:${google_service_account.service_account1.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
+resource "google_project_iam_member" "synchronizer-iam-2" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account2.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
+resource "google_project_iam_member" "synchronizer-iam-3" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account3.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
   ]
 }
 
@@ -153,7 +217,11 @@ resource "google_apigee_sync_authorization" "apigee_sync_authorization" {
     "serviceAccount:${google_service_account.service_account2.email}",
     "serviceAccount:${google_service_account.service_account3.email}"
   ]
-  depends_on = [google_project_iam_binding.synchronizer-iam]
+  depends_on = [
+    google_project_iam_member.synchronizer-iam-1,
+    google_project_iam_member.synchronizer-iam-2,
+    google_project_iam_member.synchronizer-iam-3,
+  ]
 }
 `, context)
 }
@@ -181,9 +249,62 @@ resource "google_apigee_organization" "apigee_org" {
   depends_on         = [google_project_service.apigee]
 }
 
+resource "google_service_account" "service_account1" {
+  account_id   = "tf-test-my-account1%{random_suffix}"
+  display_name = "Service Account"
+}
+
+resource "google_service_account" "service_account2" {
+  account_id   = "tf-test-my-account2%{random_suffix}"
+  display_name = "Service Account"
+}
+
+resource "google_service_account" "service_account3" {
+  account_id   = "tf-test-my-account3%{random_suffix}"
+  display_name = "Service Account"
+}
+
+resource "google_project_iam_member" "synchronizer-iam-1" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account1.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
+resource "google_project_iam_member" "synchronizer-iam-2" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account2.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
+resource "google_project_iam_member" "synchronizer-iam-3" {
+  project = google_project.project.project_id
+  role    = "roles/apigee.synchronizerManager"
+  member  = "serviceAccount:${google_service_account.service_account3.email}"
+  depends_on = [
+    google_service_account.service_account1,
+    google_service_account.service_account2,
+    google_service_account.service_account3,
+  ]
+}
+
 resource "google_apigee_sync_authorization" "apigee_sync_authorization" {
   name       = google_apigee_organization.apigee_org.name
   identities = []
+  depends_on = [
+    google_project_iam_member.synchronizer-iam-1,
+    google_project_iam_member.synchronizer-iam-2,
+    google_project_iam_member.synchronizer-iam-3,
+  ]
 }
 `, context)
 }
