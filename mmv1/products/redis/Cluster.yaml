@@ -436,6 +436,21 @@ properties:
         type: String
         description: |
           Immutable. The zone for single zone Memorystore Redis cluster.
+      - name: zones
+        type: Array
+        description: |
+          Specify the zones of a multi-zone cluster where Redis Cluster
+          allocates resources. This flag isn't applicable for single-zone clusters.
+        immutable: true
+        item_type:
+          type: String
+      - name: activeZones
+        type: Array
+        description: |
+          The exact list of zones where the cluster currently has active VMs.
+        output: true
+        item_type:
+          type: String
   - name: pscConfigs
     type: Array
     description: |
