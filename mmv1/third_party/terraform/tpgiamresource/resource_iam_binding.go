@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -185,7 +184,7 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc NewResourceIamUpdaterFunc, en
 			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Set IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()), maxBackoffTimeout)
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF, maxBackoffTimeout)
+			err = iamPolicyReadModifyWrite(updater, config, modifyF, maxBackoffTimeout)
 		}
 		if err != nil {
 			return err
@@ -227,7 +226,7 @@ func resourceIamBindingRead(newUpdaterFunc NewResourceIamUpdaterFunc, parentSpec
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Binding (Role %q)", updater.DescribeResource(), eBinding.Role))
 		}
-		log.Print(spew.Sprintf("[DEBUG] Retrieved policy for %s: %#v", updater.DescribeResource(), p))
+		log.Printf("[DEBUG] Retrieved policy for %s: %#v", updater.DescribeResource(), p)
 		log.Printf("[DEBUG] Looking for binding with role %q and condition %#v", eBinding.Role, eCondition)
 
 		var binding *cloudresourcemanager.Binding
@@ -391,7 +390,7 @@ func resourceIamBindingDelete(newUpdaterFunc NewResourceIamUpdaterFunc, enableBa
 			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Delete IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()), maxBackoffTimeout)
 		} else {
-			err = iamPolicyReadModifyWrite(updater, modifyF, maxBackoffTimeout)
+			err = iamPolicyReadModifyWrite(updater, config, modifyF, maxBackoffTimeout)
 		}
 		if err != nil {
 			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))

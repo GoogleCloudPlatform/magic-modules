@@ -78,6 +78,8 @@ parameters:
       Region where the VPC Access connector resides. If it is not provided, the provider region is used.
     url_param_only: true
     immutable: true
+    # region is a URL parameter not returned as a top-level field by the API
+    ignore_read: true
     default_from_api: true
 properties:
   - name: name

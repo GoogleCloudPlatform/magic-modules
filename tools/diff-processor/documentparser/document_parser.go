@@ -9,10 +9,11 @@ import (
 
 var (
 	// * `xxx` or - `xxx` at the start of a line, possibly indented
-	fieldNameRegex      = regexp.MustCompile("(?m)^([ \\t]*)[*-][ \\t]+`([a-z0-9_\\./]+)`")
-	nestedObjectRegex   = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`) // <a name="xxx">
-	nestedHashTagRegex  = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)  // #(nested_xxx)
-	horizontalLineRegex = regexp.MustCompile("- - -|-{3,}")               // - - - or ---
+	fieldNameRegex     = regexp.MustCompile("(?m)^([ \\t]*)[*-][ \\t]+`([a-z0-9_\\./]+)`")
+	nestedObjectRegex  = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`) // <a name="xxx">
+	nestedHashTagRegex = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)  // #(nested_xxx)
+	// - - - or --- on its own line
+	horizontalLineRegex = regexp.MustCompile(`(?m)^[ \t]*(?:- - -|-{3,})[ \t]*$`)
 
 	sectionSeparator = "## "
 )

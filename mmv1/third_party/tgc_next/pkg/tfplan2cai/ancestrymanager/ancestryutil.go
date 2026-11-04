@@ -1,13 +1,13 @@
 package ancestrymanager
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
-	"github.com/hashicorp/errwrap"
 	"google.golang.org/api/googleapi"
 )
 
@@ -128,6 +128,6 @@ func getFolderFromResource(tfData tpgresource.TerraformResourceData) (string, bo
 
 // isGoogleApiErrorWithCode cheks if the error code is of given type or not.
 func isGoogleApiErrorWithCode(err error, errCode int) bool {
-	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-	return ok && gerr != nil && gerr.Code == errCode
+	var gerr *googleapi.Error
+	return errors.As(err, &gerr) && gerr != nil && gerr.Code == errCode
 }

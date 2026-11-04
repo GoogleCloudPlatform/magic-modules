@@ -35,7 +35,8 @@ for i := 0; i < 12; i++ {
                        return nil
                }
                // If operation wait failed with "already being used", retry the whole delete
-               if gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Message, "already being used") {
+               var gerr *googleapi.Error
+               if errors.As(err, &gerr) && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Message, "already being used") {
                        log.Printf("[DEBUG] InternalRange %q is still in use during operation wait, retrying in 5s...", d.Id())
                        time.Sleep(5 * config.SleepUnit)
                        continue
@@ -44,7 +45,8 @@ for i := 0; i < 12; i++ {
        }
        
        // If DELETE request failed with "already being used", retry
-       if gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error); ok && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Message, "already being used") {
+       var gerr *googleapi.Error
+       if errors.As(err, &gerr) && gerr != nil && gerr.Code == 400 && strings.Contains(gerr.Message, "already being used") {
                log.Printf("[DEBUG] InternalRange %q is still in use, retrying in 5s...", d.Id())
                time.Sleep(5 * config.SleepUnit)
                continue
