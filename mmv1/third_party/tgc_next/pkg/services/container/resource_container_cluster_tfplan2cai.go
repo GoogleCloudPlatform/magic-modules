@@ -292,10 +292,6 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		cluster.UserManagedKeysConfig = expandUserManagedKeysConfig(v)
 	}
 
-	if err := validateNodePoolAutoConfig(cluster); err != nil {
-		return nil, err
-	}
-
 	if v, ok := d.GetOk("security_posture_config"); ok {
 		cluster.SecurityPostureConfig = expandSecurityPostureConfig(v)
 	}
