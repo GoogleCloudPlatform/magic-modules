@@ -76,12 +76,9 @@ provider "google-beta" {
 }
 ```
 
-For `google` and `google-beta`, you can use standard version constraints (such as `~> 8.0`) in `required_providers` and upgrade to the latest matching release with `terraform init -upgrade`. For `google-nightly`, you must also include a `required_providers` entry pinned to an exact version as shown above.
-
-~> Because all resource types begin with `google_`, if the `provider` field is
-omitted on a resource, Terraform will implicitly use the `google` provider by
-default even if you have only defined a `google-beta` or `google-nightly`
-provider block.
+~> If the `provider` field is omitted, Terraform will implicitly use the `google`
+ provider by default even if you have only defined a `google-beta` or
+ `google-nightly` provider block.
 
 ## Using multiple provider versions together
 
