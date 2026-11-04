@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
@@ -402,12 +401,10 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 				}
 			}
 
-			spewConf := spew.NewDefaultConfig()
-			spewConf.SortKeys = true
 			return fmt.Errorf(
 				"Labels not equivalent. Difference is shown below. Top is actual, bottom is expected."+
-					"\n\n%s\n\n%s",
-				spewConf.Sdump(actual), spewConf.Sdump(expected),
+					"\n\n%#v\n\n%#v",
+				actual, expected,
 			)
 		}
 		return nil
@@ -434,10 +431,8 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 			return err
 		}
 
-		spewConf := spew.NewDefaultConfig()
-		spewConf.SortKeys = true
 		if found.Labels != nil {
-			return fmt.Errorf("Labels should be empty. Actual \n%s", spewConf.Sdump(found.Labels))
+			return fmt.Errorf("Labels should be empty. Actual \n%#v", found.Labels)
 		}
 		return nil
 	}
