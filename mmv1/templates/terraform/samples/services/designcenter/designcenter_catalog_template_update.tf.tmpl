@@ -1,0 +1,10 @@
+resource "google_design_center_catalog_template" "example" {
+  project             = "{{index $.Vars "project"}}"
+  location            = "us-central1"
+  space               = "{{index $.Vars "space"}}"
+  catalog             = "{{index $.Vars "catalog"}}"
+  catalog_template_id = "{{index $.ResourceIdVars "catalog_template_id"}}"
+  template_category   = "APPLICATION_TEMPLATE"
+  display_name        = "Updated Example Design Center Catalog Template"
+  description         = "Updated Managed by Terraform"
+}
