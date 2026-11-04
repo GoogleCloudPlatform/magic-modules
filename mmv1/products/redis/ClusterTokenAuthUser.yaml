@@ -21,7 +21,7 @@ docs:
   note: |
     Removing a `google_redis_cluster_token_auth_user` resource from the Terraform configuration deletes the user and revokes all of its tokens.
 
-    The `default` user is automatically created when token-based authentication (`AUTH_MODE_TOKEN_AUTH`) is enabled on a cluster and is lifecycle-bound to the cluster; it cannot be created or deleted via `google_redis_cluster_token_auth_user`. To view the `default` user's metadata or active tokens, use the `google_redis_cluster_token_auth_user` and `google_redis_cluster_auth_token` data sources; to rotate its tokens, use the `google_redis_cluster_auth_token` resource.
+    The `default` user is automatically created when token-based authentication (`AUTH_MODE_TOKEN_AUTH`) is enabled on a cluster and is lifecycle-bound to the cluster; it cannot be created or deleted via `google_redis_cluster_token_auth_user`. To view the `default` user's metadata, use the `google_redis_cluster_token_auth_user` data source.
 supports_indirect_user_project_override: true
 immutable: true
 base_url: projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers
