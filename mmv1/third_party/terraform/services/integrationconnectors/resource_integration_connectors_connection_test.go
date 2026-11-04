@@ -1440,9 +1440,6 @@ func testAccIntegrationConnectorsConnection_update(context map[string]interface{
         }
       }
       enrichment_enabled = false
-      # Keep allowed_event_types and global_event_filter unchanged across update
-      # to avoid triggering the un-retried CLH clearcache task right after
-      # UpdateSynchronizerService recycles the regional synchronizer service.
       allowed_event_types = ["topic1", "topic2"]
       global_event_filter = "has(event.id)"
       dead_letter_config {
