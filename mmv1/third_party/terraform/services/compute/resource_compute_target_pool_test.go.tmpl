@@ -86,6 +86,8 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeTargetPool_withSecurityPolicy(t *testing.T) {
+	t.Parallel()
+
 	tpname := fmt.Sprintf("tf-test-tp-%s", acctest.RandString(t, 10))
 	ddosPolicy := fmt.Sprintf("tf-test-tp-ddos-pol-%s", acctest.RandString(t, 10))
 	edgeSecService := fmt.Sprintf("tf-test-tp-edge-sec-%s", acctest.RandString(t, 10))
