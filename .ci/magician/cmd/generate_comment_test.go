@@ -44,6 +44,7 @@ func TestExecGenerateComment(t *testing.T) {
 		"terraform-provider-google",
 		"terraform-provider-google-beta",
 		"terraform-google-conversion",
+		"docs-examples",
 	} {
 		variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
 		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
@@ -145,6 +146,182 @@ func TestExecGenerateComment(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestExecGenerateComment_SkipUnchangedRepos(t *testing.T) {
+	t.Run("all repos unchanged skips all clones", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		for _, repo := range []string{
+			"terraform-provider-google",
+			"terraform-provider-google-beta",
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
+			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
+			if err := mr.WriteFile(variablePathOld, "1a2a3a4a\n"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(variablePath, "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
+
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		for _, method := range []string{"Run", "Copy", "RemoveAll"} {
+			if actualCalls, ok := mr.Calls(method); ok {
+				t.Fatalf("Expected no calls for %s when all SHAs match, got %v", method, actualCalls)
+			}
+		}
+
+		for method, expectedCalls := range map[string][][]any{
+			"PostBuildStatus": {
+				{"123456", "terraform-provider-multiple-resources", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
+				{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
+				{"123456", "terraform-provider-missing-service-labels", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
+			},
+			"PostComment": {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes for commit sha1:\n\n## Diff report\n\nYour PR hasn't generated any diffs, but I'll let you know if a future commit does.\n\n\n\n\n"}},
+		} {
+			if actualCalls, ok := gh.calledMethods[method]; !ok {
+				t.Fatalf("Found no calls for %s", method)
+			} else if !reflect.DeepEqual(actualCalls, expectedCalls) {
+				t.Fatalf("Wrong calls for %s, got %v, expected %v", method, actualCalls, expectedCalls)
+			}
+		}
+	})
+
+	t.Run("only changed repos are cloned", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		diffProcessorEnv := map[string]string{
+			"NEW_REF": "auto-pr-123456",
+			"OLD_REF": "auto-pr-123456-old",
+			"PATH":    os.Getenv("PATH"),
+			"GOPATH":  os.Getenv("GOPATH"),
+			"HOME":    os.Getenv("HOME"),
+		}
+		for _, repo := range []string{
+			"terraform-provider-google",
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta-old.txt", "1a2a3a4a"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt", "1a2a3a4b"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		expectedRunCalls := []ParameterList{
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-unreadable-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-identity", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
+		}
+		actualRunCalls, ok := mr.Calls("Run")
+		if !ok {
+			t.Fatalf("Found no calls for Run")
+		}
+		assert.Equal(t, expectedRunCalls, actualRunCalls)
+	})
+
+	t.Run("missing commit SHA file skips clone and records error", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		// terraform-provider-google is missing commitSHA .txt file.
+		// terraform-provider-google-beta has .txt file but is missing -old.txt file.
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt", "1a2a3a4a"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+		for _, repo := range []string{
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
+
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		for _, method := range []string{"Run", "Copy", "RemoveAll"} {
+			if actualCalls, ok := mr.Calls(method); ok {
+				t.Fatalf("Expected no calls for %s when SHA files are missing or unchanged, got %v", method, actualCalls)
+			}
+		}
+
+		postCommentCalls, ok := gh.calledMethods["PostComment"]
+		if !ok || len(postCommentCalls) != 1 {
+			t.Fatalf("Expected 1 call to PostComment, got %v", postCommentCalls)
+		}
+		comment, _ := postCommentCalls[0][1].(string)
+		assert.Contains(t, comment, "## Errors")
+		assert.Contains(t, comment, "`google` provider:\n- Failed to read commit sha from file")
+		assert.Contains(t, comment, "`google-beta` provider:\n- Failed to read old commit sha from file")
+	})
 }
 
 func TestFormatDiffComment(t *testing.T) {
