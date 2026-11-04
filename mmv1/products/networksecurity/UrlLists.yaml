@@ -21,13 +21,14 @@ references:
     Use UrlLists: ' https://cloud.google.com/secure-web-proxy/docs/use-url-list'
   api: https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.urlLists
 docs:
-base_url: projects/{{project}}/locations/{{location}}/urlLists
+base_url: projects/{{project}}/locations/us-central1/urlLists
 self_link: projects/{{project}}/locations/{{location}}/urlLists/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/urlLists?urlListId={{name}}
 update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/urlLists/{{name}}
+generate_list_resource: true
 timeouts:
   insert_minutes: 30
   update_minutes: 30
