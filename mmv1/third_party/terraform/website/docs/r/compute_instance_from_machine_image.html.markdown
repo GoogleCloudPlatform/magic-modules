@@ -54,7 +54,7 @@ The following arguments are supported:
 
 * `retry_on_stockout` - (Optional) Whether to retry instance creation when Compute Engine reports zonal capacity exhaustion. Defaults to `false`. When `true`, `terraform apply` waits and retries with exponential backoff. Stockout retry messages are logged only at INFO level (`TF_LOG=INFO`).
 
-* `stockout_retry_timeout_seconds` - (Optional) How long to retry after the first stockout response, in seconds. Defaults to `300`. Retries are also bounded by the resource's create timeout. This setting is only used when `retry_on_stockout` is `true`.
+* `stockout_retry_timeout_seconds` - (Optional) How long to retry after the first stockout response, in seconds. Defaults to `300`. Retries are also bounded by the resource's create [timeout](#timeouts), so to retry for longer than the create timeout, also increase `timeouts.create`. This setting is only used when `retry_on_stockout` is `true`.
 
 * `network_interface.enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
 

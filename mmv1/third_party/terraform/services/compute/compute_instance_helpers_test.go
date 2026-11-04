@@ -3,6 +3,7 @@ package compute
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -27,6 +28,12 @@ func TestIsComputeInstanceStockoutError(t *testing.T) {
 			err: ComputeOperationError(map[string]interface{}{
 				"errors": []interface{}{map[string]interface{}{"code": "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS"}},
 			}),
+			expected: true,
+		},
+		"zone capacity exhausted operation wrapped by operation wait": {
+			err: fmt.Errorf("Error waiting for instance to create: %w", ComputeOperationError(map[string]interface{}{
+				"errors": []interface{}{map[string]interface{}{"code": "ZONE_RESOURCE_POOL_EXHAUSTED"}},
+			})),
 			expected: true,
 		},
 		"zone capacity exhausted API reason": {
@@ -64,13 +71,26 @@ func TestIsComputeInstanceStockoutError(t *testing.T) {
 	}
 }
 
-func TestComputeInstanceStockoutRetrySchemaDefaults(t *testing.T) {
-	schema := ResourceComputeInstance().Schema
-	if got := schema["retry_on_stockout"].Default; got != false {
-		t.Errorf("retry_on_stockout default = %v, want false", got)
+func TestComputeInstanceStockoutRetrySchemaHasNoDefaults(t *testing.T) {
+	s := ResourceComputeInstance().Schema
+	for _, field := range []string{"retry_on_stockout", "stockout_retry_timeout_seconds"} {
+		if got := s[field].Default; got != nil {
+			t.Errorf("%s default = %v, want nil", field, got)
+		}
 	}
-	if got := schema["stockout_retry_timeout_seconds"].Default; got != 300 {
-		t.Errorf("stockout_retry_timeout_seconds default = %v, want 300", got)
+}
+
+func TestComputeInstanceStockoutRetryTimeout(t *testing.T) {
+	unset := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{})
+	if got := computeInstanceStockoutRetryTimeout(unset); got != 300*time.Second {
+		t.Errorf("unset timeout = %s, want 300s", got)
+	}
+
+	set := schema.TestResourceDataRaw(t, ResourceComputeInstance().Schema, map[string]interface{}{
+		"stockout_retry_timeout_seconds": 600,
+	})
+	if got := computeInstanceStockoutRetryTimeout(set); got != 600*time.Second {
+		t.Errorf("configured timeout = %s, want 600s", got)
 	}
 }
 
@@ -212,11 +232,62 @@ func TestRunComputeInstanceCreateWithStockoutRetry_StockoutRetryTimeout(t *testi
 		return nil, computeInstanceStockoutTestError()
 	}
 	err := runComputeInstanceCreateWithStockoutRetry(r)
-	if err == nil || !strings.HasPrefix(err.Error(), "Error creating instance: ") {
-		t.Errorf("error = %v, want stockout error", err)
-	}
 	if inserts < 2 {
 		t.Errorf("insert attempts = %d, want at least 2 before timeout", inserts)
+	}
+	wantPrefix := fmt.Sprintf("Error creating instance after %d attempts due to zone resource exhaustion: ", inserts)
+	if err == nil || !strings.HasPrefix(err.Error(), wantPrefix) {
+		t.Errorf("error = %v, want prefix %q", err, wantPrefix)
+	}
+	var apiErr *googleapi.Error
+	if !errors.As(err, &apiErr) {
+		t.Errorf("error = %v, want wrapped *googleapi.Error", err)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_OperationStockoutRetryTimeout(t *testing.T) {
+	t.Parallel()
+	inserts := 0
+	opErr := ComputeOperationError(map[string]interface{}{
+		"errors": []interface{}{map[string]interface{}{"code": "ZONE_RESOURCE_POOL_EXHAUSTED"}},
+	})
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.stockoutRetryTimeout = 50 * time.Millisecond
+	r.retryDelay = func(int) time.Duration { return 20 * time.Millisecond }
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		return map[string]interface{}{}, nil
+	}
+	r.waitForOperation = func(map[string]interface{}, time.Duration) error { return opErr }
+	err := runComputeInstanceCreateWithStockoutRetry(r)
+	wantPrefix := fmt.Sprintf("Error creating instance after %d attempts due to zone resource exhaustion: ", inserts)
+	if err == nil || !strings.HasPrefix(err.Error(), wantPrefix) {
+		t.Errorf("error = %v, want prefix %q", err, wantPrefix)
+	}
+	var gotOpErr ComputeOperationError
+	if !errors.As(err, &gotOpErr) {
+		t.Errorf("error = %v, want wrapped ComputeOperationError", err)
+	}
+}
+
+func TestRunComputeInstanceCreateWithStockoutRetry_FinalAttemptAtRetryDeadline(t *testing.T) {
+	t.Parallel()
+	inserts := 0
+	r := newTestComputeInstanceCreateRetry(context.Background())
+	r.stockoutRetryTimeout = 50 * time.Millisecond
+	r.retryDelay = func(int) time.Duration { return time.Hour }
+	r.insert = func() (map[string]interface{}, error) {
+		inserts++
+		if inserts == 1 {
+			return nil, computeInstanceStockoutTestError()
+		}
+		return map[string]interface{}{}, nil
+	}
+	if err := runComputeInstanceCreateWithStockoutRetry(r); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if inserts != 2 {
+		t.Errorf("insert attempts = %d, want 2", inserts)
 	}
 }
 

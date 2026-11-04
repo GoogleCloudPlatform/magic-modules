@@ -281,28 +281,8 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		Project:   project,
-		RawURL:    insertUrl,
-		UserAgent: userAgent,
-		Body:      instance,
-	})
-	if err != nil {
-		return fmt.Errorf("Error creating instance: %s", err)
-	}
-
-	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, d.Get("name").(string)))
-
-	// Wait for the operation to complete
-	waitErr := ComputeOperationWaitTime(config, res, project,
-		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
-	if waitErr != nil {
-		// The resource didn't actually create
-		d.SetId("")
-		return waitErr
+	if err := createComputeInstanceWithStockoutRetry(d, config, project, z, insertUrl, userAgent, instance); err != nil {
+		return err
 	}
 
 	return resourceComputeInstanceRead(d, meta)

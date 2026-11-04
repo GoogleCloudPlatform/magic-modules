@@ -335,6 +335,7 @@ func TestAccComputeInstance_stockoutRetry(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "stockout_retry_timeout_seconds", fmt.Sprint(retryTimeoutSeconds)),
 				),
 			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"retry_on_stockout", "stockout_retry_timeout_seconds"}),
 		},
 	})
 }
@@ -7201,11 +7202,6 @@ func testAccCheckComputeInstanceNicAccessConfigHasNoSecurityPolicy(instance *map
 {{- end }}
 
 func testAccComputeInstance_basic(instance string) string {
-	return testAccComputeInstance_basicWithMachineType(instance, "e2-medium", "")
-}
-
-// extraArgs is inserted verbatim after desired_status; pass "" for none.
-func testAccComputeInstance_basicWithMachineType(instance, machineType, extraArgs string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-13"
@@ -7214,11 +7210,10 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-	machine_type   = "%s"
+  machine_type   = "e2-medium"
   zone           = "us-central1-a"
   tags           = ["foo", "bar"]
-	desired_status = "RUNNING"
-%s
+  desired_status  = "RUNNING"
 
   //deletion_protection = false is implicit in this config due to default value
 
@@ -7243,47 +7238,47 @@ resource "google_compute_instance" "foobar" {
     my_other_key = "my_other_value"
   }
 }
-`, instance, machineType, extraArgs)
+`, instance)
 }
 
 func testAccComputeInstance_basicWithStockoutRetry(instance string, retryTimeoutSeconds int) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-13"
-	project = "debian-cloud"
+  family  = "debian-13"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
-	name           = "%s"
-	machine_type   = "e2-medium"
-	zone           = "us-central1-a"
-	tags           = ["foo", "bar"]
-	desired_status = "RUNNING"
-	retry_on_stockout = true
-	stockout_retry_timeout_seconds = %d
+  name                           = "%s"
+  machine_type                   = "e2-medium"
+  zone                           = "us-central1-a"
+  tags                           = ["foo", "bar"]
+  desired_status                 = "RUNNING"
+  retry_on_stockout              = true
+  stockout_retry_timeout_seconds = %d
 
-	//deletion_protection = false is implicit in this config due to default value
+  //deletion_protection = false is implicit in this config due to default value
 
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
 
-	network_interface {
-		network = "default"
-	}
+  network_interface {
+    network = "default"
+  }
 
-	metadata = {
-		foo            = "bar"
-		baz            = "qux"
-		startup-script = "echo Hello"
-	}
+  metadata = {
+    foo            = "bar"
+    baz            = "qux"
+    startup-script = "echo Hello"
+  }
 
-	labels = {
-		my_key       = "my_value"
-		my_other_key = "my_other_value"
-	}
+  labels = {
+    my_key       = "my_value"
+    my_other_key = "my_other_value"
+  }
 }
 `, instance, retryTimeoutSeconds)
 }
