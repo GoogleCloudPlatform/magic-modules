@@ -59,6 +59,9 @@ custom_code:
 samples:
   - name: cloud_identity_inbound_saml_sso_profile_basic
     primary_resource_id: saml_profile
+    # Tests require Google Workspace admin privileges (INBOUND_SSO_SETTINGS) not held by
+    # the CI service account. Run locally via resource_cloud_identity_inbound_saml_sso_profile_test.go.
+    exclude_test: true
     steps:
       - name: cloud_identity_inbound_saml_sso_profile_basic
         resource_id_vars:
