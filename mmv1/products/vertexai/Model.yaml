@@ -167,6 +167,9 @@ properties:
     name: displayName
     description: Display name of the Model. Optional when copying a Model.
     default_from_api: true
+  - type: KeyValueLabels
+    name: labels
+    description: The labels with user-defined metadata to organize the Model.
   - type: String
     name: etag
     description: Used to perform consistent read-modify-write updates.

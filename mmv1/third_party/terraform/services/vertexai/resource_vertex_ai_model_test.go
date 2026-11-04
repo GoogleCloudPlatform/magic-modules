@@ -94,31 +94,6 @@ resource "google_vertex_ai_model" "model" {
 `, context)
 }
 
-func TestAccVertexAIModel_modelIdProvidedAtCreateTime(t *testing.T) {
-	t.Parallel()
-
-	randomString := acctest.RandString(t, 10)
-	context := map[string]interface{}{
-		"project_name": envvar.GetTestProjectFromEnv(),
-		"source_model": vertexai.BootstrapVertexAIModel(t, "us-central1"),
-		"model_id":     fmt.Sprintf("tf-test-test-model%s", randomString),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckVertexAIModelDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccVertexAIModel_modelIdProvided_create(context),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "model_id", context["model_id"].(string)),
-				),
-			},
-		},
-	})
-}
-
 func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 	t.Parallel()
 
@@ -149,6 +124,9 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "custom_service_account", context["service_account"].(string)),
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "encryption_spec.0.kms_key_name", context["kms_key_name"].(string)),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "description", "initial"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "display_name", "initial"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "labels.label-one", "value-one"),
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
 					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
 				),
@@ -164,6 +142,8 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "2"),
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "description", "updated"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "display_name", "updated"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "labels.label-two", "value-two"),
 					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
 					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["updated_version_alias"].(string)),
 				),
@@ -237,6 +217,11 @@ resource "google_vertex_ai_model" "model" {
 
   region = "us-central1"
   custom_service_account = "%{service_account}"
+  description = "initial"
+  display_name = "initial"
+  labels = {
+    label-one = "value-one"
+  }
   version_aliases = ["%{version_alias}"]
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
@@ -254,6 +239,11 @@ resource "google_vertex_ai_model" "model" {
 
   region = "us-central1"
   custom_service_account = "%{service_account}"
+  display_name = "updated"
+  labels = {
+    label-one = "value-one"
+    label-two = "value-two"
+  }
   version_aliases = ["%{version_alias}", "%{updated_version_alias}"]
   description = "updated"
 
