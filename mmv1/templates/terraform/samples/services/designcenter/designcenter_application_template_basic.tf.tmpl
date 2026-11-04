@@ -1,0 +1,8 @@
+resource "google_design_center_application_template" "example" {
+  project                 = "{{index $.Vars "project"}}"
+  location                = "us-central1"
+  space                   = "{{index $.Vars "space"}}"
+  application_template_id = "{{index $.ResourceIdVars "application_template_id"}}"
+  display_name            = "Example Application Template"
+  description             = "Managed by Terraform"
+}
