@@ -397,6 +397,9 @@ service/deploymentmanager:
   resources:
   - google_deployment_manager_.*
   - google_runtimeconfig_.*
+service/designcenter:
+  resources:
+  - google_design_center_.*
 service/developerconnect:
   resources:
   - google_developer_connect_.*

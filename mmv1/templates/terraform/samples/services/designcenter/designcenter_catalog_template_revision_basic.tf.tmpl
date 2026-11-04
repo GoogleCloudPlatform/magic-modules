@@ -1,0 +1,16 @@
+resource "google_design_center_catalog_template_revision" "{{$.PrimaryResourceId}}" {
+  project          = "{{index $.Vars "project"}}"
+  location         = "us-central1"
+  space            = "{{index $.Vars "space"}}"
+  catalog          = "{{index $.Vars "catalog"}}"
+  catalog_template = "{{index $.Vars "catalog_template"}}"
+  revision_id      = "{{index $.ResourceIdVars "revision_id"}}"
+  description      = "Example catalog template revision"
+  type             = "SERVICE"
+
+  git_source {
+    repo    = "GoogleCloudPlatform/terraform-google-cloud-run"
+    dir     = "modules/v2"
+    ref_tag = "v0.15.2"
+  }
+}
