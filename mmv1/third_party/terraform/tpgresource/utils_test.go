@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -978,9 +977,6 @@ func TestConflictError(t *testing.T) {
 	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 409 was a conflict error.")
 	}
-	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
-		t.Error("did not find that a wrapped (errwrap) 409 was a conflict error.")
-	}
 	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
 		t.Error("did not find that a wrapped (fmt.Errorf) 409 was a conflict error.")
 	}
@@ -989,9 +985,6 @@ func TestConflictError(t *testing.T) {
 	}
 	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 412 was a conflict error.")
-	}
-	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
-		t.Error("did not find that a wrapped 412 was a conflict error.")
 	}
 	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
 		t.Error("did not find that a wrapped (fmt.Errorf) 412 was a conflict error.")

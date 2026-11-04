@@ -43,6 +43,7 @@ async:
     resource_inside_response: false
 autogen_async: true
 custom_code:
+  constants: templates/terraform/constants/internal_range.go.tmpl
   custom_delete: templates/terraform/custom_delete/internal_range_retry.go.tmpl
 samples:
   - name: network_connectivity_internal_ranges_basic
