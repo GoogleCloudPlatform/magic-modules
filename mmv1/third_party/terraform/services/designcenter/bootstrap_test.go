@@ -16,17 +16,20 @@ import (
 )
 
 const (
-	bootstrapDesignCenterBaseURL             = "https://designcenter.googleapis.com/v1/"
-	bootstrapDesignCenterAppHubBaseURL       = "https://apphub.googleapis.com/v1/"
-	bootstrapDesignCenterLocation            = "us-central1"
-	bootstrapDesignCenterSpaceID             = "tf-bootstrap-space"
-	bootstrapDesignCenterCatalogID           = "tf-bootstrap-catalog"
-	bootstrapDesignCenterCatalogTemplateID   = "tf-bootstrap-catalog-template"
-	bootstrapDesignCenterAppTemplateID       = "tf-bootstrap-app-template"
-	bootstrapDesignCenterComponentID         = "tf-bootstrap-src-component"
-	bootstrapDesignCenterDestComponentID     = "tf-bootstrap-dest-component"
-	bootstrapDesignCenterCloudRunTemplateURI = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/1b5e09c8-780f-484e-b8ed-c7178f4e4342/revisions/r-24"
-	bootstrapDesignCenterCloudSQLTemplateURI = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/45be1bc2-89bc-477b-9b5d-64c41ff3b146/revisions/r-12"
+	bootstrapDesignCenterBaseURL           = "https://designcenter.googleapis.com/v1/"
+	bootstrapDesignCenterAppHubBaseURL     = "https://apphub.googleapis.com/v1/"
+	bootstrapDesignCenterLocation          = "us-central1"
+	bootstrapDesignCenterSpaceID           = "tf-bootstrap-space"
+	bootstrapDesignCenterCatalogID         = "tf-bootstrap-catalog"
+	bootstrapDesignCenterCatalogTemplateID = "tf-bootstrap-catalog-template"
+	bootstrapDesignCenterAppTemplateID     = "tf-bootstrap-app-template"
+	bootstrapDesignCenterComponentID       = "tf-bootstrap-src-component"
+	bootstrapDesignCenterDestComponentID   = "tf-bootstrap-dest-component"
+	// CreateComponent accepts the short "google/{shared_template}" format and
+	// resolves it server-side to the template's latest published revision in
+	// projects/gcpdesigncenter/locations/{location}/spaces/googlespace.
+	bootstrapDesignCenterCloudRunTemplateURI = "google/1b5e09c8-780f-484e-b8ed-c7178f4e4342"
+	bootstrapDesignCenterCloudSQLTemplateURI = "google/45be1bc2-89bc-477b-9b5d-64c41ff3b146"
 )
 
 var (

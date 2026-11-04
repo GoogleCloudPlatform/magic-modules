@@ -17,8 +17,6 @@ display_name: Application Design Center
 versions:
   - name: ga
     base_url: "https://designcenter.googleapis.com/v1/"
-  - name: beta
-    base_url: "https://designcenter.googleapis.com/v1/"
 scopes:
   - "https://www.googleapis.com/auth/cloud-platform"
 async:
