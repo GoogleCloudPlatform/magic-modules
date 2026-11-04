@@ -1,9 +1,14 @@
 package dataproc_test
 
 import (
+	"context"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataproc"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestDataprocExtractInitTimeout(t *testing.T) {
@@ -125,4 +130,400 @@ func TestDataprocDiffSuppress(t *testing.T) {
 			t.Errorf("expected (old: %q, new: %q) to not be suppressed", tup[0], tup[1])
 		}
 	}
+}
+
+func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
+	t.Parallel()
+
+	res := dataproc.ResourceDataprocCluster()
+	schemaBlock := res.CoreConfigSchema()
+
+	flexType := cty.Object(map[string]cty.Type{
+		"num_instances":     cty.Number,
+		"core_count":        cty.Number,
+		"hardware_class":    cty.String,
+		"boot_disk_size_gb": cty.Number,
+	})
+	autoType := cty.Object(map[string]cty.Type{
+		"policy_uri": cty.String,
+	})
+	clusterCfgElemType := cty.Object(map[string]cty.Type{
+		"master_flexible_config":           cty.List(flexType),
+		"worker_flexible_config":           cty.List(flexType),
+		"secondary_worker_flexible_config": cty.List(flexType),
+		"autoscaling_config":               cty.List(autoType),
+	})
+	rawRootType := cty.Object(map[string]cty.Type{
+		"name":           cty.String,
+		"region":         cty.String,
+		"cluster_config": cty.List(clusterCfgElemType),
+	})
+
+	makeRawConfig := func(sec []cty.Value, auto []cty.Value) cty.Value {
+		secList := cty.ListValEmpty(flexType)
+		if len(sec) > 0 {
+			secList = cty.ListVal(sec)
+		}
+		autoList := cty.ListValEmpty(autoType)
+		if len(auto) > 0 {
+			autoList = cty.ListVal(auto)
+		}
+		return cty.ObjectVal(map[string]cty.Value{
+			"name":            cty.StringVal("test-cluster"),
+			"project":         cty.StringVal("p"),
+			"region":          cty.StringVal("us-central1"),
+			"deletion_policy": cty.NullVal(cty.String),
+			"labels":          cty.NullVal(cty.Map(cty.String)),
+			"cluster_config": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"master_flexible_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"num_instances":     cty.NumberIntVal(1),
+							"core_count":        cty.NumberIntVal(4),
+							"hardware_class":    cty.StringVal("STANDARD"),
+							"boot_disk_size_gb": cty.NumberIntVal(100),
+						}),
+					}),
+					"worker_flexible_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"num_instances":     cty.NumberIntVal(2),
+							"core_count":        cty.NumberIntVal(8),
+							"hardware_class":    cty.StringVal("STANDARD"),
+							"boot_disk_size_gb": cty.NumberIntVal(100),
+						}),
+					}),
+					"secondary_worker_flexible_config": secList,
+					"autoscaling_config":               autoList,
+				}),
+			}),
+		})
+	}
+	_ = rawRootType
+
+	baseStateAttrs := func() map[string]string {
+		return map[string]string{
+			"id":                                    "projects/p/regions/us-central1/clusters/test-cluster",
+			"name":                                  "test-cluster",
+			"project":                               "p",
+			"region":                                "us-central1",
+			"cluster_config.#":                      "1",
+			"cluster_config.0.temp_bucket":          "dataproc-temp-bucket",
+			"cluster_config.0.bucket":               "dataproc-staging-bucket",
+			"cluster_config.0.cluster_type":         "STANDARD",
+			"cluster_config.0.gce_cluster_config.#": "1",
+			"cluster_config.0.gce_cluster_config.0.zone":                                                   "us-central1-a",
+			"cluster_config.0.gce_cluster_config.0.network":                                                "https://www.googleapis.com/compute/v1/projects/p/global/networks/default",
+			"cluster_config.0.gce_cluster_config.0.internal_ip_only":                                       "true",
+			"cluster_config.0.gce_cluster_config.0.shielded_instance_config.#":                             "1",
+			"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_integrity_monitoring": "true",
+			"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_secure_boot":          "true",
+			"cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_vtpm":                 "true",
+			"cluster_config.0.master_config.#":                                                             "1",
+			"cluster_config.0.master_config.0.num_instances":                                               "1",
+			"cluster_config.0.master_config.0.machine_type":                                                "n4-standard-2",
+			"cluster_config.0.master_config.0.min_cpu_platform":                                            "Automatic",
+			"cluster_config.0.master_config.0.image_uri":                                                   "https://www.googleapis.com/compute/v1/projects/cloud-dataproc/global/images/dataproc-2-3-deb12",
+			"cluster_config.0.master_config.0.disk_config.#":                                               "1",
+			"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb":                             "100",
+			"cluster_config.0.master_config.0.disk_config.0.boot_disk_type":                                "hyperdisk-balanced",
+			"cluster_config.0.master_config.0.disk_config.0.num_local_ssds":                                "0",
+			"cluster_config.0.master_config.0.disk_config.0.local_ssd_interface":                           "SCSI",
+			"cluster_config.0.master_config.0.instance_flexibility_policy.#":                               "1",
+			"cluster_config.0.worker_config.#":                                                             "1",
+			"cluster_config.0.worker_config.0.num_instances":                                               "2",
+			"cluster_config.0.worker_config.0.machine_type":                                                "n4-standard-4",
+			"cluster_config.0.worker_config.0.min_cpu_platform":                                            "Automatic",
+			"cluster_config.0.worker_config.0.image_uri":                                                   "https://www.googleapis.com/compute/v1/projects/cloud-dataproc/global/images/dataproc-2-3-deb12",
+			"cluster_config.0.worker_config.0.disk_config.#":                                               "1",
+			"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb":                             "100",
+			"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type":                                "hyperdisk-balanced",
+			"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds":                                "0",
+			"cluster_config.0.worker_config.0.disk_config.0.local_ssd_interface":                           "SCSI",
+			"cluster_config.0.worker_config.0.instance_flexibility_policy.#":                               "1",
+			"cluster_config.0.preemptible_worker_config.#":                                                 "1",
+			"cluster_config.0.preemptible_worker_config.0.num_instances":                                   "2",
+			"cluster_config.0.preemptible_worker_config.0.preemptibility":                                  "SPOT",
+			"cluster_config.0.preemptible_worker_config.0.disk_config.#":                                   "1",
+			"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_size_gb":                 "100",
+			"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type":                    "hyperdisk-balanced",
+			"cluster_config.0.preemptible_worker_config.0.disk_config.0.num_local_ssds":                    "0",
+			"cluster_config.0.preemptible_worker_config.0.disk_config.0.local_ssd_interface":               "SCSI",
+			"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.#":                   "1",
+			"cluster_config.0.software_config.#":                                                           "1",
+			"cluster_config.0.software_config.0.image_version":                                             "2.3.19-debian12",
+			"cluster_config.0.endpoint_config.#":                                                           "1",
+			"cluster_config.0.endpoint_config.0.enable_http_port_access":                                   "false",
+			"cluster_config.0.master_flexible_config.#":                                                    "1",
+			"cluster_config.0.master_flexible_config.0.num_instances":                                      "1",
+			"cluster_config.0.master_flexible_config.0.core_count":                                         "4",
+			"cluster_config.0.master_flexible_config.0.hardware_class":                                     "STANDARD",
+			"cluster_config.0.master_flexible_config.0.boot_disk_size_gb":                                  "100",
+			"cluster_config.0.worker_flexible_config.#":                                                    "1",
+			"cluster_config.0.worker_flexible_config.0.num_instances":                                      "2",
+			"cluster_config.0.worker_flexible_config.0.core_count":                                         "8",
+			"cluster_config.0.worker_flexible_config.0.hardware_class":                                     "STANDARD",
+			"cluster_config.0.worker_flexible_config.0.boot_disk_size_gb":                                  "100",
+		}
+	}
+
+	baseConfigMap := func(sec []interface{}, auto []interface{}, includeWorker bool) map[string]interface{} {
+		cc := map[string]interface{}{
+			"master_flexible_config": []interface{}{
+				map[string]interface{}{
+					"num_instances":     1,
+					"core_count":        4,
+					"hardware_class":    "STANDARD",
+					"boot_disk_size_gb": 100,
+				},
+			},
+		}
+		if includeWorker {
+			cc["worker_flexible_config"] = []interface{}{
+				map[string]interface{}{
+					"num_instances":     2,
+					"core_count":        8,
+					"hardware_class":    "STANDARD",
+					"boot_disk_size_gb": 100,
+				},
+			}
+		}
+		if sec != nil {
+			cc["secondary_worker_flexible_config"] = sec
+		}
+		if auto != nil {
+			cc["autoscaling_config"] = auto
+		}
+		return map[string]interface{}{
+			"name":           "test-cluster",
+			"project":        "p",
+			"region":         "us-central1",
+			"cluster_config": []interface{}{cc},
+		}
+	}
+
+	runDiff := func(t *testing.T, stateAttrs map[string]string, cfgMap map[string]interface{}, rawCfg cty.Value) *terraform.InstanceDiff {
+		t.Helper()
+		state := &terraform.InstanceState{
+			ID:         stateAttrs["id"],
+			Attributes: stateAttrs,
+			RawConfig:  rawCfg,
+			RawPlan:    rawCfg,
+		}
+		rc := terraform.NewResourceConfigRaw(cfgMap)
+		_ = schemaBlock
+		d, err := res.Diff(context.Background(), state, rc, &transport_tpg.Config{Project: "p", Region: "us-central1"})
+		if err != nil {
+			t.Fatalf("Diff returned unexpected error: %v", err)
+		}
+		return d
+	}
+
+	hasSecDiff := func(d *terraform.InstanceDiff) bool {
+		if d == nil {
+			return false
+		}
+		for k := range d.Attributes {
+			if strings.HasPrefix(k, "cluster_config.0.secondary_worker_flexible_config") {
+				return true
+			}
+		}
+		return false
+	}
+
+	t.Run("post_create_add_matching_worker_updates_in_place", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     2,
+				"core_count":        8,
+				"hardware_class":    "STANDARD",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(2),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !hasSecDiff(d) {
+			t.Fatalf("expected secondary_worker_flexible_config diff, got none")
+		}
+		if d.RequiresNew() {
+			t.Fatalf("expected in-place update when secondary_worker_flexible_config matches worker_flexible_config, but RequiresNew=true: %#v", d.Attributes)
+		}
+	})
+
+	t.Run("post_create_add_mismatched_shape_forces_new", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     2,
+				"core_count":        8,
+				"hardware_class":    "PERFORMANCE",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(2),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("PERFORMANCE"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !d.RequiresNew() {
+			t.Fatalf("expected RequiresNew=true when hardware_class differs from worker_flexible_config")
+		}
+	})
+
+	t.Run("post_create_add_zero_instances_forces_new", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     0,
+				"core_count":        8,
+				"hardware_class":    "STANDARD",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(0),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !d.RequiresNew() {
+			t.Fatalf("expected RequiresNew=true when num_instances == 0 on initial post-create addition")
+		}
+	})
+
+	t.Run("post_create_add_without_worker_flexible_config_forces_new", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		delete(attrs, "cluster_config.0.worker_flexible_config.#")
+		delete(attrs, "cluster_config.0.worker_flexible_config.0.num_instances")
+		delete(attrs, "cluster_config.0.worker_flexible_config.0.core_count")
+		delete(attrs, "cluster_config.0.worker_flexible_config.0.hardware_class")
+		delete(attrs, "cluster_config.0.worker_flexible_config.0.boot_disk_size_gb")
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     2,
+				"core_count":        8,
+				"hardware_class":    "STANDARD",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(2),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, false), rawCfg)
+		if !d.RequiresNew() {
+			t.Fatalf("expected RequiresNew=true when worker_flexible_config is absent")
+		}
+	})
+
+	t.Run("existing_block_shape_change_forces_new", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		attrs["cluster_config.0.secondary_worker_flexible_config.#"] = "1"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.num_instances"] = "2"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.core_count"] = "8"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.hardware_class"] = "PERFORMANCE"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb"] = "100"
+
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     2,
+				"core_count":        16,
+				"hardware_class":    "PERFORMANCE",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(2),
+				"core_count":        cty.NumberIntVal(16),
+				"hardware_class":    cty.StringVal("PERFORMANCE"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !d.RequiresNew() {
+			t.Fatalf("expected RequiresNew=true when core_count changes on existing secondary_worker_flexible_config")
+		}
+	})
+
+	t.Run("block_removed_with_positive_instances_scales_to_zero_in_place", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		attrs["cluster_config.0.secondary_worker_flexible_config.#"] = "1"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.num_instances"] = "2"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.core_count"] = "8"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.hardware_class"] = "PERFORMANCE"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb"] = "100"
+
+		rawCfg := makeRawConfig(nil, nil)
+		d := runDiff(t, attrs, baseConfigMap(nil, nil, true), rawCfg)
+		if !hasSecDiff(d) {
+			t.Fatalf("expected secondary_worker_flexible_config diff when block is removed with num_instances=2")
+		}
+		if d.RequiresNew() {
+			t.Fatalf("expected in-place update when removing secondary_worker_flexible_config, got RequiresNew=true")
+		}
+		numDiff := d.Attributes["cluster_config.0.secondary_worker_flexible_config.0.num_instances"]
+		if numDiff == nil || numDiff.Old != "2" || numDiff.New != "0" {
+			t.Fatalf("expected secondary_worker_flexible_config.0.num_instances diff 2 -> 0, got %#v", numDiff)
+		}
+	})
+
+	t.Run("block_removed_when_already_zero_is_suppressed", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		attrs["cluster_config.0.secondary_worker_flexible_config.#"] = "1"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.num_instances"] = "0"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.core_count"] = "8"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.hardware_class"] = "PERFORMANCE"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb"] = "100"
+
+		rawCfg := makeRawConfig(nil, nil)
+		d := runDiff(t, attrs, baseConfigMap(nil, nil, true), rawCfg)
+		if hasSecDiff(d) {
+			t.Fatalf("expected no secondary_worker_flexible_config diff when old.num_instances == 0, got %#v", d.Attributes)
+		}
+	})
+
+	t.Run("block_omitted_with_autoscaling_configured_is_suppressed", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		attrs["cluster_config.0.secondary_worker_flexible_config.#"] = "1"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.num_instances"] = "2"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.core_count"] = "8"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.hardware_class"] = "STANDARD"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb"] = "100"
+		attrs["cluster_config.0.autoscaling_config.#"] = "1"
+		attrs["cluster_config.0.autoscaling_config.0.policy_uri"] = "projects/p/regions/us-central1/autoscalingPolicies/pol1"
+
+		autoCfg := []interface{}{
+			map[string]interface{}{
+				"policy_uri": "projects/p/regions/us-central1/autoscalingPolicies/pol1",
+			},
+		}
+		rawCfg := makeRawConfig(nil, []cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"policy_uri": cty.StringVal("projects/p/regions/us-central1/autoscalingPolicies/pol1"),
+			}),
+		})
+		d := runDiff(t, attrs, baseConfigMap(nil, autoCfg, true), rawCfg)
+		if hasSecDiff(d) {
+			t.Fatalf("expected no secondary_worker_flexible_config diff when autoscaling_config is configured, got %#v", d.Attributes)
+		}
+	})
 }
