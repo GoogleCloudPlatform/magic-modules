@@ -1255,7 +1255,8 @@ properties:
             type: String
             description: |
               Option to specify which release or release channel to use to run this build.
-              Possible values are `rapid`, `regular`, `stable`, or a specific release version.
+              Possible values are the release channels `rapid`, `regular`, or `stable`, or a specific
+              release version such as `legacy`.
           - name: 'logging'
             type: Enum
             description: |
