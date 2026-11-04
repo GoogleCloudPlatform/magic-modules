@@ -304,6 +304,9 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
     {{- if $.ErrorAbortPredicates }}
     ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorAbortPredicates "," -}} },
     {{- end }}
+    {{- if $.ApiVersion }}
+    ApiVersion: "{{ $.ApiVersion }}",
+    {{- end }}
   })
   if err != nil {
     return nil, err

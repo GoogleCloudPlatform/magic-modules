@@ -30,6 +30,8 @@ type SendRequestOptions struct {
 	// RPC related opts
 	Product    string
 	RPCService string
+
+	ApiVersion string
 }
 
 func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
@@ -43,6 +45,9 @@ func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 	}
 	reqHeaders.Set("User-Agent", opt.UserAgent)
 	reqHeaders.Set("Content-Type", "application/json")
+	if opt.ApiVersion != "" {
+		reqHeaders.Set("X-Goog-Api-Version", opt.ApiVersion)
+	}
 
 	if opt.Config.UserProjectOverride && opt.Project != "" {
 		// When opt.Project is "NO_BILLING_PROJECT_OVERRIDE" in the function GetCurrentUserEmail,
