@@ -66,6 +66,19 @@ func TestStep_TestDependencies(t *testing.T) {
 			},
 		},
 		{
+			name: "tags bootstrapped",
+			step: resource.Step{
+				TestContextVars: map[string]string{
+					"tag_key": "tags.BootstrapSharedTestOrganizationTagKey",
+				},
+				TestHCLText: "",
+			},
+			resourcePrefixServiceMap: map[string]string{},
+			want: map[string]string{
+				"services/tags": "",
+			},
+		},
+		{
 			name: "hcl without prefixes",
 			step: resource.Step{
 				TestContextVars: map[string]string{},

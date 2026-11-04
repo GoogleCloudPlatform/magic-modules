@@ -174,7 +174,10 @@ service/cloudresourcemanager-crm:
   - google_organization_iam_member
   - google_organization_iam_policy
   - google_resource_manager_lien
+  - google_resource_manager_boundary
+  - google_resource_manager_boundary_config
   - google_resource_manager_capability
+  - google_resource_manager_capability_config
 service/cloudresourcemanager-tags:
   resources:
   - google_tags_.*

@@ -1,0 +1,70 @@
+resource "google_folder" "folder" {
+  display_name        = "{{index $.ResourceIdVars "folder_name"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+resource "google_folder_iam_member" "folder_editor" {
+  folder = google_folder.folder.folder_id
+  role   = "roles/resourcemanager.editor"
+  member = "serviceAccount:{{index $.TestEnvVars "service_account"}}"
+}
+
+resource "google_project" "management_project" {
+  project_id      = "{{index $.ResourceIdVars "management_project_id"}}"
+  name            = "{{index $.ResourceIdVars "management_project_id"}}"
+  folder_id       = google_folder.folder.folder_id
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_folder_iam_member.folder_editor, google_project.management_project]
+}
+
+resource "google_resource_manager_boundary_config" "boundary_config" {
+  parent     = google_folder.folder.name
+  tag_key    = "{{index $.TestEnvVars "org_id"}}/{{index $.Vars "tag_key"}}"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_resource_manager_boundary" "boundary_1" {
+  parent       = google_folder.folder.name
+  boundary_id  = "{{index $.ResourceIdVars "boundary_id_1"}}"
+  display_name = "Capability boundary 1"
+
+  resource_filter {
+    tag_filter {
+      tag_key   = google_resource_manager_boundary_config.boundary_config.tag_key
+      tag_value = "{{index $.Vars "tag_value_1"}}"
+    }
+  }
+}
+
+resource "google_resource_manager_boundary" "boundary_2" {
+  parent       = google_folder.folder.name
+  boundary_id  = "{{index $.ResourceIdVars "boundary_id_2"}}"
+  display_name = "Capability boundary 2"
+
+  resource_filter {
+    tag_filter {
+      tag_key   = google_resource_manager_boundary_config.boundary_config.tag_key
+      tag_value = "{{index $.Vars "tag_value_2"}}"
+    }
+  }
+}
+
+resource "google_resource_manager_capability_config" "{{$.PrimaryResourceId}}" {
+  parent               = google_folder.folder.name
+  capability_config_id = "{{index $.ResourceIdVars "capability_config_id"}}"
+  display_name         = "Folder capability config"
+  types                = ["AGENT_MANAGEMENT"]
+  management_project   = "projects/${google_project.management_project.number}"
+  boundaries           = {{index $.Vars "boundaries_expr"}}
+  depends_on = [
+    time_sleep.wait_60_seconds,
+    google_resource_manager_boundary.boundary_1,
+    google_resource_manager_boundary.boundary_2,
+  ]
+}
