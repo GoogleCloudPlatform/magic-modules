@@ -136,7 +136,7 @@ func TestParseFieldBullets(t *testing.T) {
 			want: []string{"source_snapshot", "source_snapshot.key"},
 		},
 		{
-			name: "only indented bullets",
+			name: "only indented bullets are ignored",
 			doc: []string{
 				"# google_resource",
 				"",
@@ -149,7 +149,7 @@ func TestParseFieldBullets(t *testing.T) {
 				"",
 				" * `name` - The name of the role.",
 			},
-			want: []string{"deleted", "name"},
+			want: nil,
 		},
 	}
 	for _, tc := range cases {
