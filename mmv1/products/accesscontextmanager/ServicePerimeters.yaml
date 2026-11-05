@@ -50,6 +50,7 @@ autogen_async: true
 custom_code:
   custom_delete: templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.tmpl
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl
+  pre_read: templates/terraform/pre_read/access_context_manager_service_perimeter.go.tmpl
 samples:
   - name: access_context_manager_service_perimeters_basic
     primary_resource_id: service-perimeter
@@ -70,6 +71,23 @@ parameters:
     required: true
     immutable: true
     ignore_read: true
+virtual_fields:
+  - name: deleted_principals_support
+    type: Enum
+    description: |
+      Sets the `deletedPrincipalSyntax` query parameter on `servicePerimeters.patch`
+      and `servicePerimeters.get` requests, which enables or disables deleted IAM
+      principal syntax for identities in this perimeter's ingress and egress rules.
+      * `enable`: Sends `DELETED_PRINCIPAL_SYNTAX_SUPPORT_ENABLED`. The request and
+      response can contain identities with deleted IAM principal syntax.
+      * `disable`: Sends `DELETED_PRINCIPAL_SYNTAX_SUPPORT_DISABLED`. No identities
+      in the request or response will contain deleted principal syntax.
+      If omitted, the query parameter is not sent and the API applies
+      `DELETED_PRINCIPAL_SYNTAX_SUPPORT_UNSPECIFIED`.
+      The API does not accept this parameter on create.
+    enum_values:
+      - enable
+      - disable
 properties:
   - name: servicePerimeters
     type: Array

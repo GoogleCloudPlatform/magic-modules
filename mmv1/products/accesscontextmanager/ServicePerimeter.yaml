@@ -69,6 +69,7 @@ custom_code:
   constants: templates/terraform/constants/access_context_manager.go.tmpl
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl
   pre_update: templates/terraform/pre_update/access_context_manager_service_perimeter.go.tmpl
+  pre_read: templates/terraform/pre_read/access_context_manager_service_perimeter.go.tmpl
 samples:
   - name: access_context_manager_service_perimeter_basic
     primary_resource_id: service-perimeter
@@ -99,6 +100,23 @@ samples:
       - name: access_context_manager_service_perimeter_granular_controls
         resource_id_vars:
           service_perimeter_name: granular_controls
+virtual_fields:
+  - name: deleted_principals_support
+    type: Enum
+    description: |
+      Sets the `deletedPrincipalSyntax` query parameter on `servicePerimeters.patch`
+      and `servicePerimeters.get` requests, which enables or disables deleted IAM
+      principal syntax for identities in this perimeter's ingress and egress rules.
+      * `enable`: Sends `DELETED_PRINCIPAL_SYNTAX_SUPPORT_ENABLED`. The request and
+      response can contain identities with deleted IAM principal syntax.
+      * `disable`: Sends `DELETED_PRINCIPAL_SYNTAX_SUPPORT_DISABLED`. No identities
+      in the request or response will contain deleted principal syntax.
+      If omitted, the query parameter is not sent and the API applies
+      `DELETED_PRINCIPAL_SYNTAX_SUPPORT_UNSPECIFIED`.
+      The API does not accept this parameter on create.
+    enum_values:
+      - enable
+      - disable
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
