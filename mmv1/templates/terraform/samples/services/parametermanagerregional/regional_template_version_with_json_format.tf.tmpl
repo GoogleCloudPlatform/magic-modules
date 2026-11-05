@@ -1,0 +1,15 @@
+resource "google_parameter_manager_regional_template" "regional-template-basic" {
+  provider = google-beta
+  location = "us-central1"
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  format = "TEMPLATE_FORMAT_JSON"
+}
+
+resource "google_parameter_manager_regional_template_version" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  template = google_parameter_manager_regional_template.regional-template-basic.id
+  template_version_id = "{{index $.ResourceIdVars "template_version_id"}}"
+  payload {
+    template_data = "{\"app\":\"my-app\",\"env\":\"{{"{{"}}.env{{"}}"}}\"}"
+  }
+}
