@@ -28,6 +28,7 @@ sweeper:
     - region: global
 autogen_status: UmVsZWFzZUNoYW5uZWxTZXR0aW5n
 autogen_async: false
+generate_list_resource: true
 samples:
   - name: gemini_release_channel_setting_basic
     primary_resource_id: example
