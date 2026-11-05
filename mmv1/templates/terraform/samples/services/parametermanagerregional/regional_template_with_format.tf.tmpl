@@ -1,0 +1,6 @@
+resource "google_parameter_manager_regional_template" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us-central1"
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  format = "TEMPLATE_FORMAT_JSON"
+}
