@@ -248,10 +248,9 @@ properties:
     description: |
       Identifies the backend service to which the forwarding rule sends traffic.
 
-      Required for Internal TCP/UDP Load Balancing and Network Load Balancing;
+      Required for Global External Passthrough Network Load Balancing;
       must be omitted for all other load balancer types.
-    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     exactly_one_of:
       - 'backend_service'
       - 'target'
@@ -368,7 +367,10 @@ properties:
     api_name: 'IPAddresses'
     type: Array
     description: |
-      List of 2 IP addresses from Availability Groups 0 and 1.
+      IP addresses for which this forwarding rule accepts traffic, ordered by
+      Availability Group 0 followed by Availability Group 1. Specify literal
+      IP addresses (for example, `google_compute_global_address.example.address`).
+    default_from_api: true
     item_type:
       type: String
   - name: 'loadBalancingScheme'
