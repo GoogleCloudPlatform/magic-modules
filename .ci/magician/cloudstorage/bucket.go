@@ -32,25 +32,27 @@ import (
 var ErrObjectNotExist = errors.New("storage: object doesn't exist")
 
 func (gcs *Client) WriteToGCSBucket(bucket, object, filePath string) error {
+	ctx := context.Background()
+
+	client, err := storage.NewService(ctx, gcs.opts...)
+	if err != nil {
+		return fmt.Errorf("storage.NewService: %w", err)
+	}
+
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("os.Open: %w", err)
 	}
 	defer file.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
-
-	service, err := storage.NewService(ctx, gcs.opts...)
-	if err != nil {
-		return fmt.Errorf("storage.NewService: %w", err)
-	}
 
 	obj := &storage.Object{
 		Name:        object,
 		ContentType: "application/json",
 	}
-	if _, err := service.Objects.Insert(bucket, obj).Media(file, googleapi.ContentType("application/json")).Context(ctx).Do(); err != nil {
+	if _, err := client.Objects.Insert(bucket, obj).Media(file, googleapi.ContentType("application/json")).Context(ctx).Do(); err != nil {
 		return fmt.Errorf("Objects.Insert(%q): %w", object, err)
 	}
 
@@ -59,15 +61,21 @@ func (gcs *Client) WriteToGCSBucket(bucket, object, filePath string) error {
 }
 
 func (gcs *Client) DownloadFile(bucket, object, filePath string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
-	defer cancel()
-
-	service, err := storage.NewService(ctx, gcs.opts...)
+	ctx := context.Background()
+	client, err := storage.NewService(ctx, gcs.opts...)
 	if err != nil {
 		return fmt.Errorf("storage.NewService: %w", err)
 	}
 
-	resp, err := service.Objects.Get(bucket, object).Context(ctx).Download()
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("os.Create: %w", err)
+	}
+
+	resp, err := client.Objects.Get(bucket, object).Context(ctx).Download()
 	if err != nil {
 		var apiErr *googleapi.Error
 		if errors.As(err, &apiErr) && apiErr.Code == http.StatusNotFound {
@@ -77,22 +85,16 @@ func (gcs *Client) DownloadFile(bucket, object, filePath string) error {
 	}
 	defer resp.Body.Close()
 
-	file, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("os.Create: %w", err)
-	}
-
 	if _, err := io.Copy(file, resp.Body); err != nil {
-		file.Close()
-		os.Remove(filePath)
 		return fmt.Errorf("io.Copy: %w", err)
 	}
 
-	if err := file.Close(); err != nil {
-		os.Remove(filePath)
+	if err = file.Close(); err != nil {
 		return fmt.Errorf("file.Close: %w", err)
 	}
 
-	fmt.Printf("Object %s downloaded from bucket %s as %s\n", object, bucket, filePath)
+	fmt.Printf("Obcject %s downloaded from bucket %s as %s\n", object, bucket, filePath)
+
 	return nil
+
 }

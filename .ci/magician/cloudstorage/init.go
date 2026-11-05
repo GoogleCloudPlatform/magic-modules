@@ -21,6 +21,6 @@ type Client struct {
 	opts []option.ClientOption
 }
 
-func NewClient(opts ...option.ClientOption) *Client {
-	return &Client{opts: opts}
+func NewClient() *Client {
+	return &Client{}
 }

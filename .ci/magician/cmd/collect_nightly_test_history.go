@@ -181,7 +181,7 @@ func getDailyTestStatus(pVersion provider.Version, tc TeamcityClient, gcs Clouds
 
 	err := gcs.DownloadFile(nightlyDataBucket, objectName, fileName)
 	if errors.Is(err, cloudstorage.ErrObjectNotExist) {
-		os.Remove(fileName)
+		os.Remove(fileName) // DownloadFile creates an empty local file before reading
 		fmt.Printf("Backfilling %s test status for %s from TeamCity\n", strings.ToUpper(pVersion.String()), date)
 		// Match the collect-nightly-test-status window: 7pm PT the previous day to 7pm PT on the day.
 		finishCut := time.Date(day.Year(), day.Month(), day.Day(), 19, 0, 0, 0, day.Location())

@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"magician/cloudstorage"
 	"magician/provider"
 	"magician/vcr"
 
@@ -31,7 +30,7 @@ func (f *fakeGCS) WriteToGCSBucket(bucket, object, filePath string) error {
 func (f *fakeGCS) DownloadFile(bucket, object, filePath string) error {
 	data, ok := f.objects[bucket+"/"+object]
 	if !ok {
-		return fmt.Errorf("Objects.Get(%q): %w", object, cloudstorage.ErrObjectNotExist)
+		return errors.New("object not found")
 	}
 	return os.WriteFile(filePath, data, 0644)
 }

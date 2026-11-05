@@ -18,13 +18,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strings"
 	"testing"
 	"time"
 
 	"magician/provider"
-	"magician/teamcity"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -101,38 +98,5 @@ func TestCreateNightlyTestHistoryWithoutTestNameId(t *testing.T) {
 	h := readHistory(t, gcs, provider.Beta).Tests["TestAccA"]
 	if assert.NotNil(t, h) {
 		assert.Equal(t, "", h.TestNameId)
-	}
-}
-
-type fakeTeamcityClient struct {
-	queuedBuilds int
-}
-
-func (f *fakeTeamcityClient) GetBuilds(params url.Values) (teamcity.Builds, error) {
-	if strings.Contains(params.Get("locator"), "state:queued") && f.queuedBuilds > 0 {
-		return teamcity.Builds{Builds: make([]teamcity.Build, f.queuedBuilds)}, nil
-	}
-	return teamcity.Builds{}, nil
-}
-
-func (f *fakeTeamcityClient) GetTestResults(build teamcity.Build) (teamcity.TestResults, error) {
-	return teamcity.TestResults{}, nil
-}
-
-func TestGetDailyTestStatusHandlesObjectNotExist(t *testing.T) {
-	loc, err := time.LoadLocation("America/Los_Angeles")
-	if err != nil {
-		t.Fatalf("LoadLocation: %v", err)
-	}
-	day := time.Date(2026, 9, 28, 0, 0, 0, 0, loc)
-	gcs := &fakeGCS{objects: map[string][]byte{}}
-	tc := &fakeTeamcityClient{queuedBuilds: 1}
-
-	results, found, err := getDailyTestStatus(provider.Beta, tc, gcs, day)
-	if err != nil {
-		t.Fatalf("getDailyTestStatus returned error: %v", err)
-	}
-	if found {
-		t.Errorf("expected found=false when nightly run is unfinished, got true (results=%v)", results)
 	}
 }

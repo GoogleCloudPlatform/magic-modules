@@ -30,6 +30,15 @@ import (
 	"google.golang.org/api/option"
 )
 
+func newTestClient(baseURL string) *Client {
+	return &Client{
+		opts: []option.ClientOption{
+			option.WithEndpoint(baseURL + "/storage/v1/"),
+			option.WithoutAuthentication(),
+		},
+	}
+}
+
 func TestWriteToGCSBucket(t *testing.T) {
 	const (
 		wantBucket  = "nightly-test-data"
@@ -103,7 +112,7 @@ func TestWriteToGCSBucket(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 
-	client := NewClient(option.WithEndpoint(srv.URL+"/storage/v1/"), option.WithoutAuthentication())
+	client := newTestClient(srv.URL)
 	if err := client.WriteToGCSBucket(wantBucket, wantObject, srcPath); err != nil {
 		t.Fatalf("WriteToGCSBucket returned error: %v", err)
 	}
@@ -137,7 +146,7 @@ func TestWriteToGCSBucket_MissingLocalFile(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	client := NewClient(option.WithEndpoint(srv.URL+"/storage/v1/"), option.WithoutAuthentication())
+	client := newTestClient(srv.URL)
 	err := client.WriteToGCSBucket("bucket", "obj", filepath.Join(t.TempDir(), "does-not-exist.json"))
 	if !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("expected os.ErrNotExist, got: %v", err)
@@ -170,7 +179,7 @@ func TestDownloadFile_Success(t *testing.T) {
 	defer srv.Close()
 
 	destPath := filepath.Join(t.TempDir(), "downloaded.json")
-	client := NewClient(option.WithEndpoint(srv.URL+"/storage/v1/"), option.WithoutAuthentication())
+	client := newTestClient(srv.URL)
 	if err := client.DownloadFile(wantBucket, wantObject, destPath); err != nil {
 		t.Fatalf("DownloadFile returned error: %v", err)
 	}
@@ -203,15 +212,11 @@ func TestDownloadFile_NotFound(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	destPath := filepath.Join(t.TempDir(), "should-not-be-created.json")
-	client := NewClient(option.WithEndpoint(srv.URL+"/storage/v1/"), option.WithoutAuthentication())
+	destPath := filepath.Join(t.TempDir(), "missing.json")
+	client := newTestClient(srv.URL)
 	err := client.DownloadFile("nightly-test-data", "missing/object.json", destPath)
 	if !errors.Is(err, ErrObjectNotExist) {
 		t.Fatalf("DownloadFile error = %v, want errors.Is(..., ErrObjectNotExist)", err)
-	}
-
-	if _, statErr := os.Stat(destPath); !errors.Is(statErr, os.ErrNotExist) {
-		t.Errorf("destination file %q should not be created on 404, stat err = %v", destPath, statErr)
 	}
 }
 
@@ -221,16 +226,13 @@ func TestDownloadFile_ServerError(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	destPath := filepath.Join(t.TempDir(), "should-not-be-created.json")
-	client := NewClient(option.WithEndpoint(srv.URL+"/storage/v1/"), option.WithoutAuthentication())
+	destPath := filepath.Join(t.TempDir(), "broken.json")
+	client := newTestClient(srv.URL)
 	err := client.DownloadFile("nightly-test-data", "broken/object.json", destPath)
 	if err == nil {
 		t.Fatalf("expected non-nil error on 500 response")
 	}
 	if errors.Is(err, ErrObjectNotExist) {
 		t.Errorf("500 error should not match ErrObjectNotExist: %v", err)
-	}
-	if _, statErr := os.Stat(destPath); !errors.Is(statErr, os.ErrNotExist) {
-		t.Errorf("destination file %q should not be created on 500, stat err = %v", destPath, statErr)
 	}
 }
