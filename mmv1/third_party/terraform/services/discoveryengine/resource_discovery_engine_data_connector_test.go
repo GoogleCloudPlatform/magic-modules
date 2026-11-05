@@ -289,3 +289,126 @@ func TestDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress(t 
 		}
 	}
 }
+
+func TestAccDiscoveryEngineDataConnector_federatedConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDiscoveryEngineDataConnector_federatedConfig_basic(context),
+			},
+			{
+				ResourceName:            "google_discovery_engine_data_connector.federated_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auto_run_disabled", "collection_display_name", "collection_id", "incremental_sync_disabled", "location", "params", "sync_mode", "update_time"},
+			},
+			{
+				Config: testAccDiscoveryEngineDataConnector_federatedConfig_update(context),
+			},
+			{
+				ResourceName:            "google_discovery_engine_data_connector.federated_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auto_run_disabled", "collection_display_name", "collection_id", "incremental_sync_disabled", "location", "params", "sync_mode", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccDiscoveryEngineDataConnector_federatedConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_discovery_engine_data_connector" "federated_config" {
+  location                     = "global"
+  collection_id                = "tf-test-collection-id%{random_suffix}"
+  collection_display_name      = "tf-test-dataconnector-federated-%{random_suffix}"
+  data_source                  = "onedrive_federated_search"
+  data_source_version          = 1
+  params = {
+    auth_type     = "OAUTH"
+    client_id     = "client_id_1"
+    client_secret = "client_secret_1"
+    tenant_id     = "tenant_id_1"
+  }
+  refresh_interval             = "86400s"
+  entities {
+    entity_name = "file"
+    params = jsonencode({
+      "custom_id" : "123"
+    })
+  }
+  static_ip_enabled            = false
+  incremental_refresh_interval = "21600s"
+  connector_modes              = ["FEDERATED"]
+  sync_mode                    = "PERIODIC"
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
+  tag                          = "tf-test-tag-%{random_suffix}"
+  federated_config {
+    auth_params = jsonencode({
+      "auth_type" : "OAUTH",
+      "client_id" : "client_id_1"
+    })
+    additional_params = jsonencode({
+      "custom_param" : "val_1"
+    })
+  }
+}
+`, context)
+}
+
+func testAccDiscoveryEngineDataConnector_federatedConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "time_sleep" "wait_1_minute" {
+  create_duration = "60s"
+}
+
+resource "google_discovery_engine_data_connector" "federated_config" {
+  depends_on                   = [time_sleep.wait_1_minute]
+  location                     = "global"
+  collection_id                = "tf-test-collection-id%{random_suffix}"
+  collection_display_name      = "tf-test-dataconnector-federated-%{random_suffix}"
+  data_source                  = "onedrive_federated_search"
+  data_source_version          = 1
+  params = {
+    auth_type     = "OAUTH"
+    client_id     = "client_id_1"
+    client_secret = "client_secret_1"
+    tenant_id     = "tenant_id_2"
+  }
+  refresh_interval             = "172800s"
+  entities {
+    entity_name = "file"
+    params = jsonencode({
+      "custom_id" : "456"
+    })
+  }
+  static_ip_enabled            = false
+  incremental_refresh_interval = "21600s"
+  connector_modes              = ["FEDERATED"]
+  sync_mode                    = "PERIODIC"
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
+  tag                          = "tf-test-tag-%{random_suffix}"
+  federated_config {
+    auth_params = jsonencode({
+      "auth_type" : "OAUTH",
+      "client_id" : "client_id_2"
+    })
+    additional_params = jsonencode({
+      "custom_param" : "val_2"
+    })
+  }
+}
+`, context)
+}
