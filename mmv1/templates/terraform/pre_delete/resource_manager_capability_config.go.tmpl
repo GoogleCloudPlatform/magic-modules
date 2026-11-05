@@ -17,7 +17,7 @@ if d.Get("boundaries.#").(int) > 0 {
 		RawURL:    patchUrl,
 		UserAgent: userAgent,
 		Body:      patchObj,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Timeout:   d.Timeout(schema.TimeoutDelete),
 		Headers:   headers,
 	})
 	if err != nil {
@@ -26,8 +26,8 @@ if d.Get("boundaries.#").(int) > 0 {
 
 	err = ResourceManagerV3OperationWaitTime(
 		config, res, "Disassociating boundaries from CapabilityConfig", userAgent,
-		d.Timeout(schema.TimeoutUpdate))
+		d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		return err
+		return fmt.Errorf("Error waiting to disassociate boundaries from CapabilityConfig %q: %s", d.Id(), err)
 	}
 }
